@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from hvm.models import PosteriorMixturePoisson
-from hvm.likelihoods import MFPoisson
-from hvm.priors import MixtureGaussians
-from hvm.hvm import HVM
-from hvm.util import discrete_density
+from blackbox.models import PosteriorMixturePoisson
+from blackbox.likelihoods import MFPoisson
+from blackbox.priors import MixtureGaussians
+from blackbox.hvm import HVM
+from blackbox.util import discrete_density
 
 if __name__ == '__main__':
   np.random.seed(42)

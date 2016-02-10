@@ -6,8 +6,8 @@ import numpy as np
 import seaborn as sns
 
 from scipy.stats import poisson
-from hvm.models import PosteriorMixturePoisson
-from hvm.util import discrete_density
+from blackbox.models import PosteriorMixturePoisson
+from blackbox.util import discrete_density
 
 if __name__ == '__main__':
   np.random.seed(42)

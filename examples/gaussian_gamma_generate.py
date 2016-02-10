@@ -7,7 +7,7 @@ import numpy as np
 import seaborn as sns
 
 from scipy.stats import multivariate_normal, gamma
-from hvm.util import discrete_density
+from blackbox.util import discrete_density
 
 if __name__ == '__main__':
   np.random.seed(42)

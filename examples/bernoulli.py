@@ -7,11 +7,11 @@
 #   Auxiliary: Normalizing flow
 import numpy as np
 
-from hvm.models import PosteriorBernoulli
-from hvm.likelihoods import MFBernoulli
-from hvm.priors import Flow
-from hvm.auxiliaries import InverseFlow
-from hvm.hvm import HVM
+from blackbox.models import PosteriorBernoulli
+from blackbox.likelihoods import MFBernoulli
+from blackbox.priors import Flow
+from blackbox.auxiliaries import InverseFlow
+from blackbox.hvm import HVM
 
 if __name__ == '__main__':
   np.random.seed(143479292)

@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from hvm.likelihoods import MFPoisson
-from hvm.hvm import HVM
-from hvm.util import discrete_density
+from blackbox.likelihoods import MFPoisson
+from blackbox.hvm import HVM
+from blackbox.util import discrete_density
 
 if __name__ == '__main__':
   np.random.seed(42)

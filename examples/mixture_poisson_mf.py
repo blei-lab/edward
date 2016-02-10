@@ -5,9 +5,9 @@
 #   Likelihood: Mean-field Poisson
 import numpy as np
 
-from hvm.models import PosteriorMixturePoisson
-from hvm.likelihoods import MFPoisson
-from hvm.hvm import MFVI
+from blackbox.models import PosteriorMixturePoisson
+from blackbox.likelihoods import MFPoisson
+from blackbox.hvm import MFVI
 
 if __name__ == '__main__':
   np.random.seed(42)

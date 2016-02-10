@@ -9,7 +9,7 @@ class MFBernoulli:
   def __init__(self, num_vars):
     self.num_vars = num_vars
     self.num_params = num_vars
-    self.lamda = np.zero(num_vars)
+    self.lamda = np.zeros(num_vars)
 
   def sample(self):
     """z ~ q(z | lambda)"""
