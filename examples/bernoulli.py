@@ -7,11 +7,11 @@
 #   Auxiliary: Normalizing flow
 import numpy as np
 
+import blackbox as bb
 from blackbox.models import PosteriorBernoulli
 from blackbox.likelihoods import MFBernoulli
 from blackbox.priors import Flow
 from blackbox.auxiliaries import InverseFlow
-from blackbox.hvm import HVM
 
 if __name__ == '__main__':
   np.random.seed(143479292)
@@ -27,5 +27,5 @@ if __name__ == '__main__':
   r_flow_length = 3*q_flow_length
   r_auxiliary = InverseFlow(r_flow_length, q_mf.num_params)
 
-  vi = HVM(model, q_mf, q_prior, r_auxiliary, niter=int(1e4))
-  vi.run()
+  inference = bb.HVM(model, q_mf, q_prior, r_auxiliary, niter=int(1e4))
+  inference.run()

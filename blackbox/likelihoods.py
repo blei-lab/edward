@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from scipy.stats import bernoulli, norm, poisson
+from util import logistic
 
 class MFBernoulli:
   """

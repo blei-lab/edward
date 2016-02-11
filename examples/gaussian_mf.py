@@ -12,9 +12,9 @@
 #   t-Likelihood q(t|lambda): Mean-field Gaussian
 import numpy as np
 
+import blackbox as bb
 from blackbox.models import PosteriorGaussian
 from blackbox.likelihoods import MFGaussian
-from blackbox.hvm import MFVI
 
 if __name__ == '__main__':
   np.random.seed(143479292)
@@ -22,6 +22,6 @@ if __name__ == '__main__':
   model = PosteriorGaussian(1)
   q_mf = MFGaussian(model.num_vars)
 
-  vi = MFVI(model, q_mf, niter=int(1e3))
-  vi.run()
-  print vi.q_mf.mu, vi.q_mf.log_std
+  inference = bb.MFVI(model, q_mf, niter=int(1e3))
+  inference.run()
+  print inference.q_mf.mu, inference.q_mf.log_std

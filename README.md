@@ -10,8 +10,8 @@ __blackbox__ is a tool for performing Bayesian inference over a large
 class of models, including both discrete and continuous latent
 variables. It enables rapid prototyping of models.
 
-Example (more found in `examples/`):
-```
+Example (more found in [`examples/`](examples/)):
+```{Python}
 import blackbox as bb
 
 # demo here

@@ -5,9 +5,9 @@
 #   Likelihood: Mean-field Poisson
 import numpy as np
 
+import blackbox as bb
 from blackbox.models import PosteriorMixturePoisson
 from blackbox.likelihoods import MFPoisson
-from blackbox.hvm import MFVI
 
 if __name__ == '__main__':
   np.random.seed(42)
@@ -17,5 +17,5 @@ if __name__ == '__main__':
 
   q_mf = MFPoisson(model.num_vars)
 
-  vi = MFVI(model, q_mf, niter=int(1e4))
-  vi.run()
+  inference = bb.MFVI(model, q_mf, niter=int(1e4))
+  inference.run()

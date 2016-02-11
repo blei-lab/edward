@@ -5,7 +5,7 @@ except ImportError:
 
 config = {
     'name': 'blackbox',
-    'description': 'Black box (approximate) inference for probabilistic models',
+    'description': 'Black box inference for probabilistic models',
     'author': 'Dustin Tran',
     'author_email': 'dustin@cs.columbia.edu',
     'version': '0.1',
