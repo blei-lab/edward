@@ -1,4 +1,12 @@
+import numpy as np
 import tensorflow as tf
+
+def set_seed(x):
+    """
+    Set seed for both NumPy and TensorFlow.
+    """
+    np.random.seed(x)
+    tf.set_random_seed(x)
 
 def dot(X, y):
     d = y.get_shape()[0].value

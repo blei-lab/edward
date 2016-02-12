@@ -28,8 +28,7 @@ class BernoulliModel:
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 
-np.random.seed(42)
-tf.set_random_seed(42)
+bb.set_seed(42)
 
 data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
 model = BernoulliModel(data)

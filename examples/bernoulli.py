@@ -33,8 +33,7 @@ class Bernoulli:
             elem = tf.gather(elem, tf.to_int32(x[d]))
         return elem
 
-np.random.seed(42)
-tf.set_random_seed(42)
+bb.set_seed(42)
 
 p = tf.constant(0.6)
 model = Bernoulli(p)
