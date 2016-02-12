@@ -7,10 +7,10 @@
 #   Likelihood: Mean-field Beta
 import numpy as np
 import tensorflow as tf
-
 import blackbox as bb
-from blackbox.dists import bernoulli_log_prob, beta_log_prob
+
 from blackbox.likelihoods import MFBeta
+from blackbox.dists import bernoulli_log_prob, beta_log_prob
 
 class BernoulliModel:
     """
@@ -35,5 +35,5 @@ data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
 model = BernoulliModel(data)
 q = MFBeta(model.num_vars)
 
-inference = bb.VI(model, q, n_minibatch=100)
+inference = bb.VI(model, q, n_minibatch=10)
 inference.run()

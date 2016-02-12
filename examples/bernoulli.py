@@ -5,10 +5,11 @@
 #   Likelihood: Mean-field Bernoulli
 import numpy as np
 import tensorflow as tf
-
 import blackbox as bb
-from blackbox.dists import bernoulli_log_prob
+
 from blackbox.likelihoods import MFBernoulli
+from blackbox.dists import bernoulli_log_prob
+from blackbox.util import get_dims
 
 class Bernoulli:
     """
@@ -16,18 +17,28 @@ class Bernoulli:
     """
     def __init__(self, p):
         self.p = p
-        self.num_vars = len(p.shape)
+        self.lp = tf.log(p)
+        self.num_vars = get_dims(p)[0]
 
     def log_prob(self, zs):
-        log_prior = bernoulli_log_prob(zs[:, 0], p)
-        return log_prior
+        # TODO use table lookup for everything not resort to if-elses
+        if get_dims(zs)[1] == 1:
+            return bernoulli_log_prob(zs[:, 0], p)
+        else:
+            return tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
+
+    def table_lookup(self, x):
+        elem = self.lp
+        for d in range(self.num_vars):
+            elem = tf.gather(elem, tf.to_int32(x[d]))
+        return elem
 
 np.random.seed(42)
 tf.set_random_seed(42)
 
-p = np.array([0.6])
+p = tf.constant(0.6)
 model = Bernoulli(p)
 q = MFBernoulli(model.num_vars)
 
-inference = bb.VI(model, q, n_minibatch=100)
+inference = bb.VI(model, q, n_minibatch=10)
 inference.run()
