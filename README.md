@@ -1,4 +1,4 @@
-![blackbox](http://dustintran.com/img/blackbox_150.png)
+![blackbox](http://dustintran.com/img/blackbox_200.png)
 
 __blackbox__ is a tool for performing Bayesian inference over a large
 class of models, including both discrete and continuous latent

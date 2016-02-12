@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Probability model
-#   Posterior: (1-dimensional) Bernoulli
+#   Posterior: 2-dimensional Bernoulli
 # Variational model
 #   Likelihood: Mean-field Bernoulli
 import numpy as np
@@ -16,18 +16,28 @@ class Bernoulli:
     """
     def __init__(self, p):
         self.p = p
-        self.num_vars = len(p.shape)
+        #self.num_vars = tf.rank(p)
+        self.num_vars = 2 # TODO hardcoded
 
     def log_prob(self, zs):
-        log_prior = bernoulli_log_prob(zs[:, 0], p)
-        return log_prior
+        # TODO this breaks for dim(z) = 1
+        out = tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
+        return out
+
+    def table_lookup(self, x):
+        elem = tf.log(p)
+        for d in range(self.num_vars):
+            elem = tf.gather(elem, tf.to_int32(x[d]))
+        return elem
 
 np.random.seed(42)
 tf.set_random_seed(42)
 
-p = np.array([0.6])
+p = tf.constant(
+[[0.4, 0.1],
+ [0.1, 0.4]])
 model = Bernoulli(p)
-q = MFBernoulli(model.num_vars)
+q = MFBernoulli(2) # TODO hardcoded
 
 inference = bb.VI(model, q, n_minibatch=100)
 inference.run()

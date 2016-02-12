@@ -1,4 +1,10 @@
-# Stan's Beta-Bernoulli model example
+#!/usr/bin/env python
+# A simple example from Stan.
+# Probability model
+#   Prior: Beta
+#   Likelihood: Bernoulli
+# Variational model
+#   Likelihood: Mean-field Beta
 import numpy as np
 import tensorflow as tf
 
@@ -29,20 +35,5 @@ data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
 model = BernoulliModel(data)
 q = MFBeta(model.num_vars)
 
-inference = bb.VI(model, q, 100)
-
-loss = inference.build_loss()
-update = tf.train.AdamOptimizer(0.1).minimize(-loss)
-init = tf.initialize_all_variables()
-
-sess = tf.Session()
-sess.run(init)
-feed_dict = {}
-for t in range(1000):
-    zs = inference.sample(sess)
-
-    _, a, b, elbos = sess.run([update, inference.q.alpha, inference.q.beta, inference.elbo], {inference.zs: zs})
-
-    if t % 100 == 0:
-        print "iter %d alpha %.3f beta %.3f elbo %.2f " \
-        % (t, a, b, np.mean(elbos))
+inference = bb.VI(model, q, n_minibatch=100)
+inference.run()
