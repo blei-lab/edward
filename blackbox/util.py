@@ -8,9 +8,21 @@ def set_seed(x):
     np.random.seed(x)
     tf.set_random_seed(x)
 
-def dot(X, y):
-    d = y.get_shape()[0].value
-    return tf.matmul(X, tf.reshape(y, [d, 1]))
+def dot(x, y):
+    """
+    x is M x N matrix and y is N-vector, or
+    x is M-vector and y is M x N matrix
+    """
+    if len(x.get_shape()) == 1:
+        vec = x
+        mat = y
+        d = vec.get_shape()[0].value
+        return tf.matmul(tf.reshape(vec, [1, d]), mat)
+    else:
+        mat = x
+        vec = y
+        d = vec.get_shape()[0].value
+        return tf.matmul(mat, tf.reshape(vec, [d, 1]))
 
 def trace(X):
     # assumes square
