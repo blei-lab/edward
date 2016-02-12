@@ -10,16 +10,18 @@ class VI:
         self.q = q
         self.elbo = 0
 
-    def sample(self, a, b):
+    def sample(self, sess):
         # TODO the size should be tf.shape(self.zs)
-        return self.q.sample((self.num_minibatch, self.q.num_vars), a, b)
+        return self.q.sample((self.num_minibatch, self.q.num_vars), sess)
 
     def build_loss(self):
         # TODO use MFVI gradient
         # TODO is there a more natural TF way of implementing this?
         q_log_prob = tf.zeros([self.num_minibatch], dtype=tf.float32)
         for i in range(self.q.num_vars):
-            q_log_prob += self.q.log_prob_zi(i, self.zs[:, i])
+            q_log_prob += self.q.log_prob_zi(i, self.zs)
 
         self.elbo = self.model.log_prob(self.zs) - q_log_prob
         return tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbo))
+
+# TODO keep porting stuff

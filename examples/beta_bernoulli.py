@@ -22,9 +22,12 @@ class BernoulliModel:
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 
+np.random.seed(42)
+tf.set_random_seed(42)
+
 data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
 model = BernoulliModel(data)
-q = MFBeta(1)
+q = MFBeta(model.num_vars)
 
 inference = bb.VI(model, q, 100)
 
@@ -32,20 +35,13 @@ loss = inference.build_loss()
 update = tf.train.AdamOptimizer(0.1).minimize(-loss)
 init = tf.initialize_all_variables()
 
-np.random.seed(42)
-tf.set_random_seed(42)
-
 sess = tf.Session()
 sess.run(init)
 feed_dict = {}
 for t in range(1000):
-    # need to realize the variables in order to pass into a scipy.rvs
-    # TODO make all parameters outside, not in these classes but as
-    # part of inference most generally
-    a, b = sess.run([inference.q.alpha, inference.q.beta])
-    zs = inference.sample(a, b)
+    zs = inference.sample(sess)
 
-    _, elbos = sess.run([update, inference.elbo], {inference.zs: zs})
+    _, a, b, elbos = sess.run([update, inference.q.alpha, inference.q.beta, inference.elbo], {inference.zs: zs})
 
     if t % 100 == 0:
         print "iter %d alpha %.3f beta %.3f elbo %.2f " \
