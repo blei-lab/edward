@@ -2,7 +2,6 @@ import tensorflow as tf
 
 from blackbox.util import trace
 
-#sess = tf.Session()
 sess = tf.InteractiveSession()
 
 X = tf.diag([2])

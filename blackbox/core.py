@@ -15,12 +15,10 @@ class VI:
         self.elbo = 0
 
     def sample(self, sess):
-        # TODO the size should be tf.shape(self.zs)
-        return self.q.sample((self.n_minibatch, self.q.num_vars), sess)
+        return self.q.sample(self.zs.get_shape(), sess)
 
     def build_score_loss(self):
         # TODO use MFVI gradient
-        # TODO is there a more natural TF way of implementing this?
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.q.num_vars):
             q_log_prob += self.q.log_prob_zi(i, self.zs)
@@ -51,3 +49,5 @@ class VI:
             self.q.print_params(sess)
 
 # TODO keep porting stuff
+# TODO be consistent with tf.dtypes
+# TODO visualize graph
