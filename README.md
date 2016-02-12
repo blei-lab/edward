@@ -1,10 +1,4 @@
-# blackbox
-
-<!--
-<div align="center">
-  <img src="https://www.tensorflow.org/images/tf_logo_transp.png"><br><br>
-</div>
--->
+![blackbox](http://dustintran.com/img/blackbox_150.png)
 
 __blackbox__ is a tool for performing Bayesian inference over a large
 class of models, including both discrete and continuous latent
