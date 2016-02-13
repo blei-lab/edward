@@ -130,8 +130,9 @@ class MFGaussian:
         z = np.zeros(size)
         for d in range(self.num_vars):
             z[:, d] = norm.rvs(m[d], s[d], size=size[0])
-        # TODO here i can use tf.random_normal instead
 
+        # TODO I could use tf.random_normal() here, although I need it
+        # to realize values.
         return z
 
     def log_prob_zi(self, i, z):
