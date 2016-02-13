@@ -7,8 +7,7 @@ import numpy as np
 import tensorflow as tf
 import blackbox as bb
 
-from blackbox.likelihoods import MFGaussian
-from blackbox.dists import gaussian_log_prob
+from blackbox.stats import gaussian_log_prob
 from blackbox.util import get_dims
 
 class Gaussian:
@@ -30,7 +29,7 @@ bb.set_seed(42)
 mu = tf.constant(1.0)
 Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
-q = MFGaussian(model.num_vars)
+q = bb.MFGaussian(model.num_vars)
 
 inference = bb.VI(model, q, method="reparam", n_iter=10000)
 inference.run()

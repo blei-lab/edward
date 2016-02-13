@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
@@ -82,7 +83,7 @@ class VI:
 
     def print_progress(self, t, elbos, sess):
         if t % self.n_print == 0:
-            print "iter %d elbo %.2f " % (t, np.mean(elbos))
+            print("iter %d elbo %.2f " % (t, np.mean(elbos)))
             self.q.print_params(sess)
 
 # TODO

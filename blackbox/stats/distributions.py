@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from util import log_beta, dot, get_dims
+from blackbox.util import log_beta, dot, get_dims
 
 def bernoulli_log_prob(x, p):
     """

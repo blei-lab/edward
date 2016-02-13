@@ -7,8 +7,7 @@ import numpy as np
 import tensorflow as tf
 import blackbox as bb
 
-from blackbox.likelihoods import MFBernoulli
-from blackbox.dists import bernoulli_log_prob
+from blackbox.stats import bernoulli_log_prob
 from blackbox.util import get_dims
 
 class Bernoulli:
@@ -39,7 +38,7 @@ p = tf.constant(
 [[0.4, 0.1],
  [0.1, 0.4]])
 model = Bernoulli(p)
-q = MFBernoulli(model.num_vars)
+q = bb.MFBernoulli(model.num_vars)
 
 inference = bb.VI(model, q, n_minibatch=5)
 inference.run()

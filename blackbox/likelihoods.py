@@ -1,9 +1,10 @@
+from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
 from scipy.stats import bernoulli, beta, norm
-from dists import bernoulli_log_prob, beta_log_prob, gaussian_log_prob
-from util import get_dims
+from blackbox.dists import bernoulli_log_prob, beta_log_prob, gaussian_log_prob
+from blackbox.util import get_dims
 
 class MFBernoulli:
     """
@@ -26,8 +27,8 @@ class MFBernoulli:
         if p.size > 1:
             p[-1] = 1.0 - np.sum(p[:-1])
 
-        print "probability:"
-        print p
+        print("probability:")
+        print(p)
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
@@ -70,10 +71,10 @@ class MFBeta:
             self.transform(self.a_unconst),
             self.transform(self.b_unconst)])
 
-        print "shape:"
-        print a
-        print "scale:"
-        print b
+        print("shape:")
+        print(a)
+        print("scale:")
+        print(b)
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
@@ -117,10 +118,10 @@ class MFGaussian:
             self.transform_m(self.m_unconst),
             self.transform_s(self.s_unconst)])
 
-        print "mean:"
-        print m
-        print "std dev:"
-        print s
+        print("mean:")
+        print(m)
+        print("std dev:")
+        print(s)
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
