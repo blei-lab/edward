@@ -20,9 +20,8 @@ class Gaussian:
         self.num_vars = get_dims(mu)[0]
 
     def log_prob(self, zs):
-        n_minibatch = get_dims(zs)[0]
-        return tf.pack([gaussian_log_prob(zs[m, :], mu, Sigma)
-                        for m in range(n_minibatch)])
+        return tf.pack([gaussian_log_prob(z, mu, Sigma)
+                        for z in tf.unpack(zs)])
 
 bb.set_seed(42)
 

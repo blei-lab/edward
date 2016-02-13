@@ -133,8 +133,11 @@ class MFGaussian:
         for d in range(self.num_vars):
             z[:, d] = norm.rvs(m[d], s[d], size=size[0])
 
-        # TODO I could use tf.random_normal() here, although I need it
-        # to realize values.
+        # Not using this, since TensorFlow has a large overhead
+        # whenever calling sess.run().
+        #z = tf.pack([tf.random_normal(size[0], m[d], s[d])
+        #              for d in range(self.num_vars)])
+        #return sess.run(z)
         return z
 
     def log_prob_zi(self, i, z):
@@ -147,8 +150,7 @@ class MFGaussian:
         # TODO
         #mi = self.transform_m(self.m_unconst[i])
         #si = self.transform_s(self.s_unconst[i])
-        n_minibatch = get_dims(z)[0]
-        return tf.pack([gaussian_log_prob(z[m, i], mi, si*si)
-                        for m in range(n_minibatch)])
+        return tf.pack([gaussian_log_prob(zm[i], mi, si*si)
+                        for zm in tf.unpack(z)])
         # TODO
         #return gaussian_log_prob(z[:, i], mi, si)

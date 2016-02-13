@@ -28,8 +28,8 @@ class VI:
         self.n_print = n_print
 
         self.samples = tf.placeholder(shape=(self.n_minibatch, q.num_vars),
-                                 dtype=tf.float32,
-                                 name="zs")
+                                      dtype=tf.float32,
+                                      name="samples")
         self.elbo = 0
 
     def run(self):
@@ -49,8 +49,9 @@ class VI:
             else:
                 # TODO generalize to "noise" samples, and
                 # reparameterization method, based on q's methods
-                # TODO I could use tf.random_normal() here, although I
-                # need it to realize values.
+                # Not using this, since TensorFlow has a large overhead
+                # whenever calling sess.run().
+                #samples = sess.run(tf.random_normal(self.samples.get_shape()))
                 samples = norm.rvs(size=self.samples.get_shape())
 
             _, elbos = sess.run([update, self.elbo], {self.samples: samples})
