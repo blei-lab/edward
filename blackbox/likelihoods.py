@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from scipy.stats import bernoulli, beta, norm
 from dists import bernoulli_log_prob, beta_log_prob, gaussian_log_prob
+from util import get_dims
 
 class MFBernoulli:
     """
@@ -24,7 +25,7 @@ class MFBernoulli:
         if p.size > 1:
             p[-1] = 1.0 - np.sum(p[:-1])
 
-        print "p:"
+        print "probability:"
         print p
 
     def sample(self, size, sess):
@@ -68,9 +69,9 @@ class MFBeta:
             self.transform(self.a_unconst),
             self.transform(self.b_unconst)])
 
-        print "alpha:"
+        print "shape:"
         print a
-        print "beta:"
+        print "scale:"
         print b
 
     def sample(self, size, sess):
@@ -135,7 +136,6 @@ class MFGaussian:
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
-        # TODO
         if i >= self.num_vars:
             raise
 
@@ -144,5 +144,8 @@ class MFGaussian:
         # TODO
         #mi = self.transform_m(self.m_unconst[i])
         #si = self.transform_s(self.s_unconst[i])
+        n_minibatch = get_dims(z)[0]
+        return tf.pack([gaussian_log_prob(z[m, i], mi, si*si)
+                        for m in range(n_minibatch)])
+        # TODO
         #return gaussian_log_prob(z[:, i], mi, si)
-        return gaussian_log_prob(z[0, i], mi, si)

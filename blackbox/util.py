@@ -47,8 +47,8 @@ def get_dims(x):
 
 def log_gamma(x):
     """
-    use an approximation avoiding special functions, because
-    TensorFlow doesn't currently support them
+    TensorFlow doesn't have special functions, so use a
+    log/exp/polynomial approximation.
     http://www.machinedlearnings.com/2011/06/faster-lda.html
     """
     logterm = tf.log(x * (1.0 + x) * (2.0 + x))
@@ -57,7 +57,7 @@ def log_gamma(x):
 
 def log_beta(x, y):
     """
-    use an approximation avoiding special functions, because
-    TensorFlow doesn't currently support them
+    TensorFlow doesn't have special functions, so use a
+    log/exp/polynomial approximation.
     """
     return log_gamma(x) + log_gamma(y) - log_gamma(x+y)

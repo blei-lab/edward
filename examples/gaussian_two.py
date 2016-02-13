@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Probability model
-#   Posterior: (1-dimensional) Gaussian
+#   Posterior: (2-dimensional) Gaussian
 # Variational model
 #   Likelihood: Mean-field Gaussian
 import numpy as np
@@ -27,8 +27,10 @@ class Gaussian:
 
 bb.set_seed(42)
 
-mu = tf.constant(1.0)
-Sigma = tf.constant(1.0)
+mu = tf.constant([1.0, 1.0])
+Sigma = tf.constant(
+[[1.0, 0.1],
+ [0.1, 1.0]])
 model = Gaussian(mu, Sigma)
 q = MFGaussian(model.num_vars)
 

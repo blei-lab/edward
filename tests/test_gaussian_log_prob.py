@@ -23,8 +23,15 @@ print
 print "Input: Multi-dimensional vector"
 x = tf.zeros([2])
 print gaussian_log_prob(x).eval()
+print gaussian_log_prob(x, tf.zeros([2]), tf.ones([2])).eval()
 print gaussian_log_prob(x, tf.zeros([2]), tf.diag(tf.ones([2]))).eval()
 print multivariate_normal.logpdf(np.zeros(2), np.zeros(2), np.diag(np.ones(2)))
+print
+x = tf.zeros([2])
+print gaussian_log_prob(x, tf.zeros([2]),
+                        tf.constant([[2.0, 0.5], [0.5, 1.0]])).eval()
+print multivariate_normal.logpdf(np.zeros(2), np.zeros(2),
+                                 np.array([[2.0, 0.5], [0.5, 1.0]]))
 
 """
 print "Input: Multiple one-dimensional scalars"

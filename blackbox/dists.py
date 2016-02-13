@@ -31,96 +31,50 @@ def gaussian_log_prob(x, mu=None, Sigma=None):
     Arguments
     ----------
     x: Tensor scalar, vector
-    mu: None, Tensor scalar, vector
-    mu: None, Tensor scalar, vector, matrix
+    mu: mean - None, Tensor scalar, vector
+    Sigma: variance - None, Tensor scalar, vector, matrix
     TODO allow minibatch
+    TODO this doesn't do any error checking
     """
     d = get_dims(x)[0]
     if mu is None:
-        mu = tf.zeros([d])
+        r = tf.ones([d]) * x
     elif len(mu.get_shape()) == 0: # scalar
-        # TensorFlow can't reverse-mode autodiff tf.fill()
-        #mu = tf.fill([d], mu)
-        mu = tf.ones([d]) * mu
+        r = x - mu
+    else:
+        r = tf.sub(x, mu)
 
     if Sigma is None:
-        Sigma = tf.diag(tf.ones([d]))
+        Sigma_inv = tf.diag(tf.ones([d]))
+        det_Sigma = tf.constant(1.0)
     elif len(Sigma.get_shape()) == 0: # scalar
-        #Sigma = tf.diag(tf.fill([1], Sigma))
-        Sigma = tf.diag(tf.ones([1]) * Sigma)
+        Sigma_inv = 1.0 / Sigma
+        det_Sigma = Sigma
     elif len(Sigma.get_shape()) == 1: # vector
-        Sigma = tf.diag(Sigma)
+        Sigma_inv = tf.diag(1.0 / Sigma)
+        det_Sigma = tf.reduce_prod(Sigma)
+    else:
+        Sigma_inv = tf.matrix_inverse(Sigma)
+        det_Sigma = tf.matrix_determinant(Sigma)
 
-    """
-    # TensorFlow can't reverse-mode autodiff Cholesky
-    L = tf.cholesky(Sigma)
-    L_inv = tf.matrix_inverse(L)
-    det_Sigma = tf.pow(tf.matrix_determinant(L), 2)
-    inner = dot(L_inv, tf.sub(x, mu))
-    out = -0.5*d*tf.log(2*np.pi) - \
-          0.5*tf.log(det_Sigma) - \
-          0.5*tf.matmul(tf.transpose(inner), inner)
-    """
-    det_Sigma = tf.matrix_determinant(Sigma)
-    Sigma_inv = tf.matrix_inverse(Sigma)
-    vec = tf.sub(x, mu)
-    temp = dot(tf.transpose(vec), Sigma_inv)
-    out = -0.5*d*tf.log(2*np.pi) - \
-          0.5*tf.log(det_Sigma) - \
-          0.5*dot(dot(tf.transpose(vec), Sigma_inv), vec)
-    #det_Sigma = Sigma
-    #Sigma_inv = 1.0 / Sigma
-    #vec = tf.sub(x, mu)
-    #temp = dot(tf.transpose(vec), Sigma_inv)
-    #out = -0.5*d*tf.log(2*np.pi) - \
-    #      0.5*tf.log(det_Sigma) - \
-    #      0.5*(vec * Sigma_inv * vec)
-    return out
-
-#def gaussian_log_prob(x, mu=None, Sigma=None):
-#    """
-#    log Gaussian(x; mu, Sigma)
-
-#    Arguments
-#    ----------
-#    x: Tensor scalar, vector, or matrix
-#    """
-#    dims = x.get_shape()
-#    if len(dims) == 0: # scalar
-#        N = 1
-#        d = 1
-#    elif len(dims) == 1: # vector
-#        N = 1
-#        d = dims[0].value
-#    elif len(dims) == 2: # N x d matrix
-#        N = dims[0].value
-#        d = dims[1].value
-#    else:
-#        raise
-
-#    if mu is None:
-#        mu = tf.zeros([d])
-#    if Sigma is None:
-#        Sigma = tf.diag(tf.ones([d]))
-
-#    L = tf.cholesky(Sigma)
-#    L_inv = tf.matrix_inverse(L)
-#    det_Sigma = tf.pow(tf.matrix_determinant(L), 2)
-#    out = tf.zeros([N]) # TODO item assignment
-#    for n in range(N):
-#        #xn = x[n] # TODO
-#        xn = x[n, :]
-#        inner = dot(L_inv, tf.sub(xn, mu))
-#        out[n] = tf.reshape(
-#            -0.5*d*tf.log(2*np.pi) - \
-#                0.5*tf.log(det_Sigma) - \
-#                0.5*tf.matmul(tf.transpose(inner), inner),
-#            [-1])
-
-
-#    N = 5
-#    out = tf.zeros([N])
-#    for n in range(N):
-#        out[n] = n # some operation happens here, which depends on n
-
-#    return out
+    if d == 1:
+        lps = -0.5*d*tf.log(2*np.pi) - \
+              0.5*tf.log(det_Sigma) - \
+              0.5*r * Sigma_inv * r
+    else:
+        lps = -0.5*d*tf.log(2*np.pi) - \
+              0.5*tf.log(det_Sigma) - \
+              0.5*dot(dot(tf.transpose(r), Sigma_inv), r)
+        """
+        # TensorFlow can't reverse-mode autodiff Cholesky
+        L = tf.cholesky(Sigma)
+        L_inv = tf.matrix_inverse(L)
+        det_Sigma = tf.pow(tf.matrix_determinant(L), 2)
+        inner = dot(L_inv, r)
+        out = -0.5*d*tf.log(2*np.pi) - \
+              0.5*tf.log(det_Sigma) - \
+              0.5*tf.matmul(tf.transpose(inner), inner)
+        """
+    #lp = tf.reduce_sum(lps)
+    #return lps
+    return tf.reshape(lps, [-1])
