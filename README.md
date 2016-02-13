@@ -11,7 +11,9 @@ import blackbox as bb
 # demo here
 ```
 
-Features (in progress)
+## Features
+
+(in progress)
 * [TensorFlow](https://www.tensorflow.org)
 * variational models ([Ranganath et al., 2015](http://arxiv.org/abs/1511.02386); [Tran et al., 2016](http://arxiv.org/abs/1511.06499))
 * $f$-divergences
@@ -27,9 +29,21 @@ differentiation variational inference", "variational autoencoders",
 "deep learning"
 
 ## Installation
+
 To install from pip, run
 ```{bash}
 pip install -e "git+https://github.com/blei-lab/blackbox.git#egg=blackbox"
 ```
 
 ## Authors
+
+## Citation
+
+```
+@misc{
+  author = {},
+  title = {},
+  url={https://github.com/Blei-Lab/blackbox},
+  year = {2016}
+}
+```
