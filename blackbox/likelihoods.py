@@ -18,6 +18,7 @@ class MFBernoulli:
         # part of inference most generally
         self.transform = tf.sigmoid
         # TODO something about constraining the parameters in simplex
+        # TODO deal with truncations
 
     # TODO use __str__(self):
     def print_params(self, sess):

@@ -4,13 +4,27 @@ import tensorflow as tf
 from scipy.stats import norm
 
 class VI:
-    def __init__(self, model, q, method="score", n_iter=1000, n_minibatch=1):
+    """
+    Base class for inference methods.
+
+    Arguments
+    ----------
+    model: p(x, z), class with log_prob method
+    q: q(z; lambda), class TODO
+    method: "score" or "reparam"
+    n_iter: number of iterations for optimization
+    n_minibatch: number of samples for stochastic gradient
+    n_print: number of iterations for each print progress
+    """
+    def __init__(self, model, q, method="score",
+                 n_iter=1000, n_minibatch=1, n_print=100):
         self.model = model
         self.q = q
 
-        self.method = "score"
+        self.method = method
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
+        self.n_print = n_print
 
         self.samples = tf.placeholder(shape=(self.n_minibatch, q.num_vars),
                                  dtype=tf.float32,
@@ -18,11 +32,6 @@ class VI:
         self.elbo = 0
 
     def run(self):
-        sess, update = self._initialize()
-        for t in range(self.n_iter):
-            self._update(t, sess, update)
-
-    def _initialize(self):
         if self.method == "score":
             loss = self.build_score_loss()
         else:
@@ -33,23 +42,19 @@ class VI:
 
         sess = tf.Session()
         sess.run(init)
-        return sess, update
+        for t in range(self.n_iter):
+            if self.method == "score":
+                samples = self.q.sample(self.samples.get_shape(), sess)
+            else:
+                # TODO generalize to "noise" samples, and
+                # reparameterization method, based on q's methods
+                # TODO I could use tf.random_normal() here, although I
+                # need it to realize values.
+                samples = norm.rvs(size=self.samples.get_shape())
 
-    def _update(self, t, sess, update):
-        if self.method == "score":
-            samples = self.q.sample(self.samples.get_shape(), sess)
-        else:
-            # TODO generalize to "noise" samples, and
-            # reparameterization method, based on q's methods
-            # TODO I could use tf.random_normal() here, although I
-            # need it to realize values.
-            samples = norm.rvs(size=self.samples.get_shape())
+            _, elbos = sess.run([update, self.elbo], {self.samples: samples})
 
-        _, elbos = sess.run([update, self.elbo], {self.samples: samples})
-
-        if t % 100 == 0:
-            print "iter %d elbo %.2f " % (t, np.mean(elbos))
-            self.q.print_params(sess)
+            self.print_progress(t, elbos, sess)
 
     def build_score_loss(self):
         # TODO use MFVI gradient
@@ -71,10 +76,37 @@ class VI:
             q_log_prob += self.q.log_prob_zi(i, z)
 
         self.elbo = self.model.log_prob(z) - q_log_prob
-        # TODO in the special case of gaussian entropy, calculate it
-        # analytically
+        # if isinstance(self.q, MFGaussian):
+            # TODO calculate gaussian entropy analytically
         return tf.reduce_mean(self.elbo)
 
-# TODO keep porting stuff
+    def print_progress(self, t, elbos, sess):
+        if t % self.n_print == 0:
+            print "iter %d elbo %.2f " % (t, np.mean(elbos))
+            self.q.print_params(sess)
+
+# TODO
+# what portions of this should be part of the base class?
+# how can I make MFVI a special case of this?
+#class HVM(VI):
+#    """
+#    Black box inference with a hierarchical variational model.
+#    (Ranganath et al., 2016)
+
+#    Arguments
+#    ----------
+#    model: probability model p(x, z)
+#    q_mf: likelihood q(z | lambda) (must be a mean-field)
+#    q_prior: prior q(lambda; theta)
+#    r_auxiliary: auxiliary r(lambda | z; phi)
+#    """
+#  def __init__(self, model, q_mf, q_prior, r_auxiliary,
+#               *args, **kwargs):
+#    VI.__init__(self, *args, **kwargs)
+#    self.model = model
+#    self.q_mf = q_mf
+#    self.q_prior = q_prior
+#    self.r_auxiliary = r_auxiliary
+
 # TODO be consistent with tf.dtypes
 # TODO visualize graph
