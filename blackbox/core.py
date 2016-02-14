@@ -12,17 +12,15 @@ class VI:
     ----------
     model: p(x, z), class with log_prob method
     q: q(z; lambda), class TODO
-    method: "score" or "reparam"
     n_iter: number of iterations for optimization
     n_minibatch: number of samples for stochastic gradient
     n_print: number of iterations for each print progress
     """
-    def __init__(self, model, q, method="score",
+    def __init__(self, model, q,
                  n_iter=1000, n_minibatch=1, n_print=100):
         self.model = model
         self.q = q
 
-        self.method = method
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
         self.n_print = n_print
@@ -33,7 +31,7 @@ class VI:
         self.elbo = 0
 
     def run(self):
-        if self.method == "score":
+        if self.q.reparam is False:
             loss = self.build_score_loss()
         else:
             loss = self.build_reparam_loss()
@@ -44,15 +42,10 @@ class VI:
         sess = tf.Session()
         sess.run(init)
         for t in range(self.n_iter):
-            if self.method == "score":
+            if self.q.reparam is False:
                 samples = self.q.sample(self.samples.get_shape(), sess)
             else:
-                # TODO generalize to "noise" samples, and
-                # reparameterization method, based on q's methods
-                # Not using this, since TensorFlow has a large overhead
-                # whenever calling sess.run().
-                #samples = sess.run(tf.random_normal(self.samples.get_shape()))
-                samples = norm.rvs(size=self.samples.get_shape())
+                samples = self.q.sample_noise(self.samples.get_shape())
 
             _, elbos = sess.run([update, self.elbo], {self.samples: samples})
 
@@ -69,9 +62,7 @@ class VI:
 
     def build_reparam_loss(self):
         # TODO use MFVI gradient
-        m = self.q.transform_m(self.q.m_unconst)
-        s = self.q.transform_s(self.q.s_unconst)
-        z = m + self.samples * s
+        z = self.q.reparameterize(self.samples)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.q.num_vars):

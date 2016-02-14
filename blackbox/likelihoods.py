@@ -13,6 +13,7 @@ class MFBernoulli:
     def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = num_vars
+        self.reparam = False
 
         self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
         # TODO make all variables outside, not in these classes but as
@@ -61,6 +62,7 @@ class MFBeta:
     def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = 2*num_vars
+        self.reparam = False
 
         self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
@@ -107,6 +109,7 @@ class MFGaussian:
     def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = 2*num_vars
+        self.reparam = True
 
         self.m_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.s_unconst = tf.Variable(tf.random_normal([num_vars]))
@@ -123,22 +126,24 @@ class MFGaussian:
         print("std dev:")
         print(s)
 
-    def sample(self, size, sess):
-        """z ~ q(z | lambda)"""
-        m, s = sess.run([ \
-            self.transform_m(self.m_unconst),
-            self.transform_s(self.s_unconst)])
-
-        z = np.zeros(size)
-        for d in range(self.num_vars):
-            z[:, d] = norm.rvs(m[d], s[d], size=size[0])
-
+    def sample_noise(self, size):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparameterize(eps; lambda) ~ q(z | lambda)
+        """
         # Not using this, since TensorFlow has a large overhead
         # whenever calling sess.run().
-        #z = tf.pack([tf.random_normal(size[0], m[d], s[d])
-        #              for d in range(self.num_vars)])
-        #return sess.run(z)
-        return z
+        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
+        return norm.rvs(size=size)
+
+    def reparameterize(self, eps):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparameterize(eps; lambda) ~ q(z | lambda)
+        """
+        m = self.transform_m(self.m_unconst)
+        s = self.transform_s(self.s_unconst)
+        return m + eps * s
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""

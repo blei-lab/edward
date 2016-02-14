@@ -30,5 +30,5 @@ Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
 q = bb.MFGaussian(model.num_vars)
 
-inference = bb.VI(model, q, method="reparam", n_iter=10000)
+inference = bb.VI(model, q, n_iter=10000)
 inference.run()

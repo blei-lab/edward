@@ -43,7 +43,7 @@ pip install -e "git+https://github.com/blei-lab/blackbox.git#egg=blackbox"
 @misc{
   author = {},
   title = {},
-  url={https://github.com/Blei-Lab/blackbox},
+  url = {https://github.com/Blei-Lab/blackbox},
   year = {2016}
 }
 ```
