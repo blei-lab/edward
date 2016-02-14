@@ -78,3 +78,22 @@ def gaussian_log_prob(x, mu=None, Sigma=None):
     #lp = tf.reduce_sum(lps)
     #return lps
     return tf.reshape(lps, [-1])
+
+def gaussian_entropy(Sigma):
+    """
+    - E_{Gaussian(x; mu, Sigma)} [ Gaussian(x; mu, Sigma) ]
+    Note that the entropy of a Gaussian does not depend on its mean.
+
+    Arguments
+    ----------
+    Sigma: variance - Tensor scalar, vector, matrix
+    """
+    d = get_dims(Sigma)[0]
+    if len(Sigma.get_shape()) == 0: # scalar
+        det_Sigma = Sigma
+    elif len(Sigma.get_shape()) == 1: # vector
+        det_Sigma = tf.reduce_prod(Sigma)
+    else:
+        det_Sigma = tf.matrix_determinant(Sigma)
+
+    return 0.5 * (d + d*np.log(2*np.pi) + tf.log(det_Sigma))

@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from scipy.stats import bernoulli, beta, norm
-from blackbox.dists import bernoulli_log_prob, beta_log_prob, gaussian_log_prob
+from blackbox.stats import bernoulli_log_prob, beta_log_prob, gaussian_log_prob, gaussian_entropy
 from blackbox.util import get_dims
 
 class MFBernoulli:
@@ -13,7 +13,6 @@ class MFBernoulli:
     def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = num_vars
-        self.reparam = False
 
         self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
         # TODO make all variables outside, not in these classes but as
@@ -62,7 +61,6 @@ class MFBeta:
     def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = 2*num_vars
-        self.reparam = False
 
         self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
@@ -109,7 +107,6 @@ class MFGaussian:
     def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = 2*num_vars
-        self.reparam = True
 
         self.m_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.s_unconst = tf.Variable(tf.random_normal([num_vars]))
@@ -129,17 +126,17 @@ class MFGaussian:
     def sample_noise(self, size):
         """
         eps = sample_noise() ~ s(eps)
-        s.t. z = reparameterize(eps; lambda) ~ q(z | lambda)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
         # Not using this, since TensorFlow has a large overhead
         # whenever calling sess.run().
         #samples = sess.run(tf.random_normal(self.samples.get_shape()))
         return norm.rvs(size=size)
 
-    def reparameterize(self, eps):
+    def reparam(self, eps):
         """
         eps = sample_noise() ~ s(eps)
-        s.t. z = reparameterize(eps; lambda) ~ q(z | lambda)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
         m = self.transform_m(self.m_unconst)
         s = self.transform_s(self.s_unconst)
@@ -159,3 +156,7 @@ class MFGaussian:
                         for zm in tf.unpack(z)])
         # TODO
         #return gaussian_log_prob(z[:, i], mi, si)
+
+    # TODO entropy is bugged
+    #def entropy(self):
+    #    return gaussian_entropy(self.transform_s(self.s_unconst))
