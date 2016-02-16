@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-# A simple example from Stan.
-# Probability model
-#   Prior: Beta
-#   Likelihood: Bernoulli
-# Variational model
-#   Likelihood: Mean-field Beta
+"""
+A simple example from Stan.
+Probability model
+    Prior: Beta
+    Likelihood: Bernoulli
+Variational model
+    Likelihood: Mean-field Beta
+"""
 import numpy as np
 import tensorflow as tf
 import blackbox as bb
@@ -33,5 +35,5 @@ data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
 model = BernoulliModel(data)
 q = bb.MFBeta(model.num_vars)
 
-inference = bb.VI(model, q, n_minibatch=5)
+inference = bb.MFVI(model, q, n_minibatch=5)
 inference.run()

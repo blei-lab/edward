@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 """
-Probability model
-    Posterior: (1-dimensional) Bernoulli
-Variational model
-    Likelihood: Mean-field Bernoulli
+This is just to show how fast we can do a minibatch gradient descent
+of 100,000 samples (!).
 """
 import numpy as np
 import tensorflow as tf
@@ -40,5 +38,5 @@ p = tf.constant(0.6)
 model = Bernoulli(p)
 q = bb.MFBernoulli(model.num_vars)
 
-inference = bb.MFVI(model, q, n_minibatch=5)
+inference = bb.MFVI(model, q, n_minibatch=int(1e5))
 inference.run()

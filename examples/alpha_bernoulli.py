@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """
+A toy example using alpha-divergence with the score function
+gradient.
 Probability model
     Posterior: (1-dimensional) Bernoulli
 Variational model
@@ -40,5 +42,5 @@ p = tf.constant(0.6)
 model = Bernoulli(p)
 q = bb.MFBernoulli(model.num_vars)
 
-inference = bb.MFVI(model, q, n_minibatch=5)
+inference = bb.AlphaVI(0.5, model, q, n_iter=10000)
 inference.run()

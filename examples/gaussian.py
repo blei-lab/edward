@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-# Probability model
-#   Posterior: (1-dimensional) Gaussian
-# Variational model
-#   Likelihood: Mean-field Gaussian
+"""
+Probability model
+    Posterior: (1-dimensional) Gaussian
+Variational model
+    Likelihood: Mean-field Gaussian
+"""
 import numpy as np
 import tensorflow as tf
 import blackbox as bb
@@ -30,5 +32,8 @@ Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
 q = bb.MFGaussian(model.num_vars)
 
-inference = bb.VI(model, q, n_iter=10000)
+#q.m_unconst = tf.Variable(tf.constant([20.0]))
+#q.s_unconst = tf.Variable(tf.constant([0.0]))
+
+inference = bb.MFVI(model, q, n_iter=10000)
 inference.run()

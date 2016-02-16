@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-# Probability model
-#   Posterior: (2-dimensional) Bernoulli
-# Variational model
-#   Likelihood: Mean-field Bernoulli
+"""
+Probability model
+    Posterior: (2-dimensional) Bernoulli
+Variational model
+    Likelihood: Mean-field Bernoulli
+"""
 import numpy as np
 import tensorflow as tf
 import blackbox as bb
@@ -40,5 +42,5 @@ p = tf.constant(
 model = Bernoulli(p)
 q = bb.MFBernoulli(model.num_vars)
 
-inference = bb.VI(model, q, n_minibatch=5)
+inference = bb.MFVI(model, q, n_minibatch=5)
 inference.run()

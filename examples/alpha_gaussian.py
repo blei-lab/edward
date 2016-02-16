@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """
+A toy example using alpha-divergence with the reparameterization
+gradient.
 Probability model
-    Posterior: (2-dimensional) Gaussian
+    Posterior: (1-dimensional) Gaussian
 Variational model
     Likelihood: Mean-field Gaussian
 """
@@ -27,12 +29,15 @@ class Gaussian:
 
 bb.set_seed(42)
 
-mu = tf.constant([1.0, 1.0])
-Sigma = tf.constant(
-[[1.0, 0.1],
- [0.1, 1.0]])
+# posterior at N(z; 0, 1)
+mu = tf.constant(0.0)
+Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
 q = bb.MFGaussian(model.num_vars)
 
-inference = bb.MFVI(model, q, n_iter=10000)
+# See if it works for initializations roughly 3 std's away.
+q.m_unconst = tf.Variable(tf.constant([10.0]))
+q.s_unconst = tf.Variable(tf.constant([-10.0]))
+
+inference = bb.AlphaVI(0.5, model, q, n_iter=int(1e6), n_minibatch=1)
 inference.run()
