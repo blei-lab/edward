@@ -7,7 +7,6 @@ Probability model
 Variational model
     Likelihood: Mean-field Bernoulli
 """
-import numpy as np
 import tensorflow as tf
 import blackbox as bb
 

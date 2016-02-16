@@ -3,7 +3,6 @@
 This is just to show how fast we can do a minibatch gradient descent
 of 100,000 samples (!).
 """
-import numpy as np
 import tensorflow as tf
 import blackbox as bb
 
