@@ -61,6 +61,7 @@ class VI:
         pass
 
 class MFVI(VI):
+# TODO this isn't MFVI so much as VI where q is analytic
     """
     Mean-field variational inference
     (Ranganath et al., 2014; Kingma and Welling, 2014)
@@ -135,8 +136,14 @@ class AlphaVI(VI):
         for i in range(self.q.num_vars):
             q_log_prob += self.q.log_prob_zi(i, self.samples)
 
+        # 1/B sum_{b=1}^B exp{ log(omega) }
+        # = exp{ max_log_omega } *
+        #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
         log_omega = self.model.log_prob(self.samples) - q_log_prob
-        self.elbos = tf.pow(tf.exp(log_omega), 1.0-self.alpha)
+        max_log_omega = tf.reduce_max(log_omega)
+        self.elbos = tf.pow(
+            tf.exp(max_log_omega)*tf.exp(log_omega - max_log_omega),
+            1.0-self.alpha)
         loss = tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbos))
         if self.alpha < 1:
             return -loss
@@ -154,8 +161,14 @@ class AlphaVI(VI):
         for i in range(self.q.num_vars):
             q_log_prob += self.q.log_prob_zi(i, z)
 
+        # 1/B sum_{b=1}^B exp{ log(omega) }
+        # = exp{ max_log_omega } *
+        #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
         log_omega = self.model.log_prob(z) - q_log_prob
-        self.elbos = tf.pow(tf.exp(log_omega), 1.0-self.alpha)
+        max_log_omega = tf.reduce_max(log_omega)
+        self.elbos = tf.pow(
+            tf.exp(max_log_omega)*tf.exp(log_omega - max_log_omega),
+            1.0-self.alpha)
         loss = (1.0-self.alpha) * \
                tf.reduce_mean(log_omega * tf.stop_gradient(self.elbos))
         if self.alpha < 1:
@@ -198,8 +211,14 @@ class LiVI(VI):
         for i in range(self.q.num_vars):
             q_log_prob += self.q.log_prob_zi(i, self.samples)
 
-        log_omega = self.model.log_prob(z) - q_log_prob
-        self.elbos = tf.pow(tf.exp(log_omega), 1.0-self.alpha)
+        # 1/B sum_{b=1}^B exp{ log(omega) }
+        # = exp{ max_log_omega } *
+        #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
+        log_omega = self.model.log_prob(self.samples) - q_log_prob
+        max_log_omega = tf.reduce_max(log_omega)
+        self.elbos = tf.pow(
+            tf.exp(max_log_omega)*tf.exp(log_omega - max_log_omega),
+            1.0-self.alpha)
         loss = tf.reduce_mean(q_log_prob *
                    tf.stop_gradient(tf.pow(log_omega, 1.0-self.alpha)))
         if self.alpha < 1:
@@ -218,8 +237,14 @@ class LiVI(VI):
         for i in range(self.q.num_vars):
             q_log_prob += self.q.log_prob_zi(i, z)
 
-        log_omega = self.model.log_prob(z) - q_log_prob
-        self.elbos = tf.pow(tf.exp(log_omega), 1.0-self.alpha)
+        # 1/B sum_{b=1}^B exp{ log(omega) }
+        # = exp{ max_log_omega } *
+        #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
+        log_omega = self.model.log_prob(self.samples) - q_log_prob
+        max_log_omega = tf.reduce_max(log_omega)
+        self.elbos = tf.pow(
+            tf.exp(max_log_omega)*tf.exp(log_omega - max_log_omega),
+            1.0-self.alpha)
         loss = (1.0-self.alpha) * \
                tf.reduce_mean(log_omega * tf.stop_gradient(self.elbos))
         if self.alpha < 1:
