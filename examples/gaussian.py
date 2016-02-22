@@ -31,8 +31,5 @@ Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
 q = bb.MFGaussian(model.num_vars)
 
-#q.m_unconst = tf.Variable(tf.constant([20.0]))
-#q.s_unconst = tf.Variable(tf.constant([0.0]))
-
 inference = bb.MFVI(model, q, n_iter=10000)
 inference.run()

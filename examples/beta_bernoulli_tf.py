@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 A simple example from Stan. The model is written in TensorFlow.
+
 Probability model
     Prior: Beta
     Likelihood: Bernoulli

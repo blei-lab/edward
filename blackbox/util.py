@@ -1,7 +1,11 @@
 from __future__ import print_function
 import numpy as np
-import pystan
 import tensorflow as tf
+
+try:
+    import pystan
+except ImportError:
+    pass
 
 def set_seed(x):
     """
@@ -83,26 +87,28 @@ def logit(x, clip_finite=True):
 
 class PythonModel:
     """
-    Model wrapper for models implemented in NumPy and SciPy.
-
-    Arguments
-    ----------
-    file: see documentation for argument in pystan.stan
-    model_code: see documentation for argument in pystan.stan
+    Model wrapper for models implemented in NumPy/SciPy.
     """
     def __init__(self):
         self.num_vars = None
 
-    def log_prob(self, zs):
-        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+    #def log_prob(self, zs):
+    #    return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
 
     # TODO
     #https://github.com/tensorflow/tensorflow/issues/1095
     #https://www.tensorflow.org/versions/r0.7/api_docs/python/framework.html#RegisterGradient
-    # TODO try this first on just raw numpy/scipy, and get it as a mwe
-    @tf.RegisterGradient("log_prob") # TODO or is the name self.log_prob?
-    def _log_prob_grad(self, zs):
-        return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
+    #@tf.RegisterGradient("temp") # TODO or is the name self.log_prob?
+    #def _log_prob_grad(self, zs):
+    #    return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
+
+    def log_prob(self, zs):
+        temp = tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+        @tf.RegisterGradient("temp")
+        def _log_prob_grad(self, zs):
+            return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
+
+        return temp
 
     def _py_log_prob(self, zs):
         """
@@ -146,7 +152,6 @@ class StanModel(PythonModel):
     file: see documentation for argument in pystan.stan
     model_code: see documentation for argument in pystan.stan
     """
-    # TODO pystan should be an optional package unless users want to use this class, and also requirements tensorflow>=0.7.0 for the same reason; otherwise tensorflow>=0.6.0
     def __init__(self, file=None, model_code=None, data=None):
         if data is None:
             raise
@@ -165,9 +170,11 @@ class StanModel(PythonModel):
         self.num_vars = len(self.model.par_dims) # TODO
 
     def _py_log_prob(self, zs):
-        return np.array([self.model.log_prob(z) for z in zs], dtype=np.float32)
+        return np.array([self.model.log_prob(z) for z in zs],
+                        dtype=np.float32)
         # TODO deal with constrain vs unconstrain
         #return np.array([self.model.log_prob(self.model.unconstrain_pars(z)) for z in zs], dtype=np.float32)
 
     def _py_log_prob_grad(self, zs):
-        return np.array([self.model.grad_log_prob(z) for z in zs], dtype=np.float32)
+        return np.array([self.model.grad_log_prob(z) for z in zs],
+                        dtype=np.float32)

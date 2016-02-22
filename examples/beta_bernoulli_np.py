@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 A simple example from Stan. The model is written in NumPy/SciPy.
+
 Probability model
     Prior: Beta
     Likelihood: Bernoulli
@@ -23,8 +24,8 @@ class BetaBernoulli(PythonModel):
         self.num_vars = 1
 
     def _py_log_prob(self, zs):
-        # This is written for pedagogy. We recommend vectorizing
-        # operations in practice.
+        # This example is written for pedagogy. We recommend
+        # vectorizing operations in practice.
         n_minibatch = zs.shape[0]
         log_prob = np.zeros(n_minibatch, dtype=np.float32)
         for b in range(n_minibatch):
