@@ -41,8 +41,9 @@ pip install -e "git+https://github.com/blei-lab/blackbox.git#egg=blackbox"
 
 ```
 @misc{
+  title = {{blackbox}: {B}lack box inference for probabilistic models},
   author = {},
-  title = {},
+  note = {Python package version 0.1},
   url = {https://github.com/Blei-Lab/blackbox},
   year = {2016}
 }
