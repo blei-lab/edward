@@ -10,25 +10,29 @@ class VI:
     ----------
     model: p(x, z), class with log_prob method
     q: q(z; lambda), class TODO
-    n_iter: number of iterations for optimization
-    n_minibatch: number of samples for stochastic gradient
-    n_print: number of iterations for each print progress
     """
-    def __init__(self, model, q,
-                 n_iter=1000, n_minibatch=1, n_print=100):
+    def __init__(self, model, q):
         self.model = model
         self.q = q
 
+    def run(self, n_iter=1000, n_minibatch=1, n_print=100):
+        """
+        Run inference algorithm.
+
+        Arguments
+        ----------
+        n_iter: number of iterations for optimization
+        n_minibatch: number of samples for stochastic gradient
+        n_print: number of iterations for each print progress
+        """
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
         self.n_print = n_print
-
-        self.samples = tf.placeholder(shape=(self.n_minibatch, q.num_vars),
+        self.samples = tf.placeholder(shape=(self.n_minibatch, self.q.num_vars),
                                       dtype=tf.float32,
                                       name='samples')
         self.elbos = tf.zeros([self.n_minibatch])
 
-    def run(self):
         if hasattr(self.q, 'reparam'):
             loss = self.build_reparam_loss()
         else:

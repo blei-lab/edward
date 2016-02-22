@@ -31,5 +31,5 @@ Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
 q = bb.MFGaussian(model.num_vars)
 
-inference = bb.MFVI(model, q, n_iter=10000)
-inference.run()
+inference = bb.MFVI(model, q)
+inference.run(n_iter=10000)
