@@ -7,7 +7,6 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
-import tensorflow as tf
 import blackbox as bb
 
 model_code = """
