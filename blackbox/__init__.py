@@ -8,3 +8,4 @@ from . import util
 # Direct imports for convenience
 from .likelihoods import *
 from .core import *
+from .util import Model

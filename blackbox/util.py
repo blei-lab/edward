@@ -1,4 +1,6 @@
+from __future__ import print_function
 import numpy as np
+import pystan
 import tensorflow as tf
 
 def set_seed(x):
@@ -78,3 +80,43 @@ def logit(x, clip_finite=True):
         log_jacobian = np.sum(np.log(jacobian))
 
     return transformed, log_jacobian
+
+class Model:
+    """
+    Model wrapper for Stan programs, where
+    log p(x, z) = log_prob() method
+    nabla_z log p(x, z) = grad_log_prob() method
+
+    Arguments
+    ----------
+    file: see documentation for argument in pystan.stan
+    model_code: see documentation for argument in pystan.stan
+    """
+    # TODO pystan should be an optional package unless users want to use this class, and also requirements tensorflow>=0.7.0 for the same reason; otherwise tensorflow>=0.6.0
+    def __init__(self, file=None, model_code=None, data=None):
+        if data is None:
+            raise
+
+        if file is not None:
+            print("The following message exists as Stan initializes an empty model.")
+            self.model = pystan.stan(file=file,
+                                     data=data, iter=1, chains=1)
+        elif model_code is not None:
+            print("The following message exists as Stan initializes an empty model.")
+            self.model = pystan.stan(model_code=model_code,
+                                     data=data, iter=1, chains=1)
+        else:
+            raise
+
+        self.num_vars = len(self.model.par_dims) # TODO
+
+    def temp(self, zs):
+        return np.array([self.model.log_prob(zs)])
+
+    def log_prob(self, zs):
+        #return tf.pack([self.model.log_prob(z) for z in tf.unpack(zs)])
+        #return self.model.log_prob(zs)
+        return tf.py_func(self.temp, [zs], tf.float32)
+
+    def grad_log_prob(self, zs):
+        return tf.pack([self.model.grad_log_prob(z) for z in tf.unpack(zs)])
