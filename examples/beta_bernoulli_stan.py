@@ -30,9 +30,5 @@ bb.set_seed(42)
 model = bb.StanModel(model_code=model_code, data=data)
 q = bb.MFBeta(model.num_vars)
 
-# Analytic form of posterior is
-# p(theta | y) = Beta(theta; alpha + sum_y, beta + N - sum_y)
-#              = Beta(theta; 3.0, 9.0)
-# TODO but even the original MF is not getting this?
 inference = bb.MFVI(model, q)
 inference.run(n_iter=10000)

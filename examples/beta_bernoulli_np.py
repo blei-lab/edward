@@ -41,9 +41,5 @@ data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 model = BetaBernoulli(data)
 q = bb.MFBeta(model.num_vars)
 
-print( model._py_log_prob(np.array([[0.5]], dtype=np.float32)) )
-print( model._py_log_prob(np.array([[0.314]], dtype=np.float32)) )
-print( model._py_log_prob(np.array([[0.682]], dtype=np.float32)) )
-
 inference = bb.MFVI(model, q)
 inference.run(n_iter=10000)
