@@ -19,16 +19,16 @@ model_code = """
       real<lower=0,upper=1> theta;
     }
     model {
-      theta ~ beta(0.5, 0.5);  // Jeffreys' prior
+      theta ~ beta(1.0, 1.0);
       for (n in 1:N)
         y[n] ~ bernoulli(theta);
     }
 """
-data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
+data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 bb.set_seed(42)
 model = bb.Model(model_code=model_code, data=data)
 q = bb.MFBeta(model.num_vars)
 
-inference = bb.MFVI(model, q, n_minibatch=1)
+inference = bb.MFVI(model, q, n_minibatch=1, n_iter=10000)
 inference.run()

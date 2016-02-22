@@ -110,13 +110,14 @@ class Model:
 
         self.num_vars = len(self.model.par_dims) # TODO
 
-    def temp(self, zs):
-        return np.array([self.model.log_prob(zs)])
-
     def log_prob(self, zs):
-        #return tf.pack([self.model.log_prob(z) for z in tf.unpack(zs)])
-        #return self.model.log_prob(zs)
-        return tf.py_func(self.temp, [zs], tf.float32)
+        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
 
-    def grad_log_prob(self, zs):
-        return tf.pack([self.model.grad_log_prob(z) for z in tf.unpack(zs)])
+    # TODO
+    #def grad_log_prob(self, zs):
+    #    return tf.pack([self.model.grad_log_prob(z) for z in tf.unpack(zs)])
+
+    def _py_log_prob(self, zs):
+        return np.array([self.model.log_prob(z) for z in zs], dtype=np.float32)
+        # TODO deal with constrain vs unconstrain
+        #return np.array([self.model.log_prob(self.model.unconstrain_pars(z)) for z in zs], dtype=np.float32)
