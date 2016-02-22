@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A simple example from Stan.
+A simple example from Stan. The model is written in TensorFlow.
 Probability model
     Prior: Beta
     Likelihood: Bernoulli
@@ -12,7 +12,7 @@ import blackbox as bb
 
 from blackbox.stats import bernoulli_log_prob, beta_log_prob
 
-class BernoulliModel:
+class BetaBernoulli:
     """
     p(z) = Beta(z; 1, 1)
     p(x|z) = Bernoulli(x; z)
@@ -30,8 +30,8 @@ class BernoulliModel:
 
 bb.set_seed(42)
 
-data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
-model = BernoulliModel(data)
+data = tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)
+model = BetaBernoulli(data)
 q = bb.MFBeta(model.num_vars)
 
 inference = bb.MFVI(model, q, n_minibatch=5)

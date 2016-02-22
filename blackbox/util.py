@@ -81,11 +81,65 @@ def logit(x, clip_finite=True):
 
     return transformed, log_jacobian
 
-class Model:
+class PythonModel:
     """
-    Model wrapper for Stan programs, where
-    log p(x, z) = log_prob() method
-    nabla_z log p(x, z) = grad_log_prob() method
+    Model wrapper for models implemented in NumPy and SciPy.
+
+    Arguments
+    ----------
+    file: see documentation for argument in pystan.stan
+    model_code: see documentation for argument in pystan.stan
+    """
+    def __init__(self):
+        self.num_vars = None
+
+    def log_prob(self, zs):
+        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+
+    # TODO
+    #https://github.com/tensorflow/tensorflow/issues/1095
+    #https://www.tensorflow.org/versions/r0.7/api_docs/python/framework.html#RegisterGradient
+    # TODO try this first on just raw numpy/scipy, and get it as a mwe
+    @tf.RegisterGradient("log_prob") # TODO or is the name self.log_prob?
+    def _log_prob_grad(self, zs):
+        return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
+
+    def _py_log_prob(self, zs):
+        """
+        Arguments
+        ----------
+        zs : np.ndarray
+            n_minibatch x dim(z) array, where each row is a set of
+            latent variables.
+
+        Returns
+        -------
+        np.ndarray
+            n_minibatch array of type np.float32, where each element
+            is the log pdf evaluated at (z_{b1}, ..., z_{bd})
+        """
+        pass
+
+    def _py_log_prob_grad(self, zs):
+        """
+        Arguments
+        ----------
+        zs : np.ndarray
+            n_minibatch x dim(z) array, where each row is a set of
+            latent variables.
+
+        Returns
+        -------
+        np.ndarray
+            n_minibatch x dim(z) array of type np.float32, where each
+            row is the gradient of the log pdf with respect to (z_1,
+            ..., z_d).
+        """
+        pass
+
+class StanModel(PythonModel):
+    """
+    Model wrapper for Stan programs.
 
     Arguments
     ----------
@@ -110,14 +164,10 @@ class Model:
 
         self.num_vars = len(self.model.par_dims) # TODO
 
-    def log_prob(self, zs):
-        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
-
-    # TODO
-    #def grad_log_prob(self, zs):
-    #    return tf.pack([self.model.grad_log_prob(z) for z in tf.unpack(zs)])
-
     def _py_log_prob(self, zs):
         return np.array([self.model.log_prob(z) for z in zs], dtype=np.float32)
         # TODO deal with constrain vs unconstrain
         #return np.array([self.model.log_prob(self.model.unconstrain_pars(z)) for z in zs], dtype=np.float32)
+
+    def _py_log_prob_grad(self, zs):
+        return np.array([self.model.grad_log_prob(z) for z in zs], dtype=np.float32)

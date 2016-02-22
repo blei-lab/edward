@@ -8,4 +8,5 @@ from . import util
 # Direct imports for convenience
 from .likelihoods import *
 from .core import *
-from .util import Model
+from .util import PythonModel
+from .util import StanModel

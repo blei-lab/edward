@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A simple example from Stan.
+A simple example from Stan. The model is written as a Stan program.
 Probability model
     Prior: Beta
     Likelihood: Bernoulli
@@ -26,8 +26,12 @@ model_code = """
 data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 bb.set_seed(42)
-model = bb.Model(model_code=model_code, data=data)
+model = bb.StanModel(model_code=model_code, data=data)
 q = bb.MFBeta(model.num_vars)
 
+# Analytic form of posterior is
+# p(theta | y) = Beta(theta; alpha + sum_y, beta + N - sum_y)
+#              = Beta(theta; 3.0, 9.0)
+# TODO but even the original MF is not getting this?
 inference = bb.MFVI(model, q, n_minibatch=1, n_iter=10000)
 inference.run()
