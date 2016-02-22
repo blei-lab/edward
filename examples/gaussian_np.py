@@ -26,11 +26,11 @@ class Gaussian(PythonModel):
         # This example is written for pedagogy. We recommend
         # vectorizing operations in practice.
         n_minibatch = zs.shape[0]
-        log_prob = np.zeros(n_minibatch, dtype=np.float32)
+        lp = np.zeros(n_minibatch, dtype=np.float32)
         for b in range(n_minibatch):
-            log_prob[b] = norm.logpdf(zs[b, :], loc=self.mu, b=self.Sigma)
+            lp[b] = norm.logpdf(zs[b, :], loc=self.mu, b=self.Sigma)
 
-        return log_prob
+        return lp
 
     def _py_log_prob_grad(self, zs):
         return np.array([0, 0], dtype=np.float32)

@@ -34,5 +34,5 @@ q = bb.MFBeta(model.num_vars)
 # p(theta | y) = Beta(theta; alpha + sum_y, beta + N - sum_y)
 #              = Beta(theta; 3.0, 9.0)
 # TODO but even the original MF is not getting this?
-inference = bb.MFVI(model, q, n_minibatch=1, n_iter=10000)
-inference.run()
+inference = bb.MFVI(model, q)
+inference.run(n_iter=10000)

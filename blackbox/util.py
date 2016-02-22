@@ -4,6 +4,7 @@ import tensorflow as tf
 
 try:
     import pystan
+    from collections import OrderedDict
 except ImportError:
     pass
 
@@ -87,7 +88,7 @@ def logit(x, clip_finite=True):
 
 class PythonModel:
     """
-    Model wrapper for models implemented in NumPy/SciPy.
+    Model wrapper for models written in NumPy/SciPy.
     """
     def __init__(self):
         self.num_vars = None
@@ -145,7 +146,7 @@ class PythonModel:
 
 class StanModel(PythonModel):
     """
-    Model wrapper for Stan programs.
+    Model wrapper for models written in Stan.
 
     Arguments
     ----------
@@ -170,10 +171,36 @@ class StanModel(PythonModel):
         self.num_vars = len(self.model.par_dims) # TODO
 
     def _py_log_prob(self, zs):
-        return np.array([self.model.log_prob(z) for z in zs],
-                        dtype=np.float32)
-        # TODO deal with constrain vs unconstrain
-        #return np.array([self.model.log_prob(self.model.unconstrain_pars(z)) for z in zs], dtype=np.float32)
+        """
+        Notes
+        -----
+        The log_prob() method in Stan requires the input to be a
+        dictionary data type, with each parameter named
+        correspondingly; this is because zs lives on the original
+        (constrained) latent variable space.
+
+        Ideally, in Stan it would have log_prob() for both this
+        input and a flattened vector. Internally, Stan always assumes
+        unconstrained parameters are flattened vectors, and
+        constrained parameters are named data structures.
+        """
+        lp = np.zeros((zs.shape[0]), dtype=np.float32)
+        for b, z in enumerate(zs):
+            z_dict = OrderedDict()
+            idx = 0
+            for dim, par in zip(self.model.par_dims, self.model.model_pars):
+                elems = np.sum(dim)
+                if elems == 0:
+                    z_dict[par] = float(z[idx])
+                    idx += 1
+                else:
+                    z_dict[par] = z[idx:(idx+elems)].reshape(dim)
+                    idx += elems
+
+            z_unconst = self.model.unconstrain_pars(z_dict)
+            lp[b] = self.model.log_prob(z_unconst, adjust_transform=False)
+
+        return lp
 
     def _py_log_prob_grad(self, zs):
         return np.array([self.model.grad_log_prob(z) for z in zs],

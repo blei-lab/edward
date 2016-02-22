@@ -19,7 +19,7 @@ model_code = """
 data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
 
 print("The following message exists as Stan initializes an empty model.")
-model = pystan.stan(model_code=model_code, data=data, iter=1, chains=1)
+model = pystan.stan(model_code=model_code, data=data, iter=10, chains=1)
 
 sess = tf.InteractiveSession()
 

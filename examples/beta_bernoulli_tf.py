@@ -36,4 +36,4 @@ model = BetaBernoulli(data)
 q = bb.MFBeta(model.num_vars)
 
 inference = bb.MFVI(model, q)
-inference.run()
+inference.run(n_iter=10000)
