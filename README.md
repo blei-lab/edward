@@ -15,6 +15,7 @@ import blackbox as bb
 
 (in progress)
 * [TensorFlow](https://www.tensorflow.org)
+* Support for all models implemented in [Stan](http://mc-stan.org)
 * variational models ([Ranganath et al., 2015](http://arxiv.org/abs/1511.02386); [Tran et al., 2016](http://arxiv.org/abs/1511.06499))
 * $f$-divergences
 * approximate predictive checks
