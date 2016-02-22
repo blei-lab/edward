@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in NumPy and SciPy.
+A simple example from Stan. The model is written in NumPy/SciPy.
 Probability model
     Prior: Beta
     Likelihood: Bernoulli

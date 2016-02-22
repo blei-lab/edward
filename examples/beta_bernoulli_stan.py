@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written as a Stan program.
+A simple example from Stan. The model is written in Stan.
 Probability model
     Prior: Beta
     Likelihood: Bernoulli

@@ -2,7 +2,7 @@
 
 __blackbox__ is a tool for performing Bayesian inference over a large
 class of models, including both discrete and continuous latent
-variables. It enables rapid prototyping of models.
+variables.
 
 Example (more found in [`examples/`](examples/)):
 ```{Python}
@@ -15,7 +15,7 @@ import blackbox as bb
 
 (in progress)
 * [TensorFlow](https://www.tensorflow.org)
-* Support for all models implemented in [Stan](http://mc-stan.org)
+* Support for all models written in [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org), and NumPy/SciPy
 * variational models ([Ranganath et al., 2015](http://arxiv.org/abs/1511.02386); [Tran et al., 2016](http://arxiv.org/abs/1511.06499))
 * $f$-divergences
 * approximate predictive checks
