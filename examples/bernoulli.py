@@ -39,5 +39,5 @@ p = tf.constant(0.6)
 model = Bernoulli(p)
 q = bb.MFBernoulli(model.num_vars)
 
-inference = bb.MFVI(model, q, n_minibatch=5)
+inference = bb.MFVI(model, q)
 inference.run()

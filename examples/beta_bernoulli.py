@@ -34,5 +34,5 @@ data = tf.constant((0,1,0,0,0,0,0,0,0,1), dtype=tf.float32)
 model = BernoulliModel(data)
 q = bb.MFBeta(model.num_vars)
 
-inference = bb.MFVI(model, q, n_minibatch=5)
+inference = bb.MFVI(model, q)
 inference.run()

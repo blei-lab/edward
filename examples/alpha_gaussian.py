@@ -38,5 +38,5 @@ q = bb.MFGaussian(model.num_vars)
 q.m_unconst = tf.Variable(tf.constant([10.0]))
 q.s_unconst = tf.Variable(tf.constant([-10.0]))
 
-inference = bb.AlphaVI(0.5, model, q, n_iter=int(1e6), n_minibatch=1)
-inference.run()
+inference = bb.AlphaVI(0.5, model, q)
+inference.run(n_iter=int(1e6))

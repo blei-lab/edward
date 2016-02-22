@@ -41,5 +41,5 @@ p = tf.constant(0.6)
 model = Bernoulli(p)
 q = bb.MFBernoulli(model.num_vars)
 
-inference = bb.AlphaVI(0.5, model, q, n_iter=10000)
-inference.run()
+inference = bb.AlphaVI(0.5, model, q)
+inference.run(n_iter=10000)
