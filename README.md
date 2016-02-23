@@ -1,21 +1,54 @@
 ![blackbox](http://dustintran.com/img/blackbox_200.png)
 
-__blackbox__ is a tool for performing Bayesian inference over a large
-class of models, including both discrete and continuous latent
-variables.
+__blackbox__ is a probabilistic programming tool implemented in Python
+with [TensorFlow](https://www.tensorflow.org) as a backend. It enables
+automatic Bayesian inference over a large class of models, including
+both discrete and continuous latent variables.
+Three modeling languages are supported:
+[Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org),
+and original Python using [NumPy/SciPy](http://scipy.org).
 
-Example (more found in [`examples/`](examples/)):
+Example of inference on a Beta-Binomial model written in Stan:
 ```{Python}
 import blackbox as bb
 
-# demo here
+model_code = """
+    data {
+      int<lower=0> N;
+      int<lower=0,upper=1> y[N];
+    }
+    parameters {
+      real<lower=0,upper=1> theta;
+    }
+    model {
+      theta ~ beta(1.0, 1.0);
+      for (n in 1:N)
+        y[n] ~ bernoulli(theta);
+    }
+"""
+data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+bb.set_seed(42)
+model = bb.StanModel(model_code=model_code, data=data)
+q = bb.MFBeta(model.num_vars)
+
+# Mean-field variational inference
+inference = bb.MFVI(model, q)
+inference.run()
 ```
+The equivalent example is also written in
+[TensorFlow](examples/beta_bernoulli_tf.py) and
+[NumPy/SciPy](examples/beta_bernoulli_np.py).
+More examples are located in [`examples/`](examples/)), of which we
+highlight several here:
+
+* [TODO]()
 
 ## Features
 
 (in progress)
 * [TensorFlow](https://www.tensorflow.org)
-* Support for all models written in [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org), and [NumPy/SciPy](http://scipy.org)
+* Supported modeling languages: [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org), and [NumPy/SciPy](http://scipy.org).
 * variational models ([Ranganath et al., 2015](http://arxiv.org/abs/1511.02386); [Tran et al., 2016](http://arxiv.org/abs/1511.06499))
 * $f$-divergences
 * approximate predictive checks
