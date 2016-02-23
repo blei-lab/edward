@@ -17,21 +17,20 @@ class BetaBernoulli:
     """
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
-    def __init__(self, data):
-        self.data = data
+    def __init__(self):
         self.num_vars = 1
 
-    def log_prob(self, zs):
+    def log_prob(self, xs, zs):
         log_prior = beta_log_prob(zs[:, 0], alpha=1.0, beta=1.0)
         log_lik = tf.pack([
-            tf.reduce_sum(bernoulli_log_prob(self.data, z)) \
+            tf.reduce_sum(bernoulli_log_prob(xs, z)) \
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 
 bb.set_seed(42)
-data = tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)
-model = BetaBernoulli(data)
+model = BetaBernoulli()
 variational = bb.MFBeta(model.num_vars)
+data = tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)
 
-inference = bb.MFVI(model, variational)
+inference = bb.MFVI(model, variational, data)
 inference.run(n_iter=10000)

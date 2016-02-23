@@ -26,14 +26,13 @@ model_code = """
         y[n] ~ bernoulli(theta);
     }
 """
+bb.set_seed(42)
+model = bb.StanModel(model_code=model_code)
+variational = bb.MFBeta(1)
 data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
-bb.set_seed(42)
-model = bb.StanModel(model_code=model_code, data=data)
-variational = bb.MFBeta(model.num_vars)
-
 # Mean-field variational inference
-inference = bb.MFVI(model, variational)
+inference = bb.MFVI(model, variational, data)
 inference.run()
 ```
 The equivalent example is also written in

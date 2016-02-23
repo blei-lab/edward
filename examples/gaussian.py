@@ -20,7 +20,7 @@ class Gaussian:
         self.Sigma = Sigma
         self.num_vars = get_dims(mu)[0]
 
-    def log_prob(self, zs):
+    def log_prob(self, xs, zs):
         return tf.pack([gaussian_log_prob(z, mu, Sigma)
                         for z in tf.unpack(zs)])
 

@@ -25,18 +25,22 @@ class PythonModel:
     #def _log_prob_grad(self, zs):
     #    return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
 
-    def log_prob(self, zs):
-        temp = tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+    def log_prob(self, xs, zs):
+        # TODO
+        temp = tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
         @tf.RegisterGradient("temp")
-        def _log_prob_grad(self, zs):
-            return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
+        def _log_prob_grad(self, xs, zs):
+            return tf.py_func(self._py_log_prob_grad, [xs, zs], [tf.float32])[0]
 
         return temp
 
-    def _py_log_prob(self, zs):
+    def _py_log_prob(self, xs, zs):
         """
         Arguments
         ----------
+        xs : np.ndarray
+            TODO
+
         zs : np.ndarray
             n_minibatch x dim(z) array, where each row is a set of
             latent variables.
@@ -49,10 +53,13 @@ class PythonModel:
         """
         pass
 
-    def _py_log_prob_grad(self, zs):
+    def _py_log_prob_grad(self, xs, zs):
         """
         Arguments
         ----------
+        xs : np.ndarray
+            TODO
+
         zs : np.ndarray
             n_minibatch x dim(z) array, where each row is a set of
             latent variables.
@@ -66,7 +73,7 @@ class PythonModel:
         """
         pass
 
-class StanModel(PythonModel):
+class StanModel:
     """
     Model wrapper for models written in Stan.
 
@@ -75,23 +82,40 @@ class StanModel(PythonModel):
     file: see documentation for argument in pystan.stan
     model_code: see documentation for argument in pystan.stan
     """
-    def __init__(self, file=None, model_code=None, data=None):
-        if data is None:
-            raise
-
+    def __init__(self, file=None, model_code=None):
         if file is not None:
-            print("The following message exists as Stan initializes an empty model.")
-            self.model = pystan.stan(file=file,
-                                     data=data, iter=1, chains=1)
+            self.file =  file
         elif model_code is not None:
-            print("The following message exists as Stan initializes an empty model.")
-            self.model = pystan.stan(model_code=model_code,
-                                     data=data, iter=1, chains=1)
+            self.model_code = model_code
         else:
             raise
 
+        self.flag_init = False
+
+    def log_prob(self, xs, zs):
+        if self.flag_init is False:
+            self._initialize(xs)
+
+        # TODO
+        temp = tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+        @tf.RegisterGradient("temp")
+        def _log_prob_grad(self, zs):
+            return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
+
+        return temp
+
+    def _initialize(self, xs):
+        print("The following message exists as Stan instantiates the model.")
+        if hasattr(self, 'file'):
+            self.model = pystan.stan(file=self.file,
+                                     data=xs, iter=1, chains=1)
+        else:
+            self.model = pystan.stan(model_code=self.model_code,
+                                     data=xs, iter=1, chains=1)
+
         self.num_vars = sum([sum(dim) if sum(dim) != 0 else 1 \
                              for dim in self.model.par_dims])
+        self.flag_init = True
 
     def _py_log_prob(self, zs):
         """
@@ -126,5 +150,6 @@ class StanModel(PythonModel):
         return lp
 
     def _py_log_prob_grad(self, zs):
+        # TODO
         return np.array([self.model.grad_log_prob(z) for z in zs],
                         dtype=np.float32)

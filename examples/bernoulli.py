@@ -20,7 +20,7 @@ class Bernoulli:
         self.lp = tf.log(p)
         self.num_vars = get_dims(p)[0]
 
-    def log_prob(self, zs):
+    def log_prob(self, xs, zs):
         # TODO use table lookup for everything not resort to if-elses
         if get_dims(zs)[1] == 1:
             return bernoulli_log_prob(zs[:, 0], p)
