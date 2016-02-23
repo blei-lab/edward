@@ -7,7 +7,7 @@ setup(
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
     packages=['blackbox', 'blackbox.stats'],
-    install_requires=['tensorflow>=0.7.0', 'numpy>=1.7', 'scipy>=0.16', ],
+    install_requires=['tensorflow>=0.7.0', 'numpy>=1.7', 'scipy>=0.16'],
     extras_require = {'stan': ['pystan>=2.0.1.3']},
     url='https://github.com/Blei-Lab/blackbox',
     license='MIT',

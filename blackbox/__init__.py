@@ -6,7 +6,7 @@ from . import models
 from . import util
 
 # Direct imports for convenience
-from .likelihoods import *
 from .core import *
+from .likelihoods import *
 from .models import PythonModel, StanModel
 from .util import set_seed
