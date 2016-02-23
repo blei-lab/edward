@@ -7,6 +7,7 @@ from . import util
 from . import variationals
 
 # Direct imports for convenience
+from .data import *
 from .inferences import *
 from .variationals import *
 from .models import PythonModel, StanModel

@@ -31,7 +31,7 @@ model = bb.StanModel(model_code=model_code)
 # it doesn't compile until after it takes in data
 #variational = bb.MFBeta(model.num_vars)
 variational = bb.MFBeta(1)
-data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+data = bb.IID(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 inference = bb.MFVI(model, variational, data)
 inference.run(n_iter=10000)

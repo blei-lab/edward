@@ -30,7 +30,7 @@ class BetaBernoulli:
 bb.set_seed(42)
 model = BetaBernoulli()
 variational = bb.MFBeta(model.num_vars)
-data = tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)
+data = bb.IID(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = bb.MFVI(model, variational, data)
 inference.run(n_iter=10000)
