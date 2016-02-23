@@ -8,12 +8,12 @@ class VI:
 
     Arguments
     ----------
-    model: p(x, z), class with log_prob method
-    q: q(z; lambda), class TODO
+    model: probability model, p(x, z)
+    variational: variational model, q(z; lambda)
     """
-    def __init__(self, model, q):
+    def __init__(self, model, variational):
         self.model = model
-        self.q = q
+        self.variational = variational
 
     def run(self, n_iter=1000, n_minibatch=1, n_print=100):
         """
@@ -28,12 +28,12 @@ class VI:
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
         self.n_print = n_print
-        self.samples = tf.placeholder(shape=(self.n_minibatch, self.q.num_vars),
+        self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
                                       dtype=tf.float32,
                                       name='samples')
         self.elbos = tf.zeros([self.n_minibatch])
 
-        if hasattr(self.q, 'reparam'):
+        if hasattr(self.variational, 'reparam'):
             loss = self.build_reparam_loss()
         else:
             loss = self.build_score_loss()
@@ -44,10 +44,10 @@ class VI:
         sess = tf.Session()
         sess.run(init)
         for t in range(self.n_iter):
-            if hasattr(self.q, 'reparam'):
-                samples = self.q.sample_noise(self.samples.get_shape())
+            if hasattr(self.variational, 'reparam'):
+                samples = self.variational.sample_noise(self.samples.get_shape())
             else:
-                samples = self.q.sample(self.samples.get_shape(), sess)
+                samples = self.variational.sample(self.samples.get_shape(), sess)
 
             _, elbo = sess.run([update, self.elbos], {self.samples: samples})
 
@@ -56,7 +56,7 @@ class VI:
     def print_progress(self, t, elbos, sess):
         if t % self.n_print == 0:
             print("iter %d elbo %.2f " % (t, np.mean(elbos)))
-            self.q.print_params(sess)
+            self.variational.print_params(sess)
 
     def build_score_loss(self):
         pass
@@ -78,10 +78,14 @@ class MFVI(VI):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
         """
-        if hasattr(self.q, 'entropy'):
+        if hasattr(self.variational, 'entropy'):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
             # where entropy is analytic
-            q_entropy = self.q.entropy()
+            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
+            for i in range(self.variational.num_vars):
+                q_log_prob += self.variational.log_prob_zi(i, self.samples)
+
+            q_entropy = self.variational.entropy()
             self.elbos = self.model.log_prob(z) + q_entropy
             return tf.reduce_mean(q_log_prob * \
                                   tf.stop_gradient(self.log_prob(z))) + \
@@ -89,8 +93,8 @@ class MFVI(VI):
         else:
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
             q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-            for i in range(self.q.num_vars):
-                q_log_prob += self.q.log_prob_zi(i, self.samples)
+            for i in range(self.variational.num_vars):
+                q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
             self.elbos = self.model.log_prob(self.samples) - q_log_prob
             return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbos))
@@ -100,18 +104,18 @@ class MFVI(VI):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
         """
-        z = self.q.reparam(self.samples)
+        z = self.variational.reparam(self.samples)
 
-        if hasattr(self.q, 'entropy'):
+        if hasattr(self.variational, 'entropy'):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
             # where entropy is analytic
             self.elbos = tf.reduce_mean(self.model.log_prob(z)) + \
-                        self.q.entropy()
+                        self.variational.entropy()
         else:
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
             q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-            for i in range(self.q.num_vars):
-                q_log_prob += self.q.log_prob_zi(i, z)
+            for i in range(self.variational.num_vars):
+                q_log_prob += self.variational.log_prob_zi(i, z)
 
             self.elbos = tf.reduce_mean(self.model.log_prob(z) - q_log_prob)
 
@@ -137,8 +141,8 @@ class AlphaVI(VI):
         """
         # ELBO = E_{q(z; lambda)} [ w(z; lambda)^{1-alpha} ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.q.num_vars):
-            q_log_prob += self.q.log_prob_zi(i, self.samples)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
@@ -159,11 +163,11 @@ class AlphaVI(VI):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
         """
-        z = self.q.reparam(self.samples)
+        z = self.variational.reparam(self.samples)
         # ELBO = E_{q(z; lambda)} [ w(z; lambda)^{1-alpha} ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.q.num_vars):
-            q_log_prob += self.q.log_prob_zi(i, z)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, z)
 
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
@@ -185,7 +189,7 @@ class AlphaVI(VI):
             elbo = np.mean(elbos)
             lower_bound = 1.0 / (self.alpha - 1.0) * np.log(elbo)
             print("iter %d elbo %.2f " % (t, lower_bound))
-            self.q.print_params(sess)
+            self.variational.print_params(sess)
 
 class LiVI(VI):
     """
@@ -212,8 +216,8 @@ class LiVI(VI):
         """
         # ELBO = E_{q(z; lambda)} [ log w(z; lambda)^{1-alpha} ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.q.num_vars):
-            q_log_prob += self.q.log_prob_zi(i, self.samples)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
@@ -235,11 +239,11 @@ class LiVI(VI):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
         """
-        z = self.q.reparam(self.samples)
+        z = self.variational.reparam(self.samples)
         # ELBO = E_{q(z; lambda)} [ log w(z; lambda)^{1-alpha} ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.q.num_vars):
-            q_log_prob += self.q.log_prob_zi(i, z)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, z)
 
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
@@ -261,7 +265,7 @@ class LiVI(VI):
             elbo = np.mean(elbos)
             lower_bound = 1.0 / (self.alpha - 1.0) * np.log(elbo)
             print("iter %d elbo %.2f " % (t, lower_bound))
-            self.q.print_params(sess)
+            self.variational.print_params(sess)
 
 # TODO
 # what portions of this should be part of the base class?

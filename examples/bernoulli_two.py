@@ -39,7 +39,7 @@ p = tf.constant(
 [[0.4, 0.1],
  [0.1, 0.4]])
 model = Bernoulli(p)
-q = bb.MFBernoulli(model.num_vars)
+variational = bb.MFBernoulli(model.num_vars)
 
-inference = bb.MFVI(model, q)
+inference = bb.MFVI(model, variational)
 inference.run()

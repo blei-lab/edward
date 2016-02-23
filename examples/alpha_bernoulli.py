@@ -36,10 +36,9 @@ class Bernoulli:
         return elem
 
 bb.set_seed(42)
-
 p = tf.constant(0.6)
 model = Bernoulli(p)
-q = bb.MFBernoulli(model.num_vars)
+variational = bb.MFBernoulli(model.num_vars)
 
-inference = bb.AlphaVI(0.5, model, q)
+inference = bb.AlphaVI(0.5, model, variational)
 inference.run(n_iter=10000)

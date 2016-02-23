@@ -15,8 +15,7 @@ from blackbox.stats import bernoulli_log_prob, beta_log_prob
 
 class BetaBernoulli:
     """
-    p(z) = Beta(z; 1, 1)
-    p(x|z) = Bernoulli(x; z)
+    p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
     def __init__(self, data):
         self.data = data
@@ -30,10 +29,9 @@ class BetaBernoulli:
         return log_lik + log_prior
 
 bb.set_seed(42)
-
 data = tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)
 model = BetaBernoulli(data)
-q = bb.MFBeta(model.num_vars)
+variational = bb.MFBeta(model.num_vars)
 
-inference = bb.MFVI(model, q)
+inference = bb.MFVI(model, variational)
 inference.run(n_iter=10000)

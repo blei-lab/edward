@@ -25,13 +25,12 @@ class Gaussian:
                         for z in tf.unpack(zs)])
 
 bb.set_seed(42)
-
 mu = tf.constant([1.0, 1.0])
 Sigma = tf.constant(
 [[1.0, 0.1],
  [0.1, 1.0]])
 model = Gaussian(mu, Sigma)
-q = bb.MFGaussian(model.num_vars)
+variational = bb.MFGaussian(model.num_vars)
 
-inference = bb.MFVI(model, q)
+inference = bb.MFVI(model, variational)
 inference.run(n_iter=10000)

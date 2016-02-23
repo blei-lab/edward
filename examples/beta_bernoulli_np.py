@@ -16,8 +16,7 @@ from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
     """
-    p(z) = Beta(z; 1, 1)
-    p(x|z) = Bernoulli(x; z)
+    p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
     def __init__(self, data):
         self.data = data
@@ -36,10 +35,9 @@ class BetaBernoulli(PythonModel):
         return lp
 
 bb.set_seed(42)
-
 data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 model = BetaBernoulli(data)
-q = bb.MFBeta(model.num_vars)
+variational = bb.MFBeta(model.num_vars)
 
-inference = bb.MFVI(model, q)
+inference = bb.MFVI(model, variational)
 inference.run(n_iter=10000)

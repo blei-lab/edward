@@ -27,16 +27,15 @@ class Gaussian:
                         for z in tf.unpack(zs)])
 
 bb.set_seed(42)
-
 # posterior at N(z; 0, 1)
 mu = tf.constant(0.0)
 Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
-q = bb.MFGaussian(model.num_vars)
+variational = bb.MFGaussian(model.num_vars)
 
 # See if it works for initializations roughly 3 std's away.
-q.m_unconst = tf.Variable(tf.constant([10.0]))
-q.s_unconst = tf.Variable(tf.constant([-10.0]))
+variational.m_unconst = tf.Variable(tf.constant([10.0]))
+variational.s_unconst = tf.Variable(tf.constant([-10.0]))
 
-inference = bb.AlphaVI(0.5, model, q)
+inference = bb.AlphaVI(0.5, model, variational)
 inference.run(n_iter=int(1e6))

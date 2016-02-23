@@ -30,10 +30,10 @@ data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 bb.set_seed(42)
 model = bb.StanModel(model_code=model_code, data=data)
-q = bb.MFBeta(model.num_vars)
+variational = bb.MFBeta(model.num_vars)
 
 # Mean-field variational inference
-inference = bb.MFVI(model, q)
+inference = bb.MFVI(model, variational)
 inference.run()
 ```
 The equivalent example is also written in
