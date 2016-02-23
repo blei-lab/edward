@@ -39,16 +39,14 @@ inference.run()
 The equivalent example is also written in
 [TensorFlow](examples/beta_bernoulli_tf.py) and
 [NumPy/SciPy](examples/beta_bernoulli_np.py).
-More examples are located in [`examples/`](examples/)), of which we
-highlight several here:
+More examples are located in [`examples/`](examples/). We highlight a
+few:
 
 * [TODO]()
 
-## Features
+(This list will be removed; each item will be a specific example in
+the list of highlighted examples above.)
 
-(in progress)
-* [TensorFlow](https://www.tensorflow.org)
-* Supported modeling languages: [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org), and [NumPy/SciPy](http://scipy.org).
 * variational models ([Ranganath et al., 2015](http://arxiv.org/abs/1511.02386); [Tran et al., 2016](http://arxiv.org/abs/1511.06499))
 * $f$-divergences
 * approximate predictive checks
@@ -57,10 +55,6 @@ highlight several here:
 * Bayesian nonparametrics ([Kurihara et al., 2006](http://papers.nips.cc/paper/3025-accelerated-variational-dirichlet-process-mixtures.pdf))
 * multicanonical ([Mandt et al., 2016](http://arxiv.org/abs/1411.1810))
 * streaming ([McInerney et al., 2015](http://arxiv.org/abs/1507.05253))
-
-other keywords: "black box variational inference", "automatic
-differentiation variational inference", "variational autoencoders",
-"deep learning"
 
 ## Installation
 
