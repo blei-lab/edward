@@ -42,7 +42,7 @@ tf_model_log_prob = tf.py_func(log_prob, [zs], [tf.float32])
 sess.run(tf_model_log_prob, {zs: np.array([[2.0]])})
 
 ## Test when integrated into multiple functions
-## core.py
+## in Inference class
 zs = tf.placeholder(shape=(1,1), dtype=tf.float32)
 def loss():
     return log_prob(zs)
