@@ -11,7 +11,7 @@ Variational model
 import blackbox as bb
 import numpy as np
 
-from blackbox.util import PythonModel
+from blackbox import PythonModel
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
