@@ -36,7 +36,7 @@ class BetaBernoulli(PythonModel):
 bb.set_seed(42)
 model = BetaBernoulli()
 variational = bb.MFBeta(model.num_vars)
-data = bb.IID(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+data = bb.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 inference = bb.MFVI(model, variational, data)
 inference.run(n_iter=10000)

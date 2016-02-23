@@ -29,7 +29,7 @@ model_code = """
 bb.set_seed(42)
 model = bb.StanModel(model_code=model_code)
 variational = bb.MFBeta(1)
-data = bb.IID(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+data = bb.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 # Mean-field variational inference
 inference = bb.MFVI(model, variational, data)
