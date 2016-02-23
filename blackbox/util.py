@@ -1,12 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-try:
-    import pystan
-    from collections import OrderedDict
-except ImportError:
-    pass
-
 def set_seed(x):
     """
     Set seed for both NumPy and TensorFlow.

@@ -17,7 +17,7 @@ class Data:
         # TODO
         # self.data should be the right data structure
         # for calculating log prob's in any of the model wrappers but
-        # be generic enough to enable our subsampling routines to work
+        # be generic enough to enable our subsampling routines
         self.data = data
         self.n_minibatch = n_minibatch
 

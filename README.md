@@ -3,7 +3,7 @@
 __blackbox__ is a probabilistic programming tool implemented in Python
 with [TensorFlow](https://www.tensorflow.org) as a backend. It enables
 automatic Bayesian inference over a large class of models, including
-both discrete and continuous latent variables.
+those with both discrete and continuous latent variables.
 Three modeling languages are supported:
 [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org),
 and original Python using [NumPy/SciPy](http://scipy.org).
