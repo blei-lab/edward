@@ -92,12 +92,12 @@ class MFVI(VI):
             for i in range(self.variational.num_vars):
                 q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-            q_entropy = self.variational.entropy()
             x = self.data.sample()
-            self.elbos = self.model.log_prob(x, z) + \
-                         q_entropy
+            p_log_prob = self.model.log_prob(x, self.samples)
+            q_entropy = self.variational.entropy()
+            self.elbos = p_log_prob + q_entropy
             return tf.reduce_mean(q_log_prob * \
-                                  tf.stop_gradient(self.log_prob(z))) + \
+                                  tf.stop_gradient(p_log_prob)) + \
                    q_entropy
         else:
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
