@@ -22,18 +22,26 @@ class VI:
         self.variational = variational
         self.data = data
 
-    def run(self, n_iter=1000, n_minibatch=1, n_print=100):
+    def run(self, n_iter=1000, n_minibatch=1, n_data=None, n_print=100):
         """
         Run inference algorithm.
 
         Arguments
         ----------
-        n_iter: number of iterations for optimization
-        n_minibatch: number of samples for stochastic gradient
-        n_print: number of iterations for each print progress
+        n_iter: int, optional
+            Number of iterations for optimization.
+        n_minibatch: int, optional
+            Number of samples from variational model for calculating
+            stochastic gradients.
+        n_data: int, optional
+            Number of samples for data subsampling. Default is to use all
+            the data.
+        n_print: int, optional
+            Number of iterations for each print progress.
         """
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
+        self.n_data = n_data
         self.n_print = n_print
         self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
                                       dtype=tf.float32,
@@ -92,7 +100,7 @@ class MFVI(VI):
             for i in range(self.variational.num_vars):
                 q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-            x = self.data.sample()
+            x = self.data.sample(self.n_data)
             p_log_prob = self.model.log_prob(x, self.samples)
             q_entropy = self.variational.entropy()
             self.elbos = p_log_prob + q_entropy
@@ -105,7 +113,7 @@ class MFVI(VI):
             for i in range(self.variational.num_vars):
                 q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-            x = self.data.sample()
+            x = self.data.sample(self.n_data)
             self.elbos = self.model.log_prob(x, self.samples) - \
                          q_log_prob
             return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbos))
@@ -120,7 +128,7 @@ class MFVI(VI):
         if hasattr(self.variational, 'entropy'):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
             # where entropy is analytic
-            x = self.data.sample()
+            x = self.data.sample(self.n_data)
             self.elbos = tf.reduce_mean(
                 self.model.log_prob(x, z)) + self.variational.entropy()
         else:
@@ -129,7 +137,7 @@ class MFVI(VI):
             for i in range(self.variational.num_vars):
                 q_log_prob += self.variational.log_prob_zi(i, z)
 
-            x = self.data.sample()
+            x = self.data.sample(self.n_data)
             self.elbos = tf.reduce_mean(
                 self.model.log_prob(x, z) - q_log_prob)
 
@@ -161,7 +169,7 @@ class AlphaVI(VI):
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
         #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
-        x = self.data.sample()
+        x = self.data.sample(self.n_data)
         log_omega = self.model.log_prob(x, self.samples) - \
                     q_log_prob
         max_log_omega = tf.reduce_max(log_omega)
@@ -188,7 +196,7 @@ class AlphaVI(VI):
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
         #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
-        x = self.data.sample()
+        x = self.data.sample(self.n_data)
         log_omega = self.model.log_prob(x, z) - \
                     q_log_prob
         max_log_omega = tf.reduce_max(log_omega)
@@ -240,7 +248,7 @@ class LiVI(VI):
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
         #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
-        x = self.data.sample()
+        x = self.data.sample(self.n_data)
         log_omega = self.model.log_prob(x, self.samples) - \
                     q_log_prob
         max_log_omega = tf.reduce_max(log_omega)
@@ -268,7 +276,7 @@ class LiVI(VI):
         # 1/B sum_{b=1}^B exp{ log(omega) }
         # = exp{ max_log_omega } *
         #   (1/B sum_{b=1}^B exp{ log(omega) - max_log_omega})
-        x = self.data.sample()
+        x = self.data.sample(self.n_data)
         log_omega = self.model.log_prob(x, self.samples) - \
                     q_log_prob
         max_log_omega = tf.reduce_max(log_omega)

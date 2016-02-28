@@ -14,15 +14,15 @@ class Data:
     data: dict, tf.tensor, np.ndarray, optional
         Data whose type depends on the type of model it is fed into:
         Stan, TensorFlow, and NumPy/SciPy respectively.
-    n_minibatch: int, optional
-        Number of samples for data subsampling. Default is to use all
-        the data.
     shuffled: bool, optional
         Whether the data is shuffled.
     """
-    def __init__(self, data=None, n_minibatch=None, shuffled=True):
+    def __init__(self, data=None, shuffled=True):
         self.data = data
-        self.n_minibatch = n_minibatch
+        # TODO
+        # if not shuffled:
+        #   shuffle self.data
+
         self.counter = 0
         if self.data is None:
             self.N = None
@@ -35,17 +35,12 @@ class Data:
             self.N = len(self.data['y'])
         else:
             raise
-        # TODO
-        # if not shuffled:
-        #   shuffle self.data
 
-    def sample(self):
-    # TODO
-    #def sample(self, n_minibatch):
-        if self.n_minibatch is None:
+    def sample(self, n_data):
+        if n_data is None:
             return self.data
 
-        counter_new = self.counter + self.n_minibatch
+        counter_new = self.counter + n_data
         if isinstance(self.data, tf.Tensor):
             if counter_new <= self.N:
                 minibatch = self.data[self.counter:counter_new]
