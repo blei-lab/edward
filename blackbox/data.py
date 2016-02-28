@@ -19,9 +19,10 @@ class Data:
     """
     def __init__(self, data=None, shuffled=True):
         self.data = data
-        # TODO
-        # if not shuffled:
-        #   shuffle self.data
+        if not shuffled:
+            # TODO
+            # shuffle self.data
+            pass
 
         self.counter = 0
         if self.data is None:
@@ -36,7 +37,7 @@ class Data:
         else:
             raise
 
-    def sample(self, n_data):
+    def sample(self, n_data=None):
         if n_data is None:
             return self.data
 
