@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from blackbox.data import Data
 
-class VI:
+class Inference:
     """
     Base class for inference methods.
 
@@ -79,7 +79,7 @@ class VI:
     def build_reparam_loss(self):
         pass
 
-class MFVI(VI):
+class MFVI(Inference):
 # TODO this isn't MFVI so much as VI where q is analytic
     """
     Mean-field variational inference
@@ -143,7 +143,7 @@ class MFVI(VI):
 
         return -self.elbos
 
-class AlphaVI(VI):
+class AlphaVI(Inference):
     """
     alpha-divergence.
     (Dustin's version, not Li et al. (2016)'s)
@@ -217,7 +217,7 @@ class AlphaVI(VI):
             print("iter %d elbo %.2f " % (t, lower_bound))
             self.variational.print_params(sess)
 
-class LiVI(VI):
+class LiVI(Inference):
     """
     alpha-divergence.
     A generalized version of Li et al. (2016)'s gradient, enabling
@@ -300,7 +300,7 @@ class LiVI(VI):
 # TODO
 # what portions of this should be part of the base class?
 # how can I make MFVI a special case of this?
-#class HVM(VI):
+#class HVM(Inference):
 #    """
 #    Black box inference with a hierarchical variational model.
 #    (Ranganath et al., 2016)
