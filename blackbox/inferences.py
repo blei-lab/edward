@@ -86,7 +86,7 @@ class MFVI(Inference):
     (Ranganath et al., 2014; Kingma and Welling, 2014)
     """
     def __init__(self, *args, **kwargs):
-        VI.__init__(self, *args, **kwargs)
+        Inference.__init__(self, *args, **kwargs)
 
     def build_score_loss(self):
         """
@@ -153,7 +153,7 @@ class AlphaVI(Inference):
     alpha: scalar in [0,1) U (1, infty)
     """
     def __init__(self, alpha, *args, **kwargs):
-        VI.__init__(self, *args, **kwargs)
+        Inference.__init__(self, *args, **kwargs)
         self.alpha = alpha
 
     def build_score_loss(self):
@@ -232,7 +232,7 @@ class LiVI(Inference):
     alpha: scalar in [0,1) U (1, infty)
     """
     def __init__(self, alpha, *args, **kwargs):
-        VI.__init__(self, *args, **kwargs)
+        Inference.__init__(self, *args, **kwargs)
         self.alpha = alpha
 
     def build_score_loss(self):
@@ -314,7 +314,7 @@ class LiVI(Inference):
 #    """
 #  def __init__(self, model, q_mf, q_prior, r_auxiliary,
 #               *args, **kwargs):
-#    VI.__init__(self, *args, **kwargs)
+#    Inference.__init__(self, *args, **kwargs)
 #    self.model = model
 #    self.q_mf = q_mf
 #    self.q_prior = q_prior
