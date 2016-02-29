@@ -55,6 +55,11 @@ the list of highlighted examples above.)
 * multicanonical ([Mandt et al., 2016](http://arxiv.org/abs/1411.1810))
 * streaming ([McInerney et al., 2015](http://arxiv.org/abs/1507.05253))
 
+## Documentation
+
+[A tutorial is available here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial).
+More generally, all documentation is available in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
+
 ## Installation
 
 To install from pip, run
