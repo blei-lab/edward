@@ -141,6 +141,16 @@ class MFGaussian:
         s = self.transform_s(self.s_unconst)
         return m + eps * s
 
+    def sample(self, size, sess):
+        """
+        z ~ q(z | lambda)
+        """
+        m, s = sess.run([ \
+            self.transform_m(self.m_unconst),
+            self.transform_s(self.s_unconst)]) 
+
+        return m + s * norm.rvs(size=size)
+
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
