@@ -48,12 +48,10 @@ class Inference:
         self.n_minibatch = n_minibatch
         self.n_data = n_data
         self.n_print = n_print
-        if score is True:
-            self.score = True
-        elif score is None or hasattr(self.variational, 'reparam'):
+        if score is None and hasattr(self.variational, 'reparam'):
             self.score = False
         else:
-            raise
+            self.score = True
 
         self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
                                       dtype=tf.float32,
@@ -61,9 +59,9 @@ class Inference:
         self.elbos = tf.zeros([self.n_minibatch])
 
         if self.score:
-            loss = self.build_reparam_loss()
-        else:
             loss = self.build_score_loss()
+        else:
+            loss = self.build_reparam_loss()
 
         update = tf.train.AdamOptimizer(0.1).minimize(loss)
         init = tf.initialize_all_variables()
