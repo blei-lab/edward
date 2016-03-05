@@ -22,7 +22,8 @@ class Inference:
         self.variational = variational
         self.data = data
 
-    def run(self, n_iter=1000, n_minibatch=1, n_data=None, n_print=100):
+    def run(self, n_iter=1000, n_minibatch=1, n_data=None,
+            n_print=100, score=None):
         """
         Run inference algorithm.
 
@@ -38,17 +39,28 @@ class Inference:
             the data.
         n_print: int, optional
             Number of iterations for each print progress.
+        score: bool, optional
+            Whether to force inference to use the score function
+            gradient estimator. Otherwise default is to use the
+            reparameterization gradient if available.
         """
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
         self.n_data = n_data
         self.n_print = n_print
+        if score is True:
+            self.score = True
+        elif score is None or hasattr(self.variational, 'reparam'):
+            self.score = False
+        else:
+            raise
+
         self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
                                       dtype=tf.float32,
                                       name='samples')
         self.elbos = tf.zeros([self.n_minibatch])
 
-        if hasattr(self.variational, 'reparam'):
+        if self.score:
             loss = self.build_reparam_loss()
         else:
             loss = self.build_score_loss()
@@ -59,10 +71,10 @@ class Inference:
         sess = tf.Session()
         sess.run(init)
         for t in range(self.n_iter):
-            if hasattr(self.variational, 'reparam'):
-                samples = self.variational.sample_noise(self.samples.get_shape())
-            else:
+            if self.score:
                 samples = self.variational.sample(self.samples.get_shape(), sess)
+            else:
+                samples = self.variational.sample_noise(self.samples.get_shape())
 
             _, elbo = sess.run([update, self.elbos], {self.samples: samples})
 
