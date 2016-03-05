@@ -22,7 +22,7 @@ class Data:
         if not shuffled:
             # TODO
             # shuffle self.data
-            pass
+            raise NotImplementedError()
 
         self.counter = 0
         if self.data is None:

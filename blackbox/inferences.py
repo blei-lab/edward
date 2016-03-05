@@ -84,10 +84,10 @@ class Inference:
             self.variational.print_params(sess)
 
     def build_score_loss(self):
-        pass
+        raise NotImplementedError()
 
     def build_reparam_loss(self):
-        pass
+        raise NotImplementedError()
 
 class MFVI(Inference):
 # TODO this isn't MFVI so much as VI where q is analytic
