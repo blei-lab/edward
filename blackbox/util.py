@@ -50,6 +50,7 @@ def log_dirichlet(x):
     denom = log_gamma(tf.reduce_sum(x))
     return num/denom
 
+
 def log_gamma(x):
     """
     TensorFlow doesn't have special functions, so use a
