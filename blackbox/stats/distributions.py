@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from blackbox.util import log_dirichlet, log_beta, log_gamma, dot, get_dims
+from blackbox.util import log_inv_gamma, log_dirichlet, log_beta, log_gamma, dot, get_dims
 from scipy import stats
 
 class Bernoulli:
@@ -22,6 +22,17 @@ class Dirichlet:
         """Written in TensorFlow."""
         log_dir = log_dirichlet(alpha)
         return -log_dir + tf.reduce_sum(tf.mul(alpha-1, tf.log(x))) 
+
+class Inverse_Gamma:
+    def rvs(self, alpha, beta, size=1):
+        """Written in NumPy/SciPy."""
+        return stats.invgamma.rvs(alpha, scale=beta, size=size)
+    
+    def logpdf(self, x, alpha, beta):
+        """Written in TensorFlow."""
+        return -log_inv_gamma(alpha, beta) - \
+               tf.mul(alpha+1, tf.log(x)) - tf.truediv(beta, x)
+        
 
 class Beta:
     def rvs(self, a, b, size=1):
