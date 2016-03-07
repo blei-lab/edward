@@ -51,6 +51,7 @@ def log_multinomial(x, n):
     denom = factorial(n)
     return tf.log(tf.truediv(num, denom))
 
+
 def log_dirichlet(x):
     num =  tf.reduce_prod(log_gamma(x))
     denom = log_gamma(tf.reduce_sum(x))
