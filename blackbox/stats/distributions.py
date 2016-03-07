@@ -1,28 +1,44 @@
 import numpy as np
 import tensorflow as tf
 
-from blackbox.util import log_beta, dot, get_dims
+from blackbox.util import log_beta, log_gamma, dot, get_dims
 from scipy import stats
 
 class Bernoulli:
-    def rvs(self, p, size):
+    def rvs(self, p, size=1):
         """Written in NumPy/SciPy."""
         return stats.bernoulli.rvs(p, size=size)
 
     def logpmf(self, x, p):
         """Written in TensorFlow."""
-        lp = tf.to_float(tf.log(p))
-        lp1 = tf.to_float(tf.log(1.0 - p))
-        return tf.mul(x, lp) + tf.mul(1 - x, lp1)
+        return tf.mul(x, tf.log(p)) + tf.mul(1 - x, tf.log(1.0-p))
 
 class Beta:
-    def rvs(self, a, b, size):
+    def rvs(self, a, b, size=1):
         """Written in NumPy/SciPy."""
         return stats.beta.rvs(a, b, size=size)
 
     def logpdf(self, x, a, b):
         """Written in TensorFlow."""
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - log_beta(a, b)
+
+class Expon:
+    def rvs(self, scale=1, size=1):
+        """Written in NumPy/SciPy."""
+        return stats.expon.rvs(scale=scale, size=size)
+
+    def logpdf(self, x, scale=1):
+        """Written in TensorFlow."""
+        return - x/scale - tf.log(scale)
+
+class Gamma:
+    def rvs(self, a, scale=1, size=1):
+        """Written in NumPy/SciPy."""
+        return stats.gamma.rvs(a, scale=scale, size=size)
+
+    def logpdf(self, x, a, scale=1):
+        """Written in TensorFlow."""
+        return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
@@ -103,6 +119,32 @@ class Norm:
 
         return 0.5 * (d + d*np.log(2*np.pi) + tf.log(det_Sigma))
 
+class Poisson:
+    def rvs(self, mu, size=1):
+        """Written in NumPy/SciPy."""
+        return stats.poisson.rvs(mu, size=size)
+
+    def logpmf(self, x, mu):
+        """Written in TensorFlow."""
+        return x * tf.log(mu) - mu - log_gamma(x + 1.0)
+
+class T:
+    def rvs(self, df, loc=0, scale=1, size=1):
+        """Written in NumPy/SciPy."""
+        return stats.t.rvs(df, loc=loc, scale=scale, size=size)
+
+    def logpdf(self, x, df, loc=0, scale=1):
+        """Written in TensorFlow."""
+        return 0.5 * log_gamma(df + 1.0) - \
+               log_gamma(0.5 * df) - \
+               0.5 * (np.log(np.pi) + tf.log(df)) +  tf.log(scale) - \
+               0.5 * (df + 1.0) * \
+                   tf.log(1.0 + (1.0/df) * tf.square((x-loc)/scale))
+
 bernoulli = Bernoulli()
 beta = Beta()
+expon = Expon()
+gamma = Gamma()
 norm = Norm()
+poisson = Poisson()
+t = T()
