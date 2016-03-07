@@ -22,6 +22,7 @@ class Multinomial:
         """Written in TensorFlow."""
         return -log_multinomial(x, n) + tf.reduce_sum(tf.mul(x, tf.log(p)))
 
+
 class Dirichlet:
     def rvs(self, alpha, size=1):
         """Written in NumPy/SciPy."""
