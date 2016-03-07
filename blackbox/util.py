@@ -51,6 +51,9 @@ def log_dirichlet(x):
     return num/denom
 
 
+def log_inv_gamma(x, y):
+    return log_gamma(x) - tf.mul(x, tf.log(y))
+
 def log_gamma(x):
     """
     TensorFlow doesn't have special functions, so use a
