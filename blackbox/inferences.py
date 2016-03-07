@@ -186,8 +186,9 @@ class KLpq(Inference):
         x = self.data.sample(self.n_data)
         log_w = self.model.log_prob(x, self.samples) - q_log_prob
         max_log_w = tf.reduce_max(log_w)
-        self.elbos = tf.exp(max_log_w) * tf.exp(log_w - max_log_w)
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbos))
+        w = tf.exp(max_log_w) * tf.exp(log_w - max_log_w)
+        self.elbos = w * log_w
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w))
 
     def build_reparam_loss(self):
         raise NotImplementedError("KLpq: this inference method does not "
