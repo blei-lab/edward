@@ -165,9 +165,9 @@ class KLpq(Inference):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
         """
-        # loss = - E_{q(z; lambda)} [ w(z; lambda) log q(z; lambda) ]
+        # loss = E_{q(z; lambda)} [ w(z; lambda) (log p(x, z) - log q(z; lambda)) ]
         # where w(z; lambda) = p(x, z) / q(z; lambda)
-        #     
+        # gradient = - E_{q(z; lambda)} [ w(z; lambda) grad_{lambda} log q(z; lambda) ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
@@ -183,6 +183,6 @@ class KLpq(Inference):
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbos))
 
     def build_reparam_loss(self):
-        raise NotImplementedError("KLpq: this inference method does not " 
+        raise NotImplementedError("KLpq: this inference method does not "
           "implement a reparameterization gradient. "
           "Please call `.run()` with `score=True`.")
