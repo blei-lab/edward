@@ -151,3 +151,38 @@ class MFVI(Inference):
                 self.model.log_prob(x, z) - q_log_prob)
 
         return -self.elbos
+
+class KLpq(Inference):
+    """
+    Kullback-Leibler(posterior, approximation) minimization
+    using adaptive importance sampling.
+    """
+    def __init__(self, *args, **kwargs):
+        Inference.__init__(self, *args, **kwargs)
+
+    def build_score_loss(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the score function estimator.
+        """
+        # loss = - E_{q(z; lambda)} [ w(z; lambda) log q(z; lambda) ]
+        # where w(z; lambda) = p(x, z) / q(z; lambda)
+        #     
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
+
+        # 1/B sum_{b=1}^B grad_log_q * w
+        # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w) }
+        # = 1/B sum_{b=1}^B grad_log_q *
+        #   exp{ max_log_omega } * exp{ log(omega) - max_log_omega }
+        x = self.data.sample(self.n_data)
+        log_w = self.model.log_prob(x, self.samples) - q_log_prob
+        max_log_w = tf.reduce_max(log_w)
+        self.elbos = tf.exp(max_log_w) * tf.exp(log_w - max_log_w)
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.elbos))
+
+    def build_reparam_loss(self):
+        raise NotImplementedError("KLpq: this inference method does not " 
+          "implement a reparameterization gradient. "
+          "Please call `.run()` with `score=True`.")
