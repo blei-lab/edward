@@ -6,7 +6,7 @@ of 100,000 samples (!).
 import tensorflow as tf
 import blackbox as bb
 
-from blackbox.stats import bernoulli_log_prob
+from blackbox.stats import bernoulli
 from blackbox.util import get_dims
 
 class Bernoulli:
@@ -21,7 +21,7 @@ class Bernoulli:
     def log_prob(self, xs, zs):
         # TODO use table lookup for everything not resort to if-elses
         if get_dims(zs)[1] == 1:
-            return bernoulli_log_prob(zs[:, 0], p)
+            return bernoulli.logpmf(zs[:, 0], p)
         else:
             return tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
 

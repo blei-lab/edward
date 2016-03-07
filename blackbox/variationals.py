@@ -2,8 +2,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from scipy.stats import bernoulli, beta, norm
-from blackbox.stats import bernoulli_log_prob, beta_log_prob, gaussian_log_prob, gaussian_entropy
+from blackbox.stats import bernoulli, beta, norm
 from blackbox.util import get_dims
 
 class MFBernoulli:
@@ -52,7 +51,7 @@ class MFBernoulli:
         else:
             pi = 1.0 - tf.reduce_sum(self.transform(self.p_unconst[-1]))
 
-        return bernoulli_log_prob(z[:, i], pi)
+        return bernoulli.logpmf(z[:, i], pi)
 
 class MFBeta:
     """
@@ -98,7 +97,7 @@ class MFBeta:
         # TODO
         #ai = self.transform(self.a_unconst[i])
         #bi = self.transform(self.b_unconst[i])
-        return beta_log_prob(z[:, i], ai, bi)
+        return beta.logpdf(z[:, i], ai, bi)
 
 class MFGaussian:
     """
@@ -142,6 +141,16 @@ class MFGaussian:
         s = self.transform_s(self.s_unconst)
         return m + eps * s
 
+    def sample(self, size, sess):
+        """
+        z ~ q(z | lambda)
+        """
+        m, s = sess.run([ \
+            self.transform_m(self.m_unconst),
+            self.transform_s(self.s_unconst)]) 
+
+        return m + s * norm.rvs(size=size)
+
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
@@ -152,11 +161,11 @@ class MFGaussian:
         # TODO
         #mi = self.transform_m(self.m_unconst[i])
         #si = self.transform_s(self.s_unconst[i])
-        return tf.pack([gaussian_log_prob(zm[i], mi, si*si)
+        return tf.pack([norm.logpdf(zm[i], mi, si*si)
                         for zm in tf.unpack(z)])
         # TODO
         #return gaussian_log_prob(z[:, i], mi, si)
 
     # TODO entropy is bugged
     #def entropy(self):
-    #    return gaussian_entropy(self.transform_s(self.s_unconst))
+    #    return norm.entropy(self.transform_s(self.s_unconst))

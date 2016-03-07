@@ -51,7 +51,7 @@ class PythonModel:
             n_minibatch array of type np.float32, where each element
             is the log pdf evaluated at (z_{b1}, ..., z_{bd})
         """
-        pass
+        raise NotImplementedError()
 
     def _py_log_prob_grad(self, xs, zs):
         """
@@ -71,7 +71,7 @@ class PythonModel:
             row is the gradient of the log pdf with respect to (z_1,
             ..., z_d).
         """
-        pass
+        raise NotImplementedError()
 
 class StanModel:
     """

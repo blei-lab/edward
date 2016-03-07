@@ -11,7 +11,7 @@ Variational model
 import tensorflow as tf
 import blackbox as bb
 
-from blackbox.stats import bernoulli_log_prob, beta_log_prob
+from blackbox.stats import bernoulli, beta
 
 class BetaBernoulli:
     """
@@ -21,9 +21,9 @@ class BetaBernoulli:
         self.num_vars = 1
 
     def log_prob(self, xs, zs):
-        log_prior = beta_log_prob(zs[:, 0], alpha=1.0, beta=1.0)
+        log_prior = beta.logpdf(zs[:, 0], a=1.0, b=1.0)
         log_lik = tf.pack([
-            tf.reduce_sum(bernoulli_log_prob(xs, z)) \
+            tf.reduce_sum(bernoulli.logpmf(xs, z)) \
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 
