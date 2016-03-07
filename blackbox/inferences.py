@@ -63,7 +63,14 @@ class Inference:
         else:
             loss = self.build_reparam_loss()
 
-        update = tf.train.AdamOptimizer(0.1).minimize(loss)
+        # Decay the scalar learning rate by 0.9 every 100 iterations
+        global_step = tf.Variable(0, trainable=False)
+        starter_learning_rate = 0.1
+        learning_rate = tf.train.exponential_decay(starter_learning_rate, 
+                                            global_step,
+                                            100, 0.9, staircase=True)
+
+        update = tf.train.AdamOptimizer(learning_rate).minimize(loss,global_step=global_step)
         init = tf.initialize_all_variables()
 
         sess = tf.Session()
