@@ -45,6 +45,15 @@ def get_dims(x):
     else: # array
         return [dim.value for dim in dims]
 
+def log_dirichlet(x):
+    num =  tf.reduce_prod(log_gamma(x))
+    denom = log_gamma(tf.reduce_sum(x))
+    return num/denom
+
+
+def log_inv_gamma(x, y):
+    return log_gamma(x) - tf.mul(x, tf.log(y))
+
 def log_gamma(x):
     """
     TensorFlow doesn't have special functions, so use a
