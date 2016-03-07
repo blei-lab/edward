@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from blackbox.util import log_beta, log_gamma, dot, get_dims
+from blackbox.util import log_dirichlet, log_beta, log_gamma, dot, get_dims
 from scipy import stats
 
 class Bernoulli:
@@ -12,6 +12,16 @@ class Bernoulli:
     def logpmf(self, x, p):
         """Written in TensorFlow."""
         return tf.mul(x, tf.log(p)) + tf.mul(1 - x, tf.log(1.0-p))
+
+class Dirichlet:
+    def rvs(self, alpha, size=1):
+        """Written in NumPy/SciPy."""
+        return stats.dirichlet.rvs(alpha, size=size)
+
+    def logpdf(self, x, alpha):
+        """Written in TensorFlow."""
+        log_dir = log_dirichlet(alpha)
+        return -log_dir + tf.reduce_sum(tf.mul(alpha-1, tf.log(x))) 
 
 class Beta:
     def rvs(self, a, b, size=1):
