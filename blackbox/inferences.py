@@ -66,24 +66,28 @@ class Inference:
         # Decay the scalar learning rate by 0.9 every 100 iterations
         global_step = tf.Variable(0, trainable=False)
         starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate, 
+        learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                             global_step,
                                             100, 0.9, staircase=True)
 
-        update = tf.train.AdamOptimizer(learning_rate).minimize(loss,global_step=global_step)
+        update = tf.train.AdamOptimizer(learning_rate).minimize(
+            loss, global_step=global_step)
         init = tf.initialize_all_variables()
 
         sess = tf.Session()
         sess.run(init)
         for t in range(self.n_iter):
-            if self.score:
-                samples = self.variational.sample(self.samples.get_shape(), sess)
-            else:
-                samples = self.variational.sample_noise(self.samples.get_shape())
-
-            _, elbo = sess.run([update, self.elbos], {self.samples: samples})
-
+            elbo = self.update(sess, update)
             self.print_progress(t, elbo, sess)
+
+    def update(self, sess, update):
+        if self.score:
+            samples = self.variational.sample(self.samples.get_shape(), sess)
+        else:
+            samples = self.variational.sample_noise(self.samples.get_shape())
+
+        _, elbo = sess.run([update, self.elbos], {self.samples: samples})
+        return elbo
 
     def print_progress(self, t, elbos, sess):
         if t % self.n_print == 0:
