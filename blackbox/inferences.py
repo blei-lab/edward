@@ -120,8 +120,8 @@ class MFVI(Inference):
             # where entropy is analytic
             q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob = tf.add(q_log_prob, 
-                                    self.variational.log_prob_zi(i, self.samples))  
+                q_log_prob = tf.add(q_log_prob,
+                                    self.variational.log_prob_zi(i, self.samples))
 
             p_log_prob = self.model.log_prob(x, self.samples)
             q_entropy = self.variational.entropy()
@@ -132,8 +132,8 @@ class MFVI(Inference):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
             q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob = tf.add(q_log_prob, 
-                                    self.variational.log_prob_zi(i, self.samples))  
+                q_log_prob = tf.add(q_log_prob,
+                                    self.variational.log_prob_zi(i, self.samples))
 
             x = self.data.sample(self.n_data)
             self.elbos = self.model.log_prob(x, self.samples) - q_log_prob
@@ -155,8 +155,8 @@ class MFVI(Inference):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
             q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob = tf.add(q_log_prob, 
-                                    self.variational.log_prob_zi(i, z))  
+                q_log_prob = tf.add(q_log_prob,
+                                    self.variational.log_prob_zi(i, z))
 
             x = self.data.sample(self.n_data)
             self.elbos = self.model.log_prob(x, z) - q_log_prob
@@ -185,8 +185,8 @@ class KLpq(Inference):
         #                                 grad_{lambda} log q(z; lambda) ]
         q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
         for i in range(self.variational.num_vars):
-            q_log_prob = tf.add(q_log_prob, 
-                                self.variational.log_prob_zi(i, self.samples))  
+            q_log_prob = tf.add(q_log_prob,
+                                self.variational.log_prob_zi(i, self.samples))
 
         # 1/B sum_{b=1}^B grad_log_q * w_norm
         # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }
@@ -204,3 +204,93 @@ class KLpq(Inference):
         raise NotImplementedError("KLpq: this inference method does not "
           "implement a reparameterization gradient. "
           "Please call `.run()` with `score=True`.")
+
+class MAP(Inference):
+    """
+    Maximum a posteriori
+    """
+    def __init__(self, *args, **kwargs):
+        # TODO make variational None as a default
+        variational = None
+        Inference.__init__(self, *args, **kwargs)
+
+    # TODO make this more abstract in the base class so it works without duplicate code
+    def run(self, n_iter=1000, n_minibatch=1, n_data=None,
+            n_print=100, score=None):
+        """
+        Run inference algorithm.
+
+        Arguments
+        ----------
+        n_iter: int, optional
+            Number of iterations for optimization.
+        n_minibatch: int, optional
+            Number of samples from variational model for calculating
+            stochastic gradients.
+        n_data: int, optional
+            Number of samples for data subsampling. Default is to use all
+            the data.
+        n_print: int, optional
+            Number of iterations for each print progress.
+        score: bool, optional
+            Whether to force inference to use the score function
+            gradient estimator. Otherwise default is to use the
+            reparameterization gradient if available.
+        """
+        self.n_iter = n_iter
+        self.n_minibatch = None
+        self.n_data = n_data
+        self.n_print = n_print
+        #if score is None and hasattr(self.variational, 'reparam'):
+        #    self.score = False
+        #else:
+        #    self.score = True
+
+        #self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
+        #                              dtype=tf.float32,
+        #                              name='samples')
+        # TODO objective function values
+        self.elbos = tf.zeros([self.n_minibatch])
+
+        #if self.score:
+        #    loss = self.build_score_loss()
+        #else:
+        #    loss = self.build_reparam_loss()
+        loss = self.build_loss()
+
+        # Decay the scalar learning rate by 0.9 every 100 iterations
+        global_step = tf.Variable(0, trainable=False)
+        starter_learning_rate = 0.1
+        learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                            global_step,
+                                            100, 0.9, staircase=True)
+
+        update = tf.train.AdamOptimizer(learning_rate).minimize(
+            loss, global_step=global_step)
+        init = tf.initialize_all_variables()
+
+        # TODO initialize
+        z = tf.Variable( # TODO whatever)
+
+        sess = tf.Session()
+        sess.run(init)
+        for t in range(self.n_iter):
+            elbo = self.update(sess, update)
+            self.print_progress(t, elbo, sess)
+
+    def build_loss(self):
+        # loss = log p(x, z)
+        x = self.data.sample()
+        # TODO
+        z ?
+        return self.model.log_prob(x, z)
+
+    def update(self, sess, update):
+        _, elbo = sess.run([update, self.elbos], {self.samples: samples})
+        return elbo
+
+    def print_progress(self, t, elbos, sess):
+        if t % self.n_print == 0:
+            print("iter %d elbo %.2f " % (t, np.mean(elbos)))
+            #self.variational.print_params(sess)
+
