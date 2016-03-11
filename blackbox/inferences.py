@@ -180,7 +180,7 @@ class KLpq(Inference):
         #
         # gradient = - E_{q(z; lambda)} [ w_norm(z; lambda) *
         #                                 grad_{lambda} log q(z; lambda) ]
-        q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
