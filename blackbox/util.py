@@ -14,17 +14,17 @@ def check_is_tf_vector(x):
         dimensions = x.get_shape()
         if(len(dimensions) == 0):
             raise TypeError("util::check_is_tf_vector: "
-                            "input is a scalar.")  
+                            "input is a scalar.")
         elif(len(dimensions) == 1):
             if(dimensions[0].value <= 1):
                 raise TypeError("util::check_is_tf_vector: "
                                 "input has first dimension <= 1.")
-            else:    
+            else:
                 pass
         elif(len(dimensions) == 2):
             if(dimensions[1]!=1):
                 raise TypeError("util::check_is_tf_vector: "
-                                "input has second dimension != 1.")    
+                                "input has second dimension != 1.")
         else:
             raise TypeError("util::check_is_tf_vector: "
                             "input has too many dimensions.")
@@ -36,7 +36,7 @@ def log_sum_exp(x):
     """
     Computes the log_sum_exp of the elements in x.
 
-    Works for x with 
+    Works for x with
         shape=TensorShape([Dimension(N)])
         shape=TensorShape([Dimension(N), Dimension(1)])
 

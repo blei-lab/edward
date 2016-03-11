@@ -161,8 +161,8 @@ class MFGaussian:
         # TODO
         #mi = self.transform_m(self.m_unconst[i])
         #si = self.transform_s(self.s_unconst[i])
-        return tf.concat(0, [norm.logpdf(zm[i], mi, si*si)
-                        for zm in tf.unpack(z)])
+        return tf.concat(0, [norm.logpdf(zm[i], mi, si)
+                         for zm in tf.unpack(z)])
         # TODO
         #return gaussian_log_prob(z[:, i], mi, si)
 
