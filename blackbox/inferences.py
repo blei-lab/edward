@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from blackbox.data import Data
 from blackbox.util import log_sum_exp
+from blackbox.variationals import MFPointMass
 
 class Inference:
     """
@@ -102,7 +103,7 @@ class Inference:
     def build_reparam_loss(self):
         raise NotImplementedError()
 
-    def set_inference_specific_parameters():
+    def set_inference_specific_parameters(self):
         pass
 
 class MFVI(Inference):
@@ -215,11 +216,11 @@ class MAP(MFVI):
     """
     def __init__(self, model, data=Data()):
         # TODO make variational point masses by default
-        variational = MFPointMass(model.get_num_vars(data))
+        variational = MFPointMass(model.get_num_vars(data.data))
         MFVI.__init__(self, model,variational,data)
 
 
-    def set_inference_specific_parameters():
+    def set_inference_specific_parameters(self):
         if self.n_minibatch != 1:
             # TODO add warning 
             print("a minibatch size larger than 1 is redundant for MAP estimation")
