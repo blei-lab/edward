@@ -9,6 +9,19 @@ def set_seed(x):
     np.random.seed(x)
     tf.set_random_seed(x)
 
+def log_sum_exp(x):
+    """
+    Computes the log_sum_exp of the elements in x.
+
+    Works for x with 
+        shape=TensorShape([Dimension(N)])
+        shape=TensorShape([Dimension(N), Dimension(1)])
+
+    Not tested for anything beyond that.
+    """
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
+
 def dot(x, y):
     """
     x is M x N matrix and y is N-vector, or
