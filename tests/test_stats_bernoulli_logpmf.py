@@ -7,8 +7,11 @@ from scipy import stats
 
 sess = tf.InteractiveSession()
 
-x = tf.constant(0.0)
-print(bernoulli.logpmf(x, tf.constant(0.5)).eval())
+print(bernoulli.logpmf(tf.constant(0.0), tf.constant(0.5)).eval())
+print(bernoulli.logpmf(tf.constant(0.0), tf.constant(0.5)).eval())
+print(bernoulli.logpmf(tf.constant([0.0]), tf.constant(0.5)).eval())
+print(bernoulli.logpmf(tf.constant([0.0]), tf.constant([0.5])).eval())
 print(stats.bernoulli.logpmf(0.0, 0.5))
-print(bernoulli.logpmf(x, tf.constant([0.75])).eval())
+print()
+print(bernoulli.logpmf(tf.constant(0.0), tf.constant(0.75)).eval())
 print(stats.bernoulli.logpmf(0.0, 0.75))
