@@ -11,10 +11,17 @@ def set_seed(x):
 
 def check_is_tf_vector(x):
     if isinstance(x, tf.Tensor):
-        dimensions = get_dims(x)
-        if(len(dimensions)==1):
-            pass
-        elif(len(dimensions)==2):
+        dimensions = x.get_shape()
+        if(len(dimensions) == 0):
+            raise TypeError("util::check_is_tf_vector: "
+                            "input is a scalar.")  
+        elif(len(dimensions) == 1):
+            if(dimensions[0].value <= 1):
+                raise TypeError("util::check_is_tf_vector: "
+                                "input has first dimension <= 1.")
+            else:    
+                pass
+        elif(len(dimensions) == 2):
             if(dimensions[1]!=1):
                 raise TypeError("util::check_is_tf_vector: "
                                 "input has second dimension != 1.")    
