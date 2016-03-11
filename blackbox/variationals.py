@@ -169,3 +169,36 @@ class MFGaussian:
     # TODO entropy is bugged
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
+
+class MFPointMass:
+    """
+    Point mass variational family (for MAP estimation)
+    """
+    def __init__(self, num_vars):
+        self.num_vars = num_vars
+        self.num_params = num_vars
+
+        self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
+        # TODO make all variables outside, not in these classes but as
+        # part of inference most generally
+        self.transform = tf.identity
+        # TODO something about constraining the parameters in simplex
+        # TODO deal with truncations
+
+    # TODO use __str__(self):
+    def print_params(self, sess):
+        params = sess.run([self.transform(self.p_unconst)])[0]
+        print("parameter values:")
+        print(params)
+
+    def sample(self, size, sess):
+        """point mass"""
+        p = sess.run([self.transform(self.p_unconst)])[0]
+        return p 
+
+    def log_prob_zi(self, i, z):
+        """indicator if z_i == lambda_i"""
+        if i >= self.num_vars:
+            raise
+        pi = self.transform(self.p_unconst[i])
+        return z[:, i] == pi
