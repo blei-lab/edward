@@ -153,7 +153,7 @@ class MFVI(Inference):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
             q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob += self.variational.log_prob_zi(i, self.samples)
+                q_log_prob += self.variational.log_prob_zi(i, z)
 
             x = self.data.sample(self.n_data)
             self.elbos = self.model.log_prob(x, z) - q_log_prob
