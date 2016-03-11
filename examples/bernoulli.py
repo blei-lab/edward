@@ -25,7 +25,7 @@ class Bernoulli:
         if get_dims(zs)[1] == 1:
             return bernoulli.logpmf(zs[:, 0], p)
         else:
-            return tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
+            return tf.concat(0, [self.table_lookup(z) for z in tf.unpack(zs)])
 
     def table_lookup(self, x):
         elem = self.lp

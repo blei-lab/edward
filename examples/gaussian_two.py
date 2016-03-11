@@ -21,7 +21,7 @@ class Gaussian:
         self.num_vars = get_dims(mu)[0]
 
     def log_prob(self, xs, zs):
-        return tf.pack([norm.logpdf(z, mu, Sigma)
+        return tf.concat(0, [norm.logpdf(z, mu, Sigma)
                         for z in tf.unpack(zs)])
 
 bb.set_seed(42)
