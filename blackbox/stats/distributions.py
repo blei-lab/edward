@@ -4,81 +4,112 @@ import tensorflow as tf
 from blackbox.util import log_multinomial, log_inv_gamma, log_dirichlet, log_beta, log_gamma, dot, get_dims
 from scipy import stats
 
+class Distribution:
+    """Template for all distributions."""
+    def rvs(self, size=1):
+        """
+        Returns
+        -------
+        np.ndarray
+            size-dimensional vector; scalar if size=1
+
+        Notes
+        -----
+        This is written in NumPy/SciPy, as TensorFlow does not support
+        many distributions for random number generation.
+        """
+        raise NotImplementedError()
+
+    def logpmf(self, x):
+        """
+        Arguments
+        ---------
+        x: n-dimensional vector or scalar
+        params: n-dimensional vector or scalar
+
+        Returns
+        -------
+        tf.Tensor
+            n-dimensional vector if x is n-dimensional; otherwise a scalar.
+        """
+        raise NotImplementedError()
+
 class Bernoulli:
     def rvs(self, p, size=1):
-        """Written in NumPy/SciPy."""
         return stats.bernoulli.rvs(p, size=size)
 
     def logpmf(self, x, p):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        p = tf.squeeze(p)
         return tf.mul(x, tf.log(p)) + tf.mul(1 - x, tf.log(1.0-p))
 
 class Beta:
     def rvs(self, a, b, size=1):
-        """Written in NumPy/SciPy."""
         return stats.beta.rvs(a, b, size=size)
 
     def logpdf(self, x, a, b):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        a = tf.squeeze(b)
+        b = tf.squeeze(a)
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - log_beta(a, b)
 
 class Dirichlet:
     def rvs(self, alpha, size=1):
-        """Written in NumPy/SciPy."""
         return stats.dirichlet.rvs(alpha, size=size)
 
     def logpdf(self, x, alpha):
-        """Written in TensorFlow."""
-        log_dir = log_dirichlet(alpha)
-        return -log_dir + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+        x = tf.squeeze(x)
+        alpha = tf.squeeze(alpha)
+        return -log_dirichlet(alpha) + \
+               tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
 
 class Expon:
     def rvs(self, scale=1, size=1):
-        """Written in NumPy/SciPy."""
         return stats.expon.rvs(scale=scale, size=size)
 
     def logpdf(self, x, scale=1):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        scale = tf.squeeze(scale)
         return - x/scale - tf.log(scale)
 
 class Gamma:
     """This is the shape/scale parameterization of the gamma distribution"""
     def rvs(self, a, scale=1, size=1):
-        """Written in NumPy/SciPy."""
         return stats.gamma.rvs(a, scale=scale, size=size)
 
     def logpdf(self, x, a, scale=1):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        a = tf.squeeze(a)
+        scale = tf.squeeze(scale)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
 class InvGamma:
     def rvs(self, alpha, beta, size=1):
-        """Written in NumPy/SciPy."""
         return stats.invgamma.rvs(alpha, scale=beta, size=size)
 
     def logpdf(self, x, alpha, beta):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        alpha = tf.squeeze(alpha)
+        beta = tf.squeeze(beta)
         return -log_inv_gamma(alpha, beta) - \
                tf.mul(alpha+1, tf.log(x)) - tf.truediv(beta, x)
 
 class Multinomial:
     def rvs(self, n, p, size=1):
-        """Written in NumPy/SciPy."""
         return np.random.multinomial(n, p, size=size)
 
     def logpmf(self, x, n, p):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        n = tf.squeeze(n)
+        p = tf.squeeze(p)
         return -log_multinomial(x, n) + tf.reduce_sum(tf.mul(x, tf.log(p)))
 
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
-        """Written in NumPy/SciPy."""
         return stats.norm.rvs(loc, scale, size=size)
 
     def logpdf(self, x, mu=None, Sigma=None):
         """
-        Written in TensorFlow.
-
         Arguments
         ----------
         x: Tensor scalar, vector
@@ -126,8 +157,7 @@ class Norm:
                   0.5*tf.log(det_Sigma) - \
                   0.5*tf.matmul(tf.transpose(inner), inner)
             """
-        #lp = tf.reduce_sum(lps)
-        #return lps
+        #return tf.squeeze(lps)
         return tf.reshape(lps, [-1])
 
     def entropy(self, Sigma):
@@ -151,20 +181,22 @@ class Norm:
 
 class Poisson:
     def rvs(self, mu, size=1):
-        """Written in NumPy/SciPy."""
         return stats.poisson.rvs(mu, size=size)
 
     def logpmf(self, x, mu):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        mu = tf.squeeze(mu)
         return x * tf.log(mu) - mu - log_gamma(x + 1.0)
 
 class T:
     def rvs(self, df, loc=0, scale=1, size=1):
-        """Written in NumPy/SciPy."""
         return stats.t.rvs(df, loc=loc, scale=scale, size=size)
 
     def logpdf(self, x, df, loc=0, scale=1):
-        """Written in TensorFlow."""
+        x = tf.squeeze(x)
+        df = tf.squeeze(df)
+        loc = tf.squeeze(loc)
+        scale = tf.squeeze(scale)
         return 0.5 * log_gamma(df + 1.0) - \
                log_gamma(0.5 * df) - \
                0.5 * (np.log(np.pi) + tf.log(df)) +  tf.log(scale) - \
@@ -173,11 +205,9 @@ class T:
 
 class Wishart:
     def rvs(self, df, scale, size=1):
-        """Written in NumPy/SciPy."""
         return stats.wishart.rvs(df, scale, size=size)
 
     def logpdf(self, x, df, scale):
-        """Written in TensorFlow."""
         raise NotImplementedError()
 
 bernoulli = Bernoulli()
