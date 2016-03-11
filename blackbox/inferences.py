@@ -117,10 +117,9 @@ class MFVI(Inference):
         if hasattr(self.variational, 'entropy'):
             # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
             # where entropy is analytic
-            q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
+            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob = tf.add(q_log_prob, 
-                                    self.variational.log_prob_zi(i, self.samples))  
+                q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
             p_log_prob = self.model.log_prob(x, self.samples)
             q_entropy = self.variational.entropy()
@@ -129,10 +128,9 @@ class MFVI(Inference):
                    q_entropy
         else:
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
-            q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
+            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob = tf.add(q_log_prob, 
-                                    self.variational.log_prob_zi(i, self.samples))  
+                q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
             x = self.data.sample(self.n_data)
             self.elbos = self.model.log_prob(x, self.samples) - q_log_prob
@@ -152,10 +150,9 @@ class MFVI(Inference):
             self.elbos = self.model.log_prob(x, z) + self.variational.entropy()
         else:
             # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
-            q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
+            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
             for i in range(self.variational.num_vars):
-                q_log_prob = tf.add(q_log_prob, 
-                                    self.variational.log_prob_zi(i, z))  
+                q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
             x = self.data.sample(self.n_data)
             self.elbos = self.model.log_prob(x, z) - q_log_prob
@@ -178,10 +175,9 @@ class KLpq(Inference):
         # loss = E_{q(z; lambda)} [ w(z; lambda) (log p(x, z) - log q(z; lambda)) ]
         # where w(z; lambda) = p(x, z) / q(z; lambda)
         # gradient = - E_{q(z; lambda)} [ w(z; lambda) grad_{lambda} log q(z; lambda) ]
-        q_log_prob = tf.zeros([self.n_minibatch, 1], dtype=tf.float32)
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
-            q_log_prob = tf.add(q_log_prob, 
-                                self.variational.log_prob_zi(i, self.samples))  
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
         # 1/B sum_{b=1}^B grad_log_q * w
         # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w) }
