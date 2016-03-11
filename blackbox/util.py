@@ -42,6 +42,7 @@ def log_sum_exp(x):
 
     Not tested for anything beyond that.
     """
+    check_is_tf_vector(x)
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
