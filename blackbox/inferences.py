@@ -177,15 +177,19 @@ class KLpq(Inference):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
         """
-        # loss = E_{q(z; lambda)} [ w(z; lambda) (log p(x, z) - log q(z; lambda)) ]
-        # where w(z; lambda) = p(x, z) / q(z; lambda)
-        # gradient = - E_{q(z; lambda)} [ w(z; lambda) grad_{lambda} log q(z; lambda) ]
+        # loss = E_{q(z; lambda)} [ w_norm(z; lambda) *
+        #                           ( log p(x, z) - log q(z; lambda) ) ]
+        # where w_norm(z; lambda) = w(z; lambda) / sum_z( w(z; lambda) )
+        # and w(z; lambda) = p(x, z) / q(z; lambda)
+        # 
+        # gradient = - E_{q(z; lambda)} [ w_norm(z; lambda) *
+        #                                 grad_{lambda} log q(z; lambda) ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-        # 1/B sum_{b=1}^B grad_log_q * w
-        # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w) }
+        # 1/B sum_{b=1}^B grad_log_q * w_norm
+        # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }
         x = self.data.sample(self.n_data)
         log_w = self.model.log_prob(x, self.samples) - q_log_prob
 
