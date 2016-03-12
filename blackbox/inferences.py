@@ -50,11 +50,11 @@ class Inference:
         self.n_minibatch = n_minibatch
         self.n_data = n_data
         self.n_print = n_print
-        self.set_inference_specific_parameters()
         if score is None and hasattr(self.variational, 'reparam'):
             self.score = False
         else:
             self.score = True
+        self.set_inference_specific_parameters()
 
         self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
                                       dtype=tf.float32,
@@ -215,13 +215,16 @@ class MAP(MFVI):
     Maximum a posteriori
     """
     def __init__(self, model, data=Data()):
-        # TODO make variational point masses by default
         variational = MFPointMass(model.get_num_vars(data.data))
         MFVI.__init__(self, model,variational,data)
 
 
     def set_inference_specific_parameters(self):
-        if self.n_minibatch != 1:
-            # TODO add warning 
-            print("a minibatch size larger than 1 is redundant for MAP estimation")
-            self.n_minibatch = 1
+        """
+        MAP estimation is MFVI with
+        variational = MFPointmass
+        n_minibatch = 1
+        score = False (use reparametrization gradient with 0 noise)
+        """
+        self.n_minibatch = 1
+        self.score = False

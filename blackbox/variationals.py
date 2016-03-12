@@ -178,27 +178,33 @@ class MFPointMass:
         self.num_vars = num_vars
         self.num_params = num_vars
 
-        self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
-        # TODO make all variables outside, not in these classes but as
-        # part of inference most generally
+        self.lam_unconst = tf.Variable(tf.exp(tf.random_normal([num_vars])))
         self.transform = tf.identity
-        # TODO something about constraining the parameters in simplex
-        # TODO deal with truncations
 
-    # TODO use __str__(self):
     def print_params(self, sess):
-        params = sess.run([self.transform(self.p_unconst)])[0]
+        params = sess.run([self.transform(self.lam_unconst)])
         print("parameter values:")
         print(params)
 
+    def sample_noise(self, size):
+        return norm.rvs(size=size)
+
+    def reparam(self, eps):
+        """
+        reparametrization of point mass
+        doesn't depend on noise eps
+        """
+        return self.transform(self.lam_unconst)
+
     def sample(self, size, sess):
         """point mass"""
-        p = sess.run([self.transform(self.p_unconst)])[0]
-        return p 
+        lam = sess.run([self.transform(self.lam_unconst)])
+        return lam
 
     def log_prob_zi(self, i, z):
         """indicator if z_i == lambda_i"""
         if i >= self.num_vars:
             raise
-        pi = self.transform(self.p_unconst[i])
-        return z[:, i] == pi
+        lami = self.lam_unconst[i]
+        return tf.select(tf.equal(z[i],lami),1.0,0.0)
+
