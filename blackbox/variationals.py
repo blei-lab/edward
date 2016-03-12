@@ -66,10 +66,9 @@ class MFDirichlet:
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         alpha = sess.run([self.transform(self.alpha_unconst)])
-        print(alpha)
         z = np.zeros(size)
-        #for d in xrange(self.num_vars):
-        #    z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
+        for d in xrange(self.num_vars):
+            z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
             
         return z
     
