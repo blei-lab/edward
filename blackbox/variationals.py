@@ -31,7 +31,11 @@ class MFMixGaussian:
         dirich_samples = self.dirich.sample(size, sess)
         gauss_samples = self.gauss.sample(size, sess)
         invgam_samples = self.invgam.sample(size, sess)
+        z[:, 0] = dirich_samples
+        z[:, 1] = gauss_samples
+        z[:, 2] = invgam_samples
         
+        return z
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
