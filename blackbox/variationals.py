@@ -65,7 +65,7 @@ class MFDirichlet:
         if i >= self.num_vars:
             raise
         
-        alphai = self.transform(self.alpha_unconst)[i]
+        alphai = self.transform(self.alpha_unconst)[i, :]
         
         return dirichlet.logpdf(z[:, i], alphai)
 
