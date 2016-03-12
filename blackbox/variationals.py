@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.stats import bernoulli, beta, norm
+from blackbox.stats import bernoulli, beta, multivariate_normal, norm
 from blackbox.util import get_dims
 
 class MFBernoulli:
@@ -168,4 +168,4 @@ class MFGaussian:
 
     # TODO entropy is bugged
     #def entropy(self):
-    #    return norm.entropy(self.transform_s(self.s_unconst))
+    #    return multivariate_normal.entropy(self.transform_s(self.s_unconst))
