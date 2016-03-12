@@ -52,6 +52,7 @@ class MFDirichlet:
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
     """
     def __init__(self, num_vars, K):
+        self.K = K
         self.num_vars = num_vars
         self.num_params = num_vars 
         self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
@@ -60,15 +61,15 @@ class MFDirichlet:
     def print_params(self, sess):
         alpha = sess.run([self.transform(self.alpha_unconst)])
         
-        print("parameter vector:")
+        print("concentration vector:")
         print(alpha)
         
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         alpha = sess.run([self.transform(self.alpha_unconst)])
-        z = np.zeros(size)
+        z = np.zeros(num_vars, size, self.K)
         for d in xrange(self.num_vars):
-            z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
+            z[d, :, :] = dirichlet.rvs(alpha[d,:], size = size[0])
             
         return z
     
