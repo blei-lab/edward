@@ -19,7 +19,8 @@ class Gaussian(PythonModel):
     def __init__(self, mu, Sigma):
         self.mu = mu
         self.Sigma = Sigma
-        self.num_vars = get_dims(mu)[0]
+        #self.num_vars = get_dims(mu)[0]
+        self.num_vars = 2
 
     def log_prob(self, xs, zs):
         return tf.pack([norm.logpdf(z, mu, Sigma)
@@ -30,4 +31,4 @@ mu = tf.constant(1.0)
 Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
 inference = bb.MAP(model)
-inference.run(n_iter=10000)
+inference.run(n_iter=1000)
