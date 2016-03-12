@@ -71,7 +71,7 @@ class MFDirichlet:
         for d in xrange(self.num_vars):
         	print(alpha[d,:])
         	print(size[0])
-            z[:, d] = dirichlet.rvs(alpha[d,:], size=size[0])
+            z[:, d] = dirichlet.rvs(alpha[d,:], size)
             
         return z
     
