@@ -2,13 +2,13 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.stats import bernoulli, beta, norm, dirichlet
+from blackbox.stats import bernoulli, beta, norm, dirichlet, invgamma
 from blackbox.util import get_dims
 
 
 class MFMixGaussian:
     """                                                                                                   
-    q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z | lambda3)                                         
+    q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)                                         
     """
     def __init(self, num_vars, K):
         self.dirich = MFDirichlet(1, K)
@@ -21,7 +21,8 @@ class MFMixGaussian:
         self.num_params = dirich_num_param + gauss_num_param + invgam_num_params
     
      def print_params(self, sess):
-        self.dirich.print_params(sess)
+     	
+     	self.dirich.print_params(sess)
         self.gauss.print_params(sess)
         self.invgam.print_params(sess)
 
