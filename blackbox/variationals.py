@@ -20,9 +20,8 @@ class MFMixGaussian:
         invgam_num_params = self.invgam.num_params
         self.num_params = dirich_num_param + gauss_num_param + invgam_num_params
     
-     def print_params(self, sess):
-     	
-     	self.dirich.print_params(sess)
+    def print_params(self, sess):
+    	self.dirich.print_params(sess)
         self.gauss.print_params(sess)
         self.invgam.print_params(sess)
 
