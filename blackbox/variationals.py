@@ -6,6 +6,35 @@ from blackbox.stats import bernoulli, beta, norm, dirichlet
 from blackbox.util import get_dims
 
 
+class MFMixGaussian:
+    """                                                                                                   
+    q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z | lambda3)                                         
+    """
+    def __init(self, num_vars, K):
+        self.dirich = MFDirichlet(1, K)
+        self.gauss = MFGaussian(1)
+        self.invgam = MFInvGamma(1)
+        self.num_vars = num_vars
+        dirich_num_param = self.dirich.num_params
+        gauss_num_param = self.gauss.num_params
+        invgam_num_params = self.invgam.num_params
+        self.num_params = dirich_num_param + gauss_num_param + invgam_num_params
+    
+     def print_params(self, sess):
+        self.dirich.print_params(sess)
+        self.gauss.print_params(sess)
+        self.invgam.print_params(sess)
+
+     def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        if i >= self.num_vars:
+            raise
+        dirich_log_prob = self.dirich.log_prob_zi(i, z)
+        gauss_log_prob= self.gauss.log_prob_zi(i, z)
+        invgam_log_prob= self.invgam.log_prob_zi(i, z)
+
+        return dirich_log_prob + gauss_log_prob + invgam_log_prob
+
 class MFDirichlet:
     """
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
