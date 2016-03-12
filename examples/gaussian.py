@@ -2,16 +2,17 @@
 """
 Probability model
     Posterior: (1-dimensional) Gaussian
-Variational model
-    Likelihood: Mean-field Gaussian
+Inference
+    MAP estimation
 """
 import tensorflow as tf
 import blackbox as bb
 
 from blackbox.stats import norm
 from blackbox.util import get_dims
+from blackbox.models import PythonModel
 
-class Gaussian:
+class Gaussian(PythonModel):
     """
     p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, std)
     """

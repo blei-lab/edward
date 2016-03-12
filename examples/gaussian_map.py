@@ -2,16 +2,17 @@
 """
 Probability model
     Posterior: (1-dimensional) Gaussian
-Inference
-    MAP estimation
+Variational model
+    Likelihood: Mean-field Gaussian
 """
 import tensorflow as tf
 import blackbox as bb
 
 from blackbox.stats import norm
 from blackbox.util import get_dims
+from blackbox.models import PythonModel
 
-class Gaussian:
+class Gaussian(PythonModel):
     """
     p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
     """
@@ -28,7 +29,5 @@ bb.set_seed(42)
 mu = tf.constant(1.0)
 Sigma = tf.constant(1.0)
 model = Gaussian(mu, Sigma)
-variational = bb.MFGaussian(model.num_vars)
-
-inference = bb.MFVI(model, variational)
+inference = bb.MAP(model)
 inference.run(n_iter=10000)
