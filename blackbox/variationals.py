@@ -29,7 +29,7 @@ class MFDirichlet:
         for d in xrange(self.num_vars):
             z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
             
-            return z
+        return z
     
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
@@ -45,9 +45,9 @@ class MFInvGamma:
     q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
     """
     def __init(self, num_vars):
-    self.num_vars = num_vars
-    self.num_params = 2 * num_vars
-    self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.num_vars = num_vars
+        self.num_params = 2 * num_vars
+        self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.transform = tf.nn.softplus
         
