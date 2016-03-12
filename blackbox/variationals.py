@@ -69,10 +69,10 @@ class MFDirichlet:
         print(size)
         z = np.zeros(size)
         for d in xrange(self.num_vars):
+        
         	print(alpha[d,:])
         	print(size[0])
             z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
-            
         return z
     
     def log_prob_zi(self, i, z):
