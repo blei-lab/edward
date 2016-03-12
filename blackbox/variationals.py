@@ -10,7 +10,7 @@ class MFMixGaussian:
     """                                                                                                   
     q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)                                         
     """
-    def __init(self, num_vars, K):
+    def __init__(self, num_vars, K):
         self.dirich = MFDirichlet(1, K)
         self.gauss = MFGaussian(1)
         self.invgam = MFInvGamma(1)
@@ -39,7 +39,7 @@ class MFDirichlet:
     """
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
     """
-    def __init(self, num_vars, K):
+    def __init__(self, num_vars, K):
         self.num_vars = num_vars
         self.num_params = num_vars 
         self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
@@ -73,7 +73,7 @@ class MFInvGamma:
     """
     q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
     """
-    def __init(self, num_vars):
+    def __init__(self, num_vars):
         self.num_vars = num_vars
         self.num_params = 2 * num_vars
         self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
