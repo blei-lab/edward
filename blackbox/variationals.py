@@ -27,7 +27,7 @@ class MFMixGaussian:
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        z = np.zeros((size, 3))
+        z = np.zeros((size[0], 3))
         dirich_samples = self.dirich.sample(size, sess)
         gauss_samples = self.gauss.sample(size, sess)
         invgam_samples = self.invgam.sample(size, sess)
