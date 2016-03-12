@@ -57,10 +57,13 @@ bb.set_seed(42)
 model = bb.StanModel(model_code=model_code)
 K = 2
 variational = bb.MFMixGaussian(1, K)
-x = np.loadtxt('../data/mix_mock_data.txt', dtype='float32', delimiter=',')
+x = np.loadtxt('~/Code/mix_mock_data.txt', dtype='float32', delimiter=',')
 N = len(X)
 D = 2
 data = bb.Data(dict(N=N, K=K, D=D , x=x))
 
 inference = bb.MFVI(model, variational, data)
 inference.run(n_iter=1000)
+
+
+
