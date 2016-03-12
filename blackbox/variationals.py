@@ -25,6 +25,14 @@ class MFMixGaussian:
         self.gauss.print_params(sess)
         self.invgam.print_params(sess)
 
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        z = np.zeros((size, 3))
+        dirich_samples = self.dirich.sample(size, sess)
+        gauss_samples = self.gauss.sample(size, sess)
+        invgam_samples = self.invgam.sample(size, sess)
+        
+
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
