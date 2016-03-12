@@ -55,7 +55,7 @@ model{
 """
 bb.set_seed(42)
 model = bb.StanModel(model_code=model_code)
-variational = bb.MFDirichlet * bb.MFGaussian * bb.MFInvGamma
+variational = bb.MFMixGaussian(1)
 x = np.loadtxt('../data/mix_mock_data.txt', dtype='float32', delimiter=',')
 N = len(X)
 D = 2
