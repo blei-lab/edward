@@ -24,13 +24,13 @@ class Distribution:
         """
         Arguments
         ---------
-        x: n-dimensional vector or scalar
-        params: n-dimensional vector or scalar
+        x: scalar
+        params: scalar
 
         Returns
         -------
         tf.Tensor
-            n-dimensional vector if x is n-dimensional; otherwise a scalar.
+            scalar
         """
         raise NotImplementedError()
 
@@ -39,8 +39,8 @@ class Bernoulli:
         return stats.bernoulli.rvs(p, size=size)
 
     def logpmf(self, x, p):
-        x = tf.squeeze(x)
-        p = tf.squeeze(p)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
         return tf.mul(x, tf.log(p)) + tf.mul(1 - x, tf.log(1.0-p))
 
 class Beta:
@@ -48,9 +48,9 @@ class Beta:
         return stats.beta.rvs(a, b, size=size)
 
     def logpdf(self, x, a, b):
-        x = tf.squeeze(x)
-        a = tf.squeeze(b)
-        b = tf.squeeze(a)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
+        b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - log_beta(a, b)
 
 class Dirichlet:
@@ -58,8 +58,8 @@ class Dirichlet:
         return stats.dirichlet.rvs(alpha, size=size)
 
     def logpdf(self, x, alpha):
-        x = tf.squeeze(x)
-        alpha = tf.squeeze(alpha)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
         return -log_dirichlet(alpha) + \
                tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
 
@@ -68,8 +68,8 @@ class Expon:
         return stats.expon.rvs(scale=scale, size=size)
 
     def logpdf(self, x, scale=1):
-        x = tf.squeeze(x)
-        scale = tf.squeeze(scale)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return - x/scale - tf.log(scale)
 
 class Gamma:
@@ -78,9 +78,9 @@ class Gamma:
         return stats.gamma.rvs(a, scale=scale, size=size)
 
     def logpdf(self, x, a, scale=1):
-        x = tf.squeeze(x)
-        a = tf.squeeze(a)
-        scale = tf.squeeze(scale)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
 class InvGamma:
@@ -88,9 +88,9 @@ class InvGamma:
         return stats.invgamma.rvs(alpha, scale=beta, size=size)
 
     def logpdf(self, x, alpha, beta):
-        x = tf.squeeze(x)
-        alpha = tf.squeeze(alpha)
-        beta = tf.squeeze(beta)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
+        beta = tf.cast(tf.squeeze(beta), dtype=tf.float32)
         return -log_inv_gamma(alpha, beta) - \
                tf.mul(alpha+1, tf.log(x)) - tf.truediv(beta, x)
 
@@ -101,83 +101,107 @@ class Multinomial:
     def logpmf(self, x, n, p):
         x = tf.squeeze(x)
         n = tf.squeeze(n)
-        p = tf.squeeze(p)
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
         return -log_multinomial(x, n) + tf.reduce_sum(tf.mul(x, tf.log(p)))
+
+class Multivariate_Normal:
+    def rvs(self, mean=None, cov=1, size=1):
+        return stats.multivariate_normal.rvs(mean, cov, size=size)
+
+    def logpdf(self, x, mean=None, cov=1):
+        """
+        Arguments
+        ----------
+        x: tf.Tensor
+            vector
+        mean: tf.Tensor, optional
+            vector. Defaults to zero mean.
+        cov: tf.Tensor, optional
+            vector or matrix. Defaults to identity.
+
+        Returns
+        -------
+        tf.Tensor
+            scalar
+        """
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        d = get_dims(x)[0]
+        if mean is None:
+            r = tf.ones([d]) * x
+        else:
+            mean = tf.cast(tf.squeeze(mean), dtype=tf.float32)
+            r = x - mean
+
+        if cov == 1:
+            cov_inv = tf.diag(tf.ones([d]))
+            det_cov = tf.constant(1.0)
+        else:
+            cov = tf.cast(tf.squeeze(cov), dtype=tf.float32)
+            if len(cov.get_shape()) == 1: # vector
+                cov_inv = tf.diag(1.0 / cov)
+                det_cov = tf.reduce_prod(cov)
+            else:
+                cov_inv = tf.matrix_inverse(cov)
+                det_cov = tf.matrix_determinant(cov)
+
+        lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov) - \
+              0.5*dot(dot(tf.transpose(r), cov_inv), r)
+        """
+        # TensorFlow can't reverse-mode autodiff Cholesky
+        L = tf.cholesky(cov)
+        L_inv = tf.matrix_inverse(L)
+        det_cov = tf.pow(tf.matrix_determinant(L), 2)
+        inner = dot(L_inv, r)
+        out = -0.5*d*tf.log(2*np.pi) - \
+              0.5*tf.log(det_cov) - \
+              0.5*tf.matmul(tf.transpose(inner), inner)
+        """
+        return tf.squeeze(lps)
+
+    def entropy(self, mean=None, cov=1):
+        """
+        Note entropy does not depend on its mean.
+
+        Arguments
+        ----------
+        mean: tf.Tensor, optional
+            vector. Defaults to zero mean.
+        cov: tf.Tensor, optional
+            vector or matrix. Defaults to identity.
+
+        Returns
+        -------
+        tf.Tensor
+            scalar
+        """
+        if cov == 1:
+            d = 1
+            det_cov = 1.0
+        else:
+            cov = tf.cast(cov, dtype=tf.float32)
+            d = get_dims(cov)[0]
+            if len(cov.get_shape()) == 1: # vector
+                det_cov = tf.reduce_prod(cov)
+            else:
+                det_cov = tf.matrix_determinant(cov)
+
+        return 0.5 * (d + d*tf.log(2*np.pi) + tf.log(det_cov))
 
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
         return stats.norm.rvs(loc, scale, size=size)
 
-    def logpdf(self, x, mu=None, Sigma=None):
-        """
-        Arguments
-        ----------
-        x: Tensor scalar, vector
-        mu: mean - None, Tensor scalar, vector
-        Sigma: variance - None, Tensor scalar, vector, matrix
-        TODO allow minibatch
-        TODO this doesn't do any error checking
-        """
-        d = get_dims(x)[0]
-        if mu is None:
-            r = tf.ones([d]) * x
-        elif len(mu.get_shape()) == 0: # scalar
-            r = x - mu
-        else:
-            r = tf.sub(x, mu)
+    def logpdf(self, x, loc=0, scale=1):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        z = (x - loc) / scale
+        return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*z*z
 
-        if Sigma is None:
-            Sigma_inv = tf.diag(tf.ones([d]))
-            det_Sigma = tf.constant(1.0)
-        elif len(Sigma.get_shape()) == 0: # scalar
-            Sigma_inv = 1.0 / Sigma
-            det_Sigma = Sigma
-        elif len(Sigma.get_shape()) == 1: # vector
-            Sigma_inv = tf.diag(1.0 / Sigma)
-            det_Sigma = tf.reduce_prod(Sigma)
-        else:
-            Sigma_inv = tf.matrix_inverse(Sigma)
-            det_Sigma = tf.matrix_determinant(Sigma)
-
-        if d == 1:
-            lps = -0.5*d*tf.log(2*np.pi) - \
-                  0.5*tf.log(det_Sigma) - \
-                  0.5*r * Sigma_inv * r
-        else:
-            lps = -0.5*d*tf.log(2*np.pi) - \
-                  0.5*tf.log(det_Sigma) - \
-                  0.5*dot(dot(tf.transpose(r), Sigma_inv), r)
-            """
-            # TensorFlow can't reverse-mode autodiff Cholesky
-            L = tf.cholesky(Sigma)
-            L_inv = tf.matrix_inverse(L)
-            det_Sigma = tf.pow(tf.matrix_determinant(L), 2)
-            inner = dot(L_inv, r)
-            out = -0.5*d*tf.log(2*np.pi) - \
-                  0.5*tf.log(det_Sigma) - \
-                  0.5*tf.matmul(tf.transpose(inner), inner)
-            """
-        #return tf.squeeze(lps)
-        return tf.reshape(lps, [-1])
-
-    def entropy(self, Sigma):
-        """
-        - E_{Gaussian(x; mu, Sigma)} [ Gaussian(x; mu, Sigma) ]
-        Note that the entropy of a Gaussian does not depend on its mean.
-
-        Arguments
-        ----------
-        Sigma: variance - Tensor scalar, vector, matrix
-        """
-        d = get_dims(Sigma)[0]
-        if len(Sigma.get_shape()) == 0: # scalar
-            det_Sigma = Sigma
-        elif len(Sigma.get_shape()) == 1: # vector
-            det_Sigma = tf.reduce_prod(Sigma)
-        else:
-            det_Sigma = tf.matrix_determinant(Sigma)
-
-        return 0.5 * (d + d*np.log(2*np.pi) + tf.log(det_Sigma))
+    def entropy(self, loc=0, scale=1):
+        """Note entropy does not depend on its mean."""
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return 0.5 * (1 + tf.log(2*np.pi) + tf.log(scale*scale))
 
 class Poisson:
     def rvs(self, mu, size=1):
@@ -185,7 +209,7 @@ class Poisson:
 
     def logpmf(self, x, mu):
         x = tf.squeeze(x)
-        mu = tf.squeeze(mu)
+        mu = tf.cast(tf.squeeze(mu), dtype=tf.float32)
         return x * tf.log(mu) - mu - log_gamma(x + 1.0)
 
 class T:
@@ -193,10 +217,10 @@ class T:
         return stats.t.rvs(df, loc=loc, scale=scale, size=size)
 
     def logpdf(self, x, df, loc=0, scale=1):
-        x = tf.squeeze(x)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         df = tf.squeeze(df)
-        loc = tf.squeeze(loc)
-        scale = tf.squeeze(scale)
+        loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return 0.5 * log_gamma(df + 1.0) - \
                log_gamma(0.5 * df) - \
                0.5 * (np.log(np.pi) + tf.log(df)) +  tf.log(scale) - \
@@ -217,6 +241,7 @@ expon = Expon()
 gamma = Gamma()
 invgamma = InvGamma()
 multinomial = Multinomial()
+multivariate_normal = Multivariate_Normal()
 norm = Norm()
 poisson = Poisson()
 t = T()

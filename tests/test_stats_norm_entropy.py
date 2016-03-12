@@ -3,21 +3,20 @@ import numpy as np
 import tensorflow as tf
 
 from blackbox.stats import norm
+from scipy import stats
 
 sess = tf.InteractiveSession()
 
-print("Input: One-dimensional scalar")
-x = tf.constant(1.0)
-print(norm.entropy(x).eval())
-print(1.41894)
+print("Input: None")
+print(norm.entropy().eval())
+print(stats.norm.entropy())
 print()
-print("Input: One-dimensional vector")
-x = tf.ones([1])
-print(norm.entropy(x).eval())
-print(1.41894)
+print("Input: scalar")
+scale = tf.constant(1.0)
+print(norm.entropy(scale=scale).eval())
+print(stats.norm.entropy(1.0))
 print()
-print("Input: Multi-dimensional vector")
-x = tf.ones([2])
-print(norm.entropy(x).eval())
-print(2.83788)
-print()
+print("Input: 1-dimensional vector")
+scale = tf.constant([1.0])
+print(norm.entropy(scale=scale).eval())
+print(stats.norm.entropy([1.0]))
