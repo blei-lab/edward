@@ -25,7 +25,7 @@ class MFMixGaussian:
         self.gauss.print_params(sess)
         self.invgam.print_params(sess)
 
-     def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
             raise
