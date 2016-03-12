@@ -2,8 +2,6 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from variationals import MFPointMass
-
 try:
     import pystan
     from collections import OrderedDict
