@@ -2,8 +2,86 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.stats import bernoulli, beta, multivariate_normal, norm
+from blackbox.stats import bernoulli, beta, norm, dirichlet
 from blackbox.util import get_dims
+
+
+class MFDirichlet:
+    """
+    q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
+    """
+    def __init(self, num_vars, K):
+        self.num_vars = num_vars
+        self.num_params = num_vars 
+        self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
+        self.transform = tf.nn.softplus
+        
+    def print_params(self, sess):
+        alpha = sess.run([self.transform(self.alpha_unconst)])
+        
+        print("parameter vector:")
+        print(alpha)
+        
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        alpha = sess.run([self.transform(self.alpha_unconst)])
+        z = np.zeros(size)
+        for d in xrange(self.num_vars):
+            z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
+            
+            return z
+    
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        if i >= self.num_vars:
+            raise
+        
+        alphai = self.transform(self.alpha_unconst)[i]
+        
+        return dirichlet.logpdf(z[:, i], alphai)
+
+class MFInvGamma:
+    """
+    q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
+    """
+    def __init(self, num_vars):
+    self.num_vars = num_vars
+    self.num_params = 2 * num_vars
+    self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.transform = tf.nn.softplus
+        
+    def print_params(self, sess):
+        a, b = sess.run([ \
+            self.transform(self.a_unconst),
+            self.transform(self.b_unconst)])
+
+        print("shape:")
+        print(a)
+        print("scale:")
+        print(b)
+        
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        a, b = sess.run([ \
+            self.transform(self.a_unconst),
+            self.transform(self.b_unconst)])
+
+        z = np.zeros(size)
+        for d in range(self.num_vars):
+            z[:, d] = invgamma.rvs(a[d], b[d], size=size[0])
+
+        return z
+        
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        if i >= self.num_vars:
+            raise
+
+        ai = self.transform(self.a_unconst)[i]
+        bi = self.transform(self.b_unconst)[i]
+        
+        return invgamma.logpdf(z[:, i], ai, bi)
 
 class MFBernoulli:
     """
