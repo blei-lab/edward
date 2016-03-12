@@ -28,7 +28,7 @@ class MFMixGaussian:
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         z = np.zeros((size[0], 3))
-        dirich_samples = self.dirich.sample(size, sess)
+        dirich_samples = self.dirich.sample(size[0], sess)
         gauss_samples = self.gauss.sample(size, sess)
         invgam_samples = self.invgam.sample(size, sess)
         z[:, 0] = dirich_samples
@@ -66,12 +66,10 @@ class MFDirichlet:
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         alpha = sess.run([self.transform(self.alpha_unconst)])
-        print(size)
+        print(alpha)
         z = np.zeros(size)
-        for d in xrange(self.num_vars):
-            z[:, d] = dirichlet.rvs(alpha[d,:], size)
-            print(size[0])
-            print(alpha[d,:])
+        #for d in xrange(self.num_vars):
+        #    z[:, d] = dirichlet.rvs(alpha[d,:], size = size[0])
             
         return z
     
