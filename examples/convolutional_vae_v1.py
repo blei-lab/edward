@@ -170,6 +170,37 @@ class Inference:
                kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
+    def init_temp(self, model, variational):
+        x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
+
+        loss, sampled_tensor = self.build_loss_temp(model, variational, x)
+        optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
+        train = pt.apply_optimizer(optimizer, losses=[loss])
+
+        init = tf.initialize_all_variables()
+        sess = tf.Session()
+        sess.run(init)
+        return sess, train, loss, x, sampled_tensor
+
+    def update_temp(self, sess, train, loss, x, data):
+        x_b = data.sample()
+        _, loss_value = sess.run([train, loss], {x: x_b})
+        return loss_value
+
+    def build_loss_temp(self, model, variational, x):
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
+            z, mean, stddev = variational.sample_ms(x)
+            elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
+                   kl_multivariate_normal(mean, stddev)
+            #
+            sampled_tensor = model.network(model.sample_prior())
+
+        return -elbo, sampled_tensor
+
 variational = MFGaussian()
 model = NormalBernoulli()
 
@@ -182,26 +213,8 @@ data = Data(mnist)
 inference = Inference(model, variational, data)
 
 #sess = inference.init()
-#test = inference.p_test
-if True:
-    x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
-    with pt.defaults_scope(activation_fn=tf.nn.elu,
-                       batch_normalize=True,
-                       learned_moments_update_rate=0.0003,
-                       variance_epsilon=0.001,
-                       scale_after_normalization=True):
-        z, mean, stddev = variational.sample_ms(x)
-        elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
-               kl_multivariate_normal(mean, stddev)
-        #
-        sampled_tensor = model.network(model.sample_prior())
-
-    loss = -elbo
-    optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
-    train = pt.apply_optimizer(optimizer, losses=[loss])
-    init = tf.initialize_all_variables()
-    sess = tf.Session()
-    sess.run(init)
+#sampled_tensor = inference.p_test
+sess, train, loss, x, sampled_tensor = inference.init_temp(model, variational)
 
 for epoch in range(FLAGS.max_epoch):
     avg_loss = 0.0
@@ -211,9 +224,8 @@ for epoch in range(FLAGS.max_epoch):
     pbar.start()
     for i in range(FLAGS.updates_per_epoch):
         pbar.update(i)
-        x_b = data.sample()
-        _, loss_value = sess.run([train, loss], {x: x_b})
-#        loss = inference.update(sess)
+        loss_value = inference.update_temp(sess, train, loss, x, data)
+#        loss_value = inference.update(sess)
         avg_loss += loss_value
 
     avg_loss = avg_loss / \
