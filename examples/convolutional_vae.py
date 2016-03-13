@@ -37,7 +37,7 @@ class MFGaussian:
 
     def network(self, x):
         """
-        mean, stddev | x = phi(x)
+        mean, stddev = phi(x)
         """
         output = (pt.wrap(x).
                 reshape([FLAGS.batch_size, 28, 28, 1]).
@@ -52,8 +52,7 @@ class MFGaussian:
 
     def sample(self, x):
         """
-        z | x ~ q(z | x) = N(z | mean, stddev),
-        where mean, stddev = phi(x)
+        z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
 
         Parameters
         ----------
@@ -67,7 +66,7 @@ class MFGaussian:
 class NormalBernoulli:
     def network(self, z):
         """
-        p | z = varphi(z)
+        p = varphi(z)
         """
         return (pt.wrap(z).
                 reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
@@ -79,7 +78,7 @@ class NormalBernoulli:
 
     def log_likelihood(self, x, z):
         """
-        log p(x | z) = log Bernoulli(x | varphi(z))
+        log p(x | z) = log Bernoulli(x | p = varphi(z))
         """
         p = self.network(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
@@ -123,6 +122,8 @@ class Inference:
 
         init = tf.initialize_all_variables()
         sess = tf.Session()
+        # TODO there shouldn't be any of that variable creation stuff.
+        # why was it hidden away before?
         sess.run(init)
         return sess
 
@@ -177,7 +178,9 @@ for epoch in range(FLAGS.max_epoch):
         loss = inference.update(sess)
         avg_loss += loss
 
-    avg_loss = avg_loss / FLAGS.updates_per_epoch
+    #avg_loss = avg_loss / FLAGS.updates_per_epoch
+    avg_loss = avg_loss / \
+        (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
 
     print("-log p(x) <= %f" % avg_loss)
 
