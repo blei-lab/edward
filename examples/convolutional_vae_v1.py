@@ -23,7 +23,7 @@ flags = tf.flags
 logging = tf.logging
 
 flags.DEFINE_integer("batch_size", 128, "batch size")
-flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
+flags.DEFINE_integer("updates_per_epoch", 1, "number of updates per epoch")
 flags.DEFINE_integer("max_epoch", 100, "max epoch")
 flags.DEFINE_float("learning_rate", 1e-2, "learning rate")
 flags.DEFINE_string("working_directory", "", "")
@@ -67,6 +67,10 @@ class MFGaussian:
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
         return self.mean + epsilon * self.stddev
 
+    def sample_ms(self, mean, stddev):
+        epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+        return mean + epsilon * stddev
+
 class NormalBernoulli:
     def network(self, z):
         """
@@ -85,6 +89,9 @@ class NormalBernoulli:
         log p(x | z) = log Bernoulli(x | p = varphi(z))
         """
         p = self.network(z)
+        return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
+
+    def log_likelihood_p(self, x, p):
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
     def sample_prior(self):
@@ -159,14 +166,6 @@ class Inference:
         return -elbo
 
 def encoder(input_tensor):
-    '''Create encoder network.
-
-    Args:
-        input_tensor: a batch of flattened images [batch_size, 28*28]
-
-    Returns:
-        A tensor that expresses the encoder network
-    '''
     return (pt.wrap(input_tensor).
             reshape([FLAGS.batch_size, 28, 28, 1]).
             conv2d(5, 32, stride=2).
@@ -176,18 +175,7 @@ def encoder(input_tensor):
             flatten().
             fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
 
-
 def decoder(input_tensor=None):
-    '''Create decoder network.
-
-        If input tensor is provided then decodes it, otherwise samples from
-        a sampled vector.
-    Args:
-        input_tensor: a batch of vectors to decode
-
-    Returns:
-        A tensor that expresses the decoder network
-    '''
     epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
     if input_tensor is None:
         mean = None
@@ -204,19 +192,6 @@ def decoder(input_tensor=None):
             deconv2d(5, 32, stride=2).
             deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
             flatten()).tensor, mean, stddev
-
-def get_reconstruction_cost(output_tensor, target_tensor, epsilon=1e-8):
-    '''Reconstruction loss
-
-    Cross entropy reconstruction loss
-
-    Args:
-        output_tensor: tensor produces by decoder
-        target_tensor: the target tensor that we want to reconstruct
-        epsilon:
-    '''
-    return tf.reduce_sum(-target_tensor * tf.log(output_tensor + epsilon) -
-                         (1.0 - target_tensor) * tf.log(1.0 - output_tensor + epsilon))
 
 variational = MFGaussian()
 model = NormalBernoulli()
@@ -259,8 +234,9 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
     #
     sampled_tensor, _, _ = decoder()
 
-loss = get_reconstruction_cost(output_tensor, x) + \
+elbo = tf.reduce_sum(model.log_likelihood_p(x, output_tensor)) - \
        kl_multivariate_normal(mean, stddev)
+loss = -elbo
 #    z = variational.sample(x)
 
 #elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
