@@ -102,9 +102,6 @@ class NormalBernoulli:
         p = self.network(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
-    def log_likelihood_p(self, x, p):
-        return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
-
     def sample_prior(self):
         """
         z ~ N(0, 1)
@@ -214,12 +211,11 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
     z, mean, stddev = variational.sample_ms(x)
-    p = model.network(z)
+    elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
+           kl_multivariate_normal(mean, stddev)
     #
     sampled_tensor = model.network(model.sample_prior())
 
-elbo = tf.reduce_sum(model.log_likelihood_p(x, p)) - \
-       kl_multivariate_normal(mean, stddev)
 loss = -elbo
 
 #elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
