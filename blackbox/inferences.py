@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from blackbox.data import Data
 from blackbox.util import log_sum_exp
-from blackbox.variationals import MFPointMass
+#from blackbox.variationals import 
 
 class Inference:
     """
@@ -214,8 +214,8 @@ class MAP(MFVI):
     """
     Maximum a posteriori
     """
-    def __init__(self, model, data=Data()):
-        variational = MFPointMass(model.get_num_vars(data.data))
+    def __init__(self, model, variational, data=Data(), num_params=None):
+        # TODO: chack if variational family is pointmass
         MFVI.__init__(self, model,variational,data)
 
 
@@ -228,3 +228,20 @@ class MAP(MFVI):
         """
         self.n_minibatch = 1
         self.score = False
+
+
+    #def update(self, sess, update):
+    #    _, elbo = sess.run([update, self.elbos], {})
+    #    return elbo
+
+    def build_reparam_loss(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the reparameterization trick.
+        """
+        z = self.variational.reparam(self.samples)
+
+        x = self.data.sample(self.n_data)
+        self.elbos = self.model.log_prob(x, z) 
+        return -tf.reduce_mean(self.elbos)
+

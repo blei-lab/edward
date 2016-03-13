@@ -170,7 +170,8 @@ class MFGaussian:
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
 
-class MFPointMass:
+
+class PMGaussian():
     """
     Point mass variational family (for MAP estimation)
     """
@@ -178,7 +179,7 @@ class MFPointMass:
         self.num_vars = num_vars
         self.num_params = num_vars
 
-        self.lam_unconst = tf.Variable(tf.exp(tf.random_normal([num_vars])))
+        self.lam_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.transform = tf.identity
 
     def print_params(self, sess):
@@ -187,24 +188,62 @@ class MFPointMass:
         print(params)
 
     def sample_noise(self, size):
-        return norm.rvs(size=size)
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        """
+        # Not using this, since TensorFlow has a large overhead
+        # whenever calling sess.run().
+        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
+        return np.zeros(size)
+
+    def reparam(self,eps):
+        """
+        reparametrization of point mass
+        doesn't depend on noise eps
+        """
+        #return self.transform(self.lam_unconst)
+        lam = self.transform(self.lam_unconst)
+        return lam + eps
+
+class PMBeta():
+    """
+    Point mass variational family (for MAP estimation)
+    """
+    def __init__(self, num_vars):
+        self.num_vars = num_vars
+        self.num_params = 2*num_vars
+        self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.transform = tf.nn.softplus
+
+    def sample_noise(self, size):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        """
+        # Not using this, since TensorFlow has a large overhead
+        # whenever calling sess.run().
+        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
+        return np.zeros(size)
+
 
     def reparam(self, eps):
         """
         reparametrization of point mass
         doesn't depend on noise eps
         """
-        return self.transform(self.lam_unconst)
+        return self.transform(self.a_unconst)/self.transform(self.b_unconst) + eps
 
-    def sample(self, size, sess):
-        """point mass"""
-        lam = sess.run([self.transform(self.lam_unconst)])
-        return lam
 
-    def log_prob_zi(self, i, z):
-        """indicator if z_i == lambda_i"""
-        if i >= self.num_vars:
-            raise
-        lami = self.lam_unconst[i]
-        return tf.select(tf.equal(z[i],lami),1.0,0.0)
+    def print_params(self, sess):
+        a, b = sess.run([ \
+            self.transform(self.a_unconst),
+            self.transform(self.b_unconst)])
+
+        print("shape:")
+        print(a)
+        print("scale:")
+        print(b)
+
 

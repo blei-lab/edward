@@ -26,16 +26,16 @@ class BetaBernoulli(PythonModel):
         # vectorizing operations in practice.
         n_minibatch = zs.shape[0]
         lp = np.zeros(n_minibatch, dtype=np.float32)
-        for b in range(n_minibatch):
-            lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-            for n in range(len(xs)):
-                lp[b] += bernoulli.logpmf(xs[n], p=zs[b, :])
+        lp[0] = beta.logpdf(zs[0,:], a=1.0, b=1.0)
+        for n in range(len(xs)):
+            lp[0] += bernoulli.logpmf(xs[n], p=zs[0,:])
 
         return lp
+
 
 bb.set_seed(42)
 model = BetaBernoulli()
 data = bb.Data(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]))
-
-inference = bb.MAP(model, data)
+variational = bb.PMBeta(1)
+inference = bb.MAP(model, variational, data)
 inference.run(n_iter=100)
