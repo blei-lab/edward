@@ -41,7 +41,7 @@ The equivalent example is also written in
 More examples are located in [`examples/`](examples/). We highlight a
 few:
 
-* [TODO]()
+* [Convolutional variational auto-encoder](examples/convolutional_vae.py)
 
 [A comprehensive list of features is written here](https://github.com/Blei-Lab/blackbox/wiki), along with references.
 
