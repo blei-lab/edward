@@ -29,7 +29,7 @@ class BetaBernoulli:
         # But for it to be plugged into this prior,
         # zs must be a n_minibatch x 1 matrix, where the column represents
         # the latent variable constrained in [0,1]
-        log_prior = beta.logpdf(zs[:, 0], a=1.0, b=1.0)
+        log_prior = beta.logpdf(zs[0], a=1.0, b=1.0)
         log_lik = tf.pack([
             tf.reduce_sum(bernoulli.logpmf(xs, z)) \
             for z in tf.unpack(zs)])
@@ -37,7 +37,7 @@ class BetaBernoulli:
 
 bb.set_seed(42)
 model = BetaBernoulli()
-variational = bb.MFBeta(model.num_vars)
+#variational = bb.MFBeta(model.num_vars)
 data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = bb.MAP(model, data)
