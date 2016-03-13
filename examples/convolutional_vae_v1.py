@@ -78,16 +78,11 @@ class MFGaussian:
                 fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
         return output
 
-    def sample_ms(self, input_tensor=None):
+    def sample_ms(self, input_tensor):
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        if input_tensor is None:
-            mean = None
-            stddev = None
-            input_sample = epsilon
-        else:
-            mean = input_tensor[:, :FLAGS.hidden_size]
-            stddev = tf.sqrt(tf.exp(input_tensor[:, FLAGS.hidden_size:]))
-            input_sample = mean + epsilon * stddev
+        mean = input_tensor[:, :FLAGS.hidden_size]
+        stddev = tf.sqrt(tf.exp(input_tensor[:, FLAGS.hidden_size:]))
+        input_sample = mean + epsilon * stddev
         return input_sample, mean, stddev
 
 class NormalBernoulli:
@@ -184,7 +179,8 @@ class Inference:
                kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
-def many_stuff(input_tensor=None):
+def many_stuff(x):
+    input_tensor = variational.network_ms(x)
     input_sample, mean, stddev = variational.sample_ms(input_tensor)
     return model.network(input_sample), mean, stddev
 
@@ -225,10 +221,9 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    learned_moments_update_rate=0.0003,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
-    output = variational.network_ms(x)
-    output_tensor, mean, stddev = many_stuff(output)
+    output_tensor, mean, stddev = many_stuff(x)
     #
-    sampled_tensor, _, _ = many_stuff()
+    sampled_tensor = model.network(model.sample_prior())
 
 elbo = tf.reduce_sum(model.log_likelihood_p(x, output_tensor)) - \
        kl_multivariate_normal(mean, stddev)

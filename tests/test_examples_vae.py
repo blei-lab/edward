@@ -1,0 +1,18 @@
+vae unit test
+single iterations
+0.827927
+0.889250
+0.784111
+0.686358
+0.668258
+0.658798
+0.645966
+0.617142
+0.611494
+0.606761
+
+vae unit test, optional to run
+1000 iterations
+0.219385
+0.143945
+0.137546
