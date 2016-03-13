@@ -30,15 +30,14 @@ flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
 
-class Variational:
+class MFGaussian:
     def __init__(self):
-        self.mean = None
-        self.stddev = None
+        self.mean = None # batch_size x hidden_size
+        self.stddev = None # batch_size x hidden_size
 
     def network(self, x):
         """
         mean, stddev | x = phi(x)
-        where mean and stdddev are each batch_size x hidden_size
         """
         output = (pt.wrap(x).
                 reshape([FLAGS.batch_size, 28, 28, 1]).
@@ -53,8 +52,8 @@ class Variational:
 
     def sample(self, x):
         """
-        mean, stddev | x = phi(x)
-        z | mean, stddev ~ N(0 | mean, stddev)
+        z | x ~ q(z | x) = N(z | mean, stddev),
+        where mean, stddev = phi(x)
 
         Parameters
         ----------
@@ -65,7 +64,7 @@ class Variational:
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
         return self.mean + epsilon * self.stddev
 
-class Model:
+class NormalBernoulli:
     def network(self, z):
         """
         p | z = varphi(z)
@@ -80,8 +79,7 @@ class Model:
 
     def log_likelihood(self, x, z):
         """
-        p | z = varphi(z)
-        log Bernoulli(x | p)
+        log p(x | z) = log Bernoulli(x | varphi(z))
         """
         p = self.network(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
@@ -155,8 +153,8 @@ class Inference:
                kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
-variational = Variational()
-model = Model()
+variational = MFGaussian()
+model = NormalBernoulli()
 
 data_directory = os.path.join(FLAGS.working_directory, "data/mnist")
 if not os.path.exists(data_directory):
