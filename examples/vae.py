@@ -86,29 +86,7 @@ class Model:
                (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
 class Inference:
-    def get_vae_cost(self, mean, stddev):
-        '''
-        KL(q(z | x) || p(z))
-
-        Args:
-            mean:
-            stddev:
-        '''
-        return -tf.reduce_sum(0.5 * (1.0 + 2.0 * tf.log(stddev + 1e-8) - \
-                                     tf.square(mean) - tf.square(stddev)))
-
-    def get_reconstruction_cost(self, z, x):
-        '''
-        E_{q(z | x)} [ log p(x | z) ]
-
-        Args:
-            z: tensor produces by decoder (can be thought of as a sample)
-            x: the target tensor that we want to reconstruct
-        '''
-        return tf.reduce_sum(model.log_likelihood(x, z))
-
     def build_loss(self):
-        x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
         with pt.defaults_scope(activation_fn=tf.nn.elu,
                                batch_normalize=True,
                                learned_moments_update_rate=0.0003,
@@ -116,26 +94,31 @@ class Inference:
                                scale_after_normalization=True):
             with pt.defaults_scope(phase=pt.Phase.train):
                 with tf.variable_scope("model") as scope:
-                    z_sim, mean, stddev = variational.sample(x)
+                    z, mean, stddev = variational.sample(x)
 
-            with pt.defaults_scope(phase=pt.Phase.test):
-                with tf.variable_scope("model", reuse=True) as scope:
-                    # Prior predictive check at test time
-                    z_sim_test = model.sample_prior()
-                    p_sim_test = model.network(z_sim_test)
+            #with pt.defaults_scope(phase=pt.Phase.test):
+            #    with tf.variable_scope("model", reuse=True) as scope:
+            #        # Prior predictive check at test time
+            #        z_sim_test = model.sample_prior()
+            #        p_sim_test = model.network(z_sim_test)
+            z_sim_test = model.sample_prior()
+            self.p_sim_test = model.network(z_sim_test)
 
-        return self.get_vae_cost(mean, stddev) + \
-               self.get_reconstruction_cost(z_sim, x)
+        # E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+        return tf.reduce_sum(model.log_likelihood(x, z)) - \
+               tf.reduce_sum(0.5 * (1.0 + 2.0 * tf.log(stddev + 1e-8) - \
+                                    tf.square(mean) - tf.square(stddev)))
 
 variational = Variational()
 model = Model()
 inference = Inference()
 
+x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
 loss = inference.build_loss()
 
 ## TRAIN
 
-data_directory = os.path.join(FLAGS.working_directory, "MNIST")
+data_directory = os.path.join(FLAGS.working_directory, "data/mnist")
 if not os.path.exists(data_directory):
     os.makedirs(data_directory)
 mnist = input_data.read_data_sets(data_directory, one_hot=True)
@@ -163,11 +146,11 @@ for epoch in range(FLAGS.max_epoch):
 
     print("Loss %f" % training_loss)
 
-    imgs = sess.run(p_sim_test)
+    imgs = sess.run(inference.p_sim_test)
     for k in range(FLAGS.batch_size):
-        imgs_folder = os.path.join(FLAGS.working_directory, 'imgs')
-        if not os.path.exists(imgs_folder):
-            os.makedirs(imgs_folder)
+        img_folder = os.path.join(FLAGS.working_directory, 'img')
+        if not os.path.exists(img_folder):
+            os.makedirs(img_folder)
 
-        imsave(os.path.join(imgs_folder, '%d.png') % k,
+        imsave(os.path.join(img_folder, '%d.png') % k,
                imgs[k].reshape(28, 28))
