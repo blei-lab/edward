@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from blackbox.data import Data
 from blackbox.util import log_sum_exp
+#from blackbox.variationals import 
 
 class Inference:
     """
@@ -53,6 +54,7 @@ class Inference:
             self.score = False
         else:
             self.score = True
+        self.set_inference_specific_parameters()
 
         self.samples = tf.placeholder(shape=(self.n_minibatch, self.variational.num_vars),
                                       dtype=tf.float32,
@@ -100,6 +102,9 @@ class Inference:
 
     def build_reparam_loss(self):
         raise NotImplementedError()
+
+    def set_inference_specific_parameters(self):
+        pass
 
 class MFVI(Inference):
 # TODO this isn't MFVI so much as VI where q is analytic
@@ -200,3 +205,39 @@ class KLpq(Inference):
         raise NotImplementedError("KLpq: this inference method does not "
           "implement a reparameterization gradient. "
           "Please call `.run()` with `score=True`.")
+
+class MAP(MFVI):
+    """
+    Maximum a posteriori
+    """
+    def __init__(self, model, variational, data=Data(), num_params=None):
+        # TODO: chack if variational family is pointmass
+        MFVI.__init__(self, model,variational,data)
+
+
+    def set_inference_specific_parameters(self):
+        """
+        MAP estimation is MFVI with
+        variational = MFPointmass
+        n_minibatch = 1
+        score = False (use reparametrization gradient with 0 noise)
+        """
+        self.n_minibatch = 1
+        self.score = False
+
+
+    #def update(self, sess, update):
+    #    _, elbo = sess.run([update, self.elbos], {})
+    #    return elbo
+
+    def build_reparam_loss(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the reparameterization trick.
+        """
+        z = self.variational.reparam(self.samples)
+
+        x = self.data.sample(self.n_data)
+        self.elbos = self.model.log_prob(x, z) 
+        return -tf.reduce_mean(self.elbos)
+

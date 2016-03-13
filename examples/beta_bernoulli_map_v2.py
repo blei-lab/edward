@@ -37,7 +37,11 @@ class BetaBernoulli:
 
 bb.set_seed(42)
 model = BetaBernoulli()
+<<<<<<< HEAD
 variational = bb.MFBeta(model.num_vars)
+=======
+#variational = bb.MFBeta(model.num_vars)
+>>>>>>> 3e7fb0f178a46ddd048aeaaea7e3e3d0344365e7
 data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = bb.MAP(model, data)
