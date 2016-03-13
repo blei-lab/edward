@@ -23,7 +23,7 @@ flags = tf.flags
 logging = tf.logging
 
 flags.DEFINE_integer("batch_size", 128, "batch size")
-flags.DEFINE_integer("updates_per_epoch", 1, "number of updates per epoch")
+flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
 flags.DEFINE_integer("max_epoch", 100, "max epoch")
 flags.DEFINE_float("learning_rate", 1e-2, "learning rate")
 flags.DEFINE_string("working_directory", "", "")
@@ -158,6 +158,66 @@ class Inference:
                kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
+def encoder(input_tensor):
+    '''Create encoder network.
+
+    Args:
+        input_tensor: a batch of flattened images [batch_size, 28*28]
+
+    Returns:
+        A tensor that expresses the encoder network
+    '''
+    return (pt.wrap(input_tensor).
+            reshape([FLAGS.batch_size, 28, 28, 1]).
+            conv2d(5, 32, stride=2).
+            conv2d(5, 64, stride=2).
+            conv2d(5, 128, edges='VALID').
+            dropout(0.9).
+            flatten().
+            fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
+
+
+def decoder(input_tensor=None):
+    '''Create decoder network.
+
+        If input tensor is provided then decodes it, otherwise samples from
+        a sampled vector.
+    Args:
+        input_tensor: a batch of vectors to decode
+
+    Returns:
+        A tensor that expresses the decoder network
+    '''
+    epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+    if input_tensor is None:
+        mean = None
+        stddev = None
+        input_sample = epsilon
+    else:
+        mean = input_tensor[:, :FLAGS.hidden_size]
+        stddev = tf.sqrt(tf.exp(input_tensor[:, FLAGS.hidden_size:]))
+        input_sample = mean + epsilon * stddev
+    return (pt.wrap(input_sample).
+            reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
+            deconv2d(3, 128, edges='VALID').
+            deconv2d(5, 64, edges='VALID').
+            deconv2d(5, 32, stride=2).
+            deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+            flatten()).tensor, mean, stddev
+
+def get_reconstruction_cost(output_tensor, target_tensor, epsilon=1e-8):
+    '''Reconstruction loss
+
+    Cross entropy reconstruction loss
+
+    Args:
+        output_tensor: tensor produces by decoder
+        target_tensor: the target tensor that we want to reconstruct
+        epsilon:
+    '''
+    return tf.reduce_sum(-target_tensor * tf.log(output_tensor + epsilon) -
+                         (1.0 - target_tensor) * tf.log(1.0 - output_tensor + epsilon))
+
 variational = MFGaussian()
 model = NormalBernoulli()
 
@@ -168,32 +228,75 @@ mnist = input_data.read_data_sets(data_directory, one_hot=True)
 data = Data(mnist)
 
 inference = Inference(model, variational, data)
-sess = inference.init()
-#test = inference.model.sample_latent()
-test = inference.p_test
+#sess = inference.init()
+##test = inference.model.sample_latent()
+#test = inference.p_test
+#for epoch in range(FLAGS.max_epoch):
+#    avg_loss = 0.0
+
+#    widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
+#    pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
+#    pbar.start()
+#    for t in range(FLAGS.updates_per_epoch):
+#        pbar.update(t)
+#        loss = inference.update(sess)
+#        avg_loss += loss
+
+#    #avg_loss = avg_loss / FLAGS.updates_per_epoch
+#    avg_loss = avg_loss / \
+#        (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
+
+#    print("-log p(x) <= %f" % avg_loss)
+
+x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
+
+with pt.defaults_scope(activation_fn=tf.nn.elu,
+                   batch_normalize=True,
+                   learned_moments_update_rate=0.0003,
+                   variance_epsilon=0.001,
+                   scale_after_normalization=True):
+    output_tensor, mean, stddev = decoder(encoder(x))
+    #
+    sampled_tensor, _, _ = decoder()
+
+loss = get_reconstruction_cost(output_tensor, x) + \
+       kl_multivariate_normal(mean, stddev)
+#    z = variational.sample(x)
+
+#elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
+#       kl_multivariate_normal(variational.mean, variational.stddev)
+#loss = -elbo
+
+optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
+train = pt.apply_optimizer(optimizer, losses=[loss])
+
+init = tf.initialize_all_variables()
+
+sess = tf.Session()
+sess.run(init)
+
 for epoch in range(FLAGS.max_epoch):
-    avg_loss = 0.0
+    training_loss = 0.0
 
     widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
     pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
     pbar.start()
-    for t in range(FLAGS.updates_per_epoch):
-        pbar.update(t)
-        loss = inference.update(sess)
-        avg_loss += loss
+    for i in range(FLAGS.updates_per_epoch):
+        pbar.update(i)
+        x_b = data.sample()
+        _, loss_value = sess.run([train, loss], {x: x_b})
+        training_loss += loss_value
 
-    #avg_loss = avg_loss / FLAGS.updates_per_epoch
-    avg_loss = avg_loss / \
+    training_loss = training_loss / \
         (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
 
-    print("-log p(x) <= %f" % avg_loss)
+    print("Loss %f" % training_loss)
 
-    # does model also have the fitted parameters, or is it only inference.model?
-    imgs = sess.run(test)
-    for b in range(FLAGS.batch_size):
-        img_folder = os.path.join(FLAGS.working_directory, 'img')
-        if not os.path.exists(img_folder):
-            os.makedirs(img_folder)
+    imgs = sess.run(sampled_tensor)
+    for k in range(FLAGS.batch_size):
+        imgs_folder = os.path.join(FLAGS.working_directory, 'img')
+        if not os.path.exists(imgs_folder):
+            os.makedirs(imgs_folder)
 
-        imsave(os.path.join(img_folder, '%d.png') % b,
-               imgs[b].reshape(28, 28))
+        imsave(os.path.join(imgs_folder, '%d.png') % k,
+               imgs[k].reshape(28, 28))

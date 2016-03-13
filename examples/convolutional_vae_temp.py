@@ -7,6 +7,7 @@ import os
 
 import numpy as np
 import prettytensor as pt
+import blackbox as bb
 import scipy.misc
 import tensorflow as tf
 from scipy.misc import imsave
@@ -19,7 +20,7 @@ flags = tf.flags
 logging = tf.logging
 
 flags.DEFINE_integer("batch_size", 128, "batch size")
-flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
+flags.DEFINE_integer("updates_per_epoch", 1, "number of updates per epoch")
 flags.DEFINE_integer("max_epoch", 100, "max epoch")
 flags.DEFINE_float("learning_rate", 1e-2, "learning rate")
 flags.DEFINE_string("working_directory", "", "")
@@ -27,6 +28,7 @@ flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
 
+bb.set_seed(42)
 
 def encoder(input_tensor):
     '''Create encoder network.
