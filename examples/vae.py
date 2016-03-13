@@ -141,7 +141,12 @@ class Inference:
             z_test = self.model.sample_prior()
             self.p_test = self.model.network(z_test)
 
-        # E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+        # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+        # In general, there should be a scale factor due to data
+        # subsampling, so that
+        # ELBO = N / M * ( ELBO using x_b )
+        # where x^b is a mini-batch of x, with sizes M and N respectively.
+        # This is absorbed into the learning rate.
         elbo = tf.reduce_sum(self.model.log_likelihood(x, z)) - \
                kl_gaussian(self.variational.mean, self.variational.stddev)
         return -elbo
@@ -160,28 +165,27 @@ sess = inference.init()
 #test = inference.model.sample_latent()
 test = inference.p_test
 for epoch in range(FLAGS.max_epoch):
-    training_loss = 0.0
+    avg_loss = 0.0
 
     widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
     pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
     pbar.start()
-    for i in range(FLAGS.updates_per_epoch):
-        pbar.update(i)
+    for t in range(FLAGS.updates_per_epoch):
+        pbar.update(t)
         x_batch, _ = mnist.train.next_batch(FLAGS.batch_size)
         _, loss_value = sess.run([inference.train, inference.loss], {x: x_batch})
-        training_loss += loss_value
+        avg_loss += loss_value
 
-    training_loss = training_loss / \
-        (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
+    avg_loss = avg_loss / FLAGS.updates_per_epoch
 
-    print("Loss %f" % training_loss)
+    print("-log p(x) <= %f" % avg_loss)
 
     # does model also have the fitted parameters, or is it only inference.model?
     imgs = sess.run(test)
-    for k in range(FLAGS.batch_size):
+    for b in range(FLAGS.batch_size):
         img_folder = os.path.join(FLAGS.working_directory, 'img')
         if not os.path.exists(img_folder):
             os.makedirs(img_folder)
 
-        imsave(os.path.join(img_folder, '%d.png') % k,
-               imgs[k].reshape(28, 28))
+        imsave(os.path.join(img_folder, '%d.png') % b,
+               imgs[b].reshape(28, 28))
