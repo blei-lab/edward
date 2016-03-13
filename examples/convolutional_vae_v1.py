@@ -165,7 +165,7 @@ class Inference:
                kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
-def encoder(input_tensor):
+def variational_network(input_tensor):
     output = (pt.wrap(input_tensor).
             reshape([FLAGS.batch_size, 28, 28, 1]).
             conv2d(5, 32, stride=2).
@@ -181,21 +181,7 @@ def get_output(output):
     stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
     return mean, stddev
 
-#def decoder(mean=None, stddev=None):
-#    epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-#    if mean is None and stddev is None:
-#        input_sample = epsilon
-#    else:
-#        input_sample = mean + epsilon * stddev
-#    return (pt.wrap(input_sample).
-#            reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
-#            deconv2d(3, 128, edges='VALID').
-#            deconv2d(5, 64, edges='VALID').
-#            deconv2d(5, 32, stride=2).
-#            deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
-#            flatten()).tensor
-
-def decoder(input_tensor=None):
+def model_network(input_tensor=None):
     epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
     if input_tensor is None:
         mean = None
@@ -250,12 +236,11 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    learned_moments_update_rate=0.0003,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
-    output = encoder(x)
+    output = variational_network(x)
     #mean, stddev = get_output(output)
-    #output_tensor = decoder(mean, stddev)
-    output_tensor, mean, stddev = decoder(output)
+    output_tensor, mean, stddev = model_network(output)
     #
-    sampled_tensor, _, _ = decoder()
+    sampled_tensor, _, _ = model_network()
 
 elbo = tf.reduce_sum(model.log_likelihood_p(x, output_tensor)) - \
        kl_multivariate_normal(mean, stddev)
