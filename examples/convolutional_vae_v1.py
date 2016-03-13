@@ -67,7 +67,7 @@ class MFGaussian:
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
         return self.mean + epsilon * self.stddev
 
-    def network_ms(self, input_tensor):
+    def sample_ms(self, input_tensor):
         output = (pt.wrap(input_tensor).
                 reshape([FLAGS.batch_size, 28, 28, 1]).
                 conv2d(5, 32, stride=2).
@@ -76,12 +76,9 @@ class MFGaussian:
                 dropout(0.9).
                 flatten().
                 fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
-        return output
-
-    def sample_ms(self, input_tensor):
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        mean = input_tensor[:, :FLAGS.hidden_size]
-        stddev = tf.sqrt(tf.exp(input_tensor[:, FLAGS.hidden_size:]))
+        mean = output[:, :FLAGS.hidden_size]
+        stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
         input_sample = mean + epsilon * stddev
         return input_sample, mean, stddev
 
@@ -216,16 +213,14 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    learned_moments_update_rate=0.0003,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
-    input_tensor = variational.network_ms(x)
-    input_sample, mean, stddev = variational.sample_ms(input_tensor)
-    output_tensor = model.network(input_sample)
+    z, mean, stddev = variational.sample_ms(x)
+    p = model.network(z)
     #
     sampled_tensor = model.network(model.sample_prior())
 
-elbo = tf.reduce_sum(model.log_likelihood_p(x, output_tensor)) - \
+elbo = tf.reduce_sum(model.log_likelihood_p(x, p)) - \
        kl_multivariate_normal(mean, stddev)
 loss = -elbo
-#    z = variational.sample(x)
 
 #elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
 #       kl_multivariate_normal(variational.mean, variational.stddev)
