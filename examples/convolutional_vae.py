@@ -2,18 +2,19 @@
 """
 Probability model
     Prior: Normal
-    Likelihood: Bernoulli parameterized by neural network
+    Likelihood: Bernoulli parameterized by convolutional NN
 Variational model
-    Likelihood: Mean-field Gaussian parameterized by neural network
+    Likelihood: Convolutional variational auto-encoder
+                (Mean-field Gaussian parameterized by convolutional NN)
 """
-from __future__ import absolute_import, division, print_function
+from __future__ import division, print_function
 import os
 import prettytensor as pt
 import tensorflow as tf
 
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
-from vae_util import deconv2d
+from convolutional_vae_util import deconv2d
 from progressbar import ETA, Bar, Percentage, ProgressBar
 
 flags = tf.flags
