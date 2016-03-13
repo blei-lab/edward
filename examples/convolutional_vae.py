@@ -12,6 +12,7 @@ import os
 import prettytensor as pt
 import tensorflow as tf
 
+from blackbox.util import kl_multivariate_normal
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 from convolutional_vae_util import deconv2d
@@ -28,17 +29,6 @@ flags.DEFINE_string("working_directory", "", "")
 flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
-
-def kl_gaussian(mean, stddev):
-    """
-    KL( N(z; mean, stddev) || N(z; 0, 1) )
-
-    Parameters
-    ----------
-    assumes a matrix of each
-    """
-    return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(stddev + 1e-8) - \
-                                tf.square(mean) - tf.square(stddev))
 
 class Variational:
     def __init__(self):
@@ -162,7 +152,7 @@ class Inference:
         # where x^b is a mini-batch of x, with sizes M and N respectively.
         # This is absorbed into the learning rate.
         elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-               kl_gaussian(self.variational.mean, self.variational.stddev)
+               kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
 variational = Variational()
