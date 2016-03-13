@@ -72,7 +72,7 @@ class Variational:
         """
         self.network(x)
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        return self.mean + self.epsilon * stddev
+        return self.mean + epsilon * self.stddev
 
 class Model:
     def network(self, z):
