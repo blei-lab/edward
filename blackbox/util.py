@@ -83,6 +83,28 @@ def get_dims(x):
     else: # array
         return [dim.value for dim in dims]
 
+def kl_multivariate_normal(loc, scale):
+    """
+    KL( N(z; loc, scale) || N(z; 0, 1) ) for vector inputs, or
+    sum_{m=1}^M KL( N(z_{m,:}; loc, scale) || N(z_{m,:}; 0, 1) ) for matrix inputs
+
+    Parameters
+    ----------
+    loc : tf.Tensor
+        n-dimensional vector, or M x n-dimensional matrix where each
+        row represents the mean of a n-dimensional Gaussian
+    scale : tf.Tensor
+        n-dimensional vector, or M x n-dimensional matrix where each
+        row represents the standard deviation of a n-dimensional Gaussian
+
+    Returns
+    -------
+    tf.Tensor
+        scalar
+    """
+    return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(scale + 1e-8) - \
+                                tf.square(loc) - tf.square(scale))
+
 def log_multinomial(x, n):
     num = tf.reduce_prod(factorial(x))
     denom = factorial(n)
