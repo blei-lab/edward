@@ -23,7 +23,7 @@ flags = tf.flags
 logging = tf.logging
 
 flags.DEFINE_integer("batch_size", 128, "batch size")
-flags.DEFINE_integer("updates_per_epoch", 1, "number of updates per epoch")
+flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
 flags.DEFINE_integer("max_epoch", 100, "max epoch")
 flags.DEFINE_float("learning_rate", 1e-2, "learning rate")
 flags.DEFINE_string("working_directory", "", "")
@@ -38,6 +38,8 @@ class MFGaussian:
         self.mean = None # batch_size x hidden_size
         self.stddev = None # batch_size x hidden_size
 
+    # TODO move things over to extract_params
+    # TODO in general, think about global vs local stuff
     def network(self, x):
         """
         mean, stddev = phi(x)
