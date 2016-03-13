@@ -111,15 +111,23 @@ class Model:
             z_test = self.sample_prior()
             return self.network(z_test)
 
+class Data:
+    def __init__(self, data):
+        self.mnist = data
+
+    def sample(self, size=FLAGS.batch_size):
+        x_batch, _ = mnist.train.next_batch(size)
+        return x_batch
+
 class Inference:
-    def __init__(self, model, variational):
+    def __init__(self, model, variational, data):
         self.model = model
         self.variational = variational
-
-        self.loss = None
-        self.train = None
+        self.data = data
 
     def init(self):
+        self.x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
+
         self.loss = inference.build_loss()
         optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
         self.train = pt.apply_optimizer(optimizer, losses=[self.loss])
@@ -129,13 +137,18 @@ class Inference:
         sess.run(init)
         return sess
 
+    def update(self, sess):
+        x = self.data.sample()
+        _, loss_value = sess.run([self.train, self.loss], {self.x: x})
+        return loss_value
+
     def build_loss(self):
         with pt.defaults_scope(activation_fn=tf.nn.elu,
                                batch_normalize=True,
                                learned_moments_update_rate=0.0003,
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
-            z = self.variational.sample(x)
+            z = self.variational.sample(self.x)
 
             # TODO move this over to model
             z_test = self.model.sample_prior()
@@ -147,20 +160,20 @@ class Inference:
         # ELBO = N / M * ( ELBO using x_b )
         # where x^b is a mini-batch of x, with sizes M and N respectively.
         # This is absorbed into the learning rate.
-        elbo = tf.reduce_sum(self.model.log_likelihood(x, z)) - \
+        elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
                kl_gaussian(self.variational.mean, self.variational.stddev)
         return -elbo
 
 variational = Variational()
 model = Model()
-inference = Inference(model, variational)
 
 data_directory = os.path.join(FLAGS.working_directory, "data/mnist")
 if not os.path.exists(data_directory):
     os.makedirs(data_directory)
 mnist = input_data.read_data_sets(data_directory, one_hot=True)
+data = Data(mnist)
 
-x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
+inference = Inference(model, variational, data)
 sess = inference.init()
 #test = inference.model.sample_latent()
 test = inference.p_test
@@ -172,9 +185,8 @@ for epoch in range(FLAGS.max_epoch):
     pbar.start()
     for t in range(FLAGS.updates_per_epoch):
         pbar.update(t)
-        x_batch, _ = mnist.train.next_batch(FLAGS.batch_size)
-        _, loss_value = sess.run([inference.train, inference.loss], {x: x_batch})
-        avg_loss += loss_value
+        loss = inference.update(sess)
+        avg_loss += loss
 
     avg_loss = avg_loss / FLAGS.updates_per_epoch
 
