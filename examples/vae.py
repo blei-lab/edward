@@ -13,7 +13,7 @@ import tensorflow as tf
 
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
-from deconv import deconv2d
+from vae_util import deconv2d
 from progressbar import ETA, Bar, Percentage, ProgressBar
 
 flags = tf.flags
@@ -28,8 +28,27 @@ flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
 
+def kl_gaussian(mean, stddev):
+    """
+    KL( N(z; mean, stddev) || N(z; 0, 1) )
+
+    Parameters
+    ----------
+    assumes a matrix of each
+    """
+    return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(stddev + 1e-8) - \
+                                tf.square(mean) - tf.square(stddev))
+
 class Variational:
+    def __init__(self):
+        self.mean = None
+        self.stddev = None
+
     def network(self, x):
+        """
+        mean, stddev | x = phi(x)
+        where mean and stdddev are each batch_size x hidden_size
+        """
         output = (pt.wrap(x).
                 reshape([FLAGS.batch_size, 28, 28, 1]).
                 conv2d(5, 32, stride=2).
@@ -38,28 +57,28 @@ class Variational:
                 dropout(0.9).
                 flatten().
                 fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
-        mean = output[:, :FLAGS.hidden_size]
-        stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
-        return mean, stddev
+        self.mean = output[:, :FLAGS.hidden_size]
+        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
 
     def sample(self, x):
-        '''
-        mu, sttddev | x = phi(x)
+        """
+        mean, stddev | x = phi(x)
         z | mean, stddev ~ N(0 | mean, stddev)
 
-        Args:
-            x: a batch of flattened images [batch_size, 28*28]
-        '''
-        mean, stddev = self.network(x)
+        Parameters
+        ----------
+        x : tf.Tensor
+            a batch of flattened images [batch_size, 28*28]
+        """
+        self.network(x)
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        z = mean + epsilon * stddev
-        return z, mean, stddev
+        return self.mean + self.epsilon * stddev
 
 class Model:
     def network(self, z):
-        '''
+        """
         p | z = varphi(z)
-        '''
+        """
         return (pt.wrap(z).
                 reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
                 deconv2d(3, 128, edges='VALID').
@@ -69,19 +88,18 @@ class Model:
                 flatten()).tensor
 
     def sample_prior(self):
-        '''
+        """
         z ~ N(0, 1)
-        '''
+        """
         return tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
 
     def log_likelihood(self, x, z):
-        '''
+        """
         p | z = varphi(z)
         log Bernoulli(x | p)
-        '''
+        """
         p = model.network(z)
-        return -x * tf.log(p + 1e-8) - \
-               (1.0 - x) * tf.log(1.0 - p + 1e-8)
+        return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
 class Inference:
     def __init__(self, model, variational):
@@ -108,22 +126,17 @@ class Inference:
                                learned_moments_update_rate=0.0003,
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
-            with pt.defaults_scope(phase=pt.Phase.train):
-                with tf.variable_scope("model") as scope:
-                    z, mean, stddev = self.variational.sample(x)
+            z = self.variational.sample(x)
 
-            #with pt.defaults_scope(phase=pt.Phase.test):
-            #    with tf.variable_scope("model", reuse=True) as scope:
-            #        # Prior predictive check at test time
-            #        z_test = model.sample_prior()
-            #        p_test = model.network(z_test)
+            # Prior predictive check at test time
             z_test = self.model.sample_prior()
             self.p_test = self.model.network(z_test)
 
         # E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-        return tf.reduce_sum(self.model.log_likelihood(x, z)) - \
-               tf.reduce_sum(0.5 * (1.0 + 2.0 * tf.log(stddev + 1e-8) - \
-                                    tf.square(mean) - tf.square(stddev)))
+        elbo = tf.reduce_sum(self.model.log_likelihood(x, z)) - \
+               kl_gaussian(self.variational.mean, self.variational.stddev)
+        return -elbo
+
 
 variational = Variational()
 model = Model()
