@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 """
+Convolutional variational auto-encoder for MNIST data. The model is
+written in TensorFlow, with neural networks using Pretty Tensor.
+
 Probability model
     Prior: Normal
     Likelihood: Bernoulli parameterized by convolutional NN
 Variational model
-    Likelihood: Convolutional variational auto-encoder
-                (Mean-field Gaussian parameterized by convolutional NN)
+    Likelihood: Mean-field Gaussian parameterized by convolutional NN
 """
 from __future__ import division, print_function
 import os
@@ -14,9 +16,9 @@ import tensorflow as tf
 import blackbox as bb
 
 from blackbox.util import kl_multivariate_normal
+from convolutional_vae_util import deconv2d
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
-from convolutional_vae_util import deconv2d
 from progressbar import ETA, Bar, Percentage, ProgressBar
 
 flags = tf.flags
@@ -144,7 +146,6 @@ class Inference:
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
             z = self.variational.sample(self.x)
-
             # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
             # In general, there should be a scale factor due to data
             # subsampling, so that
@@ -153,10 +154,9 @@ class Inference:
             # This is absorbed into the learning rate.
             elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
                    kl_multivariate_normal(self.variational.mean, self.variational.stddev)
-
             # TODO move this over to model
-            z_test = self.model.sample_prior()
-            self.p_test = self.model.network(z_test)
+            self.p_test = self.model.sample_latent()
+
         return -elbo
 
 variational = MFGaussian()

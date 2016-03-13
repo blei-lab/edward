@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 """
+Convolutional variational auto-encoder for MNIST data. The model is
+written in TensorFlow, with neural networks using Pretty Tensor.
+
 Probability model
     Prior: Normal
     Likelihood: Bernoulli parameterized by convolutional NN
 Variational model
-    Likelihood: Convolutional variational auto-encoder
-                (Mean-field Gaussian parameterized by convolutional NN)
+    Likelihood: Mean-field Gaussian parameterized by convolutional NN
 """
 from __future__ import division, print_function
 import os
@@ -14,16 +16,16 @@ import tensorflow as tf
 import blackbox as bb
 
 from blackbox.util import kl_multivariate_normal
+from convolutional_vae_util import deconv2d
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
-from convolutional_vae_util import deconv2d
 from progressbar import ETA, Bar, Percentage, ProgressBar
 
 flags = tf.flags
 logging = tf.logging
 
 flags.DEFINE_integer("batch_size", 128, "batch size")
-flags.DEFINE_integer("updates_per_epoch", 1, "number of updates per epoch")
+flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
 flags.DEFINE_integer("max_epoch", 100, "max epoch")
 flags.DEFINE_float("learning_rate", 1e-2, "learning rate")
 flags.DEFINE_string("working_directory", "", "")
