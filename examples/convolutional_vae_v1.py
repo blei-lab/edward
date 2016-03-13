@@ -31,7 +31,6 @@ flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
 
-# TODO check each line and make sure it gets the same results in a few iterations
 bb.set_seed(42)
 
 class MFGaussian:
@@ -181,51 +180,31 @@ mnist = input_data.read_data_sets(data_directory, one_hot=True)
 data = Data(mnist)
 
 inference = Inference(model, variational, data)
+
 #sess = inference.init()
-##test = inference.model.sample_latent()
 #test = inference.p_test
-#for epoch in range(FLAGS.max_epoch):
-#    avg_loss = 0.0
+if True:
+    x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
+    with pt.defaults_scope(activation_fn=tf.nn.elu,
+                       batch_normalize=True,
+                       learned_moments_update_rate=0.0003,
+                       variance_epsilon=0.001,
+                       scale_after_normalization=True):
+        z, mean, stddev = variational.sample_ms(x)
+        elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
+               kl_multivariate_normal(mean, stddev)
+        #
+        sampled_tensor = model.network(model.sample_prior())
 
-#    widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-#    pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
-#    pbar.start()
-#    for t in range(FLAGS.updates_per_epoch):
-#        pbar.update(t)
-#        loss = inference.update(sess)
-#        avg_loss += loss
-
-#    #avg_loss = avg_loss / FLAGS.updates_per_epoch
-#    avg_loss = avg_loss / \
-#        (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
-
-#    print("-log p(x) <= %f" % avg_loss)
-
-x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
-
-with pt.defaults_scope(activation_fn=tf.nn.elu,
-                   batch_normalize=True,
-                   learned_moments_update_rate=0.0003,
-                   variance_epsilon=0.001,
-                   scale_after_normalization=True):
-    z, mean, stddev = variational.sample_ms(x)
-    elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
-           kl_multivariate_normal(mean, stddev)
-    #
-    sampled_tensor = model.network(model.sample_prior())
-
-loss = -elbo
-
-optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
-train = pt.apply_optimizer(optimizer, losses=[loss])
-
-init = tf.initialize_all_variables()
-
-sess = tf.Session()
-sess.run(init)
+    loss = -elbo
+    optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
+    train = pt.apply_optimizer(optimizer, losses=[loss])
+    init = tf.initialize_all_variables()
+    sess = tf.Session()
+    sess.run(init)
 
 for epoch in range(FLAGS.max_epoch):
-    training_loss = 0.0
+    avg_loss = 0.0
 
     widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
     pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
@@ -234,12 +213,13 @@ for epoch in range(FLAGS.max_epoch):
         pbar.update(i)
         x_b = data.sample()
         _, loss_value = sess.run([train, loss], {x: x_b})
-        training_loss += loss_value
+#        loss = inference.update(sess)
+        avg_loss += loss_value
 
-    training_loss = training_loss / \
+    avg_loss = avg_loss / \
         (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
 
-    print("Loss %f" % training_loss)
+    print("-log p(x) <= %f" % avg_loss)
 
     imgs = sess.run(sampled_tensor)
     for k in range(FLAGS.batch_size):
