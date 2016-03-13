@@ -176,28 +176,30 @@ def variational_network(input_tensor):
             fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
     return output
 
-def get_output(output):
-    mean = output[:, :FLAGS.hidden_size]
-    stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
-    return mean, stddev
+def many_stuff(input_tensor=None):
+    def variational_sample(input_tensor=None):
+        epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+        if input_tensor is None:
+            mean = None
+            stddev = None
+            input_sample = epsilon
+        else:
+            mean = input_tensor[:, :FLAGS.hidden_size]
+            stddev = tf.sqrt(tf.exp(input_tensor[:, FLAGS.hidden_size:]))
+            input_sample = mean + epsilon * stddev
+        return input_sample, mean, stddev
 
-def model_network(input_tensor=None):
-    epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-    if input_tensor is None:
-        mean = None
-        stddev = None
-        input_sample = epsilon
-    else:
-        mean = input_tensor[:, :FLAGS.hidden_size]
-        stddev = tf.sqrt(tf.exp(input_tensor[:, FLAGS.hidden_size:]))
-        input_sample = mean + epsilon * stddev
-    return (pt.wrap(input_sample).
-            reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
-            deconv2d(3, 128, edges='VALID').
-            deconv2d(5, 64, edges='VALID').
-            deconv2d(5, 32, stride=2).
-            deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
-            flatten()).tensor, mean, stddev
+    def model_network(input_sample):
+        return (pt.wrap(input_sample).
+                reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
+                deconv2d(3, 128, edges='VALID').
+                deconv2d(5, 64, edges='VALID').
+                deconv2d(5, 32, stride=2).
+                deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+                flatten()).tensor
+
+    input_sample, mean, stddev = variational_sample(input_tensor)
+    return model_network(input_sample), mean, stddev
 
 variational = MFGaussian()
 model = NormalBernoulli()
@@ -237,10 +239,9 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
     output = variational_network(x)
-    #mean, stddev = get_output(output)
-    output_tensor, mean, stddev = model_network(output)
+    output_tensor, mean, stddev = many_stuff(output)
     #
-    sampled_tensor, _, _ = model_network()
+    sampled_tensor, _, _ = many_stuff()
 
 elbo = tf.reduce_sum(model.log_likelihood_p(x, output_tensor)) - \
        kl_multivariate_normal(mean, stddev)
