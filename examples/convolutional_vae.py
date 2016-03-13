@@ -31,7 +31,6 @@ flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
 
-# TODO check each line and make sure it gets the same results in a few iterations
 bb.set_seed(42)
 
 class MFGaussian:
@@ -144,18 +143,18 @@ class Inference:
                                scale_after_normalization=True):
             z = self.variational.sample(self.x)
 
+            # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+            # In general, there should be a scale factor due to data
+            # subsampling, so that
+            # ELBO = N / M * ( ELBO using x_b )
+            # where x^b is a mini-batch of x, with sizes M and N respectively.
+            # This is absorbed into the learning rate.
+            elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                   kl_multivariate_normal(self.variational.mean, self.variational.stddev)
+
             # TODO move this over to model
             z_test = self.model.sample_prior()
             self.p_test = self.model.network(z_test)
-
-        # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-        # In general, there should be a scale factor due to data
-        # subsampling, so that
-        # ELBO = N / M * ( ELBO using x_b )
-        # where x^b is a mini-batch of x, with sizes M and N respectively.
-        # This is absorbed into the learning rate.
-        elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-               kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
 variational = MFGaussian()
