@@ -179,11 +179,6 @@ class Inference:
                kl_multivariate_normal(self.variational.mean, self.variational.stddev)
         return -elbo
 
-def many_stuff(x):
-    input_tensor = variational.network_ms(x)
-    input_sample, mean, stddev = variational.sample_ms(input_tensor)
-    return model.network(input_sample), mean, stddev
-
 variational = MFGaussian()
 model = NormalBernoulli()
 
@@ -221,7 +216,9 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    learned_moments_update_rate=0.0003,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
-    output_tensor, mean, stddev = many_stuff(x)
+    input_tensor = variational.network_ms(x)
+    input_sample, mean, stddev = variational.sample_ms(input_tensor)
+    output_tensor = model.network(input_sample)
     #
     sampled_tensor = model.network(model.sample_prior())
 
