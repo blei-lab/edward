@@ -166,7 +166,7 @@ class Inference:
         return -elbo
 
 def encoder(input_tensor):
-    return (pt.wrap(input_tensor).
+    output = (pt.wrap(input_tensor).
             reshape([FLAGS.batch_size, 28, 28, 1]).
             conv2d(5, 32, stride=2).
             conv2d(5, 64, stride=2).
@@ -174,6 +174,26 @@ def encoder(input_tensor):
             dropout(0.9).
             flatten().
             fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
+    return output
+
+def get_output(output):
+    mean = output[:, :FLAGS.hidden_size]
+    stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+    return mean, stddev
+
+#def decoder(mean=None, stddev=None):
+#    epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+#    if mean is None and stddev is None:
+#        input_sample = epsilon
+#    else:
+#        input_sample = mean + epsilon * stddev
+#    return (pt.wrap(input_sample).
+#            reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
+#            deconv2d(3, 128, edges='VALID').
+#            deconv2d(5, 64, edges='VALID').
+#            deconv2d(5, 32, stride=2).
+#            deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+#            flatten()).tensor
 
 def decoder(input_tensor=None):
     epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
@@ -230,7 +250,10 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
                    learned_moments_update_rate=0.0003,
                    variance_epsilon=0.001,
                    scale_after_normalization=True):
-    output_tensor, mean, stddev = decoder(encoder(x))
+    output = encoder(x)
+    #mean, stddev = get_output(output)
+    #output_tensor = decoder(mean, stddev)
+    output_tensor, mean, stddev = decoder(output)
     #
     sampled_tensor, _, _ = decoder()
 
