@@ -92,16 +92,16 @@ class deconv2d(prettytensor.VarStoreMethod):
       raise ValueError('Do not set both init and stddev.')
     dtype = input_layer.tensor.dtype
     params = self.variable('weights', size, init, dt=dtype)
-
+    
     input_height = input_layer.shape[1]
     input_width = input_layer.shape[2]
-
+    
     filter_height = kernel[0]
     filter_width = kernel[1]
 
     row_stride = stride[1]
     col_stride = stride[2]
-
+    
     out_rows, out_cols = get2d_deconv_output_size(input_height, input_width, filter_height,
                                filter_width, row_stride, col_stride, edges)
 
@@ -146,7 +146,7 @@ def get2d_deconv_output_size(input_height, input_width, filter_height,
     if input_height.value is None or filter_height.value is None:
       out_rows = None
     elif padding_type == "VALID":
-      out_rows = (input_height.value - 1) * row_stride + filter_height.value
+      out_rows = (input_height.value - 1) * row_stride + filter_height.value 
     elif padding_type == "SAME":
       out_rows = input_height.value * row_stride
     else:

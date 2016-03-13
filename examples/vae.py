@@ -8,9 +8,7 @@ Variational model
 """
 from __future__ import absolute_import, division, print_function
 import os
-import numpy as np
 import prettytensor as pt
-import scipy.misc
 import tensorflow as tf
 
 from scipy.misc import imsave
@@ -86,6 +84,24 @@ class Model:
                (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
 class Inference:
+    def __init__(self, model, variational):
+        self.model = model
+        self.variational = variational
+
+        self.p_test = None
+        self.loss = None
+        self.train = None
+
+    def init(self):
+        self.loss = inference.build_loss()
+        optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
+        self.train = pt.apply_optimizer(optimizer, losses=[self.loss])
+
+        init = tf.initialize_all_variables()
+        sess = tf.Session()
+        sess.run(init)
+        return sess
+
     def build_loss(self):
         with pt.defaults_scope(activation_fn=tf.nn.elu,
                                batch_normalize=True,
@@ -94,41 +110,32 @@ class Inference:
                                scale_after_normalization=True):
             with pt.defaults_scope(phase=pt.Phase.train):
                 with tf.variable_scope("model") as scope:
-                    z, mean, stddev = variational.sample(x)
+                    z, mean, stddev = self.variational.sample(x)
 
             #with pt.defaults_scope(phase=pt.Phase.test):
             #    with tf.variable_scope("model", reuse=True) as scope:
             #        # Prior predictive check at test time
-            #        z_sim_test = model.sample_prior()
-            #        p_sim_test = model.network(z_sim_test)
-            z_sim_test = model.sample_prior()
-            self.p_sim_test = model.network(z_sim_test)
+            #        z_test = model.sample_prior()
+            #        p_test = model.network(z_test)
+            z_test = self.model.sample_prior()
+            self.p_test = self.model.network(z_test)
 
         # E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-        return tf.reduce_sum(model.log_likelihood(x, z)) - \
+        return tf.reduce_sum(self.model.log_likelihood(x, z)) - \
                tf.reduce_sum(0.5 * (1.0 + 2.0 * tf.log(stddev + 1e-8) - \
                                     tf.square(mean) - tf.square(stddev)))
 
 variational = Variational()
 model = Model()
-inference = Inference()
-
-x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
-loss = inference.build_loss()
-
-## TRAIN
+inference = Inference(model, variational)
 
 data_directory = os.path.join(FLAGS.working_directory, "data/mnist")
 if not os.path.exists(data_directory):
     os.makedirs(data_directory)
 mnist = input_data.read_data_sets(data_directory, one_hot=True)
 
-optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
-train = pt.apply_optimizer(optimizer, losses=[loss])
-init = tf.initialize_all_variables()
-
-sess = tf.Session()
-sess.run(init)
+x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
+sess = inference.init()
 for epoch in range(FLAGS.max_epoch):
     training_loss = 0.0
 
@@ -138,7 +145,7 @@ for epoch in range(FLAGS.max_epoch):
     for i in range(FLAGS.updates_per_epoch):
         pbar.update(i)
         x_batch, _ = mnist.train.next_batch(FLAGS.batch_size)
-        _, loss_value = sess.run([train, loss], {x: x_batch})
+        _, loss_value = sess.run([inference.train, inference.loss], {x: x_batch})
         training_loss += loss_value
 
     training_loss = training_loss / \
@@ -146,7 +153,7 @@ for epoch in range(FLAGS.max_epoch):
 
     print("Loss %f" % training_loss)
 
-    imgs = sess.run(inference.p_sim_test)
+    imgs = sess.run(inference.p_test)
     for k in range(FLAGS.batch_size):
         img_folder = os.path.join(FLAGS.working_directory, 'img')
         if not os.path.exists(img_folder):
