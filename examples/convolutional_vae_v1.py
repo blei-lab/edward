@@ -51,8 +51,14 @@ class MFGaussian:
                 dropout(0.9).
                 flatten().
                 fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
-        self.mean = output[:, :FLAGS.hidden_size]
-        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+        return output
+
+    def extract_params(self, output):
+        #self.mean = output[:, :FLAGS.hidden_size]
+        #self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+        mean = output[:, :FLAGS.hidden_size]
+        stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+        return mean, stddev
 
     def sample(self, x):
         """
@@ -63,24 +69,16 @@ class MFGaussian:
         x : tf.Tensor
             a batch of flattened images [batch_size, 28*28]
         """
-        self.network(x)
+        extract_params(self.network(x))
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
         return self.mean + epsilon * self.stddev
 
-    def sample_ms(self, input_tensor):
-        output = (pt.wrap(input_tensor).
-                reshape([FLAGS.batch_size, 28, 28, 1]).
-                conv2d(5, 32, stride=2).
-                conv2d(5, 64, stride=2).
-                conv2d(5, 128, edges='VALID').
-                dropout(0.9).
-                flatten().
-                fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
+    def sample_ms(self, x):
+        output = self.network(x)
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        mean = output[:, :FLAGS.hidden_size]
-        stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
-        input_sample = mean + epsilon * stddev
-        return input_sample, mean, stddev
+        mean, stddev = self.extract_params(output)
+        z = mean + epsilon * stddev
+        return z, mean, stddev
 
 class NormalBernoulli:
     def network(self, z):
@@ -217,10 +215,6 @@ with pt.defaults_scope(activation_fn=tf.nn.elu,
     sampled_tensor = model.network(model.sample_prior())
 
 loss = -elbo
-
-#elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
-#       kl_multivariate_normal(variational.mean, variational.stddev)
-#loss = -elbo
 
 optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
 train = pt.apply_optimizer(optimizer, losses=[loss])
