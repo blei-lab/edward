@@ -87,12 +87,6 @@ class Model:
                 deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
                 flatten()).tensor
 
-    def sample_prior(self):
-        """
-        z ~ N(0, 1)
-        """
-        return tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-
     def log_likelihood(self, x, z):
         """
         p | z = varphi(z)
@@ -101,12 +95,27 @@ class Model:
         p = model.network(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
+    def sample_prior(self):
+        """
+        z ~ N(0, 1)
+        """
+        return tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+
+    def sample_latent(self):
+        # Prior predictive check at test time
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                               batch_normalize=True,
+                               learned_moments_update_rate=0.0003,
+                               variance_epsilon=0.001,
+                               scale_after_normalization=True):
+            z_test = self.model.sample_prior()
+            return self.model.network(z_test)
+
 class Inference:
     def __init__(self, model, variational):
         self.model = model
         self.variational = variational
 
-        self.p_test = None
         self.loss = None
         self.train = None
 
@@ -128,15 +137,10 @@ class Inference:
                                scale_after_normalization=True):
             z = self.variational.sample(x)
 
-            # Prior predictive check at test time
-            z_test = self.model.sample_prior()
-            self.p_test = self.model.network(z_test)
-
         # E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
         elbo = tf.reduce_sum(self.model.log_likelihood(x, z)) - \
                kl_gaussian(self.variational.mean, self.variational.stddev)
         return -elbo
-
 
 variational = Variational()
 model = Model()
@@ -166,7 +170,8 @@ for epoch in range(FLAGS.max_epoch):
 
     print("Loss %f" % training_loss)
 
-    imgs = sess.run(inference.p_test)
+    # does model also have the fitted parameters, or is it only inference.model?
+    imgs = sess.run(inference.model.sample_latent())
     for k in range(FLAGS.batch_size):
         img_folder = os.path.join(FLAGS.working_directory, 'img')
         if not os.path.exists(img_folder):
