@@ -3,21 +3,25 @@ import numpy as np
 import tensorflow as tf
 
 from blackbox.stats import norm
+from scipy import stats
 
-sess = tf.InteractiveSession()
+sess = tf.Session()
 
-print("Input: One-dimensional scalar")
-x = tf.constant(1.0)
-print(norm.entropy(x).eval())
-print(1.41894)
-print()
-print("Input: One-dimensional vector")
-x = tf.ones([1])
-print(norm.entropy(x).eval())
-print(1.41894)
-print()
-print("Input: Multi-dimensional vector")
-x = tf.ones([2])
-print(norm.entropy(x).eval())
-print(2.83788)
-print()
+
+def _assert_eq(res_bb, res_true):
+    with sess.as_default():
+        assert np.allclose(res_bb.eval(), res_true)
+
+
+def test_entropy_empty():
+    _assert_eq(norm.entropy(), stats.norm.entropy())
+
+
+def test_entropy_scalar():
+    x = tf.constant(1.0)
+    _assert_eq(norm.entropy(x), stats.norm.entropy(1.0))
+
+
+def test_entropy_1d():
+    x = tf.ones([1.0])
+    _assert_eq(norm.entropy(x), stats.norm.entropy([1.0]))

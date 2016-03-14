@@ -3,11 +3,17 @@ import tensorflow as tf
 
 from blackbox.util import get_dims
 
-x = tf.constant(0.0)
-print(get_dims(x))
 
-x = tf.zeros([2])
-print(get_dims(x))
+def test_get_dims_scalar():
+    x = tf.constant(0.0)
+    assert get_dims(x) == [1]
 
-x = tf.zeros([2, 2])
-print(get_dims(x))
+
+def test_get_dims_1d():
+    x = tf.zeros([2])
+    assert get_dims(x) == [2]
+
+
+def test_get_dims_2d():
+    x = tf.zeros([2, 2])
+    assert get_dims(x) == [2, 2]
