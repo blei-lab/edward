@@ -157,10 +157,6 @@ class Inference:
             elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
                    kl_multivariate_normal(self.variational.mean, self.variational.stddev)
 
-        with tf.variable_scope("model", reuse=True) as scope:
-            # TODO move this over to model
-            self.p_rep = self.model.sample_latent()
-
         return -elbo
 
 variational = MFGaussian()
@@ -174,10 +170,9 @@ data = Data(mnist)
 
 inference = Inference(model, variational, data)
 sess = inference.init()
-# TODO
-# does model also have the fitted parameters, or is it only inference.model?
-#p_rep = inference.model.sample_latent()
-p_rep = inference.p_rep
+with tf.variable_scope("model", reuse=True) as scope:
+    p_rep = model.sample_latent()
+
 for epoch in range(FLAGS.max_epoch):
     avg_loss = 0.0
 
@@ -189,6 +184,7 @@ for epoch in range(FLAGS.max_epoch):
         loss = inference.update(sess)
         avg_loss += loss
 
+    # TODO
     #avg_loss = avg_loss / FLAGS.updates_per_epoch
     avg_loss = avg_loss / \
         (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)

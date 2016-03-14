@@ -123,14 +123,14 @@ class Inference:
     def init(self, model, variational):
         x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
 
-        loss, p_rep = self.build_loss(model, variational, x)
+        loss = self.build_loss(model, variational, x)
         optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
         train = pt.apply_optimizer(optimizer, losses=[loss])
 
         init = tf.initialize_all_variables()
         sess = tf.Session()
         sess.run(init)
-        return sess, train, loss, x, p_rep
+        return sess, train, loss, x
 
     def update(self, sess, train, loss, x, data):
         x_b = data.sample()
@@ -149,10 +149,7 @@ class Inference:
             elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
                    kl_multivariate_normal(mean, stddev)
 
-        with tf.variable_scope("model", reuse=True) as scope:
-            p_rep = model.sample_latent()
-
-        return -elbo, p_rep
+        return -elbo
 
 variational = MFGaussian()
 model = NormalBernoulli()
@@ -164,8 +161,9 @@ mnist = input_data.read_data_sets(data_directory, one_hot=True)
 data = Data(mnist)
 
 inference = Inference(model, variational, data)
-
-sess, train, loss, x, p_rep = inference.init(model, variational)
+sess, train, loss, x = inference.init(model, variational)
+with tf.variable_scope("model", reuse=True) as scope:
+    p_rep = model.sample_latent()
 
 for epoch in range(FLAGS.max_epoch):
     avg_loss = 0.0
