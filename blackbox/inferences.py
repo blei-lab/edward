@@ -3,7 +3,9 @@ import numpy as np
 import tensorflow as tf
 
 from blackbox.data import Data
-from blackbox.util import log_sum_exp
+from blackbox.util import kl_multivariate_normal, log_sum_exp
+# TODO
+import prettytensor as pt
 
 class Inference:
     """
@@ -159,6 +161,49 @@ class MFVI(Inference):
             self.elbos = self.model.log_prob(x, z) - q_log_prob
 
         return -tf.reduce_mean(self.elbos)
+
+class VAE(Inference):
+    # TODO move this class into MFVI
+    def __init__(self, *args, **kwargs):
+        Inference.__init__(self, *args, **kwargs)
+
+    def init(self):
+        # TODO hardcoded batch size
+        FLAGS_batch_size = 128
+        self.x = tf.placeholder(tf.float32, [FLAGS_batch_size, 28 * 28])
+
+        self.loss = self.build_loss()
+        optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
+        self.train = pt.apply_optimizer(optimizer, losses=[self.loss])
+
+        init = tf.initialize_all_variables()
+        sess = tf.Session()
+        # TODO there shouldn't be any of that variable creation stuff.
+        # why was it hidden away before?
+        sess.run(init)
+        return sess
+
+    def update(self, sess):
+        x = self.data.sample()
+        _, loss_value = sess.run([self.train, self.loss], {self.x: x})
+        return loss_value
+
+    def build_loss(self):
+        with tf.variable_scope("model") as scope:
+            #z = self.variational.sample(self.x)
+            z, mean, stddev = self.variational.sample(self.x)
+            # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+            # In general, there should be a scale factor due to data
+            # subsampling, so that
+            # ELBO = N / M * ( ELBO using x_b )
+            # where x^b is a mini-batch of x, with sizes M and N respectively.
+            # This is absorbed into the learning rate.
+            #elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                   #kl_multivariate_normal(self.variational.mean, self.variational.stddev)
+            elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                   kl_multivariate_normal(mean, stddev)
+
+        return -elbo
 
 class KLpq(Inference):
     """

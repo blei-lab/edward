@@ -15,7 +15,6 @@ import prettytensor as pt
 import tensorflow as tf
 import blackbox as bb
 
-from blackbox.util import kl_multivariate_normal
 from convolutional_vae_util import deconv2d
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -27,7 +26,6 @@ logging = tf.logging
 flags.DEFINE_integer("batch_size", 128, "batch size")
 flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
 flags.DEFINE_integer("max_epoch", 100, "max epoch")
-flags.DEFINE_float("learning_rate", 1e-2, "learning rate")
 flags.DEFINE_string("working_directory", "", "")
 flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
@@ -38,7 +36,6 @@ class MFGaussian:
         self.mean = None # batch_size x hidden_size
         self.stddev = None # batch_size x hidden_size
 
-    # TODO in general, think about global vs local stuff
     def network(self, x):
         """
         mean, stddev = phi(x)
@@ -57,22 +54,35 @@ class MFGaussian:
                     flatten().
                     fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
 
+    # TODO in general, think about global vs local stuff
+    #def extract_params(self, output):
+    #    self.mean = output[:, :FLAGS.hidden_size]
+    #    self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+
+    #def sample(self, x):
+    #    """
+    #    z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
+
+    #    Parameters
+    #    ----------
+    #    x : tf.Tensor
+    #        a batch of flattened images [batch_size, 28*28]
+    #    """
+    #    self.extract_params(self.network(x))
+    #    epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+    #    return self.mean + epsilon * self.stddev
+
     def extract_params(self, output):
-        self.mean = output[:, :FLAGS.hidden_size]
-        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+        mean = output[:, :FLAGS.hidden_size]
+        stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+        return mean, stddev
 
     def sample(self, x):
-        """
-        z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
-
-        Parameters
-        ----------
-        x : tf.Tensor
-            a batch of flattened images [batch_size, 28*28]
-        """
-        self.extract_params(self.network(x))
+        output = self.network(x)
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        return self.mean + epsilon * self.stddev
+        mean, stddev = self.extract_params(output)
+        z = mean + epsilon * stddev
+        return z, mean, stddev
 
 class NormalBernoulli:
     def network(self, z):
@@ -118,45 +128,6 @@ class Data:
         x_batch, _ = mnist.train.next_batch(size)
         return x_batch
 
-class Inference:
-    def __init__(self, model, variational, data):
-        self.model = model
-        self.variational = variational
-        self.data = data
-
-    def init(self):
-        self.x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
-
-        self.loss = inference.build_loss()
-        optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
-        self.train = pt.apply_optimizer(optimizer, losses=[self.loss])
-
-        init = tf.initialize_all_variables()
-        sess = tf.Session()
-        # TODO there shouldn't be any of that variable creation stuff.
-        # why was it hidden away before?
-        sess.run(init)
-        return sess
-
-    def update(self, sess):
-        x = self.data.sample()
-        _, loss_value = sess.run([self.train, self.loss], {self.x: x})
-        return loss_value
-
-    def build_loss(self):
-        with tf.variable_scope("model") as scope:
-            z = self.variational.sample(self.x)
-            # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-            # In general, there should be a scale factor due to data
-            # subsampling, so that
-            # ELBO = N / M * ( ELBO using x_b )
-            # where x^b is a mini-batch of x, with sizes M and N respectively.
-            # This is absorbed into the learning rate.
-            elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-                   kl_multivariate_normal(self.variational.mean, self.variational.stddev)
-
-        return -elbo
-
 bb.set_seed(42)
 variational = MFGaussian()
 model = NormalBernoulli()
@@ -167,7 +138,7 @@ if not os.path.exists(data_directory):
 mnist = input_data.read_data_sets(data_directory, one_hot=True)
 data = Data(mnist)
 
-inference = Inference(model, variational, data)
+inference = bb.VAE(model, variational, data)
 sess = inference.init()
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_latent()
