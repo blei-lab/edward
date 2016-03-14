@@ -59,13 +59,11 @@ class MFGaussian:
                     fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
 
     def extract_params(self, output):
-        #self.mean = output[:, :FLAGS.hidden_size]
-        #self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
         mean = output[:, :FLAGS.hidden_size]
         stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
         return mean, stddev
 
-    def sample_ms(self, x):
+    def sample(self, x):
         output = self.network(x)
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
         mean, stddev = self.extract_params(output)
@@ -105,8 +103,8 @@ class NormalBernoulli:
 
     def sample_latent(self):
         # Prior predictive check at test time
-        z_test = self.sample_prior()
-        return self.network(z_test)
+        z_rep = self.sample_prior()
+        return self.network(z_rep)
 
 class Data:
     def __init__(self, data):
@@ -122,33 +120,39 @@ class Inference:
         self.variational = variational
         self.data = data
 
-    def init_temp(self, model, variational):
+    def init(self, model, variational):
         x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
 
-        loss, sampled_tensor = self.build_loss_temp(model, variational, x)
+        loss, p_rep = self.build_loss(model, variational, x)
         optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
         train = pt.apply_optimizer(optimizer, losses=[loss])
 
         init = tf.initialize_all_variables()
         sess = tf.Session()
         sess.run(init)
-        return sess, train, loss, x, sampled_tensor
+        return sess, train, loss, x, p_rep
 
-    def update_temp(self, sess, train, loss, x, data):
+    def update(self, sess, train, loss, x, data):
         x_b = data.sample()
         _, loss_value = sess.run([train, loss], {x: x_b})
         return loss_value
 
-    def build_loss_temp(self, model, variational, x):
+    def build_loss(self, model, variational, x):
         with tf.variable_scope("model") as scope:
-            z, mean, stddev = variational.sample_ms(x)
+            z, mean, stddev = variational.sample(x)
+            # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+            # In general, there should be a scale factor due to data
+            # subsampling, so that
+            # ELBO = N / M * ( ELBO using x_b )
+            # where x^b is a mini-batch of x, with sizes M and N respectively.
+            # This is absorbed into the learning rate.
             elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
                    kl_multivariate_normal(mean, stddev)
 
         with tf.variable_scope("model", reuse=True) as scope:
-            sampled_tensor = model.network(model.sample_prior())
+            p_rep = model.sample_latent()
 
-        return -elbo, sampled_tensor
+        return -elbo, p_rep
 
 variational = MFGaussian()
 model = NormalBernoulli()
@@ -161,9 +165,7 @@ data = Data(mnist)
 
 inference = Inference(model, variational, data)
 
-#sess = inference.init()
-#sampled_tensor = inference.p_test
-sess, train, loss, x, sampled_tensor = inference.init_temp(model, variational)
+sess, train, loss, x, p_rep = inference.init(model, variational)
 
 for epoch in range(FLAGS.max_epoch):
     avg_loss = 0.0
@@ -171,10 +173,9 @@ for epoch in range(FLAGS.max_epoch):
     widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
     pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
     pbar.start()
-    for i in range(FLAGS.updates_per_epoch):
-        pbar.update(i)
-        loss_value = inference.update_temp(sess, train, loss, x, data)
-#        loss_value = inference.update(sess)
+    for t in range(FLAGS.updates_per_epoch):
+        pbar.update(t)
+        loss_value = inference.update(sess, train, loss, x, data)
         avg_loss += loss_value
 
     avg_loss = avg_loss / \
@@ -182,7 +183,7 @@ for epoch in range(FLAGS.max_epoch):
 
     print("-log p(x) <= %f" % avg_loss)
 
-    imgs = sess.run(sampled_tensor)
+    imgs = sess.run(p_rep)
     for b in range(FLAGS.batch_size):
         img_folder = os.path.join(FLAGS.working_directory, 'img')
         if not os.path.exists(img_folder):

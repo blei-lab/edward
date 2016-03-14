@@ -109,8 +109,8 @@ class NormalBernoulli:
 
     def sample_latent(self):
         # Prior predictive check at test time
-        z_test = self.sample_prior()
-        return self.network(z_test)
+        z_rep = self.sample_prior()
+        return self.network(z_rep)
 
 class Data:
     def __init__(self, data):
@@ -159,7 +159,7 @@ class Inference:
 
         with tf.variable_scope("model", reuse=True) as scope:
             # TODO move this over to model
-            self.p_test = self.model.sample_latent()
+            self.p_rep = self.model.sample_latent()
 
         return -elbo
 
@@ -176,8 +176,8 @@ inference = Inference(model, variational, data)
 sess = inference.init()
 # TODO
 # does model also have the fitted parameters, or is it only inference.model?
-#test = inference.model.sample_latent()
-test = inference.p_test
+#p_rep = inference.model.sample_latent()
+p_rep = inference.p_rep
 for epoch in range(FLAGS.max_epoch):
     avg_loss = 0.0
 
@@ -195,7 +195,7 @@ for epoch in range(FLAGS.max_epoch):
 
     print("-log p(x) <= %f" % avg_loss)
 
-    imgs = sess.run(test)
+    imgs = sess.run(p_rep)
     for b in range(FLAGS.batch_size):
         img_folder = os.path.join(FLAGS.working_directory, 'img')
         if not os.path.exists(img_folder):
