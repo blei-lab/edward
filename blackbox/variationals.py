@@ -1,6 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
+#from scipy import stats
 
 from blackbox.stats import bernoulli, beta, norm, dirichlet, invgamma
 from blackbox.util import get_dims
@@ -11,6 +12,7 @@ class MFMixGaussian:
     q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)                                         
     """
     def __init__(self, num_vars, K):
+        self.K = K
         self.dirich = MFDirichlet(1, K)
         self.gauss = MFGaussian(1)
         self.invgam = MFInvGamma(1)
@@ -27,13 +29,13 @@ class MFMixGaussian:
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        z = np.zeros((size[0], 3))
-        dirich_samples = self.dirich.sample(size[0], sess)
+        z = np.zeros((size[0], self.K + 2))
+        dirich_samples = self.dirich.sample(size, sess)
         gauss_samples = self.gauss.sample(size, sess)
         invgam_samples = self.invgam.sample(size, sess)
-        z[:, 0] = dirich_samples
-        z[:, 1] = gauss_samples
-        z[:, 2] = invgam_samples
+        z[:, 0:self.K] = dirich_samples
+        z[:, -2] = gauss_samples
+        z[:, -1] = invgam_samples
         
         return z
 
@@ -66,13 +68,13 @@ class MFDirichlet:
         
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        alpha = sess.run([self.transform(self.alpha_unconst)])
-        z = np.zeros((self.num_vars, size, self.K))
+        alpha = sess.run([self.transform(self.alpha_unconst)])[0]
+        z = np.zeros((size[1], size[0], self.K))
         for d in xrange(self.num_vars):
-            z[d, :, :] = dirichlet.rvs(alpha[d,:], size = size[0])
-            
+            z[d, :, :] = dirichlet.rvs(alpha[d, :], size = size[0])
+
         return z
-    
+
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
