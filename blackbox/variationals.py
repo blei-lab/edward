@@ -4,12 +4,12 @@ import tensorflow as tf
 #from scipy import stats
 
 from blackbox.stats import bernoulli, beta, norm, dirichlet, invgamma
-from blackbox.util import get_dims
+from blackbox.util import get_dims, concat
 
 
 class MFMixGaussian:
-    """                                                                                                   
-    q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)                                         
+    """
+    q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)
     """
     def __init__(self, num_vars, K):
         self.K = K
@@ -21,7 +21,7 @@ class MFMixGaussian:
         gauss_num_param = self.gauss.num_params
         invgam_num_params = self.invgam.num_params
         self.num_params = dirich_num_param + gauss_num_param + invgam_num_params
-    
+
     def print_params(self, sess):
     	self.dirich.print_params(sess)
         self.gauss.print_params(sess)
@@ -36,7 +36,7 @@ class MFMixGaussian:
         z[:, 0 : self.K] = dirich_samples
         z[:, -2] = gauss_samples
         z[:, -1] = invgam_samples
-        
+
         return z
 
     def log_prob_zi(self, i, z):
@@ -56,16 +56,16 @@ class MFDirichlet:
     def __init__(self, num_vars, K):
         self.K = K
         self.num_vars = num_vars
-        self.num_params = num_vars 
+        self.num_params = num_vars
         self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
         self.transform = tf.nn.softplus
-        
+
     def print_params(self, sess):
         alpha = sess.run([self.transform(self.alpha_unconst)])
-        
+
         print("concentration vector:")
         print(alpha)
-        
+
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         alpha = sess.run([self.transform(self.alpha_unconst)])[0]
@@ -79,9 +79,9 @@ class MFDirichlet:
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
             raise
-        
+
         alphai = self.transform(self.alpha_unconst)[i, :]
-        
+
         return dirichlet.logpdf(z[:, i], alphai)
 
 class MFInvGamma:
@@ -94,7 +94,7 @@ class MFInvGamma:
         self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.transform = tf.nn.softplus
-        
+
     def print_params(self, sess):
         a, b = sess.run([ \
             self.transform(self.a_unconst),
@@ -104,7 +104,7 @@ class MFInvGamma:
         print(a)
         print("scale:")
         print(b)
-        
+
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         a, b = sess.run([ \
@@ -116,7 +116,7 @@ class MFInvGamma:
             z[:, d] = invgamma.rvs(a[d], b[d], size=size[0])
 
         return z
-        
+
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
@@ -124,7 +124,7 @@ class MFInvGamma:
 
         ai = self.transform(self.a_unconst)[i]
         bi = self.transform(self.b_unconst)[i]
-        
+
         return invgamma.logpdf(z[:, i], ai, bi)
 
 class MFBernoulli:
@@ -283,8 +283,8 @@ class MFGaussian:
         # TODO
         #mi = self.transform_m(self.m_unconst[i])
         #si = self.transform_s(self.s_unconst[i])
-        return tf.concat(0, [norm.logpdf(zm[i], mi, si)
-                         for zm in tf.unpack(z)])
+        return concat([norm.logpdf(zm[i], mi, si)
+                       for zm in tf.unpack(z)])
         # TODO
         #return gaussian_log_prob(z[:, i], mi, si)
 

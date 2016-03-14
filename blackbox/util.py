@@ -32,6 +32,24 @@ def check_is_tf_vector(x):
         raise TypeError("util::check_is_tf_vector: "
                         "input is not a TensorFlow object.")
 
+def concat(x):
+    """
+    This extends concatenation of tensors to scalars.
+
+    Parameters
+    ----------
+    x : list of tf.Tensor
+
+    Returns
+    -------
+    tf.Tensor
+
+    """
+    if len(x[0].get_shape()) == 0: # scalar
+        return tf.pack(x)
+    else:
+        return tf.concat(0, x)
+
 def log_sum_exp(x):
     """
     Computes the log_sum_exp of the elements in x.
