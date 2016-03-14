@@ -238,10 +238,10 @@ for epoch in range(FLAGS.max_epoch):
     print("-log p(x) <= %f" % avg_loss)
 
     imgs = sess.run(sampled_tensor)
-    for k in range(FLAGS.batch_size):
-        imgs_folder = os.path.join(FLAGS.working_directory, 'img')
-        if not os.path.exists(imgs_folder):
-            os.makedirs(imgs_folder)
+    for b in range(FLAGS.batch_size):
+        img_folder = os.path.join(FLAGS.working_directory, 'img')
+        if not os.path.exists(img_folder):
+            os.makedirs(img_folder)
 
-        imsave(os.path.join(imgs_folder, '%d.png') % k,
-               imgs[k].reshape(28, 28))
+        imsave(os.path.join(img_folder, '%d.png') % b,
+               imgs[b].reshape(28, 28))
