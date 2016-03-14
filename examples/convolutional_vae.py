@@ -145,17 +145,20 @@ class Inference:
                                learned_moments_update_rate=0.0003,
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
-            z = self.variational.sample(self.x)
-            # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-            # In general, there should be a scale factor due to data
-            # subsampling, so that
-            # ELBO = N / M * ( ELBO using x_b )
-            # where x^b is a mini-batch of x, with sizes M and N respectively.
-            # This is absorbed into the learning rate.
-            elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-                   kl_multivariate_normal(self.variational.mean, self.variational.stddev)
-            # TODO move this over to model
-            self.p_test = self.model.sample_latent()
+            with tf.variable_scope("model") as scope:
+                z = self.variational.sample(self.x)
+                # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+                # In general, there should be a scale factor due to data
+                # subsampling, so that
+                # ELBO = N / M * ( ELBO using x_b )
+                # where x^b is a mini-batch of x, with sizes M and N respectively.
+                # This is absorbed into the learning rate.
+                elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                       kl_multivariate_normal(self.variational.mean, self.variational.stddev)
+
+            with tf.variable_scope("model", reuse=True) as scope:
+                # TODO move this over to model
+                self.p_test = self.model.sample_latent()
 
         return -elbo
 
@@ -170,6 +173,8 @@ data = Data(mnist)
 
 inference = Inference(model, variational, data)
 sess = inference.init()
+# TODO
+# does model also have the fitted parameters, or is it only inference.model?
 #test = inference.model.sample_latent()
 test = inference.p_test
 for epoch in range(FLAGS.max_epoch):
@@ -189,7 +194,6 @@ for epoch in range(FLAGS.max_epoch):
 
     print("-log p(x) <= %f" % avg_loss)
 
-    # does model also have the fitted parameters, or is it only inference.model?
     imgs = sess.run(test)
     for b in range(FLAGS.batch_size):
         img_folder = os.path.join(FLAGS.working_directory, 'img')

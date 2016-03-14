@@ -195,11 +195,13 @@ class Inference:
                            learned_moments_update_rate=0.0003,
                            variance_epsilon=0.001,
                            scale_after_normalization=True):
-            z, mean, stddev = variational.sample_ms(x)
-            elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
-                   kl_multivariate_normal(mean, stddev)
-            #
-            sampled_tensor = model.network(model.sample_prior())
+            with tf.variable_scope("model") as scope:
+                z, mean, stddev = variational.sample_ms(x)
+                elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
+                       kl_multivariate_normal(mean, stddev)
+
+            with tf.variable_scope("model", reuse=True) as scope:
+                sampled_tensor = model.network(model.sample_prior())
 
         return -elbo, sampled_tensor
 
