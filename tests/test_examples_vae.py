@@ -1,18 +1,22 @@
-vae unit test
-single iterations
-0.827927
-0.889250
-0.784111
-0.686358
-0.668258
-0.658798
-0.645966
-0.617142
-0.611494
-0.606761
+# Run examples/convolutional_vae.py.
+# Set to update 1 time per epoch.
+# Check that objective values are as follows:
+0.827012
+0.886294
+0.792136
+0.668022
+0.660516
+0.668974
+0.648113
+0.615716
+0.616493
+0.612958
 
-vae unit test, optional to run
-1000 iterations
-0.219385
-0.143945
-0.137546
+# Set to update 1000 times per epoch.
+# Check that objective values are as follows:
+0.219992
+0.144405
+0.137927
+0.134993
+
+# Check that generated images after 2 epochs look like digits.

@@ -188,18 +188,16 @@ class VAE(Inference):
 
     def build_loss(self):
         with tf.variable_scope("model") as scope:
-            #z = self.variational.sample(self.x)
-            z, mean, stddev = self.variational.sample(self.x)
+            z = self.variational.sample(self.x)
             # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
             # In general, there should be a scale factor due to data
             # subsampling, so that
             # ELBO = N / M * ( ELBO using x_b )
             # where x^b is a mini-batch of x, with sizes M and N respectively.
             # This is absorbed into the learning rate.
-            #elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-                   #kl_multivariate_normal(self.variational.mean, self.variational.stddev)
             elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-                   kl_multivariate_normal(mean, stddev)
+                   kl_multivariate_normal(self.variational.mean,
+                                          self.variational.stddev)
 
         return -elbo
 

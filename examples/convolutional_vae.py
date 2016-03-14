@@ -54,35 +54,22 @@ class MFGaussian:
                     flatten().
                     fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
 
-    # TODO in general, think about global vs local stuff
-    #def extract_params(self, output):
-    #    self.mean = output[:, :FLAGS.hidden_size]
-    #    self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
-
-    #def sample(self, x):
-    #    """
-    #    z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
-
-    #    Parameters
-    #    ----------
-    #    x : tf.Tensor
-    #        a batch of flattened images [batch_size, 28*28]
-    #    """
-    #    self.extract_params(self.network(x))
-    #    epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-    #    return self.mean + epsilon * self.stddev
-
     def extract_params(self, output):
-        mean = output[:, :FLAGS.hidden_size]
-        stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
-        return mean, stddev
+        self.mean = output[:, :FLAGS.hidden_size]
+        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
 
     def sample(self, x):
-        output = self.network(x)
+        """
+        z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
+
+        Parameters
+        ----------
+        x : tf.Tensor
+            a batch of flattened images [batch_size, 28*28]
+        """
+        self.extract_params(self.network(x))
         epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        mean, stddev = self.extract_params(output)
-        z = mean + epsilon * stddev
-        return z, mean, stddev
+        return self.mean + epsilon * self.stddev
 
 class NormalBernoulli:
     def network(self, z):
