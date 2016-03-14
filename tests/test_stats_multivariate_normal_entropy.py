@@ -5,18 +5,28 @@ import tensorflow as tf
 from blackbox.stats import multivariate_normal
 from scipy import stats
 
-sess = tf.InteractiveSession()
+sess = tf.Session()
 
-print("Input: None")
-print(multivariate_normal.entropy().eval())
-print(stats.multivariate_normal.entropy())
-print()
-print("Input: 2-dimensional vector")
-cov = tf.constant([1.0, 1.0])
-print(multivariate_normal.entropy(cov=cov).eval())
-print(2.83788)
-print()
-print("Input: 2x2 matrix")
-cov = tf.constant([[1.0, 0.0], [0.0, 1.0]])
-print(multivariate_normal.entropy(cov=cov).eval())
-print(2.83788)
+
+def _assert_eq(res_bb, res_true):
+    with sess.as_default():
+        assert np.allclose(res_bb.eval(), res_true)
+
+
+def test_entropy_empty():
+    _assert_eq(multivariate_normal.entropy(),
+               stats.multivariate_normal.entropy())
+
+
+def test_entropy_1d():
+    diag = [1.0, 1.0]
+    cov = tf.constant(diag)
+    _assert_eq(multivariate_normal.entropy(cov=cov),
+               stats.multivariate_normal.entropy(cov=np.diag(diag)))
+
+
+def test_entropy_2d():
+    cm = [[1.0, 0.0], [0.0, 1.0]]
+    cov = tf.constant(cm)
+    _assert_eq(multivariate_normal.entropy(cov=cov),
+               stats.multivariate_normal.entropy(cov=np.array(cm)))

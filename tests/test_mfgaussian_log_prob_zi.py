@@ -16,13 +16,18 @@ print("n_minibatch x d dimensional array of zs")
 print("n_minibatch = 1, d = 1, q(z_{1,:}):")
 print(variational.log_prob_zi(0,
           tf.constant([[0.0]], dtype=tf.float32)).eval())
-print("n_minibatch = 1, d = 2, q(z_{1,:}):")
-print(variational.log_prob_zi(0,
-          tf.constant([[0.0, 0.0]], dtype=tf.float32)).eval())
 
 print("n_minibatch = 2, d = 1, q(z_{1,:}):")
 print(variational.log_prob_zi(0,
           tf.constant([[0.0], [0.0]], dtype=tf.float32)).eval())
+
+variational = bb.MFGaussian(2)
+variational.m_unconst = tf.constant([0.0, 0.0])
+variational.s_unconst = tf.constant([0.0, 0.0])
+
+print("n_minibatch = 1, d = 2, q(z_{1,:}):")
+print(variational.log_prob_zi(0,
+          tf.constant([[0.0, 0.0]], dtype=tf.float32)).eval())
 
 print("n_minibatch = 2, d = 2, q(z_{1,:}):")
 print(variational.log_prob_zi(0,
