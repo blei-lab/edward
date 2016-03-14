@@ -5,7 +5,7 @@ import blackbox as bb
 
 from scipy import stats
 
-sess = tf.InteractiveSession()
+sess = tf.Session()
 # fix random seed
 np.random.seed(98765)
 
