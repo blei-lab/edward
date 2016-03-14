@@ -22,7 +22,7 @@ def _test_log_prob_zi(n_data, n_vars):
         z = np.random.randn(n_data, n_vars)
 
         for i in xrange(n_vars):
-            np.allclose(variational.log_prob_zi(
+            assert np.allclose(variational.log_prob_zi(
                 i, tf.constant(z, dtype=tf.float32)).eval(),
                 stats.norm.logpdf(z[:, i], m[i], s[i]))
 
