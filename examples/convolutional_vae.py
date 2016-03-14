@@ -139,7 +139,7 @@ mnist = input_data.read_data_sets(data_directory, one_hot=True)
 data = Data(mnist)
 
 inference = bb.VAE(model, variational, data)
-sess = inference.init()
+sess = inference.init(n_data=FLAGS.batch_size)
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_latent()
 
@@ -154,11 +154,13 @@ for epoch in range(FLAGS.max_epoch):
         loss = inference.update(sess)
         avg_loss += loss
 
-    # TODO
-    #avg_loss = avg_loss / FLAGS.updates_per_epoch
-    avg_loss = avg_loss / \
-        (FLAGS.updates_per_epoch * 28 * 28 * FLAGS.batch_size)
+    # Take average of all ELBOs during the epoch.
+    avg_loss = avg_loss / FLAGS.updates_per_epoch
+    # Take average over each data point (pixel), where each image has
+    # 28*28 pixels.
+    avg_loss = avg_loss / (28 * 28 * FLAGS.batch_size)
 
+    # Print (an upper bound to) the average NLL for a single pixel.
     print("-log p(x) <= %f" % avg_loss)
 
     imgs = sess.run(p_rep)

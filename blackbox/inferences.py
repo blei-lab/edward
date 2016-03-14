@@ -167,10 +167,8 @@ class VAE(Inference):
     def __init__(self, *args, **kwargs):
         Inference.__init__(self, *args, **kwargs)
 
-    def init(self):
-        # TODO hardcoded batch size
-        FLAGS_batch_size = 128
-        self.x = tf.placeholder(tf.float32, [FLAGS_batch_size, 28 * 28])
+    def init(self, n_data):
+        self.x = tf.placeholder(tf.float32, [n_data, 28 * 28])
 
         self.loss = self.build_loss()
         optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
