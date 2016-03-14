@@ -55,11 +55,12 @@ def test_ndarray_multiple_samples():
     _test(data_ndarray, 2, _assert_eq_ndarray)
 
 
-def test_dict_single_sample():
-    data_dict = bb.Data(dict(N=len(data), y=data))
-    _test(data_dict, 1, _assert_eq_ndarray)
-
-
-def test_dict_multiple_samples():
-    data_dict = bb.Data(dict(N=len(data), y=data))
-    _test(data_dict, 2, _assert_eq_ndarray)
+# TODO: test dict
+#def test_dict_single_sample():
+#    data_dict = bb.Data(dict(N=len(data), y=data))
+#    _test(data_dict, 1, _assert_eq_ndarray)
+#
+#
+#def test_dict_multiple_samples():
+#    data_dict = bb.Data(dict(N=len(data), y=data))
+#    _test(data_dict, 2, _assert_eq_ndarray)

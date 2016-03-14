@@ -13,21 +13,21 @@ from blackbox.util import get_dims
 
 class Gaussian:
     """
-    p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
+    p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, std)
     """
-    def __init__(self, mu, Sigma):
+    def __init__(self, mu, std):
         self.mu = mu
-        self.Sigma = Sigma
-        self.num_vars = get_dims(mu)[0]
+        self.std = std
+        self.num_vars = 1
 
     def log_prob(self, xs, zs):
-        return tf.pack([norm.logpdf(z, mu, Sigma)
-                        for z in tf.unpack(zs)])
+        return tf.concat(0, [norm.logpdf(z, self.mu, self.std)
+                         for z in tf.unpack(zs)])
 
 bb.set_seed(42)
 mu = tf.constant(1.0)
-Sigma = tf.constant(1.0)
-model = Gaussian(mu, Sigma)
+std = tf.constant(1.0)
+model = Gaussian(mu, std)
 variational = bb.MFGaussian(model.num_vars)
 
 inference = bb.MFVI(model, variational)

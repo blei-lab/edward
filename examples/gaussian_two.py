@@ -8,7 +8,7 @@ Variational model
 import tensorflow as tf
 import blackbox as bb
 
-from blackbox.stats import norm
+from blackbox.stats import multivariate_normal
 from blackbox.util import get_dims
 
 class Gaussian:
@@ -21,8 +21,8 @@ class Gaussian:
         self.num_vars = get_dims(mu)[0]
 
     def log_prob(self, xs, zs):
-        return tf.pack([norm.logpdf(z, mu, Sigma)
-                        for z in tf.unpack(zs)])
+        return tf.concat(0, [multivariate_normal.logpdf(z, self.mu, self.Sigma)
+                         for z in tf.unpack(zs)])
 
 bb.set_seed(42)
 mu = tf.constant([1.0, 1.0])
