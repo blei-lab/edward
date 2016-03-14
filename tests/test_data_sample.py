@@ -5,65 +5,60 @@ import tensorflow as tf
 
 sess = tf.InteractiveSession()
 
-print("tf.Tensor data type, single sample")
-data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
-for t in range(20):
-    if t == 10:
-        print()
+data = [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 
-    x = data.sample(1)
-    print(x.eval())
 
-print(type(x))
+def _sample_onepass(data, n_samples):
+    samples = []
+    for _ in xrange(data.N / n_samples):
+        # NOTE: the test will only work if data.N % n_samples == 0
+        samples.append(data.sample(n_data=n_samples))
+    return samples
 
-print("tf.Tensor data type, multiple samples")
-for t in range(10):
-    if t == 5:
-        print()
 
-    x = data.sample(2)
-    print(x.eval())
+def _assert_eq_tf(samples1, samples2):
+    for (s1, s2) in zip(samples1, samples2):
+        assert np.all(tf.equal(s1, s2).eval())
 
-print(type(x))
 
-print("np.ndarray data type, single sample")
-data = bb.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
-for t in range(20):
-    if t == 10:
-        print()
+def _assert_eq_ndarray(samples1, samples2):
+    for (s1, s2) in zip(samples1, samples2):
+        assert np.all(s1 == s2)
 
-    x = data.sample(1)
-    print(x)
 
-print(type(x))
+def _test(data, n_samples, _eq):
+    samples1 = _sample_onepass(data, n_samples)
+    samples2 = _sample_onepass(data, n_samples)
+    _eq(samples1, samples2)
 
-print("np.ndarray data type, multiple samples")
-for t in range(10):
-    if t == 5:
-        print()
 
-    x = data.sample(2)
-    print(x)
+def test_tf_single_sample():
+    data_tf = bb.Data(tf.constant(data, dtype=tf.float32),
+                      shuffled=True)
+    _test(data_tf, 1, _assert_eq_tf)
 
-print(type(x))
 
-print("dict data type, single sample")
-data = bb.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
-for t in range(20):
-    if t == 10:
-        print()
+def test_tf_multiple_samples():
+    data_tf = bb.Data(tf.constant(data, dtype=tf.float32),
+                      shuffled=True)
+    _test(data_tf, 2, _assert_eq_tf)
 
-    x = data.sample(1)
-    print(x)
 
-print(type(x))
+def test_ndarray_single_sample():
+    data_ndarray = bb.Data(np.array(data))
+    _test(data_ndarray, 1, _assert_eq_ndarray)
 
-print("dict data type, multiple samples")
-for t in range(10):
-    if t == 5:
-        print()
 
-    x = data.sample(2)
-    print(x)
+def test_ndarray_multiple_samples():
+    data_ndarray = bb.Data(np.array(data))
+    _test(data_ndarray, 2, _assert_eq_ndarray)
 
-print(type(x))
+
+def test_dict_single_sample():
+    data_dict = bb.Data(dict(N=len(data), y=data))
+    _test(data_dict, 1, _assert_eq_ndarray)
+
+
+def test_dict_multiple_samples():
+    data_dict = bb.Data(dict(N=len(data), y=data))
+    _test(data_dict, 2, _assert_eq_ndarray)
