@@ -5,26 +5,41 @@ import tensorflow as tf
 from blackbox.stats import multivariate_normal
 from scipy import stats
 
-sess = tf.InteractiveSession()
+sess = tf.Session()
 
-print("Input: 2-dimensional vector, float")
-x = tf.constant([0.0, 0.0])
-print(multivariate_normal.logpdf(x).eval())
-print(multivariate_normal.logpdf(x, tf.zeros([2]), tf.ones([2])).eval())
-print(multivariate_normal.logpdf(x, tf.zeros([2]), tf.diag(tf.ones([2]))).eval())
-print(stats.multivariate_normal.logpdf(np.zeros(2), np.zeros(2), np.diag(np.ones(2))))
-print()
-x = tf.constant([0.0, 0.0])
-print(multivariate_normal.logpdf(x,
-        tf.zeros([2]),
-        tf.constant([[2.0, 0.5], [0.5, 1.0]])).eval())
-print(stats.multivariate_normal.logpdf(np.zeros(2),
+
+def _assert_eq(val_bb, val_true):
+    with sess.as_default():
+        assert np.allclose(val_bb.eval(), val_true)
+
+
+def _test_logpdf_standard_2d(val):
+    x = tf.constant(val)
+    val_true = stats.multivariate_normal.logpdf(
         np.zeros(2),
-        np.array([[2.0, 0.5], [0.5, 1.0]])))
-print()
-print("Input: 2-dimensional vector, int")
-x = tf.constant([0, 0])
-print(multivariate_normal.logpdf(x).eval())
-print(multivariate_normal.logpdf(x, tf.zeros([2]), tf.ones([2])).eval())
-print(multivariate_normal.logpdf(x, tf.zeros([2]), tf.diag(tf.ones([2]))).eval())
-print(stats.multivariate_normal.logpdf(np.zeros(2), np.zeros(2), np.diag(np.ones(2))))
+        np.zeros(2),
+        np.diag(np.ones(2)))
+    _assert_eq(multivariate_normal.logpdf(x), val_true)
+    _assert_eq(multivariate_normal.logpdf(x, tf.zeros([2]), tf.ones([2])),
+               val_true)
+    _assert_eq(multivariate_normal.logpdf(
+        x, tf.zeros([2]), tf.diag(tf.ones([2]))), val_true)
+
+
+def test_logpdf_standard_float_2d():
+    _test_logpdf_standard_2d([0.0, 0.0])
+
+
+def test_logpdf_standard_int_2d():
+    _test_logpdf_standard_2d([0, 0])
+
+
+def test_logpdf_cov_float_2d():
+    x = tf.constant([0.0, 0.0])
+    val_true = stats.multivariate_normal.logpdf(
+        np.zeros(2),
+        np.zeros(2),
+        np.array([[2.0, 0.5], [0.5, 1.0]]))
+    _assert_eq(multivariate_normal.logpdf(
+        x, tf.zeros([2]), tf.constant([[2.0, 0.5], [0.5, 1.0]])),
+        val_true)
