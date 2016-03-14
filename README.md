@@ -2,13 +2,17 @@
 
 __blackbox__ is a probabilistic programming tool implemented in Python
 with [TensorFlow](https://www.tensorflow.org) as a backend. It enables
-automatic Bayesian inference over a large class of models, including
-those with both discrete and continuous latent variables.
-Three modeling languages are supported:
+black box inference for probabilistic models, including those with
+discrete and continuous latent variables, neural network
+parameterizations, and infinite dimensional parameter spaces. It is a
+fusion of three fields: Bayesian statistics and machine learning, deep
+learning, and probabilistic programming. 
+
+Three modeling languages are currently supported:
 [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org),
 and original Python using [NumPy/SciPy](http://scipy.org).
 
-Example of inference on a Beta-Binomial model written in Stan:
+Here is an example of variational inference on a Beta-Binomial model written in Stan:
 ```{Python}
 import blackbox as bb
 
@@ -43,17 +47,7 @@ few:
 
 * [TODO]()
 
-(This list will be removed; each item will be a specific example in
-the list of highlighted examples above.)
-
-* variational models ([Ranganath et al., 2015](http://arxiv.org/abs/1511.02386); [Tran et al., 2016](http://arxiv.org/abs/1511.06499))
-* $f$-divergences
-* approximate predictive checks
-* inference networks ([Kingma and Welling, 2014](http://arxiv.org/abs/1312.6114); [Rezende et al., 2014](http://arxiv.org/abs/1401.4082))
-* stochastic dynamics ([Salimans et al., 2015](http://arxiv.org/abs/1410.6460))
-* Bayesian nonparametrics ([Kurihara et al., 2006](http://papers.nips.cc/paper/3025-accelerated-variational-dirichlet-process-mixtures.pdf))
-* multicanonical ([Mandt et al., 2016](http://arxiv.org/abs/1411.1810))
-* streaming ([McInerney et al., 2015](http://arxiv.org/abs/1507.05253))
+[A comprehensive list of features is written here](https://github.com/Blei-Lab/blackbox/wiki), along with references.
 
 ## Documentation
 
