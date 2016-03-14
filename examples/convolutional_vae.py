@@ -33,8 +33,6 @@ flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
 
 FLAGS = flags.FLAGS
 
-bb.set_seed(42)
-
 class MFGaussian:
     def __init__(self):
         self.mean = None # batch_size x hidden_size
@@ -159,6 +157,7 @@ class Inference:
 
         return -elbo
 
+bb.set_seed(42)
 variational = MFGaussian()
 model = NormalBernoulli()
 
