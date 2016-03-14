@@ -3,7 +3,7 @@ import blackbox as bb
 import numpy as np
 import tensorflow as tf
 
-sess = tf.InteractiveSession()
+sess = tf.Session()
 
 data = [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 
@@ -17,8 +17,9 @@ def _sample_onepass(data, n_samples):
 
 
 def _assert_eq_tf(samples1, samples2):
-    for (s1, s2) in zip(samples1, samples2):
-        assert np.all(tf.equal(s1, s2).eval())
+    with sess.as_default():
+        for (s1, s2) in zip(samples1, samples2):
+            assert np.all(tf.equal(s1, s2).eval())
 
 
 def _assert_eq_ndarray(samples1, samples2):
