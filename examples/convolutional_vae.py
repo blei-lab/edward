@@ -23,18 +23,19 @@ from progressbar import ETA, Bar, Percentage, ProgressBar
 flags = tf.flags
 logging = tf.logging
 
-flags.DEFINE_integer("batch_size", 128, "batch size")
-flags.DEFINE_integer("updates_per_epoch", 1000, "number of updates per epoch")
-flags.DEFINE_integer("max_epoch", 100, "max epoch")
-flags.DEFINE_string("working_directory", "", "")
-flags.DEFINE_integer("hidden_size", 10, "size of the hidden VAE unit")
+flags.DEFINE_integer("num_vars", 10, "Number of latent variables.")
+flags.DEFINE_integer("n_iter_per_epoch", 1000, "Number of iterations per epoch.")
+flags.DEFINE_integer("n_epoch", 100, "Maximum number of epochs.")
+flags.DEFINE_integer("n_data", 128, "Mini-batch size for data subsampling.")
+flags.DEFINE_string("data_directory", "data/mnist", "Directory to store data.")
+flags.DEFINE_string("img_directory", "img", "Directory to store sampled images.")
 
 FLAGS = flags.FLAGS
 
 class MFGaussian:
     def __init__(self):
-        self.mean = None # batch_size x hidden_size
-        self.stddev = None # batch_size x hidden_size
+        self.mean = None # n_data x num_vars
+        self.stddev = None # n_data x num_vars
 
     def network(self, x):
         """
@@ -46,17 +47,17 @@ class MFGaussian:
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
             return (pt.wrap(x).
-                    reshape([FLAGS.batch_size, 28, 28, 1]).
+                    reshape([FLAGS.n_data, 28, 28, 1]).
                     conv2d(5, 32, stride=2).
                     conv2d(5, 64, stride=2).
                     conv2d(5, 128, edges='VALID').
                     dropout(0.9).
                     flatten().
-                    fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
+                    fully_connected(FLAGS.num_vars * 2, activation_fn=None)).tensor
 
     def extract_params(self, output):
-        self.mean = output[:, :FLAGS.hidden_size]
-        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
+        self.mean = output[:, :FLAGS.num_vars]
+        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.num_vars:]))
 
     def sample(self, x):
         """
@@ -65,10 +66,10 @@ class MFGaussian:
         Parameters
         ----------
         x : tf.Tensor
-            a batch of flattened images [batch_size, 28*28]
+            a batch of flattened images [n_data, 28*28]
         """
         self.extract_params(self.network(x))
-        epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+        epsilon = tf.random_normal([FLAGS.n_data, FLAGS.num_vars])
         return self.mean + epsilon * self.stddev
 
 class NormalBernoulli:
@@ -82,7 +83,7 @@ class NormalBernoulli:
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
             return (pt.wrap(z).
-                    reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
+                    reshape([FLAGS.n_data, 1, 1, FLAGS.num_vars]).
                     deconv2d(3, 128, edges='VALID').
                     deconv2d(5, 64, edges='VALID').
                     deconv2d(5, 32, stride=2).
@@ -100,7 +101,7 @@ class NormalBernoulli:
         """
         z ~ N(0, 1)
         """
-        return tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
+        return tf.random_normal([FLAGS.n_data, FLAGS.num_vars])
 
     def sample_latent(self):
         # Prior predictive check at test time
@@ -111,7 +112,7 @@ class Data:
     def __init__(self, data):
         self.mnist = data
 
-    def sample(self, size=FLAGS.batch_size):
+    def sample(self, size=FLAGS.n_data):
         x_batch, _ = mnist.train.next_batch(size)
         return x_batch
 
@@ -119,42 +120,40 @@ bb.set_seed(42)
 variational = MFGaussian()
 model = NormalBernoulli()
 
-data_directory = os.path.join(FLAGS.working_directory, "data/mnist")
-if not os.path.exists(data_directory):
-    os.makedirs(data_directory)
-mnist = input_data.read_data_sets(data_directory, one_hot=True)
+if not os.path.exists(FLAGS.data_directory):
+    os.makedirs(FLAGS.data_directory)
+mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 data = Data(mnist)
 
 inference = bb.VAE(model, variational, data)
-sess = inference.init(n_data=FLAGS.batch_size)
+sess = inference.init(n_data=FLAGS.n_data)
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_latent()
 
-for epoch in range(FLAGS.max_epoch):
+for epoch in range(FLAGS.n_epoch):
     avg_loss = 0.0
 
     widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-    pbar = ProgressBar(FLAGS.updates_per_epoch, widgets=widgets)
+    pbar = ProgressBar(FLAGS.n_iter_per_epoch, widgets=widgets)
     pbar.start()
-    for t in range(FLAGS.updates_per_epoch):
+    for t in range(FLAGS.n_iter_per_epoch):
         pbar.update(t)
         loss = inference.update(sess)
         avg_loss += loss
 
     # Take average of all ELBOs during the epoch.
-    avg_loss = avg_loss / FLAGS.updates_per_epoch
+    avg_loss = avg_loss / FLAGS.n_iter_per_epoch
     # Take average over each data point (pixel), where each image has
     # 28*28 pixels.
-    avg_loss = avg_loss / (28 * 28 * FLAGS.batch_size)
+    avg_loss = avg_loss / (28 * 28 * FLAGS.n_data)
 
     # Print (an upper bound to) the average NLL for a single pixel.
     print("-log p(x) <= %f" % avg_loss)
 
     imgs = sess.run(p_rep)
-    for b in range(FLAGS.batch_size):
-        img_folder = os.path.join(FLAGS.working_directory, 'img')
-        if not os.path.exists(img_folder):
-            os.makedirs(img_folder)
+    for b in range(FLAGS.n_data):
+        if not os.path.exists(FLAGS.img_directory):
+            os.makedirs(FLAGS.img_directory)
 
-        imsave(os.path.join(img_folder, '%d.png') % b,
+        imsave(os.path.join(FLAGS.img_directory, '%d.png') % b,
                imgs[b].reshape(28, 28))

@@ -4,8 +4,11 @@ import tensorflow as tf
 
 from blackbox.data import Data
 from blackbox.util import kl_multivariate_normal, log_sum_exp
-# TODO
-import prettytensor as pt
+
+try:
+    import prettytensor as pt
+except ImportError:
+    pass
 
 class Inference:
     """
@@ -163,7 +166,7 @@ class MFVI(Inference):
         return -tf.reduce_mean(self.elbos)
 
 class VAE(Inference):
-    # TODO move this class into MFVI
+    # TODO refactor it to better integrate into Inference
     def __init__(self, *args, **kwargs):
         Inference.__init__(self, *args, **kwargs)
 
@@ -172,12 +175,11 @@ class VAE(Inference):
 
         self.loss = self.build_loss()
         optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
+        # TODO move this to not rely on Pretty Tensor
         self.train = pt.apply_optimizer(optimizer, losses=[self.loss])
 
         init = tf.initialize_all_variables()
         sess = tf.Session()
-        # TODO there shouldn't be any of that variable creation stuff.
-        # why was it hidden away before?
         sess.run(init)
         return sess
 
