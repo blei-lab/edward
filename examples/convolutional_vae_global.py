@@ -44,15 +44,19 @@ class MFGaussian:
         """
         mean, stddev = phi(x)
         """
-        output = (pt.wrap(x).
-                reshape([FLAGS.batch_size, 28, 28, 1]).
-                conv2d(5, 32, stride=2).
-                conv2d(5, 64, stride=2).
-                conv2d(5, 128, edges='VALID').
-                dropout(0.9).
-                flatten().
-                fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
-        return output
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                               batch_normalize=True,
+                               learned_moments_update_rate=0.0003,
+                               variance_epsilon=0.001,
+                               scale_after_normalization=True):
+            return (pt.wrap(x).
+                    reshape([FLAGS.batch_size, 28, 28, 1]).
+                    conv2d(5, 32, stride=2).
+                    conv2d(5, 64, stride=2).
+                    conv2d(5, 128, edges='VALID').
+                    dropout(0.9).
+                    flatten().
+                    fully_connected(FLAGS.hidden_size * 2, activation_fn=None)).tensor
 
     def extract_params(self, output):
         #self.mean = output[:, :FLAGS.hidden_size]
@@ -60,19 +64,6 @@ class MFGaussian:
         mean = output[:, :FLAGS.hidden_size]
         stddev = tf.sqrt(tf.exp(output[:, FLAGS.hidden_size:]))
         return mean, stddev
-
-    def sample(self, x):
-        """
-        z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
-
-        Parameters
-        ----------
-        x : tf.Tensor
-            a batch of flattened images [batch_size, 28*28]
-        """
-        extract_params(self.network(x))
-        epsilon = tf.random_normal([FLAGS.batch_size, FLAGS.hidden_size])
-        return self.mean + epsilon * self.stddev
 
     def sample_ms(self, x):
         output = self.network(x)
@@ -86,13 +77,18 @@ class NormalBernoulli:
         """
         p = varphi(z)
         """
-        return (pt.wrap(z).
-                reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
-                deconv2d(3, 128, edges='VALID').
-                deconv2d(5, 64, edges='VALID').
-                deconv2d(5, 32, stride=2).
-                deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
-                flatten()).tensor
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                               batch_normalize=True,
+                               learned_moments_update_rate=0.0003,
+                               variance_epsilon=0.001,
+                               scale_after_normalization=True):
+            return (pt.wrap(z).
+                    reshape([FLAGS.batch_size, 1, 1, FLAGS.hidden_size]).
+                    deconv2d(3, 128, edges='VALID').
+                    deconv2d(5, 64, edges='VALID').
+                    deconv2d(5, 32, stride=2).
+                    deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+                    flatten()).tensor
 
     def log_likelihood(self, x, z):
         """
@@ -109,13 +105,8 @@ class NormalBernoulli:
 
     def sample_latent(self):
         # Prior predictive check at test time
-        with pt.defaults_scope(activation_fn=tf.nn.elu,
-                               batch_normalize=True,
-                               learned_moments_update_rate=0.0003,
-                               variance_epsilon=0.001,
-                               scale_after_normalization=True):
-            z_test = self.sample_prior()
-            return self.network(z_test)
+        z_test = self.sample_prior()
+        return self.network(z_test)
 
 class Data:
     def __init__(self, data):
@@ -130,47 +121,6 @@ class Inference:
         self.model = model
         self.variational = variational
         self.data = data
-
-    def init(self):
-        self.x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
-
-        self.loss = inference.build_loss()
-        optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, epsilon=1.0)
-        self.train = pt.apply_optimizer(optimizer, losses=[self.loss])
-
-        init = tf.initialize_all_variables()
-        sess = tf.Session()
-        # TODO there shouldn't be any of that variable creation stuff.
-        # why was it hidden away before?
-        sess.run(init)
-        return sess
-
-    def update(self, sess):
-        x = self.data.sample()
-        _, loss_value = sess.run([self.train, self.loss], {self.x: x})
-        return loss_value
-
-    def build_loss(self):
-        with pt.defaults_scope(activation_fn=tf.nn.elu,
-                               batch_normalize=True,
-                               learned_moments_update_rate=0.0003,
-                               variance_epsilon=0.001,
-                               scale_after_normalization=True):
-            z = self.variational.sample(self.x)
-
-            # TODO move this over to model
-            z_test = self.model.sample_prior()
-            self.p_test = self.model.network(z_test)
-
-        # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-        # In general, there should be a scale factor due to data
-        # subsampling, so that
-        # ELBO = N / M * ( ELBO using x_b )
-        # where x^b is a mini-batch of x, with sizes M and N respectively.
-        # This is absorbed into the learning rate.
-        elbo = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-               kl_multivariate_normal(self.variational.mean, self.variational.stddev)
-        return -elbo
 
     def init_temp(self, model, variational):
         x = tf.placeholder(tf.float32, [FLAGS.batch_size, 28 * 28])
@@ -190,18 +140,13 @@ class Inference:
         return loss_value
 
     def build_loss_temp(self, model, variational, x):
-        with pt.defaults_scope(activation_fn=tf.nn.elu,
-                           batch_normalize=True,
-                           learned_moments_update_rate=0.0003,
-                           variance_epsilon=0.001,
-                           scale_after_normalization=True):
-            with tf.variable_scope("model") as scope:
-                z, mean, stddev = variational.sample_ms(x)
-                elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
-                       kl_multivariate_normal(mean, stddev)
+        with tf.variable_scope("model") as scope:
+            z, mean, stddev = variational.sample_ms(x)
+            elbo = tf.reduce_sum(model.log_likelihood(x, z)) - \
+                   kl_multivariate_normal(mean, stddev)
 
-            with tf.variable_scope("model", reuse=True) as scope:
-                sampled_tensor = model.network(model.sample_prior())
+        with tf.variable_scope("model", reuse=True) as scope:
+            sampled_tensor = model.network(model.sample_prior())
 
         return -elbo, sampled_tensor
 
