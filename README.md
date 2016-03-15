@@ -32,45 +32,12 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial).
-Here is an example of variational inference on a Beta-Binomial model written in Stan:
-```{Python}
-import blackbox as bb
-
-model_code = """
-    data {
-      int<lower=0> N;
-      int<lower=0,upper=1> y[N];
-    }
-    parameters {
-      real<lower=0,upper=1> theta;
-    }
-    model {
-      theta ~ beta(1.0, 1.0);
-      for (n in 1:N)
-        y[n] ~ bernoulli(theta);
-    }
-"""
-bb.set_seed(42)
-model = bb.StanModel(model_code=model_code)
-variational = bb.MFBeta(1)
-data = bb.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
-
-# Mean-field variational inference
-inference = bb.MFVI(model, variational, data)
-inference.run()
-```
-We also have a
-[TensorFlow version](examples/beta_bernoulli_tf.py) and
-[NumPy/SciPy version](examples/beta_bernoulli_np.py) of the example.
-More examples are located in [`examples/`](examples/). We highlight a
-few:
+[You can find a tutorial here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
+We highlight a few examples, more of which can be found in [`examples/`](examples/):
 
 * [TODO]()
 
-## Documentation
-
-All documentation is available in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
+Read the documentation in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
 
 ## Installation
 
