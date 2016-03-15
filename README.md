@@ -6,7 +6,7 @@ black box inference for probabilistic models, including those with
 discrete and continuous latent variables, neural network
 parameterizations, and infinite dimensional parameter spaces. It is a
 fusion of three fields: Bayesian statistics and machine learning, deep
-learning, and probabilistic programming. 
+learning, and probabilistic programming.
 
 Three modeling languages are currently supported:
 [Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org),
@@ -65,12 +65,15 @@ pip install -e "git+https://github.com/blei-lab/blackbox.git#egg=blackbox"
 
 ## Citation
 
+We appreciate citations for blackbox because it lets us find out how
+people have been using the library and it motivates further work.
+
+. 2016. blackbox: Black box inference for probabilistic models, Version 0.1.   https://github.com/Blei-Lab/blackbox
 ```
 @misc{
-  title = {{blackbox: Black box inference for probabilistic models}},
   author = {},
-  note = {Python package version 0.1},
-  url = {https://github.com/Blei-Lab/blackbox},
-  year = {2016}
+  title = {{blackbox: Black box inference for probabilistic models, Version 0.1}},
+  year = {2016},
+  url = {https://github.com/Blei-Lab/blackbox}
 }
 ```
