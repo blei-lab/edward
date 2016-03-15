@@ -46,7 +46,7 @@ model{
    }
    for (n in 1:N) {
       real ps[K];
-      for (k in 1:K){
+      for (k in 1:K-1){
          ps[k] <- log(theta[k]) + normal_log(x[n], mu[k], sigma[k]);
       }
       increment_log_prob(log_sum_exp(ps));
@@ -56,10 +56,10 @@ model{
 bb.set_seed(42)
 model = bb.StanModel(model_code=model_code)
 K = 2
-variational = bb.MFMixGaussian(1, K)
+D = 2
+variational = bb.MFMixGaussian(D, K)
 x = np.loadtxt('./mix_data/mix_mock_data.txt', dtype='float32', delimiter=',')
 N = len(x)
-D = 2
 data = bb.Data(dict(N=N, K=K, D=D , x=x))
 
 inference = bb.MFVI(model, variational, data)

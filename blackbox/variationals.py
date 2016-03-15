@@ -40,7 +40,7 @@ class MFMixGaussian:
         
         z = np.concatenate((dirich_samples[0][0], gauss_samples, invgam_samples[0]), axis=0)
        
-        return z
+        return z.reshape(size)
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
