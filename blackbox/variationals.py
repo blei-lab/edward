@@ -309,16 +309,6 @@ class PMGaussian():
         print("parameter values:")
         print(params)
 
-    def sample_noise(self, size):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
-        """
-        # Not using this, since TensorFlow has a large overhead
-        # whenever calling sess.run().
-        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
-        return np.zeros(size)
-
     def reparam(self,eps):
         """
         reparametrization of point mass
@@ -339,24 +329,12 @@ class PMBeta():
         self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.transform = tf.nn.softplus
 
-    def sample_noise(self, size):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
-        """
-        # Not using this, since TensorFlow has a large overhead
-        # whenever calling sess.run().
-        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
-        return np.zeros(size)
-
-
     def reparam(self, eps):
         """
         reparametrization of point mass
         doesn't depend on noise eps
         """
         return self.transform(self.a_unconst)/self.transform(self.b_unconst) + eps
-
 
     def print_params(self, sess):
         a, b = sess.run([ \
@@ -367,5 +345,3 @@ class PMBeta():
         print(a)
         print("scale:")
         print(b)
-
-
