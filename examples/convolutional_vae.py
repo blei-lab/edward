@@ -9,16 +9,16 @@ Probability model
 Variational model
     Likelihood: Mean-field Gaussian parameterized by convolutional NN
 """
-from __future__ import division, print_function
+from __future__ import print_function
 import os
+import blackbox as bb
 import prettytensor as pt
 import tensorflow as tf
-import blackbox as bb
 
 from convolutional_vae_util import deconv2d
+from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
-from progressbar import ETA, Bar, Percentage, ProgressBar
 
 flags = tf.flags
 logging = tf.logging

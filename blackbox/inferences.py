@@ -174,9 +174,8 @@ class VAE(Inference):
         """
         Parameters
         ----------
-        n_data: int, optional
-            Number of samples for data subsampling. Default is to use all
-            the data.
+        n_data: int
+            Number of samples for data subsampling.
         """
         self.n_data = n_data
         self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
