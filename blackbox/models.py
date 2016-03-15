@@ -25,10 +25,6 @@ class PythonModel:
     #def _log_prob_grad(self, zs):
     #    return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
 
-    def get_num_vars(self, xs=None):
-        return self.num_vars
-
-
     def log_prob(self, xs, zs):
         # TODO
         temp = tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
@@ -95,11 +91,6 @@ class StanModel:
             raise
 
         self.flag_init = False
-
-    def get_num_vars(self, xs):
-        if self.flag_init is False:
-            self._initialize(xs)
-        return self.num_vars
 
     def log_prob(self, xs, zs):
         if self.flag_init is False:
