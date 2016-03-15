@@ -294,7 +294,7 @@ class MFGaussian:
 
 class PointMass():
     """
-    Point mass variational family (for MAP estimation)
+    Point mass variational family
     """
     def __init__(self, num_vars, transform=tf.identity):
         self.num_vars = num_vars
