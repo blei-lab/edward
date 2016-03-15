@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from blackbox.data import Data
+from blackbox.variationals import PointMass
 from blackbox.util import log_sum_exp
 
 class Inference:
@@ -260,12 +261,12 @@ class MAP(VariationalInference):
     """
     Maximum a posteriori
     """
-    def __init__(self, model, variational, data=Data(), num_params=None):
-        # TODO: chack if variational family is pointmass
+    def __init__(self, model, data=Data(), transform=tf.identity):
+        variational = PointMass(model.num_vars, transform)
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
-        z = self.variational.get_params()
         x = self.data.sample(self.n_data)
+        z = self.variational.get_params()
         self.losses = self.model.log_prob(x, z)
         return -tf.reduce_mean(self.losses)

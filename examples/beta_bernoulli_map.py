@@ -31,6 +31,5 @@ model = BetaBernoulli()
 variational = bb.MFBeta(model.num_vars)
 data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-variational = bb.PMBernoulli(1)
-inference = bb.MAP(model, variational, data)
+inference = bb.MAP(model, data, transform=tf.sigmoid)
 inference.run(n_iter=100, n_print=10)

@@ -38,6 +38,5 @@ Sigma = tf.constant(0.1)
 model = Gaussian(mu, Sigma)
 data = bb.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-variational = bb.PMGaussian(1)
-inference = bb.MAP(model,variational,data)
+inference = bb.MAP(model, data)
 inference.run(n_iter=200, n_print=50)

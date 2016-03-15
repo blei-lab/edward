@@ -292,64 +292,21 @@ class MFGaussian:
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
 
-class PMGaussian():
+class PointMass():
     """
     Point mass variational family (for MAP estimation)
     """
-    def __init__(self, num_vars):
+    def __init__(self, num_vars, transform=tf.identity):
         self.num_vars = num_vars
         self.num_params = num_vars
 
-        self.lam_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.transform = tf.identity
+        self.param_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.transform = transform
 
     def print_params(self, sess):
-        params = sess.run([self.transform(self.lam_unconst)])
+        params = sess.run([self.transform(self.param_unconst)])
         print("parameter values:")
         print(params)
 
     def get_params(self):
-        return self.transform(self.lam_unconst)
-
-class PMBernoulli:
-    """
-    Point mass variational family (for MAP estimation)
-    """
-    def __init__(self, num_vars):
-        self.num_vars = num_vars
-        self.num_params = num_vars
-        self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.transform = tf.sigmoid
-
-    def get_params(self):
-        return self.transform(self.p_unconst)
-
-    def print_params(self, sess):
-        p = sess.run([self.transform(self.p_unconst)])
-
-        print("probability:")
-        print(p)
-
-class PMBeta():
-    """
-    Point mass variational family (for MAP estimation)
-    """
-    def __init__(self, num_vars):
-        self.num_vars = num_vars
-        self.num_params = 2*num_vars
-        self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.transform = tf.nn.softplus
-
-    def get_params(self):
-        return self.transform(self.a_unconst)/self.transform(self.b_unconst)
-
-    def print_params(self, sess):
-        a, b = sess.run([ \
-            self.transform(self.a_unconst),
-            self.transform(self.b_unconst)])
-
-        print("shape:")
-        print(a)
-        print("scale:")
-        print(b)
+        return self.transform(self.param_unconst)
