@@ -28,8 +28,6 @@ It also has __features__ including
 * Documentation and tutorials
 * Examples demonstrating state-of-the-art generative models and inference
 
-[A list of advanced features is written here](https://github.com/Blei-Lab/blackbox/wiki), along with references.
-
 ## Getting Started
 
 [You can find a tutorial here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
