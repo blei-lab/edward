@@ -265,7 +265,7 @@ class MAP(VariationalInference):
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
-        z = self.variational.reparam(0.0)
+        z = self.variational.get_params()
         x = self.data.sample(self.n_data)
-        self.elbos = self.model.log_prob(x, z)
-        return -tf.reduce_mean(self.elbos)
+        self.losses = self.model.log_prob(x, z)
+        return -tf.reduce_mean(self.losses)

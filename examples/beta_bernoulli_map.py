@@ -19,7 +19,7 @@ class BetaBernoulli(PythonModel):
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
     def __init__(self):
-        self.num_vars = 1 
+        self.num_vars = 1
 
     def _py_log_prob(self, xs, zs):
         # This example is written for pedagogy. We recommend
@@ -36,6 +36,6 @@ class BetaBernoulli(PythonModel):
 bb.set_seed(42)
 model = BetaBernoulli()
 data = bb.Data(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]))
-variational = bb.PMBeta(1)
+variational = bb.PMBernoulli(1)
 inference = bb.MAP(model, variational, data)
 inference.run(n_iter=100)

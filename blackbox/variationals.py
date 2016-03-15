@@ -292,7 +292,6 @@ class MFGaussian:
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
 
-
 class PMGaussian():
     """
     Point mass variational family (for MAP estimation)
@@ -309,14 +308,27 @@ class PMGaussian():
         print("parameter values:")
         print(params)
 
-    def reparam(self,eps):
-        """
-        reparametrization of point mass
-        doesn't depend on noise eps
-        """
-        #return self.transform(self.lam_unconst)
-        lam = self.transform(self.lam_unconst)
-        return lam + eps
+    def get_param(self):
+        return self.transform(self.lam_unconst)
+
+class PMBernoulli:
+    """
+    Point mass variational family (for MAP estimation)
+    """
+    def __init__(self, num_vars):
+        self.num_vars = num_vars
+        self.num_params = num_vars
+        self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.transform = tf.sigmoid
+
+    def get_params(self):
+        return self.transform(self.p_unconst)
+
+    def print_params(self, sess):
+        p = sess.run([self.transform(self.p_unconst)])
+
+        print("probability:")
+        print(p)
 
 class PMBeta():
     """
@@ -329,12 +341,8 @@ class PMBeta():
         self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.transform = tf.nn.softplus
 
-    def reparam(self, eps):
-        """
-        reparametrization of point mass
-        doesn't depend on noise eps
-        """
-        return self.transform(self.a_unconst)/self.transform(self.b_unconst) + eps
+    def get_params(self):
+        return self.transform(self.a_unconst)/self.transform(self.b_unconst)
 
     def print_params(self, sess):
         a, b = sess.run([ \
