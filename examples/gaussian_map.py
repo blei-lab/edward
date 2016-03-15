@@ -40,4 +40,4 @@ data = bb.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 
 
 variational = bb.PMGaussian(1)
 inference = bb.MAP(model,variational,data)
-inference.run(n_iter=1000)
+inference.run(n_iter=200, n_print=50)

@@ -33,4 +33,4 @@ data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 variational = bb.PMBernoulli(1)
 inference = bb.MAP(model, variational, data)
-inference.run(n_iter=100)
+inference.run(n_iter=100, n_print=10)

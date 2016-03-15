@@ -308,7 +308,7 @@ class PMGaussian():
         print("parameter values:")
         print(params)
 
-    def get_param(self):
+    def get_params(self):
         return self.transform(self.lam_unconst)
 
 class PMBernoulli:
