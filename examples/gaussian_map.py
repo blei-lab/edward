@@ -9,16 +9,14 @@ import blackbox as bb
 
 from blackbox.stats import norm
 from blackbox.util import get_dims
-from blackbox.models import PythonModel
 
-class Gaussian(PythonModel):
+class Gaussian:
     """
     p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
     """
     def __init__(self, mu, Sigma):
         self.mu = mu
         self.Sigma = Sigma
-        #self.num_vars = get_dims(mu)[0]
         self.num_vars = 1
 
     def log_prob(self, xs, zs):
