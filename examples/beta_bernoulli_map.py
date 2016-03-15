@@ -1,41 +1,36 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in NumPy/SciPy.
+A simple example from Stan. The model is written in TensorFlow.
 
 Probability model
     Prior: Beta
     Likelihood: Bernoulli
-Variational model
-    Likelihood: Mean-field Beta
+Inference: Maximum a posteriori
 """
+import tensorflow as tf
 import blackbox as bb
-import numpy as np
 
-from blackbox import PythonModel
-from scipy.stats import beta, bernoulli
+from blackbox.stats import bernoulli, beta
 
-class BetaBernoulli(PythonModel):
+class BetaBernoulli:
     """
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
     def __init__(self):
         self.num_vars = 1
 
-    def _py_log_prob(self, xs, zs):
-        # This example is written for pedagogy. We recommend
-        # vectorizing operations in practice.
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        lp[0] = beta.logpdf(zs[0,:], a=1.0, b=1.0)
-        for n in range(len(xs)):
-            lp[0] += bernoulli.logpmf(xs[n], p=zs[0,:])
-
-        return lp
-
+    def log_prob(self, xs, zs):
+        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+        log_lik = tf.concat(0, [
+            tf.reduce_sum(bernoulli.logpmf(xs, z)) \
+            for z in tf.unpack(zs)])
+        return log_lik + log_prior
 
 bb.set_seed(42)
 model = BetaBernoulli()
-data = bb.Data(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]))
+variational = bb.MFBeta(model.num_vars)
+data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
+
 variational = bb.PMBernoulli(1)
 inference = bb.MAP(model, variational, data)
 inference.run(n_iter=100)

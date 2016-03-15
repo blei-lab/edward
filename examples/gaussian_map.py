@@ -2,8 +2,7 @@
 """
 Probability model
     Posterior: (1-dimensional) Gaussian
-Variational model
-    Likelihood: Mean-field Gaussian
+Inference: Maximum a posteriori
 """
 import tensorflow as tf
 import blackbox as bb
@@ -41,6 +40,4 @@ data = bb.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 
 
 variational = bb.PMGaussian(1)
 inference = bb.MAP(model,variational,data)
-#variational = bb.MFGaussian(1)
-#inference = bb.MFVI(model,variational,data)
 inference.run(n_iter=1000)
