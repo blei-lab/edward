@@ -40,7 +40,7 @@ class MFGaussian:
 
     def network(self, x):
         """
-        mean, stddev = phi(x)
+        lambda = phi(x)
         """
         with pt.defaults_scope(activation_fn=tf.nn.elu,
                                batch_normalize=True,
@@ -57,12 +57,29 @@ class MFGaussian:
                     fully_connected(self.num_vars * 2, activation_fn=None)).tensor
 
     def extract_params(self, params):
+        """
+        lambda = (mean, stddev)
+        """
         self.mean = params[:, :self.num_vars]
         self.stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
 
+    def sample_noise(self, size):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        """
+        return tf.random_normal(size)
+
+    def reparam(self, eps):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        """
+        return self.mean + eps * self.stddev
+
     def sample(self, size, x):
         """
-        z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
+        z | x ~ q(z | x) = N(z | lambda = phi(x))
 
         Parameters
         ----------
@@ -70,8 +87,7 @@ class MFGaussian:
             a batch of flattened images [n_data, 28*28]
         """
         self.extract_params(self.network(x))
-        epsilon = tf.random_normal(size)
-        return self.mean + epsilon * self.stddev
+        return self.reparam(self.sample_noise(size))
 
 class NormalBernoulli:
     def __init__(self, num_vars):
