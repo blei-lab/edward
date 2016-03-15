@@ -170,7 +170,7 @@ class VAE(Inference):
     def __init__(self, *args, **kwargs):
         Inference.__init__(self, *args, **kwargs)
 
-    def init(self, n_data):
+    def initialize(self, n_data):
         """
         Parameters
         ----------

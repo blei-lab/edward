@@ -130,7 +130,7 @@ mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 data = Data(mnist)
 
 inference = bb.VAE(model, variational, data)
-sess = inference.init(n_data=FLAGS.n_data)
+sess = inference.initialize(n_data=FLAGS.n_data)
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_latent([FLAGS.n_data, FLAGS.num_vars])
 
