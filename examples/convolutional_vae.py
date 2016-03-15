@@ -33,7 +33,8 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 FLAGS = flags.FLAGS
 
 class MFGaussian:
-    def __init__(self):
+    def __init__(self, num_vars):
+        self.num_vars = num_vars
         self.mean = None # n_data x num_vars
         self.stddev = None # n_data x num_vars
 
@@ -53,13 +54,13 @@ class MFGaussian:
                     conv2d(5, 128, edges='VALID').
                     dropout(0.9).
                     flatten().
-                    fully_connected(FLAGS.num_vars * 2, activation_fn=None)).tensor
+                    fully_connected(self.num_vars * 2, activation_fn=None)).tensor
 
-    def extract_params(self, output):
-        self.mean = output[:, :FLAGS.num_vars]
-        self.stddev = tf.sqrt(tf.exp(output[:, FLAGS.num_vars:]))
+    def extract_params(self, params):
+        self.mean = params[:, :self.num_vars]
+        self.stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
 
-    def sample(self, x):
+    def sample(self, size, x):
         """
         z | x ~ q(z | x) = N(z | mean, stddev = phi(x))
 
@@ -69,10 +70,13 @@ class MFGaussian:
             a batch of flattened images [n_data, 28*28]
         """
         self.extract_params(self.network(x))
-        epsilon = tf.random_normal([FLAGS.n_data, FLAGS.num_vars])
+        epsilon = tf.random_normal(size)
         return self.mean + epsilon * self.stddev
 
 class NormalBernoulli:
+    def __init__(self, num_vars):
+        self.num_vars = num_vars
+
     def network(self, z):
         """
         p = varphi(z)
@@ -83,7 +87,7 @@ class NormalBernoulli:
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
             return (pt.wrap(z).
-                    reshape([FLAGS.n_data, 1, 1, FLAGS.num_vars]).
+                    reshape([FLAGS.n_data, 1, 1, self.num_vars]).
                     deconv2d(3, 128, edges='VALID').
                     deconv2d(5, 64, edges='VALID').
                     deconv2d(5, 32, stride=2).
@@ -97,28 +101,28 @@ class NormalBernoulli:
         p = self.network(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
-    def sample_prior(self):
+    def sample_prior(self, size):
         """
         z ~ N(0, 1)
         """
-        return tf.random_normal([FLAGS.n_data, FLAGS.num_vars])
+        return tf.random_normal(size)
 
-    def sample_latent(self):
+    def sample_latent(self, size):
         # Prior predictive check at test time
-        z_rep = self.sample_prior()
+        z_rep = self.sample_prior(size)
         return self.network(z_rep)
 
 class Data:
     def __init__(self, data):
         self.mnist = data
 
-    def sample(self, size=FLAGS.n_data):
+    def sample(self, size):
         x_batch, _ = mnist.train.next_batch(size)
         return x_batch
 
 bb.set_seed(42)
-variational = MFGaussian()
-model = NormalBernoulli()
+model = NormalBernoulli(FLAGS.num_vars)
+variational = MFGaussian(FLAGS.num_vars)
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
@@ -128,7 +132,7 @@ data = Data(mnist)
 inference = bb.VAE(model, variational, data)
 sess = inference.init(n_data=FLAGS.n_data)
 with tf.variable_scope("model", reuse=True) as scope:
-    p_rep = model.sample_latent()
+    p_rep = model.sample_latent([FLAGS.n_data, FLAGS.num_vars])
 
 for epoch in range(FLAGS.n_epoch):
     avg_loss = 0.0

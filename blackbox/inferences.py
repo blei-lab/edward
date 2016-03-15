@@ -171,7 +171,15 @@ class VAE(Inference):
         Inference.__init__(self, *args, **kwargs)
 
     def init(self, n_data):
-        self.x = tf.placeholder(tf.float32, [n_data, 28 * 28])
+        """
+        Parameters
+        ----------
+        n_data: int, optional
+            Number of samples for data subsampling. Default is to use all
+            the data.
+        """
+        self.n_data = n_data
+        self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
 
         self.loss = self.build_loss()
         optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
@@ -184,13 +192,14 @@ class VAE(Inference):
         return sess
 
     def update(self, sess):
-        x = self.data.sample()
+        x = self.data.sample(self.n_data)
         _, loss_value = sess.run([self.train, self.loss], {self.x: x})
         return loss_value
 
     def build_loss(self):
         with tf.variable_scope("model") as scope:
-            z = self.variational.sample(self.x)
+            z = self.variational.sample([self.n_data, self.variational.num_vars],
+                                        self.x)
             # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
             # In general, there should be a scale factor due to data
             # subsampling, so that
