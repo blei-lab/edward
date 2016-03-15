@@ -1,7 +1,6 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
-#from scipy import stats
 
 from blackbox.stats import bernoulli, beta, norm, dirichlet, invgamma
 from blackbox.util import get_dims
@@ -11,12 +10,18 @@ class MFMixGaussian:
     """                                                                                                   
     q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)                                         
     """
-    def __init__(self, num_vars, K):
+    def __init__(self, D, K):
         self.K = K
-        self.dirich = MFDirichlet(1, K)
-        self.gauss = MFGaussian(1)
-        self.invgam = MFInvGamma(1)
-        self.num_vars = num_vars
+        #self.dirich = MFDirichlet(1, K)
+        self.dirich = MFDirichlet(K, K)
+        self.gauss = MFGaussian(K*D)
+        self.invgam = MFInvGamma(K*D)
+
+        dirich_num_vars = self.dirich.num_vars
+        gauss_num_vars = self.gauss.num_vars
+        invgam_num_vars = self.invgam.num_vars
+        self.num_vars = dirich_num_vars + gauss_num_vars + invgam_num_vars
+
         dirich_num_param = self.dirich.num_params
         gauss_num_param = self.gauss.num_params
         invgam_num_params = self.invgam.num_params
@@ -29,26 +34,38 @@ class MFMixGaussian:
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        z = np.zeros((size[0], self.K + 2))
-        dirich_samples = self.dirich.sample(size, sess)
-        gauss_samples = self.gauss.sample(size, sess)
-        invgam_samples = self.invgam.sample(size, sess)
-        z[:, 0 : self.K] = dirich_samples
-        z[:, -2] = gauss_samples
-        z[:, -1] = invgam_samples
+        dirich_samples = self.dirich.sample((size[0],self.dirich.num_vars), sess)
+        gauss_samples = self.gauss.sample((size[0], self.gauss.num_vars), sess)
+        invgam_samples = self.invgam.sample((size[0], self.invgam.num_vars), sess)
         
-        return z
+        z = np.concatenate((dirich_samples[0][0], gauss_samples, invgam_samples[0]), axis=0)
+        z[1] = 1 - z[0]
+        print(z[1] + z[0])
+        return z.reshape(size)
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
+        #z is self.samples..it is a placeholder of size n_minibatch x num_vars
+        #sess2 = tf.Session()
+        #y = tf.mul(1., z)
+        #print(sess2.run(y, feed_dict={z:z}))
+        #z[:,0] = 1 - z[:,1]
+    
+        log_prob = 0
+        if i < self.dirich.num_vars:
+            log_prob += self.dirich.log_prob_zi(i, z)  
+
+        if i < self.gauss.num_vars:
+            log_prob += self.gauss.log_prob_zi(i, z) 
+        
+        if i < self.invgam.num_vars:
+            log_prob += self.invgam.log_prob_zi(i, z)
+ 
         if i >= self.num_vars:
             raise
-        dirich_log_prob = self.dirich.log_prob_zi(i, z)
-        gauss_log_prob= self.gauss.log_prob_zi(i, z)
-        invgam_log_prob= self.invgam.log_prob_zi(i, z)
 
-        return dirich_log_prob + gauss_log_prob + invgam_log_prob
-
+        return log_prob
+ 
 class MFDirichlet:
     """
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
@@ -56,13 +73,12 @@ class MFDirichlet:
     def __init__(self, num_vars, K):
         self.K = K
         self.num_vars = num_vars
-        self.num_params = num_vars 
+        self.num_params = K * num_vars 
         self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
         self.transform = tf.nn.softplus
-        
+
     def print_params(self, sess):
         alpha = sess.run([self.transform(self.alpha_unconst)])
-        
         print("concentration vector:")
         print(alpha)
         
@@ -72,14 +88,13 @@ class MFDirichlet:
         z = np.zeros((size[1], size[0], self.K))
         for d in xrange(self.num_vars):
             z[d, :, :] = dirichlet.rvs(alpha[d, :], size = size[0])
-
+        
         return z
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
             raise
-        
         alphai = self.transform(self.alpha_unconst)[i, :]
         
         return dirichlet.logpdf(z[:, i], alphai)
@@ -271,7 +286,7 @@ class MFGaussian:
             self.transform_m(self.m_unconst),
             self.transform_s(self.s_unconst)])
 
-        return m + s * norm.rvs(size=size)
+        return m + s * norm.rvs(size=size[0])
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
