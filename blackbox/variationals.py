@@ -37,29 +37,29 @@ class MFMixGaussian:
         dirich_samples = self.dirich.sample((size[0],self.dirich.num_vars), sess)
         gauss_samples = self.gauss.sample((size[0], self.gauss.num_vars), sess)
         invgam_samples = self.invgam.sample((size[0], self.invgam.num_vars), sess)
-        
+
         z = np.concatenate((dirich_samples[0][0], gauss_samples, invgam_samples[0]), axis=0)
-       
+
         return z.reshape(size)
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
-       
+
         log_prob = 0
         if i < self.dirich.num_vars:
-            log_prob += self.dirich.log_prob_zi(i, z)  
+            log_prob += self.dirich.log_prob_zi(i, z)
 
         if i < self.gauss.num_vars:
-            log_prob += self.gauss.log_prob_zi(i, z) 
-        
+            log_prob += self.gauss.log_prob_zi(i, z)
+
         if i < self.invgam.num_vars:
             log_prob += self.invgam.log_prob_zi(i, z)
- 
+
         if i >= self.num_vars:
             raise
 
         return log_prob
- 
+
 class MFDirichlet:
     """
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
@@ -67,7 +67,7 @@ class MFDirichlet:
     def __init__(self, num_vars, K):
         self.K = K
         self.num_vars = num_vars
-        self.num_params = K * num_vars 
+        self.num_params = K * num_vars
         self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
         self.transform = tf.nn.softplus
 
@@ -83,7 +83,7 @@ class MFDirichlet:
         z = np.zeros((size[1], size[0], self.K))
         for d in xrange(self.num_vars):
             z[d, :, :] = dirichlet.rvs(alpha[d, :], size = size[0])
-        
+
         return z
 
     def log_prob_zi(self, i, z):

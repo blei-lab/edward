@@ -21,6 +21,10 @@ It supports __inference__ via
     * Variational auto-encoders
     * Inclusive KL divergence (KL(p || q))
 
+It supports __criticism__ of the model and inference via
+
+* Prior and posterior predictive checks
+
 It also has __features__ including
 
 * [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
