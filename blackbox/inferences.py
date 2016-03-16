@@ -3,8 +3,13 @@ import numpy as np
 import tensorflow as tf
 
 from blackbox.data import Data
+from blackbox.util import kl_multivariate_normal, log_sum_exp
 from blackbox.variationals import PointMass
-from blackbox.util import log_sum_exp
+
+try:
+    import prettytensor as pt
+except ImportError:
+    pass
 
 class Inference:
     """
@@ -220,6 +225,50 @@ class MFVI(VariationalInference):
         z = self.variational.reparam(self.samples)
         self.losses = self.model.log_prob(x, z) + self.variational.entropy()
         return -tf.reduce_mean(self.losses)
+
+class VAE(VariationalInference):
+    # TODO refactor into MFVI
+    def __init__(self, *args, **kwargs):
+        VariationalInference.__init__(self, *args, **kwargs)
+
+    def initialize(self, n_data=None):
+        # TODO refactor to use VariationalInference's initialize()
+        self.n_data = n_data
+
+        # TODO don't fix number of covariates
+        self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
+        self.losses = tf.constant(0.0)
+
+        loss = self.build_loss()
+        optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
+        # TODO move this to not rely on Pretty Tensor
+        self.train = pt.apply_optimizer(optimizer, losses=[loss])
+
+        init = tf.initialize_all_variables()
+        sess = tf.Session()
+        sess.run(init)
+        return sess
+
+    def update(self, sess):
+        x = self.data.sample(self.n_data)
+        _, loss_value = sess.run([self.train, self.losses], {self.x: x})
+        return loss_value
+
+    def build_loss(self):
+        # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+        # In general, there should be a scale factor due to data
+        # subsampling, so that
+        # ELBO = N / M * ( ELBO using x_b )
+        # where x^b is a mini-batch of x, with sizes M and N respectively.
+        # This is absorbed into the learning rate.
+        with tf.variable_scope("model") as scope:
+            z = self.variational.sample([self.n_data, self.variational.num_vars],
+                                        self.x)
+            self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                          kl_multivariate_normal(self.variational.mean,
+                                                 self.variational.stddev)
+
+        return -self.losses
 
 class KLpq(VariationalInference):
     """

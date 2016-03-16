@@ -8,6 +8,7 @@ fusion of three fields: Bayesian statistics and machine learning, deep
 learning, and probabilistic programming.
 
 It supports __modeling languages__ including
+
 * [Stan](http://mc-stan.org)
 * [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
 * original Python using [NumPy/SciPy](http://scipy.org/)
@@ -35,7 +36,7 @@ It also has __features__ including
 [You can find a tutorial here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
 We highlight a few examples, more of which can be found in [`examples/`](examples/):
 
-* [TODO]()
+* [Convolutional variational auto-encoder](examples/convolutional_vae.py)
 
 Read the documentation in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
 
