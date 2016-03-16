@@ -1,58 +1,42 @@
 ![blackbox](http://dustintran.com/img/blackbox_200.png)
 
-__blackbox__ is a probabilistic programming tool implemented in Python
-with [TensorFlow](https://www.tensorflow.org) as a backend. It enables
+__blackbox__ is a probabilistic programming tool written in Python. It enables
 black box inference for probabilistic models, including those with
 discrete and continuous latent variables, neural network
 parameterizations, and infinite dimensional parameter spaces. It is a
 fusion of three fields: Bayesian statistics and machine learning, deep
 learning, and probabilistic programming.
 
-Three modeling languages are currently supported:
-[Stan](http://mc-stan.org), [TensorFlow](https://www.tensorflow.org),
-and original Python using [NumPy/SciPy](http://scipy.org).
+It supports __modeling languages__ including
+* [Stan](http://mc-stan.org)
+* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
+* original Python using [NumPy/SciPy](http://scipy.org/)
 
-Here is an example of variational inference on a Beta-Binomial model written in Stan:
-```{Python}
-import blackbox as bb
+It supports __inference__ via
 
-model_code = """
-    data {
-      int<lower=0> N;
-      int<lower=0,upper=1> y[N];
-    }
-    parameters {
-      real<lower=0,upper=1> theta;
-    }
-    model {
-      theta ~ beta(1.0, 1.0);
-      for (n in 1:N)
-        y[n] ~ bernoulli(theta);
-    }
-"""
-bb.set_seed(42)
-model = bb.StanModel(model_code=model_code)
-variational = bb.MFBeta(1)
-data = bb.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+* Variational inference
+  * Global divergence minimization
+    * Black box variational inference
+    * Stochastic variational inference
+    * Variational auto-encoders
+    * Inclusive KL divergence (KL(p || q))
+  * Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
 
-# Mean-field variational inference
-inference = bb.MFVI(model, variational, data)
-inference.run()
-```
-The equivalent example is also written in
-[TensorFlow](examples/beta_bernoulli_tf.py) and
-[NumPy/SciPy](examples/beta_bernoulli_np.py).
-More examples are located in [`examples/`](examples/). We highlight a
-few:
+It also has __features__ including
+
+* [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
+* A library for probability distributions in TensorFlow
+* Documentation and tutorials
+* Examples demonstrating state-of-the-art generative models and inference
+
+## Getting Started
+
+[You can find a tutorial here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
+We highlight a few examples, more of which can be found in [`examples/`](examples/):
 
 * [TODO]()
 
-[A comprehensive list of features is written here](https://github.com/Blei-Lab/blackbox/wiki), along with references.
-
-## Documentation
-
-[A tutorial is available here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial).
-More generally, all documentation is available in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
+Read the documentation in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
 
 ## Installation
 
