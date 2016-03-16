@@ -301,4 +301,23 @@ class MFGaussian:
 
     # TODO entropy is bugged
     #def entropy(self):
-    #    return multivariate_normal.entropy(self.transform_s(self.s_unconst))
+    #    return norm.entropy(self.transform_s(self.s_unconst))
+
+class PointMass():
+    """
+    Point mass variational family
+    """
+    def __init__(self, num_vars, transform=tf.identity):
+        self.num_vars = num_vars
+        self.num_params = num_vars
+
+        self.param_unconst = tf.Variable(tf.random_normal([num_vars]))
+        self.transform = transform
+
+    def print_params(self, sess):
+        params = sess.run([self.transform(self.param_unconst)])
+        print("parameter values:")
+        print(params)
+
+    def get_params(self):
+        return self.transform(self.param_unconst)
