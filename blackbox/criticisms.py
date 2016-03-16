@@ -1,5 +1,8 @@
 import tensorflow as tf
 
+# TODO
+# whether to keep around sess. This seems like a bother to users
+# who don't know TensorFlow
 def predictive_check(T, data, model, latent, size=100, sess=tf.Session()):
     """
     Predictive check.

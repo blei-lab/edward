@@ -30,7 +30,6 @@ class BetaBernoulli:
 
     def sample_likelihood(self, z, N):
         """x | z ~ p(x | z)"""
-        # TODO hard-coded data size
         return bernoulli.rvs(z, size=N)
 
 bb.set_seed(42)
@@ -42,6 +41,4 @@ inference = bb.MFVI(model, variational, data)
 sess = inference.run(n_iter=200)
 
 T = lambda x: np.mean(x)
-
-# TODO this is waiting the inference refactor, so we can keep the session
 print(bb.predictive_check(T, data, model, variational, sess=sess))
