@@ -119,14 +119,11 @@ class NormalBernoulli:
 
     def sample_prior(self, size):
         """
-        z ~ N(0, 1)
+        p ~ some complex distribution induced by
+        z ~ N(0, 1), p = phi(z)
         """
-        return tf.random_normal(size)
-
-    def sample_latent(self, size):
-        # Prior predictive check at test time
-        z_rep = self.sample_prior(size)
-        return self.network(z_rep)
+        z = tf.random_normal(size)
+        return self.network(z)
 
 class Data:
     def __init__(self, data):
