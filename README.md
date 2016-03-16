@@ -20,6 +20,7 @@ It supports __inference__ via
     * Stochastic variational inference
     * Variational auto-encoders
     * Inclusive KL divergence (KL(p || q))
+  * Maximum a posteriori (penalized maximum likelihood, maximum likelihood)
 
 It also has __features__ including
 
