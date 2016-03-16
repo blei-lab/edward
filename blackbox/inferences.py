@@ -61,6 +61,8 @@ class VariationalInference(Inference):
             loss = self.update(sess)
             self.print_progress(t, loss, sess)
 
+        return sess
+
     def initialize(self, n_iter=1000, n_data=None, n_print=100):
         """
         Initialize inference algorithm.
