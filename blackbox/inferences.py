@@ -112,7 +112,7 @@ class MFVI(VariationalInference):
 # TODO this isn't MFVI so much as VI where q is analytic
     """
     Mean-field variational inference
-    (Ranganath et al., 2014; Kingma and Welling, 2014)
+    (Ranganath et al., 2014)
     """
     def __init__(self, *args, **kwargs):
         VariationalInference.__init__(self, *args, **kwargs)
@@ -163,6 +163,7 @@ class MFVI(VariationalInference):
         """
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
+        (Paisley et al., 2012)
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
@@ -177,6 +178,7 @@ class MFVI(VariationalInference):
         """
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
+        (Kingma and Welling, 2014)
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         z = self.variational.reparam(self.samples)
@@ -219,8 +221,9 @@ class MFVI(VariationalInference):
 
 class KLpq(VariationalInference):
     """
-    Kullback-Leibler(posterior, approximation) minimization
-    using adaptive importance sampling.
+    Kullback-Leibler divergence from posterior to variational model,
+    KL( p(z |x) || q(z) ).
+    (Cappe et al., 2008)
     """
     def __init__(self, *args, **kwargs):
         VariationalInference.__init__(self, *args, **kwargs)
@@ -240,12 +243,13 @@ class KLpq(VariationalInference):
     def build_loss(self):
         """
         Loss function to minimize, whose gradient is a stochastic
-        gradient based on the score function estimator.
+        gradient inspired by adaptive importance sampling.
         """
         # loss = E_{q(z; lambda)} [ w_norm(z; lambda) *
         #                           ( log p(x, z) - log q(z; lambda) ) ]
-        # where w_norm(z; lambda) = w(z; lambda) / sum_z( w(z; lambda) )
-        # and w(z; lambda) = p(x, z) / q(z; lambda)
+        # where
+        # w_norm(z; lambda) = w(z; lambda) / sum_z( w(z; lambda) )
+        # w(z; lambda) = p(x, z) / q(z; lambda)
         #
         # gradient = - E_{q(z; lambda)} [ w_norm(z; lambda) *
         #                                 grad_{lambda} log q(z; lambda) ]
