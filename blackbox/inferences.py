@@ -150,8 +150,12 @@ class MFVI(VariationalInference):
         return loss
 
     def build_loss(self):
-        if self.score:
+        if self.score and hasattr(self.variational, 'entropy'):
+            return self.build_score_loss_entropy()
+        elif self.score:
             return self.build_score_loss()
+        elif not self.score and hasattr(self.variational, 'entropy'):
+            return self.build_reparam_loss_entropy()
         else:
             return self.build_reparam_loss()
 
@@ -160,49 +164,57 @@ class MFVI(VariationalInference):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
         """
-        if hasattr(self.variational, 'entropy'):
-            # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
-            # where entropy is analytic
-            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-            for i in range(self.variational.num_vars):
-                q_log_prob += self.variational.log_prob_zi(i, self.samples)
+        # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-            p_log_prob = self.model.log_prob(x, self.samples)
-            q_entropy = self.variational.entropy()
-            self.losses = p_log_prob + q_entropy
-            return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
-                   q_entropy
-        else:
-            # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
-            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-            for i in range(self.variational.num_vars):
-                q_log_prob += self.variational.log_prob_zi(i, self.samples)
-
-            x = self.data.sample(self.n_data)
-            self.losses = self.model.log_prob(x, self.samples) - q_log_prob
-            return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.losses))
+        x = self.data.sample(self.n_data)
+        self.losses = self.model.log_prob(x, self.samples) - q_log_prob
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.losses))
 
     def build_reparam_loss(self):
         """
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
         """
+        # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         z = self.variational.reparam(self.samples)
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, z)
 
-        if hasattr(self.variational, 'entropy'):
-            # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
-            # where entropy is analytic
-            x = self.data.sample(self.n_data)
-            self.losses = self.model.log_prob(x, z) + self.variational.entropy()
-        else:
-            # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
-            q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-            for i in range(self.variational.num_vars):
-                q_log_prob += self.variational.log_prob_zi(i, z)
+        x = self.data.sample(self.n_data)
+        self.losses = self.model.log_prob(x, z) - q_log_prob
+        return -tf.reduce_mean(self.losses)
 
-            x = self.data.sample(self.n_data)
-            self.losses = self.model.log_prob(x, z) - q_log_prob
+    def build_score_loss_entropy(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the score function estimator.
+        """
+        # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
+        # where entropy is analytic
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
+        p_log_prob = self.model.log_prob(x, self.samples)
+        q_entropy = self.variational.entropy()
+        self.losses = p_log_prob + q_entropy
+        return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
+               q_entropy
+
+    def build_reparam_loss_entropy(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the reparameterization trick.
+        """
+        # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
+        # where entropy is analytic
+        x = self.data.sample(self.n_data)
+        z = self.variational.reparam(self.samples)
+        self.losses = self.model.log_prob(x, z) + self.variational.entropy()
         return -tf.reduce_mean(self.losses)
 
 class KLpq(VariationalInference):
@@ -221,11 +233,7 @@ class KLpq(VariationalInference):
         return VariationalInference.initialize(self, *args, **kwargs)
 
     def update(self, sess):
-        if self.score:
-            samples = self.variational.sample(self.samples.get_shape(), sess)
-        else:
-            samples = self.variational.sample_noise(self.samples.get_shape())
-
+        samples = self.variational.sample(self.samples.get_shape(), sess)
         _, loss = sess.run([self.train, self.losses], {self.samples: samples})
         return loss
 
