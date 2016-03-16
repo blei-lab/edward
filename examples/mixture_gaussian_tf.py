@@ -17,50 +17,37 @@ Variational model
     q(sigma_j) ~ inverse_gamma(aj', Bj') iid
     q(c_i) ~ Multinomial(phi_i)  iid...integrated out
 """
+import tensorflow as tf
 import blackbox as bb
 import numpy as np
+from blackbox.stats import dirichlet, norm, invgamma
 
-model_code = """
-data{
-   int<lower=0> N;
-   int<lower=0> K;
-   int<lower=0> D;
-   vector[D] x[N];
-}
-transformed data{
-   vector<lower=0>[K] alpha_0;
-   for (k in 1:K) {
-      alpha_0[k] <- 1.0/K;
-   }
-}
-parameters{
-   simplex[K] theta;
-   vector[D] mu[K];
-   vector<lower=0>[D] sigma[K];
-}
-model{
-   theta ~ dirichlet(alpha_0);
-   for (k in 1:K){
-      mu[k] ~ normal(0.0, 10);
-      sigma[k] ~ inv_gamma(1.0, 1.0);
-   }
-   for (n in 1:N) {
-      real ps[K];
-      for (k in 1:K-1){
-         ps[k] <- log(theta[k]) + normal_log(x[n], mu[k], sigma[k]);
-      }
-      increment_log_prob(log_sum_exp(ps));
-   }
-}
-"""
+class GaussMixture:
+    def __init__(self, K, D):
+        self.K = K
+        self.D = D
+        self.num_vars = (2*D + 1) * K
+    
+    def log_prob(self, xs, zs):
+        alpha_vec = np.ones(K)
+        dirich_log_prior = dirichlet.logpdf(zs[:,0:K], alpha=alpha_vec)
+        gauss_log_prior = norm.logpdf(zs[:, K:(K+K*D)], loc=0, scale=np.sqrt(10))
+        invgam_log_prior = invgamma.logpdf(zs[:, K+K*D:(K+2*K*D)], alpha=1, beta=1)
+        
+        log_prior = dirich_log_prior + gauss_log_prior + invgam_log_prior
+        
+        log_lik = 0
+        
+        return log_lik + log_prior
+
 bb.set_seed(42)
-model = bb.StanModel(model_code=model_code)
 K = 2
 D = 2
+model = GaussMixture(K, D)
 variational = bb.MFMixGaussian(D, K)
 x = np.loadtxt('./mix_data/mix_mock_data.txt', dtype='float32', delimiter=',')
 N = len(x)
-data = bb.Data(dict(N=N, K=K, D=D , x=x))
+data = bb.Data(tf.constant(x, dtype=tf.float32))
 
 inference = bb.MFVI(model, variational, data)
 inference.run(n_iter=1000)
