@@ -81,6 +81,8 @@ class Inference:
             elbo = self.update(sess, update)
             self.print_progress(t, elbo, sess)
 
+        return sess
+
     def update(self, sess, update):
         if self.score:
             samples = self.variational.sample(self.samples.get_shape(), sess)
