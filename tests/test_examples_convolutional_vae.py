@@ -1,5 +1,7 @@
-# Run examples/convolutional_vae.py.
-# Set to update 1 time per epoch.
+# examples/convolutional_vae.py
+
+# Run with 1 update per epoch:
+# python convolutional_vae.py --n_iter_per_epoch=1
 # Check that objective values are as follows:
 0.827012
 0.886294
@@ -12,7 +14,8 @@
 0.616493
 0.612958
 
-# Set to update 1000 times per epoch.
+# Run with 1000 updates per epoch:
+# python convolutional_vae.py --n_iter_per_epoch=1000
 # Check that objective values are as follows:
 0.219992
 0.144405
