@@ -20,6 +20,7 @@ It supports __inference__ via
     * Stochastic variational inference
     * Variational auto-encoders
     * Inclusive KL divergence (KL(p || q))
+  * Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
 
 It also has __features__ including
 
