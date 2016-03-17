@@ -1,5 +1,5 @@
 from __future__ import print_function
-import blackbox as bb
+import edward as ed
 import numpy as np
 import tensorflow as tf
 
@@ -34,33 +34,33 @@ def _test(data, n_samples, _eq):
 
 
 def test_tf_single_sample():
-    data_tf = bb.Data(tf.constant(data, dtype=tf.float32),
+    data_tf = ed.Data(tf.constant(data, dtype=tf.float32),
                       shuffled=True)
     _test(data_tf, 1, _assert_eq_tf)
 
 
 def test_tf_multiple_samples():
-    data_tf = bb.Data(tf.constant(data, dtype=tf.float32),
+    data_tf = ed.Data(tf.constant(data, dtype=tf.float32),
                       shuffled=True)
     _test(data_tf, 2, _assert_eq_tf)
 
 
 def test_ndarray_single_sample():
-    data_ndarray = bb.Data(np.array(data))
+    data_ndarray = ed.Data(np.array(data))
     _test(data_ndarray, 1, _assert_eq_ndarray)
 
 
 def test_ndarray_multiple_samples():
-    data_ndarray = bb.Data(np.array(data))
+    data_ndarray = ed.Data(np.array(data))
     _test(data_ndarray, 2, _assert_eq_ndarray)
 
 
 # TODO: test dict
 #def test_dict_single_sample():
-#    data_dict = bb.Data(dict(N=len(data), y=data))
+#    data_dict = ed.Data(dict(N=len(data), y=data))
 #    _test(data_dict, 1, _assert_eq_ndarray)
 #
 #
 #def test_dict_multiple_samples():
-#    data_dict = bb.Data(dict(N=len(data), y=data))
+#    data_dict = ed.Data(dict(N=len(data), y=data))
 #    _test(data_dict, 2, _assert_eq_ndarray)

@@ -1,6 +1,6 @@
-![blackbox](http://dustintran.com/img/blackbox_200.png)
+![edward](http://dustintran.com/img/blackbox_200.png)
 
-__blackbox__ is a probabilistic programming tool written in Python. It enables
+__Edward__ is a probabilistic programming tool written in Python. It enables
 black box inference for probabilistic models, including those with
 discrete and continuous latent variables, neural network
 parameterizations, and infinite dimensional parameter spaces. It is a
@@ -33,33 +33,33 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](https://github.com/Blei-Lab/blackbox/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
+[You can find a tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
 We highlight a few examples, more of which can be found in [`examples/`](examples/):
 
 * [Convolutional variational auto-encoder](examples/convolutional_vae.py)
 
-Read the documentation in the [Wiki](https://github.com/Blei-Lab/blackbox/wiki).
+Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
 
 ## Installation
 
 To install from pip, run
 ```{bash}
-pip install -e "git+https://github.com/blei-lab/blackbox.git#egg=blackbox"
+pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
 ```
 
 ## Authors
 
 ## Citation
 
-We appreciate citations for blackbox because it lets us find out how
+We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
-. 2016. blackbox: Black box inference for probabilistic models, Version 0.1.   https://github.com/Blei-Lab/blackbox
+. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 0.1. https://github.com/blei-lab/edward
 ```
 @misc{
   author = {},
-  title = {{blackbox: Black box inference for probabilistic models, Version 0.1}},
+  title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 0.1}},
   year = {2016},
-  url = {https://github.com/Blei-Lab/blackbox}
+  url = {https://github.com/blei-lab/edward}
 }
 ```

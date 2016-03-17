@@ -2,15 +2,15 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.stats import multivariate_normal
+from edward.stats import multivariate_normal
 from scipy import stats
 
 sess = tf.Session()
 
 
-def _assert_eq(res_bb, res_true):
+def _assert_eq(res_ed, res_true):
     with sess.as_default():
-        assert np.allclose(res_bb.eval(), res_true)
+        assert np.allclose(res_ed.eval(), res_true)
 
 
 def test_entropy_empty():

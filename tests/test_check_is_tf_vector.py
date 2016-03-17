@@ -3,7 +3,7 @@ import unittest
 import tensorflow as tf
 import numpy as np
 
-from blackbox.util import check_is_tf_vector
+from edward.util import check_is_tf_vector
 
 class test_check_is_tf_vector(unittest.TestCase):
 
@@ -38,7 +38,7 @@ class test_check_is_tf_vector(unittest.TestCase):
   def test_3D_tensor(self):
       x = tf.zeros([2,1,3])
       with self.assertRaises(TypeError):
-          check_is_tf_vector(x)                
+          check_is_tf_vector(x)
 
 if __name__ == '__main__':
     unittest.main()

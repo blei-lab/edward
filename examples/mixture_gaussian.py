@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-This is the implementation of the Bayesian Mixture of K Gaussians. 
+This is the implementation of the Bayesian Mixture of K Gaussians.
 The model is written in Stan.
 Data: X = {x1,...,xn} where each xi is in R^d..we choose d=2 in our example
 Probability model
-    Likelihood: 
+    Likelihood:
          x_i|c_i ~ N(mu_{c_i}, sigma_{c_i})
          c_i ~ Discrete(theta)
     Prior:
@@ -12,12 +12,12 @@ Probability model
          mu_j ~ N(0, cI) iid...we take c = 10 in our example
          sigma_j ~ inverse_gamma(a, b) iid..we take a = b = 1 in our example
 Variational model
-    q(pi) ~ Dirichlet(alpha') where alpha' is a vector of dimension K 
+    q(pi) ~ Dirichlet(alpha') where alpha' is a vector of dimension K
     q(mu_j) ~ N(mj', Sigmaj') iid
     q(sigma_j) ~ inverse_gamma(aj', Bj') iid
     q(c_i) ~ Multinomial(phi_i)  iid...integrated out
 """
-import blackbox as bb
+import edward as ed
 import numpy as np
 
 model_code = """
@@ -53,16 +53,16 @@ model{
    }
 }
 """
-bb.set_seed(42)
-model = bb.StanModel(model_code=model_code)
+ed.set_seed(42)
+model = ed.StanModel(model_code=model_code)
 K = 2
 D = 2
-variational = bb.MFMixGaussian(D, K)
+variational = ed.MFMixGaussian(D, K)
 x = np.loadtxt('./mix_data/mix_mock_data.txt', dtype='float32', delimiter=',')
 N = len(x)
-data = bb.Data(dict(N=N, K=K, D=D , x=x))
+data = ed.Data(dict(N=N, K=K, D=D , x=x))
 
-inference = bb.MFVI(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000)
 
 

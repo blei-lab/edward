@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from blackbox.util import log_multinomial, log_inv_gamma, log_dirichlet, log_beta, log_gamma, dot, get_dims
+from edward.util import log_multinomial, log_inv_gamma, log_dirichlet, log_beta, log_gamma, dot, get_dims
 from scipy import stats
 
 class Distribution:

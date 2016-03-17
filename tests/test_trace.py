@@ -1,7 +1,7 @@
 from __future__ import print_function
 import tensorflow as tf
 
-from blackbox.util import trace
+from edward.util import trace
 
 sess = tf.Session()
 
