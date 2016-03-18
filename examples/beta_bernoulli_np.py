@@ -8,10 +8,10 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
-import blackbox as bb
+import edward as ed
 import numpy as np
 
-from blackbox import PythonModel
+from edward import PythonModel
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
@@ -33,10 +33,10 @@ class BetaBernoulli(PythonModel):
 
         return lp
 
-bb.set_seed(42)
+ed.set_seed(42)
 model = BetaBernoulli()
-variational = bb.MFBeta(model.num_vars)
-data = bb.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+variational = ed.MFBeta(model.num_vars)
+data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
-inference = bb.MFVI(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

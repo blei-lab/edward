@@ -6,10 +6,10 @@ Variational model
     Likelihood: Mean-field Bernoulli
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import bernoulli
-from blackbox.util import get_dims
+from edward.stats import bernoulli
+from edward.util import get_dims
 
 class Bernoulli:
     """
@@ -33,10 +33,10 @@ class Bernoulli:
             elem = tf.gather(elem, tf.to_int32(x[d]))
         return elem
 
-bb.set_seed(42)
+ed.set_seed(42)
 p = tf.constant(0.6)
 model = Bernoulli(p)
-variational = bb.MFBernoulli(model.num_vars)
+variational = ed.MFBernoulli(model.num_vars)
 
-inference = bb.MFVI(model, variational)
+inference = ed.MFVI(model, variational)
 inference.run()

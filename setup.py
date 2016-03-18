@@ -1,17 +1,17 @@
 from setuptools import setup
 
 setup(
-    name='blackbox',
+    name='edward',
     version='0.1',
-    description='Black box inference for probabilistic models',
+    description='A library for probabilistic modeling, inference, and criticism',
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
-    packages=['blackbox', 'blackbox.stats'],
+    packages=['edward', 'edward.stats'],
     install_requires=['tensorflow>=0.7.0', 'numpy>=1.7', 'scipy>=0.16'],
     extras_require = {'stan': ['pystan>=2.0.1.3'],
                       'neural networks': ['prettytensor>=0.5.3'],
                       'visualization': ['progressbar>=2.0']},
-    url='https://github.com/Blei-Lab/blackbox',
+    url='https://github.com/blei-lab/edward',
     license='MIT',
     classifiers=['License :: OSI Approved :: MIT License',
                  'Programming Language :: Python :: 2.7'],

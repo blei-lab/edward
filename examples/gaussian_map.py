@@ -5,10 +5,10 @@ Probability model
 Inference: Maximum a posteriori
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import norm
-from blackbox.util import get_dims
+from edward.stats import norm
+from edward.util import get_dims
 
 class Gaussian:
     """
@@ -30,11 +30,11 @@ class Gaussian:
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 
-bb.set_seed(42)
+ed.set_seed(42)
 mu = tf.constant(3.0)
 Sigma = tf.constant(0.1)
 model = Gaussian(mu, Sigma)
-data = bb.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
+data = ed.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-inference = bb.MAP(model, data)
+inference = ed.MAP(model, data)
 inference.run(n_iter=200, n_print=50)

@@ -2,15 +2,15 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.stats import multivariate_normal
+from edward.stats import multivariate_normal
 from scipy import stats
 
 sess = tf.Session()
 
 
-def _assert_eq(val_bb, val_true):
+def _assert_eq(val_ed, val_true):
     with sess.as_default():
-        assert np.allclose(val_bb.eval(), val_true)
+        assert np.allclose(val_ed.eval(), val_true)
 
 
 def _test_logpdf_standard_2d(val):
