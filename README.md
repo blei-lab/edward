@@ -3,9 +3,9 @@
 __Edward__ is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
 and continuous latent variables, neural network parameterizations, and
-infinite dimensional parameter spaces. It is a fusion of three fields:
-Bayesian statistics and machine learning, deep learning, and
-probabilistic programming.
+infinite dimensional parameter spaces. Edward serves as a fusion of
+three fields: Bayesian statistics and machine learning, deep learning,
+and probabilistic programming.
 
 It supports __modeling languages__ including
 
