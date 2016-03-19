@@ -69,7 +69,7 @@ class NormalBernoulli:
     def __init__(self, num_vars):
         self.num_vars = num_vars
 
-    def network(self, z):
+    def mapping(self, z):
         """
         p = varphi(z)
         """
@@ -90,7 +90,7 @@ class NormalBernoulli:
         """
         log p(x | z) = log Bernoulli(x | p = varphi(z))
         """
-        p = self.network(z)
+        p = self.mapping(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
     def sample_prior(self, size):
@@ -99,7 +99,7 @@ class NormalBernoulli:
         z ~ N(0, 1), p = phi(z)
         """
         z = tf.random_normal(size)
-        return self.network(z)
+        return self.mapping(z)
 
 class Data:
     def __init__(self, data):
