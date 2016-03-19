@@ -173,11 +173,13 @@ class MFVI(VariationalInference):
         (Paisley et al., 2012)
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-        x = self.data.sample(self.n_data)
         self.losses = self.model.log_prob(x, self.samples) - q_log_prob
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.losses))
 
@@ -188,12 +190,14 @@ class MFVI(VariationalInference):
         (Kingma and Welling, 2014)
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, z)
 
-        x = self.data.sample(self.n_data)
         self.losses = self.model.log_prob(x, z) - q_log_prob
         return -tf.reduce_mean(self.losses)
 
@@ -204,6 +208,9 @@ class MFVI(VariationalInference):
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
         # where entropy is analytic
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
@@ -222,6 +229,7 @@ class MFVI(VariationalInference):
         # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
         # where entropy is analytic
         x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
         self.losses = self.model.log_prob(x, z) + self.variational.entropy()
         return -tf.reduce_mean(self.losses)

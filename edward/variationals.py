@@ -16,7 +16,8 @@ class Likelihood(VarStoreMethod):
 
     # TODO how can this also be used for writing up variational models?
     # TODO should the parameters of this mapping be stored within the class as it currently is, or outside (outside makes sense, e.g., for random parameters, and with inference networks)
-    def parameterize(self, x):
+    # TODO don't raise errors for inference methods that don't deal with q(z | x) cases
+    def mapping(self, x):
         """
         A global mapping from data point x -> lambda, the local
         variational parameters.
@@ -32,21 +33,30 @@ class Likelihood(VarStoreMethod):
         a function of data point with a fixed number of parameters
         that does not grow with the data.
 
+        Parameters
+        ----------
+        x : Data
+            Data point
+
         Returns
         -------
         tf.Tensor
-            A long vector of all the parameters.
+            A list where each element is a particular set of local parameters.
             TODO or maybe
             A dictionary of local variational parameter names and
             their outputted values.
         """
         raise NotImplementedError()
 
-    def extract_params(self, params):
+    def set_params(self, params):
         """
-        This takes the output of the parameters from the
-        parameterize() method and pieces out the corresponding
-        parameters for use in other methods in the variational class.
+        This sets the parameters of the variational family, for use in
+        other methods of the class.
+
+        Parameters
+        ----------
+        params : list
+            Each element in the list is a particular set of local parameters.
         """
         raise NotImplementedError()
 
@@ -334,15 +344,12 @@ class MFGaussian(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_params = 2*self.num_vars
 
-    def parameterize(self, x):
+    def mapping(self, x):
         mean = self.variable("mu", [self.num_vars])
         stddev = self.variable("sigma", [self.num_vars])
         return [tf.identity(mean), tf.nn.softplus(stddev)]
 
-    def extract_params(self, params):
-        # would be nice to have self.params which just stores a dictionary
-        # TODO
-        # in general, these stored values are just temporary
+    def set_params(self, params):
         self.m = params[0]
         self.s = params[1]
 
@@ -368,7 +375,6 @@ class MFGaussian(Likelihood):
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
-        self.extract_params(self.parameterize(0))
         return self.m + eps * self.s
 
     def log_prob_zi(self, i, z):
@@ -376,8 +382,6 @@ class MFGaussian(Likelihood):
         if i >= self.num_vars:
             raise
 
-        # TODO this should intelligently need to call it only once if we already called sample before
-        self.extract_params(self.parameterize(0))
         mi = self.m[i]
         si = self.s[i]
         return concat([norm.logpdf(zm[i], mi, si)
