@@ -312,13 +312,15 @@ class KLpq(VariationalInference):
         #
         # gradient = - E_{q(z; lambda)} [ w_norm(z; lambda) *
         #                                 grad_{lambda} log q(z; lambda) ]
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
         # 1/B sum_{b=1}^B grad_log_q * w_norm
         # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }
-        x = self.data.sample(self.n_data)
         log_w = self.model.log_prob(x, self.samples) - q_log_prob
 
         # normalized log importance weights
