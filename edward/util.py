@@ -230,13 +230,17 @@ class VarStoreMethod(object):
 
 class VARIABLE(VarStoreMethod):
     """
-    A simple wrapper to hold variables by itself, so that when calling
-    objects of this class, it will create the TensorFlow variable at
-    the first time and return the variable; in subsequent calls, it
-    will simply return the variable.
+    A simple wrapper to contain variables. It will create a TensorFlow
+    variable the first time it is called and return the variable; in
+    subsequent calls, it will simply return the variable and not
+    create the TensorFlow variable again.
 
-    This also enables variables to be stored outside of classes which
-    depend on parameters.
+    This enables variables to be stored outside of classes which
+    depend on parameters. It is a useful application for parametric
+    distributions whose parameters may or may not be random (e.g.,
+    through a prior), and for inverse mappings such as auto-encoders
+    where we'd like to store inverse mapping parameters outside of the
+    distribution class.
     """
     def __call__(self, name, shape):
         self.name = name

@@ -13,8 +13,8 @@ class Likelihood:
         self.num_vars = num_vars
         self.num_params = None
 
-    # TODO how can this also be used for writing up variational models?
-    # TODO don't raise errors for inference methods that don't deal with q(z | x) cases
+    # TODO don't raise errors for inference methods that don't deal
+    # with q(z | x) cases with the set_param/mapping
     def mapping(self, x):
         """
         A global mapping from data point x -> lambda, the local
@@ -24,6 +24,13 @@ class Likelihood:
         parameterized by the collection of all variational parameters,
         and the output is simply the subset of relevant local
         variational parameters.
+
+        In a slightly more complex scenario, such as for latent
+        variables with constrained support, the mapping additionally
+        includes a constrained transformation so that the parameters
+        to be optimized live on the unconstrained space but the output
+        of this mapping for use in the variational model has
+        constrained latent variables.
 
         In non-trivial parameterizations such as inverse mappings in
         Helmholtz machines and variational auto-encoders, and
