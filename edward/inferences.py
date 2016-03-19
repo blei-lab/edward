@@ -208,6 +208,7 @@ class MFVI(VariationalInference):
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
+        x = self.data.sample(self.n_data)
         p_log_prob = self.model.log_prob(x, self.samples)
         q_entropy = self.variational.entropy()
         self.losses = p_log_prob + q_entropy
