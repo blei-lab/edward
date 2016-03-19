@@ -25,8 +25,9 @@ class Likelihood:
 
         Returns
         -------
-        tf.Tensor
-            A list where each element is a particular set of local parameters.
+        list
+            A list of TensorFlow tensors, where each element is a
+            particular set of local parameters.
 
         Notes
         -----
@@ -112,6 +113,7 @@ class Likelihood:
         Unlike the other methods, this return object is a realization
         of a TensorFlow array. This is required as we rely on
         NumPy/SciPy for sampling from distributions.
+
         The method defaults to sampling noise and reparameterizing it
         (which will raise an error if this is not possible).
         """

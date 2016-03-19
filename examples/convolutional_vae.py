@@ -140,8 +140,8 @@ for epoch in range(FLAGS.n_epoch):
     # 28*28 pixels.
     avg_loss = avg_loss / (28 * 28 * FLAGS.n_data)
 
-    # Print (an upper bound to) the average NLL for a single pixel.
-    print("-log p(x) <= %f" % avg_loss)
+    # Print a lower bound to the average marginal likelihood for a single pixel.
+    print("log p(x) >= %f" % avg_loss)
 
     imgs = sess.run(p_rep)
     for b in range(FLAGS.n_data):
