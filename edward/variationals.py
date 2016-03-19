@@ -15,26 +15,8 @@ class Likelihood:
 
     def mapping(self, x):
         """
-        A global mapping from data point x -> lambda, the local
-        variational parameters.
-
-        In classical variational inference, the global mapping is
-        parameterized by the collection of all variational parameters,
-        and the output is simply the subset of relevant local
-        variational parameters.
-
-        In a slightly more complex scenario, such as for latent
-        variables with constrained support, the mapping additionally
-        includes a constrained transformation so that the parameters
-        to be optimized live on the unconstrained space but the output
-        of this mapping for use in the variational model has
-        constrained latent variables.
-
-        In non-trivial parameterizations such as inverse mappings in
-        Helmholtz machines and variational auto-encoders, and
-        parameter tying procedures in message passing, the mapping is
-        a function of data point with a fixed number of parameters
-        that does not grow with the data.
+        A mapping from data point x -> lambda, the local variational
+        parameters, which are parameters specific to x.
 
         Parameters
         ----------
@@ -45,9 +27,27 @@ class Likelihood:
         -------
         tf.Tensor
             A list where each element is a particular set of local parameters.
-            TODO or maybe
-            A dictionary of local variational parameter names and
-            their outputted values.
+
+        Notes
+        -----
+        In classical variational inference, the mapping can be
+        interpreted as the collection of all local variational
+        parameters; the output is simply the projection to the
+        relevant subset of local parameters.
+
+        For local variational parameters with constrained support, the
+        mapping additionally acts as a transformation. The parameters
+        to be optimized live on the unconstrained space; the output of
+        the mapping is then constrained variational parameters.
+
+        Global parameterizations are useful to prevent the parameters
+        of this mapping to grow with the number of data points, and
+        also as an implicit regularization. This is known as inverse
+        mappings in Helmholtz machines and variational auto-encoders,
+        and parameter tying in message passing. The mapping is a
+        function of data point with a fixed number of parameters, and
+        it tries to (in some sense) "predict" the best local
+        variational parameters given this lower rank.
         """
         raise NotImplementedError()
 
@@ -71,11 +71,13 @@ class Likelihood:
         """
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+
         Returns
         -------
         np.ndarray
             n_minibatch x dim(lambda) array of type np.float32, where each
             row is a sample from q.
+
         Notes
         -----
         Unlike the other methods, this return object is a realization
