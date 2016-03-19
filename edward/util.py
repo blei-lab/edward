@@ -171,3 +171,62 @@ def logit(x, clip_finite=True):
         log_jacobian = np.sum(np.log(jacobian))
 
     return transformed, log_jacobian
+
+# This is taken from PrettyTensor.
+# It is useful so that on the first call to the method, the TensorFlow
+# variable is instantiated and returned. On future calls the same #
+# TensorFlow variable is returned but not instantiated again.
+# https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
+class VarStoreMethod(object):
+  """Convenience base class for registered methods that create variables.
+  This tracks the variables and requries subclasses to provide a __call__
+  method.
+  """
+
+  def __init__(self):
+    self.vars = {}
+
+  def variable(self, var_name, shape, init=tf.zeros_initializer, dt=tf.float32, train=True):
+    """Adds a named variable to this bookkeeper or returns an existing one.
+    Variables marked train are returned by the training_variables method. If
+    the requested name already exists and it is compatible (same shape, dt and
+    train) then it is returned. In case of an incompatible type, an exception is
+    thrown.
+    Args:
+      var_name: The unique name of this variable.  If a variable with the same
+        name exists, then it is returned.
+      shape: The shape of the variable.
+      init: The init function to use or a Tensor to copy.
+      dt: The datatype, defaults to float.  This will automatically extract the
+        base dtype.
+      train: Whether or not the variable should be trained.
+    Returns:
+      A TensorFlow tensor.
+    Raises:
+      ValueError: if reuse is False (or unspecified and allow_reuse is False)
+        and the variable already exists or if the specification of a reused
+        variable does not match the original.
+    """
+    # Make sure it is a TF dtype and convert it into a base dtype.
+    dt = tf.as_dtype(dt).base_dtype
+    if var_name in self.vars:
+      v = self.vars[var_name]
+      if v.get_shape() != shape:
+        raise ValueError(
+            'Shape mismatch: %s vs %s. Perhaps a UnboundVariable had '
+            'incompatible values within a graph.' % (v.get_shape(), shape))
+      return v
+    elif callable(init):
+
+      v = tf.get_variable(var_name,
+                          shape=shape,
+                          dtype=dt,
+                          initializer=init,
+                          trainable=train)
+      self.vars[var_name] = v
+      return v
+    else:
+      v = tf.convert_to_tensor(init, name=var_name, dtype=dt)
+      v.get_shape().assert_is_compatible_with(shape)
+      self.vars[var_name] = v
+      return v

@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
-from edward.util import get_dims, concat
+from edward.util import get_dims, concat, VarStoreMethod
 
 
 class MFMixGaussian:
@@ -232,18 +232,31 @@ class MFBeta:
         #bi = self.transform(self.b_unconst[i])
         return beta.logpdf(z[:, i], ai, bi)
 
-class MFGaussian:
+class MFGaussian(VarStoreMethod):
     """
     q(z | lambda ) = prod_{i=1}^d Gaussian(z[i] | lambda[i])
     """
     def __init__(self, num_vars):
+        VarStoreMethod.__init__(self)
         self.num_vars = num_vars
         self.num_params = 2*num_vars
 
-        self.m_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.s_unconst = tf.Variable(tf.random_normal([num_vars]))
         self.transform_m = tf.identity
         self.transform_s = tf.nn.softplus
+
+    # TODO
+    # parameterize will define the variables and output their value as a long parameter
+    # extract_params will extract out their parameters to be part of the class
+    def parameterize(self, x):
+        #self.variable(tf.random_normal([2*self.num_vars]))
+        mean = self.variable("mu", [self.num_vars])
+        stddev = self.variable("sigma", [self.num_vars])
+        return [mean, stddev]
+
+    def extract_params(self, params):
+        # would be nice to have self.params which just stores a dictionary
+        self.m_unconst = params[0]
+        self.s_unconst = params[1]
 
     def print_params(self, sess):
         m, s = sess.run([ \
@@ -270,6 +283,7 @@ class MFGaussian:
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
+        self.extract_params(self.parameterize(0))
         m = self.transform_m(self.m_unconst)
         s = self.transform_s(self.s_unconst)
         return m + eps * s
@@ -278,6 +292,7 @@ class MFGaussian:
         """
         z ~ q(z | lambda)
         """
+        self.extract_params(self.parameterize(0))
         m, s = sess.run([ \
             self.transform_m(self.m_unconst),
             self.transform_s(self.s_unconst)])
@@ -289,6 +304,8 @@ class MFGaussian:
         if i >= self.num_vars:
             raise
 
+        # TODO this should intelligently need to call it only once if we already called sample before
+        self.extract_params(self.parameterize(0))
         mi = self.transform_m(self.m_unconst)[i]
         si = self.transform_s(self.s_unconst)[i]
         # TODO
