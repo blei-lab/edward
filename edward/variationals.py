@@ -261,22 +261,27 @@ class MFBernoulli(Likelihood):
     """
     def __init__(self, *args, **kwargs):
         Likelihood.__init__(self, *args, **kwargs)
-        self.num_params = self.num_vars
+        if self.num_vars == 1:
+            self.num_params = self.num_vars
+        else:
+            self.num_params = self.num_vars - 1
+
         self.p = None
 
     def mapping(self, x):
-        p = Variable("p", [self.num_vars])
-        return [tf.sigmoid(p)]
+        p = Variable("p", [self.num_params])
+        # Force probability vector to lie on simplex.
+        p_const = tf.sigmoid(p)
+        if self.num_vars > 1:
+            # TensorFlow supports neither negative indexing or assignment.
+            #p_const[-1] = 1.0 - tf.reduce_sum(p_const[-1])
+            p_const = concat([p_const,
+                              tf.expand_dims(1.0 - tf.reduce_sum(p_const), 0)])
+
+        return [p_const]
 
     def set_params(self, params):
         self.p = params[0]
-        # TODO constrain the parameters in simplex within mapping()
-        d = get_dims(self.p)[0]
-        if get_dims(self.p)[0] > 1:
-            # TensorFlow supports neither negative indexing or assignment.
-            #self.p[-1] = 1.0 - tf.reduce_sum(self.p[-1])
-            self.p = concat([self.p[:(d-1)],
-                             tf.expand_dims(1.0 - tf.reduce_sum(self.p[:(d-1)]), 0)])
 
     def print_params(self, sess):
         p = sess.run(self.p)
@@ -297,6 +302,7 @@ class MFBernoulli(Likelihood):
         if i >= self.num_vars:
             raise
 
+        print(self.p)
         return bernoulli.logpmf(z[:, i], self.p[i])
 
 class MFBeta(Likelihood):
