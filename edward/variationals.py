@@ -13,8 +13,6 @@ class Likelihood:
         self.num_vars = num_vars
         self.num_params = None
 
-    # TODO don't raise errors for inference methods that don't deal
-    # with q(z | x) cases with the set_param/mapping
     def mapping(self, x):
         """
         A global mapping from data point x -> lambda, the local
@@ -113,7 +111,7 @@ class Likelihood:
         of a TensorFlow array. This is required as we rely on
         NumPy/SciPy for sampling from distributions.
         The method defaults to sampling noise and reparameterizing it
-        (which will error out if this is not possible).
+        (which will raise an error if this is not possible).
         """
         return self.reparam(self.sample_noise(size))
 
@@ -414,7 +412,7 @@ class PointMass(Likelihood):
         self.params = params[0]
 
     def print_params(self, sess):
-        params = sess.run([self.params])
+        params = sess.run(self.params)
         print("parameter values:")
         print(params)
 

@@ -149,6 +149,13 @@ class MFVI(VariationalInference):
 
     def update(self, sess):
         if self.score:
+            # TODO the mapping should go here before sampling.
+            # In principle the mapping should go here but we don't
+            # want to have to run this twice. Also I've noticed that it
+            # is significantly slower if I have it here for some reason,
+            # so I'm leaving this as an open problem.
+            #x = self.data.sample(self.n_data)
+            #self.variational.set_params(self.variational.mapping(x))
             samples = self.variational.sample(self.samples.get_shape(), sess)
         else:
             samples = self.variational.sample_noise(self.samples.get_shape())
