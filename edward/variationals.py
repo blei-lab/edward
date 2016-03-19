@@ -241,28 +241,21 @@ class MFGaussian(VarStoreMethod):
         self.num_vars = num_vars
         self.num_params = 2*num_vars
 
-        self.transform_m = tf.identity
-        self.transform_s = tf.nn.softplus
-
     # TODO
     # parameterize will define the variables and output their value as a long parameter
     # extract_params will extract out their parameters to be part of the class
     def parameterize(self, x):
-        #self.variable(tf.random_normal([2*self.num_vars]))
         mean = self.variable("mu", [self.num_vars])
         stddev = self.variable("sigma", [self.num_vars])
-        return [mean, stddev]
+        return [tf.identity(mean), tf.nn.softplus(stddev)]
 
     def extract_params(self, params):
         # would be nice to have self.params which just stores a dictionary
-        self.m_unconst = params[0]
-        self.s_unconst = params[1]
+        self.m = params[0]
+        self.s = params[1]
 
     def print_params(self, sess):
-        m, s = sess.run([ \
-            self.transform_m(self.m_unconst),
-            self.transform_s(self.s_unconst)])
-
+        m, s = sess.run([self.m, self.s])
         print("mean:")
         print(m)
         print("std dev:")
@@ -284,8 +277,8 @@ class MFGaussian(VarStoreMethod):
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
         self.extract_params(self.parameterize(0))
-        m = self.transform_m(self.m_unconst)
-        s = self.transform_s(self.s_unconst)
+        m = self.m
+        s = self.s
         return m + eps * s
 
     def sample(self, size, sess):
@@ -293,10 +286,7 @@ class MFGaussian(VarStoreMethod):
         z ~ q(z | lambda)
         """
         self.extract_params(self.parameterize(0))
-        m, s = sess.run([ \
-            self.transform_m(self.m_unconst),
-            self.transform_s(self.s_unconst)])
-
+        m, s = sess.run([self.m, self.s])
         return m + s * norm.rvs(size=size[0])
 
     def log_prob_zi(self, i, z):
@@ -306,11 +296,8 @@ class MFGaussian(VarStoreMethod):
 
         # TODO this should intelligently need to call it only once if we already called sample before
         self.extract_params(self.parameterize(0))
-        mi = self.transform_m(self.m_unconst)[i]
-        si = self.transform_s(self.s_unconst)[i]
-        # TODO
-        #mi = self.transform_m(self.m_unconst[i])
-        #si = self.transform_s(self.s_unconst[i])
+        mi = self.m[i]
+        si = self.s[i]
         return concat([norm.logpdf(zm[i], mi, si)
                        for zm in tf.unpack(z)])
         # TODO
