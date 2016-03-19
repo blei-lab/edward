@@ -281,14 +281,6 @@ class MFGaussian(VarStoreMethod):
         s = self.s
         return m + eps * s
 
-    def sample(self, size, sess):
-        """
-        z ~ q(z | lambda)
-        """
-        self.extract_params(self.parameterize(0))
-        m, s = sess.run([self.m, self.s])
-        return m + s * norm.rvs(size=size[0])
-
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
         if i >= self.num_vars:
