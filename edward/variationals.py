@@ -278,11 +278,7 @@ class MFGaussian:
         """
         z ~ q(z | lambda)
         """
-        m, s = sess.run([ \
-            self.transform_m(self.m_unconst),
-            self.transform_s(self.s_unconst)])
-
-        return m + s * norm.rvs(size=size[0])
+        return self.reparam(self.sample_noise(size))
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
