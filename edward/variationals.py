@@ -292,8 +292,6 @@ class MFGaussian:
         #si = self.transform_s(self.s_unconst[i])
         return concat([norm.logpdf(zm[i], mi, si)
                        for zm in tf.unpack(z)])
-        # TODO
-        #return gaussian_log_prob(z[:, i], mi, si)
 
     # TODO entropy is bugged
     #def entropy(self):
