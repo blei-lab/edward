@@ -338,6 +338,7 @@ class MAP(VariationalInference):
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
         z = self.variational.get_params()
         self.losses = self.model.log_prob(x, z)
         return -tf.reduce_mean(self.losses)

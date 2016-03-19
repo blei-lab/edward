@@ -183,7 +183,7 @@ class VarStoreMethod(object):
   def __init__(self):
     self.vars = {}
 
-  def variable(self, var_name, shape, init=tf.zeros_initializer, dt=tf.float32, train=True):
+  def variable(self, var_name, shape, init=tf.random_normal_initializer(), dt=tf.float32, train=True):
     """Adds a named variable to this bookkeeper or returns an existing one.
     Variables marked train are returned by the training_variables method. If
     the requested name already exists and it is compatible (same shape, dt and

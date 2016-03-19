@@ -194,7 +194,7 @@ class MFDirichlet:
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        alpha = sess.run([self.transform(self.alpha_unconst)])[0]
+        alpha = sess.run(self.transform(self.alpha_unconst))
         z = np.zeros((size[1], size[0], self.K))
         for d in xrange(self.num_vars):
             z[d, :, :] = dirichlet.rvs(alpha[d, :], size = size[0])
@@ -253,36 +253,37 @@ class MFInvGamma:
 
         return invgamma.logpdf(z[:, i], ai, bi)
 
-class MFBernoulli:
+class MFBernoulli(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Bernoulli(z[i] | lambda[i])
     """
-    def __init__(self, num_vars):
-        self.num_vars = num_vars
-        self.num_params = num_vars
+    def __init__(self, *args, **kwargs):
+        Likelihood.__init__(self, *args, **kwargs)
+        self.num_params = self.num_vars
+        self.p = None
 
-        self.p_unconst = tf.Variable(tf.random_normal([num_vars]))
-        # TODO make all variables outside, not in these classes but as
-        # part of inference most generally
-        self.transform = tf.sigmoid
-        # TODO something about constraining the parameters in simplex
-        # TODO deal with truncations
+    def mapping(self, x):
+        p = Variable("p", [self.num_vars])
+        return [tf.sigmoid(p)]
 
-    # TODO use __str__(self):
+    def set_params(self, params):
+        self.p = params[0]
+        # TODO constrain the parameters in simplex within mapping()
+        d = get_dims(self.p)[0]
+        if get_dims(self.p)[0] > 1:
+            # TensorFlow supports neither negative indexing or assignment.
+            #self.p[-1] = 1.0 - tf.reduce_sum(self.p[-1])
+            self.p = concat([self.p[:(d-1)],
+                             tf.expand_dims(1.0 - tf.reduce_sum(self.p[:(d-1)]), 0)])
+
     def print_params(self, sess):
-        p = sess.run([self.transform(self.p_unconst)])[0]
-        if p.size > 1:
-            p[-1] = 1.0 - np.sum(p[:-1])
-
+        p = sess.run(self.p)
         print("probability:")
         print(p)
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        p = sess.run([self.transform(self.p_unconst)])[0]
-        if p.size > 1:
-            p[-1] = 1.0 - np.sum(p[:-1])
-
+        p = sess.run(self.p)
         z = np.zeros(size)
         for d in range(self.num_vars):
             z[:, d] = bernoulli.rvs(p[d], size=size[0])
@@ -294,30 +295,29 @@ class MFBernoulli:
         if i >= self.num_vars:
             raise
 
-        if i < self.num_vars:
-            pi = self.transform(self.p_unconst[i])
-        else:
-            pi = 1.0 - tf.reduce_sum(self.transform(self.p_unconst[-1]))
+        return bernoulli.logpmf(z[:, i], self.p[i])
 
-        return bernoulli.logpmf(z[:, i], pi)
-
-class MFBeta:
+class MFBeta(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Beta(z[i] | lambda[i])
     """
-    def __init__(self, num_vars):
-        self.num_vars = num_vars
-        self.num_params = 2*num_vars
+    def __init__(self, *args, **kwargs):
+        Likelihood.__init__(self, *args, **kwargs)
+        self.num_params = 2*self.num_vars
+        self.a = None
+        self.b = None
 
-        self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.transform = tf.nn.softplus
+    def mapping(self, x):
+        alpha = Variable("alpha", [self.num_vars])
+        beta = Variable("beta", [self.num_vars])
+        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
+
+    def set_params(self, params):
+        self.a = params[0]
+        self.b = params[1]
 
     def print_params(self, sess):
-        a, b = sess.run([ \
-            self.transform(self.a_unconst),
-            self.transform(self.b_unconst)])
-
+        a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
@@ -325,10 +325,7 @@ class MFBeta:
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        a, b = sess.run([ \
-            self.transform(self.a_unconst),
-            self.transform(self.b_unconst)])
-
+        a, b = sess.run([self.a, self.b])
         z = np.zeros(size)
         for d in range(self.num_vars):
             z[:, d] = beta.rvs(a[d], b[d], size=size[0])
@@ -340,12 +337,7 @@ class MFBeta:
         if i >= self.num_vars:
             raise
 
-        ai = self.transform(self.a_unconst)[i]
-        bi = self.transform(self.b_unconst)[i]
-        # TODO
-        #ai = self.transform(self.a_unconst[i])
-        #bi = self.transform(self.b_unconst[i])
-        return beta.logpdf(z[:, i], ai, bi)
+        return beta.logpdf(z[:, i], self.a[i], self.b[i])
 
 class MFGaussian(Likelihood):
     """
@@ -354,6 +346,8 @@ class MFGaussian(Likelihood):
     def __init__(self, *args, **kwargs):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_params = 2*self.num_vars
+        self.m = None
+        self.s = None
 
     def mapping(self, x):
         mean = Variable("mu", [self.num_vars])
@@ -402,21 +396,27 @@ class MFGaussian(Likelihood):
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
 
-class PointMass():
+class PointMass(Likelihood):
     """
     Point mass variational family
     """
     def __init__(self, num_vars, transform=tf.identity):
-        self.num_vars = num_vars
-        self.num_params = num_vars
-
-        self.param_unconst = tf.Variable(tf.random_normal([num_vars]))
+        Likelihood.__init__(self, num_vars)
+        self.num_params = self.num_vars
         self.transform = transform
+        self.params = None
+
+    def mapping(self, x):
+        params = Variable("params", [self.num_vars])
+        return [self.transform(params)]
+
+    def set_params(self, params):
+        self.params = params[0]
 
     def print_params(self, sess):
-        params = sess.run([self.transform(self.param_unconst)])
+        params = sess.run([self.params])
         print("parameter values:")
         print(params)
 
     def get_params(self):
-        return self.transform(self.param_unconst)
+        return self.params
