@@ -88,14 +88,20 @@ class Likelihood(VarStoreMethod):
         """
         raise NotImplementedError()
 
-    def sample(self, size, sess):
+    def sample(self, size, sess=None):
         """
         z ~ q(z | lambda)
+
+        Parameters
+        ----------
+        sess : tf.Session, optional
+
         Returns
         -------
         np.ndarray
             n_minibatch x dim(z) array of type np.float32, where each
             row is a sample from q.
+
         Notes
         -----
         Unlike the other methods, this return object is a realization

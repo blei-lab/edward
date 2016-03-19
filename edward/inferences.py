@@ -271,7 +271,7 @@ class VAE(VariationalInference):
         # This is absorbed into the learning rate.
         with tf.variable_scope("model") as scope:
             self.variational.set_params(self.variational.mapping(self.x))
-            z = self.variational.sample([self.n_data, self.variational.num_vars], 0)
+            z = self.variational.sample([self.n_data, self.variational.num_vars])
             self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
                           kl_multivariate_normal(self.variational.m,
                                                  self.variational.s)
