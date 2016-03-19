@@ -8,10 +8,16 @@ from edward.util import get_dims, concat, Variable
 class Likelihood:
     """
     Base class for variational likelihoods, q(z | lambda).
+
+    Parameters
+    ----------
+    num_vars : int
+        Number of latent variables.
     """
     def __init__(self, num_vars):
         self.num_vars = num_vars
-        self.num_params = None
+        self.num_params = None # number of local variational parameters
+        # TODO attribute for number of global variational parameters
 
     def mapping(self, x):
         """
@@ -270,11 +276,9 @@ class MFBernoulli(Likelihood):
 
     def mapping(self, x):
         p = Variable("p", [self.num_params])
-        # Force probability vector to lie on simplex.
+        # Constrain parameters to lie on simplex.
         p_const = tf.sigmoid(p)
         if self.num_vars > 1:
-            # TensorFlow supports neither negative indexing or assignment.
-            #p_const[-1] = 1.0 - tf.reduce_sum(p_const[-1])
             p_const = concat([p_const,
                               tf.expand_dims(1.0 - tf.reduce_sum(p_const), 0)])
 
@@ -302,7 +306,6 @@ class MFBernoulli(Likelihood):
         if i >= self.num_vars:
             raise
 
-        print(self.p)
         return bernoulli.logpmf(z[:, i], self.p[i])
 
 class MFBeta(Likelihood):
