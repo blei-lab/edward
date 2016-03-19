@@ -3,19 +3,17 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
-from edward.util import get_dims, concat, VarStoreMethod
+from edward.util import get_dims, concat, Variable
 
-class Likelihood(VarStoreMethod):
+class Likelihood:
     """
     Base class for variational likelihoods, q(z | lambda).
     """
     def __init__(self, num_vars):
-        VarStoreMethod.__init__(self)
         self.num_vars = num_vars
         self.num_params = None
 
     # TODO how can this also be used for writing up variational models?
-    # TODO should the parameters of this mapping be stored within the class as it currently is, or outside (outside makes sense, e.g., for random parameters, and with inference networks)
     # TODO don't raise errors for inference methods that don't deal with q(z | x) cases
     def mapping(self, x):
         """
@@ -351,8 +349,8 @@ class MFGaussian(Likelihood):
         self.num_params = 2*self.num_vars
 
     def mapping(self, x):
-        mean = self.variable("mu", [self.num_vars])
-        stddev = self.variable("sigma", [self.num_vars])
+        mean = Variable("mu", [self.num_vars])
+        stddev = Variable("sigma", [self.num_vars])
         return [tf.identity(mean), tf.nn.softplus(stddev)]
 
     def set_params(self, params):

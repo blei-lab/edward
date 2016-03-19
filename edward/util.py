@@ -173,9 +173,6 @@ def logit(x, clip_finite=True):
     return transformed, log_jacobian
 
 # This is taken from PrettyTensor.
-# It is useful so that on the first call to the method, the TensorFlow
-# variable is instantiated and returned. On future calls the same #
-# TensorFlow variable is returned but not instantiated again.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
 class VarStoreMethod(object):
   """Convenience base class for registered methods that create variables.
@@ -230,3 +227,19 @@ class VarStoreMethod(object):
       v.get_shape().assert_is_compatible_with(shape)
       self.vars[var_name] = v
       return v
+
+class VARIABLE(VarStoreMethod):
+    """
+    A simple wrapper to hold variables by itself, so that when calling
+    objects of this class, it will create the TensorFlow variable at
+    the first time and return the variable; in subsequent calls, it
+    will simply return the variable.
+
+    This also enables variables to be stored outside of classes which
+    depend on parameters.
+    """
+    def __call__(self, name, shape):
+        self.name = name
+        return self.variable(name, shape)
+
+Variable = VARIABLE()
