@@ -22,7 +22,7 @@ class Data:
         if not shuffled:
             # TODO
             # shuffle self.data
-            pass
+            raise NotImplementedError()
 
         self.counter = 0
         if self.data is None:
@@ -32,8 +32,7 @@ class Data:
         elif isinstance(self.data, np.ndarray):
             self.N = self.data.shape[0]
         elif isinstance(self.data, dict):
-            # TODO assume y in dict is the data
-            self.N = len(self.data['y'])
+            pass
         else:
             raise
 

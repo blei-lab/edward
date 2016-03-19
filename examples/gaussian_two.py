@@ -6,10 +6,10 @@ Variational model
     Likelihood: Mean-field Gaussian
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import gaussian_log_prob
-from blackbox.util import get_dims
+from edward.stats import multivariate_normal
+from edward.util import get_dims
 
 class Gaussian:
     """
@@ -21,16 +21,16 @@ class Gaussian:
         self.num_vars = get_dims(mu)[0]
 
     def log_prob(self, xs, zs):
-        return tf.pack([gaussian_log_prob(z, mu, Sigma)
-                        for z in tf.unpack(zs)])
+        return tf.concat(0, [multivariate_normal.logpdf(z, self.mu, self.Sigma)
+                         for z in tf.unpack(zs)])
 
-bb.set_seed(42)
+ed.set_seed(42)
 mu = tf.constant([1.0, 1.0])
 Sigma = tf.constant(
 [[1.0, 0.1],
  [0.1, 1.0]])
 model = Gaussian(mu, Sigma)
-variational = bb.MFGaussian(model.num_vars)
+variational = ed.MFGaussian(model.num_vars)
 
-inference = bb.MFVI(model, variational)
+inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

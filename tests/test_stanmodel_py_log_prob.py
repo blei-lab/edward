@@ -1,8 +1,8 @@
 # Compare log_prob evaluations from Stan to a NumPy/SciPy version.
-import blackbox as bb
+import edward as ed
 import numpy as np
 
-from blackbox.util import PythonModel
+from edward.util import PythonModel
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
@@ -45,7 +45,7 @@ model_code = """
 """
 data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
-model = bb.StanModel(model_code=model_code, data=data)
+model = ed.StanModel(model_code=model_code, data=data)
 
 print( npmodel._py_log_prob(np.array([[0.5]], dtype=np.float32)) )
 print( model._py_log_prob(np.array([[0.5]], dtype=np.float32)) )

@@ -6,29 +6,29 @@ Variational model
     Likelihood: Mean-field Gaussian
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import gaussian_log_prob
-from blackbox.util import get_dims
+from edward.stats import norm
+from edward.util import get_dims
 
 class Gaussian:
     """
-    p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
+    p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, std)
     """
-    def __init__(self, mu, Sigma):
+    def __init__(self, mu, std):
         self.mu = mu
-        self.Sigma = Sigma
-        self.num_vars = get_dims(mu)[0]
+        self.std = std
+        self.num_vars = 1
 
     def log_prob(self, xs, zs):
-        return tf.pack([gaussian_log_prob(z, mu, Sigma)
-                        for z in tf.unpack(zs)])
+        return tf.concat(0, [norm.logpdf(z, self.mu, self.std)
+                         for z in tf.unpack(zs)])
 
-bb.set_seed(42)
+ed.set_seed(42)
 mu = tf.constant(1.0)
-Sigma = tf.constant(1.0)
-model = Gaussian(mu, Sigma)
-variational = bb.MFGaussian(model.num_vars)
+std = tf.constant(1.0)
+model = Gaussian(mu, std)
+variational = ed.MFGaussian(model.num_vars)
 
-inference = bb.MFVI(model, variational)
+inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

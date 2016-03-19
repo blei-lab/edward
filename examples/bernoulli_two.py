@@ -6,10 +6,10 @@ Variational model
     Likelihood: Mean-field Bernoulli
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import bernoulli_log_prob
-from blackbox.util import get_dims
+from edward.stats import bernoulli
+from edward.util import get_dims
 
 class Bernoulli:
     """
@@ -23,9 +23,9 @@ class Bernoulli:
     def log_prob(self, xs, zs):
         # TODO use table lookup for everything not resort to if-elses
         if get_dims(zs)[1] == 1:
-            return bernoulli_log_prob(zs[:, 0], p)
+            return bernoulli.logpmf(zs[:, 0], p)
         else:
-            return tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
+            return tf.concat(0, [self.table_lookup(z) for z in tf.unpack(zs)])
 
     def table_lookup(self, x):
         elem = self.lp
@@ -33,13 +33,13 @@ class Bernoulli:
             elem = tf.gather(elem, tf.to_int32(x[d]))
         return elem
 
-bb.set_seed(42)
+ed.set_seed(42)
 
 p = tf.constant(
 [[0.4, 0.1],
  [0.1, 0.4]])
 model = Bernoulli(p)
-variational = bb.MFBernoulli(model.num_vars)
+variational = ed.MFBernoulli(model.num_vars)
 
-inference = bb.MFVI(model, variational)
+inference = ed.MFVI(model, variational)
 inference.run()
