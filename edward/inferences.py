@@ -136,7 +136,7 @@ class MFVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and hasattr(self.variational, 'reparam'):
+        if score is None and 'reparam' in self.variational.__class__.__dict__:
             self.score = False
         else:
             self.score = True
@@ -340,7 +340,7 @@ class ChiVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and hasattr(self.variational, 'reparam'):
+        if score is None and 'reparam' in self.variational.__class__.__dict__:
             self.score = False
         else:
             self.score = True

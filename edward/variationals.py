@@ -5,6 +5,100 @@ import tensorflow as tf
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
 from edward.util import get_dims, concat, VarStoreMethod
 
+class Likelihood(VarStoreMethod):
+    """
+    Base class for variational likelihoods, q(z | lambda).
+    """
+    def __init__(self, num_vars):
+        VarStoreMethod.__init__(self)
+        self.num_vars = num_vars
+        self.num_params = None
+
+    # TODO how can this also be used for writing up variational models?
+    # TODO should the parameters of this mapping be stored within the class as it currently is, or outside (outside makes sense, e.g., for random parameters, and with inference networks)
+    def parameterize(self, x):
+        """
+        A global mapping from data point x -> lambda, the local
+        variational parameters.
+
+        In classical variational inference, the global mapping is
+        parameterized by the collection of all variational parameters,
+        and the output is simply the subset of relevant local
+        variational parameters.
+
+        In non-trivial parameterizations such as inverse mappings in
+        Helmholtz machines and variational auto-encoders, and
+        parameter tying procedures in message passing, the mapping is
+        a function of data point with a fixed number of parameters
+        that does not grow with the data.
+
+        Returns
+        -------
+        tf.Tensor
+            A long vector of all the parameters.
+            TODO or maybe
+            A dictionary of local variational parameter names and
+            their outputted values.
+        """
+        raise NotImplementedError()
+
+    def extract_params(self, params):
+        """
+        This takes the output of the parameters from the
+        parameterize() method and pieces out the corresponding
+        parameters for use in other methods in the variational class.
+        """
+        raise NotImplementedError()
+
+    # TODO use __str__(self):
+    def print_params(self, sess):
+        raise NotImplementedError()
+
+    def sample_noise(self, size):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        Returns
+        -------
+        np.ndarray
+            n_minibatch x dim(lambda) array of type np.float32, where each
+            row is a sample from q.
+        Notes
+        -----
+        Unlike the other methods, this return object is a realization
+        of a TensorFlow array. This is required as we rely on
+        NumPy/SciPy for sampling from distributions.
+        """
+        raise NotImplementedError()
+
+    def reparam(self, eps):
+        """
+        eps = sample_noise() ~ s(eps)
+        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        """
+        raise NotImplementedError()
+
+    def sample(self, size, sess):
+        """
+        z ~ q(z | lambda)
+        Returns
+        -------
+        np.ndarray
+            n_minibatch x dim(z) array of type np.float32, where each
+            row is a sample from q.
+        Notes
+        -----
+        Unlike the other methods, this return object is a realization
+        of a TensorFlow array. This is required as we rely on
+        NumPy/SciPy for sampling from distributions.
+        The method defaults to sampling noise and reparameterizing it
+        (which will error out if this is not possible).
+        """
+        return self.reparam(self.sample_noise(size))
+
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        raise NotImplementedError()
 
 class MFMixGaussian:
     """
@@ -232,18 +326,14 @@ class MFBeta:
         #bi = self.transform(self.b_unconst[i])
         return beta.logpdf(z[:, i], ai, bi)
 
-class MFGaussian(VarStoreMethod):
+class MFGaussian(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Gaussian(z[i] | lambda[i])
     """
-    def __init__(self, num_vars):
-        VarStoreMethod.__init__(self)
-        self.num_vars = num_vars
-        self.num_params = 2*num_vars
+    def __init__(self, *args, **kwargs):
+        Likelihood.__init__(self, *args, **kwargs)
+        self.num_params = 2*self.num_vars
 
-    # TODO
-    # parameterize will define the variables and output their value as a long parameter
-    # extract_params will extract out their parameters to be part of the class
     def parameterize(self, x):
         mean = self.variable("mu", [self.num_vars])
         stddev = self.variable("sigma", [self.num_vars])
@@ -251,6 +341,8 @@ class MFGaussian(VarStoreMethod):
 
     def extract_params(self, params):
         # would be nice to have self.params which just stores a dictionary
+        # TODO
+        # in general, these stored values are just temporary
         self.m = params[0]
         self.s = params[1]
 
@@ -277,9 +369,7 @@ class MFGaussian(VarStoreMethod):
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
         self.extract_params(self.parameterize(0))
-        m = self.m
-        s = self.s
-        return m + eps * s
+        return self.m + eps * self.s
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
