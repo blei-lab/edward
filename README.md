@@ -16,7 +16,7 @@ It supports __modeling languages__ including
 It supports __inference__ via
 
 * Variational inference
-  * Global divergence minimization
+  * Divergence minimization
     * Black box variational inference
     * Stochastic variational inference
     * Variational auto-encoders
