@@ -8,7 +8,7 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
-import blackbox as bb
+import edward as ed
 
 model_code = """
     data {
@@ -24,14 +24,14 @@ model_code = """
         y[n] ~ bernoulli(theta);
     }
 """
-bb.set_seed(42)
-model = bb.StanModel(model_code=model_code)
+ed.set_seed(42)
+model = ed.StanModel(model_code=model_code)
 # TODO
 # model.num_vars no longer exists in StanModel:
 # it doesn't compile until after it takes in data
-#variational = bb.MFBeta(model.num_vars)
-variational = bb.MFBeta(1)
-data = bb.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+#variational = ed.MFBeta(model.num_vars)
+variational = ed.MFBeta(1)
+data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
-inference = bb.MFVI(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

@@ -8,9 +8,9 @@ Probability model
 Inference: Maximum a posteriori
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import bernoulli, beta
+from edward.stats import bernoulli, beta
 
 class BetaBernoulli:
     """
@@ -26,10 +26,10 @@ class BetaBernoulli:
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 
-bb.set_seed(42)
+ed.set_seed(42)
 model = BetaBernoulli()
-variational = bb.MFBeta(model.num_vars)
-data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
+variational = ed.MFBeta(model.num_vars)
+data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-inference = bb.MAP(model, data, transform=tf.sigmoid)
+inference = ed.MAP(model, data, transform=tf.sigmoid)
 inference.run(n_iter=100, n_print=10)

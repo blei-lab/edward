@@ -2,17 +2,17 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.stats import beta
+from edward.stats import beta
 from scipy import stats
 
 sess = tf.Session()
 
 
-def _assert_eq(val_bb, val_true):
+def _assert_eq(val_ed, val_true):
     with sess.as_default():
         # NOTE: since Tensorflow has no log_beta function, the values here are
         # only an approximation
-        assert np.allclose(val_bb.eval(), val_true, atol=1e-4)
+        assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
 
 def _test_logpdf_scalar(scalar, a=.5, b=.5):

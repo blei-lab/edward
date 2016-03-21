@@ -1,7 +1,7 @@
 from __future__ import print_function
 import tensorflow as tf
 
-from blackbox.util import get_dims
+from edward.util import get_dims
 
 
 def test_get_dims_scalar():

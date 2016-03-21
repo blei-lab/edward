@@ -11,7 +11,7 @@ Variational model
 """
 from __future__ import print_function
 import os
-import blackbox as bb
+import edward as ed
 import prettytensor as pt
 import tensorflow as tf
 
@@ -133,7 +133,7 @@ class Data:
         x_batch, _ = mnist.train.next_batch(size)
         return x_batch
 
-bb.set_seed(42)
+ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
 variational = MFGaussian(FLAGS.num_vars)
 
@@ -142,7 +142,7 @@ if not os.path.exists(FLAGS.data_directory):
 mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 data = Data(mnist)
 
-inference = bb.VAE(model, variational, data)
+inference = ed.VAE(model, variational, data)
 sess = inference.initialize(n_data=FLAGS.n_data)
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior([FLAGS.n_data, FLAGS.num_vars])

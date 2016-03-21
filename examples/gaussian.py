@@ -6,10 +6,10 @@ Variational model
     Likelihood: Mean-field Gaussian
 """
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
-from blackbox.stats import norm
-from blackbox.util import get_dims
+from edward.stats import norm
+from edward.util import get_dims
 
 class Gaussian:
     """
@@ -24,11 +24,11 @@ class Gaussian:
         return tf.concat(0, [norm.logpdf(z, self.mu, self.std)
                          for z in tf.unpack(zs)])
 
-bb.set_seed(42)
+ed.set_seed(42)
 mu = tf.constant(1.0)
 std = tf.constant(1.0)
 model = Gaussian(mu, std)
-variational = bb.MFGaussian(model.num_vars)
+variational = ed.MFGaussian(model.num_vars)
 
-inference = bb.MFVI(model, variational)
+inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

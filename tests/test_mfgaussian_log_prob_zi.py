@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
-import blackbox as bb
+import edward as ed
 
 from scipy import stats
 
@@ -11,7 +11,7 @@ np.random.seed(98765)
 
 
 def _test_log_prob_zi(n_data, n_vars):
-    variational = bb.MFGaussian(n_vars)
+    variational = ed.MFGaussian(n_vars)
     variational.m_unconst = tf.constant([0.0] * n_vars)
     variational.s_unconst = tf.constant(np.random.randn(n_vars))
 
