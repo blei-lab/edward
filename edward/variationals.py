@@ -129,7 +129,7 @@ class Likelihood:
         """log q(z_i | lambda_i)"""
         raise NotImplementedError()
 
-class MFMixGaussian:
+class MFMixGaussian(Likelihood):
     """
     q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)
     """
@@ -139,15 +139,22 @@ class MFMixGaussian:
         self.gauss = MFGaussian(K*D)
         self.invgam = MFInvGamma(K*D)
 
-        dirich_num_vars = self.dirich.num_vars
-        gauss_num_vars = self.gauss.num_vars
-        invgam_num_vars = self.invgam.num_vars
-        self.num_vars = dirich_num_vars + gauss_num_vars + invgam_num_vars
+        Likelihood.__init__(self, self.dirich.num_vars + \
+                                  self.gauss.num_vars +  \
+                                  self.invgam.num_vars)
+        self.num_params = self.dirich.num_params + \
+                          self.gauss.num_params + \
+                          self.invgam.num_params
 
-        dirich_num_param = self.dirich.num_params
-        gauss_num_param = self.gauss.num_params
-        invgam_num_params = self.invgam.num_params
-        self.num_params = dirich_num_param + gauss_num_param + invgam_num_params
+    def mapping(self, x):
+        return [self.dirich.mapping(x),
+                self.gauss.mapping(x),
+                self.invgam.mapping(x)]
+
+    def set_params(self, params):
+    	self.dirich.set_params(params[0])
+        self.gauss.set_params(params[1])
+        self.invgam.set_params(params[2])
 
     def print_params(self, sess):
     	self.dirich.print_params(sess)
@@ -162,7 +169,6 @@ class MFMixGaussian:
         invgam_samples = self.invgam.sample((size[0], self.invgam.num_vars), sess)
 
         z = np.concatenate((dirich_samples[0][0], gauss_samples, invgam_samples[0]), axis=0)
-
         return z.reshape(size)
 
     def log_prob_zi(self, i, z):
@@ -183,26 +189,31 @@ class MFMixGaussian:
 
         return log_prob
 
-class MFDirichlet:
+class MFDirichlet(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
     """
     def __init__(self, num_vars, K):
-        self.K = K
-        self.num_vars = num_vars
+        Likelihood.__init__(self, num_vars)
         self.num_params = K * num_vars
-        self.alpha_unconst = tf.Variable(tf.random_normal([num_vars, K]))
-        self.transform = tf.nn.softplus
+        self.K = K
+        self.alpha = None
+
+    def mapping(self, x):
+        alpha = Variable("alpha", [self.num_vars, K])
+        return [tf.nn.softplus(alpha)]
+
+    def set_params(self, params):
+        self.alpha = params[0]
 
     def print_params(self, sess):
-        alpha = sess.run([self.transform(self.alpha_unconst)])
-
+        alpha = sess.run([self.alpha])
         print("concentration vector:")
         print(alpha)
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        alpha = sess.run(self.transform(self.alpha_unconst))
+        alpha = sess.run([self.alpha])
         z = np.zeros((size[1], size[0], self.K))
         for d in xrange(self.num_vars):
             z[d, :, :] = dirichlet.rvs(alpha[d, :], size = size[0])
@@ -214,26 +225,29 @@ class MFDirichlet:
         if i >= self.num_vars:
             raise
 
-        alphai = self.transform(self.alpha_unconst)[i, :]
+        return dirichlet.logpdf(z[:, i], self.alpha[i, :])
 
-        return dirichlet.logpdf(z[:, i], alphai)
-
-class MFInvGamma:
+class MFInvGamma(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
     """
-    def __init__(self, num_vars):
-        self.num_vars = num_vars
-        self.num_params = 2 * num_vars
-        self.a_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.b_unconst = tf.Variable(tf.random_normal([num_vars]))
-        self.transform = tf.nn.softplus
+    def __init__(self, *args, **kwargs):
+        Likelihood.__init__(self, *args, **kwargs)
+        self.num_params = 2*self.num_vars
+        self.a = None
+        self.b = None
+
+    def mapping(self, x):
+        alpha = Variable("alpha", [self.num_vars])
+        beta = Variable("beta", [self.num_vars])
+        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
+
+    def set_params(self, params):
+        self.a = params[0]
+        self.b = params[1]
 
     def print_params(self, sess):
-        a, b = sess.run([ \
-            self.transform(self.a_unconst),
-            self.transform(self.b_unconst)])
-
+        a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
@@ -241,10 +255,7 @@ class MFInvGamma:
 
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
-        a, b = sess.run([ \
-            self.transform(self.a_unconst),
-            self.transform(self.b_unconst)])
-
+        a, b = sess.run([self.a, self.b])
         z = np.zeros(size)
         for d in range(self.num_vars):
             z[:, d] = invgamma.rvs(a[d], b[d], size=size[0])
@@ -256,10 +267,7 @@ class MFInvGamma:
         if i >= self.num_vars:
             raise
 
-        ai = self.transform(self.a_unconst)[i]
-        bi = self.transform(self.b_unconst)[i]
-
-        return invgamma.logpdf(z[:, i], ai, bi)
+        return invgamma.logpdf(z[:, i], self.a[i], self.b[i])
 
 class MFBernoulli(Likelihood):
     """
