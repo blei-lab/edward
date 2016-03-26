@@ -136,7 +136,7 @@ class MFVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and hasattr(self.variational, 'reparam'):
+        if score is None and 'reparam' in self.variational.__class__.__dict__:
             self.score = False
         else:
             self.score = True
@@ -149,6 +149,13 @@ class MFVI(VariationalInference):
 
     def update(self, sess):
         if self.score:
+            # TODO the mapping should go here before sampling.
+            # In principle the mapping should go here but we don't
+            # want to have to run this twice. Also I've noticed that it
+            # is significantly slower if I have it here for some reason,
+            # so I'm leaving this as an open problem.
+            #x = self.data.sample(self.n_data)
+            #self.variational.set_params(self.variational.mapping(x))
             samples = self.variational.sample(self.samples.get_shape(), sess)
         else:
             samples = self.variational.sample_noise(self.samples.get_shape())
@@ -173,11 +180,13 @@ class MFVI(VariationalInference):
         (Paisley et al., 2012)
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-        x = self.data.sample(self.n_data)
         self.losses = self.model.log_prob(x, self.samples) - q_log_prob
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.losses))
 
@@ -188,12 +197,14 @@ class MFVI(VariationalInference):
         (Kingma and Welling, 2014)
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, z)
 
-        x = self.data.sample(self.n_data)
         self.losses = self.model.log_prob(x, z) - q_log_prob
         return -tf.reduce_mean(self.losses)
 
@@ -204,6 +215,9 @@ class MFVI(VariationalInference):
         """
         # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
         # where entropy is analytic
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
@@ -223,6 +237,7 @@ class MFVI(VariationalInference):
         # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
         # where entropy is analytic
         x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
         self.losses = self.model.log_prob(x, z) + self.variational.entropy()
         return -tf.reduce_mean(self.losses)
@@ -263,11 +278,11 @@ class VAE(VariationalInference):
         # where x^b is a mini-batch of x, with sizes M and N respectively.
         # This is absorbed into the learning rate.
         with tf.variable_scope("model") as scope:
-            z = self.variational.sample([self.n_data, self.variational.num_vars],
-                                        self.x)
+            self.variational.set_params(self.variational.mapping(self.x))
+            z = self.variational.sample([self.n_data, self.variational.num_vars])
             self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-                          kl_multivariate_normal(self.variational.mean,
-                                                 self.variational.stddev)
+                          kl_multivariate_normal(self.variational.m,
+                                                 self.variational.s)
 
         return -self.losses
 
@@ -305,13 +320,15 @@ class KLpq(VariationalInference):
         #
         # gradient = - E_{q(z; lambda)} [ w_norm(z; lambda) *
         #                                 grad_{lambda} log q(z; lambda) ]
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
         # 1/B sum_{b=1}^B grad_log_q * w_norm
         # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }
-        x = self.data.sample(self.n_data)
         log_w = self.model.log_prob(x, self.samples) - q_log_prob
 
         # normalized log importance weights
@@ -331,6 +348,7 @@ class MAP(VariationalInference):
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
         z = self.variational.get_params()
         self.losses = self.model.log_prob(x, z)
         return -tf.reduce_mean(self.losses)
