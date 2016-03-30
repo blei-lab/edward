@@ -3,23 +3,21 @@
 # Run with 1 update per epoch:
 # python convolutional_vae.py --n_iter_per_epoch=1
 # Check that objective values are as follows:
-0.827012
-0.886294
-0.792136
-0.668022
-0.660516
-0.668974
-0.648113
-0.615716
-0.616493
-0.612958
+-0.831284
+-0.834811
+-0.783949
+-0.689275
+-0.653788
+-0.656840
+-0.650696
+-0.622813
+-0.619293
+-0.608524
 
 # Run with 1000 updates per epoch:
 # python convolutional_vae.py --n_iter_per_epoch=1000
 # Check that objective values are as follows:
-0.219992
-0.144405
-0.137927
-0.134993
+-0.219641
+-0.143808
 
 # Check that generated images after 2 epochs look like digits.

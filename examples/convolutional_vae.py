@@ -16,6 +16,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
+from edward import MFGaussian
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -32,68 +33,43 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 
 FLAGS = flags.FLAGS
 
-class MFGaussian:
-    def __init__(self, num_vars):
-        self.num_vars = num_vars
-        self.mean = None # n_data x num_vars
-        self.stddev = None # n_data x num_vars
+def mapping(self, x):
+    """
+    lambda = phi(x)
+    """
+    with pt.defaults_scope(activation_fn=tf.nn.elu,
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
+        params = (pt.wrap(x).
+                reshape([FLAGS.n_data, 28, 28, 1]).
+                conv2d(5, 32, stride=2).
+                conv2d(5, 64, stride=2).
+                conv2d(5, 128, edges='VALID').
+                dropout(0.9).
+                flatten().
+                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
 
-    def network(self, x):
-        """
-        lambda = phi(x)
-        """
-        with pt.defaults_scope(activation_fn=tf.nn.elu,
-                               batch_normalize=True,
-                               learned_moments_update_rate=0.0003,
-                               variance_epsilon=0.001,
-                               scale_after_normalization=True):
-            return (pt.wrap(x).
-                    reshape([FLAGS.n_data, 28, 28, 1]).
-                    conv2d(5, 32, stride=2).
-                    conv2d(5, 64, stride=2).
-                    conv2d(5, 128, edges='VALID').
-                    dropout(0.9).
-                    flatten().
-                    fully_connected(self.num_vars * 2, activation_fn=None)).tensor
+    mean = params[:, :self.num_vars]
+    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
+    return [mean, stddev]
 
-    def extract_params(self, params):
-        """
-        lambda = (mean, stddev)
-        """
-        self.mean = params[:, :self.num_vars]
-        self.stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
+def sample_noise(self, size):
+    """
+    eps = sample_noise() ~ s(eps)
+    s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+    """
+    return tf.random_normal(size)
 
-    def sample_noise(self, size):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
-        """
-        return tf.random_normal(size)
-
-    def reparam(self, eps):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
-        """
-        return self.mean + eps * self.stddev
-
-    def sample(self, size, x):
-        """
-        z | x ~ q(z | x) = N(z | lambda = phi(x))
-
-        Parameters
-        ----------
-        x : tf.Tensor
-            a batch of flattened images [n_data, 28*28]
-        """
-        self.extract_params(self.network(x))
-        return self.reparam(self.sample_noise(size))
+MFGaussian.mapping = mapping
+MFGaussian.sample_noise = sample_noise
 
 class NormalBernoulli:
     def __init__(self, num_vars):
         self.num_vars = num_vars
 
-    def network(self, z):
+    def mapping(self, z):
         """
         p = varphi(z)
         """
@@ -114,7 +90,7 @@ class NormalBernoulli:
         """
         log p(x | z) = log Bernoulli(x | p = varphi(z))
         """
-        p = self.network(z)
+        p = self.mapping(z)
         return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
 
     def sample_prior(self, size):
@@ -123,7 +99,7 @@ class NormalBernoulli:
         z ~ N(0, 1), p = phi(z)
         """
         z = tf.random_normal(size)
-        return self.network(z)
+        return self.mapping(z)
 
 class Data:
     def __init__(self, data):
@@ -164,8 +140,8 @@ for epoch in range(FLAGS.n_epoch):
     # 28*28 pixels.
     avg_loss = avg_loss / (28 * 28 * FLAGS.n_data)
 
-    # Print (an upper bound to) the average NLL for a single pixel.
-    print("-log p(x) <= %f" % avg_loss)
+    # Print a lower bound to the average marginal likelihood for a single pixel.
+    print("log p(x) >= %f" % avg_loss)
 
     imgs = sess.run(p_rep)
     for b in range(FLAGS.n_data):
