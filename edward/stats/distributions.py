@@ -34,6 +34,17 @@ class Distribution:
         """
         raise NotImplementedError()
 
+class TruncNorm:
+    def rvs(self, a, b, loc=0, scale=1, size=1):
+        return stats.truncnorm.rvs(a, b, loc, scale, size=size)
+    
+    def logpdf(self, a, b, loc=0, scale=1):
+        cdf = stats.norm.cdf
+        cst = cdf((b - loc)/scale) - cdf((a - loc)/scale)
+        cst = -np.log(scale) - np.log(cst)
+        
+        return cst + Norm.logpdf(loc, scale)
+        
 class Bernoulli:
     def rvs(self, p, size=1):
         return stats.bernoulli.rvs(p, size=size)
