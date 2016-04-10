@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+
 from scipy.special import factorial
 
 def set_seed(x):
@@ -171,6 +172,10 @@ def logit(x, clip_finite=True):
         log_jacobian = np.sum(np.log(jacobian))
 
     return transformed, log_jacobian
+
+def rbf(x):
+    """RBF kernel element-wise."""
+    return tf.exp(-0.5*x*x)
 
 # This is taken from PrettyTensor.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
