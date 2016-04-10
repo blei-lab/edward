@@ -32,5 +32,5 @@ model = BetaBernoulli()
 variational = ed.MFBeta(model.num_vars)
 data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-inference = ed.ChiVI(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)
