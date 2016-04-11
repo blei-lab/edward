@@ -13,6 +13,7 @@ Variational model
 """
 import edward as ed
 import tensorflow as tf
+import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
@@ -22,8 +23,8 @@ class BayesianNN:
     """
     Bayesian neural network for regressing outputs y on inputs x.
 
-    p((x,y), z) = Normal(y; NN(x; z), lik_variance) *
-                  Normal(z; 0, prior_variance),
+    p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
+                  Normal(z | 0, prior_variance),
 
     where z are neural network weights, and with known lik_variance
     and prior_variance.
@@ -53,34 +54,38 @@ class BayesianNN:
         self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
         self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
 
-    def unpack_weights(self, zs):
+    def unpack_weights(self, z):
         """Unpack weight matrices and biases from a flattened vector."""
-        #n_minibatch = len(zs) # TODO
         for m, n in self.weight_dims:
-            # TODO can't subset tf.tensors(?)
-            # i would reshape it into a
-            # tf.tensor of
-            # [matrix/vector, ..., ] x n_minibatch x (m or 1) x n
-            #yield zs[:, :m*n]     .reshape((n_minibatch, m, n)), \
-            #      zs[:, m*n:m*n+n].reshape((n_minibatch, 1, n))
-            #zs = zs[:, (m+1)*n:]
-            yield tf.reshape(zs[:m*n],      [m, n]), \
-                  tf.reshape(zs[m*n:m*n+n], [1, n])
-            zs = zs[(m+1)*n:]
+            yield tf.reshape(z[:m*n],        [m, n]), \
+                  tf.reshape(z[m*n:(m*n+n)], [1, n])
+            z = z[(m+1)*n:]
 
-    def mapping(self, x, zs):
+    def mapping(self, x, z):
         """
         mu = NN(x; z)
-        A vector for z in zs.
+
+        Note this is one sample of z at a time.
+
+        Parameters
+        -------
+        x : tf.tensor
+            n_data x D
+
+        z : tf.tensor
+            num_vars
+
+        Returns
+        -------
+        tf.tensor
+            vector of length n_data
         """
-        #h = tf.expand_dims(x, 0) # TODO
-        # using batch_matmul
-        zs = zs[0, :]
         h = x
-        for W, b in self.unpack_weights(zs):
+        for W, b in self.unpack_weights(z):
             # broadcasting to do (W*h) + b (e.g. 40x10 + 1x10)
             h = self.nonlinearity(tf.matmul(h, W) + b)
 
+        h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
     def log_prob(self, xs, zs):
@@ -89,9 +94,9 @@ class BayesianNN:
 
         Parameters
         ----------
-        xs : tuple
-            tuple of inputs, a np.ndarray of dimension n_data x D,
-            and outputs, a np.ndarray of dimension n_data x D
+        xs : tf.tensor
+            n_data x (D + 1), where first column is outputs and other
+            columns are inputs and features
         zs : tf.tensor or np.ndarray
             n_minibatch x num_vars, where n_minibatch is the number of
             weight samples and num_vars is the number of weights
@@ -99,34 +104,71 @@ class BayesianNN:
         Returns
         -------
         tf.tensor
-            n_minibatch array where the i^th element is the log joint
-            density of x and zs[i, :]
+            vector of length n_minibatch, where the i^th element is
+            the log joint density of xs and zs[i, :]
         """
-        x, y = xs
+        y = xs[:, 0]
+        x = xs[:, 1:]
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
-        mu = self.mapping(x, zs)
-        log_lik = -tf.reduce_sum(tf.pow(y - mu, 2), 1) / self.lik_variance
+        mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
+        # broadcasting to do mus - y (n_minibatch x n_data - n_data)
+        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
+        # TODO bug somewhere
         return log_lik + log_prior
 
 def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_data/2, dtype=np.float32),
-                         np.linspace(6, 8, num=n_data/2, dtype=np.float32)])
+    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
+                         np.linspace(6, 8, num=n_data/2)])
     y = np.cos(x) + norm.rvs(0, noise_std, size=n_data)
     x = (x - 4.0) / 4.0
     x = x.reshape((n_data, D))
-    y = y.reshape((n_data, D))
-    return ed.Data((x, y))
+    y = y.reshape((n_data, 1))
+    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
+    data = tf.constant(data, dtype=tf.float32)
+    return ed.Data(data)
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = ed.MFGaussian(model.num_vars)
 data = build_toy_dataset()
 
-inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000)
-
-# TODO visualization; see autograd
+# TODO make more fluid
 # https://github.com/HIPS/autograd/blob/master/examples/bayesian_neural_net.py
 # https://www.youtube.com/watch?v=xrCalU-MPCc
+# Set up figure
+fig = plt.figure(figsize=(8,8), facecolor='white')
+ax = fig.add_subplot(111, frameon=False)
+plt.ion()
+plt.show(block=False)
+
+def print_progress(self, t, losses, sess):
+    if t % self.n_print == 0:
+        print("iter %d loss %.2f " % (t, np.mean(losses)))
+
+        # Sample functions from variational model
+        mean, std = sess.run([self.variational.m, self.variational.s])
+        #zs = norm.rvs(mean, std, size=(10, self.variational.num_vars))
+        rs = np.random.RandomState(0)
+        zs = rs.randn(10, self.variational.num_vars) * std + mean
+        zs = tf.constant(zs, dtype=tf.float32)
+        inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
+        x = tf.expand_dims(tf.constant(inputs), 1)
+        mus = tf.pack([self.model.mapping(x, z) for z in tf.unpack(zs)])
+        outputs = sess.run(mus)
+
+        # Get data
+        y, x = sess.run([self.data.data[:, 0], self.data.data[:, 1]])
+
+        # Plot data and functions
+        plt.cla()
+        ax.plot(x, y, 'bx')
+        ax.plot(inputs, outputs.T)
+        ax.set_ylim([-2, 3])
+        plt.draw()
+        plt.pause(1.0/60.0)
+
+ed.MFVI.print_progress = print_progress
+inference = ed.MFVI(model, variational, data)
+inference.run(n_iter=1000, n_print=10)

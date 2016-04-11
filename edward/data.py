@@ -33,8 +33,6 @@ class Data:
             self.N = self.data.shape[0]
         elif isinstance(self.data, dict):
             pass
-        elif isinstance(self.data, tuple):
-            pass # TODO temporary
         else:
             raise
 
