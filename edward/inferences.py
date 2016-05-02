@@ -68,7 +68,7 @@ class VariationalInference(Inference):
 
         return sess
 
-    def initialize(self, n_iter=1000, n_data=None, n_print=100):
+    def initialize(self, n_iter=1000, n_data=None, n_print=10):
         """
         Initialize inference algorithm.
 
@@ -159,8 +159,10 @@ class MFVI(VariationalInference):
             samples = self.variational.sample(self.samples.get_shape(), sess)
         else:
             samples = self.variational.sample_noise(self.samples.get_shape())
-
+        #print(sess.run(samples))	
         _, loss = sess.run([self.train, self.losses], {self.samples: samples})
+        #print(sess.run(self.losses, {self.samples: samples}))
+        
         return loss
 
     def build_loss(self):
@@ -204,8 +206,9 @@ class MFVI(VariationalInference):
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, z)
-
+        
         self.losses = self.model.log_prob(x, z) - q_log_prob
+        
         return -tf.reduce_mean(self.losses)
 
     def build_score_loss_entropy(self):
@@ -352,3 +355,7 @@ class MAP(VariationalInference):
         z = self.variational.get_params()
         self.losses = self.model.log_prob(x, z)
         return -tf.reduce_mean(self.losses)
+
+
+
+

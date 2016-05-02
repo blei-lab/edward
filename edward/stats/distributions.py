@@ -131,7 +131,7 @@ class Multivariate_Normal:
         else:
             mean = tf.cast(tf.squeeze(mean), dtype=tf.float32)
             r = x - mean
-
+            
         if cov == 1:
             cov_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
@@ -143,9 +143,11 @@ class Multivariate_Normal:
             else:
                 cov_inv = tf.matrix_inverse(cov)
                 det_cov = tf.matrix_determinant(cov)
-
+        #print(cov_inv)
+        r = tf.reshape(r, shape=(d, 1))
+        #print(r)
         lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov) - \
-              0.5*dot(dot(tf.transpose(r), cov_inv), r)
+              0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
         """
         # TensorFlow can't reverse-mode autodiff Cholesky
         L = tf.cholesky(cov)
