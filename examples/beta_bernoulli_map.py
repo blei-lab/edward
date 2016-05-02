@@ -7,8 +7,8 @@ Probability model
     Likelihood: Bernoulli
 Inference: Maximum a posteriori
 """
-import tensorflow as tf
 import edward as ed
+import tensorflow as tf
 
 from edward.stats import bernoulli, beta
 

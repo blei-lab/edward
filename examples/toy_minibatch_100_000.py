@@ -3,8 +3,8 @@
 This is just to show how fast we can do a minibatch gradient descent
 of 100,000 samples (!).
 """
-import tensorflow as tf
 import edward as ed
+import tensorflow as tf
 
 from edward.stats import bernoulli
 from edward.util import get_dims

@@ -4,8 +4,8 @@ Probability model
     Posterior: (1-dimensional) Gaussian
 Inference: Maximum a posteriori
 """
-import tensorflow as tf
 import edward as ed
+import tensorflow as tf
 
 from edward.stats import norm
 from edward.util import get_dims

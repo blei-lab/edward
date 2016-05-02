@@ -15,11 +15,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
-from edward.util import get_dims, rbf
 
 class LinearModel:
     """
-    Bayesian neural network for regressing outputs y on inputs x.
+    Bayesian linear regression for outputs y on inputs x.
 
     p((x,y), z) = Normal(y | x*z, lik_variance) *
                   Normal(z | 0, prior_variance),
@@ -30,7 +29,8 @@ class LinearModel:
     Parameters
     ----------
     weight_dim : list
-        Dimension of weights.
+        Dimension of weights, which is dimension of input x dimension
+        of output.
     lik_variance : float, optional
         Variance of the normal likelihood; aka noise parameter,
         homoscedastic variance, scale parameter.
@@ -45,6 +45,7 @@ class LinearModel:
         self.num_vars = (self.weight_dim[0]+1)*self.weight_dim[1]
 
     def mapping(self, x, z):
+        """Linear transformation W*x + b"""
         m, n = self.weight_dim[0], self.weight_dim[1]
         W = tf.reshape(z[:m*n], [m, n])
         b = tf.reshape(z[m*n:], [1, n])
@@ -61,7 +62,7 @@ class LinearModel:
         ----------
         xs : tf.tensor
             n_data x (D + 1), where first column is outputs and other
-            columns are inputs and features
+            columns are inputs (features)
         zs : tf.tensor or np.ndarray
             n_minibatch x num_vars, where n_minibatch is the number of
             weight samples and num_vars is the number of weights
@@ -128,8 +129,7 @@ def print_progress(self, t, losses, sess):
         ax.plot(inputs, outputs.T)
         ax.set_ylim([-2, 3])
         plt.draw()
-        plt.pause(1.0/60.0)
 
 ed.MFVI.print_progress = print_progress
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=5000, n_print=100)
+inference.run(n_iter=5000, n_print=5)

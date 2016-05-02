@@ -5,8 +5,8 @@ Probability model
 Variational model
     Likelihood: Mean-field Gaussian
 """
-import tensorflow as tf
 import edward as ed
+import tensorflow as tf
 
 from edward.stats import multivariate_normal
 from edward.util import get_dims
