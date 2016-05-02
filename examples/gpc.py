@@ -40,7 +40,6 @@ class GaussProcess:
         sess = tf.Session()
         mat = np.zeros(shape=(self.N, self.N))
         for i in xrange(self.N):
-            print("computing K...iteration: ", i)
             xi = xs[i, 1:]
             for j in xrange(self.N):
                 if j == i:
@@ -52,7 +51,7 @@ class GaussProcess:
         return tf.constant(mat, dtype=tf.float32)
     
     def logit(self, x):
-        """x[:, 0] is y """
+        
         return tf.truediv(1.0, (1.0 + tf.exp(-x))) 
                             
     def probit(self, x):
@@ -65,14 +64,10 @@ class GaussProcess:
             z = tf.exp(-x)
             return 1.0 / (1.0 + z)
         else:
-            # if x is less than zero then z will be small, denom can't be                                                                                         
-            # zero because it's 1+z.                                                                                                                              
             z = tf.exp(x)
             return z / (1.0 + z)
 
     def log_prob(self, xs, zs):
-        #xs is the whole data and 
-        #zs are the latent variables it is of size n_minibatch x num_vars
         K = self.compute_K(xs)
         log_prior = multivariate_normal.logpdf(zs[:, :], cov=K)
         log_lik = tf.concat(0, [tf.reduce_sum(bernoulli.logpmf(xs[:,0], 
