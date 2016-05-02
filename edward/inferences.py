@@ -159,9 +159,7 @@ class MFVI(VariationalInference):
             samples = self.variational.sample(self.samples.get_shape(), sess)
         else:
             samples = self.variational.sample_noise(self.samples.get_shape())
-        #print(sess.run(samples))	
-        _, loss = sess.run([self.train, self.losses], {self.samples: samples})
-        #print(sess.run(self.losses, {self.samples: samples}))
+          _, loss = sess.run([self.train, self.losses], {self.samples: samples})
         
         return loss
 
