@@ -36,7 +36,9 @@ It also has __features__ including
 [You can find a tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
 We highlight a few examples, more of which can be found in [`examples/`](examples/):
 
-* [Convolutional variational auto-encoder](examples/convolutional_vae.py)
+* [Bayesian linear regression](examples/bayesian_linear_regression.py)
+* [Bayesian neural network](examples/bayesian_nn.py)
+* [Variational auto-encoder](examples/convolutional_vae.py)
 
 Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
 

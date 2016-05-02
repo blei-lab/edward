@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """
+TODO this doesn't work
 This is the implementation of the Bayesian Mixture of K Gaussians.
 The model is written in Stan.
 Data: X = {x1,...,xn} where each xi is in R^d..we choose d=2 in our example
@@ -45,12 +46,9 @@ K = 2
 D = 2
 model = GaussMixture(K, D)
 variational = ed.MFMixGaussian(D, K)
-x = np.loadtxt('./mix_data/mix_mock_data.txt', dtype='float32', delimiter=',')
+x = np.loadtxt('data/mix_mock_data.txt', dtype='float32', delimiter=',')
 N = len(x)
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000)
-
-
-
