@@ -34,16 +34,6 @@ class Distribution:
         """
         raise NotImplementedError()
 
-class TruncNorm:
-    def rvs(self, a, b, loc=0, scale=1, size=1):
-        return stats.truncnorm.rvs(a, b, loc, scale, size=size)
-
-    def logpdf(self, a, b, loc=0, scale=1):
-        cdf = stats.norm.cdf
-        cst = cdf((b - loc)/scale) - cdf((a - loc)/scale)
-        cst = -np.log(scale) - np.log(cst)
-        return cst + norm.logpdf(loc, scale)
-
 class Bernoulli:
     def rvs(self, p, size=1):
         return stats.bernoulli.rvs(p, size=size)
@@ -238,6 +228,16 @@ class T:
                0.5 * (np.log(np.pi) + tf.log(df)) +  tf.log(scale) - \
                0.5 * (df + 1.0) * \
                    tf.log(1.0 + (1.0/df) * tf.square((x-loc)/scale))
+
+class TruncNorm:
+    def rvs(self, a, b, loc=0, scale=1, size=1):
+        return stats.truncnorm.rvs(a, b, loc, scale, size=size)
+
+    def logpdf(self, a, b, loc=0, scale=1):
+        cdf = stats.norm.cdf
+        cst = cdf((b - loc)/scale) - cdf((a - loc)/scale)
+        cst = -np.log(scale) - np.log(cst)
+        return cst + norm.logpdf(loc, scale)
 
 class Wishart:
     def rvs(self, df, scale, size=1):
