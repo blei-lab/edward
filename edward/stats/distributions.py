@@ -137,15 +137,13 @@ class Multivariate_Normal:
             det_cov = tf.constant(1.0)
         else:
             cov = tf.cast(tf.squeeze(cov), dtype=tf.float32)
-            if len(cov.get_shape()) == 1: # vector
+            if len(cov.get_shape()) == 1: 
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
             else:
                 cov_inv = tf.matrix_inverse(cov)
                 det_cov = tf.matrix_determinant(cov)
-        #print(cov_inv)
         r = tf.reshape(r, shape=(d, 1))
-        #print(r)
         lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov) - \
               0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
         """
@@ -182,7 +180,7 @@ class Multivariate_Normal:
         else:
             cov = tf.cast(cov, dtype=tf.float32)
             d = get_dims(cov)[0]
-            if len(cov.get_shape()) == 1: # vector
+            if len(cov.get_shape()) == 1: 
                 det_cov = tf.reduce_prod(cov)
             else:
                 det_cov = tf.matrix_determinant(cov)
