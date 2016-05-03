@@ -49,7 +49,11 @@ Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
 
 ## Installation
 
-To install from pip, run
+To install the latest stable version, run
+```{bash}
+pip install edward
+```
+To install the latest development version, run
 ```{bash}
 pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
 ```
