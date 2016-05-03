@@ -65,6 +65,21 @@ def log_sum_exp(x):
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
+def logit(x):
+    return tf.truediv(1.0, (1.0 + tf.exp(-x)))
+
+def probit(x):
+    return 0.5 * (1.0 + tf.erf(x / tf.sqrt(2.0)))
+
+def sigmoid(x):
+    "Numerically-stable sigmoid function."
+    if x >= 0.0:
+        z = tf.exp(-x)
+        return 1.0 / (1.0 + z)
+    else:
+        z = tf.exp(x)
+        return z / (1.0 + z)
+
 def dot(x, y):
     """
     x is M x N matrix and y is N-vector, or

@@ -1,4 +1,4 @@
-![edward](http://dustintran.com/img/blackbox_200.png)
+[![edward](http://dustintran.com/img/blackbox_200.png)](http://www.erikolofsen.com/blackbox.html)
 
 __Edward__ is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
@@ -33,10 +33,14 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial) (TODO I think we should put a short tutorial here, or just demonstrate code snippets).
-We highlight a few examples, more of which can be found in [`examples/`](examples/):
+[You can find a tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial)
+for getting started with Edward, as well as a
+[tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial-for-Research)
+for how to use it for research. We highlight a few examples, more of
+which can be found in [`examples/`](examples/):
 
 * [Bayesian linear regression](examples/bayesian_linear_regression.py)
+* [Gaussian process classification](examples/gp_classification.py)
 * [Bayesian neural network](examples/bayesian_nn.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)
 
@@ -56,11 +60,11 @@ pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
 We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
-. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 0.1. https://github.com/blei-lab/edward
+Dustin Tran, Adji Dieng, Alp Kucukelbir, Maja Rudolph, Dawen Liang, and David M. Blei. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0. https://github.com/blei-lab/edward
 ```
 @misc{
-  author = {},
-  title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 0.1}},
+  author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Maja Rudolph and Dawen Liang and David M. Blei},
+  title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0}},
   year = {2016},
   url = {https://github.com/blei-lab/edward}
 }
