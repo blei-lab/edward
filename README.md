@@ -55,6 +55,10 @@ pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
 
 ## Authors
 
+Edward is under active development by [Dustin Tran](http://dustintran.com), [Adji Dieng](http://stat.columbia.edu/~diengadji/), [Alp Kucukelbir](http://www.proditus.com/), [Maja Rudolph](http://maja-rita-rudolph.com/), and [Dawen Liang](http://www.ee.columbia.edu/~dliang/), and it is overseen by [David Blei](http://www.cs.columbia.edu/~blei/). We welcome contributions by submitting issues, feature requests, or by solving any current issues!
+
+We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of the Blei Lab for their helpful feedback and advice.
+
 ## Citation
 
 We appreciate citations for Edward because it lets us find out how
@@ -62,7 +66,7 @@ people have been using the library and it motivates further work.
 
 Dustin Tran, Adji Dieng, Alp Kucukelbir, Maja Rudolph, Dawen Liang, and David M. Blei. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0. https://github.com/blei-lab/edward
 ```
-@misc{
+@misc{tran2016edward,
   author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Maja Rudolph and Dawen Liang and David M. Blei},
   title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0}},
   year = {2016},
