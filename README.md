@@ -56,7 +56,7 @@ pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
 
 ## Authors
 
-Edward is under active development by [Dustin Tran](http://dustintran.com), [Adji Dieng](http://stat.columbia.edu/~diengadji/), [Alp Kucukelbir](http://www.proditus.com/), [Maja Rudolph](http://maja-rita-rudolph.com/), and [Dawen Liang](http://www.ee.columbia.edu/~dliang/), and it is overseen by [David Blei](http://www.cs.columbia.edu/~blei/). We welcome contributions by submitting issues, feature requests, or by solving any current issues!
+Edward is led by [Dustin Tran](http://dustintran.com) with guidance by [David Blei](http://www.cs.columbia.edu/~blei/). It is under active development (by order of joining) by [Dustin Tran](http://dustintran.com), [David Blei](http://www.cs.columbia.edu/~blei/), [Alp Kucukelbir](http://www.proditus.com/), [Adji Dieng](http://stat.columbia.edu/~diengadji/), [Maja Rudolph](http://maja-rita-rudolph.com/), and [Dawen Liang](http://www.ee.columbia.edu/~dliang/). We welcome contributions by submitting issues, feature requests, or by solving any current issues!
 
 We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of the Blei Lab for their helpful feedback and advice.
 
@@ -65,10 +65,10 @@ We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of t
 We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
-Dustin Tran, Adji Dieng, Alp Kucukelbir, Maja Rudolph, Dawen Liang, and David M. Blei. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0. https://github.com/blei-lab/edward
+Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0. https://github.com/blei-lab/edward
 ```
 @misc{tran2016edward,
-  author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Maja Rudolph and Dawen Liang and David M. Blei},
+  author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
   title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0}},
   year = {2016},
   url = {https://github.com/blei-lab/edward}
