@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Mean-field variational inference for Bayesian linear regression.
+Bayesian linear regression using mean-field variational inference.
 
 Probability model:
     Bayesian linear model
@@ -111,7 +111,6 @@ def print_progress(self, t, losses, sess):
 
         # Sample functions from variational model
         mean, std = sess.run([self.variational.m, self.variational.s])
-        #zs = norm.rvs(mean, std, size=(10, self.variational.num_vars))
         rs = np.random.RandomState(0)
         zs = rs.randn(10, self.variational.num_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)

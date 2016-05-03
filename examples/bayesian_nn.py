@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Mean-field variational inference on a Bayesian neural network.
+Bayesian neural network using mean-field variational inference.
 (see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016))
 Inspired by autograd's Bayesian neural network example.
 
@@ -113,7 +113,6 @@ class BayesianNN:
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
         # broadcasting to do mus - y (n_minibatch x n_data - n_data)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
-        # TODO bug somewhere
         return log_lik + log_prior
 
 def build_toy_dataset(n_data=40, noise_std=0.1):
@@ -134,9 +133,6 @@ model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = ed.MFGaussian(model.num_vars)
 data = build_toy_dataset()
 
-# TODO make more fluid
-# https://github.com/HIPS/autograd/blob/master/examples/bayesian_neural_net.py
-# https://www.youtube.com/watch?v=xrCalU-MPCc
 # Set up figure
 fig = plt.figure(figsize=(8,8), facecolor='white')
 ax = fig.add_subplot(111, frameon=False)
@@ -149,7 +145,6 @@ def print_progress(self, t, losses, sess):
 
         # Sample functions from variational model
         mean, std = sess.run([self.variational.m, self.variational.s])
-        #zs = norm.rvs(mean, std, size=(10, self.variational.num_vars))
         rs = np.random.RandomState(0)
         zs = rs.randn(10, self.variational.num_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
@@ -167,8 +162,7 @@ def print_progress(self, t, losses, sess):
         ax.plot(inputs, outputs.T)
         ax.set_ylim([-2, 3])
         plt.draw()
-        plt.pause(1.0/60.0)
 
 ed.MFVI.print_progress = print_progress
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000, n_print=10)
+inference.run(n_iter=5000, n_print=10)

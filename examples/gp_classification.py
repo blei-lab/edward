@@ -74,9 +74,6 @@ class GaussianProcess:
 
         return log_prior + log_lik
 
-    def predict():
-        pass
-
 ed.set_seed(42)
 # Data must have labels in the first column and features in
 # subsequent columns.
