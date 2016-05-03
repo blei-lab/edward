@@ -35,7 +35,7 @@ class LinearModel:
         Variance of the normal likelihood; aka noise parameter,
         homoscedastic variance, scale parameter.
     prior_variance : float, optional
-        Variance of the normal prior on neural network weights; aka L2
+        Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
     def __init__(self, weight_dim, lik_variance=0.01, prior_variance=0.01):

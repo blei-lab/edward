@@ -34,7 +34,7 @@ class HierarchicalLogistic:
     link : function, optional
         Link function, whose inverse is applied to the linear transformation.
     prior_variance : float, optional
-        Variance of the normal prior on neural network weights; aka L2
+        Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
     def __init__(self, weight_dim, link=tf.sigmoid, prior_variance=0.01):
@@ -80,7 +80,6 @@ class HierarchicalLogistic:
         log_lik = []
         for z in tf.unpack(zs):
             p = self.mapping(x, z)
-            #p = tf.maximum(tf.minimum(p, 1.0), 0.0)
             log_lik += [bernoulli.logpmf(y, p)]
 
         log_lik = tf.concat(0, log_lik)
