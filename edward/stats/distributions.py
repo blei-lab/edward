@@ -32,6 +32,11 @@ class Distribution:
         -------
         tf.Tensor
             scalar
+
+        Note
+        ----
+        The following distributions use scalar arguments unless
+        documented otherwise.
         """
         raise NotImplementedError()
 
@@ -59,6 +64,14 @@ class Dirichlet:
         return stats.dirichlet.rvs(alpha, size=size)
 
     def logpdf(self, x, alpha):
+        """
+        Arguments
+        ----------
+        x: np.array or tf.Tensor
+            vector
+        alpha: np.array or tf.Tensor
+            vector
+        """
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
         return -multivariate_log_beta(alpha) + \
@@ -100,6 +113,16 @@ class Multinomial:
         return np.random.multinomial(n, p, size=size)
 
     def logpmf(self, x, n, p):
+        """
+        Arguments
+        ----------
+        x: np.array or tf.Tensor
+            vector
+        mean: np.array or tf.Tensor, optional
+            vector. Defaults to zero mean.
+        cov: np.array or tf.Tensor, optional
+            vector or matrix. Defaults to identity.
+        """
         # TODO dimensions?
         x = tf.squeeze(x)
         n = tf.squeeze(n)
@@ -122,26 +145,20 @@ class Multivariate_Normal:
             vector. Defaults to zero mean.
         cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
-
-        Returns
-        -------
-        tf.Tensor
-            scalar
         """
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        x = tf.cast(tf.squeeze(tf.convert_to_tensor(x)), dtype=tf.float32)
         d = get_dims(x)[0]
         if mean is None:
             r = tf.ones([d]) * x
         else:
-            # TODO tf.convert_to_tensor
-            mean = tf.cast(tf.squeeze(mean), dtype=tf.float32)
+            mean = tf.cast(tf.squeeze(tf.convert_to_tensor(mean)), dtype=tf.float32)
             r = x - mean
 
-        if cov == 1:
+        if cov is 1:
             cov_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
         else:
-            cov = tf.cast(tf.squeeze(cov), dtype=tf.float32)
+            cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
             if len(cov.get_shape()) == 1:
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
@@ -169,21 +186,16 @@ class Multivariate_Normal:
 
         Arguments
         ----------
-        mean: tf.Tensor, optional
+        mean: np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
-        cov: tf.Tensor, optional
+        cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
-
-        Returns
-        -------
-        tf.Tensor
-            scalar
         """
-        if cov == 1:
+        if cov is 1:
             d = 1
             det_cov = 1.0
         else:
-            cov = tf.cast(cov, dtype=tf.float32)
+            cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
             d = get_dims(cov)[0]
             if len(cov.get_shape()) == 1:
                 det_cov = tf.reduce_prod(cov)
@@ -252,13 +264,13 @@ class Wishart:
 bernoulli = Bernoulli()
 beta = Beta()
 dirichlet = Dirichlet()
-expon = Expon()
+expon = Expon() # TODO unit test
 gamma = Gamma()
 invgamma = InvGamma()
-multinomial = Multinomial()
+multinomial = Multinomial() # TODO unit test
 multivariate_normal = Multivariate_Normal()
 norm = Norm()
-poisson = Poisson()
-t = T()
-truncnorm = TruncNorm()
-wishart = Wishart()
+poisson = Poisson() # TODO unit test
+t = T() # TODO unit test
+truncnorm = TruncNorm() # TODO unit test
+wishart = Wishart() # TODO unit test
