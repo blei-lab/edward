@@ -7,9 +7,9 @@ Data: X = {x1,...,xn} where each xi is in R^d..we choose d=2 in our example
 Probability model
     Likelihood:
          x_i|c_i ~ N(mu_{c_i}, sigma_{c_i})
-         c_i ~ Discrete(theta)
+         c_i ~ Discrete(pi)
     Prior:
-         theta ~ Dirichlet(alpha_0) where alpha_0 is a vector of dimension K
+         pi ~ Dirichlet(alpha_0) where alpha_0 is a vector of dimension K
          mu_j ~ N(0, cI) iid...we take c = 10 in our example
          sigma_j ~ inverse_gamma(a, b) iid..we take a = b = 1 in our example
 Variational model
@@ -22,25 +22,25 @@ import edward as ed
 import numpy as np
 
 model_code = """
-data{
+data {
    int<lower=0> N;
    int<lower=0> K;
    int<lower=0> D;
    vector[D] x[N];
 }
-transformed data{
+transformed data {
    vector<lower=0>[K] alpha_0;
    for (k in 1:K) {
       alpha_0[k] <- 1.0/K;
    }
 }
-parameters{
-   simplex[K] theta;
+parameters {
+   simplex[K] pi;
    vector[D] mu[K];
    vector<lower=0>[D] sigma[K];
 }
-model{
-   theta ~ dirichlet(alpha_0);
+model {
+   pi ~ dirichlet(alpha_0);
    for (k in 1:K){
       mu[k] ~ normal(0.0, 10);
       sigma[k] ~ inv_gamma(1.0, 1.0);
@@ -48,7 +48,7 @@ model{
    for (n in 1:N) {
       real ps[K];
       for (k in 1:K-1){
-         ps[k] <- log(theta[k]) + normal_log(x[n], mu[k], sigma[k]);
+         ps[k] <- log(pi[k]) + normal_log(x[n], mu[k], sigma[k]);
       }
       increment_log_prob(log_sum_exp(ps));
    }

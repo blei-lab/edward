@@ -41,6 +41,7 @@ which can be found in [`examples/`](examples/):
 
 * [Bayesian linear regression](examples/bayesian_linear_regression.py)
 * [Hierarchical logistic regression](examples/hierarchical_logistic_regression.py)
+* [Mixture of Gaussians](examples/mixture_gaussian.py)
 * [Gaussian process classification](examples/gp_classification.py)
 * [Bayesian neural network](examples/bayesian_nn.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)

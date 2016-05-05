@@ -1,54 +1,171 @@
 #!/usr/bin/env python
 """
-TODO this doesn't work
-This is the implementation of the Bayesian Mixture of K Gaussians.
-The model is written in Stan.
-Data: X = {x1,...,xn} where each xi is in R^d..we choose d=2 in our example
-Probability model
-    Likelihood:
-         x_i|c_i ~ N(mu_{c_i}, sigma_{c_i})
-         c_i ~ Discrete(theta)
-    Prior:
-         theta ~ Dirichlet(alpha_0) where alpha_0 is a vector of dimension K
-         mu_j ~ N(0, cI) iid...we take c = 10 in our example
-         sigma_j ~ inverse_gamma(a, b) iid..we take a = b = 1 in our example
-Variational model
-    q(pi) ~ Dirichlet(alpha') where alpha' is a vector of dimension K
-    q(mu_j) ~ N(mj', Sigmaj') iid
-    q(sigma_j) ~ inverse_gamma(aj', Bj') iid
-    q(c_i) ~ Multinomial(phi_i)  iid...integrated out
-"""
-import tensorflow as tf
-import edward as ed
-import numpy as np
-from edward.stats import dirichlet, norm, invgamma
+Mixture model using mean-field variational inference.
 
-class GaussMixture:
+Probability model:
+    Mixture of Gaussians
+    pi ~ Dirichlet(alpha)
+    for k = 1, ..., K
+        mu_k ~ N(0, cI)
+        sigma_k ~ Inv-Gamma(a, b)
+    for n = 1, ..., N
+        c_n ~ Multinomial(pi)
+        x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
+Variational model
+    Likelihood:
+        q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
+        q(pi) = Dirichlet(alpha')
+        q(mu_k) = N(mu'_k, Sigma'_k)
+        q(sigma_k) = Inv-Gamma(a'_k, b'_k)
+    (We collapse the c_n latent variables in the probability model's
+    joint density.)
+
+Data: x = {x_1, ..., x_N}, where each x_i is in R^2
+"""
+import edward as ed
+import tensorflow as tf
+import numpy as np
+
+from edward.stats import dirichlet, invgamma, multivariate_normal, norm
+from edward.util import get_dims
+
+class MixtureGaussian:
+    """
+    Mixture of Gaussians
+
+    p(x, z) = [ prod_{n=1}^N N(x_n; mu_{c_n}, sigma_{c_n}) Multinomial(c_n; pi) ]
+              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
+              Dirichlet(pi; alpha)
+
+    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
+
+    Parameters
+    ----------
+    K : int
+        Number of mixture components.
+    D : float, optional
+        Dimension of the Gaussians.
+    """
     def __init__(self, K, D):
         self.K = K
         self.D = D
         self.num_vars = (2*D + 1) * K
 
+        self.a = 1
+        self.b = 1
+        self.c = 10
+        self.alpha = tf.ones([K])
+
+    def unpack_params(self, z):
+        """Unpack parameters from a flattened vector."""
+        K = self.K
+        D = self.D
+        pi = z[0:K]
+        mus = z[K:(K+K*D)]
+        sigmas = z[(K+K*D):(K+2*K*D)]
+        return pi, mus, sigmas
+
     def log_prob(self, xs, zs):
-        alpha_vec = np.ones(K)
-        dirich_log_prior = dirichlet.logpdf(zs[:,0:K], alpha=alpha_vec)
-        gauss_log_prior = norm.logpdf(zs[:, K:(K+K*D)], loc=0, scale=np.sqrt(10))
-        invgam_log_prior = invgamma.logpdf(zs[:, K+K*D:(K+2*K*D)], alpha=1, beta=1)
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        D = self.D
+        N = get_dims(xs)[0]
+        # Loop over each mini-batch zs[b,:]
+        log_prob = []
+        for z in tf.unpack(zs):
+            pi, mus, sigmas = self.unpack_params(z)
+            log_prior = dirichlet.logpdf(pi, self.alpha)
+            for k in xrange(self.K):
+                log_prior += norm.logpdf(mus[k*D], 0, np.sqrt(self.c))
+                log_prior += norm.logpdf(mus[k*D+1], 0, np.sqrt(self.c))
+                log_prior += invgamma.logpdf(sigmas[k*D], self.a, self.b)
+                log_prior += invgamma.logpdf(sigmas[k*D+1], self.a, self.b)
 
-        log_prior = dirich_log_prior + gauss_log_prior + invgam_log_prior
+            log_lik = tf.constant(0.0, dtype=tf.float32)
+            for x in tf.unpack(xs):
+                for k in xrange(self.K):
+                    log_lik += tf.log(pi[k])
+                    log_lik += multivariate_normal.logpdf(x,
+                        mus[(k*D):((k+1)*D)], sigmas[(k*D):((k+1)*D)])
 
-        log_lik = 0
+            log_prob += [log_prior + log_lik]
 
-        return log_lik + log_prior
+        return tf.concat(0, log_prob) # convert list to tf.Tensor
+
+# TODO
+# this will be useful in general to assess how to combine individual
+# factors
+from edward.variationals import Likelihood, MFDirichlet, MFGaussian, MFInvGamma
+class MFMixGaussian(Likelihood):
+    """
+    q(z | lambda ) = q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
+        q(pi) = Dirichlet(alpha')
+        q(mu_k) = N(mu'_k, Sigma'_k)
+        q(sigma_k) = Inv-Gamma(a'_k, b'_k)
+
+    where z = {pi, mu, sigma}
+    """
+    def __init__(self, K, D):
+        self.K = K
+        self.D = D
+        self.dirichlet = MFDirichlet(1, K)
+        self.gaussian = MFGaussian(K*D)
+        self.invgamma = MFInvGamma(K*D)
+
+        Likelihood.__init__(self, self.dirichlet.num_vars + \
+                                  self.gaussian.num_vars +  \
+                                  self.invgamma.num_vars)
+        self.num_params = self.dirichlet.num_params + \
+                          self.gaussian.num_params + \
+                          self.invgamma.num_params
+
+    def mapping(self, x):
+        return [self.dirichlet.mapping(x),
+                self.gaussian.mapping(x),
+                self.invgamma.mapping(x)]
+
+    def set_params(self, params):
+    	self.dirichlet.set_params(params[0])
+        self.gaussian.set_params(params[1])
+        self.invgamma.set_params(params[2])
+
+    def print_params(self, sess):
+    	self.dirichlet.print_params(sess)
+        self.gaussian.print_params(sess)
+        self.invgamma.print_params(sess)
+
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        z_dirichlet = self.dirichlet.sample((size[0], self.dirichlet.num_vars), sess)
+        z_gaussian = self.gaussian.sample((size[0], self.gaussian.num_vars), sess)
+        z_invgamma = self.invgamma.sample((size[0], self.invgamma.num_vars), sess)
+        z = np.concatenate((z_dirichlet, z_gaussian, z_invgamma), axis=1)
+        return z.reshape(size)
+
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        if i < self.dirichlet.num_vars:
+            return self.dirichlet.log_prob_zi(i, z[:, 0:self.dirichlet.num_vars])
+        elif i < self.dirichlet.num_vars + self.gaussian.num_vars:
+            i = i - self.dirichlet.num_vars
+            return self.gaussian.log_prob_zi(i,
+                       z[:, self.dirichlet.num_vars:(self.dirichlet.num_vars+self.gaussian.num_vars)])
+        elif i < self.num_vars:
+            i = i - self.dirichlet.num_vars - self.gaussian.num_vars
+            return self.invgamma.log_prob_zi(i,
+                       z[:, (self.dirichlet.num_vars+self.gaussian.num_vars):])
+        else:
+            raise
 
 ed.set_seed(42)
-K = 2
-D = 2
-model = GaussMixture(K, D)
-variational = ed.MFMixGaussian(D, K)
-x = np.loadtxt('data/mix_mock_data.txt', dtype='float32', delimiter=',')
-N = len(x)
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
+K = 2
+D = 2
+model = MixtureGaussian(K, D)
+variational = MFMixGaussian(K, D)
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000)
+# TODO
+#inference.run(n_iter=1000, n_minibatch=10)
+inference.run(n_iter=30, n_print=1)
+# TODO it runs but breaks at n_iter=16 for some reason
