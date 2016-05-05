@@ -98,15 +98,16 @@ class Gamma:
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
 class InvGamma:
-    def rvs(self, alpha, beta, size=1):
-        return stats.invgamma.rvs(alpha, scale=beta, size=size)
+    """Shape/scale parameterization"""
+    def rvs(self, alpha, scale=1, size=1):
+        return stats.invgamma.rvs(alpha, scale=scale, size=size)
 
-    def logpdf(self, x, alpha, beta):
+    def logpdf(self, x, alpha, scale=1):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
-        beta = tf.cast(tf.squeeze(beta), dtype=tf.float32)
-        return tf.mul(alpha, tf.log(beta)) - log_gamma(alpha) + \
-               tf.mul(-alpha-1, tf.log(x)) - tf.truediv(beta, x)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return tf.mul(alpha, tf.log(scale)) - log_gamma(alpha) + \
+               tf.mul(-alpha-1, tf.log(x)) - tf.truediv(scale, x)
 
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
