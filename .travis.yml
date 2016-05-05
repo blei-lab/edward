@@ -14,25 +14,20 @@ before_install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
-    - pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.8.0-cp27-none-linux_x86_64.whl
-    - conda install anaconda-client
-    - anaconda search -t conda prettytensor 
-    - deps='pip numpy scipy nose pep8 pystan progressbar prettytensor'
+    - deps='pip numpy scipy nose pep8 pystan progressbar'
     - conda create -q -n test-environment "python=$TRAVIS_PYTHON_VERSION" $deps 
     - source activate test-environment
+    - pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.8.0-cp27-none-linux_x86_64.whl
+    - pip install prettytensor
     - pip install python-coveralls
     - pip install numpydoc
 
 install:
     - pip install -e .
 
-before_script:
-    - pep8 mir_eval tests evaluators
-
 script:
-    - nosetests -v --with-coverage --cover-package=mir_eval
-    - python setup.py build_sphinx
-    - python setup.py egg_info -b.dev sdist --formats gztar
+    - python --version
+    - nosetests --with-coverage --cover-erase --cover-package=edward -v -w tests/
 
 after_success:
     - coveralls
