@@ -13,13 +13,13 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_logpdf_scalar(scalar, a=0.5, b=0.5):
-    x = tf.constant(scalar)
-    val_true = stats.invgamma.logpdf(scalar, a, scale=b)
-    _assert_eq(invgamma.logpdf(x, tf.constant(a), tf.constant(b)), val_true)
-    _assert_eq(invgamma.logpdf(x, tf.constant([a]), tf.constant(b)), val_true)
-    _assert_eq(invgamma.logpdf(x, tf.constant(a), tf.constant([b])), val_true)
-    _assert_eq(invgamma.logpdf(x, tf.constant([a]), tf.constant([b])), val_true)
+def _test_logpdf_scalar(x, a=0.5, b=0.5):
+    xtf = tf.constant(x)
+    val_true = stats.invgamma.logpdf(x, a, scale=b)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant(a), tf.constant(b)), val_true)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant([a]), tf.constant(b)), val_true)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant(a), tf.constant([b])), val_true)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant([a]), tf.constant([b])), val_true)
 
 def test_logpdf_scalar():
     _test_logpdf_scalar(0.3)
