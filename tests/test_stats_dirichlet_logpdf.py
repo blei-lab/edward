@@ -13,11 +13,11 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_logpdf_1d(vector, alpha=np.array([0.5, 0.5])):
-    x = tf.constant(vector)
-    val_true = stats.dirichlet.logpdf(vector, alpha)
-    _assert_eq(dirichlet.logpdf(x, alpha), val_true)
-    _assert_eq(dirichlet.logpdf(x, tf.convert_to_tensor(alpha)), val_true)
+def _test_logpdf_1d(x, alpha=np.array([0.5, 0.5])):
+    xtf = tf.constant(x)
+    val_true = stats.dirichlet.logpdf(x, alpha)
+    _assert_eq(dirichlet.logpdf(xtf, alpha), val_true)
+    _assert_eq(dirichlet.logpdf(xtf, tf.convert_to_tensor(alpha)), val_true)
 
 def test_logpdf_1d():
     _test_logpdf_1d(np.array([0.3, 0.7]))

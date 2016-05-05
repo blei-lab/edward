@@ -35,9 +35,10 @@ def test_logpdf_scalar():
     _test_logpdf_scalar(0.7, a=5.0, b=0.5)
 
 def test_logpdf_1d():
-    x = tf.constant([0.5])
-    val_true = stats.invgamma.logpdf([0.5], 0.5, scale=0.5)
-    _assert_eq(invgamma.logpdf(x, tf.constant(0.5), tf.constant(0.5)), val_true)
-    _assert_eq(invgamma.logpdf(x, tf.constant([0.5]), tf.constant(0.5)), val_true)
-    _assert_eq(invgamma.logpdf(x, tf.constant(0.5), tf.constant([0.5])), val_true)
-    _assert_eq(invgamma.logpdf(x, tf.constant([0.5]), tf.constant([0.5])), val_true)
+    x = [0.5]
+    xtf = tf.constant([0.5])
+    val_true = stats.invgamma.logpdf(x, 0.5, scale=0.5)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant(0.5), tf.constant(0.5)), val_true)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant([0.5]), tf.constant(0.5)), val_true)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant(0.5), tf.constant([0.5])), val_true)
+    _assert_eq(invgamma.logpdf(xtf, tf.constant([0.5]), tf.constant([0.5])), val_true)

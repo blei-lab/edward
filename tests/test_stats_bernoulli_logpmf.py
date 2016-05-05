@@ -11,11 +11,11 @@ def _assert_eq(val_ed, val_true):
     with sess.as_default():
         assert np.allclose(val_ed.eval(), val_true)
 
-def _test_logpdf(scalar, param):
-    x = tf.constant(scalar)
-    val_true = stats.bernoulli.logpmf(scalar, param)
-    _assert_eq(bernoulli.logpmf(x, tf.constant(param)), val_true)
-    _assert_eq(bernoulli.logpmf(x, tf.constant([param])), val_true)
+def _test_logpdf(x, p):
+    xtf = tf.constant(x)
+    val_true = stats.bernoulli.logpmf(x, p)
+    _assert_eq(bernoulli.logpmf(xtf, tf.constant(p)), val_true)
+    _assert_eq(bernoulli.logpmf(xtf, tf.constant([p])), val_true)
 
 def test_logpdf_int_scalar():
     _test_logpdf(0, 0.5)
