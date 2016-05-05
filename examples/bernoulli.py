@@ -5,8 +5,8 @@ Probability model
 Variational model
     Likelihood: Mean-field Bernoulli
 """
-import tensorflow as tf
 import edward as ed
+import tensorflow as tf
 
 from edward.stats import bernoulli
 from edward.util import get_dims

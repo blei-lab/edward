@@ -26,10 +26,6 @@ model_code = """
 """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
-# TODO
-# model.num_vars no longer exists in StanModel:
-# it doesn't compile until after it takes in data
-#variational = ed.MFBeta(model.num_vars)
 variational = ed.MFBeta(1)
 data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 

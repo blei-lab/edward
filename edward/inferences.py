@@ -125,6 +125,7 @@ class MFVI(VariationalInference):
         VariationalInference.__init__(self, *args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
+        # TODO if score=True, make MFGaussian do sess.run()
         """
         Parameters
         ----------
@@ -161,6 +162,7 @@ class MFVI(VariationalInference):
             samples = self.variational.sample_noise(self.samples.get_shape())
 
         _, loss = sess.run([self.train, self.losses], {self.samples: samples})
+
         return loss
 
     def build_loss(self):
@@ -206,6 +208,7 @@ class MFVI(VariationalInference):
             q_log_prob += self.variational.log_prob_zi(i, z)
 
         self.losses = self.model.log_prob(x, z) - q_log_prob
+
         return -tf.reduce_mean(self.losses)
 
     def build_score_loss_entropy(self):
@@ -352,3 +355,7 @@ class MAP(VariationalInference):
         z = self.variational.get_params()
         self.losses = self.model.log_prob(x, z)
         return -tf.reduce_mean(self.losses)
+
+
+
+
