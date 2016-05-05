@@ -1,8 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-from scipy.special import factorial
-
 def set_seed(x):
     """
     Set seed for both NumPy and TensorFlow.
@@ -139,21 +137,6 @@ def kl_multivariate_normal(loc, scale):
     return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(scale + 1e-8) - \
                                 tf.square(loc) - tf.square(scale))
 
-def log_multinomial(x, n):
-    num = tf.reduce_prod(factorial(x))
-    denom = factorial(n)
-    return tf.log(tf.truediv(num, denom))
-
-
-def log_dirichlet(x):
-    num =  tf.reduce_prod(log_gamma(x))
-    denom = log_gamma(tf.reduce_sum(x))
-    return num/denom
-
-
-def log_inv_gamma(x, y):
-    return log_gamma(x) - tf.mul(x, tf.log(y))
-
 def log_gamma(x):
     """
     TensorFlow doesn't have special functions, so use a
@@ -162,7 +145,7 @@ def log_gamma(x):
     """
     logterm = tf.log(x * (1.0 + x) * (2.0 + x))
     xp3 = 3.0 + x
-    return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log (xp3)
+    return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log(xp3)
 
 def log_beta(x, y):
     """
@@ -187,6 +170,9 @@ def logit(x, clip_finite=True):
         log_jacobian = np.sum(np.log(jacobian))
 
     return transformed, log_jacobian
+
+def multivariate_log_beta(x):
+    return tf.reduce_sum(log_gamma(x)) - log_gamma(tf.reduce_sum(x))
 
 def rbf(x):
     """RBF kernel element-wise."""

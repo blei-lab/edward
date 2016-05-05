@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='edward',
-    version='0.1',
+    version='1.0.0',
     description='A library for probabilistic modeling, inference, and criticism',
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
@@ -12,7 +12,7 @@ setup(
                       'neural networks': ['prettytensor>=0.5.3'],
                       'visualization': ['progressbar>=2.0']},
     url='https://github.com/blei-lab/edward',
-    license='MIT',
-    classifiers=['License :: OSI Approved :: MIT License',
+    license='Apache License 2.0',
+    classifiers=['License :: OSI Approved :: Apache Software License',
                  'Programming Language :: Python :: 2.7'],
 )

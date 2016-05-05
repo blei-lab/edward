@@ -40,7 +40,7 @@ class BayesianNN:
         Variance of the normal likelihood; aka noise parameter,
         homoscedastic variance, scale parameter.
     prior_variance : float, optional
-        Variance of the normal prior on neural network weights; aka L2
+        Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
     def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
@@ -128,7 +128,9 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     data = tf.constant(data, dtype=tf.float32)
     return ed.Data(data)
 
-ed.set_seed(42)
+ed.set_seed(43)
+# TODO This converges to the zero line. I think this is an
+# initialization issue.
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = ed.MFGaussian(model.num_vars)
 data = build_toy_dataset()
@@ -160,6 +162,7 @@ def print_progress(self, t, losses, sess):
         plt.cla()
         ax.plot(x, y, 'bx')
         ax.plot(inputs, outputs.T)
+        ax.set_xlim([-8, 8])
         ax.set_ylim([-2, 3])
         plt.draw()
 
