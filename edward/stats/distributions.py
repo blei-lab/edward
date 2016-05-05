@@ -1,8 +1,9 @@
 import numpy as np
 import tensorflow as tf
 
-from edward.util import log_multinomial, log_inv_gamma, log_dirichlet, log_beta, log_gamma, dot, get_dims
+from edward.util import dot, get_dims, log_beta, log_gamma, multivariate_log_beta
 from scipy import stats
+from scipy.special import factorial
 
 class Distribution:
     """Template for all distributions."""
@@ -24,8 +25,8 @@ class Distribution:
         """
         Arguments
         ---------
-        x: scalar
-        params: scalar
+        x: np.array or tf.Tensor
+        params: np.array or tf.Tensor
 
         Returns
         -------
@@ -59,8 +60,8 @@ class Dirichlet:
 
     def logpdf(self, x, alpha):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
-        return -log_dirichlet(alpha) + \
+        alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
+        return -multivariate_log_beta(alpha) + \
                tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
 
 class Expon:
@@ -73,7 +74,7 @@ class Expon:
         return - x/scale - tf.log(scale)
 
 class Gamma:
-    """This is the shape/scale parameterization of the gamma distribution"""
+    """Shape/scale parameterization"""
     def rvs(self, a, scale=1, size=1):
         return stats.gamma.rvs(a, scale=scale, size=size)
 
@@ -91,18 +92,21 @@ class InvGamma:
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
         beta = tf.cast(tf.squeeze(beta), dtype=tf.float32)
-        return -log_inv_gamma(alpha, beta) - \
-               tf.mul(alpha+1, tf.log(x)) - tf.truediv(beta, x)
+        return tf.mul(alpha, tf.log(beta)) - log_gamma(alpha) + \
+               tf.mul(-alpha-1, tf.log(x)) - tf.truediv(beta, x)
 
 class Multinomial:
     def rvs(self, n, p, size=1):
         return np.random.multinomial(n, p, size=size)
 
     def logpmf(self, x, n, p):
+        # TODO dimensions?
         x = tf.squeeze(x)
         n = tf.squeeze(n)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        return -log_multinomial(x, n) + tf.reduce_sum(tf.mul(x, tf.log(p)))
+        return tf.log(factorial(n)) - \
+               tf.log(tf.reduce_prod(factorial(x))) + \
+               tf.reduce_sum(tf.mul(x, tf.log(p)))
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
@@ -112,11 +116,11 @@ class Multivariate_Normal:
         """
         Arguments
         ----------
-        x: tf.Tensor
+        x: np.array or tf.Tensor
             vector
-        mean: tf.Tensor, optional
+        mean: np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
-        cov: tf.Tensor, optional
+        cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
 
         Returns
@@ -129,15 +133,16 @@ class Multivariate_Normal:
         if mean is None:
             r = tf.ones([d]) * x
         else:
+            # TODO tf.convert_to_tensor
             mean = tf.cast(tf.squeeze(mean), dtype=tf.float32)
             r = x - mean
-            
+
         if cov == 1:
             cov_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
         else:
             cov = tf.cast(tf.squeeze(cov), dtype=tf.float32)
-            if len(cov.get_shape()) == 1: 
+            if len(cov.get_shape()) == 1:
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
             else:
@@ -180,7 +185,7 @@ class Multivariate_Normal:
         else:
             cov = tf.cast(cov, dtype=tf.float32)
             d = get_dims(cov)[0]
-            if len(cov.get_shape()) == 1: 
+            if len(cov.get_shape()) == 1:
                 det_cov = tf.reduce_prod(cov)
             else:
                 det_cov = tf.matrix_determinant(cov)
