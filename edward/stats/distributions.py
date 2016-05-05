@@ -109,6 +109,7 @@ class InvGamma:
                tf.mul(-alpha-1, tf.log(x)) - tf.truediv(beta, x)
 
 class Multinomial:
+    """There is no equivalent version implemented in SciPy."""
     def rvs(self, n, p, size=1):
         return np.random.multinomial(n, p, size=size)
 
@@ -117,18 +118,19 @@ class Multinomial:
         Arguments
         ----------
         x: np.array or tf.Tensor
-            vector
-        mean: np.array or tf.Tensor, optional
-            vector. Defaults to zero mean.
-        cov: np.array or tf.Tensor, optional
-            vector or matrix. Defaults to identity.
+            vector of length K, where x[i] is the number of outcomes
+            in the ith bucket
+        n: int or tf.Tensor
+            number of outcomes equal to sum x[i]
+        p: np.array or tf.Tensor
+            vector of probabilities summing to 1
         """
-        # TODO dimensions?
-        x = tf.squeeze(x)
-        n = tf.squeeze(n)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        return tf.log(factorial(n)) - \
-               tf.log(tf.reduce_prod(factorial(x))) + \
+        one = tf.constant(1.0, dtype=tf.float32)
+        return log_gamma(n + one) - \
+               tf.reduce_sum(log_gamma(x + one)) + \
                tf.reduce_sum(tf.mul(x, tf.log(p)))
 
 class Multivariate_Normal:
@@ -267,7 +269,7 @@ dirichlet = Dirichlet()
 expon = Expon() # TODO unit test
 gamma = Gamma()
 invgamma = InvGamma()
-multinomial = Multinomial() # TODO unit test
+multinomial = Multinomial()
 multivariate_normal = Multivariate_Normal()
 norm = Norm()
 poisson = Poisson() # TODO unit test
