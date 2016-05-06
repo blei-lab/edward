@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from edward.util import log_multinomial, log_inv_gamma, log_dirichlet, log_beta, log_gamma, dot, get_dims
+from edward.util import dot, get_dims, log_beta, log_gamma, multivariate_log_beta
 from scipy import stats
 
 class Distribution:
@@ -24,13 +24,18 @@ class Distribution:
         """
         Arguments
         ---------
-        x: scalar
-        params: scalar
+        x: np.array or tf.Tensor
+        params: np.array or tf.Tensor
 
         Returns
         -------
         tf.Tensor
             scalar
+
+        Note
+        ----
+        The following distributions use scalar arguments unless
+        documented otherwise.
         """
         raise NotImplementedError()
 
@@ -58,9 +63,17 @@ class Dirichlet:
         return stats.dirichlet.rvs(alpha, size=size)
 
     def logpdf(self, x, alpha):
+        """
+        Arguments
+        ----------
+        x: np.array or tf.Tensor
+            vector
+        alpha: np.array or tf.Tensor
+            vector
+        """
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
-        return -log_dirichlet(alpha) + \
+        alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
+        return -multivariate_log_beta(alpha) + \
                tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
 
 class Expon:
@@ -73,7 +86,7 @@ class Expon:
         return - x/scale - tf.log(scale)
 
 class Gamma:
-    """This is the shape/scale parameterization of the gamma distribution"""
+    """Shape/scale parameterization"""
     def rvs(self, a, scale=1, size=1):
         return stats.gamma.rvs(a, scale=scale, size=size)
 
@@ -84,25 +97,41 @@ class Gamma:
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
 class InvGamma:
-    def rvs(self, alpha, beta, size=1):
-        return stats.invgamma.rvs(alpha, scale=beta, size=size)
+    """Shape/scale parameterization"""
+    def rvs(self, alpha, scale=1, size=1):
+        return stats.invgamma.rvs(alpha, scale=scale, size=size)
 
-    def logpdf(self, x, alpha, beta):
+    def logpdf(self, x, alpha, scale=1):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
-        beta = tf.cast(tf.squeeze(beta), dtype=tf.float32)
-        return -log_inv_gamma(alpha, beta) - \
-               tf.mul(alpha+1, tf.log(x)) - tf.truediv(beta, x)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return tf.mul(alpha, tf.log(scale)) - log_gamma(alpha) + \
+               tf.mul(-alpha-1, tf.log(x)) - tf.truediv(scale, x)
 
 class Multinomial:
+    """There is no equivalent version implemented in SciPy."""
     def rvs(self, n, p, size=1):
         return np.random.multinomial(n, p, size=size)
 
     def logpmf(self, x, n, p):
-        x = tf.squeeze(x)
-        n = tf.squeeze(n)
+        """
+        Arguments
+        ----------
+        x: np.array or tf.Tensor
+            vector of length K, where x[i] is the number of outcomes
+            in the ith bucket
+        n: int or tf.Tensor
+            number of outcomes equal to sum x[i]
+        p: np.array or tf.Tensor
+            vector of probabilities summing to 1
+        """
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        return -log_multinomial(x, n) + tf.reduce_sum(tf.mul(x, tf.log(p)))
+        one = tf.constant(1.0, dtype=tf.float32)
+        return log_gamma(n + one) - \
+               tf.reduce_sum(log_gamma(x + one)) + \
+               tf.reduce_sum(tf.mul(x, tf.log(p)))
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
@@ -112,32 +141,27 @@ class Multivariate_Normal:
         """
         Arguments
         ----------
-        x: tf.Tensor
+        x: np.array or tf.Tensor
             vector
-        mean: tf.Tensor, optional
+        mean: np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
-        cov: tf.Tensor, optional
+        cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
-
-        Returns
-        -------
-        tf.Tensor
-            scalar
         """
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        x = tf.cast(tf.squeeze(tf.convert_to_tensor(x)), dtype=tf.float32)
         d = get_dims(x)[0]
         if mean is None:
             r = tf.ones([d]) * x
         else:
-            mean = tf.cast(tf.squeeze(mean), dtype=tf.float32)
+            mean = tf.cast(tf.squeeze(tf.convert_to_tensor(mean)), dtype=tf.float32)
             r = x - mean
-            
-        if cov == 1:
+
+        if cov is 1:
             cov_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
         else:
-            cov = tf.cast(tf.squeeze(cov), dtype=tf.float32)
-            if len(cov.get_shape()) == 1: 
+            cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
+            if len(cov.get_shape()) == 1:
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
             else:
@@ -164,23 +188,18 @@ class Multivariate_Normal:
 
         Arguments
         ----------
-        mean: tf.Tensor, optional
+        mean: np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
-        cov: tf.Tensor, optional
+        cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
-
-        Returns
-        -------
-        tf.Tensor
-            scalar
         """
-        if cov == 1:
+        if cov is 1:
             d = 1
             det_cov = 1.0
         else:
-            cov = tf.cast(cov, dtype=tf.float32)
+            cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
             d = get_dims(cov)[0]
-            if len(cov.get_shape()) == 1: 
+            if len(cov.get_shape()) == 1:
                 det_cov = tf.reduce_prod(cov)
             else:
                 det_cov = tf.matrix_determinant(cov)
@@ -247,13 +266,13 @@ class Wishart:
 bernoulli = Bernoulli()
 beta = Beta()
 dirichlet = Dirichlet()
-expon = Expon()
+expon = Expon() # TODO unit test
 gamma = Gamma()
 invgamma = InvGamma()
 multinomial = Multinomial()
 multivariate_normal = Multivariate_Normal()
 norm = Norm()
-poisson = Poisson()
-t = T()
-truncnorm = TruncNorm()
-wishart = Wishart()
+poisson = Poisson() # TODO unit test
+t = T() # TODO unit test
+truncnorm = TruncNorm() # TODO unit test
+wishart = Wishart() # TODO unit test

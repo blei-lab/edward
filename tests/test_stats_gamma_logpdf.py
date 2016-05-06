@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.stats import beta
+from edward.stats import gamma
 from scipy import stats
 
 sess = tf.Session()
@@ -15,11 +15,11 @@ def _assert_eq(val_ed, val_true):
 
 def _test_logpdf_scalar(x, a=0.5, b=0.5):
     xtf = tf.constant(x)
-    val_true = stats.beta.logpdf(x, a, b)
-    _assert_eq(beta.logpdf(xtf, tf.constant(a), tf.constant(b)), val_true)
-    _assert_eq(beta.logpdf(xtf, tf.constant([a]), tf.constant(b)), val_true)
-    _assert_eq(beta.logpdf(xtf, tf.constant(a), tf.constant([b])), val_true)
-    _assert_eq(beta.logpdf(xtf, tf.constant([a]), tf.constant([b])), val_true)
+    val_true = stats.gamma.logpdf(x, a, scale=b)
+    _assert_eq(gamma.logpdf(xtf, tf.constant(a), tf.constant(b)), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant([a]), tf.constant(b)), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant(a), tf.constant([b])), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant([a]), tf.constant([b])), val_true)
 
 def test_logpdf_scalar():
     _test_logpdf_scalar(0.3)
@@ -37,8 +37,8 @@ def test_logpdf_scalar():
 def test_logpdf_1d():
     x = [0.5]
     xtf = tf.constant([0.5])
-    val_true = stats.beta.logpdf(x, 0.5, 0.5)
-    _assert_eq(beta.logpdf(xtf, tf.constant(0.5), tf.constant(0.5)), val_true)
-    _assert_eq(beta.logpdf(xtf, tf.constant([0.5]), tf.constant(0.5)), val_true)
-    _assert_eq(beta.logpdf(xtf, tf.constant(0.5), tf.constant([0.5])), val_true)
-    _assert_eq(beta.logpdf(xtf, tf.constant([0.5]), tf.constant([0.5])), val_true)
+    val_true = stats.gamma.logpdf(x, 0.5, scale=0.5)
+    _assert_eq(gamma.logpdf(xtf, tf.constant(0.5), tf.constant(0.5)), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant([0.5]), tf.constant(0.5)), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant(0.5), tf.constant([0.5])), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant([0.5]), tf.constant([0.5])), val_true)

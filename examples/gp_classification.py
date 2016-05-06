@@ -42,7 +42,7 @@ class GaussianProcess:
         # TODO use an rbf function from edward.util
         x = sess.run(x)
         xstar = sess.run(xstar)
-        s = np.power(self.eta, 2.0) *\
+        s = np.power(self.eta, 2.0) * \
             np.exp(-1.0/(np.power(self.l,   2.0) * 2.0) * \
                          (np.sum(np.power(x - xstar , 2.0))))
 
@@ -68,10 +68,9 @@ class GaussianProcess:
     def log_prob(self, xs, zs):
         K = self.kernel(xs)
         log_prior = multivariate_normal.logpdf(zs[:, :], cov=K)
-        log_lik = tf.concat(0, [tf.reduce_sum( \
+        log_lik = tf.pack([tf.reduce_sum( \
             bernoulli.logpmf(xs[:,0], self.inverse_link(tf.mul(xs[:,0], z))) \
             ) for z in tf.unpack(zs)])
-
         return log_prior + log_lik
 
 ed.set_seed(42)

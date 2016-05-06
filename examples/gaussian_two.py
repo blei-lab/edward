@@ -21,8 +21,8 @@ class Gaussian:
         self.num_vars = get_dims(mu)[0]
 
     def log_prob(self, xs, zs):
-        return tf.concat(0, [multivariate_normal.logpdf(z, self.mu, self.Sigma)
-                         for z in tf.unpack(zs)])
+        return tf.pack([multivariate_normal.logpdf(z, self.mu, self.Sigma)
+                        for z in tf.unpack(zs)])
 
 ed.set_seed(42)
 mu = tf.constant([1.0, 1.0])

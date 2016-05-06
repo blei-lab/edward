@@ -9,7 +9,6 @@ sess = tf.Session()
 # fix random seed
 np.random.seed(98765)
 
-
 def _test_log_prob_zi(n_data, n_vars):
     variational = ed.MFGaussian(n_vars)
     variational.m_unconst = tf.constant([0.0] * n_vars)
@@ -26,18 +25,14 @@ def _test_log_prob_zi(n_data, n_vars):
                 i, tf.constant(z, dtype=tf.float32)).eval(),
                 stats.norm.logpdf(z[:, i], m[i], s[i]))
 
-
 def test_log_prob_zi_1d_1v():
     _test_log_prob_zi(1, 1)
-
 
 def test_log_prob_zi_2d_1v():
     _test_log_prob_zi(2, 1)
 
-
 def test_log_prob_zi_1d_2v():
     _test_log_prob_zi(1, 2)
-
 
 def test_log_prob_zi_2d_2v():
     _test_log_prob_zi(2, 2)

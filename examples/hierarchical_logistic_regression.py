@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Mean-field variational inference for hierarchical logistic regression.
+Hierarchical logistic regression using mean-field variational inference.
 
 Probability model:
     Hierarchical logistic regression
@@ -82,7 +82,7 @@ class HierarchicalLogistic:
             p = self.mapping(x, z)
             log_lik += [bernoulli.logpmf(y, p)]
 
-        log_lik = tf.concat(0, log_lik)
+        log_lik = tf.pack(log_lik)
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
         return log_lik + log_prior
 
