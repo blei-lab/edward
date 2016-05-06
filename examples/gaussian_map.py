@@ -22,11 +22,8 @@ class Gaussian:
     def log_prob(self, xs, zs):
         log_prior = tf.pack([norm.logpdf(z, mu, Sigma)
                         for z in tf.unpack(zs)])
-        # log_lik = tf.pack([
-        #     tf.reduce_sum(norm.logpdf(x, zs[:,0], Sigma)) \
-        #     for x in tf.unpack(xs)])
         log_lik = tf.pack([
-            tf.reduce_sum(norm.logpdf(xs, z, 0*xs+Sigma)) \
+            tf.reduce_sum(norm.logpdf(xs, z, Sigma)) \
             for z in tf.unpack(zs)])
         return log_lik + log_prior
 

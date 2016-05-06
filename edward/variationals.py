@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
-from edward.util import get_dims, concat, Variable
+from edward.util import get_dims, Variable
 
 class Likelihood:
     """
@@ -287,8 +287,8 @@ class MFBernoulli(Likelihood):
         # Constrain parameters to lie on simplex.
         p_const = tf.sigmoid(p)
         if self.num_vars > 1:
-            p_const = concat([p_const,
-                              tf.expand_dims(1.0 - tf.reduce_sum(p_const), 0)])
+            p_const = tf.concat(0,
+                [p_const, tf.expand_dims(1.0 - tf.reduce_sum(p_const), 0)])
 
         return [p_const]
 
@@ -408,8 +408,8 @@ class MFGaussian(Likelihood):
 
         mi = self.m[i]
         si = self.s[i]
-        return concat([norm.logpdf(zm[i], mi, si)
-                       for zm in tf.unpack(z)])
+        return tf.pack([norm.logpdf(zm[i], mi, si)
+                        for zm in tf.unpack(z)])
 
     # TODO entropy is bugged
     #def entropy(self):
