@@ -27,7 +27,6 @@ class BetaBernoulli:
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = ed.MFBeta(model.num_vars)
 data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = ed.MAP(model, data, transform=tf.sigmoid)
