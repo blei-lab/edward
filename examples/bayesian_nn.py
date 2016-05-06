@@ -9,7 +9,7 @@ Probability model:
     Prior: Normal
     Likelihood: Normal with mean parameterized by fully connected NN
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
-from edward.variationals import Gaussian
+from edward.variationals import Normal
 from edward.util import rbf
 
 class BayesianNN:
@@ -133,7 +133,7 @@ ed.set_seed(43)
 # TODO This converges to the zero line. I think this is an
 # initialization issue.
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
-variational = Gaussian(model.num_vars)
+variational = Normal(model.num_vars)
 data = build_toy_dataset()
 
 # Set up figure

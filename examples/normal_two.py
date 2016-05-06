@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 """
 Probability model
-    Posterior: (2-dimensional) Gaussian
+    Posterior: (2-dimensional) Normal
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
 
 from edward.stats import multivariate_normal
-from edward.variationals import Gaussian
+from edward.variationals import Normal
 from edward.util import get_dims
 
-class GaussianModel:
+class NormalPosterior:
     """
-    p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
+    p(x, z) = p(z) = p(z | x) = Normal(z; mu, Sigma)
     """
     def __init__(self, mu, Sigma):
         self.mu = mu
@@ -30,8 +30,8 @@ mu = tf.constant([1.0, 1.0])
 Sigma = tf.constant(
 [[1.0, 0.1],
  [0.1, 1.0]])
-model = GaussianModel(mu, Sigma)
-variational = Gaussian(model.num_vars)
+model = NormalPosterior(mu, Sigma)
+variational = Normal(model.num_vars)
 
 inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

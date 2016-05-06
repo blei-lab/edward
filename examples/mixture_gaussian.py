@@ -27,7 +27,7 @@ import tensorflow as tf
 import numpy as np
 
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
-from edward.variationals import Variational, Dirichlet, Gaussian, InvGamma
+from edward.variationals import Variational, Dirichlet, Normal, InvGamma
 from edward.util import get_dims
 
 class MixtureGaussian:
@@ -91,13 +91,13 @@ class MixtureGaussian:
         return tf.pack(log_prob)
 
 ed.set_seed(42)
-x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')[0:5,:]
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')[0:5, :]
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
 variational = Variational()
 variational.add(Dirichlet(1, model.K))
-variational.add(Gaussian(model.K*model.D))
+variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 
 inference = ed.MFVI(model, variational, data)

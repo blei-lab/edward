@@ -125,7 +125,7 @@ class MFVI(VariationalInference):
         VariationalInference.__init__(self, *args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
-        # TODO if score=True, make MFGaussian do sess.run()
+        # TODO if score=True, make Gaussian do sess.run()
         """
         Parameters
         ----------

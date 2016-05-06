@@ -7,14 +7,14 @@ Probability model:
     Prior: Gaussian process with RBF kernel
     Likelihood: Bernoulli-Probit or Bernoulli-Logit
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
 import numpy as np
 
 from edward.stats import bernoulli, multivariate_normal
-from edward.variationals import Gaussian
+from edward.variationals import Normal
 from edward.util import sigmoid
 
 class GaussianProcess:
@@ -81,6 +81,6 @@ df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(df, dtype=tf.float32))
 
 model = GaussianProcess(N=len(df))
-variational = Gaussian(model.num_vars)
+variational = Normal(model.num_vars)
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

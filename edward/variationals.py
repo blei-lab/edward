@@ -7,8 +7,8 @@ from edward.util import Variable
 
 class Variational:
     """A stack of variational families."""
-    def __init__(self):
-        self.layers = []
+    def __init__(self, layers=[]):
+        self.layers = layers
         self.num_vars = 0
         self.num_params = 0
 
@@ -41,7 +41,7 @@ class Variational:
         z_layers = []
         for layer in self.layers:
             z_layer = layer.sample((size[0], layer.num_vars), sess)
-            if isinstance(layer, Gaussian):
+            if isinstance(layer, Normal):
                 z_layer = sess.run(z_layer)
 
             z_layers += [z_layer]
@@ -320,9 +320,9 @@ class Dirichlet(Likelihood):
         if i >= 1:
             return tf.constant(0.0, dtype=tf.float32)
 
-class Gaussian(Likelihood):
+class Normal(Likelihood):
     """
-    q(z | lambda ) = prod_{i=1}^d Gaussian(z[i] | lambda[i])
+    q(z | lambda ) = prod_{i=1}^d Normal(z[i] | lambda[i])
     """
     def __init__(self, *args, **kwargs):
         Likelihood.__init__(self, *args, **kwargs)
