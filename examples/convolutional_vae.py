@@ -16,7 +16,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward import Normal
+from edward import Variational, Normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -111,7 +111,8 @@ class Data:
 
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
-variational = Normal(FLAGS.num_vars)
+variational = Variational()
+variational.add(Normal(FLAGS.num_vars))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)

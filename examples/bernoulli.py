@@ -9,7 +9,7 @@ import edward as ed
 import tensorflow as tf
 
 from edward.stats import bernoulli
-from edward.variationals import Bernoulli
+from edward.variationals import Variational, Bernoulli
 
 class BernoulliModel:
     """
@@ -24,7 +24,8 @@ class BernoulliModel:
 ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliModel(p)
-variational = Bernoulli(1)
+variational = Variational()
+variational.add(Bernoulli(1))
 
 inference = ed.MFVI(model, variational)
-inference.run()
+inference.run(n_iter=10000)

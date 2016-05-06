@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
-from edward.variationals import Normal
+from edward.variationals import Variational, Normal
 
 class LinearModel:
     """
@@ -97,7 +97,8 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel(weight_dim=[1,1])
-variational = Normal(model.num_vars)
+variational = Variational()
+variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 
 # Set up figure

@@ -14,7 +14,7 @@ import tensorflow as tf
 import numpy as np
 
 from edward.stats import bernoulli, multivariate_normal
-from edward.variationals import Normal
+from edward.variationals import Variational, Normal
 from edward.util import sigmoid
 
 class GaussianProcess:
@@ -81,6 +81,7 @@ df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(df, dtype=tf.float32))
 
 model = GaussianProcess(N=len(df))
-variational = Normal(model.num_vars)
+variational = Variational()
+variational.add(Normal(model.num_vars))
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)
