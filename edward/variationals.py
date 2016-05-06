@@ -386,4 +386,7 @@ class PointMass(Likelihood):
         print(params)
 
     def get_params(self):
-        return self.params
+        # Return a matrix to be compatible with probability model
+        # methods which assume the input is possibly a mini-batch of
+        # parameter samples (used for black box variational methods).
+        return tf.reshape(self.params, [1, self.num_params])

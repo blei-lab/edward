@@ -9,7 +9,6 @@ sess = tf.Session()
 a = tf.ones([5]) * np.arange(5)
 b = tf.diag(tf.ones([5]))
 
-
 def test_dot():
     with sess.as_default():
         assert np.all(dot(a, b).eval() == a.eval()[np.newaxis].dot(b.eval()))

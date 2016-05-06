@@ -3,7 +3,6 @@ import tensorflow as tf
 
 from edward.util import dot, get_dims, log_beta, log_gamma, multivariate_log_beta
 from scipy import stats
-from scipy.special import factorial
 
 class Distribution:
     """Template for all distributions."""

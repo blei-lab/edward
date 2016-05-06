@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Mean-field variational inference for hierarchical logistic regression.
+Hierarchical logistic regression using mean-field variational inference.
 
 Probability model:
     Hierarchical logistic regression
