@@ -9,7 +9,6 @@ import edward as ed
 import tensorflow as tf
 
 from edward.stats import norm
-from edward.util import get_dims
 
 class Gaussian:
     """
