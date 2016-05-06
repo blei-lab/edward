@@ -27,6 +27,7 @@ import tensorflow as tf
 import numpy as np
 
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
+from edward.variationals import Variational, Dirichlet, Gaussian, InvGamma
 from edward.util import get_dims
 
 class MixtureGaussian:
@@ -89,72 +90,15 @@ class MixtureGaussian:
 
         return tf.pack(log_prob)
 
-from edward.variationals import Likelihood, MFDirichlet, MFGaussian, MFInvGamma
-class MFMixGaussian(Likelihood):
-    """
-    q(z | lambda ) = q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
-        q(pi) = Dirichlet(alpha')
-        q(mu_k) = N(mu'_k, Sigma'_k)
-        q(sigma_k) = Inv-Gamma(a'_k, b'_k)
-
-    where z = {pi, mu, sigma}
-    """
-    def __init__(self, K, D):
-        self.K = K
-        self.D = D
-        self.dirichlet = MFDirichlet(1, K)
-        self.gaussian = MFGaussian(K*D)
-        self.invgamma = MFInvGamma(K*D)
-
-        Likelihood.__init__(self, self.dirichlet.num_vars + \
-                                  self.gaussian.num_vars +  \
-                                  self.invgamma.num_vars)
-        self.num_params = self.dirichlet.num_params + \
-                          self.gaussian.num_params + \
-                          self.invgamma.num_params
-
-    def mapping(self, x):
-        return [self.dirichlet.mapping(x),
-                self.gaussian.mapping(x),
-                self.invgamma.mapping(x)]
-
-    def set_params(self, params):
-    	self.dirichlet.set_params(params[0])
-        self.gaussian.set_params(params[1])
-        self.invgamma.set_params(params[2])
-
-    def print_params(self, sess):
-    	self.dirichlet.print_params(sess)
-        self.gaussian.print_params(sess)
-        self.invgamma.print_params(sess)
-
-    def sample(self, size, sess):
-        """z ~ q(z | lambda)"""
-        z_dirichlet = self.dirichlet.sample((size[0], self.dirichlet.num_vars), sess)
-        z_gaussian = sess.run(self.gaussian.sample((size[0], self.gaussian.num_vars), sess))
-        z_invgamma = self.invgamma.sample((size[0], self.invgamma.num_vars), sess)
-        return np.concatenate((z_dirichlet, z_gaussian, z_invgamma), axis=1)
-
-    def log_prob_zi(self, i, z):
-        """log q(z_i | lambda_i)"""
-        if i < self.dirichlet.num_vars:
-            return self.dirichlet.log_prob_zi(i, z[:, 0:self.dirichlet.num_vars])
-        elif i < self.dirichlet.num_vars + self.gaussian.num_vars:
-            i = i - self.dirichlet.num_vars
-            return self.gaussian.log_prob_zi(i,
-                       z[:, self.dirichlet.num_vars:(self.dirichlet.num_vars+self.gaussian.num_vars)])
-        elif i < self.num_vars:
-            i = i - self.dirichlet.num_vars - self.gaussian.num_vars
-            return self.invgamma.log_prob_zi(i,
-                       z[:, (self.dirichlet.num_vars+self.gaussian.num_vars):])
-        else:
-            raise
-
 ed.set_seed(42)
-x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')[0:5,:]
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
-variational = MFMixGaussian(model.K, model.D)
+variational = Variational()
+variational.add(Dirichlet(1, model.K))
+variational.add(Gaussian(model.K*model.D))
+variational.add(InvGamma(model.K*model.D))
+
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000, n_minibatch=5)

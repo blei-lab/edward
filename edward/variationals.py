@@ -5,6 +5,62 @@ import tensorflow as tf
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
 from edward.util import get_dims, Variable
 
+class Variational:
+    """A stack of variational families."""
+    def __init__(self):
+        self.layers = []
+        self.num_vars = 0
+        self.num_params = 0
+
+    def add(self, layer):
+        """
+        Adds a layer instance on top of the layer stack.
+
+        Parameters
+        ----------
+            layer: layer instance.
+        """
+        self.layers += [layer]
+        self.num_vars += layer.num_vars
+        self.num_params += layer.num_params
+
+    def mapping(self, x):
+        return [layer.mapping(x) for layer in self.layers]
+
+    def set_params(self, params):
+        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
+
+    def print_params(self, sess):
+        [layer.print_params(sess) for layer in self.layers]
+
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        #z_layers = [layer.sample((size[0], layer.num_vars), sess)
+        #            for layer in self.layers]
+        # TODO This is temporary to deal with reparameterizable ones.
+        z_layers = []
+        for layer in self.layers:
+            z_layer = layer.sample((size[0], layer.num_vars), sess)
+            if isinstance(layer, Gaussian):
+                z_layer = sess.run(z_layer)
+
+            z_layers += [z_layer]
+
+        return np.concatenate(z_layers, axis=1)
+
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        start = 0
+        for layer in self.layers:
+            final = start + layer.num_vars
+            if start + i < final:
+                return layer.log_prob_zi(i, z[:, start:final])
+
+            i = i - layer.num_vars
+            start = final
+
+        raise IndexError()
+
 class Likelihood:
     """
     Base class for variational likelihoods, q(z | lambda).
@@ -129,7 +185,7 @@ class Likelihood:
         """log q(z_i | lambda_i)"""
         raise NotImplementedError()
 
-class MFBernoulli(Likelihood):
+class Bernoulli(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Bernoulli(z[i] | lambda[i])
     """
@@ -176,7 +232,7 @@ class MFBernoulli(Likelihood):
 
         return bernoulli.logpmf(z[:, i], self.p[i])
 
-class MFBeta(Likelihood):
+class Beta(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Beta(z[i] | lambda[i])
     """
@@ -218,7 +274,7 @@ class MFBeta(Likelihood):
 
         return beta.logpdf(z[:, i], self.a[i], self.b[i])
 
-class MFDirichlet(Likelihood):
+class Dirichlet(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
     (each z[i] here is K-dimensional)
@@ -264,7 +320,7 @@ class MFDirichlet(Likelihood):
         if i >= 1:
             return tf.constant(0.0, dtype=tf.float32)
 
-class MFGaussian(Likelihood):
+class Gaussian(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Gaussian(z[i] | lambda[i])
     """
@@ -321,7 +377,7 @@ class MFGaussian(Likelihood):
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
 
-class MFInvGamma(Likelihood):
+class InvGamma(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
     """

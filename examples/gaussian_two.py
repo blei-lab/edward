@@ -9,9 +9,10 @@ import edward as ed
 import tensorflow as tf
 
 from edward.stats import multivariate_normal
+from edward.variationals import Gaussian
 from edward.util import get_dims
 
-class Gaussian:
+class GaussianModel:
     """
     p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
     """
@@ -29,8 +30,8 @@ mu = tf.constant([1.0, 1.0])
 Sigma = tf.constant(
 [[1.0, 0.1],
  [0.1, 1.0]])
-model = Gaussian(mu, Sigma)
-variational = ed.MFGaussian(model.num_vars)
+model = GaussianModel(mu, Sigma)
+variational = Gaussian(model.num_vars)
 
 inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

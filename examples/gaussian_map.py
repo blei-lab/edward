@@ -10,7 +10,7 @@ import tensorflow as tf
 from edward.stats import norm
 from edward.util import get_dims
 
-class Gaussian:
+class GaussianModel:
     """
     p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
     """
@@ -29,7 +29,7 @@ class Gaussian:
 ed.set_seed(42)
 mu = tf.constant(3.0)
 Sigma = tf.constant(0.1)
-model = Gaussian(mu, Sigma)
+model = GaussianModel(mu, Sigma)
 data = ed.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = ed.MAP(model, data)

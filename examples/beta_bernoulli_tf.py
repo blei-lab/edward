@@ -12,6 +12,7 @@ import edward as ed
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta
+from edward.variationals import Beta
 
 class BetaBernoulli:
     """
@@ -28,7 +29,7 @@ class BetaBernoulli:
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = ed.MFBeta(model.num_vars)
+variational = Beta(model.num_vars)
 data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = ed.MFVI(model, variational, data)
