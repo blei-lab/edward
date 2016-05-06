@@ -1,3 +1,5 @@
+dist: trusty
+
 language: python
 
 notifications:
@@ -17,7 +19,7 @@ before_install:
     - deps='pip numpy scipy nose pep8 pystan progressbar'
     - conda create -q -n test-environment "python=$TRAVIS_PYTHON_VERSION" $deps 
     - source activate test-environment
-    - pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.8.0-cp27-none-linux_x86_64.whl
+    - pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.8.0-cp27-none-linux_x86_64.whl
     - pip install prettytensor
     - pip install python-coveralls
     - pip install numpydoc
