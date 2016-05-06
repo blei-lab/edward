@@ -18,7 +18,7 @@ import numpy as np
 
 from edward.stats import norm
 from edward.variationals import Gaussian
-from edward.util import get_dims, rbf
+from edward.util import rbf
 
 class BayesianNN:
     """

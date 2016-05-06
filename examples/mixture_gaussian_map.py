@@ -2,7 +2,7 @@
 """
 Mixture model using maximum a posteriori.
 
-Probability model:
+Probability model
     Mixture of Gaussians
     pi ~ Dirichlet(alpha)
     for k = 1, ..., K
@@ -100,4 +100,4 @@ data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
 inference = ed.MAP(model, data)
-inference.run(n_iter=300)
+inference.run(n_iter=1000, n_print=50)

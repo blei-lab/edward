@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
-from edward.util import get_dims, Variable
+from edward.util import Variable
 
 class Variational:
     """A stack of variational families."""

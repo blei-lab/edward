@@ -2,7 +2,7 @@
 """
 Mixture model using mean-field variational inference.
 
-Probability model:
+Probability model
     Mixture of Gaussians
     pi ~ Dirichlet(alpha)
     for k = 1, ..., K
