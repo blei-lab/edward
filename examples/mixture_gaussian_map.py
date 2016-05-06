@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Mixture model using mean-field variational inference.
+Mixture model using maximum a posteriori.
 
 Probability model:
     Mixture of Gaussians
@@ -59,13 +59,12 @@ class MixtureGaussian:
     def unpack_params(self, z):
         """Unpack parameters from a flattened vector."""
         pi = z[0:self.K]
-        mus = z[self.K:(self.K+self.K*D)]
-        sigmas = z[(self.K+self.K*D):(self.K+2*self.K*D)]
+        mus = z[self.K:(self.K+self.K*self.D)]
+        sigmas = z[(self.K+self.K*self.D):(self.K+2*self.K*self.D)]
         return pi, mus, sigmas
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        D = self.D
         N = get_dims(xs)[0]
         # Loop over each mini-batch zs[b,:]
         log_prob = []
@@ -76,34 +75,32 @@ class MixtureGaussian:
             # Do the unconstrained to constrained transformation for MAP here.
             pi, mus, sigmas = self.unpack_params(zs)
             pi = tf.sigmoid(pi)
-            pi = tf.concat(0, [pi[0:(K-1)],
-                         tf.expand_dims(1.0 - tf.reduce_sum(pi[0:(K-1)]), 0)])
+            pi = tf.concat(0, [pi[0:(self.K-1)],
+                         tf.expand_dims(1.0 - tf.reduce_sum(pi[0:(self.K-1)]), 0)])
             sigmas = tf.nn.softplus(sigmas)
-            #
-            log_prior = dirichlet.logpdf(pi, alpha=self.alpha)
+            log_prior = dirichlet.logpdf(pi, self.alpha)
             for k in xrange(self.K):
-                log_prior += norm.logpdf(mus[k*D], 0, np.sqrt(self.c))
-                log_prior += norm.logpdf(mus[k*D+1], 0, np.sqrt(self.c))
-                log_prior += invgamma.logpdf(sigmas[k*D], self.a, self.b)
-                log_prior += invgamma.logpdf(sigmas[k*D+1], self.a, self.b)
+                log_prior += norm.logpdf(mus[k*self.D], 0, np.sqrt(self.c))
+                log_prior += norm.logpdf(mus[k*self.D+1], 0, np.sqrt(self.c))
+                log_prior += invgamma.logpdf(sigmas[k*self.D], self.a, self.b)
+                log_prior += invgamma.logpdf(sigmas[k*self.D+1], self.a, self.b)
 
             log_lik = tf.constant(0.0, dtype=tf.float32)
             for x in tf.unpack(xs):
                 for k in xrange(self.K):
                     log_lik += tf.log(pi[k])
                     log_lik += multivariate_normal.logpdf(x,
-                        mus[(k*D):((k+1)*D)], sigmas[(k*D):((k+1)*D)])
+                        mus[(k*self.D):((k+1)*self.D)],
+                        sigmas[(k*self.D):((k+1)*self.D)])
 
             log_prob += [log_prior + log_lik]
 
-        return tf.concat(0, log_prob) # convert list to tf.Tensor
+        return tf.pack(log_prob)
 
 ed.set_seed(42)
 x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
-K = 2
-D = 2
-model = MixtureGaussian(K, D)
+model = MixtureGaussian(K=2, D=2)
 inference = ed.MAP(model, data)
-inference.run(n_iter=10000)
+inference.run(n_iter=300)
