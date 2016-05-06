@@ -16,25 +16,21 @@ class Bernoulli:
     p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)
     """
     def __init__(self, p):
-        self.p = p
         self.lp = tf.log(p)
         self.num_vars = get_dims(p)[0]
 
     def log_prob(self, xs, zs):
-        # TODO use table lookup for everything not resort to if-elses
-        if get_dims(zs)[1] == 1:
-            return bernoulli.logpmf(zs[:, 0], p)
-        else:
-            return tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
+        return tf.pack([self.table_lookup(z) for z in tf.unpack(zs)])
 
     def table_lookup(self, x):
+        """Look up value from the probability table."""
         elem = self.lp
         for d in range(self.num_vars):
             elem = tf.gather(elem, tf.to_int32(x[d]))
+
         return elem
 
 ed.set_seed(42)
-
 p = tf.constant(
 [[0.4, 0.1],
  [0.1, 0.4]])
