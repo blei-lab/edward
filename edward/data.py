@@ -75,6 +75,3 @@ class Data:
                 self.counter = counter_new
 
             return minibatch
-# TODO
-# for more complex data structures, specify a default for sampling,
-# e.g., for matrices sample rows or something

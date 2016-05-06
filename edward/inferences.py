@@ -355,7 +355,3 @@ class MAP(VariationalInference):
         z = self.variational.get_params()
         self.losses = self.model.log_prob(x, z)
         return -tf.reduce_mean(self.losses)
-
-
-
-
