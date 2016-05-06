@@ -68,7 +68,7 @@ class GaussianProcess:
     def log_prob(self, xs, zs):
         K = self.kernel(xs)
         log_prior = multivariate_normal.logpdf(zs[:, :], cov=K)
-        log_lik = tf.concat(0, [tf.reduce_sum( \
+        log_lik = tf.pack([tf.reduce_sum( \
             bernoulli.logpmf(xs[:,0], self.inverse_link(tf.mul(xs[:,0], z))) \
             ) for z in tf.unpack(zs)])
 
