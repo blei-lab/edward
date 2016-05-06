@@ -133,8 +133,7 @@ class MFMixGaussian(Likelihood):
         z_dirichlet = self.dirichlet.sample((size[0], self.dirichlet.num_vars), sess)
         z_gaussian = sess.run(self.gaussian.sample((size[0], self.gaussian.num_vars), sess))
         z_invgamma = self.invgamma.sample((size[0], self.invgamma.num_vars), sess)
-        z = np.concatenate((z_dirichlet, z_gaussian, z_invgamma), axis=1)
-        return z.reshape(size)
+        return np.concatenate((z_dirichlet, z_gaussian, z_invgamma), axis=1)
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
