@@ -123,9 +123,7 @@ class Likelihood:
         The method defaults to sampling noise and reparameterizing it
         (which will raise an error if this is not possible).
         """
-        #return self.reparam(self.sample_noise(size))
-        # TODO temp
-        return sess.run(self.reparam(self.sample_noise(size)))
+        return self.reparam(self.sample_noise(size))
 
     def log_prob_zi(self, i, z):
         """log q(z_i | lambda_i)"""
