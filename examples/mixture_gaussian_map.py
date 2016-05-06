@@ -95,7 +95,8 @@ class MixtureGaussian:
         return tf.pack(log_prob)
 
 ed.set_seed(42)
-x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
+# Use a subset of the data.
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')[0:20, :]
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
