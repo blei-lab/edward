@@ -224,7 +224,7 @@ class MFDirichlet(Likelihood):
     (each z[i] here is K-dimensional)
     """
     def __init__(self, num_pis, K):
-        self.num_pis = num_pis # TODO number of probability vectors
+        self.num_pis = num_pis # number of probability vectors
         Likelihood.__init__(self, num_pis*K)
         self.num_params = K * num_pis
         self.K = K
@@ -258,7 +258,7 @@ class MFDirichlet(Likelihood):
             raise
 
         if i == 0:
-            # TODO just one of them
+            # TODO take logpdf of just one of the probability vectors
             return dirichlet.logpdf(z[:, :], self.alpha[0, :])
 
         if i >= 1:

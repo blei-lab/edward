@@ -68,12 +68,9 @@ class MixtureGaussian:
         N = get_dims(xs)[0]
         # Loop over each mini-batch zs[b,:]
         log_prob = []
-        # TODO MAP doesn't seem to let you unpack
-        #for z in tf.unpack(zs):
-        #    pi, mus, sigmas = self.unpack_params(z)
-        for i in xrange(1):
+        for z in tf.unpack(zs):
             # Do the unconstrained to constrained transformation for MAP here.
-            pi, mus, sigmas = self.unpack_params(zs)
+            pi, mus, sigmas = self.unpack_params(z)
             pi = tf.sigmoid(pi)
             pi = tf.concat(0, [pi[0:(self.K-1)],
                          tf.expand_dims(1.0 - tf.reduce_sum(pi[0:(self.K-1)]), 0)])

@@ -89,9 +89,6 @@ class MixtureGaussian:
 
         return tf.pack(log_prob)
 
-# TODO
-# this will be useful in general to assess how to combine individual
-# factors
 from edward.variationals import Likelihood, MFDirichlet, MFGaussian, MFInvGamma
 class MFMixGaussian(Likelihood):
     """
