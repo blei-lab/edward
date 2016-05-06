@@ -58,11 +58,9 @@ class MixtureGaussian:
 
     def unpack_params(self, z):
         """Unpack parameters from a flattened vector."""
-        K = self.K
-        D = self.D
-        pi = z[0:K]
-        mus = z[K:(K+K*D)]
-        sigmas = z[(K+K*D):(K+2*K*D)]
+        pi = z[0:self.K]
+        mus = z[self.K:(self.K+self.K*D)]
+        sigmas = z[(self.K+self.K*D):(self.K+2*self.K*D)]
         return pi, mus, sigmas
 
     def log_prob(self, xs, zs):
