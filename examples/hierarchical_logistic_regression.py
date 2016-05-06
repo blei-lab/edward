@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import bernoulli, norm
+from edward.variationals import Gaussian
 
 class HierarchicalLogistic:
     """
@@ -102,7 +103,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = HierarchicalLogistic(weight_dim=[1,1])
-variational = ed.MFGaussian(model.num_vars)
+variational = Gaussian(model.num_vars)
 data = build_toy_dataset()
 
 # Set up figure
