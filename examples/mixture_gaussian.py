@@ -91,8 +91,7 @@ class MixtureGaussian:
         return tf.pack(log_prob)
 
 ed.set_seed(42)
-# Use a subset of the data.
-x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')[0:20, :]
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
@@ -102,4 +101,4 @@ variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=10000, n_minibatch=5)
+inference.run(n_iter=10000, n_minibatch=5, n_data=5)
