@@ -66,31 +66,28 @@ def sample_noise(self, size):
 Normal.mapping = mapping
 Normal.sample_noise = sample_noise
 
-def initialize(self, n_data=None):
-    self.n_data = n_data
+def sample_noise(self, size):
+    eps_layers = [layer.sample_noise((size[0], layer.num_vars))
+                  for layer in self.layers]
+    return eps_layers[0]
 
-    # TODO don't fix number of covariates
-    self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
-    self.losses = tf.constant(0.0)
+ed.Variational.sample_noise = sample_noise
 
-    loss = self.build_loss()
-    optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
-    # TODO move this to not rely on Pretty Tensor
-    self.train = pt.apply_optimizer(optimizer, losses=[loss])
-
-    init = tf.initialize_all_variables()
-    sess = tf.Session()
-    sess.run(init)
-    return sess
+from edward import VariationalInference
+def initialize(self, n_minibatch=1, score=False, *args, **kwargs):
+    # TODO generalize to if x is tensor
+    # TODO generalize to not needing z samples
+    self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
+    return VariationalInference.initialize(self, *args, **kwargs)
 
 def update(self, sess):
-    # TODO generalize to if x is tensor
     x = self.data.sample(self.n_data)
     _, loss_value = sess.run([self.train, self.losses], {self.x: x})
     return loss_value
 
-# TODO this is the case KL(p||q) is tractable
-# TODO this uses scope
+# TODO this is the case KL(p||q) is tractable. for now check a flag
+# defined in the model for this
+# TODO this uses scope. should we always use scope?
 def build_loss(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     with tf.variable_scope("model") as scope:
