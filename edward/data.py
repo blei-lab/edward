@@ -37,18 +37,21 @@ class Data:
             raise
 
     def sample(self, n_data=None):
+        # TODO scale gradient and printed loss by self.N / self.n_data
         if n_data is None:
             return self.data
 
         counter_new = self.counter + n_data
         if isinstance(self.data, tf.Tensor):
             if counter_new <= self.N:
-                minibatch = self.data[self.counter:counter_new]
+                minibatch = tf.gather(self.data,
+                                      list(range(self.counter, counter_new)))
                 self.counter = counter_new
             else:
                 counter_new = counter_new - self.N
-                minibatch = tf.concat(0, [self.data[self.counter:],
-                                          self.data[:counter_new]])
+                minibatch = tf.gather(self.data,
+                                      list(range(self.counter, self.N)) + \
+                                      list(range(0, counter_new)))
                 self.counter = counter_new
 
             return minibatch

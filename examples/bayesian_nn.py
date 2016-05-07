@@ -9,7 +9,7 @@ Probability model:
     Prior: Normal
     Likelihood: Normal with mean parameterized by fully connected NN
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
@@ -17,7 +17,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
-from edward.util import get_dims, rbf
+from edward.variationals import Variational, Normal
+from edward.util import rbf
 
 class BayesianNN:
     """
@@ -82,31 +83,16 @@ class BayesianNN:
         """
         h = x
         for W, b in self.unpack_weights(z):
-            # broadcasting to do (W*h) + b (e.g. 40x10 + 1x10)
+            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
             h = self.nonlinearity(tf.matmul(h, W) + b)
 
         h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
     def log_prob(self, xs, zs):
-        """
-        Calculates the unnormalized log joint density.
-
-        Parameters
-        ----------
-        xs : tf.tensor
-            n_data x (D + 1), where first column is outputs and other
-            columns are inputs and features
-        zs : tf.tensor or np.ndarray
-            n_minibatch x num_vars, where n_minibatch is the number of
-            weight samples and num_vars is the number of weights
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_minibatch, where the i^th element is
-            the log joint density of xs and zs[i, :]
-        """
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        # Data must have labels in the first column and features in
+        # subsequent columns.
         y = xs[:, 0]
         x = xs[:, 1:]
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
@@ -132,7 +118,8 @@ ed.set_seed(43)
 # TODO This converges to the zero line. I think this is an
 # initialization issue.
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
-variational = ed.MFGaussian(model.num_vars)
+variational = Variational()
+variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 
 # Set up figure

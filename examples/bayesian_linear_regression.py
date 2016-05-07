@@ -7,7 +7,7 @@ Probability model:
     Prior: Normal
     Likelihood: Normal
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
+from edward.variationals import Variational, Normal
 
 class LinearModel:
     """
@@ -49,30 +50,15 @@ class LinearModel:
         m, n = self.weight_dim[0], self.weight_dim[1]
         W = tf.reshape(z[:m*n], [m, n])
         b = tf.reshape(z[m*n:], [1, n])
-        # broadcasting to do (W*x) + b (e.g. 40x10 + 1x10)
+        # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
         h = tf.matmul(x, W) + b
         h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
     def log_prob(self, xs, zs):
-        """
-        Calculates the unnormalized log joint density.
-
-        Parameters
-        ----------
-        xs : tf.tensor
-            n_data x (D + 1), where first column is outputs and other
-            columns are inputs (features)
-        zs : tf.tensor or np.ndarray
-            n_minibatch x num_vars, where n_minibatch is the number of
-            weight samples and num_vars is the number of weights
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_minibatch, where the i^th element is
-            the log joint density of xs and zs[i, :]
-        """
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        # Data must have labels in the first column and features in
+        # subsequent columns.
         y = xs[:, 0]
         x = xs[:, 1:]
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
@@ -96,7 +82,8 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel(weight_dim=[1,1])
-variational = ed.MFGaussian(model.num_vars)
+variational = Variational()
+variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 
 # Set up figure

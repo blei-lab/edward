@@ -9,9 +9,10 @@ import edward as ed
 import tensorflow as tf
 
 from edward.stats import bernoulli
+from edward.variationals import Variational, Bernoulli
 from edward.util import get_dims
 
-class Bernoulli:
+class BernoulliPosterior:
     """
     p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)
     """
@@ -34,8 +35,9 @@ ed.set_seed(42)
 p = tf.constant(
 [[0.4, 0.1],
  [0.1, 0.4]])
-model = Bernoulli(p)
-variational = ed.MFBernoulli(model.num_vars)
+model = BernoulliPosterior(p)
+variational = Variational()
+variational.add(Bernoulli(model.num_vars))
 
 inference = ed.MFVI(model, variational)
 inference.run()

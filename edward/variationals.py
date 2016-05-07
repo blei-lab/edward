@@ -3,7 +3,69 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
-from edward.util import get_dims, Variable
+from edward.util import Variable
+
+class Variational:
+    """A stack of variational families."""
+    def __init__(self, layers=[]):
+        self.layers = layers
+        self.num_vars = 0
+        self.num_params = 0
+        self.is_reparam = True
+
+    def add(self, layer):
+        """
+        Adds a layer instance on top of the layer stack.
+
+        Parameters
+        ----------
+            layer: layer instance.
+        """
+        self.layers += [layer]
+        self.num_vars += layer.num_vars
+        self.num_params += layer.num_params
+        self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+
+    def mapping(self, x):
+        return [layer.mapping(x) for layer in self.layers]
+
+    def set_params(self, params):
+        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
+
+    def print_params(self, sess):
+        [layer.print_params(sess) for layer in self.layers]
+
+    def sample_noise(self, size):
+        eps_layers = [layer.sample_noise((size[0], layer.num_vars))
+                      for layer in self.layers]
+        return np.concatenate(eps_layers, axis=1)
+
+    def reparam(self, eps):
+        z_layers = []
+        start = final = 0
+        for layer in self.layers:
+            final += layer.num_vars
+            z_layers += [layer.reparam(eps[:, start:final])]
+            start = final
+
+        return tf.concat(1, z_layers)
+
+    def sample(self, size, sess):
+        z_layers = [layer.sample((size[0], layer.num_vars), sess)
+                    for layer in self.layers]
+        return np.concatenate(z_layers, axis=1)
+
+    def log_prob_zi(self, i, z):
+        start = final = 0
+        for layer in self.layers:
+            final += layer.num_vars
+            if start + i < final:
+                return layer.log_prob_zi(i, z[:, start:final])
+
+            i = i - layer.num_vars
+            start = final
+
+        raise IndexError()
 
 class Likelihood:
     """
@@ -129,147 +191,7 @@ class Likelihood:
         """log q(z_i | lambda_i)"""
         raise NotImplementedError()
 
-class MFMixGaussian(Likelihood):
-    """
-    q(z | lambda ) = Dirichlet(z | lambda1) * Gaussian(z | lambda2) * Inv_Gamma(z|lambda3)
-    """
-    def __init__(self, D, K):
-        self.K = K
-        self.dirich = MFDirichlet(K, K)
-        self.gauss = MFGaussian(K*D)
-        self.invgam = MFInvGamma(K*D)
-
-        Likelihood.__init__(self, self.dirich.num_vars + \
-                                  self.gauss.num_vars +  \
-                                  self.invgam.num_vars)
-        self.num_params = self.dirich.num_params + \
-                          self.gauss.num_params + \
-                          self.invgam.num_params
-
-    def mapping(self, x):
-        return [self.dirich.mapping(x),
-                self.gauss.mapping(x),
-                self.invgam.mapping(x)]
-
-    def set_params(self, params):
-    	self.dirich.set_params(params[0])
-        self.gauss.set_params(params[1])
-        self.invgam.set_params(params[2])
-
-    def print_params(self, sess):
-    	self.dirich.print_params(sess)
-        self.gauss.print_params(sess)
-        self.invgam.print_params(sess)
-
-    def sample(self, size, sess):
-        """z ~ q(z | lambda)"""
-
-        dirich_samples = self.dirich.sample((size[0],self.dirich.num_vars), sess)
-        gauss_samples = self.gauss.sample((size[0], self.gauss.num_vars), sess)
-        invgam_samples = self.invgam.sample((size[0], self.invgam.num_vars), sess)
-
-        z = np.concatenate((dirich_samples[0][0], gauss_samples, invgam_samples[0]), axis=0)
-        return z.reshape(size)
-
-    def log_prob_zi(self, i, z):
-        """log q(z_i | lambda_i)"""
-
-        log_prob = 0
-        if i < self.dirich.num_vars:
-            log_prob += self.dirich.log_prob_zi(i, z)
-
-        if i < self.gauss.num_vars:
-            log_prob += self.gauss.log_prob_zi(i, z)
-
-        if i < self.invgam.num_vars:
-            log_prob += self.invgam.log_prob_zi(i, z)
-
-        if i >= self.num_vars:
-            raise
-
-        return log_prob
-
-class MFDirichlet(Likelihood):
-    """
-    q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
-    """
-    def __init__(self, num_vars, K):
-        Likelihood.__init__(self, num_vars)
-        self.num_params = K * num_vars
-        self.K = K
-        self.alpha = None
-
-    def mapping(self, x):
-        alpha = Variable("alpha", [self.num_vars, K])
-        return [tf.nn.softplus(alpha)]
-
-    def set_params(self, params):
-        self.alpha = params[0]
-
-    def print_params(self, sess):
-        alpha = sess.run([self.alpha])
-        print("concentration vector:")
-        print(alpha)
-
-    def sample(self, size, sess):
-        """z ~ q(z | lambda)"""
-        alpha = sess.run([self.alpha])
-        z = np.zeros((size[1], size[0], self.K))
-        for d in xrange(self.num_vars):
-            z[d, :, :] = dirichlet.rvs(alpha[d, :], size = size[0])
-
-        return z
-
-    def log_prob_zi(self, i, z):
-        """log q(z_i | lambda_i)"""
-        if i >= self.num_vars:
-            raise
-
-        return dirichlet.logpdf(z[:, i], self.alpha[i, :])
-
-class MFInvGamma(Likelihood):
-    """
-    q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
-    """
-    def __init__(self, *args, **kwargs):
-        Likelihood.__init__(self, *args, **kwargs)
-        self.num_params = 2*self.num_vars
-        self.a = None
-        self.b = None
-
-    def mapping(self, x):
-        alpha = Variable("alpha", [self.num_vars])
-        beta = Variable("beta", [self.num_vars])
-        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
-
-    def set_params(self, params):
-        self.a = params[0]
-        self.b = params[1]
-
-    def print_params(self, sess):
-        a, b = sess.run([self.a, self.b])
-        print("shape:")
-        print(a)
-        print("scale:")
-        print(b)
-
-    def sample(self, size, sess):
-        """z ~ q(z | lambda)"""
-        a, b = sess.run([self.a, self.b])
-        z = np.zeros(size)
-        for d in range(self.num_vars):
-            z[:, d] = invgamma.rvs(a[d], b[d], size=size[0])
-
-        return z
-
-    def log_prob_zi(self, i, z):
-        """log q(z_i | lambda_i)"""
-        if i >= self.num_vars:
-            raise
-
-        return invgamma.logpdf(z[:, i], self.a[i], self.b[i])
-
-class MFBernoulli(Likelihood):
+class Bernoulli(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Bernoulli(z[i] | lambda[i])
     """
@@ -316,7 +238,7 @@ class MFBernoulli(Likelihood):
 
         return bernoulli.logpmf(z[:, i], self.p[i])
 
-class MFBeta(Likelihood):
+class Beta(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Beta(z[i] | lambda[i])
     """
@@ -358,9 +280,55 @@ class MFBeta(Likelihood):
 
         return beta.logpdf(z[:, i], self.a[i], self.b[i])
 
-class MFGaussian(Likelihood):
+class Dirichlet(Likelihood):
     """
-    q(z | lambda ) = prod_{i=1}^d Gaussian(z[i] | lambda[i])
+    q(z | lambda ) = prod_{i=1}^d Dirichlet(z[i] | lambda[i])
+    (each z[i] here is K-dimensional)
+    """
+    def __init__(self, num_pis, K):
+        self.num_pis = num_pis # number of probability vectors
+        Likelihood.__init__(self, num_pis*K)
+        self.num_params = K * num_pis
+        self.K = K
+        self.alpha = None
+
+    def mapping(self, x):
+        alpha = Variable("dirichlet_alpha", [self.num_pis, self.K])
+        return [tf.nn.softplus(alpha)]
+
+    def set_params(self, params):
+        self.alpha = params[0]
+
+    def print_params(self, sess):
+        alpha = sess.run(self.alpha)
+        print("concentration vector:")
+        print(alpha)
+
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        alpha = sess.run(self.alpha)
+        z = np.zeros(size)
+        for pi in xrange(self.num_pis):
+            z[:, (pi*self.K):((pi+1)*self.K)] = dirichlet.rvs(alpha[pi, :], size=size[0])
+
+        return z
+
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        # a hack for now
+        if i >= self.num_vars:
+            raise
+
+        if i == 0:
+            # TODO take logpdf of just one of the probability vectors
+            return dirichlet.logpdf(z[:, :], self.alpha[0, :])
+
+        if i >= 1:
+            return tf.constant(0.0, dtype=tf.float32)
+
+class Normal(Likelihood):
+    """
+    q(z | lambda ) = prod_{i=1}^d Normal(z[i] | lambda[i])
     """
     def __init__(self, *args, **kwargs):
         Likelihood.__init__(self, *args, **kwargs)
@@ -414,6 +382,48 @@ class MFGaussian(Likelihood):
     # TODO entropy is bugged
     #def entropy(self):
     #    return norm.entropy(self.transform_s(self.s_unconst))
+
+class InvGamma(Likelihood):
+    """
+    q(z | lambda ) = prod_{i=1}^d Inv_Gamma(z[i] | lambda[i])
+    """
+    def __init__(self, *args, **kwargs):
+        Likelihood.__init__(self, *args, **kwargs)
+        self.num_params = 2*self.num_vars
+        self.a = None
+        self.b = None
+
+    def mapping(self, x):
+        alpha = Variable("alpha", [self.num_vars])
+        beta = Variable("beta", [self.num_vars])
+        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
+
+    def set_params(self, params):
+        self.a = params[0]
+        self.b = params[1]
+
+    def print_params(self, sess):
+        a, b = sess.run([self.a, self.b])
+        print("shape:")
+        print(a)
+        print("scale:")
+        print(b)
+
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        a, b = sess.run([self.a, self.b])
+        z = np.zeros(size)
+        for d in range(self.num_vars):
+            z[:, d] = invgamma.rvs(a[d], b[d], size=size[0])
+
+        return z
+
+    def log_prob_zi(self, i, z):
+        """log q(z_i | lambda_i)"""
+        if i >= self.num_vars:
+            raise
+
+        return invgamma.logpdf(z[:, i], self.a[i], self.b[i])
 
 class PointMass(Likelihood):
     """

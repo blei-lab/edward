@@ -99,7 +99,10 @@ class Gamma:
 class InvGamma:
     """Shape/scale parameterization"""
     def rvs(self, alpha, scale=1, size=1):
-        return stats.invgamma.rvs(alpha, scale=scale, size=size)
+        x = stats.invgamma.rvs(alpha, scale=scale, size=size)
+        # This is temporary to avoid returning Inf values.
+        x[np.logical_not(np.isfinite(x))] = 1.0
+        return x
 
     def logpdf(self, x, alpha, scale=1):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
