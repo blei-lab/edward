@@ -166,14 +166,24 @@ class MFVI(VariationalInference):
         return loss
 
     def build_loss(self):
-        if self.score and hasattr(self.variational, 'entropy'):
-            return self.build_score_loss_entropy()
-        elif self.score:
-            return self.build_score_loss()
-        elif not self.score and hasattr(self.variational, 'entropy'):
-            return self.build_reparam_loss_entropy()
+        if self.score:
+            if self.variational.is_normal and \
+               hasattr(self.model, 'is_normal') and \
+               hasattr(self.model, 'log_likelihood'):
+                return self.build_score_loss_kl()
+            elif hasattr(self.variational, 'entropy'):
+                return self.build_score_loss_entropy()
+            else:
+                return self.build_score_loss()
         else:
-            return self.build_reparam_loss()
+            if self.variational.is_normal and \
+               hasattr(self.model, 'is_normal') and \
+               hasattr(self.model, 'log_likelihood'):
+                return self.build_reparam_loss_kl()
+            elif hasattr(self.variational, 'entropy'):
+                return self.build_reparam_loss_entropy()
+            else:
+                return self.build_reparam_loss()
 
     def build_score_loss(self):
         """
@@ -211,13 +221,24 @@ class MFVI(VariationalInference):
 
         return -tf.reduce_mean(self.losses)
 
+    def build_score_loss_kl(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the score function estimator.
+
+        ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
+        where KL is analytic
+        """
+        raise
+
     def build_score_loss_entropy(self):
         """
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
+
+        ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
+        where entropy is analytic
         """
-        # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
-        # where entropy is analytic
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
 
@@ -232,13 +253,24 @@ class MFVI(VariationalInference):
         return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
                q_entropy
 
+    def build_reparam_loss_kl(self):
+        """
+        Loss function to minimize, whose gradient is a stochastic
+        gradient based on the reparameterization trick.
+
+        ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
+        where KL is analytic
+        """
+        raise
+
     def build_reparam_loss_entropy(self):
         """
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
+
+        ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
+        where entropy is analytic
         """
-        # ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
-        # where entropy is analytic
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
