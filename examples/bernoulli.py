@@ -11,7 +11,7 @@ import tensorflow as tf
 from edward.stats import bernoulli
 from edward.variationals import Variational, Bernoulli
 
-class BernoulliModel:
+class BernoulliPosterior:
     """
     p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)
     """
@@ -23,7 +23,7 @@ class BernoulliModel:
 
 ed.set_seed(42)
 p = tf.constant(0.6)
-model = BernoulliModel(p)
+model = BernoulliPosterior(p)
 variational = Variational()
 variational.add(Bernoulli(1))
 
