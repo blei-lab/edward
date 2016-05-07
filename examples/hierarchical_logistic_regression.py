@@ -104,7 +104,8 @@ def print_progress(self, t, losses, sess):
         self.variational.print_params(sess)
 
         # Sample functions from variational model
-        mean, std = sess.run([self.variational.m, self.variational.s])
+        mean, std = sess.run([self.variational.layers[0].m,
+                              self.variational.layers[0].s])
         rs = np.random.RandomState(0)
         zs = rs.randn(10, self.variational.num_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)

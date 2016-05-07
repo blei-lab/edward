@@ -12,6 +12,7 @@ class Variational:
         self.num_vars = 0
         self.num_params = 0
         self.is_reparam = True
+        self.is_normal = True
 
     def add(self, layer):
         """
@@ -25,6 +26,7 @@ class Variational:
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.is_normal = self.is_normal and isinstance(layer, Normal)
 
     def mapping(self, x):
         return [layer.mapping(x) for layer in self.layers]
