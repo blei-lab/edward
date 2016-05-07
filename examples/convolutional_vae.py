@@ -34,28 +34,10 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 
 FLAGS = flags.FLAGS
 
-def mapping(self, x):
-    """
-    lambda = phi(x)
-    """
-    with pt.defaults_scope(activation_fn=tf.nn.elu,
-                           batch_normalize=True,
-                           learned_moments_update_rate=0.0003,
-                           variance_epsilon=0.001,
-                           scale_after_normalization=True):
-        params = (pt.wrap(x).
-                reshape([FLAGS.n_data, 28, 28, 1]).
-                conv2d(5, 32, stride=2).
-                conv2d(5, 64, stride=2).
-                conv2d(5, 128, edges='VALID').
-                dropout(0.9).
-                flatten().
-                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
-
-    mean = params[:, :self.num_vars]
-    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
-    return [mean, stddev]
-
+# TODO
+# This is a temporary fix so that we can leverage TensorFlow sampling,
+# which is faster than realizing TensorFlow parameters and then
+# running SciPy sampling.
 def sample_noise(self, size):
     """
     eps = sample_noise() ~ s(eps)
@@ -63,42 +45,45 @@ def sample_noise(self, size):
     """
     return tf.random_normal(size)
 
-Normal.mapping = mapping
 Normal.sample_noise = sample_noise
 
 def sample_noise(self, size):
     eps_layers = [layer.sample_noise((size[0], layer.num_vars))
                   for layer in self.layers]
-    return eps_layers[0]
+    return tf.concat(0, eps_layers)
 
-ed.Variational.sample_noise = sample_noise
+Variational.sample_noise = sample_noise
 
 from edward import VariationalInference
-def initialize(self, n_minibatch=1, score=False, *args, **kwargs):
-    # TODO generalize to if x is tensor
-    # TODO generalize to not needing z samples
+def initialize(self, *args, **kwargs):
     self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
-    return VariationalInference.initialize(self, *args, **kwargs)
+    self.losses = tf.constant(0.0)
+
+    loss = self.build_loss()
+    optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
+    self.train = pt.apply_optimizer(optimizer, losses=[loss])
+
+    init = tf.initialize_all_variables()
+    sess = tf.Session()
+    sess.run(init)
+    return sess
 
 def update(self, sess):
     x = self.data.sample(self.n_data)
     _, loss_value = sess.run([self.train, self.losses], {self.x: x})
     return loss_value
 
-# TODO this is the case KL(p||q) is tractable. for now check a flag
-# defined in the model for this
-# TODO this uses scope. should we always use scope?
 def build_loss(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     with tf.variable_scope("model") as scope:
         self.variational.set_params(self.variational.mapping(self.x))
         eps = self.variational.sample_noise([self.n_data, self.variational.num_vars])
         z = self.variational.reparam(eps)
-        self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+        self.losses = self.model.log_lik(self.x, z) - \
                       kl_multivariate_normal(self.variational.layers[0].m,
-                                             self.variational.layers[0].s)
+                                             self.variational.layers[0].s
 
-    return -self.losses
+    return -tf.reduce_sum(self.losses)
 
 ed.MFVI.initialize = initialize
 ed.MFVI.update = update
@@ -140,7 +125,29 @@ class NormalBernoulli:
         z = tf.random_normal(size)
         return self.mapping(z)
 
-# TODO generalize
+def mapping(self, x):
+    """
+    lambda = phi(x)
+    """
+    with pt.defaults_scope(activation_fn=tf.nn.elu,
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
+        params = (pt.wrap(x).
+                reshape([FLAGS.n_data, 28, 28, 1]).
+                conv2d(5, 32, stride=2).
+                conv2d(5, 64, stride=2).
+                conv2d(5, 128, edges='VALID').
+                dropout(0.9).
+                flatten().
+                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
+
+    mean = params[:, :self.num_vars]
+    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
+    return [mean, stddev]
+
+# TODO
 class Data:
     def __init__(self, data):
         self.mnist = data
@@ -152,6 +159,7 @@ class Data:
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
 variational = Variational()
+Normal.mapping = mapping
 variational.add(Normal(FLAGS.num_vars))
 
 if not os.path.exists(FLAGS.data_directory):
