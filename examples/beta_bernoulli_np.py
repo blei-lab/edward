@@ -12,6 +12,7 @@ import edward as ed
 import numpy as np
 
 from edward import PythonModel
+from edward.variationals import Variational, Beta
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
@@ -35,7 +36,8 @@ class BetaBernoulli(PythonModel):
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = ed.MFBeta(model.num_vars)
+variational = Variational()
+variational.add(Beta(model.num_vars))
 data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 inference = ed.MFVI(model, variational, data)

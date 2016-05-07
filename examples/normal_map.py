@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Probability model
-    Posterior: (1-dimensional) Gaussian
+    Posterior: (1-dimensional) Normal
 Inference: Maximum a posteriori
 """
 import edward as ed
@@ -9,9 +9,9 @@ import tensorflow as tf
 
 from edward.stats import norm
 
-class Gaussian:
+class NormalModel:
     """
-    p(x, z) = p(z) = p(z | x) = Gaussian(z; mu, Sigma)
+    p(x, z) = Normal(x; z, Sigma)Normal(z; mu, Sigma)
     """
     def __init__(self, mu, Sigma):
         self.mu = mu
@@ -28,7 +28,7 @@ class Gaussian:
 ed.set_seed(42)
 mu = tf.constant(3.0)
 Sigma = tf.constant(0.1)
-model = Gaussian(mu, Sigma)
+model = NormalModel(mu, Sigma)
 data = ed.Data(tf.constant((3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = ed.MAP(model, data)

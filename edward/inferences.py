@@ -125,7 +125,7 @@ class MFVI(VariationalInference):
         VariationalInference.__init__(self, *args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
-        # TODO if score=True, make MFGaussian do sess.run()
+        # TODO if score=True, make Normal do sess.run()
         """
         Parameters
         ----------
@@ -137,7 +137,7 @@ class MFVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and 'reparam' in self.variational.__class__.__dict__:
+        if score is None and self.variational.is_reparam:
             self.score = False
         else:
             self.score = True

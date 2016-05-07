@@ -7,7 +7,7 @@ Probability model
     Prior: Normal
     Likelihood: Bernoulli parameterized by convolutional NN
 Variational model
-    Likelihood: Mean-field Gaussian parameterized by convolutional NN
+    Likelihood: Mean-field Normal parameterized by convolutional NN
 """
 from __future__ import print_function
 import os
@@ -16,7 +16,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward import MFGaussian
+from edward import Variational, Normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -62,8 +62,8 @@ def sample_noise(self, size):
     """
     return tf.random_normal(size)
 
-MFGaussian.mapping = mapping
-MFGaussian.sample_noise = sample_noise
+Normal.mapping = mapping
+Normal.sample_noise = sample_noise
 
 class NormalBernoulli:
     def __init__(self, num_vars):
@@ -111,7 +111,8 @@ class Data:
 
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
-variational = MFGaussian(FLAGS.num_vars)
+variational = Variational()
+variational.add(Normal(FLAGS.num_vars))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)

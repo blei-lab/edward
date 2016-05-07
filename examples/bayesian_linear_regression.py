@@ -7,7 +7,7 @@ Probability model:
     Prior: Normal
     Likelihood: Normal
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.stats import norm
+from edward.variationals import Variational, Normal
 
 class LinearModel:
     """
@@ -81,7 +82,8 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel(weight_dim=[1,1])
-variational = ed.MFGaussian(model.num_vars)
+variational = Variational()
+variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 
 # Set up figure
