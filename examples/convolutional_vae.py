@@ -86,7 +86,7 @@ class NormalBernoulli:
                     deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
                     flatten()).tensor
 
-    def log_likelihood(self, x, z):
+    def log_lik(self, x, z):
         """
         log p(x | z) = log Bernoulli(x | p = varphi(z))
         """

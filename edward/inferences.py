@@ -167,18 +167,14 @@ class MFVI(VariationalInference):
 
     def build_loss(self):
         if self.score:
-            if self.variational.is_normal and \
-               hasattr(self.model, 'is_normal') and \
-               hasattr(self.model, 'log_likelihood'):
+            if self.variational.is_normal and hasattr(self.model, 'log_lik'):
                 return self.build_score_loss_kl()
             elif hasattr(self.variational, 'entropy'):
                 return self.build_score_loss_entropy()
             else:
                 return self.build_score_loss()
         else:
-            if self.variational.is_normal and \
-               hasattr(self.model, 'is_normal') and \
-               hasattr(self.model, 'log_likelihood'):
+            if self.variational.is_normal and hasattr(self.model, 'log_lik'):
                 return self.build_reparam_loss_kl()
             elif hasattr(self.variational, 'entropy'):
                 return self.build_reparam_loss_entropy()
@@ -190,8 +186,9 @@ class MFVI(VariationalInference):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the score function estimator.
         (Paisley et al., 2012)
+
+        ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
-        # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
 
@@ -207,8 +204,9 @@ class MFVI(VariationalInference):
         Loss function to minimize, whose gradient is a stochastic
         gradient based on the reparameterization trick.
         (Kingma and Welling, 2014)
+
+        ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
-        # ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
@@ -229,7 +227,19 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
         where KL is analytic
         """
-        raise
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+
+        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
+        for i in range(self.variational.num_vars):
+            q_log_prob += self.variational.log_prob_zi(i, self.samples)
+
+        x = self.data.sample(self.n_data)
+        p_log_lik = self.model.log_lik(x, self.samples)
+        kl = kl_multivariate_normal(self.variational.layers[0].m,
+                                    self.variational.layers[0].s)
+        self.losses = p_log_lik - kl
+        return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl
 
     def build_score_loss_entropy(self):
         """
@@ -246,7 +256,6 @@ class MFVI(VariationalInference):
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-        x = self.data.sample(self.n_data)
         p_log_prob = self.model.log_prob(x, self.samples)
         q_entropy = self.variational.entropy()
         self.losses = p_log_prob + q_entropy
@@ -261,7 +270,15 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
         where KL is analytic
         """
-        raise
+        # assumes prior p(z) = N(0, 1)
+        # assumes just one layer
+        x = self.data.sample(self.n_data)
+        self.variational.set_params(self.variational.mapping(x))
+        z = self.variational.reparam(self.samples)
+        self.losses = self.model.log_lik(x, z) - \
+                      kl_multivariate_normal(self.variational.layers[0].m,
+                                             self.variational.layers[0].s)
+        return -tf.reduce_mean(self.losses)
 
     def build_reparam_loss_entropy(self):
         """
@@ -315,7 +332,7 @@ class VAE(VariationalInference):
         with tf.variable_scope("model") as scope:
             self.variational.set_params(self.variational.mapping(self.x))
             z = self.variational.sample([self.n_data, self.variational.num_vars])
-            self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+            self.losses = tf.reduce_sum(self.model.log_lik(self.x, z)) - \
                           kl_multivariate_normal(self.variational.m,
                                                  self.variational.s)
 
