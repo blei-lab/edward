@@ -31,15 +31,15 @@ class HierarchicalLogistic:
     weight_dim : list
         Dimension of weights, which is dimension of input x dimension
         of output.
-    link : function, optional
-        Link function, whose inverse is applied to the linear transformation.
+    inv_link : function, optional
+        Inverse of link function, which is applied to the linear transformation.
     prior_variance : float, optional
         Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
-    def __init__(self, weight_dim, link=tf.sigmoid, prior_variance=0.01):
+    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=0.01):
         self.weight_dim = weight_dim
-        self.link = link
+        self.inv_link = inv_link
         self.prior_variance = prior_variance
         self.num_vars = (self.weight_dim[0]+1)*self.weight_dim[1]
 
@@ -51,30 +51,15 @@ class HierarchicalLogistic:
         m, n = self.weight_dim[0], self.weight_dim[1]
         W = tf.reshape(z[:m*n], [m, n])
         b = tf.reshape(z[m*n:], [1, n])
-        # broadcasting to do (W*x) + b (e.g. 40x10 + 1x10)
-        h = self.link(tf.matmul(x, W) + b)
+        # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
+        h = self.inv_link(tf.matmul(x, W) + b)
         h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
     def log_prob(self, xs, zs):
-        """
-        Calculates the unnormalized log joint density.
-
-        Parameters
-        ----------
-        xs : tf.tensor
-            n_data x (D + 1), where first column is outputs and other
-            columns are inputs (features)
-        zs : tf.tensor or np.ndarray
-            n_minibatch x num_vars, where n_minibatch is the number of
-            weight samples and num_vars is the number of weights
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_minibatch, where the i^th element is
-            the log joint density of xs and zs[i, :]
-        """
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        # Data must have labels in the first column and features in
+        # subsequent columns.
         y = xs[:, 0]
         x = xs[:, 1:]
         log_lik = []

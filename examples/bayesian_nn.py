@@ -82,31 +82,16 @@ class BayesianNN:
         """
         h = x
         for W, b in self.unpack_weights(z):
-            # broadcasting to do (W*h) + b (e.g. 40x10 + 1x10)
+            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
             h = self.nonlinearity(tf.matmul(h, W) + b)
 
         h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
     def log_prob(self, xs, zs):
-        """
-        Calculates the unnormalized log joint density.
-
-        Parameters
-        ----------
-        xs : tf.tensor
-            n_data x (D + 1), where first column is outputs and other
-            columns are inputs and features
-        zs : tf.tensor or np.ndarray
-            n_minibatch x num_vars, where n_minibatch is the number of
-            weight samples and num_vars is the number of weights
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_minibatch, where the i^th element is
-            the log joint density of xs and zs[i, :]
-        """
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        # Data must have labels in the first column and features in
+        # subsequent columns.
         y = xs[:, 0]
         x = xs[:, 1:]
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
