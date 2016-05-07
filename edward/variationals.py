@@ -38,7 +38,9 @@ class Variational:
     def sample_noise(self, size):
         eps_layers = [layer.sample_noise((size[0], layer.num_vars))
                       for layer in self.layers]
-        return np.concatenate(eps_layers, axis=1)
+        # TODO
+        return eps_layers[0]
+        #return np.concatenate(eps_layers, axis=1)
 
     def reparam(self, eps):
         z_layers = []

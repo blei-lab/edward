@@ -17,6 +17,7 @@ import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
 from edward import Variational, Normal
+from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -65,6 +66,47 @@ def sample_noise(self, size):
 Normal.mapping = mapping
 Normal.sample_noise = sample_noise
 
+def initialize(self, n_data=None):
+    self.n_data = n_data
+
+    # TODO don't fix number of covariates
+    self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
+    self.losses = tf.constant(0.0)
+
+    loss = self.build_loss()
+    optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
+    # TODO move this to not rely on Pretty Tensor
+    self.train = pt.apply_optimizer(optimizer, losses=[loss])
+
+    init = tf.initialize_all_variables()
+    sess = tf.Session()
+    sess.run(init)
+    return sess
+
+def update(self, sess):
+    # TODO generalize to if x is tensor
+    x = self.data.sample(self.n_data)
+    _, loss_value = sess.run([self.train, self.losses], {self.x: x})
+    return loss_value
+
+# TODO this is the case KL(p||q) is tractable
+# TODO this uses scope
+def build_loss(self):
+    # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+    with tf.variable_scope("model") as scope:
+        self.variational.set_params(self.variational.mapping(self.x))
+        eps = self.variational.sample_noise([self.n_data, self.variational.num_vars])
+        z = self.variational.reparam(eps)
+        self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                      kl_multivariate_normal(self.variational.layers[0].m,
+                                             self.variational.layers[0].s)
+
+    return -self.losses
+
+ed.MFVI.initialize = initialize
+ed.MFVI.update = update
+ed.MFVI.build_loss = build_loss
+
 class NormalBernoulli:
     def __init__(self, num_vars):
         self.num_vars = num_vars
@@ -101,6 +143,7 @@ class NormalBernoulli:
         z = tf.random_normal(size)
         return self.mapping(z)
 
+# TODO generalize
 class Data:
     def __init__(self, data):
         self.mnist = data
@@ -111,15 +154,15 @@ class Data:
 
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
-# TODO This family is not currently amenable to the variational construction.
-variational = Normal(FLAGS.num_vars)
+variational = Variational()
+variational.add(Normal(FLAGS.num_vars))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
 mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 data = Data(mnist)
 
-inference = ed.VAE(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 sess = inference.initialize(n_data=FLAGS.n_data)
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior([FLAGS.n_data, FLAGS.num_vars])

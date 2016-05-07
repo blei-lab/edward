@@ -37,7 +37,11 @@ class Data:
             raise
 
     def sample(self, n_data=None):
-        # TODO scale gradient and printed loss by self.N / self.n_data
+        # TODO
+        # In general, there should be a scale factor due to data
+        # subsampling, so that
+        # ELBO = self.N / self.n_data * ( mini-batch ELBO )
+        # For now this is absorbed into the learning rate.
         if n_data is None:
             return self.data
 
