@@ -11,6 +11,7 @@ class Variational:
         self.layers = layers
         self.num_vars = 0
         self.num_params = 0
+        self.is_reparam = True
 
     def add(self, layer):
         """
@@ -23,6 +24,7 @@ class Variational:
         self.layers += [layer]
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
+        self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
 
     def mapping(self, x):
         return [layer.mapping(x) for layer in self.layers]
@@ -33,26 +35,30 @@ class Variational:
     def print_params(self, sess):
         [layer.print_params(sess) for layer in self.layers]
 
-    def sample(self, size, sess):
-        """z ~ q(z | lambda)"""
-        #z_layers = [layer.sample((size[0], layer.num_vars), sess)
-        #            for layer in self.layers]
-        # TODO This is temporary to deal with reparameterizable ones.
+    def sample_noise(self, size):
+        eps_layers = [layer.sample_noise((size[0], layer.num_vars))
+                      for layer in self.layers]
+        return np.concatenate(eps_layers, axis=1)
+
+    def reparam(self, eps):
         z_layers = []
+        start = final = 0
         for layer in self.layers:
-            z_layer = layer.sample((size[0], layer.num_vars), sess)
-            if isinstance(layer, Normal):
-                z_layer = sess.run(z_layer)
+            final += layer.num_vars
+            z_layers += [layer.reparam(eps[:, start:final])]
+            start = final
 
-            z_layers += [z_layer]
+        return tf.concat(1, z_layers)
 
+    def sample(self, size, sess):
+        z_layers = [layer.sample((size[0], layer.num_vars), sess)
+                    for layer in self.layers]
         return np.concatenate(z_layers, axis=1)
 
     def log_prob_zi(self, i, z):
-        """log q(z_i | lambda_i)"""
-        start = 0
+        start = final = 0
         for layer in self.layers:
-            final = start + layer.num_vars
+            final += layer.num_vars
             if start + i < final:
                 return layer.log_prob_zi(i, z[:, start:final])
 
