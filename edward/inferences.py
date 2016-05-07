@@ -226,6 +226,8 @@ class MFVI(VariationalInference):
 
         ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
         where KL is analytic
+
+        It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
@@ -234,12 +236,12 @@ class MFVI(VariationalInference):
         for i in range(self.variational.num_vars):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-        x = self.data.sample(self.n_data)
         p_log_lik = self.model.log_lik(x, self.samples)
-        kl = kl_multivariate_normal(self.variational.layers[0].m,
-                                    self.variational.layers[0].s)
+        mu = tf.concat(0, [layer.m for layer in self.variational.layers])
+        sigma = tf.concat(0, [layer.s for layer in self.variational.layers])
+        kl = kl_multivariate_normal(mu, sigma)
         self.losses = p_log_lik - kl
-        return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl
+        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
         """
@@ -259,8 +261,8 @@ class MFVI(VariationalInference):
         p_log_prob = self.model.log_prob(x, self.samples)
         q_entropy = self.variational.entropy()
         self.losses = p_log_prob + q_entropy
-        return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
-               q_entropy
+        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
+                 q_entropy)
 
     def build_reparam_loss_kl(self):
         """
@@ -269,15 +271,16 @@ class MFVI(VariationalInference):
 
         ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
         where KL is analytic
+
+        It assumes the model prior is p(z) = N(z; 0, 1).
         """
-        # assumes prior p(z) = N(0, 1)
-        # assumes just one layer
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
-        self.losses = self.model.log_lik(x, z) - \
-                      kl_multivariate_normal(self.variational.layers[0].m,
-                                             self.variational.layers[0].s)
+
+        mu = tf.concat(0, [layer.m for layer in self.variational.layers])
+        sigma = tf.concat(0, [layer.s for layer in self.variational.layers])
+        self.losses = self.model.log_lik(x, z) - kl_multivariate_normal(mu, sigma)
         return -tf.reduce_mean(self.losses)
 
     def build_reparam_loss_entropy(self):
