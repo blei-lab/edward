@@ -51,8 +51,17 @@ class Variational:
         return tf.concat(1, z_layers)
 
     def sample(self, size, sess):
-        z_layers = [layer.sample((size[0], layer.num_vars), sess)
-                    for layer in self.layers]
+        #z_layers = [layer.sample((size[0], layer.num_vars), sess)
+        #            for layer in self.layers]
+        # This is temporary to deal with reparameterizable ones.
+        z_layers = []
+        for layer in self.layers:
+            z_layer = layer.sample((size[0], layer.num_vars), sess)
+            if isinstance(layer, Normal):
+                z_layer = sess.run(z_layer)
+
+            z_layers += [z_layer]
+
         return np.concatenate(z_layers, axis=1)
 
     def log_prob_zi(self, i, z):
