@@ -45,7 +45,7 @@ class BayesianNN:
         regularization parameter, ridge penalty, scale parameter.
     """
     def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-        lik_variance=0.01, prior_variance=0.01):
+        lik_variance=0.01, prior_variance=1):
         self.layer_sizes = layer_sizes
         self.nonlinearity = nonlinearity
         self.lik_variance = lik_variance
@@ -114,9 +114,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     data = tf.constant(data, dtype=tf.float32)
     return ed.Data(data)
 
-ed.set_seed(43)
-# TODO This converges to the zero line. I think this is an
-# initialization issue.
+ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = Variational()
 variational.add(Normal(model.num_vars))
@@ -156,4 +154,4 @@ def print_progress(self, t, losses, sess):
 
 ed.MFVI.print_progress = print_progress
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=5000, n_print=10)
+inference.run(n_iter=1000, n_print=10)
