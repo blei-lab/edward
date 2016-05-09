@@ -10,5 +10,5 @@ from . import variationals
 from .data import *
 from .inferences import *
 from .variationals import *
-from .models import PythonModel, StanModel
+from .models import PythonModel, StanModel, PyMC3Model
 from .util import set_seed
