@@ -12,6 +12,7 @@ It supports __modeling languages__ including
 * [Stan](http://mc-stan.org)
 * [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
 * original Python using [NumPy/SciPy](http://scipy.org/)
+* [PyMC3](http://pymc-devs.github.io/pymc3/)
 
 It supports __inference__ via
 
