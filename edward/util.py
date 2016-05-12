@@ -45,21 +45,6 @@ def log_sum_exp(x):
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
-def logit(x):
-    return tf.truediv(1.0, (1.0 + tf.exp(-x)))
-
-def probit(x):
-    return 0.5 * (1.0 + tf.erf(x / tf.sqrt(2.0)))
-
-def sigmoid(x):
-    "Numerically-stable sigmoid function."
-    if x >= 0.0:
-        z = tf.exp(-x)
-        return 1.0 / (1.0 + z)
-    else:
-        z = tf.exp(x)
-        return z / (1.0 + z)
-
 def dot(x, y):
     """
     x is M x N matrix and y is N-vector, or
@@ -136,29 +121,25 @@ def log_beta(x, y):
     """
     return log_gamma(x) + log_gamma(y) - log_gamma(x+y)
 
-def logit(x, clip_finite=True):
-    if isinstance(x, tf.Tensor):
-        if clip_finite:
-            x = tf.clip_by_value(x, -88, 88, name="clipped_logit_input")
-        transformed = 1.0 / (1 + tf.exp(-x))
-        jacobian = transformed * (1-transformed)
-        if clip_finite:
-            jacobian = tf.clip_by_value(jacobian, 1e-45, 1e38, name="clipped_jacobian")
-        log_jacobian = tf.reduce_sum(tf.log(jacobian))
-
-    else:
-        transformed = 1.0 / (1 + np.exp(-x))
-        jacobian = transformed * (1-transformed)
-        log_jacobian = np.sum(np.log(jacobian))
-
-    return transformed, log_jacobian
-
 def multivariate_log_beta(x):
     return tf.reduce_sum(log_gamma(x)) - log_gamma(tf.reduce_sum(x))
 
-def rbf(x):
-    """RBF kernel element-wise."""
-    return tf.exp(-0.5*x*x)
+def rbf(x, y=0.0, sigma=1.0, l=1.0):
+    """
+    Squared-exponential kernel element-wise
+    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
+    """
+    return tf.pow(sigma, 2.0) * \
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
+
+def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
+    """
+    Squared-exponential kernel
+    k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }
+    """
+    return tf.pow(sigma, 2.0) * \
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
+                  tf.reduce_sum(tf.pow(x - y , 2.0)))
 
 # This is taken from PrettyTensor.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
