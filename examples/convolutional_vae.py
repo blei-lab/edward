@@ -81,7 +81,7 @@ def build_loss(self):
         z = self.variational.reparam(eps)
         self.losses = self.model.log_lik(self.x, z) - \
                       kl_multivariate_normal(self.variational.layers[0].m,
-                                             self.variational.layers[0].s)
+                                             self.variational.layers[0].s
 
     return -tf.reduce_sum(self.losses)
 
