@@ -6,76 +6,136 @@ from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
 from edward.util import Variable
 
 class Variational:
-    """A stack of variational families."""
-    def __init__(self, layers=[]):
-        self.layers = layers
-        self.num_vars = 0
-        self.num_params = 0
-        self.is_reparam = True
+    """
+    A stack of variational families and their parameterizations.
+    It is represented as a directed acyclic graph, where a node is a
+    variational family or parameterization. An edge i -> j exists if
+    node i is a prior on the parameters of node j or it is a
+    parameterization of node j.
 
-    def add(self, layer):
+    Parameters
+    ----------
+    graph : list
+        List of lists where the ith list is the ith layer, and each
+        element in the list (node in a layer) is a variational family
+        or mapping. The first layer can contain only variational
+        families.
+
+    Notes
+    -----
+    Currently, nodes are only connected to the node directly above it.
+    """
+    def __init__(self, graph=[[]]):
+        self.graph = graph
+        self.num_vars = 0 # num of posterior latent variables
+        self.num_params = 0 # num of variational parameters
+        self.is_reparam = True # if the variational family is reparameterizable
+
+    def add(self, node):
         """
-        Adds a layer instance on top of the layer stack.
+        Add a node instance horizontally.
 
         Parameters
         ----------
-            layer: layer instance.
+        node : variational family or parameterization
         """
-        self.layers += [layer]
-        self.num_vars += layer.num_vars
-        self.num_params += layer.num_params
-        self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.graph[-1] += [node]
+        self.is_reparam = self.is_reparam and 'reparam' in node.__class__.__dict__
+
+        if len(self.graph) == 1:
+            if not isinstance(node, Likelihood):
+                raise
+
+            self.num_params += node.num_params
+            self.num_vars += node.num_vars
+        else:
+            connected_node = self.graph[-2][self.horizontal_index]
+            if hasattr(node, '__call__'):
+                mapping = Mapping(node, connected_node.num_params)
+                connected_node.mapping = mapping
+                self.num_params += mapping.num_params
+            elif isinstance(node, Likelihood):
+                # For now this does nothing
+                raise
+            else:
+                raise
+
+            self.num_params -= connected_node.num_params
+            self.horizontal_index += 1
+
+    def layer(self):
+        """Declare a new layer. Adding now adds to this layer."""
+        self.graph += [[]]
+        self.horizontal_index = 0 # to keep track when adding to a layer
 
     def mapping(self, x):
-        return [layer.mapping(x) for layer in self.layers]
+        return [node.mapping(x) for node in self.graph[0]]
 
+    # The following methods all deal with only the first layer.
     def set_params(self, params):
-        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
+        [node.set_params(params[i]) for i,node in enumerate(self.graph[0])]
 
     def print_params(self, sess):
-        [layer.print_params(sess) for layer in self.layers]
+        [node.print_params(sess) for node in self.graph[0]]
 
     def sample_noise(self, size):
-        eps_layers = [layer.sample_noise((size[0], layer.num_vars))
-                      for layer in self.layers]
-        return np.concatenate(eps_layers, axis=1)
+        eps_list = [node.sample_noise((size[0], node.num_vars))
+                    for node in self.graph[0]]
+        return np.concatenate(eps_list, axis=1)
 
     def reparam(self, eps):
-        z_layers = []
+        z_list = []
         start = final = 0
-        for layer in self.layers:
-            final += layer.num_vars
-            z_layers += [layer.reparam(eps[:, start:final])]
+        for node in self.graph[0]:
+            final += node.num_vars
+            z_list += [node.reparam(eps[:, start:final])]
             start = final
 
-        return tf.concat(1, z_layers)
+        return tf.concat(1, z_list)
 
     def sample(self, size, sess):
-        #z_layers = [layer.sample((size[0], layer.num_vars), sess)
-        #            for layer in self.layers]
+        #z_list = [node.sample((size[0], node.num_vars), sess)
+        #          for node in self.graph[0]]
         # This is temporary to deal with reparameterizable ones.
-        z_layers = []
-        for layer in self.layers:
-            z_layer = layer.sample((size[0], layer.num_vars), sess)
-            if isinstance(layer, Normal):
-                z_layer = sess.run(z_layer)
+        z_list = []
+        for node in self.graph[0]:
+            z_node = node.sample((size[0], node.num_vars), sess)
+            if isinstance(node, Normal):
+                z_node = sess.run(z_node)
 
-            z_layers += [z_layer]
+            z_list += [z_node]
 
-        return np.concatenate(z_layers, axis=1)
+        return np.concatenate(z_list, axis=1)
 
     def log_prob_zi(self, i, z):
+        """log q(z_i | lambda)"""
         start = final = 0
-        for layer in self.layers:
-            final += layer.num_vars
+        for node in self.graph[0]:
+            final += node.num_vars
             if start + i < final:
-                return layer.log_prob_zi(i, z[:, start:final])
+                return node.log_prob_zi(i, z[:, start:final])
 
-            i = i - layer.num_vars
+            i = i - node.num_vars
             start = final
 
         raise IndexError()
 
+class Mapping:
+    def __init__(self, f, output_dim):
+        self.f = f
+        self.output_dim = output_dim
+
+        self.num_params = 0 # TODO figure this out from f
+
+    def __call__(self, x):
+        return self.f(x, output_dim=self.output_dim)
+
+    def set_params(self):
+        # This will be used if placing a prior over its parameters.
+        pass
+
+# TODO possibly rename to variational family or maybe distribution if
+# it also generalizes to work for probability models
 class Likelihood:
     """
     Base class for variational likelihoods, q(z | lambda).
