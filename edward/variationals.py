@@ -455,9 +455,8 @@ class Multinomial(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([multinomial.logpmf(z[(i*self.K):((i+1)*self.K)],
-                                           1, self.pi[i, :])
-                        for z in tf.unpack(zs)])
+        return multinomial.logpmf(zs[:, (i*self.K):((i+1)*self.K)],
+                                  1, self.pi[i, :])
 
 class Normal(Likelihood):
     """

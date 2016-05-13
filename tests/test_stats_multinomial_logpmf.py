@@ -23,6 +23,14 @@ def multinomial_logpmf(x, n, p):
            np.sum(gammaln(x + 1.0)) + \
            np.sum(x * np.log(p))
 
+def multinomial_logpmf_vec(x, n, p):
+    if len(x.shape) == 1:
+        return multinomial_logpmf(x, n, p)
+    else:
+        n_minibatch = x.shape[0]
+        return np.array([multinomial_logpmf(x[i, :], n, p)
+                         for i in xrange(n_minibatch)])
+
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
         # NOTE: since Tensorflow has no special functions, the values here are
@@ -31,7 +39,7 @@ def _assert_eq(val_ed, val_true):
 
 def _test_logpdf(x, n, p):
     xtf = tf.constant(x)
-    val_true = multinomial_logpmf(x, n, p)
+    val_true = multinomial_logpmf_vec(x, n, p)
     _assert_eq(multinomial.logpmf(xtf, n, p),
                val_true)
     _assert_eq(multinomial.logpmf(xtf, n, tf.constant(p, dtype=tf.float32)),
@@ -48,3 +56,11 @@ def test_logpdf_int_1d():
 def test_logpdf_float_1d():
     _test_logpdf(np.array([0.0, 1.0]), 1, np.array([0.5, 0.5]))
     _test_logpdf(np.array([1.0, 0.0]), 1, np.array([0.75, 0.25]))
+
+def test_logpdf_int_2d():
+    _test_logpdf(np.array([[0, 1],[1, 0]]), 1, np.array([0.5, 0.5]))
+    _test_logpdf(np.array([[1, 0],[0, 1]]), 1, np.array([0.75, 0.25]))
+
+def test_logpdf_float_2d():
+    _test_logpdf(np.array([[0.0, 1.0],[1.0, 0.0]]), 1, np.array([0.5, 0.5]))
+    _test_logpdf(np.array([[1.0, 0.0],[0.0, 1.0]]), 1, np.array([0.75, 0.25]))

@@ -136,9 +136,14 @@ class Multinomial:
         n = tf.cast(tf.squeeze(n), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
         one = tf.constant(1.0, dtype=tf.float32)
-        return log_gamma(n + one) - \
-               tf.reduce_sum(log_gamma(x + one)) + \
-               tf.reduce_sum(tf.mul(x, tf.log(p)))
+        if len(get_dims(x)) == 1:
+            return log_gamma(n + one) - \
+                   tf.reduce_sum(log_gamma(x + one)) + \
+                   tf.reduce_sum(tf.mul(x, tf.log(p)))
+        else:
+            return log_gamma(n + one) - \
+                   tf.reduce_sum(log_gamma(x + one), 1) + \
+                   tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
