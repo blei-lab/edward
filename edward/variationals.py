@@ -64,12 +64,12 @@ class Variational:
 
         return np.concatenate(z_layers, axis=1)
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         start = final = 0
         for layer in self.layers:
             final += layer.num_vars
             if i < layer.num_factors:
-                return layer.log_prob_zi(i, z[:, start:final])
+                return layer.log_prob_zi(i, zs[:, start:final])
 
             i = i - layer.num_factors
             start = final
@@ -197,12 +197,23 @@ class Likelihood:
         """
         return self.reparam(self.sample_noise(size))
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         """
         log q(z_i | lambda)
         Note this calculates the density of the ith factor, not
         necessarily the ith latent variable (such as for multivariate
         factors).
+
+        Parameters
+        ----------
+        i : int
+            Index of the factor to take the log density of.
+        zs : np.array
+            n_minibatch x num_vars
+
+        Returns
+        -------
+        [log q(zs[1]_i | lambda), ..., log q(zs[S]_i | lambda)]
         """
         raise NotImplementedError()
 
@@ -248,12 +259,13 @@ class Bernoulli(Likelihood):
 
         return z
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         """log q(z_i | lambda)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        return bernoulli.logpmf(z[:, i], self.p[i])
+        return tf.pack([bernoulli.logpmf(z[i], self.p[i])
+                        for z in tf.unpack(zs)])
 
 class Beta(Likelihood):
     """
@@ -292,12 +304,13 @@ class Beta(Likelihood):
 
         return z
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         """log q(z_i | lambda)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        return beta.logpdf(z[:, i], self.a[i], self.b[i])
+        return tf.pack([beta.logpdf(z[i], self.a[i], self.b[i])
+                        for z in tf.unpack(zs)])
 
 class Dirichlet(Likelihood):
     """
@@ -309,7 +322,7 @@ class Dirichlet(Likelihood):
         Likelihood.__init__(self, num_factors)
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
-        self.K = K # dimension of dirichlet
+        self.K = K # dimension of each factor
         self.alpha = None
 
     def mapping(self, x):
@@ -334,14 +347,16 @@ class Dirichlet(Likelihood):
 
         return z
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         """log q(z_i | lambda)"""
         # Note this calculates the log density with respect to z_i,
         # which is the ith factor and not the ith latent variable.
         if i >= self.num_factors:
             raise IndexError()
 
-        return dirichlet.logpdf(z[:, (i*self.K):((i+1)*self.K)], self.alpha[i, :])
+        return tf.pack([dirichlet.logpdf(z[(i*self.K):((i+1)*self.K)],
+                                         self.alpha[i, :])
+                        for z in tf.unpack(zs)])
 
 class InvGamma(Likelihood):
     """
@@ -380,12 +395,13 @@ class InvGamma(Likelihood):
 
         return z
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         """log q(z_i | lambda)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        return invgamma.logpdf(z[:, i], self.a[i], self.b[i])
+        return tf.pack([invgamma.logpdf(z[i], self.a[i], self.b[i])
+                        for z in tf.unpack(zs)])
 
 class Normal(Likelihood):
     """
@@ -432,15 +448,15 @@ class Normal(Likelihood):
         """
         return self.m + eps * self.s
 
-    def log_prob_zi(self, i, z):
+    def log_prob_zi(self, i, zs):
         """log q(z_i | lambda)"""
         if i >= self.num_factors:
             raise IndexError()
 
         mi = self.m[i]
         si = self.s[i]
-        return tf.pack([norm.logpdf(zm[i], mi, si)
-                        for zm in tf.unpack(z)])
+        return tf.pack([norm.logpdf(z[i], mi, si)
+                        for z in tf.unpack(zs)])
 
     # TODO entropy is bugged
     #def entropy(self):
