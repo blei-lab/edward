@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.stats import bernoulli, beta, norm, dirichlet, invgamma
+from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import Variable
 
 class Variational:
@@ -401,6 +401,65 @@ class InvGamma(Likelihood):
             raise IndexError()
 
         return tf.pack([invgamma.logpdf(z[i], self.a[i], self.b[i])
+                        for z in tf.unpack(zs)])
+
+class Multinomial(Likelihood):
+    """
+    q(z | lambda ) = prod_{i=1}^d Multinomial(z_i | pi[i, :])
+    where z is a flattened vector such that z_i represents
+    the ith factor z[(i-1)*K:i*K], and lambda = alpha.
+
+    Notes
+    -----
+    For each factor (multinomial distribution), it assumes a single
+    trial (n=1) when sampling and calculating the density.
+    """
+    def __init__(self, num_factors, K):
+        if K == 1:
+            raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
+
+        Likelihood.__init__(self, num_factors)
+        self.num_vars = K*num_factors
+        self.num_params = K*num_factors
+        self.K = K # dimension of each factor
+        self.pi = None
+
+    def mapping(self, x):
+        # Transform unconstrained parameters to lie on simplex.
+        pi = Variable("pi", [self.num_factors, self.K-1])
+        pi_const = tf.sigmoid(pi)
+        pi_const = tf.concat(1,
+            [pi_const, tf.expand_dims(1.0 - tf.reduce_sum(pi_const), 0)])
+
+        return [pi_const]
+
+    def set_params(self, params):
+        self.pi = params[0]
+
+    def print_params(self, sess):
+        pi = sess.run(self.pi)
+        print("probability vector:")
+        print(pi)
+
+    def sample(self, size, sess):
+        """z ~ q(z | lambda)"""
+        pi = sess.run(self.pi)
+        z = np.zeros((size, self.num_vars))
+        for i in xrange(self.num_factors):
+            z[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
+                                                              size=size)
+
+        return z
+
+    def log_prob_zi(self, i, zs):
+        """log q(z_i | lambda)"""
+        # Note this calculates the log density with respect to z_i,
+        # which is the ith factor and not the ith latent variable.
+        if i >= self.num_factors:
+            raise IndexError()
+
+        return tf.pack([multinomial.logpmf(z[(i*self.K):((i+1)*self.K)],
+                                           1, self.pi[i, :])
                         for z in tf.unpack(zs)])
 
 class Normal(Likelihood):
