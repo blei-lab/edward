@@ -308,8 +308,7 @@ class Beta(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([beta.logpdf(z[i], self.a[i], self.b[i])
-                        for z in tf.unpack(zs)])
+        return beta.logpdf(zs[:, i], self.a[i], self.b[i])
 
 class Dirichlet(Likelihood):
     """

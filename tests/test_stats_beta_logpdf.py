@@ -35,8 +35,8 @@ def test_logpdf_scalar():
     _test_logpdf_scalar(0.7, a=5.0, b=0.5)
 
 def test_logpdf_1d():
-    x = [0.5]
-    xtf = tf.constant([0.5])
+    x = [0.5, 0.3, 0.8, 0.1]
+    xtf = tf.constant(x)
     val_true = stats.beta.logpdf(x, 0.5, 0.5)
     _assert_eq(beta.logpdf(xtf, tf.constant(0.5), tf.constant(0.5)), val_true)
     _assert_eq(beta.logpdf(xtf, tf.constant([0.5]), tf.constant(0.5)), val_true)
