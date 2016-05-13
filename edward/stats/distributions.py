@@ -273,7 +273,7 @@ class Wishart:
 bernoulli = Bernoulli()
 beta = Beta()
 dirichlet = Dirichlet()
-expon = Expon() # TODO unit test
+expon = Expon()
 gamma = Gamma()
 invgamma = InvGamma()
 multinomial = Multinomial()
