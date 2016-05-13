@@ -264,8 +264,7 @@ class Bernoulli(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([bernoulli.logpmf(z[i], self.p[i])
-                        for z in tf.unpack(zs)])
+        return bernoulli.logpmf(zs[:, i], self.p[i])
 
 class Beta(Likelihood):
     """

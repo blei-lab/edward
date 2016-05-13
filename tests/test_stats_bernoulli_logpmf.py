@@ -26,9 +26,9 @@ def test_logpdf_float_scalar():
     _test_logpdf(1.0, 0.75)
 
 def test_logpdf_int_1d():
-    _test_logpdf([0], 0.5)
-    _test_logpdf([1], 0.75)
+    _test_logpdf([0, 1, 0], 0.5)
+    _test_logpdf([1, 0, 0], 0.75)
 
 def test_logpdf_float_1d():
-    _test_logpdf([0.0], 0.5)
-    _test_logpdf([1.0], 0.75)
+    _test_logpdf([0.0, 1.0, 0.0], 0.5)
+    _test_logpdf([1.0, 0.0, 0.0], 0.75)
