@@ -250,7 +250,7 @@ class Norm:
         loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         z = (x - loc) / scale
-        return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*z*z
+        return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*tf.square(z)
 
     def entropy(self, loc=0, scale=1):
         """Note entropy does not depend on its mean."""

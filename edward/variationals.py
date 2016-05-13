@@ -510,8 +510,7 @@ class Normal(Likelihood):
 
         mi = self.m[i]
         si = self.s[i]
-        return tf.pack([norm.logpdf(z[i], mi, si)
-                        for z in tf.unpack(zs)])
+        return norm.logpdf(zs[:, i], mi, si)
 
     # TODO entropy is bugged
     #def entropy(self):
