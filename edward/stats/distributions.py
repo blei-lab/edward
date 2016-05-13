@@ -25,12 +25,19 @@ class Distribution:
         Arguments
         ---------
         x: np.array or tf.Tensor
+            If univariate distribution, can be a scalar or vector.
+            If multivariate distribution, can be a vector or matrix.
+
         params: np.array or tf.Tensor
 
         Returns
         -------
         tf.Tensor
-            scalar
+            For univariate distributions, scalar if scalar input and
+            vector if vector input. For multivariate distributions,
+            scalar if vector input and vector if matrix input, where
+            the each element in the vector evaluates a row in the
+            matrix.
 
         Note
         ----
