@@ -73,8 +73,12 @@ class Dirichlet:
         """
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
-        return -multivariate_log_beta(alpha) + \
-               tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+        if len(get_dims(x)) == 1:
+            return -multivariate_log_beta(alpha) + \
+                   tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+        else:
+            return -multivariate_log_beta(alpha) + \
+                   tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
 
 class Expon:
     def rvs(self, scale=1, size=1):

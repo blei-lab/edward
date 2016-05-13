@@ -352,9 +352,8 @@ class Dirichlet(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([dirichlet.logpdf(z[(i*self.K):((i+1)*self.K)],
-                                         self.alpha[i, :])
-                        for z in tf.unpack(zs)])
+        return dirichlet.logpdf(zs[:, (i*self.K):((i+1)*self.K)],
+                                self.alpha[i, :])
 
 class InvGamma(Likelihood):
     """
