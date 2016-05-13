@@ -262,7 +262,7 @@ class Poisson:
         return stats.poisson.rvs(mu, size=size)
 
     def logpmf(self, x, mu):
-        x = tf.squeeze(x)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         mu = tf.cast(tf.squeeze(mu), dtype=tf.float32)
         return x * tf.log(mu) - mu - log_gamma(x + 1.0)
 
@@ -307,7 +307,7 @@ invgamma = InvGamma()
 multinomial = Multinomial()
 multivariate_normal = Multivariate_Normal()
 norm = Norm()
-poisson = Poisson() # TODO unit test
+poisson = Poisson()
 t = T() # TODO unit test
 truncnorm = TruncNorm() # TODO unit test
 wishart = Wishart() # TODO unit test
