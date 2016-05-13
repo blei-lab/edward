@@ -157,9 +157,9 @@ class MFVI(VariationalInference):
             # so I'm leaving this as an open problem.
             #x = self.data.sample(self.n_data)
             #self.variational.set_params(self.variational.mapping(x))
-            samples = self.variational.sample(self.samples.get_shape(), sess)
+            samples = self.variational.sample(self.n_minibatch, sess)
         else:
-            samples = self.variational.sample_noise(self.samples.get_shape())
+            samples = self.variational.sample_noise(self.n_minibatch)
 
         _, loss = sess.run([self.train, self.losses], {self.samples: samples})
 
@@ -282,7 +282,7 @@ class VAE(VariationalInference):
         # This is absorbed into the learning rate.
         with tf.variable_scope("model") as scope:
             self.variational.set_params(self.variational.mapping(self.x))
-            z = self.variational.sample([self.n_data, self.variational.num_vars])
+            z = self.variational.sample(self.n_data)
             self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
                           kl_multivariate_normal(self.variational.m,
                                                  self.variational.s)
@@ -306,7 +306,7 @@ class KLpq(VariationalInference):
         return VariationalInference.initialize(self, *args, **kwargs)
 
     def update(self, sess):
-        samples = self.variational.sample(self.samples.get_shape(), sess)
+        samples = self.variational.sample(self.n_minibatch, sess)
         _, loss = sess.run([self.train, self.losses], {self.samples: samples})
         return loss
 

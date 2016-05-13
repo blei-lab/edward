@@ -60,7 +60,7 @@ def sample_noise(self, size):
     eps = sample_noise() ~ s(eps)
     s.t. z = reparam(eps; lambda) ~ q(z | lambda)
     """
-    return tf.random_normal(size)
+    return tf.random_normal([size, self.num_vars])
 
 Normal.mapping = mapping
 Normal.sample_noise = sample_noise

@@ -38,8 +38,7 @@ class Variational:
         [layer.print_params(sess) for layer in self.layers]
 
     def sample_noise(self, size):
-        eps_layers = [layer.sample_noise((size[0], layer.num_vars))
-                      for layer in self.layers]
+        eps_layers = [layer.sample_noise(size) for layer in self.layers]
         return np.concatenate(eps_layers, axis=1)
 
     def reparam(self, eps):
@@ -53,12 +52,11 @@ class Variational:
         return tf.concat(1, z_layers)
 
     def sample(self, size, sess):
-        #z_layers = [layer.sample((size[0], layer.num_vars), sess)
-        #            for layer in self.layers]
+        #z_layers = [layer.sample(size, sess) for layer in self.layers]
         # This is temporary to deal with reparameterizable ones.
         z_layers = []
         for layer in self.layers:
-            z_layer = layer.sample((size[0], layer.num_vars), sess)
+            z_layer = layer.sample(size, sess)
             if isinstance(layer, Normal):
                 z_layer = sess.run(z_layer)
 
@@ -156,7 +154,7 @@ class Likelihood:
         Returns
         -------
         np.ndarray
-            n_minibatch x dim(lambda) array of type np.float32, where each
+            size x dim(lambda) array of type np.float32, where each
             row is a sample from q.
 
         Notes
@@ -185,7 +183,7 @@ class Likelihood:
         Returns
         -------
         np.ndarray
-            n_minibatch x dim(z) array of type np.float32, where each
+            size x dim(z) array of type np.float32, where each
             row is a sample from q.
 
         Notes
@@ -244,9 +242,9 @@ class Bernoulli(Likelihood):
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         p = sess.run(self.p)
-        z = np.zeros(size)
+        z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
-            z[:, d] = bernoulli.rvs(p[d], size=size[0])
+            z[:, d] = bernoulli.rvs(p[d], size=size)
 
         return z
 
@@ -288,9 +286,9 @@ class Beta(Likelihood):
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         a, b = sess.run([self.a, self.b])
-        z = np.zeros(size)
+        z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
-            z[:, d] = beta.rvs(a[d], b[d], size=size[0])
+            z[:, d] = beta.rvs(a[d], b[d], size=size)
 
         return z
 
@@ -329,10 +327,10 @@ class Dirichlet(Likelihood):
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         alpha = sess.run(self.alpha)
-        z = np.zeros(size)
+        z = np.zeros((size, self.num_vars))
         for i in xrange(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
-                                                            size=size[0])
+                                                            size=size)
 
         return z
 
@@ -376,9 +374,9 @@ class InvGamma(Likelihood):
     def sample(self, size, sess):
         """z ~ q(z | lambda)"""
         a, b = sess.run([self.a, self.b])
-        z = np.zeros(size)
+        z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
-            z[:, d] = invgamma.rvs(a[d], b[d], size=size[0])
+            z[:, d] = invgamma.rvs(a[d], b[d], size=size)
 
         return z
 
@@ -425,7 +423,7 @@ class Normal(Likelihood):
         # Not using this, since TensorFlow has a large overhead
         # whenever calling sess.run().
         #samples = sess.run(tf.random_normal(self.samples.get_shape()))
-        return norm.rvs(size=size)
+        return norm.rvs(size=(size, self.num_vars))
 
     def reparam(self, eps):
         """
