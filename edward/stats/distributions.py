@@ -74,7 +74,7 @@ class Dirichlet:
         Arguments
         ----------
         x: np.array or tf.Tensor
-            vector
+            vector or matrix
         alpha: np.array or tf.Tensor
             vector
         """
@@ -133,7 +133,7 @@ class Multinomial:
         ----------
         x: np.array or tf.Tensor
             vector of length K, where x[i] is the number of outcomes
-            in the ith bucket
+            in the ith bucket, or matrix with column length K
         n: int or tf.Tensor
             number of outcomes equal to sum x[i]
         p: np.array or tf.Tensor
@@ -161,16 +161,21 @@ class Multivariate_Normal:
         Arguments
         ----------
         x: np.array or tf.Tensor
-            vector
+            vector or matrix
         mean: np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
         cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
         """
         x = tf.cast(tf.squeeze(tf.convert_to_tensor(x)), dtype=tf.float32)
-        d = get_dims(x)[0]
+        x_shape = get_dims(x)
+        if len(x_shape) == 1:
+            d = x_shape[0]
+        else:
+            d = x_shape[1]
+
         if mean is None:
-            r = tf.ones([d]) * x
+            r = x
         else:
             mean = tf.cast(tf.squeeze(tf.convert_to_tensor(mean)), dtype=tf.float32)
             r = x - mean
@@ -180,15 +185,27 @@ class Multivariate_Normal:
             det_cov = tf.constant(1.0)
         else:
             cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
-            if len(cov.get_shape()) == 1:
+            if len(cov.get_shape()) == 1: # vector
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
-            else:
+            else: # matrix
                 cov_inv = tf.matrix_inverse(cov)
                 det_cov = tf.matrix_determinant(cov)
-        r = tf.reshape(r, shape=(d, 1))
-        lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov) - \
-              0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
+
+        lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov)
+        if len(x_shape) == 1:
+            r = tf.reshape(r, shape=(d, 1))
+            lps -= 0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
+            return tf.squeeze(lps)
+        else:
+            # TODO vectorize further
+            out = []
+            for r_vec in tf.unpack(r):
+                r_vec = tf.reshape(r_vec, shape=(d, 1))
+                out += [tf.squeeze(lps - 0.5 * tf.matmul(
+                                   tf.matmul(r_vec, cov_inv, transpose_a=True),
+                                   r_vec))]
+            return tf.pack(out)
         """
         # TensorFlow can't reverse-mode autodiff Cholesky
         L = tf.cholesky(cov)
@@ -197,9 +214,8 @@ class Multivariate_Normal:
         inner = dot(L_inv, r)
         out = -0.5*d*tf.log(2*np.pi) - \
               0.5*tf.log(det_cov) - \
-              0.5*tf.matmul(tf.transpose(inner), inner)
+              0.5*tf.matmul(inner, inner, transpose_a=True)
         """
-        return tf.squeeze(lps)
 
     def entropy(self, mean=None, cov=1):
         """
