@@ -9,10 +9,17 @@ class Variational:
     """A stack of variational families."""
     def __init__(self, layers=[]):
         self.layers = layers
-        self.num_factors = 0
-        self.num_vars = 0
-        self.num_params = 0
-        self.is_reparam = True
+        if layers == []:
+            self.num_factors = 0
+            self.num_vars = 0
+            self.num_params = 0
+            self.is_reparam = True
+        else:
+            self.num_factors = sum([layers.num_factors for layer in self.layers])
+            self.num_vars = sum([layers.num_vars for layer in self.layers])
+            self.num_params = sum([layers.num_params for layer in self.layers])
+            self.is_reparam = all(['reparam' in layer.__class__.__dict__
+                                   for layer in self.layers])
 
     def add(self, layer):
         """
@@ -83,9 +90,9 @@ class Likelihood:
     Parameters
     ----------
     num_factors : int
-        Number of factors.
+        Number of factors. Default is 1.
     """
-    def __init__(self, num_factors):
+    def __init__(self, num_factors=1):
         self.num_factors = num_factors
         self.num_vars = None # number of posterior latent variables
         self.num_params = None # number of local variational parameters
@@ -509,7 +516,7 @@ class PointMass(Likelihood):
     """
     Point mass variational family
     """
-    def __init__(self, num_vars, transform=tf.identity):
+    def __init__(self, num_vars=1, transform=tf.identity):
         Likelihood.__init__(self, 1)
         self.num_vars = num_vars
         self.num_params = num_vars
