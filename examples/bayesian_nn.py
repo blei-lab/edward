@@ -16,8 +16,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
+from edward.models import Variational, Normal
 from edward.stats import norm
-from edward.variationals import Variational, Normal
 from edward.util import rbf
 
 class BayesianNN:

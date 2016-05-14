@@ -13,7 +13,7 @@ import pymc3 as pm
 import numpy as np
 import theano
 
-from edward import PyMC3Model, Variational, Beta
+from edward.models import PyMC3Model, Variational, Beta
 
 data_shared = theano.shared(np.zeros(1))
 

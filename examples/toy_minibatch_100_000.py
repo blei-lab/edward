@@ -6,8 +6,8 @@ of 100,000 samples (!).
 import edward as ed
 import tensorflow as tf
 
+from edward.models import Variational, Bernoulli
 from edward.stats import bernoulli
-from edward.variationals import Variational, Bernoulli
 
 class BernoulliModel:
     """

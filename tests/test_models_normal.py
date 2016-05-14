@@ -3,7 +3,7 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.variationals import Normal
+from edward.models import Normal
 from scipy import stats
 
 sess = tf.Session()

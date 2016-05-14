@@ -11,8 +11,7 @@ Variational model
 import edward as ed
 import numpy as np
 
-from edward import PythonModel
-from edward.variationals import Variational, Beta
+from edward.models import PythonModel, Variational, Beta
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
