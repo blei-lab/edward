@@ -25,12 +25,19 @@ class Distribution:
         Arguments
         ---------
         x: np.array or tf.Tensor
+            If univariate distribution, can be a scalar or vector.
+            If multivariate distribution, can be a vector or matrix.
+
         params: np.array or tf.Tensor
 
         Returns
         -------
         tf.Tensor
-            scalar
+            For univariate distributions, scalar if scalar input and
+            vector if vector input. For multivariate distributions,
+            scalar if vector input and vector if matrix input, where
+            the each element in the vector evaluates a row in the
+            matrix.
 
         Note
         ----
@@ -67,14 +74,18 @@ class Dirichlet:
         Arguments
         ----------
         x: np.array or tf.Tensor
-            vector
+            vector or matrix
         alpha: np.array or tf.Tensor
             vector
         """
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
-        return -multivariate_log_beta(alpha) + \
-               tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+        if len(get_dims(x)) == 1:
+            return -multivariate_log_beta(alpha) + \
+                   tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+        else:
+            return -multivariate_log_beta(alpha) + \
+                   tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
 
 class Expon:
     def rvs(self, scale=1, size=1):
@@ -122,7 +133,7 @@ class Multinomial:
         ----------
         x: np.array or tf.Tensor
             vector of length K, where x[i] is the number of outcomes
-            in the ith bucket
+            in the ith bucket, or matrix with column length K
         n: int or tf.Tensor
             number of outcomes equal to sum x[i]
         p: np.array or tf.Tensor
@@ -131,10 +142,14 @@ class Multinomial:
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         n = tf.cast(tf.squeeze(n), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        one = tf.constant(1.0, dtype=tf.float32)
-        return log_gamma(n + one) - \
-               tf.reduce_sum(log_gamma(x + one)) + \
-               tf.reduce_sum(tf.mul(x, tf.log(p)))
+        if len(get_dims(x)) == 1:
+            return log_gamma(n + 1.0) - \
+                   tf.reduce_sum(log_gamma(x + 1.0)) + \
+                   tf.reduce_sum(tf.mul(x, tf.log(p)))
+        else:
+            return log_gamma(n + 1.0) - \
+                   tf.reduce_sum(log_gamma(x + 1.0), 1) + \
+                   tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
@@ -145,16 +160,21 @@ class Multivariate_Normal:
         Arguments
         ----------
         x: np.array or tf.Tensor
-            vector
+            vector or matrix
         mean: np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
         cov: np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
         """
         x = tf.cast(tf.squeeze(tf.convert_to_tensor(x)), dtype=tf.float32)
-        d = get_dims(x)[0]
+        x_shape = get_dims(x)
+        if len(x_shape) == 1:
+            d = x_shape[0]
+        else:
+            d = x_shape[1]
+
         if mean is None:
-            r = tf.ones([d]) * x
+            r = x
         else:
             mean = tf.cast(tf.squeeze(tf.convert_to_tensor(mean)), dtype=tf.float32)
             r = x - mean
@@ -164,15 +184,27 @@ class Multivariate_Normal:
             det_cov = tf.constant(1.0)
         else:
             cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
-            if len(cov.get_shape()) == 1:
+            if len(cov.get_shape()) == 1: # vector
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
-            else:
+            else: # matrix
                 cov_inv = tf.matrix_inverse(cov)
                 det_cov = tf.matrix_determinant(cov)
-        r = tf.reshape(r, shape=(d, 1))
-        lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov) - \
-              0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
+
+        lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov)
+        if len(x_shape) == 1:
+            r = tf.reshape(r, shape=(d, 1))
+            lps -= 0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
+            return tf.squeeze(lps)
+        else:
+            # TODO vectorize further
+            out = []
+            for r_vec in tf.unpack(r):
+                r_vec = tf.reshape(r_vec, shape=(d, 1))
+                out += [tf.squeeze(lps - 0.5 * tf.matmul(
+                                   tf.matmul(r_vec, cov_inv, transpose_a=True),
+                                   r_vec))]
+            return tf.pack(out)
         """
         # TensorFlow can't reverse-mode autodiff Cholesky
         L = tf.cholesky(cov)
@@ -181,9 +213,8 @@ class Multivariate_Normal:
         inner = dot(L_inv, r)
         out = -0.5*d*tf.log(2*np.pi) - \
               0.5*tf.log(det_cov) - \
-              0.5*tf.matmul(tf.transpose(inner), inner)
+              0.5*tf.matmul(inner, inner, transpose_a=True)
         """
-        return tf.squeeze(lps)
 
     def entropy(self, mean=None, cov=1):
         """
@@ -218,7 +249,7 @@ class Norm:
         loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         z = (x - loc) / scale
-        return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*z*z
+        return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*tf.square(z)
 
     def entropy(self, loc=0, scale=1):
         """Note entropy does not depend on its mean."""
@@ -230,7 +261,7 @@ class Poisson:
         return stats.poisson.rvs(mu, size=size)
 
     def logpmf(self, x, mu):
-        x = tf.squeeze(x)
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         mu = tf.cast(tf.squeeze(mu), dtype=tf.float32)
         return x * tf.log(mu) - mu - log_gamma(x + 1.0)
 
@@ -240,42 +271,42 @@ class T:
 
     def logpdf(self, x, df, loc=0, scale=1):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        df = tf.squeeze(df)
+        df = tf.cast(tf.squeeze(df), dtype=tf.float32)
         loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
-        return 0.5 * log_gamma(df + 1.0) - \
-               log_gamma(0.5 * df) - \
-               0.5 * (np.log(np.pi) + tf.log(df)) +  tf.log(scale) - \
-               0.5 * (df + 1.0) * \
-                   tf.log(1.0 + (1.0/df) * tf.square((x-loc)/scale))
+        z = (x - loc) / scale
+        return log_gamma(0.5 * (df + 1.0)) - log_gamma(0.5 * df) - \
+               0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
+               0.5 * (df + 1.0) * tf.log(1.0 + (1.0/df) * tf.square(z))
 
 class TruncNorm:
     def rvs(self, a, b, loc=0, scale=1, size=1):
         return stats.truncnorm.rvs(a, b, loc, scale, size=size)
 
-    def logpdf(self, a, b, loc=0, scale=1):
-        cdf = stats.norm.cdf
-        cst = cdf((b - loc)/scale) - cdf((a - loc)/scale)
-        cst = -np.log(scale) - np.log(cst)
-        return cst + norm.logpdf(loc, scale)
-
-class Wishart:
-    def rvs(self, df, scale, size=1):
-        return stats.wishart.rvs(df, scale, size=size)
-
-    def logpdf(self, x, df, scale):
-        raise NotImplementedError()
+    def logpdf(self, x, a, b, loc=0, scale=1):
+        # Note there is no error checking if x is outside domain.
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        # This is slow, as we require use of stats.norm.cdf.
+        sess = tf.Session()
+        a = sess.run(tf.cast(tf.squeeze(a), dtype=tf.float32))
+        b = sess.run(tf.cast(tf.squeeze(b), dtype=tf.float32))
+        loc = sess.run(tf.cast(tf.squeeze(loc), dtype=tf.float32))
+        scale = sess.run(tf.cast(tf.squeeze(scale), dtype=tf.float32))
+        sess.close()
+        return -tf.log(scale) + norm.logpdf(x, loc, scale) - \
+               tf.log(tf.cast(stats.norm.cdf((b - loc)/scale) - \
+                      stats.norm.cdf((a - loc)/scale),
+                      dtype=tf.float32))
 
 bernoulli = Bernoulli()
 beta = Beta()
 dirichlet = Dirichlet()
-expon = Expon() # TODO unit test
+expon = Expon()
 gamma = Gamma()
 invgamma = InvGamma()
 multinomial = Multinomial()
 multivariate_normal = Multivariate_Normal()
 norm = Norm()
-poisson = Poisson() # TODO unit test
-t = T() # TODO unit test
-truncnorm = TruncNorm() # TODO unit test
-wishart = Wishart() # TODO unit test
+poisson = Poisson()
+t = T()
+truncnorm = TruncNorm()

@@ -264,8 +264,7 @@ class Bernoulli(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([bernoulli.logpmf(z[i], self.p[i])
-                        for z in tf.unpack(zs)])
+        return bernoulli.logpmf(zs[:, i], self.p[i])
 
 class Beta(Likelihood):
     """
@@ -309,8 +308,7 @@ class Beta(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([beta.logpdf(z[i], self.a[i], self.b[i])
-                        for z in tf.unpack(zs)])
+        return beta.logpdf(zs[:, i], self.a[i], self.b[i])
 
 class Dirichlet(Likelihood):
     """
@@ -354,9 +352,8 @@ class Dirichlet(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([dirichlet.logpdf(z[(i*self.K):((i+1)*self.K)],
-                                         self.alpha[i, :])
-                        for z in tf.unpack(zs)])
+        return dirichlet.logpdf(zs[:, (i*self.K):((i+1)*self.K)],
+                                self.alpha[i, :])
 
 class InvGamma(Likelihood):
     """
@@ -400,8 +397,7 @@ class InvGamma(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([invgamma.logpdf(z[i], self.a[i], self.b[i])
-                        for z in tf.unpack(zs)])
+        return invgamma.logpdf(zs[:, i], self.a[i], self.b[i])
 
 class Multinomial(Likelihood):
     """
@@ -458,9 +454,8 @@ class Multinomial(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([multinomial.logpmf(z[(i*self.K):((i+1)*self.K)],
-                                           1, self.pi[i, :])
-                        for z in tf.unpack(zs)])
+        return multinomial.logpmf(zs[:, (i*self.K):((i+1)*self.K)],
+                                  1, self.pi[i, :])
 
 class Normal(Likelihood):
     """
@@ -514,8 +509,7 @@ class Normal(Likelihood):
 
         mi = self.m[i]
         si = self.s[i]
-        return tf.pack([norm.logpdf(z[i], mi, si)
-                        for z in tf.unpack(zs)])
+        return norm.logpdf(zs[:, i], mi, si)
 
     # TODO entropy is bugged
     #def entropy(self):
