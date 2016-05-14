@@ -24,3 +24,6 @@ def test_logpdf_scalar():
 
 def test_logpdf_1d():
     _test_logpdf([2.0, 1.0, 0.58, 2.3])
+
+def test_logpdf_2d():
+    _test_logpdf(np.array([[2.0, 1.0, 0.58, 2.3],[2.1, 1.3, 1.58, 0.3]]))

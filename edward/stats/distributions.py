@@ -25,7 +25,7 @@ class Distribution:
         Arguments
         ---------
         x: np.array or tf.Tensor
-            If univariate distribution, can be a scalar or vector.
+            If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
 
         params: np.array or tf.Tensor
@@ -33,11 +33,11 @@ class Distribution:
         Returns
         -------
         tf.Tensor
-            For univariate distributions, scalar if scalar input and
-            vector if vector input. For multivariate distributions,
-            scalar if vector input and vector if matrix input, where
-            the each element in the vector evaluates a row in the
-            matrix.
+            For univariate distributions, returns a scalar, vector, or
+            matrix corresponding to the size of input. For
+            multivariate distributions, returns a scalar if vector
+            input and vector if matrix input, where each element in
+            the vector evaluates a row in the matrix.
 
         Note
         ----
@@ -357,7 +357,7 @@ class Uniform:
     def logpdf(self, x, loc=0, scale=1):
         # Note there is no error checking if x is outside domain.
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
-        return tf.squeeze(tf.ones([get_dims(x)[0]]) * -tf.log(scale))
+        return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
 
 bernoulli = Bernoulli()
 beta = Beta()

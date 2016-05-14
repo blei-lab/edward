@@ -32,3 +32,11 @@ def test_logpmf_int_1d():
 def test_logpmf_float_1d():
     _test_logpmf([0.0, 1.0, 0.0], 0.5)
     _test_logpmf([1.0, 0.0, 0.0], 0.75)
+
+def test_logpmf_int_2d():
+    _test_logpmf(np.array([[0, 1, 0],[0, 1, 0]]), 0.5)
+    _test_logpmf(np.array([[1, 0, 0],[0, 1, 0]]), 0.75)
+
+def test_logpmf_float_2d():
+    _test_logpmf(np.array([[0.0, 1.0, 0.0],[0.0, 1.0, 0.0]]), 0.5)
+    _test_logpmf(np.array([[1.0, 0.0, 0.0],[0.0, 1.0, 0.0]]), 0.75)
