@@ -225,22 +225,12 @@ class Bernoulli(Likelihood):
     def __init__(self, *args, **kwargs):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
-        if self.num_vars == 1:
-            self.num_params = self.num_factors
-        else:
-            self.num_params = self.num_factors - 1
-
+        self.num_params = self.num_factors
         self.p = None
 
     def mapping(self, x):
-        # Transform unconstrained parameters to lie on simplex.
         p = Variable("p", [self.num_params])
-        p_const = tf.sigmoid(p)
-        if self.num_vars > 1:
-            p_const = tf.concat(0,
-                [p_const, tf.expand_dims(1.0 - tf.reduce_sum(p_const), 0)])
-
-        return [p_const]
+        return [tf.sigmoid(p)]
 
     def set_params(self, params):
         self.p = params[0]
