@@ -58,6 +58,28 @@ class Beta:
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - log_beta(a, b)
 
+class Binom:
+    def rvs(self, n, p, size=1):
+        return stats.binom.rvs(p, size=size)
+
+    def logpmf(self, x, n, p):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        return log_gamma(n + 1.0) - log_gamma(x + 1.0) - \
+               log_gamma(n - x + 1.0) + \
+               tf.mul(x, tf.log(p)) + tf.mul(n - x, tf.log(1.0-p))
+
+class Chi2:
+    def rvs(self, df, size=1):
+        return stats.chi2.rvs(df, size=size)
+
+    def logpdf(self, x, df):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        df = tf.cast(tf.squeeze(df), dtype=tf.float32)
+        return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
+               tf.mul(0.5*df, tf.log(2.0)) - log_gamma(0.5*df)
+
 class Dirichlet:
     def rvs(self, alpha, size=1):
         return stats.dirichlet.rvs(alpha, size=size)
@@ -96,6 +118,15 @@ class Gamma:
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
+class Geom:
+    def rvs(self, p, size=1):
+        return stats.geom.rvs(p, size=size)
+
+    def logpmf(self, x, p):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
+
 class InvGamma:
     """Shape/scale parameterization"""
     def rvs(self, alpha, scale=1, size=1):
@@ -110,6 +141,16 @@ class InvGamma:
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return tf.mul(alpha, tf.log(scale)) - log_gamma(alpha) + \
                tf.mul(-alpha-1, tf.log(x)) - tf.truediv(scale, x)
+
+class LogNorm:
+    def rvs(self, s, size=1):
+        return stats.lognorm.rvs(s, size=size)
+
+    def logpdf(self, x, s):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        s = tf.cast(tf.squeeze(s), dtype=tf.float32)
+        return -0.5*tf.log(2*np.pi) - tf.log(s) - tf.log(x) - \
+               0.5*tf.square(tf.log(x) / s)
 
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
@@ -209,6 +250,17 @@ class Multivariate_Normal:
 
         return 0.5 * (d + d*tf.log(2*np.pi) + tf.log(det_cov))
 
+class NBinom:
+    def rvs(self, n, p, size=1):
+        return stats.nbinom.rvs(n, p, size=size)
+
+    def logpmf(self, x, n, p):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        return log_gamma(x + n) - log_gamma(x + 1.0) - log_gamma(n) + \
+               tf.mul(n, tf.log(p)) + tf.mul(x, tf.log(1.0-p))
+
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
         return stats.norm.rvs(loc, scale, size=size)
@@ -259,6 +311,15 @@ class TruncNorm:
         cst = -np.log(scale) - np.log(cst)
         return cst + norm.logpdf(loc, scale)
 
+class Uniform:
+    def rvs(self, loc=0, scale=1, size=1):
+        return stats.uniform.rvs(loc, scale, size=size)
+
+    def logpdf(self, x, loc=0, scale=1):
+        # Note there is no error checking if x is outside domain.
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return -tf.log(scale)
+
 class Wishart:
     def rvs(self, df, scale, size=1):
         return stats.wishart.rvs(df, scale, size=size)
@@ -268,14 +329,20 @@ class Wishart:
 
 bernoulli = Bernoulli()
 beta = Beta()
+binom = Binom()
+chi2 = Chi2()
 dirichlet = Dirichlet()
 expon = Expon() # TODO unit test
 gamma = Gamma()
+geom = Geom()
 invgamma = InvGamma()
+lognorm = LogNorm()
 multinomial = Multinomial()
 multivariate_normal = Multivariate_Normal()
+nbinom = NBinom()
 norm = Norm()
 poisson = Poisson() # TODO unit test
 t = T() # TODO unit test
 truncnorm = TruncNorm() # TODO unit test
 wishart = Wishart() # TODO unit test
+uniform = Uniform()
