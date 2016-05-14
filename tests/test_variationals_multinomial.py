@@ -27,8 +27,8 @@ def multinomial_logpmf(x, n, p):
 
 def multinomial_logpmf_vec(x, n, p):
     n_minibatch = x.shape[0]
-    out = np.zeros(n_minibatch)
-    return np.array([multinomial_logpmf(x[i,:], n, p) for i in xrange(n_minibatch)])
+    return np.array([multinomial_logpmf(x[i, :], n, p)
+                     for i in xrange(n_minibatch)])
 
 def _test_log_prob_zi(n_minibatch, num_factors, K):
     multinomial = Multinomial(num_factors, K)
