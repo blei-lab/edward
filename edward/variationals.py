@@ -397,8 +397,7 @@ class InvGamma(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
-        return tf.pack([invgamma.logpdf(z[i], self.a[i], self.b[i])
-                        for z in tf.unpack(zs)])
+        return invgamma.logpdf(zs[:, i], self.a[i], self.b[i])
 
 class Multinomial(Likelihood):
     """
