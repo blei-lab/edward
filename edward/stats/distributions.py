@@ -284,11 +284,19 @@ class TruncNorm:
     def rvs(self, a, b, loc=0, scale=1, size=1):
         return stats.truncnorm.rvs(a, b, loc, scale, size=size)
 
-    def logpdf(self, a, b, loc=0, scale=1):
-        cdf = stats.norm.cdf
-        cst = cdf((b - loc)/scale) - cdf((a - loc)/scale)
-        cst = -np.log(scale) - np.log(cst)
-        return cst + norm.logpdf(loc, scale)
+    def logpdf(self, x, a, b, loc=0, scale=1):
+        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        # This is slow, as we require use of stats.norm.cdf.
+        sess = tf.Session()
+        a = sess.run(tf.cast(tf.squeeze(a), dtype=tf.float32))
+        b = sess.run(tf.cast(tf.squeeze(b), dtype=tf.float32))
+        loc = sess.run(tf.cast(tf.squeeze(loc), dtype=tf.float32))
+        scale = sess.run(tf.cast(tf.squeeze(scale), dtype=tf.float32))
+        sess.close()
+        return -tf.log(scale) + norm.logpdf(x, loc, scale) - \
+               tf.log(tf.cast(stats.norm.cdf((b - loc)/scale) - \
+                      stats.norm.cdf((a - loc)/scale),
+                      dtype=tf.float32))
 
 bernoulli = Bernoulli()
 beta = Beta()
@@ -301,4 +309,4 @@ multivariate_normal = Multivariate_Normal()
 norm = Norm()
 poisson = Poisson()
 t = T()
-truncnorm = TruncNorm() # TODO unit test
+truncnorm = TruncNorm()
