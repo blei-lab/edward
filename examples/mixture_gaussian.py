@@ -57,38 +57,34 @@ class MixtureGaussian:
         self.c = 10
         self.alpha = tf.ones([K])
 
-    def unpack_params(self, z):
-        """Unpack parameters from a flattened vector."""
-        pi = z[0:self.K]
-        mus = z[self.K:(self.K+self.K*self.D)]
-        sigmas = z[(self.K+self.K*self.D):(self.K+2*self.K*self.D)]
+    def unpack_params(self, zs):
+        """Unpack sets of parameters from a flattened matrix."""
+        pi = zs[:, 0:self.K]
+        mus = zs[:, self.K:(self.K+self.K*self.D)]
+        sigmas = zs[:, (self.K+self.K*self.D):(self.K+2*self.K*self.D)]
         return pi, mus, sigmas
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         N = get_dims(xs)[0]
         # Loop over each mini-batch zs[b,:]
-        log_prob = []
-        for z in tf.unpack(zs):
-            pi, mus, sigmas = self.unpack_params(z)
-            log_prior = dirichlet.logpdf(pi, self.alpha)
+        pi, mus, sigmas = self.unpack_params(zs)
+        log_prior = dirichlet.logpdf(pi, self.alpha)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+
+        log_lik = []
+        n_minibatch = get_dims(zs)[0]
+        for s in xrange(n_minibatch):
+            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
             for k in xrange(self.K):
-                log_prior += norm.logpdf(mus[k*self.D], 0, np.sqrt(self.c))
-                log_prior += norm.logpdf(mus[k*self.D+1], 0, np.sqrt(self.c))
-                log_prior += invgamma.logpdf(sigmas[k*self.D], self.a, self.b)
-                log_prior += invgamma.logpdf(sigmas[k*self.D+1], self.a, self.b)
+                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
+                    mus[s, (k*self.D):((k+1)*self.D)],
+                    sigmas[s, (k*self.D):((k+1)*self.D)]))
 
-            log_lik = tf.constant(0.0, dtype=tf.float32)
-            for x in tf.unpack(xs):
-                for k in xrange(self.K):
-                    log_lik += tf.log(pi[k])
-                    log_lik += multivariate_normal.logpdf(x,
-                        mus[(k*self.D):((k+1)*self.D)],
-                        sigmas[(k*self.D):((k+1)*self.D)])
+            log_lik += [log_lik_z]
 
-            log_prob += [log_prior + log_lik]
-
-        return tf.pack(log_prob)
+        return log_prior + tf.pack(log_lik)
 
 ed.set_seed(42)
 x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
@@ -101,4 +97,4 @@ variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=10000, n_minibatch=5, n_data=5)
+inference.run(n_iter=500, n_minibatch=5, n_data=5)

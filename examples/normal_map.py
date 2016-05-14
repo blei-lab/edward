@@ -19,8 +19,7 @@ class NormalModel:
         self.num_vars = 1
 
     def log_prob(self, xs, zs):
-        log_prior = tf.pack([norm.logpdf(z, mu, Sigma)
-                        for z in tf.unpack(zs)])
+        log_prior = norm.logpdf(zs, mu, Sigma)
         log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs, z, Sigma))
                            for z in tf.unpack(zs)])
         return log_lik + log_prior

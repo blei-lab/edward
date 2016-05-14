@@ -21,8 +21,7 @@ class NormalPosterior:
         self.num_vars = 1
 
     def log_prob(self, xs, zs):
-        return tf.pack([norm.logpdf(z, self.mu, self.std)
-                        for z in tf.unpack(zs)])
+        return norm.logpdf(zs, self.mu, self.std)
 
 ed.set_seed(42)
 mu = tf.constant(1.0)
