@@ -318,7 +318,7 @@ class Uniform:
     def logpdf(self, x, loc=0, scale=1):
         # Note there is no error checking if x is outside domain.
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
-        return -tf.log(scale)
+        return tf.squeeze(tf.ones([get_dims(x)[0]]) * -tf.log(scale))
 
 class Wishart:
     def rvs(self, df, scale, size=1):
