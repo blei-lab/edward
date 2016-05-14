@@ -9,8 +9,6 @@ sess = tf.Session()
 
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
-        print(val_ed.eval())
-        print(val_true)
         assert np.allclose(val_ed.eval(), val_true)
 
 def _test_logpdf(x, loc=0, scale=1):

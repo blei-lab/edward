@@ -272,14 +272,13 @@ class T:
 
     def logpdf(self, x, df, loc=0, scale=1):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        df = tf.squeeze(df)
+        df = tf.cast(tf.squeeze(df), dtype=tf.float32)
         loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
-        return 0.5 * log_gamma(df + 1.0) - \
-               log_gamma(0.5 * df) - \
-               0.5 * (np.log(np.pi) + tf.log(df)) +  tf.log(scale) - \
-               0.5 * (df + 1.0) * \
-                   tf.log(1.0 + (1.0/df) * tf.square((x-loc)/scale))
+        z = (x - loc) / scale
+        return log_gamma(0.5 * (df + 1.0)) - log_gamma(0.5 * df) - \
+               0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
+               0.5 * (df + 1.0) * tf.log(1.0 + (1.0/df) * tf.square(z))
 
 class TruncNorm:
     def rvs(self, a, b, loc=0, scale=1, size=1):
@@ -308,6 +307,6 @@ multinomial = Multinomial()
 multivariate_normal = Multivariate_Normal()
 norm = Norm()
 poisson = Poisson()
-t = T() # TODO unit test
+t = T()
 truncnorm = TruncNorm() # TODO unit test
 wishart = Wishart() # TODO unit test
