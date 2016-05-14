@@ -142,14 +142,13 @@ class Multinomial:
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         n = tf.cast(tf.squeeze(n), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        one = tf.constant(1.0, dtype=tf.float32)
         if len(get_dims(x)) == 1:
-            return log_gamma(n + one) - \
-                   tf.reduce_sum(log_gamma(x + one)) + \
+            return log_gamma(n + 1.0) - \
+                   tf.reduce_sum(log_gamma(x + 1.0)) + \
                    tf.reduce_sum(tf.mul(x, tf.log(p)))
         else:
-            return log_gamma(n + one) - \
-                   tf.reduce_sum(log_gamma(x + one), 1) + \
+            return log_gamma(n + 1.0) - \
+                   tf.reduce_sum(log_gamma(x + 1.0), 1) + \
                    tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
 
 class Multivariate_Normal:
@@ -285,6 +284,7 @@ class TruncNorm:
         return stats.truncnorm.rvs(a, b, loc, scale, size=size)
 
     def logpdf(self, x, a, b, loc=0, scale=1):
+        # Note there is no error checking if x is outside domain.
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         # This is slow, as we require use of stats.norm.cdf.
         sess = tf.Session()
