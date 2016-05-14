@@ -290,13 +290,6 @@ class TruncNorm:
         cst = -np.log(scale) - np.log(cst)
         return cst + norm.logpdf(loc, scale)
 
-class Wishart:
-    def rvs(self, df, scale, size=1):
-        return stats.wishart.rvs(df, scale, size=size)
-
-    def logpdf(self, x, df, scale):
-        raise NotImplementedError()
-
 bernoulli = Bernoulli()
 beta = Beta()
 dirichlet = Dirichlet()
@@ -309,4 +302,3 @@ norm = Norm()
 poisson = Poisson()
 t = T()
 truncnorm = TruncNorm() # TODO unit test
-wishart = Wishart() # TODO unit test
