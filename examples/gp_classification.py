@@ -13,8 +13,8 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
+from edward.models import Variational, Normal
 from edward.stats import bernoulli, multivariate_normal
-from edward.variationals import Variational, Normal
 from edward.util import multivariate_rbf
 
 class GaussianProcess:

@@ -112,7 +112,6 @@ class StanModel:
 
         return lp
 
-
 class PyMC3Model:
     """
     Model wrapper for models written in PyMC3.

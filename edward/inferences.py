@@ -3,8 +3,8 @@ import numpy as np
 import tensorflow as tf
 
 from edward.data import Data
+from edward.models import PointMass
 from edward.util import kl_multivariate_normal, log_sum_exp
-from edward.variationals import PointMass
 
 try:
     import prettytensor as pt

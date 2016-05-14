@@ -11,8 +11,8 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
+from edward.models import Variational, Beta
 from edward.stats import bernoulli, beta
-from edward.variationals import Variational, Beta
 
 class BetaBernoulli:
     """

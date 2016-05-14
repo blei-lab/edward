@@ -26,8 +26,8 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
+from edward.models import Variational, Dirichlet, Normal, InvGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
-from edward.variationals import Variational, Dirichlet, Normal, InvGamma
 from edward.util import get_dims
 
 class MixtureGaussian:

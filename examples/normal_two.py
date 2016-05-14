@@ -8,8 +8,8 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
+from edward.models import Variational, Normal
 from edward.stats import multivariate_normal
-from edward.variationals import Variational, Normal
 from edward.util import get_dims
 
 class NormalPosterior:

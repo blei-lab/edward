@@ -3,7 +3,7 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.variationals import Multinomial
+from edward.models import Multinomial
 from scipy.special import gammaln
 
 sess = tf.Session()
