@@ -25,7 +25,7 @@ ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliPosterior(p)
 variational = Variational()
-variational.add(Bernoulli(1))
+variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

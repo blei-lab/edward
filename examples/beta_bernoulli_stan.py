@@ -28,7 +28,7 @@ model_code = """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
 variational = Variational()
-variational.add(Beta(1))
+variational.add(Beta())
 data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 inference = ed.MFVI(model, variational, data)

@@ -22,7 +22,6 @@ class NormalPosterior:
     def __init__(self, mu, std):
         self.mu = mu
         self.std = std
-        self.num_vars = 1
 
     def log_prob(self, xs, zs):
         return norm.logpdf(zs, self.mu, self.std)
@@ -32,7 +31,7 @@ mu = tf.constant(1.0)
 std = tf.constant(1.0)
 model = NormalPosterior(mu, std)
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal())
 
 inference = ed.MFVI(model, variational)
 sess = inference.initialize()

@@ -23,7 +23,7 @@ ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliModel(p)
 variational = Variational()
-variational.add(Bernoulli(1))
+variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)
 inference.run(n_minibatch=int(1e5))
