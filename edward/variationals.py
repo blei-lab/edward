@@ -521,8 +521,8 @@ class PointMass(Likelihood):
     """
     def __init__(self, num_vars, transform=tf.identity):
         Likelihood.__init__(self, 1)
-        self.num_vars = self.num_vars
-        self.num_params = self.num_vars
+        self.num_vars = num_vars
+        self.num_params = num_vars
         self.transform = transform
         self.params = None
 
