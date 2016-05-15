@@ -13,7 +13,7 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_entropy(a=0.5, scale=0.5):
+def _test_entropy(a, scale=1):
     val_true = stats.gamma.entropy(a, scale=scale)
     _assert_eq(gamma.entropy(a, scale), val_true)
     _assert_eq(gamma.entropy(tf.constant(a), tf.constant(scale)), val_true)
