@@ -39,8 +39,3 @@ def test_entropy_scalar():
 
 def test_entropy_1d():
     _test_entropy([0.5, 1.2, 5.3, 8.7], [0.5, 1.2, 5.3, 8.7])
-
-# TODO vectorize stats.norm.entropy
-#def test_entropy_2d():
-#    _test_entropy(np.array([[0.5, 1.2, 5.3, 8.7],[0.5, 1.2, 5.3, 8.7]]),
-#                  np.array([[0.5, 1.2, 5.3, 8.7],[0.5, 1.2, 5.3, 8.7]]))
