@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.util import dot, get_dims, digamma, log_beta, log_gamma, log_multivariate_beta
+from itertools import product
 from scipy import stats
 
 class Distribution:
@@ -28,7 +29,7 @@ class Distribution:
             If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
 
-        params: np.array or tf.Tensor
+        params : np.array or tf.Tensor
             scalar unless documented otherwise
 
         Returns
@@ -46,7 +47,7 @@ class Distribution:
         """
         Parameters
         ---------
-        params: np.array or tf.Tensor
+        params : np.array or tf.Tensor
             If univariate distribution, can be a scalar or vector.
             If multivariate distribution, can be a vector or matrix.
 
@@ -275,15 +276,33 @@ class Multinomial:
                    tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
 
     def entropy(self, n, p):
-        """This is not vectorized with respect to any arguments."""
-        # TODO don't require session
+        # Note that given n and p where p is a probability vector of
+        # length k, the entropy requires a sum over all
+        # possible configurations of a k-vector which sums to n. It's
+        # expensive.
+        # http://stackoverflow.com/questions/36435754/generating-a-numpy-array-with-all-combinations-of-numbers-that-sum-to-less-than
         sess = tf.Session()
-        n = sess.run(tf.cast(tf.squeeze(n), dtype=tf.float32))
+        n = sess.run(tf.cast(tf.squeeze(n), dtype=tf.int32))
         sess.close()
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        x = tf.convert_to_tensor(np.arange(n, dtype=np.float32))
-        logpmf = self.logpmf(x, n, p)
-        return tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))
+        if isinstance(n, np.int32):
+            k = get_dims(p)[0]
+            max_range = np.zeros(k, dtype=np.int32) + n
+            x = np.array([i for i in product(*(range(i+1) for i in max_range))
+                                 if sum(i)==n])
+            logpmf = self.logpmf(x, n, p)
+            return tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))
+        else:
+            out = []
+            for j in range(n.shape[0]):
+                k = get_dims(p)[0]
+                max_range = np.zeros(k, dtype=np.int32) + n[j]
+                x = np.array([i for i in product(*(range(i+1) for i in max_range))
+                                     if sum(i)==n[j]])
+                logpmf = self.logpmf(x, n[j], p[j, :])
+                out += [tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))]
+
+            return tf.pack(out)
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
