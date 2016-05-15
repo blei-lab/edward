@@ -104,6 +104,17 @@ def kl_multivariate_normal(loc, scale):
     return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(scale + 1e-8) - \
                                 tf.square(loc) - tf.square(scale))
 
+def digamma(x):
+    """
+    TensorFlow doesn't have special functions, so use a
+    log/exp/polynomial approximation.
+    http://www.machinedlearnings.com/2011/06/faster-lda.html
+    """
+    twopx = 2.0 + x
+    logterm = tf.log(twopx)
+    return - (1.0 + 2.0 * x) / (x * (1.0 + x)) - \
+           (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
+
 def log_gamma(x):
     """
     TensorFlow doesn't have special functions, so use a
