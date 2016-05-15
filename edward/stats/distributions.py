@@ -165,7 +165,8 @@ class Dirichlet:
         else:
             K = get_dims(alpha)[1]
             a = tf.reduce_sum(alpha, 1)
-            return log_multivariate_beta(alpha) + \
+            return tf.pack([log_multivariate_beta(al)
+                           for al in tf.unpack(alpha)]) + \
                    tf.mul(a - K, digamma(a)) - \
                    tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)), 1)
 
