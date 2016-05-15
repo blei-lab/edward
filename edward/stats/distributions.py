@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from edward.util import dot, get_dims, log_beta, log_gamma, multivariate_log_beta
+from edward.util import dot, get_dims, digamma, log_beta, log_gamma, log_multivariate_beta
 from scipy import stats
 
 class Distribution:
@@ -29,6 +29,7 @@ class Distribution:
             If multivariate distribution, can be a vector or matrix.
 
         params: np.array or tf.Tensor
+            scalar unless documented otherwise
 
         Returns
         -------
@@ -39,10 +40,27 @@ class Distribution:
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
 
-        Note
-        ----
-        The following distributions use scalar arguments unless
-        documented otherwise.
+        Notes
+        -----
+        The function is vectorized with respect to x.
+        """
+        raise NotImplementedError()
+
+    def entropy(self):
+        """
+        Arguments
+        ---------
+        params: np.array or tf.Tensor
+
+        Returns
+        -------
+        tf.Tensor
+            scalar
+
+        Notes
+        -----
+        The function is vectorized with respect to all of its
+        parameters.
         """
         raise NotImplementedError()
 
@@ -53,7 +71,11 @@ class Bernoulli:
     def logpmf(self, x, p):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
-        return tf.mul(x, tf.log(p)) + tf.mul(1 - x, tf.log(1.0-p))
+        return tf.mul(x, tf.log(p)) + tf.mul(1.0 - x, tf.log(1.0-p))
+
+    def entropy(self, p):
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
 
 class Beta:
     def rvs(self, a, b, size=1):
@@ -64,6 +86,13 @@ class Beta:
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - log_beta(a, b)
+
+    def entropy(self, a, b):
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
+        b = tf.cast(tf.squeeze(b), dtype=tf.float32)
+        return log_beta(a, b) - \
+               tf.mul(a - 1.0, digamma(a) + digamma(a+b)) - \
+               tf.mul(b - 1.0, digamma(b) - digamma(a+b))
 
 class Binom:
     def rvs(self, n, p, size=1):
@@ -103,11 +132,32 @@ class Dirichlet:
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
         if len(get_dims(x)) == 1:
-            return -multivariate_log_beta(alpha) + \
+            return -log_multivariate_beta(alpha) + \
                    tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
         else:
-            return -multivariate_log_beta(alpha) + \
+            return -log_multivariate_beta(alpha) + \
                    tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
+
+    def entropy(self, alpha):
+        """
+        Arguments
+        ----------
+        alpha: np.array or tf.Tensor
+            vector or matrix
+        """
+        alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
+        if len(get_dims(alpha)) == 1:
+            K = get_dims(alpha)[0]
+            a = tf.reduce_sum(alpha)
+            return log_multivariate_beta(alpha) + \
+                   tf.mul(a - K, digamma(a)) - \
+                   tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)))
+        else:
+            K = get_dims(alpha)[1]
+            a = tf.reduce_sum(alpha, 1)
+            return log_multivariate_beta(alpha) + \
+                   tf.mul(a - K, digamma(a)) - \
+                   tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)), 1)
 
 class Expon:
     def rvs(self, scale=1, size=1):
@@ -146,12 +196,18 @@ class InvGamma:
         x[np.logical_not(np.isfinite(x))] = 1.0
         return x
 
-    def logpdf(self, x, alpha, scale=1):
+    def logpdf(self, x, a, scale=1):
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        alpha = tf.cast(tf.squeeze(alpha), dtype=tf.float32)
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
-        return tf.mul(alpha, tf.log(scale)) - log_gamma(alpha) + \
-               tf.mul(-alpha-1, tf.log(x)) - tf.truediv(scale, x)
+        return tf.mul(a, tf.log(scale)) - log_gamma(a) + \
+               tf.mul(-a-1, tf.log(x)) - tf.truediv(scale, x)
+
+    def entropy(self, a, scale=1):
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return a + tf.log(scale*tf.exp(log_gamma(a))) - \
+               (1.0 + a) * digamma(a)
 
 class LogNorm:
     def rvs(self, s, size=1):
@@ -191,6 +247,17 @@ class Multinomial:
             return log_gamma(n + 1.0) - \
                    tf.reduce_sum(log_gamma(x + 1.0), 1) + \
                    tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
+
+    def entropy(self, n, p):
+        """This is not vectorized with respect to any arguments."""
+        # TODO don't require session
+        sess = tf.Session()
+        n = sess.run(tf.cast(tf.squeeze(n), dtype=tf.float32))
+        sess.close()
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        x = tf.convert_to_tensor(np.arange(n, dtype=np.float32))
+        logpmf = self.logpmf(x, n, p)
+        return tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
@@ -259,7 +326,8 @@ class Multivariate_Normal:
 
     def entropy(self, mean=None, cov=1):
         """
-        Note entropy does not depend on its mean.
+        Note entropy does not depend on the mean.
+        This is not vectorized with respect to any arguments.
 
         Arguments
         ----------
@@ -304,9 +372,9 @@ class Norm:
         return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*tf.square(z)
 
     def entropy(self, loc=0, scale=1):
-        """Note entropy does not depend on its mean."""
+        """Note entropy does not depend on the mean."""
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
-        return 0.5 * (1 + tf.log(2*np.pi) + tf.log(scale*scale))
+        return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
 
 class Poisson:
     def rvs(self, mu, size=1):
@@ -358,6 +426,10 @@ class Uniform:
         # Note there is no error checking if x is outside domain.
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
+
+    def entropy(self, loc=0, scale=1):
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return tf.log(scale)
 
 bernoulli = Bernoulli()
 beta = Beta()

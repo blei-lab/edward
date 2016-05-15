@@ -132,7 +132,7 @@ def log_beta(x, y):
     """
     return log_gamma(x) + log_gamma(y) - log_gamma(x+y)
 
-def multivariate_log_beta(x):
+def log_multivariate_beta(x):
     return tf.reduce_sum(log_gamma(x)) - log_gamma(tf.reduce_sum(x))
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
