@@ -22,13 +22,13 @@ class Distribution:
 
     def logpmf(self, x):
         """
-        Arguments
+        Parameters
         ---------
-        x: np.array or tf.Tensor
+        x : np.array or tf.Tensor
             If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
 
-        params: np.array or tf.Tensor
+        params : np.array or tf.Tensor
 
         Returns
         -------
@@ -39,8 +39,8 @@ class Distribution:
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
 
-        Note
-        ----
+        Notes
+        -----
         The following distributions use scalar arguments unless
         documented otherwise.
         """
@@ -93,11 +93,11 @@ class Dirichlet:
 
     def logpdf(self, x, alpha):
         """
-        Arguments
+        Parameters
         ----------
-        x: np.array or tf.Tensor
+        x : np.array or tf.Tensor
             vector or matrix
-        alpha: np.array or tf.Tensor
+        alpha : np.array or tf.Tensor
             vector
         """
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
@@ -170,14 +170,14 @@ class Multinomial:
 
     def logpmf(self, x, n, p):
         """
-        Arguments
+        Parameters
         ----------
-        x: np.array or tf.Tensor
+        x : np.array or tf.Tensor
             vector of length K, where x[i] is the number of outcomes
             in the ith bucket, or matrix with column length K
-        n: int or tf.Tensor
+        n : int or tf.Tensor
             number of outcomes equal to sum x[i]
-        p: np.array or tf.Tensor
+        p : np.array or tf.Tensor
             vector of probabilities summing to 1
         """
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
@@ -198,13 +198,13 @@ class Multivariate_Normal:
 
     def logpdf(self, x, mean=None, cov=1):
         """
-        Arguments
+        Parameters
         ----------
-        x: np.array or tf.Tensor
+        x : np.array or tf.Tensor
             vector or matrix
-        mean: np.array or tf.Tensor, optional
+        mean : np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
-        cov: np.array or tf.Tensor, optional
+        cov : np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
         """
         x = tf.cast(tf.squeeze(tf.convert_to_tensor(x)), dtype=tf.float32)
@@ -261,11 +261,11 @@ class Multivariate_Normal:
         """
         Note entropy does not depend on its mean.
 
-        Arguments
+        Parameters
         ----------
-        mean: np.array or tf.Tensor, optional
+        mean : np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
-        cov: np.array or tf.Tensor, optional
+        cov : np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
         """
         if cov is 1:
