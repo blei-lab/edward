@@ -39,10 +39,6 @@ class Distribution:
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
-
-        Notes
-        -----
-        The function is vectorized with respect to x.
         """
         raise NotImplementedError()
 
@@ -51,16 +47,23 @@ class Distribution:
         Arguments
         ---------
         params: np.array or tf.Tensor
+            If univariate distribution, can be a scalar or vector.
+            If multivariate distribution, can be a vector or matrix.
 
         Returns
         -------
         tf.Tensor
-            scalar
+            For univariate distributions, returns a scalar or vector
+            corresponding to the size of input. For multivariate
+            distributions, returns a scalar if vector input and vector
+            if matrix input, where each element in the vector
+            evaluates a row in the matrix.
 
         Notes
         -----
-        The function is vectorized with respect to all of its
-        parameters.
+        SciPy doesn't always enable vector inputs for
+        univariate distributions or matrix inputs for multivariate
+        distributions. This does.
         """
         raise NotImplementedError()
 
@@ -91,8 +94,9 @@ class Beta:
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         return log_beta(a, b) - \
-               tf.mul(a - 1.0, digamma(a) + digamma(a+b)) - \
-               tf.mul(b - 1.0, digamma(b) - digamma(a+b))
+               tf.mul(a - 1.0, digamma(a)) - \
+               tf.mul(b - 1.0, digamma(b)) + \
+               tf.mul(a + b - 2.0, digamma(a+b))
 
 class Binom:
     def rvs(self, n, p, size=1):
@@ -106,6 +110,9 @@ class Binom:
                log_gamma(n - x + 1.0) + \
                tf.mul(x, tf.log(p)) + tf.mul(n - x, tf.log(1.0-p))
 
+    def entropy(self, n, p):
+        raise NotImplementedError()
+
 class Chi2:
     def rvs(self, df, size=1):
         return stats.chi2.rvs(df, size=size)
@@ -115,6 +122,9 @@ class Chi2:
         df = tf.cast(tf.squeeze(df), dtype=tf.float32)
         return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
                tf.mul(0.5*df, tf.log(2.0)) - log_gamma(0.5*df)
+
+    def entropy(self, df):
+        raise NotImplementedError()
 
 class Dirichlet:
     def rvs(self, alpha, size=1):
@@ -168,6 +178,9 @@ class Expon:
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return - x/scale - tf.log(scale)
 
+    def entropy(self, scale=1):
+        raise NotImplementedError()
+
 class Gamma:
     """Shape/scale parameterization"""
     def rvs(self, a, scale=1, size=1):
@@ -179,6 +192,12 @@ class Gamma:
         scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - log_gamma(a)
 
+    def entropy(self, a, scale=1):
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
+        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        return a + tf.log(scale) + log_gamma(a) + \
+               tf.mul(1.0 - a, digamma(a))
+
 class Geom:
     def rvs(self, p, size=1):
         return stats.geom.rvs(p, size=size)
@@ -187,6 +206,9 @@ class Geom:
         x = tf.cast(tf.squeeze(x), dtype=tf.float32)
         p = tf.cast(tf.squeeze(p), dtype=tf.float32)
         return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
+
+    def entropy(self, p):
+        raise NotImplementedError()
 
 class InvGamma:
     """Shape/scale parameterization"""
@@ -218,6 +240,9 @@ class LogNorm:
         s = tf.cast(tf.squeeze(s), dtype=tf.float32)
         return -0.5*tf.log(2*np.pi) - tf.log(s) - tf.log(x) - \
                0.5*tf.square(tf.log(x) / s)
+
+    def entropy(self, s):
+        raise NotImplementedError()
 
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
@@ -360,6 +385,9 @@ class NBinom:
         return log_gamma(x + n) - log_gamma(x + 1.0) - log_gamma(n) + \
                tf.mul(n, tf.log(p)) + tf.mul(x, tf.log(1.0-p))
 
+    def entropy(self, n, p):
+        raise NotImplementedError()
+
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
         return stats.norm.rvs(loc, scale, size=size)
@@ -385,6 +413,9 @@ class Poisson:
         mu = tf.cast(tf.squeeze(mu), dtype=tf.float32)
         return x * tf.log(mu) - mu - log_gamma(x + 1.0)
 
+    def entropy(self, mu):
+        raise NotImplementedError()
+
 class T:
     def rvs(self, df, loc=0, scale=1, size=1):
         return stats.t.rvs(df, loc=loc, scale=scale, size=size)
@@ -398,6 +429,9 @@ class T:
         return log_gamma(0.5 * (df + 1.0)) - log_gamma(0.5 * df) - \
                0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
                0.5 * (df + 1.0) * tf.log(1.0 + (1.0/df) * tf.square(z))
+
+    def entropy(self, df, loc=0, scale=1):
+        raise NotImplementedError()
 
 class TruncNorm:
     def rvs(self, a, b, loc=0, scale=1, size=1):
@@ -417,6 +451,9 @@ class TruncNorm:
                tf.log(tf.cast(stats.norm.cdf((b - loc)/scale) - \
                       stats.norm.cdf((a - loc)/scale),
                       dtype=tf.float32))
+
+    def entropy(self, a, b, loc=0, scale=1):
+        raise NotImplementedError()
 
 class Uniform:
     def rvs(self, loc=0, scale=1, size=1):
