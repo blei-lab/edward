@@ -9,7 +9,7 @@ sess = tf.Session()
 
 def norm_entropy_vec(loc, scale):
     """Vectorized version of stats.norm.entropy."""
-    if isinstance(loc, float):
+    if isinstance(loc, float) or isinstance(loc, int):
         return stats.norm.entropy(loc, scale)
     else:
         return np.array([stats.norm.entropy(loc_x, scale_x)
