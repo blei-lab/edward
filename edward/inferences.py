@@ -125,7 +125,6 @@ class MFVI(VariationalInference):
         VariationalInference.__init__(self, *args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
-        # TODO if score=True, make Normal do sess.run()
         """
         Parameters
         ----------
@@ -166,11 +165,11 @@ class MFVI(VariationalInference):
         return loss
 
     def build_loss(self):
-        if self.score and hasattr(self.variational, 'entropy'):
+        if self.score and self.variational.is_entropy:
             return self.build_score_loss_entropy()
         elif self.score:
             return self.build_score_loss()
-        elif not self.score and hasattr(self.variational, 'entropy'):
+        elif not self.score and self.variational.is_entropy:
             return self.build_reparam_loss_entropy()
         else:
             return self.build_reparam_loss()
@@ -229,7 +228,7 @@ class MFVI(VariationalInference):
         p_log_prob = self.model.log_prob(x, self.samples)
         q_entropy = self.variational.entropy()
         self.losses = p_log_prob + q_entropy
-        return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) - \
                q_entropy
 
     def build_reparam_loss_entropy(self):
