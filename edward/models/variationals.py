@@ -160,7 +160,6 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    # TODO use __str__(self):
     def print_params(self, sess):
         raise NotImplementedError()
 

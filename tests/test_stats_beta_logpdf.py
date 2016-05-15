@@ -16,6 +16,7 @@ def _assert_eq(val_ed, val_true):
 def _test_logpdf(x, a=0.5, b=0.5):
     xtf = tf.constant(x)
     val_true = stats.beta.logpdf(x, a, b)
+    _assert_eq(beta.logpdf(xtf, a, b), val_true)
     _assert_eq(beta.logpdf(xtf, tf.constant(a), tf.constant(b)), val_true)
     _assert_eq(beta.logpdf(xtf, tf.constant([a]), tf.constant(b)), val_true)
     _assert_eq(beta.logpdf(xtf, tf.constant(a), tf.constant([b])), val_true)

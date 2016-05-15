@@ -7,9 +7,9 @@ from scipy import stats
 
 sess = tf.Session()
 
-def _assert_eq(res_ed, res_true):
+def _assert_eq(val_ed, val_true):
     with sess.as_default():
-        assert np.allclose(res_ed.eval(), res_true)
+        assert np.allclose(val_ed.eval(), val_true)
 
 def test_entropy_empty():
     _assert_eq(multivariate_normal.entropy(),
