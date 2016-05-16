@@ -8,29 +8,6 @@ def set_seed(x):
     np.random.seed(x)
     tf.set_random_seed(x)
 
-def check_is_tf_vector(x):
-    if isinstance(x, tf.Tensor):
-        dimensions = x.get_shape()
-        if(len(dimensions) == 0):
-            raise TypeError("util::check_is_tf_vector: "
-                            "input is a scalar.")
-        elif(len(dimensions) == 1):
-            if(dimensions[0].value <= 1):
-                raise TypeError("util::check_is_tf_vector: "
-                                "input has first dimension <= 1.")
-            else:
-                pass
-        elif(len(dimensions) == 2):
-            if(dimensions[1]!=1):
-                raise TypeError("util::check_is_tf_vector: "
-                                "input has second dimension != 1.")
-        else:
-            raise TypeError("util::check_is_tf_vector: "
-                            "input has too many dimensions.")
-    else:
-        raise TypeError("util::check_is_tf_vector: "
-                        "input is not a TensorFlow object.")
-
 def log_sum_exp(x):
     """
     Computes the log_sum_exp of the elements in x.
@@ -60,13 +37,6 @@ def dot(x, y):
         vec = y
         d = vec.get_shape()[0].value
         return tf.matmul(mat, tf.reshape(vec, [d, 1]))
-
-def trace(X):
-    # assumes square
-    n = X.get_shape()[0].value
-    mask = tf.diag(tf.ones([n], dtype=X.dtype))
-    X = tf.mul(mask, X)
-    return tf.reduce_sum(X)
 
 def get_dims(x):
     """
