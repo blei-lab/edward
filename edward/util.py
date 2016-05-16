@@ -1,26 +1,29 @@
-import numpy as np
 import tensorflow as tf
+import numpy as np
 
-def set_seed(x):
+def digamma(x):
     """
-    Set seed for both NumPy and TensorFlow.
-    """
-    np.random.seed(x)
-    tf.set_random_seed(x)
+    Computes the digamma function element-wise.
 
-def log_sum_exp(x):
-    """
-    Computes the log_sum_exp of the elements in x.
+    TensorFlow doesn't have special functions with support for
+    automatic differentiation, so use a log/exp/polynomial
+    approximation.
+    http://www.machinedlearnings.com/2011/06/faster-lda.html
 
-    Works for x with
-        shape=TensorShape([Dimension(N)])
-        shape=TensorShape([Dimension(N), Dimension(1)])
+    Parameters
+    ----------
+    x : np.array or tf.Tensor
+        scalar, vector, or rank-n tensor
 
-    Not tested for anything beyond that.
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
-    check_is_tf_vector(x)
-    x_max = tf.reduce_max(x)
-    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
+    twopx = 2.0 + x
+    logterm = tf.log(twopx)
+    return - (1.0 + 2.0 * x) / (x * (1.0 + x)) - \
+           (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
 
 def dot(x, y):
     """
@@ -74,44 +77,66 @@ def kl_multivariate_normal(loc, scale):
     return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(scale + 1e-8) - \
                                 tf.square(loc) - tf.square(scale))
 
-def digamma(x):
+def lbeta(x):
     """
-    TensorFlow doesn't have special functions, so use a
-    log/exp/polynomial approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-    """
-    twopx = 2.0 + x
-    logterm = tf.log(twopx)
-    return - (1.0 + 2.0 * x) / (x * (1.0 + x)) - \
-           (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
+    Computes the log of Beta(x), reducing along the last dimension.
 
-def log_gamma(x):
-    """
-    TensorFlow doesn't have special functions, so use a
-    log/exp/polynomial approximation.
+    TensorFlow doesn't have special functions with support for
+    automatic differentiation, so use a log/exp/polynomial
+    approximation.
     http://www.machinedlearnings.com/2011/06/faster-lda.html
+
+    Parameters
+    ----------
+    x : np.array or tf.Tensor
+        vector or rank-n tensor
+
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, rank-(n-1) if rank-n tensor input
+    """
+    x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+    if len(get_dims(x)) == 1:
+        return tf.reduce_sum(lgamma(x)) - lgamma(tf.reduce_sum(x))
+    else:
+        return tf.reduce_sum(lgamma(x), 1) - lgamma(tf.reduce_sum(x, 1))
+
+def lgamma(x):
+    """
+    Computes the log of Gamma(x) element-wise.
+
+    TensorFlow doesn't have special functions with support for
+    automatic differentiation, so use a log/exp/polynomial
+    approximation.
+    http://www.machinedlearnings.com/2011/06/faster-lda.html
+
+    Parameters
+    ----------
+    x : np.array or tf.Tensor
+        scalar, vector, or rank-n tensor
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
     logterm = tf.log(x * (1.0 + x) * (2.0 + x))
     xp3 = 3.0 + x
     return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log(xp3)
 
-def log_beta(x, y):
+def log_sum_exp(x):
     """
-    TensorFlow doesn't have special functions, so use a
-    log/exp/polynomial approximation.
-    """
-    return log_gamma(x) + log_gamma(y) - log_gamma(x+y)
+    Computes the log_sum_exp of the elements in x.
 
-def multivariate_log_beta(x):
-    return tf.reduce_sum(log_gamma(x)) - log_gamma(tf.reduce_sum(x))
+    Works for x with
+        shape=TensorShape([Dimension(N)])
+        shape=TensorShape([Dimension(N), Dimension(1)])
 
-def rbf(x, y=0.0, sigma=1.0, l=1.0):
+    Not tested for anything beyond that.
     """
-    Squared-exponential kernel element-wise
-    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
-    """
-    return tf.pow(sigma, 2.0) * \
-           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     """
@@ -121,6 +146,21 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
                   tf.reduce_sum(tf.pow(x - y , 2.0)))
+
+def rbf(x, y=0.0, sigma=1.0, l=1.0):
+    """
+    Squared-exponential kernel element-wise
+    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
+    """
+    return tf.pow(sigma, 2.0) * \
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
+
+def set_seed(x):
+    """
+    Set seed for both NumPy and TensorFlow.
+    """
+    np.random.seed(x)
+    tf.set_random_seed(x)
 
 # This is taken from PrettyTensor.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
