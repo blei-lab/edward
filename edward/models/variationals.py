@@ -365,7 +365,7 @@ class Dirichlet(Likelihood):
         """z ~ q(z | lambda)"""
         alpha = sess.run(self.alpha)
         z = np.zeros((size, self.num_vars))
-        for i in xrange(self.num_factors):
+        for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
                                                             size=size)
 
@@ -473,7 +473,7 @@ class Multinomial(Likelihood):
         """z ~ q(z | lambda)"""
         pi = sess.run(self.pi)
         z = np.zeros((size, self.num_vars))
-        for i in xrange(self.num_factors):
+        for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
                                                               size=size)
 

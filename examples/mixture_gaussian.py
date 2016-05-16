@@ -75,9 +75,9 @@ class MixtureGaussian:
         # Loop over each mini-batch zs[b,:]
         log_lik = []
         n_minibatch = get_dims(zs)[0]
-        for s in xrange(n_minibatch):
+        for s in range(n_minibatch):
             log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
-            for k in xrange(self.K):
+            for k in range(self.K):
                 log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
                     mus[s, (k*self.D):((k+1)*self.D)],
                     sigmas[s, (k*self.D):((k+1)*self.D)]))

@@ -18,7 +18,7 @@ def _test_log_prob_zi(n_minibatch, num_factors):
         m = normal.m.eval()
         s = normal.s.eval()
         z = np.random.randn(n_minibatch, num_factors)
-        for i in xrange(num_factors):
+        for i in range(num_factors):
             assert np.allclose(
                 normal.log_prob_zi(i, tf.constant(z, dtype=tf.float32)).eval(),
                 stats.norm.logpdf(z[:, i], m[i], s[i]))

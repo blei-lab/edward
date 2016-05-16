@@ -28,7 +28,7 @@ def multinomial_logpmf(x, n, p):
 def multinomial_logpmf_vec(x, n, p):
     n_minibatch = x.shape[0]
     return np.array([multinomial_logpmf(x[i, :], n, p)
-                     for i in xrange(n_minibatch)])
+                     for i in range(n_minibatch)])
 
 def _test_log_prob_zi(n_minibatch, num_factors, K):
     multinomial = Multinomial(num_factors, K)
@@ -37,11 +37,11 @@ def _test_log_prob_zi(n_minibatch, num_factors, K):
     with sess.as_default():
         pi = multinomial.pi.eval()
         z = np.zeros((n_minibatch, K*num_factors))
-        for i in xrange(num_factors):
+        for i in range(num_factors):
             z[:, (i*K):((i+1)*K)] = np.random.multinomial(1, pi[i, :], size=n_minibatch)
 
         z_tf = tf.constant(z, dtype=tf.float32)
-        for i in xrange(num_factors):
+        for i in range(num_factors):
             # NOTE: since Tensorflow has no special functions, the values here are
             # only an approximation
             assert np.allclose(
