@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in NumPy/SciPy.
+A simple coin flipping example. The model is written in NumPy/SciPy.
+Inspired by Stan's toy example.
 
 Probability model
     Prior: Beta

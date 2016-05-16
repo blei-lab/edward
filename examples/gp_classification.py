@@ -47,10 +47,10 @@ class GaussianProcess:
 
     def kernel(self, xs):
         mat = []
-        for i in xrange(self.N):
+        for i in range(self.N):
             mat += [[]]
             xi = xs[i, 1:]
-            for j in xrange(self.N):
+            for j in range(self.N):
                 if j == i:
                     mat[i] += [multivariate_rbf(xi, xi, self.sigma, self.l)]
                 else:

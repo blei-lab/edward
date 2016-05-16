@@ -14,7 +14,7 @@ def dirichlet_logpdf_vec(x, alpha):
     else:
         n_minibatch = x.shape[0]
         return np.array([stats.dirichlet.logpdf(x[i, :], alpha)
-                         for i in xrange(n_minibatch)])
+                         for i in range(n_minibatch)])
 
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
