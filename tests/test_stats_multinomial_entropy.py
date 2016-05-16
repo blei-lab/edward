@@ -57,8 +57,6 @@ def _assert_eq(val_ed, val_true):
     with sess.as_default():
         # NOTE: since Tensorflow has no special functions, the values here are
         # only an approximation
-        print(val_ed.eval())
-        print(val_true)
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
 def _test_entropy(n, p):

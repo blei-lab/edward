@@ -39,5 +39,5 @@ def test_logpdf_1d():
     _test_logpdf([0.5, 0.3, 0.8, 0.1], a=0.5, b=0.5)
 
 def test_logpdf_2d():
-    _test_logpdf(np.array([[0.5, 0.3, 0.8, 0.1],[0.5, 0.3, 0.8, 0.1]]),
+    _test_logpdf(np.array([[0.5, 0.3, 0.8, 0.1],[0.1, 0.7, 0.2, 0.4]]),
                  a=0.5, b=0.5)
