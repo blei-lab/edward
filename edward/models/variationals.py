@@ -15,9 +15,9 @@ class Variational:
             self.num_params = 0
             self.is_reparam = True
         else:
-            self.num_factors = sum([layers.num_factors for layer in self.layers])
-            self.num_vars = sum([layers.num_vars for layer in self.layers])
-            self.num_params = sum([layers.num_params for layer in self.layers])
+            self.num_factors = sum([layer.num_factors for layer in self.layers])
+            self.num_vars = sum([layer.num_vars for layer in self.layers])
+            self.num_params = sum([layer.num_params for layer in self.layers])
             self.is_reparam = all(['reparam' in layer.__class__.__dict__
                                    for layer in self.layers])
 
