@@ -9,7 +9,7 @@ and probabilistic programming.
 
 It supports __modeling languages__ including
 
-* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
+* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Keras](http://keras.io), [Pretty Tensor](https://github.com/google/prettytensor), or [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
 * [Stan](http://mc-stan.org)
 * [PyMC3](http://pymc-devs.github.io/pymc3/)
 * original Python using [NumPy/SciPy](http://scipy.org/)
