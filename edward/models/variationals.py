@@ -14,12 +14,14 @@ class Variational:
             self.num_vars = 0
             self.num_params = 0
             self.is_reparam = True
+            self.sample_tensor = []
         else:
             self.num_factors = sum([layer.num_factors for layer in self.layers])
             self.num_vars = sum([layer.num_vars for layer in self.layers])
             self.num_params = sum([layer.num_params for layer in self.layers])
             self.is_reparam = all(['reparam' in layer.__class__.__dict__
                                    for layer in self.layers])
+            self.sample_tensor = [layer.sample_tensor for layer in self.layers]
 
     def add(self, layer):
         """
@@ -34,6 +36,7 @@ class Variational:
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.sample_tensor += [layer.sample_tensor]
 
     def mapping(self, x):
         return [layer.mapping(x) for layer in self.layers]
@@ -45,33 +48,13 @@ class Variational:
         [layer.print_params(sess) for layer in self.layers]
 
     def sample_noise(self, size=1):
-        eps_layers = [layer.sample_noise(size) for layer in self.layers]
-        # TODO
-        return tf.concat(1, eps_layers)
-        #return np.concatenate(eps_layers, axis=1)
+        return [layer.sample_noise(size) for layer in self.layers]
 
     def reparam(self, eps):
-        z_layers = []
-        start = final = 0
-        for layer in self.layers:
-            final += layer.num_vars
-            z_layers += [layer.reparam(eps[:, start:final])]
-            start = final
-
-        return tf.concat(1, z_layers)
+        return [layer.reparam(eps[i]) for i,layer in enumerate(self.layers)]
 
     def sample(self, size=1, sess=None):
-        #z_layers = [layer.sample(size, sess) for layer in self.layers]
-        # This is temporary to deal with reparameterizable ones.
-        z_layers = []
-        for layer in self.layers:
-            z_layer = layer.sample(size, sess)
-            if isinstance(layer, Normal):
-                z_layer = sess.run(z_layer)
-
-            z_layers += [z_layer]
-
-        return np.concatenate(z_layers, axis=1)
+        return [layer.sample(size, sess) for layer in self.layers]
 
     def log_prob_zi(self, i, zs):
         start = final = 0
@@ -84,6 +67,46 @@ class Variational:
             start = final
 
         raise IndexError()
+
+    # TODO a better name
+    # this is really the "true" sample method
+    # TODO mixture_gaussian.py; issue with nan's
+    def draw_samples(self, x, size=1, score=True):
+        """
+        Draws TensorFlow-based samples for variational factors using
+        TensorFlow samplers; SciPy-based samples are given
+        placeholders. The intermediate list is returned so that
+        other procedures can feed the placeholders.
+
+        Notes
+        -----
+        TODO this is confusing
+        This sets parameters of the variational distribution according
+        to any data points it conditions on. This means after calling
+        this method, log_prob_zi() is well-defined even though it
+        technically must be called after this method.
+
+        Parameters
+        ----------
+        size : int
+        score : bool
+            Whether to force all samplers to use sample() and not
+            sample_noise(). For calculating score function gradients.
+        """
+        self.set_params(self.mapping(x))
+        samples = []
+        for layer in self.layers:
+            if layer.sample_tensor and score:
+                samples += [layer.sample(size)]
+            elif layer.sample_tensor and not score:
+                samples += [layer.sample_noise(size)]
+            else:
+                samples += [tf.placeholder(tf.float32, (size, layer.num_vars))]
+
+        if score:
+            return tf.concat(1, samples), samples
+        else:
+            return tf.concat(1, self.reparam(samples)), samples
 
 class Likelihood:
     """
@@ -98,6 +121,7 @@ class Likelihood:
         self.num_factors = num_factors
         self.num_vars = None # number of posterior latent variables
         self.num_params = None # number of local variational parameters
+        self.sample_tensor = False
         # TODO attribute for number of global variational parameters
 
     def mapping(self, x):
@@ -235,6 +259,8 @@ class Bernoulli(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = self.num_factors
+        self.sample_tensor = False
+
         self.p = None
 
     def mapping(self, x):
@@ -274,6 +300,8 @@ class Beta(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
+        self.sample_tensor = False
+
         self.a = None
         self.b = None
 
@@ -320,6 +348,8 @@ class Dirichlet(Likelihood):
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
+        self.sample_tensor = False
+
         self.alpha = None
 
     def mapping(self, x):
@@ -363,6 +393,8 @@ class InvGamma(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
+        self.sample_tensor = False
+
         self.a = None
         self.b = None
 
@@ -417,6 +449,8 @@ class Multinomial(Likelihood):
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
+        self.sample_tensor = False
+
         self.pi = None
 
     def mapping(self, x):
@@ -465,6 +499,8 @@ class Normal(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
+        self.sample_tensor = True
+
         self.m = None
         self.s = None
 
@@ -489,10 +525,7 @@ class Normal(Likelihood):
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
-        # Not using this, since TensorFlow has a large overhead
-        # whenever calling sess.run().
-        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
-        return norm.rvs(size=(size, self.num_vars))
+        return tf.random_normal((size, self.num_vars))
 
     def reparam(self, eps):
         """
@@ -524,6 +557,7 @@ class PointMass(Likelihood):
         self.num_params = num_vars
         self.transform = transform
         self.params = None
+        self.sample_tensor = True
 
     def mapping(self, x):
         params = Variable("params", [self.num_vars])
@@ -537,12 +571,9 @@ class PointMass(Likelihood):
         print("parameter values:")
         print(params)
 
-    def sample_noise(self, size=1):
-        # TODO this is a waste of storage
+    def sample(self, size=1, sess=None):
         # Return a matrix to be compatible with probability model
         # methods which assume the input is possibly a mini-batch of
         # parameter samples (used for black box variational methods).
-        return tf.zeros([size, self.num_params])
-
-    def reparam(self, eps):
-        return tf.reshape(self.params, [1, self.num_params])
+        # TODO duplicate across size-many rows
+        return tf.reshape(self.params, [1, self.num_vars])
