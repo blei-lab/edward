@@ -35,9 +35,9 @@ class MixtureDensityNetwork:
         # TODO is this reconstructed every time? check tensorboard
         hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 128 units and ReLU activation
         hidden2 = Dense(25, activation='relu')(hidden1)
-        self.means = Dense(self.K)(hidden2)
-        self.standard_deviations = Dense(self.K, activation=K.exp)(hidden2)
-        self.weights = Dense(self.K, activation=K.softmax)(hidden2)
+        self.mus = Dense(self.K)(hidden2)
+        self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
+        self.pi = Dense(self.K, activation=K.softmax)(hidden2)
 
     def log_prob(self, xs, zs=None):
         """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
@@ -45,8 +45,8 @@ class MixtureDensityNetwork:
         # parameters are baked into how we specify the neural networks.
         X, y = xs
         self.mapping(X)
-        result = tf.exp(norm.logpdf(y, self.means, self.standard_deviations))
-        result = tf.mul(result, self.weights)
+        result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+        result = tf.mul(result, self.pi)
         result = tf.reduce_sum(result, 1, keep_dims=True)
         result = tf.log(result)
         return tf.reduce_sum(result)
@@ -84,5 +84,4 @@ for i in range(NEPOCH):
     test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
     print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i], test_loss[i]))
     pred_weights, pred_means, pred_std = sess.run(
-        [model.weights, model.means, model.standard_deviations],
-        feed_dict={X: X_test})
+        [model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
