@@ -45,6 +45,7 @@ which can be found in [`examples/`](examples/):
 * [Mixture model of Gaussians](examples/mixture_gaussian.py)
 * [Gaussian process classification](examples/gp_classification.py)
 * [Bayesian neural network](examples/bayesian_nn.py)
+* [Mixture density network](examples/mixture_density_network.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)
 
 Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
