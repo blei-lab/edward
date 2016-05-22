@@ -13,14 +13,23 @@ class Data:
 
     Arguments
     ----------
-    data: dict, tf.tensor, np.ndarray, optional
-        Data whose type depends on the type of model it is fed into:
-        Stan, TensorFlow, and NumPy/SciPy respectively.
+    data: tf.tensor, list dict, np.ndarray, optional
+        Data whose type depends on the type of model it is fed into.
+        If TensorFlow, must be tf.tensor or list (see notes).
+        If Stan, must be dict.
+        If PyMC3, must be np.array.
+        If NumPy/SciPy, must be np.array.
     shuffled: bool, optional
         Whether the data is shuffled.
 
     Notes
     -----
+    data argument can be list of placeholders or list of np.arrays
+    (assuming TensorFlow model). If np.arrays, it will form
+    placeholders and feed in batches of the np.arrays during
+    computation. If placeholders, user must manually control
+    mini-batches and also give to us the full data set size.
+
     Data subsampling is not currently available for Stan models.
     """
     def __init__(self, data=None, shuffled=True):
@@ -36,10 +45,8 @@ class Data:
         elif isinstance(self.data, tf.Tensor):
             self.N = self.data.get_shape()[0].value
         elif isinstance(self.data, list):
-            # TODO this is in progress, as a list of tensors for being
-            # fed because the person has the data has np arrays and
-            # then it gives us placeholders
-            # (maybe we can default to placeholders)
+            # TODO
+            # data subsampling for this general set of data arguments
             pass
         elif isinstance(self.data, np.ndarray):
             self.N = self.data.shape[0]

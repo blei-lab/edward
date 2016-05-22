@@ -58,6 +58,7 @@ def build_toy_dataset(nsample=6000):
     return train_test_split(x_data, y_data, random_state=42)
 
 ed.set_seed(42)
+model = MixtureDensityNetwork(10)
 
 X_train, X_test, y_train, y_test = build_toy_dataset()
 print("Size of features in training data: {:s}".format(X_train.shape))
@@ -67,14 +68,6 @@ print("Size of output in test data: {:s}".format(y_test.shape))
 
 X = tf.placeholder(tf.float32, shape=(None, 1))
 y = tf.placeholder(tf.float32, shape=(None, 1))
-
-model = MixtureDensityNetwork(10)
-# TODO ed.Data; list is okay with placeholders but makes it difficult
-# for data subsampling. but the user seems to do it outside in the
-# loop of batches for you. so maybe this is okay as long as we can
-# can control of the scale factors
-# TODO in update, how do users define the feed_dict if data is np
-# arrays and ed.Data is list of tensor placeholders?
 data = ed.Data([X, y])
 
 inference = ed.MAP(model, data)
