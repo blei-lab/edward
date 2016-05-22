@@ -25,9 +25,9 @@ class Data:
     Notes
     -----
     For TensorFlow models, data argument can be list of placeholders
-    or list of np.ndarrays. If np.ndarrays, it will form placeholders
-    and feed in mini-batches of the np.arrays during computation. If
-    placeholders, user must manually control mini-batches.
+    or list of np.ndarrays. If np.ndarrays, it will use mini-batches
+    of the np.arrays during computation. If placeholders, user must
+    manually control mini-batches and feed in the placeholders.
 
     Data subsampling is not currently available for Stan models.
     """

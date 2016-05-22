@@ -13,7 +13,7 @@ import tensorflow as tf
 
 from edward.stats import norm
 from keras import backend as K
-from keras.layers import Input, Dense, merge
+from keras.layers import Dense
 from sklearn.cross_validation import train_test_split
 
 class MixtureDensityNetwork:
@@ -32,7 +32,6 @@ class MixtureDensityNetwork:
 
     def mapping(self, X):
         """pi, mu, sigma = NN(x; theta)"""
-        # TODO is this reconstructed every time? check tensorboard
         hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 128 units and ReLU activation
         hidden2 = Dense(25, activation='relu')(hidden1)
         self.mus = Dense(self.K)(hidden2)
