@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.data import Data
-from edward.models import PointMass
+from edward.models import Variational, PointMass
 from edward.util import kl_multivariate_normal, log_sum_exp
 
 try:
@@ -351,12 +351,20 @@ class MAP(VariationalInference):
     Maximum a posteriori
     """
     def __init__(self, model, data=Data(), transform=tf.identity):
-        variational = PointMass(model.num_vars, transform)
+        if hasattr(model, 'num_vars'):
+            variational = Variational()
+            variational.add(PointMass(model.num_vars, transform))
+        else:
+            variational = Variational()
+            variational.add(PointMass(0, transform))
+
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
-        z = self.variational.get_params()
+        # TODO
+        z = self.variational.reparam(self.variational.sample_noise())
+        #z = self.variational.sample()
         self.loss = tf.reduce_mean(self.model.log_prob(x, z))
         return -self.loss

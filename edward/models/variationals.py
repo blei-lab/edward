@@ -44,9 +44,11 @@ class Variational:
     def print_params(self, sess):
         [layer.print_params(sess) for layer in self.layers]
 
-    def sample_noise(self, size):
+    def sample_noise(self, size=1):
         eps_layers = [layer.sample_noise(size) for layer in self.layers]
-        return np.concatenate(eps_layers, axis=1)
+        # TODO
+        return tf.concat(1, eps_layers)
+        #return np.concatenate(eps_layers, axis=1)
 
     def reparam(self, eps):
         z_layers = []
@@ -58,7 +60,7 @@ class Variational:
 
         return tf.concat(1, z_layers)
 
-    def sample(self, size, sess):
+    def sample(self, size=1, sess=None):
         #z_layers = [layer.sample(size, sess) for layer in self.layers]
         # This is temporary to deal with reparameterizable ones.
         z_layers = []
@@ -153,7 +155,7 @@ class Likelihood:
     def print_params(self, sess):
         raise NotImplementedError()
 
-    def sample_noise(self, size):
+    def sample_noise(self, size=1):
         """
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
@@ -179,7 +181,7 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    def sample(self, size, sess=None):
+    def sample(self, size=1, sess=None):
         """
         z ~ q(z | lambda)
 
@@ -247,7 +249,7 @@ class Bernoulli(Likelihood):
         print("probability:")
         print(p)
 
-    def sample(self, size, sess):
+    def sample(self, size=1, sess=None):
         """z ~ q(z | lambda)"""
         p = sess.run(self.p)
         z = np.zeros((size, self.num_vars))
@@ -291,7 +293,7 @@ class Beta(Likelihood):
         print("scale:")
         print(b)
 
-    def sample(self, size, sess):
+    def sample(self, size=1, sess=None):
         """z ~ q(z | lambda)"""
         a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
@@ -332,7 +334,7 @@ class Dirichlet(Likelihood):
         print("concentration vector:")
         print(alpha)
 
-    def sample(self, size, sess):
+    def sample(self, size=1, sess=None):
         """z ~ q(z | lambda)"""
         alpha = sess.run(self.alpha)
         z = np.zeros((size, self.num_vars))
@@ -380,7 +382,7 @@ class InvGamma(Likelihood):
         print("scale:")
         print(b)
 
-    def sample(self, size, sess):
+    def sample(self, size=1, sess=None):
         """z ~ q(z | lambda)"""
         a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
@@ -434,7 +436,7 @@ class Multinomial(Likelihood):
         print("probability vector:")
         print(pi)
 
-    def sample(self, size, sess):
+    def sample(self, size=1, sess=None):
         """z ~ q(z | lambda)"""
         pi = sess.run(self.pi)
         z = np.zeros((size, self.num_vars))
@@ -482,7 +484,7 @@ class Normal(Likelihood):
         print("std dev:")
         print(s)
 
-    def sample_noise(self, size):
+    def sample_noise(self, size=1):
         """
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
@@ -535,8 +537,12 @@ class PointMass(Likelihood):
         print("parameter values:")
         print(params)
 
-    def get_params(self):
+    def sample_noise(self, size=1):
+        # TODO this is a waste of storage
         # Return a matrix to be compatible with probability model
         # methods which assume the input is possibly a mini-batch of
         # parameter samples (used for black box variational methods).
+        return tf.zeros([size, self.num_params])
+
+    def reparam(self, eps):
         return tf.reshape(self.params, [1, self.num_params])

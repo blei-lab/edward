@@ -35,6 +35,12 @@ class Data:
             self.N = None
         elif isinstance(self.data, tf.Tensor):
             self.N = self.data.get_shape()[0].value
+        elif isinstance(self.data, list):
+            # TODO this is in progress, as a list of tensors for being
+            # fed because the person has the data has np arrays and
+            # then it gives us placeholders
+            # (maybe we can default to placeholders)
+            pass
         elif isinstance(self.data, np.ndarray):
             self.N = self.data.shape[0]
         elif isinstance(self.data, dict):

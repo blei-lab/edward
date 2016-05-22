@@ -20,16 +20,19 @@ class MixtureDensityNetwork:
     """
     Mixture density network for outputs y on inputs x.
 
-    p((x,y), z) = sum_{k=1}^K pi_k(x; z) Normal(y; mu_k(x; z), sigma_k(x; z))
+    p((x,y), (z,theta))
+    = sum_{k=1}^K pi_k(x; z) Normal(y; mu_k(x; z), sigma_k(x; z))
 
     where pi, mu, sigma are the output of a neural network taking x
-    as input and with parameters z.
+    as input and with parameters theta. There are no latent variables
+    z, which are hidden variables we aim to be Bayesian about.
     """
     def __init__(self, K):
         self.K = K
 
     def mapping(self, X):
-        """pi, mu, sigma = NN(x; z)"""
+        """pi, mu, sigma = NN(x; theta)"""
+        # TODO is this reconstructed every time? check tensorboard
         hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 128 units and ReLU activation
         hidden2 = Dense(25, activation='relu')(hidden1)
         self.means = Dense(self.K)(hidden2)
@@ -37,10 +40,9 @@ class MixtureDensityNetwork:
         self.weights = Dense(self.K, activation=K.softmax)(hidden2)
 
     def log_prob(self, xs, zs=None):
-        """log p((xs,ys), z) = sum_{n=1}^N log p((xs[n,:],ys[n]), z)"""
+        """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
         # Note there are no parameters we're being Bayesian about. The
-        # parameters z are baked into how we specify the neural
-        # networks.
+        # parameters are baked into how we specify the neural networks.
         X, y = xs
         self.mapping(X)
         result = tf.exp(norm.logpdf(y, self.means, self.standard_deviations))
@@ -49,40 +51,45 @@ class MixtureDensityNetwork:
         result = tf.log(result)
         return tf.reduce_sum(result)
 
-def build_toy_dataset():
-    NSAMPLE = 6000
-    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, NSAMPLE))).T
-    r_data = np.float32(np.random.normal(size=(NSAMPLE,1))) # random noise
+def build_toy_dataset(nsample=6000):
+    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, nsample))).T
+    r_data = np.float32(np.random.normal(size=(nsample,1))) # random noise
     x_data = np.float32(np.sin(0.75*y_data)*7.0+y_data*0.5+r_data*1.0)
     return train_test_split(x_data, y_data, random_state=42)
 
 ed.set_seed(42)
 
-X_train, X_valid, y_train, y_valid = build_toy_dataset()
-print(X_train.shape, X_valid.shape)
-print(y_train.shape, y_valid.shape)
+X_train, X_test, y_train, y_test = build_toy_dataset()
+print("Size of features in training data: {:s}".format(X_train.shape))
+print("Size of output in training data: {:s}".format(y_train.shape))
+print("Size of features in test data: {:s}".format(X_test.shape))
+print("Size of output in test data: {:s}".format(y_test.shape))
 
 X = tf.placeholder(tf.float32, shape=(None, 1))
 y = tf.placeholder(tf.float32, shape=(None, 1))
 
+model = MixtureDensityNetwork(10)
+# TODO ed.Data; list is okay with placeholders but makes it difficult
+# for data subsampling. but the user seems to do it outside in the
+# loop of batches for you. so maybe this is okay as long as we can
+# can control of the scale factors
+# TODO in update, how do users define the feed_dict if data is np
+# arrays and ed.Data is list of tensor placeholders?
+data = ed.Data([X, y])
+
+inference = ed.MAP(model, data)
 sess = tf.Session()
 K.set_session(sess)
-
-model = MixtureDensityNetwork(10)
-loss = -model.log_prob([X, y])
-train = tf.train.AdamOptimizer().minimize(loss)
-
-init = tf.initialize_all_variables()
-sess.run(init)
+inference.initialize(sess=sess)
 
 NEPOCH = 20
-train_loss = np.zeros(NEPOCH) # store the training progress here.
-valid_loss = np.zeros(NEPOCH)
+train_loss = np.zeros(NEPOCH)
+test_loss = np.zeros(NEPOCH)
 for i in range(NEPOCH):
-    _, train_loss[i] = sess.run([train, loss],
+    _, train_loss[i] = sess.run([inference.train, inference.loss],
                                 feed_dict={X: X_train, y: y_train})
-    valid_loss[i] = sess.run(loss, feed_dict={X: X_valid, y: y_valid})
-    print(train_loss[i], valid_loss[i])
+    test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
+    print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i], test_loss[i]))
     pred_weights, pred_means, pred_std = sess.run(
         [model.weights, model.means, model.standard_deviations],
-        feed_dict={X: X_valid})
+        feed_dict={X: X_test})
