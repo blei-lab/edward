@@ -86,7 +86,7 @@ class VariationalInference(Inference):
         self.n_data = n_data
         self.n_print = n_print
 
-        self.losses = tf.constant(0.0)
+        self.loss = tf.constant(0.0)
 
         loss = self.build_loss()
         # Use ADAM with a decaying scale factor
@@ -104,12 +104,12 @@ class VariationalInference(Inference):
         return sess
 
     def update(self, sess):
-        _, loss = sess.run([self.train, self.losses])
+        _, loss = sess.run([self.train, self.loss])
         return loss
 
-    def print_progress(self, t, losses, sess):
+    def print_progress(self, t, loss, sess):
         if t % self.n_print == 0:
-            print("iter %d loss %.2f " % (t, np.mean(losses)))
+            print("iter {:d} loss {:.2f}".format(t, loss))
             self.variational.print_params(sess)
 
     def build_loss(self):
@@ -161,7 +161,7 @@ class MFVI(VariationalInference):
         else:
             samples = self.variational.sample_noise(self.n_minibatch)
 
-        _, loss = sess.run([self.train, self.losses], {self.samples: samples})
+        _, loss = sess.run([self.train, self.loss], {self.samples: samples})
 
         return loss
 
@@ -189,8 +189,9 @@ class MFVI(VariationalInference):
         for i in range(self.variational.num_factors):
             q_log_prob += self.variational.log_prob_zi(i, self.samples)
 
-        self.losses = self.model.log_prob(x, self.samples) - q_log_prob
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(self.losses))
+        losses = self.model.log_prob(x, self.samples) - q_log_prob
+        self.loss = tf.reduce_mean(losses)
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
     def build_reparam_loss(self):
         """
@@ -207,9 +208,8 @@ class MFVI(VariationalInference):
         for i in range(self.variational.num_factors):
             q_log_prob += self.variational.log_prob_zi(i, z)
 
-        self.losses = self.model.log_prob(x, z) - q_log_prob
-
-        return -tf.reduce_mean(self.losses)
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) - q_log_prob)
+        return -self.loss
 
     def build_score_loss_entropy(self):
         """
@@ -228,7 +228,7 @@ class MFVI(VariationalInference):
         x = self.data.sample(self.n_data)
         p_log_prob = self.model.log_prob(x, self.samples)
         q_entropy = self.variational.entropy()
-        self.losses = p_log_prob + q_entropy
+        self.loss = tf.reduce_mean(p_log_prob + q_entropy)
         return tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) + \
                q_entropy
 
@@ -242,8 +242,9 @@ class MFVI(VariationalInference):
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
         z = self.variational.reparam(self.samples)
-        self.losses = self.model.log_prob(x, z) + self.variational.entropy()
-        return -tf.reduce_mean(self.losses)
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) + \
+                                   self.variational.entropy())
+        return -self.loss
 
 class VAE(VariationalInference):
     # TODO refactor into MFVI
@@ -256,7 +257,7 @@ class VAE(VariationalInference):
 
         # TODO don't fix number of covariates
         self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
-        self.losses = tf.constant(0.0)
+        self.loss = tf.constant(0.0)
 
         loss = self.build_loss()
         optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
@@ -270,7 +271,7 @@ class VAE(VariationalInference):
 
     def update(self, sess):
         x = self.data.sample(self.n_data)
-        _, loss_value = sess.run([self.train, self.losses], {self.x: x})
+        _, loss_value = sess.run([self.train, self.loss], {self.x: x})
         return loss_value
 
     def build_loss(self):
@@ -283,11 +284,11 @@ class VAE(VariationalInference):
         with tf.variable_scope("model") as scope:
             self.variational.set_params(self.variational.mapping(self.x))
             z = self.variational.sample(self.n_data)
-            self.losses = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
-                          kl_multivariate_normal(self.variational.m,
-                                                 self.variational.s)
+            self.loss = tf.reduce_sum(self.model.log_likelihood(self.x, z)) - \
+                        kl_multivariate_normal(self.variational.m,
+                                               self.variational.s)
 
-        return -self.losses
+        return -self.loss
 
 class KLpq(VariationalInference):
     """
@@ -307,7 +308,7 @@ class KLpq(VariationalInference):
 
     def update(self, sess):
         samples = self.variational.sample(self.n_minibatch, sess)
-        _, loss = sess.run([self.train, self.losses], {self.samples: samples})
+        _, loss = sess.run([self.train, self.loss], {self.samples: samples})
         return loss
 
     def build_loss(self):
@@ -338,7 +339,7 @@ class KLpq(VariationalInference):
         log_w_norm = log_w - log_sum_exp(log_w)
         w_norm = tf.exp(log_w_norm)
 
-        self.losses = w_norm * log_w
+        self.loss = tf.reduce_mean(w_norm * log_w)
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 
 class MAP(VariationalInference):
@@ -353,5 +354,5 @@ class MAP(VariationalInference):
         x = self.data.sample(self.n_data)
         self.variational.set_params(self.variational.mapping(x))
         z = self.variational.get_params()
-        self.losses = self.model.log_prob(x, z)
-        return -tf.reduce_mean(self.losses)
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z))
+        return -self.loss
