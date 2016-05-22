@@ -15,11 +15,11 @@ class Inference:
     """
     Base class for inference methods.
 
-    Arguments
+    Parameters
     ----------
-    model: Model
+    model : Model
         probability model p(x, z)
-    data: Data, optional
+    data : Data, optional
         data x
     """
     def __init__(self, model, data=Data()):
@@ -30,11 +30,11 @@ class MonteCarlo(Inference):
     """
     Base class for Monte Carlo methods.
 
-    Arguments
+    Parameters
     ----------
-    model: Model
+    model : Model
         probability model p(x, z)
-    data: Data, optional
+    data : Data, optional
         data x
     """
     def __init__(self, *args, **kwargs):
@@ -44,13 +44,13 @@ class VariationalInference(Inference):
     """
     Base class for variational inference methods.
 
-    Arguments
+    Parameters
     ----------
-    model: Model
+    model : Model
         probability model p(x, z)
-    variational: Variational
+    variational : Variational
         variational model q(z; lambda)
-    data: Data, optional
+    data : Data, optional
         data x
     """
     def __init__(self, model, variational, data=Data()):
@@ -68,19 +68,21 @@ class VariationalInference(Inference):
 
         return sess
 
-    def initialize(self, n_iter=1000, n_data=None, n_print=100):
+    def initialize(self, n_iter=1000, n_data=None, n_print=100, sess=None):
         """
         Initialize inference algorithm.
 
-        Arguments
+        Parameters
         ----------
-        n_iter: int, optional
+        n_iter : int, optional
             Number of iterations for optimization.
-        n_data: int, optional
+        n_data : int, optional
             Number of samples for data subsampling. Default is to use all
             the data.
-        n_print: int, optional
+        n_print : int, optional
             Number of iterations for each print progress.
+        sess : tf.Session, optional
+            TensorFlow session for computation.
         """
         self.n_iter = n_iter
         self.n_data = n_data
@@ -99,7 +101,9 @@ class VariationalInference(Inference):
             loss, global_step=global_step)
 
         init = tf.initialize_all_variables()
-        sess = tf.Session()
+        if sess == None:
+            sess = tf.Session()
+
         sess.run(init)
         return sess
 
@@ -129,10 +133,10 @@ class MFVI(VariationalInference):
         """
         Parameters
         ----------
-        n_minibatch: int, optional
+        n_minibatch : int, optional
             Number of samples from variational model for calculating
             stochastic gradients.
-        score: bool, optional
+        score : bool, optional
             Whether to force inference to use the score function
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
