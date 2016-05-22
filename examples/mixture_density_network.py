@@ -25,19 +25,19 @@ class MixtureDensityNetwork:
     where pi, mu, sigma are the output of a neural network taking x
     as input and with parameters z.
     """
-    def __init__(self, mixture_components):
-        self.mixture_components = mixture_components
+    def __init__(self, K):
+        self.K = K
 
     def mapping(self, X):
         """pi, mu, sigma = NN(x; z)"""
         hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 128 units and ReLU activation
         hidden2 = Dense(25, activation='relu')(hidden1)
-        self.means = Dense(self.mixture_components)(hidden2)
-        self.standard_deviations = Dense(self.mixture_components, activation=K.exp)(hidden2)
-        self.weights = Dense(self.mixture_components, activation=K.softmax)(hidden2)
+        self.means = Dense(self.K)(hidden2)
+        self.standard_deviations = Dense(self.K, activation=K.exp)(hidden2)
+        self.weights = Dense(self.K, activation=K.softmax)(hidden2)
 
     def log_prob(self, xs, zs=None):
-        """-1/M sum_{n=1}^M log p((x_n,y_n), z)"""
+        """log p((xs,ys), z) = sum_{n=1}^N log p((xs[n,:],ys[n]), z)"""
         # Note there are no parameters we're being Bayesian about. The
         # parameters z are baked into how we specify the neural
         # networks.
@@ -46,8 +46,8 @@ class MixtureDensityNetwork:
         result = tf.exp(norm.logpdf(y, self.means, self.standard_deviations))
         result = tf.mul(result, self.weights)
         result = tf.reduce_sum(result, 1, keep_dims=True)
-        result = -tf.log(result)
-        return tf.reduce_mean(result)
+        result = tf.log(result)
+        return tf.reduce_sum(result)
 
 def build_toy_dataset():
     NSAMPLE = 6000
@@ -69,7 +69,7 @@ sess = tf.Session()
 K.set_session(sess)
 
 model = MixtureDensityNetwork(10)
-loss = model.log_prob([X, y])
+loss = -model.log_prob([X, y])
 train = tf.train.AdamOptimizer().minimize(loss)
 
 init = tf.initialize_all_variables()
