@@ -5,9 +5,11 @@ class Data:
     """
     Base class for data.
 
-    By default, it assumes the data is a vector and subsamples data
-    i.i.d. (independent and identically distributed). Use one of the
-    derived classes for subsampling more complex data structures.
+    By default, it assumes the data is an array and if requested will
+    perform data subsampling according to slices of the first index
+    (e.g., elements in a vector, rows in a matrix, y-by-z matrices in
+    a x-by-y-by-z tensor). Use one of the derived classes for
+    subsampling more complex data structures.
 
     Arguments
     ----------
@@ -16,6 +18,10 @@ class Data:
         Stan, TensorFlow, and NumPy/SciPy respectively.
     shuffled: bool, optional
         Whether the data is shuffled.
+
+    Notes
+    -----
+    Data subsampling is not currently available for Stan models.
     """
     def __init__(self, data=None, shuffled=True):
         self.data = data

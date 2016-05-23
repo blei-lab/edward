@@ -16,7 +16,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward import Variational, Normal
+from edward.models import Variational, Normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -60,7 +60,7 @@ def sample_noise(self, size):
     eps = sample_noise() ~ s(eps)
     s.t. z = reparam(eps; lambda) ~ q(z | lambda)
     """
-    return tf.random_normal(size)
+    return tf.random_normal([size, self.num_vars])
 
 Normal.mapping = mapping
 Normal.sample_noise = sample_noise
@@ -111,8 +111,8 @@ class Data:
 
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
-variational = Variational()
-variational.add(Normal(FLAGS.num_vars))
+# TODO This family is not currently amenable to the variational construction.
+variational = Normal(FLAGS.num_vars)
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)

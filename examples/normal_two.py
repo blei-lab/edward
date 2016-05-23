@@ -8,8 +8,8 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
+from edward.models import Variational, Normal
 from edward.stats import multivariate_normal
-from edward.variationals import Variational, Normal
 from edward.util import get_dims
 
 class NormalPosterior:
@@ -22,8 +22,7 @@ class NormalPosterior:
         self.num_vars = get_dims(mu)[0]
 
     def log_prob(self, xs, zs):
-        return tf.pack([multivariate_normal.logpdf(z, self.mu, self.Sigma)
-                        for z in tf.unpack(zs)])
+        return multivariate_normal.logpdf(zs, self.mu, self.Sigma)
 
 ed.set_seed(42)
 mu = tf.constant([1.0, 1.0])

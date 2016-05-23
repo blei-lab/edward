@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 """
+This demonstrates a more idiomatic TensorFlow example. Instead of
+running inference.run(), we may want direct access to the TensorFlow
+session and to manipulate various objects during inference.
+
 Probability model
     Posterior: (1-dimensional) Normal
 Variational model
@@ -30,4 +34,7 @@ variational = Variational()
 variational.add(Normal())
 
 inference = ed.MFVI(model, variational)
-inference.run(n_iter=10000)
+sess = inference.initialize()
+for t in range(1000):
+    loss = inference.update(sess)
+    inference.print_progress(t, loss, sess)
