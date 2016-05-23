@@ -592,8 +592,15 @@ class PointMass(Likelihood):
         print(params)
 
     def sample(self, size=1, sess=None):
-        # Return a matrix to be compatible with probability model
+        # Return a matrix where each row is the same set of
+        # parameters. This is to be compatible with probability model
         # methods which assume the input is possibly a mini-batch of
-        # parameter samples (used for black box variational methods).
-        # TODO duplicate across size-many rows
-        return tf.reshape(self.params, [1, self.num_vars])
+        # parameter samples (as in black box variational methods).
+        return tf.pack([self.params]*size)
+
+    def log_prob_zi(self, i, zs):
+        """log q(z_i | lambda)"""
+        if i >= self.num_factors:
+            raise IndexError()
+
+        return tf.cast(tf.equal(zs[:, i], self.params[i]), dtype=tf.float32)
