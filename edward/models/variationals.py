@@ -38,23 +38,68 @@ class Variational:
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
         self.sample_tensor += [layer.sample_tensor]
 
-    def mapping(self, x):
-        return [layer.mapping(x) for layer in self.layers]
+    def sample(self, x, size=1, score=True):
+        """
+        Draws a mix of tensors and placeholders, corresponding to
+        TensorFlow-based samplers and SciPy-based samplers depending
+        on the variational factor.
 
-    def set_params(self, params):
-        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
+        Parameters
+        ----------
+        x : Data
+        size : int, optional
+        score : bool, optional
+            Whether to force all samplers to use sample() and not
+            sample_noise(). For calculating score function gradients.
+
+        Returns
+        -------
+        tf.Tensor, list
+            A tensor concatenating sample outputs of tensors and
+            placeholders. The list used to form the tensor is also
+            returned so that other procedures can feed values into the
+            placeholders.
+
+        Notes
+        -----
+        This sets parameters of the variational distribution according
+        to any data points it conditions on. This means after calling
+        this method, log_prob_zi() is well-defined, even though
+        mathematically it is a function of both z and x, and it only
+        takes z as input.
+        """
+        self._set_params(self._mapping(x))
+        samples = []
+        for layer in self.layers:
+            if layer.sample_tensor and score:
+                samples += [layer.sample(size)]
+            elif layer.sample_tensor and not score:
+                samples += [layer.sample_noise(size)]
+            else:
+                samples += [tf.placeholder(tf.float32, (size, layer.num_vars))]
+
+        if score:
+            return tf.concat(1, samples), samples
+        else:
+            return tf.concat(1, self._reparam(samples)), samples
+
+    def np_sample(self, samples, size=1, score=True, sess=None):
+        """
+        Form dictionary to feed any placeholders with np.array
+        samples.
+        """
+        feed_dict = {}
+        for sample,layer in zip(samples, self.layers):
+            if sample.name.startswith('Placeholder'):
+                if score:
+                    feed_dict[sample] = layer.sample(size, sess)
+                else:
+                    feed_dict[sample] = layer.sample_noise(size)
+
+        return feed_dict
 
     def print_params(self, sess):
         [layer.print_params(sess) for layer in self.layers]
-
-    def sample_noise(self, size=1):
-        return [layer.sample_noise(size) for layer in self.layers]
-
-    def reparam(self, eps):
-        return [layer.reparam(eps[i]) for i,layer in enumerate(self.layers)]
-
-    def sample(self, size=1, sess=None):
-        return [layer.sample(size, sess) for layer in self.layers]
 
     def log_prob_zi(self, i, zs):
         start = final = 0
@@ -68,45 +113,20 @@ class Variational:
 
         raise IndexError()
 
-    # TODO a better name
-    # this is really the "true" sample method
-    # TODO mixture_gaussian.py; issue with nan's
-    def draw_samples(self, x, size=1, score=True):
-        """
-        Draws TensorFlow-based samples for variational factors using
-        TensorFlow samplers; SciPy-based samples are given
-        placeholders. The intermediate list is returned so that
-        other procedures can feed the placeholders.
+    def _mapping(self, x):
+        return [layer.mapping(x) for layer in self.layers]
 
-        Notes
-        -----
-        TODO this is confusing
-        This sets parameters of the variational distribution according
-        to any data points it conditions on. This means after calling
-        this method, log_prob_zi() is well-defined even though it
-        technically must be called after this method.
+    def _set_params(self, params):
+        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
 
-        Parameters
-        ----------
-        size : int
-        score : bool
-            Whether to force all samplers to use sample() and not
-            sample_noise(). For calculating score function gradients.
-        """
-        self.set_params(self.mapping(x))
-        samples = []
-        for layer in self.layers:
-            if layer.sample_tensor and score:
-                samples += [layer.sample(size)]
-            elif layer.sample_tensor and not score:
-                samples += [layer.sample_noise(size)]
-            else:
-                samples += [tf.placeholder(tf.float32, (size, layer.num_vars))]
+    def _sample_noise(self, size=1):
+        return [layer.sample_noise(size) for layer in self.layers]
 
-        if score:
-            return tf.concat(1, samples), samples
-        else:
-            return tf.concat(1, self.reparam(samples)), samples
+    def _reparam(self, eps):
+        return [layer.reparam(eps[i]) for i,layer in enumerate(self.layers)]
+
+    def _sample(self, size=1, sess=None):
+        return [layer.sample(size, sess) for layer in self.layers]
 
 class Likelihood:
     """
