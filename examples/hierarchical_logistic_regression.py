@@ -98,9 +98,9 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
-def print_progress(self, t, losses, sess):
+def print_progress(self, t, loss, sess):
     if t % self.n_print == 0:
-        print("iter %d loss %.2f " % (t, np.mean(losses)))
+        print("iter {:d} loss {:.2f}".format(t, loss))
         self.variational.print_params(sess)
 
         # Sample functions from variational model
