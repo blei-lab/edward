@@ -83,7 +83,7 @@ plt.show(block=False)
 
 inference = ed.MFVI(model, variational, data)
 sess = inference.initialize(n_minibatch=5, n_print=5)
-for t in range(5000):
+for t in range(250):
     loss = inference.update(sess)
     if t % inference.n_print == 0:
         print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
