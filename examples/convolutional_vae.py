@@ -33,39 +33,15 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 
 FLAGS = flags.FLAGS
 
-def mapping(self, x):
-    """
-    lambda = phi(x)
-    """
-    with pt.defaults_scope(activation_fn=tf.nn.elu,
-                           batch_normalize=True,
-                           learned_moments_update_rate=0.0003,
-                           variance_epsilon=0.001,
-                           scale_after_normalization=True):
-        params = (pt.wrap(x).
-                reshape([FLAGS.n_data, 28, 28, 1]).
-                conv2d(5, 32, stride=2).
-                conv2d(5, 64, stride=2).
-                conv2d(5, 128, edges='VALID').
-                dropout(0.9).
-                flatten().
-                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
-
-    mean = params[:, :self.num_vars]
-    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
-    return [mean, stddev]
-
-def sample_noise(self, size):
-    """
-    eps = sample_noise() ~ s(eps)
-    s.t. z = reparam(eps; lambda) ~ q(z | lambda)
-    """
-    return tf.random_normal([size, self.num_vars])
-
-Normal.mapping = mapping
-Normal.sample_noise = sample_noise
-
 class NormalBernoulli:
+    """
+    Each binarized pixel in an image is modeled by a Bernoulli
+    likelihood. The success probability for each pixel is the output
+    of a neural network that takes samples from a normal prior as
+    input.
+
+    p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
+    """
     def __init__(self, num_vars):
         self.num_vars = num_vars
 
@@ -96,10 +72,40 @@ class NormalBernoulli:
     def sample_prior(self, size):
         """
         p ~ some complex distribution induced by
-        z ~ N(0, 1), p = phi(z)
+        z ~ N(0, 1), p = varphi(z)
         """
         z = tf.random_normal(size)
+        # Note the output of this is not prior samples, but just the
+        # success probability, i.e., the hidden representation learned
+        # by the neural network.
         return self.mapping(z)
+
+def mapping(self, x):
+    """
+    Inference network to parameterize variational family. It takes
+    data x as input and outputs the variational parameters lambda.
+
+    lambda = phi(x)
+    """
+    with pt.defaults_scope(activation_fn=tf.nn.elu,
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
+        params = (pt.wrap(x).
+                reshape([FLAGS.n_data, 28, 28, 1]).
+                conv2d(5, 32, stride=2).
+                conv2d(5, 64, stride=2).
+                conv2d(5, 128, edges='VALID').
+                dropout(0.9).
+                flatten().
+                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
+
+    mean = params[:, :self.num_vars]
+    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
+    return [mean, stddev]
+
+Normal.mapping = mapping
 
 class Data:
     def __init__(self, data):
