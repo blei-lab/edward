@@ -59,10 +59,9 @@ def update(self, sess):
 def build_loss(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     with tf.variable_scope("model") as scope:
-        z, _ = self.variational.sample(self.n_data)
-        # TODO This currently uses Normal, not Variational()
-        #self.variational.set_params(self.variational.mapping(self.x))
-        #z = self.variational.sample(self.n_data)
+        x = self.x
+        # TODO samples 1 set of latent variables for each data point
+        z, _ = self.variational.sample(x, self.n_data, score=False)
         self.loss = tf.reduce_sum(self.model.log_lik(self.x, z)) - \
                     kl_multivariate_normal(self.variational.layers[0].m,
                                            self.variational.layers[0].s)
@@ -155,6 +154,7 @@ class Data:
 
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
+
 variational = Variational()
 # TODO
 Normal.mapping = mapping
