@@ -258,11 +258,10 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        self.variational.set_params(self.variational.mapping(x))
-        z = self.variational.reparam(self.samples)
+        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
 
-        mu = tf.concat(0, [layer.m for layer in self.variational.layers])
-        sigma = tf.concat(0, [layer.s for layer in self.variational.layers])
+        mu = tf.pack([layer.m for layer in self.variational.layers])
+        sigma = tf.pack([layer.s for layer in self.variational.layers])
         self.losses = self.model.log_lik(x, z) - kl_multivariate_normal(mu, sigma)
         return -tf.reduce_mean(self.losses)
 
