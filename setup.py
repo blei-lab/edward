@@ -7,7 +7,7 @@ setup(
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
     packages=['edward', 'edward.stats'],
-    install_requires=['tensorflow>=0.6.0', 'numpy>=1.7', 'scipy>=0.16'],
+    install_requires=['tensorflow>=0.7.0', 'numpy>=1.7', 'scipy>=0.16'],
     extras_require = {'stan': ['pystan>=2.0.1.3'],
                       'neural networks': ['prettytensor>=0.5.3'],
                       'visualization': ['progressbar>=2.0']},
