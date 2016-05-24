@@ -128,3 +128,4 @@ for t in range(600):
         ax.set_xlim([-3, 3])
         ax.set_ylim([-0.5, 1.5])
         plt.draw()
+        plt.pause(1.0/60.0)

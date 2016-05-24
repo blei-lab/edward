@@ -110,3 +110,4 @@ for t in range(5000):
         ax.plot(inputs, outputs)
         ax.set_ylim([-2, 3])
         plt.draw()
+        plt.pause(1.0/60.0)

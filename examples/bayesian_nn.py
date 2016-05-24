@@ -154,3 +154,4 @@ for t in range(1000):
         ax.set_xlim([-8, 8])
         ax.set_ylim([-2, 3])
         plt.draw()
+        plt.pause(1.0/60.0)
