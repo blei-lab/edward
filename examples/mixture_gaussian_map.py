@@ -11,14 +11,7 @@ Probability model
     for n = 1, ..., N
         c_n ~ Multinomial(pi)
         x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
-Variational model
-    Likelihood:
-        q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
-        q(pi) = Dirichlet(alpha')
-        q(mu_k) = N(mu'_k, Sigma'_k)
-        q(sigma_k) = Inv-Gamma(a'_k, b'_k)
-    (We collapse the c_n latent variables in the probability model's
-    joint density.)
+Inference: Maximum a posteriori
 
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """

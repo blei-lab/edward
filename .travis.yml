@@ -1,0 +1,36 @@
+sudo: required
+
+dist: trusty
+
+language: python
+
+notifications:
+    email: false
+
+python:
+    - "2.7"
+
+before_install:
+    - wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda info -a
+    - deps='pip numpy scipy nose pep8 progressbar'
+    - conda create -q -n test-environment "python=$TRAVIS_PYTHON_VERSION" $deps 
+    - source activate test-environment
+    - pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+    - pip install python-coveralls
+    - pip install numpydoc
+
+install:
+    - pip install -e .
+
+script:
+    - python --version
+    - nosetests --with-coverage --cover-erase --cover-package=edward -v -w tests/
+
+after_success:
+    - coveralls
