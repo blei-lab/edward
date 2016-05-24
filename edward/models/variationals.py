@@ -14,6 +14,7 @@ class Variational:
             self.num_vars = 0
             self.num_params = 0
             self.is_reparam = True
+            self.is_normal = True
             self.sample_tensor = []
         else:
             self.num_factors = sum([layer.num_factors for layer in self.layers])
@@ -21,6 +22,8 @@ class Variational:
             self.num_params = sum([layer.num_params for layer in self.layers])
             self.is_reparam = all(['reparam' in layer.__class__.__dict__
                                    for layer in self.layers])
+            self.is_normal = all([isinstance(layer, Normal)
+                                  for layer in self.layers])
             self.sample_tensor = [layer.sample_tensor for layer in self.layers]
 
     def add(self, layer):
@@ -36,6 +39,7 @@ class Variational:
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.sample_tensor += [layer.sample_tensor]
 
     def sample(self, x, size=1, score=True):
