@@ -131,7 +131,7 @@ sess = inference.initialize(n_print=10)
 for t in range(1000):
     loss = inference.update(sess)
     if t % inference.n_print == 0:
-        print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
+        print("iter {:d} loss {:.2f}".format(t, loss))
 
         # Sample functions from variational model
         mean, std = sess.run([variational.layers[0].m,

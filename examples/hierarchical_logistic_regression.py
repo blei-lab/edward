@@ -104,7 +104,7 @@ sess = inference.initialize(n_print=5)
 for t in range(600):
     loss = inference.update(sess)
     if t % inference.n_print == 0:
-        print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
+        print("iter {:d} loss {:.2f}".format(t, loss))
         variational.print_params(sess)
 
         # Sample functions from variational model

@@ -11,7 +11,7 @@ and probabilistic programming.
 
 It supports __modeling languages__ including
 
-* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
+* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Keras](http://keras.io), [Pretty Tensor](https://github.com/google/prettytensor), or [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
 * [Stan](http://mc-stan.org)
 * [PyMC3](http://pymc-devs.github.io/pymc3/)
 * original Python using [NumPy/SciPy](http://scipy.org/)
@@ -47,6 +47,7 @@ which can be found in [`examples/`](examples/):
 * [Mixture model of Gaussians](examples/mixture_gaussian.py)
 * [Gaussian process classification](examples/gp_classification.py)
 * [Bayesian neural network](examples/bayesian_nn.py)
+* [Mixture density network](examples/mixture_density_network.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)
 
 Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
