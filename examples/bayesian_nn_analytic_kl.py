@@ -16,8 +16,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
+from edward.models import Variational, Normal
 from edward.stats import norm
-from edward.variationals import Variational, Normal
 from edward.util import rbf
 
 class BayesianNN:
@@ -121,23 +121,29 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
-def print_progress(self, t, losses, sess):
-    if t % self.n_print == 0:
-        print("iter %d loss %.2f " % (t, np.mean(losses)))
+# model.log_lik() is defined so MFVI will do variational inference
+# assuming a standard normal prior on the weights; this enables VI
+# with an analytic KL term which provides faster inference.
+inference = ed.MFVI(model, variational, data)
+sess = inference.initialize(n_print=10)
+for t in range(1000):
+    loss = inference.update(sess)
+    if t % inference.n_print == 0:
+        print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
         # Sample functions from variational model
-        mean, std = sess.run([self.variational.layers[0].m,
-                              self.variational.layers[0].s])
+        mean, std = sess.run([variational.layers[0].m,
+                              variational.layers[0].s])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, self.variational.num_vars) * std + mean
+        zs = rs.randn(10, variational.num_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
-        mus = tf.pack([self.model.mapping(x, z) for z in tf.unpack(zs)])
+        mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
         outputs = sess.run(mus)
 
         # Get data
-        y, x = sess.run([self.data.data[:, 0], self.data.data[:, 1]])
+        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
 
         # Plot data and functions
         plt.cla()
@@ -146,10 +152,4 @@ def print_progress(self, t, losses, sess):
         ax.set_xlim([-8, 8])
         ax.set_ylim([-2, 3])
         plt.draw()
-
-ed.MFVI.print_progress = print_progress
-# model.log_lik() is defined so MFVI will do variational inference
-# assuming a standard normal prior on the weights; this enables VI
-# with an analytic KL term which provides faster inference.
-inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000, n_print=10)
+        plt.pause(1.0/60.0)
