@@ -5,7 +5,6 @@ Mixture density network using maximum likelihood.
 Probability model:
     Prior: None ("flat prior")
     Likelihood: Mixture sum of normals parameterized by a NN
-    
 Inference: Maximum a posteriori
 """
 import edward as ed
