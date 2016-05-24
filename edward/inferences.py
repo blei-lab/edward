@@ -221,15 +221,11 @@ class MFVI(VariationalInference):
         x = self.data.sample(self.n_data)
         z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
-
         p_log_lik = self.model.log_lik(x, self.samples)
-        mu = tf.concat(0, [layer.m for layer in self.variational.layers])
-        sigma = tf.concat(0, [layer.s for layer in self.variational.layers])
+        mu = tf.pack([layer.m for layer in self.variational.layers])
+        sigma = tf.pack([layer.s for layer in self.variational.layers])
         kl = kl_multivariate_normal(mu, sigma)
-        self.losses = p_log_lik - kl
+        self.loss = tf.reduce_mean(p_log_lik - kl)
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
@@ -241,6 +237,8 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
+        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
         self.loss = tf.reduce_mean(p_log_prob + q_entropy)
@@ -262,8 +260,9 @@ class MFVI(VariationalInference):
 
         mu = tf.pack([layer.m for layer in self.variational.layers])
         sigma = tf.pack([layer.s for layer in self.variational.layers])
-        self.losses = self.model.log_lik(x, z) - kl_multivariate_normal(mu, sigma)
-        return -tf.reduce_mean(self.losses)
+        self.loss = tf.reduce_mean(self.model.log_lik(x, z) -
+                                   kl_multivariate_normal(mu, sigma))
+        return -self.loss
 
     def build_reparam_loss_entropy(self):
         """
@@ -275,7 +274,7 @@ class MFVI(VariationalInference):
         """
         x = self.data.sample(self.n_data)
         z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) + \
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) +
                                    self.variational.entropy())
         return -self.loss
 
