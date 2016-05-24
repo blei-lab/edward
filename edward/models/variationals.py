@@ -421,7 +421,7 @@ class InvGamma(Likelihood):
     def mapping(self, x):
         alpha = Variable("alpha", [self.num_vars])
         beta = Variable("beta", [self.num_vars])
-        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
+        return [tf.nn.softplus(alpha)+1e-2, tf.nn.softplus(beta)+1e-2]
 
     def set_params(self, params):
         self.a = params[0]

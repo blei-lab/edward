@@ -97,4 +97,4 @@ variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_minibatch=5, n_data=5)
+inference.run(n_iter=1000, n_minibatch=5, n_data=5)

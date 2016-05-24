@@ -140,6 +140,8 @@ class InvGamma:
     def rvs(self, alpha, scale=1, size=1):
         x = stats.invgamma.rvs(alpha, scale=scale, size=size)
         # This is temporary to avoid returning Inf values.
+        x[x < 1e-10] = 0.1
+        x[x > 1e10] = 1.0
         x[np.logical_not(np.isfinite(x))] = 1.0
         return x
 

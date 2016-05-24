@@ -177,7 +177,7 @@ class MFVI(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, z)
+            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
 
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
@@ -212,7 +212,7 @@ class MFVI(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, z)
+            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
 
         x = self.data.sample(self.n_data)
         p_log_prob = self.model.log_prob(x, z)
