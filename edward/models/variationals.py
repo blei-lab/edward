@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import Variable
+from edward.util import cumprod, Variable
 
 class Variational:
     """A stack of variational families."""
@@ -478,13 +478,15 @@ class Multinomial(Likelihood):
         self.pi = None
 
     def mapping(self, x):
-        # Transform unconstrained parameters to lie on simplex.
+        # Transform a real (K-1)-vector to K-dimensional simplex.
         pi = Variable("pi", [self.num_factors, self.K-1])
-        pi_const = tf.sigmoid(pi)
-        pi_const = tf.concat(1,
-            [pi_const, tf.expand_dims(1.0 - tf.reduce_sum(pi_const), 0)])
-
-        return [pi_const]
+        eq = -tf.log(tf.cast(K - 1 - tf.range(K-1), dtype=tf.float32))
+        z = tf.sigmoid(eq + pi)
+        pil = tf.concat(1, [z, tf.ones([self.num_factors, 1])])
+        piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - z])
+        # cumulative product along 1st axis
+        S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+        return [S * pil]
 
     def set_params(self, params):
         self.pi = params[0]

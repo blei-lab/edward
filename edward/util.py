@@ -1,6 +1,22 @@
 import tensorflow as tf
 import numpy as np
 
+def cumprod(xs):
+    """
+    Cumulative product of a tensor along first dimension.
+    https://github.com/tensorflow/tensorflow/issues/813
+    """
+    values = tf.unpack(xs)
+    out = []
+    prev = tf.ones_like(values[0])
+    for val in values:
+        s = prev * val
+        out.append(s)
+        prev = s
+
+    result = tf.pack(out)
+    return result
+
 def digamma(x):
     """
     Computes the digamma function element-wise.
