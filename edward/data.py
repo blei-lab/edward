@@ -30,6 +30,10 @@ class Data:
     manually control mini-batches and feed in the placeholders.
 
     Data subsampling is not currently available for Stan models.
+
+    Internally, self.counter stores the last accessed data index. It
+    is used to obtain the next batch of data starting from
+    self.counter to the size of the data set.
     """
     def __init__(self, data=None, shuffled=True):
         self.data = data

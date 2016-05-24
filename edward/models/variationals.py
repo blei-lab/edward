@@ -570,6 +570,10 @@ class Normal(Likelihood):
 class PointMass(Likelihood):
     """
     Point mass variational family
+
+    q(z | lambda ) = prod_{i=1}^d Dirac(z[i] | params[i])
+    where lambda = params. Dirac(x; p) is the Dirac delta distribution
+    with density equal to 1 if x == p and 0 otherwise.
     """
     def __init__(self, num_vars=1, transform=tf.identity):
         Likelihood.__init__(self, 1)
@@ -603,4 +607,6 @@ class PointMass(Likelihood):
         if i >= self.num_factors:
             raise IndexError()
 
+        # a vector where the jth element is 1 if zs[j, i] is equal to
+        # the ith parameter, 0 otherwise
         return tf.cast(tf.equal(zs[:, i], self.params[i]), dtype=tf.float32)
