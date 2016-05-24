@@ -21,7 +21,7 @@ class MixtureDensityNetwork:
     Mixture density network for outputs y on inputs x.
 
     p((x,y), (z,theta))
-    = sum_{k=1}^K pi_k(x; z) Normal(y; mu_k(x; z), sigma_k(x; z))
+    = sum_{k=1}^K pi_k(x; theta) Normal(y; mu_k(x; theta), sigma_k(x; theta))
 
     where pi, mu, sigma are the output of a neural network taking x
     as input and with parameters theta. There are no latent variables
@@ -32,7 +32,7 @@ class MixtureDensityNetwork:
 
     def mapping(self, X):
         """pi, mu, sigma = NN(x; theta)"""
-        hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 128 units and ReLU activation
+        hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 25 hidden units
         hidden2 = Dense(25, activation='relu')(hidden1)
         self.mus = Dense(self.K)(hidden2)
         self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
