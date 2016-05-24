@@ -9,15 +9,16 @@ Probability model:
     Prior: Normal
     Likelihood: Normal with mean parameterized by fully connected NN
 Variational model
-    Likelihood: Mean-field Gaussian
+    Likelihood: Mean-field Normal
 """
 import edward as ed
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
+from edward.models import Variational, Normal
 from edward.stats import norm
-from edward.util import get_dims, rbf
+from edward.util import rbf
 
 class BayesianNN:
     """
@@ -44,7 +45,7 @@ class BayesianNN:
         regularization parameter, ridge penalty, scale parameter.
     """
     def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-        lik_variance=0.01, prior_variance=0.01):
+        lik_variance=0.01, prior_variance=1):
         self.layer_sizes = layer_sizes
         self.nonlinearity = nonlinearity
         self.lik_variance = lik_variance
@@ -82,31 +83,16 @@ class BayesianNN:
         """
         h = x
         for W, b in self.unpack_weights(z):
-            # broadcasting to do (W*h) + b (e.g. 40x10 + 1x10)
+            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
             h = self.nonlinearity(tf.matmul(h, W) + b)
 
         h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
     def log_prob(self, xs, zs):
-        """
-        Calculates the unnormalized log joint density.
-
-        Parameters
-        ----------
-        xs : tf.tensor
-            n_data x (D + 1), where first column is outputs and other
-            columns are inputs and features
-        zs : tf.tensor or np.ndarray
-            n_minibatch x num_vars, where n_minibatch is the number of
-            weight samples and num_vars is the number of weights
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_minibatch, where the i^th element is
-            the log joint density of xs and zs[i, :]
-        """
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        # Data must have labels in the first column and features in
+        # subsequent columns.
         y = xs[:, 0]
         x = xs[:, 1:]
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
@@ -128,11 +114,10 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     data = tf.constant(data, dtype=tf.float32)
     return ed.Data(data)
 
-ed.set_seed(43)
-# TODO This converges to the zero line. I think this is an
-# initialization issue.
+ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
-variational = ed.MFGaussian(model.num_vars)
+variational = Variational()
+variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 
 # Set up figure
@@ -141,22 +126,26 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
-def print_progress(self, t, losses, sess):
-    if t % self.n_print == 0:
-        print("iter %d loss %.2f " % (t, np.mean(losses)))
+inference = ed.MFVI(model, variational, data)
+sess = inference.initialize(n_print=10)
+for t in range(1000):
+    loss = inference.update(sess)
+    if t % inference.n_print == 0:
+        print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
         # Sample functions from variational model
-        mean, std = sess.run([self.variational.m, self.variational.s])
+        mean, std = sess.run([variational.layers[0].m,
+                              variational.layers[0].s])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, self.variational.num_vars) * std + mean
+        zs = rs.randn(10, variational.num_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
-        mus = tf.pack([self.model.mapping(x, z) for z in tf.unpack(zs)])
+        mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
         outputs = sess.run(mus)
 
         # Get data
-        y, x = sess.run([self.data.data[:, 0], self.data.data[:, 1]])
+        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
 
         # Plot data and functions
         plt.cla()
@@ -165,7 +154,4 @@ def print_progress(self, t, losses, sess):
         ax.set_xlim([-8, 8])
         ax.set_ylim([-2, 3])
         plt.draw()
-
-ed.MFVI.print_progress = print_progress
-inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=5000, n_print=10)
+        plt.pause(1.0/60.0)

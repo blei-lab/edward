@@ -5,9 +5,11 @@ class Data:
     """
     Base class for data.
 
-    By default, it assumes the data is a vector and subsamples data
-    i.i.d. (independent and identically distributed). Use one of the
-    derived classes for subsampling more complex data structures.
+    By default, it assumes the data is an array and if requested will
+    perform data subsampling according to slices of the first index
+    (e.g., elements in a vector, rows in a matrix, y-by-z matrices in
+    a x-by-y-by-z tensor). Use one of the derived classes for
+    subsampling more complex data structures.
 
     Arguments
     ----------
@@ -16,6 +18,10 @@ class Data:
         Stan, TensorFlow, and NumPy/SciPy respectively.
     shuffled: bool, optional
         Whether the data is shuffled.
+
+    Notes
+    -----
+    Data subsampling is not currently available for Stan models.
     """
     def __init__(self, data=None, shuffled=True):
         self.data = data
@@ -37,18 +43,21 @@ class Data:
             raise
 
     def sample(self, n_data=None):
+        # TODO scale gradient and printed loss by self.N / self.n_data
         if n_data is None:
             return self.data
 
         counter_new = self.counter + n_data
         if isinstance(self.data, tf.Tensor):
             if counter_new <= self.N:
-                minibatch = self.data[self.counter:counter_new]
+                minibatch = tf.gather(self.data,
+                                      list(range(self.counter, counter_new)))
                 self.counter = counter_new
             else:
                 counter_new = counter_new - self.N
-                minibatch = tf.concat(0, [self.data[self.counter:],
-                                          self.data[:counter_new]])
+                minibatch = tf.gather(self.data,
+                                      list(range(self.counter, self.N)) + \
+                                      list(range(0, counter_new)))
                 self.counter = counter_new
 
             return minibatch
@@ -75,6 +84,3 @@ class Data:
                 self.counter = counter_new
 
             return minibatch
-# TODO
-# for more complex data structures, specify a default for sampling,
-# e.g., for matrices sample rows or something

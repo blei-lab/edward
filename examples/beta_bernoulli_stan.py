@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in Stan.
+A simple coin flipping example. The model is written in Stan.
+Inspired by Stan's toy example.
 
 Probability model
     Prior: Beta
@@ -9,6 +10,7 @@ Variational model
     Likelihood: Mean-field Beta
 """
 import edward as ed
+from edward.models import Variational, Beta
 
 model_code = """
     data {
@@ -26,7 +28,8 @@ model_code = """
 """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
-variational = ed.MFBeta(1)
+variational = Variational()
+variational.add(Beta())
 data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 inference = ed.MFVI(model, variational, data)

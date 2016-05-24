@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in TensorFlow.
+A simple coin flipping example. The model is written in TensorFlow.
+Inspired by Stan's toy example.
 
 Probability model
     Prior: Beta
@@ -21,14 +22,12 @@ class BetaBernoulli:
 
     def log_prob(self, xs, zs):
         log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.concat(0, [
-            tf.reduce_sum(bernoulli.logpmf(xs, z)) \
-            for z in tf.unpack(zs)])
+        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs, z))
+                           for z in tf.unpack(zs)])
         return log_lik + log_prior
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = ed.MFBeta(model.num_vars)
 data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = ed.MAP(model, data, transform=tf.sigmoid)
