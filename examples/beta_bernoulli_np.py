@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in NumPy/SciPy.
+A simple coin flipping example. The model is written in NumPy/SciPy.
+Inspired by Stan's toy example.
 
 Probability model
     Prior: Beta
@@ -11,17 +12,13 @@ Variational model
 import edward as ed
 import numpy as np
 
-from edward import PythonModel
-from edward.variationals import Variational, Beta
+from edward.models import PythonModel, Variational, Beta
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
     """
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
-    def __init__(self):
-        self.num_vars = 1
-
     def _py_log_prob(self, xs, zs):
         # This example is written for pedagogy. We recommend
         # vectorizing operations in practice.
@@ -37,7 +34,7 @@ class BetaBernoulli(PythonModel):
 ed.set_seed(42)
 model = BetaBernoulli()
 variational = Variational()
-variational.add(Beta(model.num_vars))
+variational.add(Beta())
 data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
 inference = ed.MFVI(model, variational, data)

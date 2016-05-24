@@ -9,7 +9,7 @@ data = [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 
 def _sample_onepass(data, n_samples):
     samples = []
-    for _ in xrange(data.N / n_samples):
+    for _ in range(data.N / n_samples):
         # NOTE: the test will only work if data.N % n_samples == 0
         samples.append(data.sample(n_data=n_samples))
     return samples

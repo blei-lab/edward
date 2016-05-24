@@ -8,6 +8,12 @@ try:
 except ImportError:
     pass
 
+try:
+    import pymc3 as pm
+except ImportError:
+    pass
+
+
 class PythonModel:
     """
     Model wrapper for models written in NumPy/SciPy.
@@ -103,5 +109,38 @@ class StanModel:
 
             z_unconst = self.model.unconstrain_pars(z_dict)
             lp[b] = self.model.log_prob(z_unconst, adjust_transform=False)
+
+        return lp
+
+class PyMC3Model:
+    """
+    Model wrapper for models written in PyMC3.
+
+    Arguments
+    ----------
+    model : pymc3.Model object
+    observed : The shared theano tensor passed to the model likelihood
+    """
+    def __init__(self, model, observed):
+        self.model = model
+        self.observed = observed
+
+        vars = pm.inputvars(model.cont_vars)
+
+        bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
+        self.logp = bij.mapf(model.fastlogp)
+        self.dlogp = bij.mapf(model.fastdlogp(vars))
+
+        self.num_vars = len(vars)
+
+    def log_prob(self, xs, zs):
+        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
+
+    def _py_log_prob(self, xs, zs):
+        n_minibatch = zs.shape[0]
+        lp = np.zeros(n_minibatch, dtype=np.float32)
+        self.observed.set_value(xs)
+        for s in range(n_minibatch):
+            lp[s] = self.logp(zs[s, :])
 
         return lp

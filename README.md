@@ -9,8 +9,9 @@ and probabilistic programming.
 
 It supports __modeling languages__ including
 
-* [Stan](http://mc-stan.org)
 * [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
+* [Stan](http://mc-stan.org)
+* [PyMC3](http://pymc-devs.github.io/pymc3/)
 * original Python using [NumPy/SciPy](http://scipy.org/)
 
 It supports __inference__ via
@@ -70,11 +71,11 @@ We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of t
 We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
-Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0.1. https://github.com/blei-lab/edward
+Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. https://github.com/blei-lab/edward
 ```
 @misc{tran2016edward,
   author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
-  title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0.1}},
+  title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
   year = {2016},
   url = {https://github.com/blei-lab/edward}
 }
