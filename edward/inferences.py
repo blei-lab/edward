@@ -314,12 +314,12 @@ class VAE(VariationalInference):
         # where x^b is a mini-batch of x, with sizes M and N respectively.
         # This is absorbed into the learning rate.
         with tf.variable_scope("model") as scope:
-            # TODO This currently uses Normal, not Variational()
-            self.variational.set_params(self.variational.mapping(self.x))
-            z = self.variational.sample(self.n_data)
+            x = self.x
+            # TODO samples 1 set of latent variables for each data point
+            z, self.samples = self.variational.sample(x, self.n_data, score=False)
             self.loss = tf.reduce_sum(self.model.log_lik(self.x, z)) - \
-                        kl_multivariate_normal(self.variational.m,
-                                               self.variational.s)
+                        kl_multivariate_normal(self.variational.layers[0].m,
+                                               self.variational.layers[0].s)
 
         return -self.loss
 
