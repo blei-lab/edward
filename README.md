@@ -1,5 +1,8 @@
 [![edward](http://dustintran.com/img/blackbox_200.png)](http://www.erikolofsen.com/blackbox.html)
 
+[![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
+[![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master)](https://coveralls.io/github/blei-lab/edward?branch=master)
+
 __Edward__ is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
 and continuous latent variables, neural network parameterizations, and
@@ -9,8 +12,9 @@ and probabilistic programming.
 
 It supports __modeling languages__ including
 
+* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Keras](http://keras.io), [Pretty Tensor](https://github.com/google/prettytensor), or [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
 * [Stan](http://mc-stan.org)
-* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Pretty Tensor](https://github.com/google/prettytensor) and [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
+* [PyMC3](http://pymc-devs.github.io/pymc3/)
 * original Python using [NumPy/SciPy](http://scipy.org/)
 
 It supports __inference__ via
@@ -44,6 +48,7 @@ which can be found in [`examples/`](examples/):
 * [Mixture model of Gaussians](examples/mixture_gaussian.py)
 * [Gaussian process classification](examples/gp_classification.py)
 * [Bayesian neural network](examples/bayesian_nn.py)
+* [Mixture density network](examples/mixture_density_network.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)
 
 Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
@@ -70,11 +75,11 @@ We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of t
 We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
-Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0.1. https://github.com/blei-lab/edward
+Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. https://github.com/blei-lab/edward
 ```
 @misc{tran2016edward,
   author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
-  title = {{Edward: A library for probabilistic modeling, inference, and criticism, Version 1.0.1}},
+  title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
   year = {2016},
   url = {https://github.com/blei-lab/edward}
 }

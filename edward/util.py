@@ -1,64 +1,45 @@
-import numpy as np
 import tensorflow as tf
+import numpy as np
 
-def set_seed(x):
+def cumprod(xs):
     """
-    Set seed for both NumPy and TensorFlow.
+    Cumulative product of a tensor along first dimension.
+    https://github.com/tensorflow/tensorflow/issues/813
     """
-    np.random.seed(x)
-    tf.set_random_seed(x)
+    values = tf.unpack(xs)
+    out = []
+    prev = tf.ones_like(values[0])
+    for val in values:
+        s = prev * val
+        out.append(s)
+        prev = s
 
-def check_is_tf_vector(x):
-    if isinstance(x, tf.Tensor):
-        dimensions = x.get_shape()
-        if(len(dimensions) == 0):
-            raise TypeError("util::check_is_tf_vector: "
-                            "input is a scalar.")
-        elif(len(dimensions) == 1):
-            if(dimensions[0].value <= 1):
-                raise TypeError("util::check_is_tf_vector: "
-                                "input has first dimension <= 1.")
-            else:
-                pass
-        elif(len(dimensions) == 2):
-            if(dimensions[1]!=1):
-                raise TypeError("util::check_is_tf_vector: "
-                                "input has second dimension != 1.")
-        else:
-            raise TypeError("util::check_is_tf_vector: "
-                            "input has too many dimensions.")
-    else:
-        raise TypeError("util::check_is_tf_vector: "
-                        "input is not a TensorFlow object.")
+    result = tf.pack(out)
+    return result
 
-def log_sum_exp(x):
+def digamma(x):
     """
-    Computes the log_sum_exp of the elements in x.
+    Computes the digamma function element-wise.
 
-    Works for x with
-        shape=TensorShape([Dimension(N)])
-        shape=TensorShape([Dimension(N), Dimension(1)])
+    TensorFlow doesn't have special functions with support for
+    automatic differentiation, so use a log/exp/polynomial
+    approximation.
+    http://www.machinedlearnings.com/2011/06/faster-lda.html
 
-    Not tested for anything beyond that.
+    Parameters
+    ----------
+    x : np.array or tf.Tensor
+        scalar, vector, or rank-n tensor
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
-    check_is_tf_vector(x)
-    x_max = tf.reduce_max(x)
-    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
-
-def logit(x):
-    return tf.truediv(1.0, (1.0 + tf.exp(-x)))
-
-def probit(x):
-    return 0.5 * (1.0 + tf.erf(x / tf.sqrt(2.0)))
-
-def sigmoid(x):
-    "Numerically-stable sigmoid function."
-    if x >= 0.0:
-        z = tf.exp(-x)
-        return 1.0 / (1.0 + z)
-    else:
-        z = tf.exp(x)
-        return z / (1.0 + z)
+    twopx = 2.0 + x
+    logterm = tf.log(twopx)
+    return - (1.0 + 2.0 * x) / (x * (1.0 + x)) - \
+           (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
 
 def dot(x, y):
     """
@@ -75,13 +56,6 @@ def dot(x, y):
         vec = y
         d = vec.get_shape()[0].value
         return tf.matmul(mat, tf.reshape(vec, [d, 1]))
-
-def trace(X):
-    # assumes square
-    n = X.get_shape()[0].value
-    mask = tf.diag(tf.ones([n], dtype=X.dtype))
-    X = tf.mul(mask, X)
-    return tf.reduce_sum(X)
 
 def get_dims(x):
     """
@@ -136,46 +110,90 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             tf.square((loc_two - loc_one)/scale_two) - \
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
-def log_gamma(x):
+def lbeta(x):
     """
-    TensorFlow doesn't have special functions, so use a
-    log/exp/polynomial approximation.
+    Computes the log of Beta(x), reducing along the last dimension.
+
+    TensorFlow doesn't have special functions with support for
+    automatic differentiation, so use a log/exp/polynomial
+    approximation.
     http://www.machinedlearnings.com/2011/06/faster-lda.html
+
+    Parameters
+    ----------
+    x : np.array or tf.Tensor
+        vector or rank-n tensor
+
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, rank-(n-1) if rank-n tensor input
+    """
+    x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+    if len(get_dims(x)) == 1:
+        return tf.reduce_sum(lgamma(x)) - lgamma(tf.reduce_sum(x))
+    else:
+        return tf.reduce_sum(lgamma(x), 1) - lgamma(tf.reduce_sum(x, 1))
+
+def lgamma(x):
+    """
+    Computes the log of Gamma(x) element-wise.
+
+    TensorFlow doesn't have special functions with support for
+    automatic differentiation, so use a log/exp/polynomial
+    approximation.
+    http://www.machinedlearnings.com/2011/06/faster-lda.html
+
+    Parameters
+    ----------
+    x : np.array or tf.Tensor
+        scalar, vector, or rank-n tensor
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
     logterm = tf.log(x * (1.0 + x) * (2.0 + x))
     xp3 = 3.0 + x
     return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log(xp3)
 
-def log_beta(x, y):
+def log_sum_exp(x):
     """
-    TensorFlow doesn't have special functions, so use a
-    log/exp/polynomial approximation.
+    Computes the log_sum_exp of the elements in x.
+
+    Works for x with
+        shape=TensorShape([Dimension(N)])
+        shape=TensorShape([Dimension(N), Dimension(1)])
+
+    Not tested for anything beyond that.
     """
-    return log_gamma(x) + log_gamma(y) - log_gamma(x+y)
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
-def logit(x, clip_finite=True):
-    if isinstance(x, tf.Tensor):
-        if clip_finite:
-            x = tf.clip_by_value(x, -88, 88, name="clipped_logit_input")
-        transformed = 1.0 / (1 + tf.exp(-x))
-        jacobian = transformed * (1-transformed)
-        if clip_finite:
-            jacobian = tf.clip_by_value(jacobian, 1e-45, 1e38, name="clipped_jacobian")
-        log_jacobian = tf.reduce_sum(tf.log(jacobian))
+def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
+    """
+    Squared-exponential kernel
+    k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }
+    """
+    return tf.pow(sigma, 2.0) * \
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
+                  tf.reduce_sum(tf.pow(x - y , 2.0)))
 
-    else:
-        transformed = 1.0 / (1 + np.exp(-x))
-        jacobian = transformed * (1-transformed)
-        log_jacobian = np.sum(np.log(jacobian))
+def rbf(x, y=0.0, sigma=1.0, l=1.0):
+    """
+    Squared-exponential kernel element-wise
+    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
+    """
+    return tf.pow(sigma, 2.0) * \
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
 
-    return transformed, log_jacobian
-
-def multivariate_log_beta(x):
-    return tf.reduce_sum(log_gamma(x)) - log_gamma(tf.reduce_sum(x))
-
-def rbf(x):
-    """RBF kernel element-wise."""
-    return tf.exp(-0.5*x*x)
+def set_seed(x):
+    """
+    Set seed for both NumPy and TensorFlow.
+    """
+    np.random.seed(x)
+    tf.set_random_seed(x)
 
 # This is taken from PrettyTensor.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497

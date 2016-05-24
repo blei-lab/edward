@@ -11,14 +11,7 @@ Probability model
     for n = 1, ..., N
         c_n ~ Multinomial(pi)
         x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
-Variational model
-    Likelihood:
-        q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
-        q(pi) = Dirichlet(alpha')
-        q(mu_k) = N(mu'_k, Sigma'_k)
-        q(sigma_k) = Inv-Gamma(a'_k, b'_k)
-    (We collapse the c_n latent variables in the probability model's
-    joint density.)
+Inference: Maximum a posteriori
 
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """
@@ -56,43 +49,39 @@ class MixtureGaussian:
         self.c = 10
         self.alpha = tf.ones([K])
 
-    def unpack_params(self, z):
-        """Unpack parameters from a flattened vector."""
-        pi = z[0:self.K]
-        mus = z[self.K:(self.K+self.K*self.D)]
-        sigmas = z[(self.K+self.K*self.D):(self.K+2*self.K*self.D)]
+    def unpack_params(self, zs):
+        """Unpack sets of parameters from a flattened matrix."""
+        pi = zs[:, 0:self.K]
+        mus = zs[:, self.K:(self.K+self.K*self.D)]
+        sigmas = zs[:, (self.K+self.K*self.D):(self.K+2*self.K*self.D)]
+        # Do the unconstrained to constrained transformation for MAP here.
+        pi = tf.sigmoid(pi)
+        pi = tf.concat(1, [pi[:, 0:(self.K-1)],
+             tf.expand_dims(1.0 - tf.reduce_sum(pi[:, 0:(self.K-1)], 1), 0)])
+        sigmas = tf.nn.softplus(sigmas)
         return pi, mus, sigmas
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         N = get_dims(xs)[0]
+        pi, mus, sigmas = self.unpack_params(zs)
+        log_prior = dirichlet.logpdf(pi, self.alpha)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
+
         # Loop over each mini-batch zs[b,:]
-        log_prob = []
-        for z in tf.unpack(zs):
-            # Do the unconstrained to constrained transformation for MAP here.
-            pi, mus, sigmas = self.unpack_params(z)
-            pi = tf.sigmoid(pi)
-            pi = tf.concat(0, [pi[0:(self.K-1)],
-                         tf.expand_dims(1.0 - tf.reduce_sum(pi[0:(self.K-1)]), 0)])
-            sigmas = tf.nn.softplus(sigmas)
-            log_prior = dirichlet.logpdf(pi, self.alpha)
-            for k in xrange(self.K):
-                log_prior += norm.logpdf(mus[k*self.D], 0, np.sqrt(self.c))
-                log_prior += norm.logpdf(mus[k*self.D+1], 0, np.sqrt(self.c))
-                log_prior += invgamma.logpdf(sigmas[k*self.D], self.a, self.b)
-                log_prior += invgamma.logpdf(sigmas[k*self.D+1], self.a, self.b)
+        log_lik = []
+        n_minibatch = get_dims(zs)[0]
+        for s in range(n_minibatch):
+            log_lik_z = N*tf.reduce_sum(tf.log(pi))
+            for k in range(self.K):
+                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
+                    mus[s, (k*self.D):((k+1)*self.D)],
+                    sigmas[s, (k*self.D):((k+1)*self.D)]))
 
-            log_lik = tf.constant(0.0, dtype=tf.float32)
-            for x in tf.unpack(xs):
-                for k in xrange(self.K):
-                    log_lik += tf.log(pi[k])
-                    log_lik += multivariate_normal.logpdf(x,
-                        mus[(k*self.D):((k+1)*self.D)],
-                        sigmas[(k*self.D):((k+1)*self.D)])
+            log_lik += [log_lik_z]
 
-            log_prob += [log_prior + log_lik]
-
-        return tf.pack(log_prob)
+        return log_prior + tf.pack(log_lik)
 
 ed.set_seed(42)
 x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')

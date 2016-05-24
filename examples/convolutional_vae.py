@@ -16,7 +16,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward import Variational, Normal
+from edward.models import Variational, Normal
 from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
@@ -34,33 +34,16 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 
 FLAGS = flags.FLAGS
 
-# TODO
-# This is a temporary fix so that we can leverage TensorFlow sampling,
-# which is faster than realizing TensorFlow parameters and then
-# running SciPy sampling.
-def sample_noise(self, size):
-    """
-    eps = sample_noise() ~ s(eps)
-    s.t. z = reparam(eps; lambda) ~ q(z | lambda)
-    """
-    return tf.random_normal(size)
-
-Normal.sample_noise = sample_noise
-
-def sample_noise(self, size):
-    eps_layers = [layer.sample_noise((size[0], layer.num_vars))
-                  for layer in self.layers]
-    return tf.concat(0, eps_layers)
-
-Variational.sample_noise = sample_noise
-
 from edward import VariationalInference
 def initialize(self, *args, **kwargs):
+    self.n_data = FLAGS.n_data
+    # TODO don't fix number of covariates
     self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
     self.losses = tf.constant(0.0)
 
     loss = self.build_loss()
     optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
+    # TODO move this to not rely on Pretty Tensor
     self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
     init = tf.initialize_all_variables()
@@ -70,26 +53,35 @@ def initialize(self, *args, **kwargs):
 
 def update(self, sess):
     x = self.data.sample(self.n_data)
-    _, loss_value = sess.run([self.train, self.losses], {self.x: x})
+    _, loss_value = sess.run([self.train, self.loss], {self.x: x})
     return loss_value
 
 def build_loss(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     with tf.variable_scope("model") as scope:
-        self.variational.set_params(self.variational.mapping(self.x))
-        eps = self.variational.sample_noise([self.n_data, self.variational.num_vars])
-        z = self.variational.reparam(eps)
-        self.losses = self.model.log_lik(self.x, z) - \
-                      kl_multivariate_normal(self.variational.layers[0].m,
-                                             self.variational.layers[0].s
+        z, _ = self.variational.sample(self.n_data)
+        # TODO This currently uses Normal, not Variational()
+        #self.variational.set_params(self.variational.mapping(self.x))
+        #z = self.variational.sample(self.n_data)
+        self.loss = tf.reduce_sum(self.model.log_lik(self.x, z)) - \
+                    kl_multivariate_normal(self.variational.layers[0].m,
+                                           self.variational.layers[0].s)
 
-    return -tf.reduce_sum(self.losses)
+    return -self.loss
 
 ed.MFVI.initialize = initialize
 ed.MFVI.update = update
 ed.MFVI.build_loss = build_loss
 
 class NormalBernoulli:
+    """
+    Each binarized pixel in an image is modeled by a Bernoulli
+    likelihood. The success probability for each pixel is the output
+    of a neural network that takes samples from a normal prior as
+    input.
+
+    p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
+    """
     def __init__(self, num_vars):
         self.num_vars = num_vars
 
@@ -120,13 +112,19 @@ class NormalBernoulli:
     def sample_prior(self, size):
         """
         p ~ some complex distribution induced by
-        z ~ N(0, 1), p = phi(z)
+        z ~ N(0, 1), p = varphi(z)
         """
         z = tf.random_normal(size)
+        # Note the output of this is not prior samples, but just the
+        # success probability, i.e., the hidden representation learned
+        # by the neural network.
         return self.mapping(z)
 
 def mapping(self, x):
     """
+    Inference network to parameterize variational family. It takes
+    data x as input and outputs the variational parameters lambda.
+
     lambda = phi(x)
     """
     with pt.defaults_scope(activation_fn=tf.nn.elu,
@@ -147,7 +145,6 @@ def mapping(self, x):
     stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
     return [mean, stddev]
 
-# TODO
 class Data:
     def __init__(self, data):
         self.mnist = data
@@ -159,6 +156,7 @@ class Data:
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
 variational = Variational()
+# TODO
 Normal.mapping = mapping
 variational.add(Normal(FLAGS.num_vars))
 
