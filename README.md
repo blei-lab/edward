@@ -1,5 +1,7 @@
 [![edward](http://dustintran.com/img/blackbox_200.png)](http://www.erikolofsen.com/blackbox.html)
 
+[![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
+
 __Edward__ is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
 and continuous latent variables, neural network parameterizations, and
