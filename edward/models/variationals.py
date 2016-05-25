@@ -460,7 +460,7 @@ class Multinomial(Likelihood):
     def mapping(self, x):
         # Transform a real (K-1)-vector to K-dimensional simplex.
         pi = Variable("pi", [self.num_factors, self.K-1])
-        eq = -tf.log(tf.cast(K - 1 - tf.range(K-1), dtype=tf.float32))
+        eq = -tf.log(tf.cast(self.K - 1 - tf.range(self.K-1), dtype=tf.float32))
         z = tf.sigmoid(eq + pi)
         pil = tf.concat(1, [z, tf.ones([self.num_factors, 1])])
         piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - z])
