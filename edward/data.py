@@ -63,7 +63,10 @@ class Data:
             raise NotImplementedError()
 
     def sample(self, n_data=None):
-        # TODO scale gradient and printed loss by self.N / self.n_data
+        # TODO
+        # In general, there should be a scale factor due to data
+        # subsampling, so that
+        # log_lik \approx self.N / n_data * ( mini-batch log_lik )
         if n_data is None or self.data is None:
             return self.data
 

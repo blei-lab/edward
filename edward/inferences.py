@@ -294,6 +294,7 @@ class VAE(VariationalInference):
     def initialize(self, n_data=None):
         # TODO refactor to use VariationalInference's initialize()
         self.n_data = n_data
+        self.score = False
 
         # TODO don't fix number of covariates
         self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
@@ -311,23 +312,20 @@ class VAE(VariationalInference):
 
     def update(self, sess):
         x = self.data.sample(self.n_data)
-        _, loss_value = sess.run([self.train, self.loss], {self.x: x})
-        return loss_value
+        _, loss = sess.run([self.train, self.loss], {self.x: x})
+        return loss
 
     def build_loss(self):
         # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-        # In general, there should be a scale factor due to data
-        # subsampling, so that
-        # ELBO = N / M * ( ELBO using x_b )
-        # where x^b is a mini-batch of x, with sizes M and N respectively.
-        # This is absorbed into the learning rate.
         with tf.variable_scope("model") as scope:
             x = self.x
             # TODO samples 1 set of latent variables for each data point
-            z, self.samples = self.variational.sample(x, self.n_data, score=False)
-            self.loss = tf.reduce_sum(self.model.log_lik(self.x, z)) - \
-                        kl_multivariate_normal(self.variational.layers[0].m,
-                                               self.variational.layers[0].s)
+            z, _ = self.variational.sample(x, self.n_data, self.score)
+
+            mu = tf.pack([layer.m for layer in self.variational.layers])
+            sigma = tf.pack([layer.s for layer in self.variational.layers])
+            self.loss = tf.reduce_sum(self.model.log_lik(x, z)) - \
+                        kl_multivariate_normal(mu, sigma)
 
         return -self.loss
 
