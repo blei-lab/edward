@@ -66,8 +66,7 @@ class Data:
         # TODO
         # In general, there should be a scale factor due to data
         # subsampling, so that
-        # ELBO = self.N / self.n_data * ( mini-batch ELBO )
-        # For now this is absorbed into the learning rate.
+        # log_lik = self.N / n_data * ( mini-batch log_lik )
         if n_data is None or self.data is None:
             return self.data
 

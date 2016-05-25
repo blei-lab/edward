@@ -34,10 +34,19 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 
 FLAGS = flags.FLAGS
 
-from edward import VariationalInference
+# TODO
+# debug so that it currently still runs again
+#from edward import VariationalInference
+#def initialize(self, n_minibatch=1, score=False, *args, **kwargs):
+#    self.n_data = FLAGS.n_data
+#    self.score = False
+#    self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
+#    return VariationalInference.initialize(self, *args, **kwargs)
+
 def initialize(self, *args, **kwargs):
     self.n_data = FLAGS.n_data
-    # TODO don't fix number of covariates
+    self.score = False
+    # TODO generalize to if x is tensor; this is doable now
     self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
     self.losses = tf.constant(0.0)
 
@@ -56,21 +65,25 @@ def update(self, sess):
     _, loss_value = sess.run([self.train, self.loss], {self.x: x})
     return loss_value
 
-def build_loss(self):
+def build_reparam_loss_kl(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
+    # TODO should we always use scope?
     with tf.variable_scope("model") as scope:
         x = self.x
         # TODO samples 1 set of latent variables for each data point
-        z, _ = self.variational.sample(x, self.n_data, score=False)
-        self.loss = tf.reduce_sum(self.model.log_lik(self.x, z)) - \
-                    kl_multivariate_normal(self.variational.layers[0].m,
-                                           self.variational.layers[0].s)
+        z, _ = self.variational.sample(x, self.n_data, self.score)
+
+        mu = tf.pack([layer.m for layer in self.variational.layers])
+        sigma = tf.pack([layer.s for layer in self.variational.layers])
+        # TODO tf.reduce_sum()
+        self.loss = tf.reduce_sum(self.model.log_lik(x, z)) - \
+                    kl_multivariate_normal(mu, sigma)
 
     return -self.loss
 
 ed.MFVI.initialize = initialize
 ed.MFVI.update = update
-ed.MFVI.build_loss = build_loss
+ed.MFVI.build_reparam_loss_kl = build_reparam_loss_kl
 
 class NormalBernoulli:
     """
@@ -156,7 +169,7 @@ ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
 
 variational = Variational()
-# TODO
+# TODO see feature/vertical-layers
 Normal.mapping = mapping
 variational.add(Normal(FLAGS.num_vars))
 
