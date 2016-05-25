@@ -146,7 +146,7 @@ class MFVI(VariationalInference):
 
     def update(self, sess):
         feed_dict = self.variational.np_sample(
-            self.samples, self.n_minibatch, self.score, sess)
+            self.samples, self.n_minibatch, sess)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -175,7 +175,7 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+        z, self.samples = self.variational.sample(x, self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
@@ -194,7 +194,7 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+        z, self.samples = self.variational.sample(x, self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
@@ -214,7 +214,7 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+        z, self.samples = self.variational.sample(x, self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
@@ -236,7 +236,7 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+        z, self.samples = self.variational.sample(x, self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
@@ -259,7 +259,7 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+        z, self.samples = self.variational.sample(x, self.n_minibatch)
 
         mu = tf.pack([layer.m for layer in self.variational.layers])
         sigma = tf.pack([layer.s for layer in self.variational.layers])
@@ -276,7 +276,7 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch, self.score)
+        z, self.samples = self.variational.sample(x, self.n_minibatch)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss

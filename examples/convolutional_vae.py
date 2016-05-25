@@ -38,7 +38,6 @@ FLAGS = flags.FLAGS
 # debug so that it currently still runs again
 def initialize(self, *args, **kwargs):
     self.n_data = FLAGS.n_data
-    self.score = False
     # TODO generalize to if x is tensor; this is doable now
     self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
     self.losses = tf.constant(0.0)
@@ -64,7 +63,7 @@ def build_reparam_loss_kl(self):
     with tf.variable_scope("model") as scope:
         x = self.x
         # TODO samples 1 set of latent variables for each data point
-        z, self.samples = self.variational.sample(x, self.n_data, self.score)
+        z, self.samples = self.variational.sample(x, self.n_data)
 
         mu = tf.pack([layer.m for layer in self.variational.layers])
         sigma = tf.pack([layer.s for layer in self.variational.layers])

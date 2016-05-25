@@ -42,7 +42,7 @@ class Variational:
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.sample_tensor += [layer.sample_tensor]
 
-    def sample(self, x, size=1, score=True):
+    def sample(self, x, size=1):
         """
         Draws a mix of tensors and placeholders, corresponding to
         TensorFlow-based samplers and SciPy-based samplers depending
@@ -52,9 +52,6 @@ class Variational:
         ----------
         x : Data
         size : int, optional
-        score : bool, optional
-            Whether to force all samplers to use sample() and not
-            sample_noise(). For calculating score function gradients.
 
         Returns
         -------
@@ -75,19 +72,14 @@ class Variational:
         self._set_params(self._mapping(x))
         samples = []
         for layer in self.layers:
-            if layer.sample_tensor and score:
+            if layer.sample_tensor:
                 samples += [layer.sample(size)]
-            elif layer.sample_tensor and not score:
-                samples += [layer.sample_noise(size)]
             else:
                 samples += [tf.placeholder(tf.float32, (size, layer.num_vars))]
 
-        if score:
-            return tf.concat(1, samples), samples
-        else:
-            return tf.concat(1, self._reparam(samples)), samples
+        return tf.concat(1, samples), samples
 
-    def np_sample(self, samples, size=1, score=True, sess=None):
+    def np_sample(self, samples, size=1, sess=None):
         """
         Form dictionary to feed any placeholders with np.array
         samples.
@@ -95,10 +87,7 @@ class Variational:
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
-                if score:
-                    feed_dict[sample] = layer.sample(size, sess)
-                else:
-                    feed_dict[sample] = layer.sample_noise(size)
+                feed_dict[sample] = layer.sample(size, sess)
 
         return feed_dict
 
@@ -122,15 +111,6 @@ class Variational:
 
     def _set_params(self, params):
         [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
-
-    def _sample_noise(self, size=1):
-        return [layer.sample_noise(size) for layer in self.layers]
-
-    def _reparam(self, eps):
-        return [layer.reparam(eps[i]) for i,layer in enumerate(self.layers)]
-
-    def _sample(self, size=1, sess=None):
-        return [layer.sample(size, sess) for layer in self.layers]
 
 class Likelihood:
     """
