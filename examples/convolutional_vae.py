@@ -36,13 +36,6 @@ FLAGS = flags.FLAGS
 
 # TODO
 # debug so that it currently still runs again
-#from edward import VariationalInference
-#def initialize(self, n_minibatch=1, score=False, *args, **kwargs):
-#    self.n_data = FLAGS.n_data
-#    self.score = False
-#    self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
-#    return VariationalInference.initialize(self, *args, **kwargs)
-
 def initialize(self, *args, **kwargs):
     self.n_data = FLAGS.n_data
     self.score = False
@@ -71,7 +64,7 @@ def build_reparam_loss_kl(self):
     with tf.variable_scope("model") as scope:
         x = self.x
         # TODO samples 1 set of latent variables for each data point
-        z, _ = self.variational.sample(x, self.n_data, self.score)
+        z, self.samples = self.variational.sample(x, self.n_data, self.score)
 
         mu = tf.pack([layer.m for layer in self.variational.layers])
         sigma = tf.pack([layer.s for layer in self.variational.layers])

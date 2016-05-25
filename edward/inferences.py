@@ -6,11 +6,6 @@ from edward.data import Data
 from edward.models import Variational, PointMass
 from edward.util import kl_multivariate_normal, log_sum_exp
 
-#try:
-#    import prettytensor as pt
-#except ImportError:
-#    pass
-
 class Inference:
     """
     Base class for inference methods.
@@ -97,11 +92,8 @@ class VariationalInference(Inference):
         learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                             global_step,
                                             100, 0.9, staircase=True)
-        optimizer = tf.train.AdamOptimizer(learning_rate)
-        if True: # TODO
-            #self.train = pt.apply_optimizer(optimizer, losses=[loss])
-        #else:
-            self.train = optimizer.minimize(loss, global_step=global_step)
+        self.train = tf.train.AdamOptimizer(learning_rate).minimize(
+            loss, global_step=global_step)
 
         init = tf.initialize_all_variables()
         if sess == None:
