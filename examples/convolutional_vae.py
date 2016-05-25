@@ -34,13 +34,10 @@ flags.DEFINE_string("img_directory", "img", "Directory to store sampled images."
 
 FLAGS = flags.FLAGS
 
-# TODO
-# debug so that it currently still runs again
 def initialize(self, *args, **kwargs):
-    self.n_data = FLAGS.n_data
-    # TODO generalize to if x is tensor; this is doable now
-    self.x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
-    self.losses = tf.constant(0.0)
+    self.n_data = None
+    self.score = False
+    self.loss = tf.constant(0.0)
 
     loss = self.build_loss()
     optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
@@ -52,18 +49,13 @@ def initialize(self, *args, **kwargs):
     sess.run(init)
     return sess
 
-def update(self, sess):
-    x = self.data.sample(self.n_data)
-    _, loss_value = sess.run([self.train, self.loss], {self.x: x})
-    return loss_value
-
 def build_reparam_loss_kl(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     # TODO should we always use scope?
     with tf.variable_scope("model") as scope:
-        x = self.x
+        x = self.data.sample(self.n_data)
         # TODO samples 1 set of latent variables for each data point
-        z, self.samples = self.variational.sample(x, self.n_data)
+        z, self.samples = self.variational.sample(x, FLAGS.n_data)
 
         mu = tf.pack([layer.m for layer in self.variational.layers])
         sigma = tf.pack([layer.s for layer in self.variational.layers])
@@ -74,7 +66,6 @@ def build_reparam_loss_kl(self):
     return -self.loss
 
 ed.MFVI.initialize = initialize
-ed.MFVI.update = update
 ed.MFVI.build_reparam_loss_kl = build_reparam_loss_kl
 
 class NormalBernoulli:
@@ -149,14 +140,6 @@ def mapping(self, x):
     stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
     return [mean, stddev]
 
-class Data:
-    def __init__(self, data):
-        self.mnist = data
-
-    def sample(self, size):
-        x_batch, _ = mnist.train.next_batch(size)
-        return x_batch
-
 ed.set_seed(42)
 model = NormalBernoulli(FLAGS.num_vars)
 
@@ -167,11 +150,16 @@ variational.add(Normal(FLAGS.num_vars))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
+
 mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
-data = Data(mnist)
+
+# data uses placeholder in order to build inference's computational
+# graph. np.arrays of data are fed in during computation.
+x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
+data = ed.Data(x)
 
 inference = ed.MFVI(model, variational, data)
-sess = inference.initialize(n_data=FLAGS.n_data)
+sess = inference.initialize()
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior([FLAGS.n_data, FLAGS.num_vars])
 
@@ -183,17 +171,19 @@ for epoch in range(FLAGS.n_epoch):
     pbar.start()
     for t in range(FLAGS.n_iter_per_epoch):
         pbar.update(t)
-        loss = inference.update(sess)
+        x_train, _ = mnist.train.next_batch(FLAGS.n_data)
+        _, loss = sess.run([inference.train, inference.loss],
+                            feed_dict={x: x_train})
         avg_loss += loss
 
-    # Take average of all ELBOs during the epoch.
+    # Take average over all ELBOs during the epoch, and over minibatch
+    # of data points (images).
     avg_loss = avg_loss / FLAGS.n_iter_per_epoch
-    # Take average over each data point (pixel), where each image has
-    # 28*28 pixels.
-    avg_loss = avg_loss / (28 * 28 * FLAGS.n_data)
+    avg_loss = avg_loss / FLAGS.n_data
 
-    # Print a lower bound to the average marginal likelihood for a single pixel.
-    print("log p(x) >= %f" % avg_loss)
+    # Print a lower bound to the average marginal likelihood for an
+    # image.
+    print("log p(x) >= {:0.3f}".format(avg_loss))
 
     imgs = sess.run(p_rep)
     for b in range(FLAGS.n_data):
