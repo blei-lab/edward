@@ -68,7 +68,8 @@ class VariationalInference(Inference):
 
         return sess
 
-    def initialize(self, n_iter=1000, n_data=None, n_print=100, sess=None):
+    def initialize(self, n_iter=1000, n_data=None, n_print=100,
+        optimizer=None, sess=None):
         """
         Initialize inference algorithm.
 
@@ -81,6 +82,9 @@ class VariationalInference(Inference):
             the data.
         n_print : int, optional
             Number of iterations for each print progress.
+        optimizer : str, optional
+            Whether to use TensorFlow optimizer or PrettyTensor
+            optimizer if using PrettyTensor. Defaults to TensorFlow.
         sess : tf.Session, optional
             TensorFlow session for computation.
         """
@@ -91,14 +95,18 @@ class VariationalInference(Inference):
         self.loss = tf.constant(0.0)
 
         loss = self.build_loss()
-        # Use ADAM with a decaying scale factor
-        global_step = tf.Variable(0, trainable=False)
-        starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                            global_step,
-                                            100, 0.9, staircase=True)
-        self.train = tf.train.AdamOptimizer(learning_rate).minimize(
-            loss, global_step=global_step)
+        if optimizer == None:
+            # Use ADAM with a decaying scale factor
+            global_step = tf.Variable(0, trainable=False)
+            starter_learning_rate = 0.1
+            learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                                global_step,
+                                                100, 0.9, staircase=True)
+            optimizer = tf.train.AdamOptimizer(learning_rate)
+            self.train = optimizer.minimize(loss, global_step=global_step)
+        else:
+            optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
+            self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
         init = tf.initialize_all_variables()
         if sess == None:
@@ -284,49 +292,6 @@ class MFVI(VariationalInference):
         z, self.samples = self.variational.sample(x, self.n_minibatch)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
-        return -self.loss
-
-class VAE(VariationalInference):
-    # TODO refactor into MFVI
-    def __init__(self, *args, **kwargs):
-        VariationalInference.__init__(self, *args, **kwargs)
-
-    def initialize(self, n_data=None):
-        # TODO refactor to use VariationalInference's initialize()
-        self.n_data = n_data
-        self.score = False
-
-        # TODO don't fix number of covariates
-        self.x = tf.placeholder(tf.float32, [self.n_data, 28 * 28])
-        self.loss = tf.constant(0.0)
-
-        loss = self.build_loss()
-        optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
-        # TODO move this to not rely on Pretty Tensor
-        self.train = pt.apply_optimizer(optimizer, losses=[loss])
-
-        init = tf.initialize_all_variables()
-        sess = tf.Session()
-        sess.run(init)
-        return sess
-
-    def update(self, sess):
-        x = self.data.sample(self.n_data)
-        _, loss = sess.run([self.train, self.loss], {self.x: x})
-        return loss
-
-    def build_loss(self):
-        # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-        with tf.variable_scope("model") as scope:
-            x = self.x
-            # TODO samples 1 set of latent variables for each data point
-            z, _ = self.variational.sample(x, self.n_data)
-
-            mu = tf.pack([layer.m for layer in self.variational.layers])
-            sigma = tf.pack([layer.s for layer in self.variational.layers])
-            self.loss = tf.reduce_sum(self.model.log_lik(x, z)) - \
-                        kl_multivariate_normal(mu, sigma)
-
         return -self.loss
 
 class KLpq(VariationalInference):

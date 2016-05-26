@@ -17,6 +17,8 @@ import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
 from edward.models import Variational, Normal
+from edward.stats import bernoulli
+from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
@@ -36,7 +38,7 @@ class NormalBernoulli:
     p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
     """
     def __init__(self, num_vars):
-        self.num_vars = num_vars # number of latent variables
+        self.num_vars = num_vars # number of local latent variables
 
     def mapping(self, z):
         """
@@ -57,10 +59,13 @@ class NormalBernoulli:
 
     def log_lik(self, x, z):
         """
+        Bernoulli log-likelihood, summing over every image n and pixel i
+        in image n.
+
         log p(x | z) = log Bernoulli(x | p = varphi(z))
+         = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
         """
-        p = self.mapping(z)
-        return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
+        return tf.reduce_sum(bernoulli.logpmf(x, p=self.mapping(z)))
 
     def sample_prior(self, size):
         """
@@ -92,35 +97,45 @@ def mapping(self, x):
                 conv2d(5, 128, edges='VALID').
                 dropout(0.9).
                 flatten().
-                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
+                fully_connected(self.num_local_vars * 2, activation_fn=None)).tensor
 
-    mean = params[:, :self.num_vars]
-    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
+    # Return list of vectors where mean[i], stddev[i] are the
+    # parameters of the local variational factor for data point i.
+    mean = tf.reshape(params[:, :self.num_local_vars], [-1])
+    stddev = tf.reshape(tf.sqrt(tf.exp(params[:, self.num_local_vars:])), [-1])
     return [mean, stddev]
-
-Normal.mapping = mapping
-
-class Data:
-    def __init__(self, data):
-        self.mnist = data
-
-    def sample(self, size):
-        x_batch, _ = mnist.train.next_batch(size)
-        return x_batch
 
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)
 
+# We use the variational model
+# q(z | x) = prod_{n=1}^N q(z_n | x)
+#          = prod_{n=1}^n Normal(z_n | mu, sigma = phi(x_n))
+# It is a distribution of the latent variables z_n for each data
+# point x_n. We use mapping() to globally parameterize the local
+# variational factors q(z_n | x).
+# We also do data subsampling during inference. Therefore we only need
+# to explicitly represent the corresponding variational factors for a
+# mini-batch,
+# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | mu, sigma = phi(x))
 variational = Variational()
-variational.add(Normal(model.num_vars))
+Normal.mapping = mapping
+Normal.num_local_vars = model.num_vars
+variational.add(Normal(model.num_vars * FLAGS.n_data))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
-mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
-data = Data(mnist)
 
-inference = ed.VAE(model, variational, data)
-sess = inference.initialize(n_data=FLAGS.n_data)
+mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
+
+# data uses placeholder in order to build inference's computational
+# graph. np.arrays of data are fed in during computation.
+x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
+data = ed.Data(x)
+
+inference = ed.MFVI(model, variational, data)
+with tf.variable_scope("model") as scope:
+    sess = inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior(FLAGS.n_data)
 
@@ -134,7 +149,9 @@ for epoch in range(n_epoch):
     pbar.start()
     for t in range(n_iter_per_epoch):
         pbar.update(t)
-        loss = inference.update(sess)
+        x_train, _ = mnist.train.next_batch(FLAGS.n_data)
+        _, loss = sess.run([inference.train, inference.loss],
+                            feed_dict={x: x_train})
         avg_loss += loss
 
     # Take average over all ELBOs during the epoch, and over minibatch

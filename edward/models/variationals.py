@@ -124,9 +124,8 @@ class Likelihood:
     def __init__(self, num_factors=1):
         self.num_factors = num_factors
         self.num_vars = None # number of posterior latent variables
-        self.num_params = None # number of local variational parameters
+        self.num_params = None # number of variational parameters
         self.sample_tensor = False
-        # TODO attribute for number of global variational parameters
 
     def mapping(self, x):
         """
