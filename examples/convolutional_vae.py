@@ -28,23 +28,6 @@ tf.flags.DEFINE_string("data_directory", "data/mnist", "Directory to store data.
 tf.flags.DEFINE_string("img_directory", "img", "Directory to store sampled images.")
 FLAGS = tf.flags.FLAGS
 
-def build_reparam_loss_kl(self):
-    # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-    x = self.data.sample(self.n_data)
-    # TODO samples 1 set of local latent variables for each data point
-    # ideally we'd define the entire variational distribution of all
-    # the numbers of latent variables
-    z, self.samples = self.variational.sample(x, FLAGS.n_data)
-
-    mu = tf.pack([layer.m for layer in self.variational.layers])
-    sigma = tf.pack([layer.s for layer in self.variational.layers])
-    self.loss = tf.reduce_mean(self.model.log_lik(x, z)) - \
-                kl_multivariate_normal(mu, sigma)
-
-    return -self.loss
-
-ed.MFVI.build_reparam_loss_kl = build_reparam_loss_kl
-
 class NormalBernoulli:
     """
     Each binarized pixel in an image is modeled by a Bernoulli
@@ -55,7 +38,7 @@ class NormalBernoulli:
     p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
     """
     def __init__(self, num_vars):
-        self.num_vars = num_vars # number of latent variables
+        self.num_vars = num_vars # number of local latent variables
 
     def mapping(self, z):
         """
@@ -114,19 +97,25 @@ def mapping(self, x):
                 conv2d(5, 128, edges='VALID').
                 dropout(0.9).
                 flatten().
-                fully_connected(self.num_vars * 2, activation_fn=None)).tensor
+                fully_connected(self.num_local_vars * 2, activation_fn=None)).tensor
 
-    mean = params[:, :self.num_vars]
-    stddev = tf.sqrt(tf.exp(params[:, self.num_vars:]))
+    # Return list of vectors where mean[i], stddev[i] are the
+    # parameters of the local variational factor for data point i.
+    mean = tf.reshape(params[:, :self.num_local_vars], [-1])
+    stddev = tf.reshape(tf.sqrt(tf.exp(params[:, self.num_local_vars:])), [-1])
     return [mean, stddev]
 
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)
 
+# Form a variational model for a single data point, i.e., a local
+# variational factor.
+# We use the variational factors for a mini-batch of data.
 variational = Variational()
-# TODO see feature/vertical-layers
 Normal.mapping = mapping
-variational.add(Normal(model.num_vars))
+# TODO
+Normal.num_local_vars = model.num_vars
+variational.add(Normal(model.num_vars*FLAGS.n_data))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
