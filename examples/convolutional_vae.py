@@ -27,21 +27,6 @@ tf.flags.DEFINE_string("data_directory", "data/mnist", "Directory to store data.
 tf.flags.DEFINE_string("img_directory", "img", "Directory to store sampled images.")
 FLAGS = tf.flags.FLAGS
 
-def initialize(self, *args, **kwargs):
-    self.n_data = None
-    self.score = False
-    self.loss = tf.constant(0.0)
-
-    loss = self.build_loss()
-    optimizer = tf.train.AdamOptimizer(1e-2, epsilon=1.0)
-    # TODO move this to not rely on Pretty Tensor
-    self.train = pt.apply_optimizer(optimizer, losses=[loss])
-
-    init = tf.initialize_all_variables()
-    sess = tf.Session()
-    sess.run(init)
-    return sess
-
 def build_reparam_loss_kl(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     # TODO should we always use scope?
@@ -58,7 +43,6 @@ def build_reparam_loss_kl(self):
 
     return -self.loss
 
-ed.MFVI.initialize = initialize
 ed.MFVI.build_reparam_loss_kl = build_reparam_loss_kl
 
 class NormalBernoulli:
@@ -152,7 +136,7 @@ x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 data = ed.Data(x)
 
 inference = ed.MFVI(model, variational, data)
-sess = inference.initialize()
+sess = inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior(FLAGS.n_data)
 

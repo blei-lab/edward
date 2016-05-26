@@ -6,6 +6,11 @@ from edward.data import Data
 from edward.models import Variational, PointMass
 from edward.util import kl_multivariate_normal, log_sum_exp
 
+try:
+    import prettytensor as pt
+except ImportError:
+    pass
+
 class Inference:
     """
     Base class for inference methods.
@@ -63,7 +68,8 @@ class VariationalInference(Inference):
 
         return sess
 
-    def initialize(self, n_iter=1000, n_data=None, n_print=100, sess=None):
+    def initialize(self, n_iter=1000, n_data=None, n_print=100,
+        optimizer=None, sess=None):
         """
         Initialize inference algorithm.
 
@@ -76,6 +82,9 @@ class VariationalInference(Inference):
             the data.
         n_print : int, optional
             Number of iterations for each print progress.
+        optimizer : str, optional
+            Whether to use TensorFlow optimizer or PrettyTensor
+            optimizer if using PrettyTensor. Defaults to TensorFlow.
         sess : tf.Session, optional
             TensorFlow session for computation.
         """
@@ -86,14 +95,18 @@ class VariationalInference(Inference):
         self.loss = tf.constant(0.0)
 
         loss = self.build_loss()
-        # Use ADAM with a decaying scale factor
-        global_step = tf.Variable(0, trainable=False)
-        starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                            global_step,
-                                            100, 0.9, staircase=True)
-        self.train = tf.train.AdamOptimizer(learning_rate).minimize(
-            loss, global_step=global_step)
+        if optimizer == None:
+            # Use ADAM with a decaying scale factor
+            global_step = tf.Variable(0, trainable=False)
+            starter_learning_rate = 0.1
+            learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                                global_step,
+                                                100, 0.9, staircase=True)
+            optimizer = tf.train.AdamOptimizer(learning_rate)
+            self.train = optimizer.minimize(loss, global_step=global_step)
+        else:
+            optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
+            self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
         init = tf.initialize_all_variables()
         if sess == None:
