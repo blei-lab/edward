@@ -22,17 +22,10 @@ from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 
-flags = tf.flags
-logging = tf.logging
-
-flags.DEFINE_integer("num_vars", 10, "Number of latent variables.")
-flags.DEFINE_integer("n_iter_per_epoch", 1000, "Number of iterations per epoch.")
-flags.DEFINE_integer("n_epoch", 100, "Maximum number of epochs.")
-flags.DEFINE_integer("n_data", 128, "Mini-batch size for data subsampling.")
-flags.DEFINE_string("data_directory", "data/mnist", "Directory to store data.")
-flags.DEFINE_string("img_directory", "img", "Directory to store sampled images.")
-
-FLAGS = flags.FLAGS
+tf.flags.DEFINE_integer("n_data", 128, "Mini-batch size for data subsampling.")
+tf.flags.DEFINE_string("data_directory", "data/mnist", "Directory to store data.")
+tf.flags.DEFINE_string("img_directory", "img", "Directory to store sampled images.")
+FLAGS = tf.flags.FLAGS
 
 def initialize(self, *args, **kwargs):
     self.n_data = None
@@ -78,7 +71,7 @@ class NormalBernoulli:
     p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
     """
     def __init__(self, num_vars):
-        self.num_vars = num_vars
+        self.num_vars = num_vars # number of latent variables
 
     def mapping(self, z):
         """
@@ -109,7 +102,7 @@ class NormalBernoulli:
         p ~ some complex distribution induced by
         z ~ N(0, 1), p = varphi(z)
         """
-        z = tf.random_normal(size)
+        z = tf.random_normal([size, self.num_vars])
         # Note the output of this is not prior samples, but just the
         # success probability, i.e., the hidden representation learned
         # by the neural network.
@@ -141,12 +134,12 @@ def mapping(self, x):
     return [mean, stddev]
 
 ed.set_seed(42)
-model = NormalBernoulli(FLAGS.num_vars)
+model = NormalBernoulli(num_vars=10)
 
 variational = Variational()
 # TODO see feature/vertical-layers
 Normal.mapping = mapping
-variational.add(Normal(FLAGS.num_vars))
+variational.add(Normal(model.num_vars))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
@@ -161,15 +154,17 @@ data = ed.Data(x)
 inference = ed.MFVI(model, variational, data)
 sess = inference.initialize()
 with tf.variable_scope("model", reuse=True) as scope:
-    p_rep = model.sample_prior([FLAGS.n_data, FLAGS.num_vars])
+    p_rep = model.sample_prior(FLAGS.n_data)
 
-for epoch in range(FLAGS.n_epoch):
+n_epoch = 100
+n_iter_per_epoch = 1000
+for epoch in range(n_epoch):
     avg_loss = 0.0
 
     widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-    pbar = ProgressBar(FLAGS.n_iter_per_epoch, widgets=widgets)
+    pbar = ProgressBar(n_iter_per_epoch, widgets=widgets)
     pbar.start()
-    for t in range(FLAGS.n_iter_per_epoch):
+    for t in range(n_iter_per_epoch):
         pbar.update(t)
         x_train, _ = mnist.train.next_batch(FLAGS.n_data)
         _, loss = sess.run([inference.train, inference.loss],
@@ -178,7 +173,7 @@ for epoch in range(FLAGS.n_epoch):
 
     # Take average over all ELBOs during the epoch, and over minibatch
     # of data points (images).
-    avg_loss = avg_loss / FLAGS.n_iter_per_epoch
+    avg_loss = avg_loss / n_iter_per_epoch
     avg_loss = avg_loss / FLAGS.n_data
 
     # Print a lower bound to the average marginal likelihood for an
