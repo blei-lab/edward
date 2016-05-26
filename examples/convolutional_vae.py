@@ -108,14 +108,20 @@ def mapping(self, x):
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)
 
-# Form a variational model for a single data point, i.e., a local
-# variational factor.
-# We use the variational factors for a mini-batch of data.
+# We use the variational model
+# q(z | x) = prod_{n=1}^N q(z_n | x)
+#          = prod_{n=1}^n Normal(z_n | mu, sigma = phi(x_n))
+# It is a distribution of the latent variables z_n for each data
+# point x_n. We use mapping() to globally parameterize the local
+# variational factors q(z_n | x).
+# We also do data subsampling during inference. Therefore we only need
+# to explicitly represent the corresponding variational factors for a
+# mini-batch,
+# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | mu, sigma = phi(x))
 variational = Variational()
 Normal.mapping = mapping
-# TODO
 Normal.num_local_vars = model.num_vars
-variational.add(Normal(model.num_vars*FLAGS.n_data))
+variational.add(Normal(model.num_vars * FLAGS.n_data))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
