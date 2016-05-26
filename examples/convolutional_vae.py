@@ -31,13 +31,14 @@ FLAGS = tf.flags.FLAGS
 def build_reparam_loss_kl(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
     x = self.data.sample(self.n_data)
-    # TODO samples 1 set of latent variables for each data point
+    # TODO samples 1 set of local latent variables for each data point
+    # ideally we'd define the entire variational distribution of all
+    # the numbers of latent variables
     z, self.samples = self.variational.sample(x, FLAGS.n_data)
 
     mu = tf.pack([layer.m for layer in self.variational.layers])
     sigma = tf.pack([layer.s for layer in self.variational.layers])
-    # TODO tf.reduce_sum()
-    self.loss = tf.reduce_sum(self.model.log_lik(x, z)) - \
+    self.loss = tf.reduce_mean(self.model.log_lik(x, z)) - \
                 kl_multivariate_normal(mu, sigma)
 
     return -self.loss
@@ -75,10 +76,13 @@ class NormalBernoulli:
 
     def log_lik(self, x, z):
         """
+        Bernoulli log-likelihood, summing over every image n and pixel i
+        in image n.
+
         log p(x | z) = log Bernoulli(x | p = varphi(z))
+         = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
         """
-        p = self.mapping(z)
-        return bernoulli.logpmf(x, p)
+        return tf.reduce_sum(bernoulli.logpmf(x, p=self.mapping(z)))
 
     def sample_prior(self, size):
         """
