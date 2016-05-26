@@ -47,8 +47,7 @@ class MixtureDensityNetwork:
         result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
         result = tf.mul(result, self.pi)
         result = tf.reduce_sum(result, 1, keep_dims=True)
-        result = tf.log(result)
-        return tf.reduce_sum(result)
+        return tf.log(result)
 
 def build_toy_dataset(nsample=6000):
     y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, nsample))).T
