@@ -17,6 +17,7 @@ import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
 from edward.models import Variational, Normal
+from edward.stats import bernoulli
 from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
@@ -77,7 +78,7 @@ class NormalBernoulli:
         log p(x | z) = log Bernoulli(x | p = varphi(z))
         """
         p = self.mapping(z)
-        return x * tf.log(p + 1e-8) + (1.0 - x) * tf.log(1.0 - p + 1e-8)
+        return bernoulli.logpmf(x, p)
 
     def sample_prior(self, size):
         """
