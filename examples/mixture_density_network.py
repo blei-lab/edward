@@ -46,7 +46,7 @@ class MixtureDensityNetwork:
         self.mapping(X)
         result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
         result = tf.mul(result, self.pi)
-        result = tf.reduce_sum(result, 1, keep_dims=True)
+        result = tf.reduce_sum(result, 1)
         result = tf.log(result)
         return tf.reduce_sum(result)
 
@@ -82,6 +82,6 @@ for i in range(NEPOCH):
                                 feed_dict={X: X_train, y: y_train})
     test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
     print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i], test_loss[i]))
-    
+
 pred_weights, pred_means, pred_std = sess.run(
         [model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
