@@ -1,4 +1,5 @@
 # examples/convolutional_vae.py
+# TODO re-do numbers here
 
 # Run with 1 update per epoch:
 # python convolutional_vae.py --n_iter_per_epoch=1
