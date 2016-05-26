@@ -29,17 +29,15 @@ FLAGS = tf.flags.FLAGS
 
 def build_reparam_loss_kl(self):
     # ELBO = E_{q(z | x)} [ log p(x | z) ] - KL(q(z | x) || p(z))
-    # TODO should we always use scope?
-    with tf.variable_scope("model") as scope:
-        x = self.data.sample(self.n_data)
-        # TODO samples 1 set of latent variables for each data point
-        z, self.samples = self.variational.sample(x, FLAGS.n_data)
+    x = self.data.sample(self.n_data)
+    # TODO samples 1 set of latent variables for each data point
+    z, self.samples = self.variational.sample(x, FLAGS.n_data)
 
-        mu = tf.pack([layer.m for layer in self.variational.layers])
-        sigma = tf.pack([layer.s for layer in self.variational.layers])
-        # TODO tf.reduce_sum()
-        self.loss = tf.reduce_sum(self.model.log_lik(x, z)) - \
-                    kl_multivariate_normal(mu, sigma)
+    mu = tf.pack([layer.m for layer in self.variational.layers])
+    sigma = tf.pack([layer.s for layer in self.variational.layers])
+    # TODO tf.reduce_sum()
+    self.loss = tf.reduce_sum(self.model.log_lik(x, z)) - \
+                kl_multivariate_normal(mu, sigma)
 
     return -self.loss
 
@@ -136,7 +134,8 @@ x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 data = ed.Data(x)
 
 inference = ed.MFVI(model, variational, data)
-sess = inference.initialize(optimizer="PrettyTensor")
+with tf.variable_scope("model") as scope:
+    sess = inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior(FLAGS.n_data)
 
