@@ -35,8 +35,9 @@ class Data:
     is used to obtain the next batch of data starting from
     self.counter to the size of the data set.
     """
-    def __init__(self, data=None, shuffled=True):
+    def __init__(self, data=None, test_data=None, shuffled=True):
         self.data = data
+        self.test_data = test_data
         if not shuffled:
             # TODO
             # shuffle self.data
@@ -61,6 +62,7 @@ class Data:
             pass
         else:
             raise NotImplementedError()
+
 
     def sample(self, n_data=None):
         # TODO scale gradient and printed loss by self.N / self.n_data
