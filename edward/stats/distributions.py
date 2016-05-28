@@ -78,7 +78,7 @@ class Bernoulli:
         return tf.mul(x, tf.log(p)) + tf.mul(1.0 - x, tf.log(1.0-p))
 
     def entropy(self, p):
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
 
 class Beta:
@@ -160,7 +160,7 @@ class Dirichlet:
         alpha: np.array or tf.Tensor
             vector or matrix
         """
-        alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
+        alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
         if len(get_dims(alpha)) == 1:
             K = get_dims(alpha)[0]
             a = tf.reduce_sum(alpha)
@@ -198,8 +198,8 @@ class Gamma:
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - lgamma(a)
 
     def entropy(self, a, scale=1):
-        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        a = tf.cast(a, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return a + tf.log(scale) + lgamma(a) + \
                tf.mul(1.0 - a, digamma(a))
 
@@ -233,8 +233,8 @@ class InvGamma:
                tf.mul(-a-1, tf.log(x)) - tf.truediv(scale, x)
 
     def entropy(self, a, scale=1):
-        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        a = tf.cast(a, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return a + tf.log(scale*tf.exp(lgamma(a))) - \
                (1.0 + a) * digamma(a)
 
@@ -490,7 +490,7 @@ class Uniform:
         return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
 
     def entropy(self, loc=0, scale=1):
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return tf.log(scale)
 
 bernoulli = Bernoulli()
