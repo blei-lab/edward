@@ -15,6 +15,7 @@ class Variational:
             self.num_params = 0
             self.is_reparam = True
             self.is_normal = True
+            self.is_entropy = True
             self.sample_tensor = []
         else:
             self.num_factors = sum([layer.num_factors for layer in self.layers])
@@ -24,6 +25,8 @@ class Variational:
                                    for layer in self.layers])
             self.is_normal = all([isinstance(layer, Normal)
                                   for layer in self.layers])
+            self.is_entropy = all(['entropy' in layer.__class__.__dict__
+                                   for layer in self.layers])
             self.sample_tensor = [layer.sample_tensor for layer in self.layers]
 
     def add(self, layer):
@@ -39,6 +42,7 @@ class Variational:
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.sample_tensor += [layer.sample_tensor]
 
@@ -105,6 +109,13 @@ class Variational:
             start = final
 
         raise IndexError()
+
+    def entropy(self):
+        out = tf.constant(0.0, dtype=tf.float32)
+        for layer in self.layers:
+            out += layer.entropy()
+
+        return out
 
     def _mapping(self, x):
         return [layer.mapping(x) for layer in self.layers]
@@ -178,7 +189,6 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    # TODO use __str__(self):
     def print_params(self, sess):
         raise NotImplementedError()
 
@@ -253,6 +263,19 @@ class Likelihood:
         """
         raise NotImplementedError()
 
+    def entropy(self):
+        """
+        H(q(z| lambda))
+        = E_{q(z | lambda)} [ - log q(z | lambda) ]
+        = sum_{i=1}^d E_{q(z_i | lambda)} [ - log q(z_i | lambda) ]
+
+        Returns
+        -------
+        tf.Tensor
+            scalar
+        """
+        raise NotImplementedError()
+
 class Bernoulli(Likelihood):
     """
     q(z | lambda) = prod_{i=1}^d Bernoulli(z[i] | p[i])
@@ -293,6 +316,9 @@ class Bernoulli(Likelihood):
             raise IndexError()
 
         return bernoulli.logpmf(zs[:, i], self.p[i])
+
+    def entropy(self):
+        return tf.reduce_sum(bernoulli.entropy(self.p))
 
 class Beta(Likelihood):
     """
@@ -339,6 +365,9 @@ class Beta(Likelihood):
             raise IndexError()
 
         return beta.logpdf(zs[:, i], self.a[i], self.b[i])
+
+    def entropy(self):
+        return tf.reduce_sum(beta.entropy(self.a, self.b))
 
 class Dirichlet(Likelihood):
     """
@@ -387,6 +416,9 @@ class Dirichlet(Likelihood):
         return dirichlet.logpdf(zs[:, (i*self.K):((i+1)*self.K)],
                                 self.alpha[i, :])
 
+    def entropy(self):
+        return tf.reduce_sum(dirichlet.entropy(self.alpha))
+
 class InvGamma(Likelihood):
     """
     q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | a[i], b[i])
@@ -432,6 +464,9 @@ class InvGamma(Likelihood):
             raise IndexError()
 
         return invgamma.logpdf(zs[:, i], self.a[i], self.b[i])
+
+    def entropy(self):
+        return tf.reduce_sum(invgamma.entropy(self.a, self.b))
 
 class Multinomial(Likelihood):
     """
@@ -495,6 +530,9 @@ class Multinomial(Likelihood):
         return multinomial.logpmf(zs[:, (i*self.K):((i+1)*self.K)],
                                   1, self.pi[i, :])
 
+    def entropy(self):
+        return tf.reduce_sum(multinomial.entropy(1, self.pi))
+
 class Normal(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Normal(z[i] | m[i], s[i])
@@ -548,9 +586,8 @@ class Normal(Likelihood):
         si = self.s[i]
         return norm.logpdf(zs[:, i], mi, si)
 
-    # TODO entropy is bugged
-    #def entropy(self):
-    #    return norm.entropy(self.transform_s(self.s_unconst))
+    def entropy(self):
+        return tf.reduce_sum(norm.entropy(scale=self.s))
 
 class PointMass(Likelihood):
     """

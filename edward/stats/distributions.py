@@ -1,7 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
-from edward.util import dot, get_dims, lbeta, lgamma
+from edward.util import dot, get_dims, digamma, lbeta, lgamma
+from itertools import product
 from scipy import stats
 
 class Distribution:
@@ -29,6 +30,7 @@ class Distribution:
             If multivariate distribution, can be a vector or matrix.
 
         params : np.array or tf.Tensor
+            scalar unless documented otherwise
 
         Returns
         -------
@@ -38,11 +40,31 @@ class Distribution:
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
+        """
+        raise NotImplementedError()
+
+    def entropy(self):
+        """
+        Parameters
+        ---------
+        params : np.array or tf.Tensor
+            If univariate distribution, can be a scalar or vector.
+            If multivariate distribution, can be a vector or matrix.
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar or vector
+            corresponding to the size of input. For multivariate
+            distributions, returns a scalar if vector input and vector
+            if matrix input, where each element in the vector
+            evaluates a row in the matrix.
 
         Notes
         -----
-        The following distributions use scalar arguments unless
-        documented otherwise.
+        SciPy doesn't always enable vector inputs for
+        univariate distributions or matrix inputs for multivariate
+        distributions. This does.
         """
         raise NotImplementedError()
 
@@ -55,6 +77,10 @@ class Bernoulli:
         p = tf.cast(p, dtype=tf.float32)
         return tf.mul(x, tf.log(p)) + tf.mul(1.0 - x, tf.log(1.0-p))
 
+    def entropy(self, p):
+        p = tf.cast(p, dtype=tf.float32)
+        return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
+
 class Beta:
     def rvs(self, a, b, size=1):
         return stats.beta.rvs(a, b, size=size)
@@ -64,6 +90,21 @@ class Beta:
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - lbeta(tf.pack([a, b]))
+
+    def entropy(self, a, b):
+        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
+        b = tf.cast(tf.squeeze(b), dtype=tf.float32)
+        if len(a.get_shape()) == 0:
+            return lbeta(tf.pack([a, b])) - \
+                   tf.mul(a - 1.0, digamma(a)) - \
+                   tf.mul(b - 1.0, digamma(b)) + \
+                   tf.mul(a + b - 2.0, digamma(a+b))
+        else:
+            return lbeta(tf.concat(1,
+                         [tf.expand_dims(a, 1), tf.expand_dims(b, 1)])) - \
+                   tf.mul(a - 1.0, digamma(a)) - \
+                   tf.mul(b - 1.0, digamma(b)) + \
+                   tf.mul(a + b - 2.0, digamma(a+b))
 
 class Binom:
     def rvs(self, n, p, size=1):
@@ -76,6 +117,9 @@ class Binom:
         return lgamma(n + 1.0) - lgamma(x + 1.0) - lgamma(n - x + 1.0) + \
                tf.mul(x, tf.log(p)) + tf.mul(n - x, tf.log(1.0-p))
 
+    def entropy(self, n, p):
+        raise NotImplementedError()
+
 class Chi2:
     def rvs(self, df, size=1):
         return stats.chi2.rvs(df, size=size)
@@ -85,6 +129,9 @@ class Chi2:
         df = tf.cast(df, dtype=tf.float32)
         return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
                tf.mul(0.5*df, tf.log(2.0)) - lgamma(0.5*df)
+
+    def entropy(self, df):
+        raise NotImplementedError()
 
 class Dirichlet:
     def rvs(self, alpha, size=1):
@@ -106,6 +153,27 @@ class Dirichlet:
         else:
             return -lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
 
+    def entropy(self, alpha):
+        """
+        Arguments
+        ----------
+        alpha: np.array or tf.Tensor
+            vector or matrix
+        """
+        alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
+        if len(get_dims(alpha)) == 1:
+            K = get_dims(alpha)[0]
+            a = tf.reduce_sum(alpha)
+            return lbeta(alpha) + \
+                   tf.mul(a - K, digamma(a)) - \
+                   tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)))
+        else:
+            K = get_dims(alpha)[1]
+            a = tf.reduce_sum(alpha, 1)
+            return lbeta(alpha) + \
+                   tf.mul(a - K, digamma(a)) - \
+                   tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)), 1)
+
 class Expon:
     def rvs(self, scale=1, size=1):
         return stats.expon.rvs(scale=scale, size=size)
@@ -114,6 +182,9 @@ class Expon:
         x = tf.cast(x, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return - x/scale - tf.log(scale)
+
+    def entropy(self, scale=1):
+        raise NotImplementedError()
 
 class Gamma:
     """Shape/scale parameterization"""
@@ -126,6 +197,12 @@ class Gamma:
         scale = tf.cast(scale, dtype=tf.float32)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - lgamma(a)
 
+    def entropy(self, a, scale=1):
+        a = tf.cast(a, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
+        return a + tf.log(scale) + lgamma(a) + \
+               tf.mul(1.0 - a, digamma(a))
+
 class Geom:
     def rvs(self, p, size=1):
         return stats.geom.rvs(p, size=size)
@@ -134,6 +211,9 @@ class Geom:
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
+
+    def entropy(self, p):
+        raise NotImplementedError()
 
 class InvGamma:
     """Shape/scale parameterization"""
@@ -152,6 +232,12 @@ class InvGamma:
         return tf.mul(a, tf.log(scale)) - lgamma(a) + \
                tf.mul(-a-1, tf.log(x)) - tf.truediv(scale, x)
 
+    def entropy(self, a, scale=1):
+        a = tf.cast(a, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
+        return a + tf.log(scale*tf.exp(lgamma(a))) - \
+               (1.0 + a) * digamma(a)
+
 class LogNorm:
     def rvs(self, s, size=1):
         return stats.lognorm.rvs(s, size=size)
@@ -161,6 +247,9 @@ class LogNorm:
         s = tf.cast(s, dtype=tf.float32)
         return -0.5*tf.log(2*np.pi) - tf.log(s) - tf.log(x) - \
                0.5*tf.square(tf.log(x) / s)
+
+    def entropy(self, s):
+        raise NotImplementedError()
 
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
@@ -190,6 +279,35 @@ class Multinomial:
             return lgamma(n + 1.0) - \
                    tf.reduce_sum(lgamma(x + 1.0), 1) + \
                    tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
+
+    def entropy(self, n, p):
+        # Note that given n and p where p is a probability vector of
+        # length k, the entropy requires a sum over all
+        # possible configurations of a k-vector which sums to n. It's
+        # expensive.
+        # http://stackoverflow.com/questions/36435754/generating-a-numpy-array-with-all-combinations-of-numbers-that-sum-to-less-than
+        sess = tf.Session()
+        n = sess.run(tf.cast(tf.squeeze(n), dtype=tf.int32))
+        sess.close()
+        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        if isinstance(n, np.int32):
+            k = get_dims(p)[0]
+            max_range = np.zeros(k, dtype=np.int32) + n
+            x = np.array([i for i in product(*(range(i+1) for i in max_range))
+                                 if sum(i)==n])
+            logpmf = self.logpmf(x, n, p)
+            return tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))
+        else:
+            out = []
+            for j in range(n.shape[0]):
+                k = get_dims(p)[0]
+                max_range = np.zeros(k, dtype=np.int32) + n[j]
+                x = np.array([i for i in product(*(range(i+1) for i in max_range))
+                                     if sum(i)==n[j]])
+                logpmf = self.logpmf(x, n[j], p[j, :])
+                out += [tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))]
+
+            return tf.pack(out)
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
@@ -258,7 +376,8 @@ class Multivariate_Normal:
 
     def entropy(self, mean=None, cov=1):
         """
-        Note entropy does not depend on its mean.
+        Note entropy does not depend on the mean.
+        This is not vectorized with respect to any arguments.
 
         Parameters
         ----------
@@ -291,6 +410,9 @@ class NBinom:
         return lgamma(x + n) - lgamma(x + 1.0) - lgamma(n) + \
                tf.mul(n, tf.log(p)) + tf.mul(x, tf.log(1.0-p))
 
+    def entropy(self, n, p):
+        raise NotImplementedError()
+
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
         return stats.norm.rvs(loc, scale, size=size)
@@ -316,6 +438,9 @@ class Poisson:
         mu = tf.cast(mu, dtype=tf.float32)
         return x * tf.log(mu) - mu - lgamma(x + 1.0)
 
+    def entropy(self, mu):
+        raise NotImplementedError()
+
 class T:
     def rvs(self, df, loc=0, scale=1, size=1):
         return stats.t.rvs(df, loc=loc, scale=scale, size=size)
@@ -329,6 +454,9 @@ class T:
         return lgamma(0.5 * (df + 1.0)) - lgamma(0.5 * df) - \
                0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
                0.5 * (df + 1.0) * tf.log(1.0 + (1.0/df) * tf.square(z))
+
+    def entropy(self, df, loc=0, scale=1):
+        raise NotImplementedError()
 
 class TruncNorm:
     def rvs(self, a, b, loc=0, scale=1, size=1):
@@ -349,6 +477,9 @@ class TruncNorm:
                       stats.norm.cdf((a - loc)/scale),
                       dtype=tf.float32))
 
+    def entropy(self, a, b, loc=0, scale=1):
+        raise NotImplementedError()
+
 class Uniform:
     def rvs(self, loc=0, scale=1, size=1):
         return stats.uniform.rvs(loc, scale, size=size)
@@ -357,6 +488,10 @@ class Uniform:
         # Note there is no error checking if x is outside domain.
         scale = tf.cast(scale, dtype=tf.float32)
         return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
+
+    def entropy(self, loc=0, scale=1):
+        scale = tf.cast(scale, dtype=tf.float32)
+        return tf.log(scale)
 
 bernoulli = Bernoulli()
 beta = Beta()
