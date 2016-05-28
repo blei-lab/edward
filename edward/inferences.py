@@ -166,15 +166,17 @@ class MFVI(VariationalInference):
         if self.score:
             if self.variational.is_normal and hasattr(self.model, 'log_lik'):
                 return self.build_score_loss_kl()
-            elif self.variational.is_entropy::
-                return self.build_score_loss_entropy()
+            # Analytic entropies may lead to problems around
+            # convergence; for now it is deactivated.
+            #elif self.variational.is_entropy:
+            #    return self.build_score_loss_entropy()
             else:
                 return self.build_score_loss()
         else:
             if self.variational.is_normal and hasattr(self.model, 'log_lik'):
                 return self.build_reparam_loss_kl()
-            elif self.variational.is_entropy:
-                return self.build_reparam_loss_entropy()
+            #elif self.variational.is_entropy:
+            #    return self.build_reparam_loss_entropy()
             else:
                 return self.build_reparam_loss()
 
