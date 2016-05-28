@@ -73,8 +73,8 @@ class Bernoulli:
         return stats.bernoulli.rvs(p, size=size)
 
     def logpmf(self, x, p):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         return tf.mul(x, tf.log(p)) + tf.mul(1.0 - x, tf.log(1.0-p))
 
     def entropy(self, p):
@@ -86,7 +86,7 @@ class Beta:
         return stats.beta.rvs(a, b, size=size)
 
     def logpdf(self, x, a, b):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - lbeta(tf.pack([a, b]))
@@ -111,9 +111,9 @@ class Binom:
         return stats.binom.rvs(p, size=size)
 
     def logpmf(self, x, n, p):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        n = tf.cast(n, dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         return lgamma(n + 1.0) - lgamma(x + 1.0) - lgamma(n - x + 1.0) + \
                tf.mul(x, tf.log(p)) + tf.mul(n - x, tf.log(1.0-p))
 
@@ -125,8 +125,8 @@ class Chi2:
         return stats.chi2.rvs(df, size=size)
 
     def logpdf(self, x, df):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        df = tf.cast(tf.squeeze(df), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        df = tf.cast(df, dtype=tf.float32)
         return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
                tf.mul(0.5*df, tf.log(2.0)) - lgamma(0.5*df)
 
@@ -146,8 +146,8 @@ class Dirichlet:
         alpha : np.array or tf.Tensor
             vector
         """
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        alpha = tf.cast(tf.squeeze(tf.convert_to_tensor(alpha)), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
         if len(get_dims(x)) == 1:
             return -lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
         else:
@@ -179,8 +179,8 @@ class Expon:
         return stats.expon.rvs(scale=scale, size=size)
 
     def logpdf(self, x, scale=1):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return - x/scale - tf.log(scale)
 
     def entropy(self, scale=1):
@@ -192,9 +192,9 @@ class Gamma:
         return stats.gamma.rvs(a, scale=scale, size=size)
 
     def logpdf(self, x, a, scale=1):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        a = tf.cast(a, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - lgamma(a)
 
     def entropy(self, a, scale=1):
@@ -208,8 +208,8 @@ class Geom:
         return stats.geom.rvs(p, size=size)
 
     def logpmf(self, x, p):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
 
     def entropy(self, p):
@@ -220,13 +220,15 @@ class InvGamma:
     def rvs(self, alpha, scale=1, size=1):
         x = stats.invgamma.rvs(alpha, scale=scale, size=size)
         # This is temporary to avoid returning Inf values.
+        x[x < 1e-10] = 0.1
+        x[x > 1e10] = 1.0
         x[np.logical_not(np.isfinite(x))] = 1.0
         return x
 
     def logpdf(self, x, a, scale=1):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        a = tf.cast(tf.squeeze(a), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        a = tf.cast(a, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return tf.mul(a, tf.log(scale)) - lgamma(a) + \
                tf.mul(-a-1, tf.log(x)) - tf.truediv(scale, x)
 
@@ -241,8 +243,8 @@ class LogNorm:
         return stats.lognorm.rvs(s, size=size)
 
     def logpdf(self, x, s):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        s = tf.cast(tf.squeeze(s), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        s = tf.cast(s, dtype=tf.float32)
         return -0.5*tf.log(2*np.pi) - tf.log(s) - tf.log(x) - \
                0.5*tf.square(tf.log(x) / s)
 
@@ -266,9 +268,9 @@ class Multinomial:
         p : np.array or tf.Tensor
             vector of probabilities summing to 1
         """
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        n = tf.cast(n, dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         if len(get_dims(x)) == 1:
             return lgamma(n + 1.0) - \
                    tf.reduce_sum(lgamma(x + 1.0)) + \
@@ -322,7 +324,7 @@ class Multivariate_Normal:
         cov : np.array or tf.Tensor, optional
             vector or matrix. Defaults to identity.
         """
-        x = tf.cast(tf.squeeze(tf.convert_to_tensor(x)), dtype=tf.float32)
+        x = tf.cast(tf.convert_to_tensor(x), dtype=tf.float32)
         x_shape = get_dims(x)
         if len(x_shape) == 1:
             d = x_shape[0]
@@ -332,14 +334,14 @@ class Multivariate_Normal:
         if mean is None:
             r = x
         else:
-            mean = tf.cast(tf.squeeze(tf.convert_to_tensor(mean)), dtype=tf.float32)
+            mean = tf.cast(tf.convert_to_tensor(mean), dtype=tf.float32)
             r = x - mean
 
         if cov is 1:
             cov_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
         else:
-            cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
+            cov = tf.cast(tf.convert_to_tensor(cov), dtype=tf.float32)
             if len(cov.get_shape()) == 1: # vector
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
@@ -388,7 +390,7 @@ class Multivariate_Normal:
             d = 1
             det_cov = 1.0
         else:
-            cov = tf.cast(tf.squeeze(tf.convert_to_tensor(cov)), dtype=tf.float32)
+            cov = tf.cast(tf.convert_to_tensor(cov), dtype=tf.float32)
             d = get_dims(cov)[0]
             if len(cov.get_shape()) == 1:
                 det_cov = tf.reduce_prod(cov)
@@ -402,9 +404,9 @@ class NBinom:
         return stats.nbinom.rvs(n, p, size=size)
 
     def logpmf(self, x, n, p):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        n = tf.cast(tf.squeeze(n), dtype=tf.float32)
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        n = tf.cast(n, dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         return lgamma(x + n) - lgamma(x + 1.0) - lgamma(n) + \
                tf.mul(n, tf.log(p)) + tf.mul(x, tf.log(1.0-p))
 
@@ -416,15 +418,15 @@ class Norm:
         return stats.norm.rvs(loc, scale, size=size)
 
     def logpdf(self, x, loc=0, scale=1):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        loc = tf.cast(loc, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         z = (x - loc) / scale
         return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*tf.square(z)
 
     def entropy(self, loc=0, scale=1):
         """Note entropy does not depend on the mean."""
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
 
 class Poisson:
@@ -432,8 +434,8 @@ class Poisson:
         return stats.poisson.rvs(mu, size=size)
 
     def logpmf(self, x, mu):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        mu = tf.cast(tf.squeeze(mu), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        mu = tf.cast(mu, dtype=tf.float32)
         return x * tf.log(mu) - mu - lgamma(x + 1.0)
 
     def entropy(self, mu):
@@ -444,10 +446,10 @@ class T:
         return stats.t.rvs(df, loc=loc, scale=scale, size=size)
 
     def logpdf(self, x, df, loc=0, scale=1):
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-        df = tf.cast(tf.squeeze(df), dtype=tf.float32)
-        loc = tf.cast(tf.squeeze(loc), dtype=tf.float32)
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
+        df = tf.cast(df, dtype=tf.float32)
+        loc = tf.cast(loc, dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         z = (x - loc) / scale
         return lgamma(0.5 * (df + 1.0)) - lgamma(0.5 * df) - \
                0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
@@ -462,13 +464,13 @@ class TruncNorm:
 
     def logpdf(self, x, a, b, loc=0, scale=1):
         # Note there is no error checking if x is outside domain.
-        x = tf.cast(tf.squeeze(x), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
         # This is slow, as we require use of stats.norm.cdf.
         sess = tf.Session()
-        a = sess.run(tf.cast(tf.squeeze(a), dtype=tf.float32))
-        b = sess.run(tf.cast(tf.squeeze(b), dtype=tf.float32))
-        loc = sess.run(tf.cast(tf.squeeze(loc), dtype=tf.float32))
-        scale = sess.run(tf.cast(tf.squeeze(scale), dtype=tf.float32))
+        a = sess.run(tf.cast(a, dtype=tf.float32))
+        b = sess.run(tf.cast(b, dtype=tf.float32))
+        loc = sess.run(tf.cast(loc, dtype=tf.float32))
+        scale = sess.run(tf.cast(scale, dtype=tf.float32))
         sess.close()
         return -tf.log(scale) + norm.logpdf(x, loc, scale) - \
                tf.log(tf.cast(stats.norm.cdf((b - loc)/scale) - \
@@ -484,7 +486,7 @@ class Uniform:
 
     def logpdf(self, x, loc=0, scale=1):
         # Note there is no error checking if x is outside domain.
-        scale = tf.cast(tf.squeeze(scale), dtype=tf.float32)
+        scale = tf.cast(scale, dtype=tf.float32)
         return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
 
     def entropy(self, loc=0, scale=1):

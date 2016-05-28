@@ -11,6 +11,7 @@ Variational model
 """
 import edward as ed
 import tensorflow as tf
+import matplotlib.pyplot as plt
 import numpy as np
 
 from edward.models import Variational, Normal
@@ -74,5 +75,39 @@ variational = Variational()
 variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 
+# Set up figure
+fig = plt.figure(figsize=(8,8), facecolor='white')
+ax = fig.add_subplot(111, frameon=False)
+plt.ion()
+plt.show(block=False)
+
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=250, n_minibatch=5, n_print=10)
+sess = inference.initialize(n_minibatch=5, n_print=5)
+for t in range(250):
+    loss = inference.update(sess)
+    if t % inference.n_print == 0:
+        print("iter {:d} loss {:.2f}".format(t, loss))
+
+        # Sample functions from variational model
+        mean, std = sess.run([variational.layers[0].m,
+                              variational.layers[0].s])
+        rs = np.random.RandomState(0)
+        zs = rs.randn(10, variational.num_vars) * std + mean
+        zs = tf.constant(zs, dtype=tf.float32)
+        inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
+        x = tf.expand_dims(tf.constant(inputs), 1)
+        W = tf.expand_dims(zs[:, 0], 0)
+        b = zs[:, 1]
+        mus = tf.matmul(x, W) + b
+        outputs = sess.run(mus)
+
+        # Get data
+        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
+
+        # Plot data and functions
+        plt.cla()
+        ax.plot(x, y, 'bx')
+        ax.plot(inputs, outputs)
+        ax.set_ylim([-2, 3])
+        plt.draw()
+        plt.pause(1.0/60.0)
