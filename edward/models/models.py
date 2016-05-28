@@ -8,6 +8,12 @@ try:
 except ImportError:
     pass
 
+try:
+    import pymc3 as pm
+except ImportError:
+    pass
+
+
 class PythonModel:
     """
     Model wrapper for models written in NumPy/SciPy.
@@ -15,31 +21,14 @@ class PythonModel:
     def __init__(self):
         self.num_vars = None
 
-    #def log_prob(self, zs):
-    #    return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
-
-    # TODO
-    #https://github.com/tensorflow/tensorflow/issues/1095
-    #https://www.tensorflow.org/versions/r0.7/api_docs/python/framework.html#RegisterGradient
-    #@tf.RegisterGradient("temp") # TODO or is the name self.log_prob?
-    #def _log_prob_grad(self, zs):
-    #    return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
-
     def log_prob(self, xs, zs):
-        # TODO
-        temp = tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
-        @tf.RegisterGradient("temp")
-        def _log_prob_grad(self, xs, zs):
-            return tf.py_func(self._py_log_prob_grad, [xs, zs], [tf.float32])[0]
-
-        return temp
+        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
 
     def _py_log_prob(self, xs, zs):
         """
         Arguments
         ----------
         xs : np.ndarray
-            TODO
 
         zs : np.ndarray
             n_minibatch x dim(z) array, where each row is a set of
@@ -50,26 +39,6 @@ class PythonModel:
         np.ndarray
             n_minibatch array of type np.float32, where each element
             is the log pdf evaluated at (z_{b1}, ..., z_{bd})
-        """
-        raise NotImplementedError()
-
-    def _py_log_prob_grad(self, xs, zs):
-        """
-        Arguments
-        ----------
-        xs : np.ndarray
-            TODO
-
-        zs : np.ndarray
-            n_minibatch x dim(z) array, where each row is a set of
-            latent variables.
-
-        Returns
-        -------
-        np.ndarray
-            n_minibatch x dim(z) array of type np.float32, where each
-            row is the gradient of the log pdf with respect to (z_1,
-            ..., z_d).
         """
         raise NotImplementedError()
 
@@ -96,13 +65,7 @@ class StanModel:
         if self.flag_init is False:
             self._initialize(xs)
 
-        # TODO
-        temp = tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
-        @tf.RegisterGradient("temp")
-        def _log_prob_grad(self, zs):
-            return tf.py_func(self._py_log_prob_grad, [zs], [tf.float32])[0]
-
-        return temp
+        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
 
     def _initialize(self, xs):
         print("The following message exists as Stan instantiates the model.")
@@ -149,7 +112,35 @@ class StanModel:
 
         return lp
 
-    def _py_log_prob_grad(self, zs):
-        # TODO
-        return np.array([self.model.grad_log_prob(z) for z in zs],
-                        dtype=np.float32)
+class PyMC3Model:
+    """
+    Model wrapper for models written in PyMC3.
+
+    Arguments
+    ----------
+    model : pymc3.Model object
+    observed : The shared theano tensor passed to the model likelihood
+    """
+    def __init__(self, model, observed):
+        self.model = model
+        self.observed = observed
+
+        vars = pm.inputvars(model.cont_vars)
+
+        bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
+        self.logp = bij.mapf(model.fastlogp)
+        self.dlogp = bij.mapf(model.fastdlogp(vars))
+
+        self.num_vars = len(vars)
+
+    def log_prob(self, xs, zs):
+        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
+
+    def _py_log_prob(self, xs, zs):
+        n_minibatch = zs.shape[0]
+        lp = np.zeros(n_minibatch, dtype=np.float32)
+        self.observed.set_value(xs)
+        for s in range(n_minibatch):
+            lp[s] = self.logp(zs[s, :])
+
+        return lp

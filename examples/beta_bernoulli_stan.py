@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in Stan.
+A simple coin flipping example. The model is written in Stan.
+Inspired by Stan's toy example.
 
 Probability model
     Prior: Beta
@@ -8,7 +9,8 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
-import blackbox as bb
+import edward as ed
+from edward.models import Variational, Beta
 
 model_code = """
     data {
@@ -24,14 +26,11 @@ model_code = """
         y[n] ~ bernoulli(theta);
     }
 """
-bb.set_seed(42)
-model = bb.StanModel(model_code=model_code)
-# TODO
-# model.num_vars no longer exists in StanModel:
-# it doesn't compile until after it takes in data
-#variational = bb.MFBeta(model.num_vars)
-variational = bb.MFBeta(1)
-data = bb.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+ed.set_seed(42)
+model = ed.StanModel(model_code=model_code)
+variational = Variational()
+variational.add(Beta())
+data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
-inference = bb.MFVI(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

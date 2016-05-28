@@ -2,13 +2,12 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from blackbox.util import dot
+from edward.util import dot
 
 sess = tf.Session()
 
 a = tf.ones([5]) * np.arange(5)
 b = tf.diag(tf.ones([5]))
-
 
 def test_dot():
     with sess.as_default():

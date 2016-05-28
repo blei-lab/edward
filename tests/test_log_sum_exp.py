@@ -3,7 +3,7 @@ import unittest
 import tensorflow as tf
 import numpy as np
 
-from blackbox.util import log_sum_exp
+from edward.util import log_sum_exp
 
 class test_log_sum_exp(unittest.TestCase):
 
