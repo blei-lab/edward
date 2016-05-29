@@ -30,6 +30,7 @@ It supports __inference__ via
 
 It supports __criticism__ of the model and inference via
 
+* Test set and cross validated evaluations
 * Prior and posterior predictive checks
 
 It also has __features__ including
