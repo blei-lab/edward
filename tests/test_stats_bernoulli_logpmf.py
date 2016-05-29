@@ -14,6 +14,7 @@ def _assert_eq(val_ed, val_true):
 def _test_logpmf(x, p):
     xtf = tf.constant(x)
     val_true = stats.bernoulli.logpmf(x, p)
+    _assert_eq(bernoulli.logpmf(xtf, p), val_true)
     _assert_eq(bernoulli.logpmf(xtf, tf.constant(p)), val_true)
     _assert_eq(bernoulli.logpmf(xtf, tf.constant([p])), val_true)
 

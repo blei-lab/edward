@@ -137,7 +137,6 @@ class MFVI(VariationalInference):
         VariationalInference.__init__(self, *args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
-        # TODO if score=True, make Normal do sess.run()
         """
         Parameters
         ----------
@@ -167,15 +166,17 @@ class MFVI(VariationalInference):
         if self.score:
             if self.variational.is_normal and hasattr(self.model, 'log_lik'):
                 return self.build_score_loss_kl()
-            elif hasattr(self.variational, 'entropy'):
-                return self.build_score_loss_entropy()
+            # Analytic entropies may lead to problems around
+            # convergence; for now it is deactivated.
+            #elif self.variational.is_entropy:
+            #    return self.build_score_loss_entropy()
             else:
                 return self.build_score_loss()
         else:
             if self.variational.is_normal and hasattr(self.model, 'log_lik'):
                 return self.build_reparam_loss_kl()
-            elif hasattr(self.variational, 'entropy'):
-                return self.build_reparam_loss_entropy()
+            #elif self.variational.is_entropy:
+            #    return self.build_reparam_loss_entropy()
             else:
                 return self.build_reparam_loss()
 

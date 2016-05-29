@@ -9,7 +9,9 @@ sess = tf.Session()
 
 def multinomial_logpmf(x, n, p):
     """
-    Arguments
+    log pmf of multinomial. SciPy doesn't have it.
+
+    Parameters
     ----------
     x: np.array
         vector of length K, where x[i] is the number of outcomes
@@ -24,6 +26,7 @@ def multinomial_logpmf(x, n, p):
            np.sum(x * np.log(p))
 
 def multinomial_logpmf_vec(x, n, p):
+    """Vectorized version of multinomial_logpmf."""
     if len(x.shape) == 1:
         return multinomial_logpmf(x, n, p)
     else:

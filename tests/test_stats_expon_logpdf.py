@@ -11,7 +11,7 @@ def _assert_eq(val_ed, val_true):
     with sess.as_default():
         assert np.allclose(val_ed.eval(), val_true)
 
-def _test_logpdf(x, scale=0.5):
+def _test_logpdf(x, scale=1):
     xtf = tf.constant(x)
     val_true = stats.expon.logpdf(x, scale=scale)
     _assert_eq(expon.logpdf(xtf, scale=tf.constant(scale)), val_true)
