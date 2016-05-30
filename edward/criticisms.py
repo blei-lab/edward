@@ -37,9 +37,9 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
         metrics = [metrics]
 
     for metric in metrics:
-        if metric == 'accuracy' or 'crossentropy':
+        if metric == 'accuracy' or metric == 'crossentropy':
             # automate binary or sparse cat depending on max(y_true)
-            support = sess.run(tf.maximum(y_true))
+            support = sess.run(tf.reduce_max(y_true))
             if support <= 1:
                 metric = 'binary_' + metric
             else:
@@ -125,29 +125,28 @@ def ppc(model, variational=None, data=Data(), T=None, size=100,
 
     Returns
     -------
-    tuple
-        Tuple containing the reference distribution, which is a Numpy
+    list
+        List containing the reference distribution, which is a Numpy
         vector of size elements,
         (T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}));
         and the realized discrepancy, which is a NumPy vector of size
         elements,
         (T(y, z^{1}), ..., T(y, z^{size})).
     """
-    if T == None:
-        T = lambda y, z=None: y
-
-    # TODO
-    y, xs = data.data
+    y = data.data
     if y == None:
         N = 1
     else:
         N = data.N
 
+    if T == None:
+        T = lambda y, z=None: y
+
     # 1. Sample from posterior (or prior).
     # We must fetch zs out of the session because sample_likelihood()
     # may require a SciPy-based sampler.
     if variational != None:
-        zs, samples = variational.sample(xs, size=size)
+        zs, samples = variational.sample(y, size=size)
         feed_dict = variational.np_sample(samples, size, sess=sess)
         zs = sess.run(zs, feed_dict)
     else:
