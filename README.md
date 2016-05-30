@@ -30,8 +30,8 @@ It supports __inference__ via
 
 It supports __criticism__ of the model and inference via
 
-* Test set evaluations
-* Prior and posterior predictive checks
+* Evaluations on both supervised and unsupervised tasks
+* Posterior predictive checks
 
 It also has __features__ including
 

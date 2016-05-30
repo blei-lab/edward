@@ -263,7 +263,7 @@ def sparse_categorical_crossentropy(y_true, y_pred):
         The outermost dimension are the categorical probabilities for
         that data point.
     """
-    y_true = tf.cast(y_true, tf.int32)
+    y_true = tf.cast(y_true, tf.int64)
     y_pred = logit(tf.cast(y_pred, tf.float32))
     return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
 
