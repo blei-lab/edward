@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-A simple example from Stan. The model is written in TensorFlow.
+A simple coin flipping example. The model is written in TensorFlow.
+Inspired by Stan's toy example.
 
 Probability model
     Prior: Beta
@@ -8,11 +9,12 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
-import blackbox as bb
+import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from blackbox.stats import bernoulli, beta
+from edward.models import Variational, Beta
+from edward.stats import bernoulli, beta
 
 class BetaBernoulli:
     """
@@ -22,23 +24,27 @@ class BetaBernoulli:
         self.num_vars = 1
 
     def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs[:, 0], a=1.0, b=1.0)
-        log_lik = tf.concat(0, [
-            tf.reduce_sum(bernoulli.logpmf(xs, z)) \
-            for z in tf.unpack(zs)])
+        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs, z))
+                           for z in tf.unpack(zs)])
         return log_lik + log_prior
 
-    def sample_likelihood(self, z, N):
+    def sample_likelihood(self, zs, size):
         """x | z ~ p(x | z)"""
-        return bernoulli.rvs(z, size=N)
+        out = np.zeros((zs.shape[0], size))
+        for s in range(zs.shape[0]):
+            out[s,:] = bernoulli.rvs(zs[s,:], size=size)
 
-bb.set_seed(42)
+        return out
+
+ed.set_seed(42)
 model = BetaBernoulli()
-variational = bb.MFBeta(model.num_vars)
-data = bb.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
+variational = Variational()
+variational.add(Beta(model.num_vars))
+data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-inference = bb.MFVI(model, variational, data)
+inference = ed.MFVI(model, variational, data)
 sess = inference.run(n_iter=200)
 
-T = lambda x: np.mean(x)
-print(bb.predictive_check(T, data, model, variational, sess=sess))
+T = lambda x, z=None: tf.reduce_mean(x)
+print(ed.ppc(model, variational, data, T, sess=sess))

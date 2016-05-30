@@ -1,9 +1,10 @@
 import numpy as np
 import tensorflow as tf
 
+from edward.data import Data
 from edward.util import logit
 
-# template
+# templates for model methods
 def predict(self, xs, zs):
     """
     Parameters
@@ -35,11 +36,39 @@ def predict(self, xs, zs):
     """
     pass
 
-# TODO 3
-def sample_prior():
+def sample_prior(self, size=1):
+    """
+    Parameters
+    ----------
+    size : int, optional
+        Number of latent variable samples.
+
+    Returns
+    -------
+    tf.Tensor
+        size x d matrix, where each row is a set of latent variables.
+    """
     pass
 
-def sample_lik():
+def sample_likelihood(self, zs, size=1):
+    """
+    Parameters
+    ----------
+    zs : tf.Tensor
+        S x d matrix.
+    size : int, optional
+        Number of data points to generate per set of latent variables.
+
+    Returns
+    -------
+    list
+        List of replicated data sets from the likelihood,
+        [x^{rep, 1}, ..., x^{rep, S}],
+        where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
+        size-many data points. Type-wise, the output is a list of
+        objects where the type of the object is the same as the type
+        of the test data.
+    """
     pass
 
 # TODO default to grabbing session from environment if it exists
@@ -132,10 +161,13 @@ def cv_evaluate(metric, model, variational, data, sess=tf.Session()):
     # TODO it calls evaluate(), wrapped around importance sampling
     raise NotImplementedError()
 
-def ppc(model, variational, data, T, size=100, sess=tf.Session()):
+def ppc(model, variational=None, data=Data(), T=tf.identity, size=100,
+    sess=tf.Session()):
     """
     Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
+    If variational is not specified, it defaults to a prior predictive
+    check (Box, 1980).
 
     It form an empirical distribution for the predictive discrepancy,
     p(T) = \int p(T(x) | z) p(z | x) dz
@@ -147,14 +179,18 @@ def ppc(model, variational, data, T, size=100, sess=tf.Session()):
     model : Model
         model object must have a 'sample_lik' method, which takes xs,
         zs, size as input and returns replicated data set
-    data : Data
-        Observed data to check to.
-    variational : Variational
+    variational : Variational, optional
         latent variable distribution q(z) to sample from. It is an
         approximation to the posterior, e.g., a variational
         approximation or an empirical distribution from MCMC samples.
-    T : function
-        Discrepancy function.
+        If not specified, samples will be obtained from the model
+        object using a 'sample_prior' method.
+    data : Data, optional
+        Observed data to compare to. If not specified, will return
+        only the reference distribution.
+    T : function, optional
+        Discrepancy function written in TensorFlow. Default is
+        identity.
     size : int, optional
         number of replicated data sets
     sess : tf.Session, optional
@@ -162,66 +198,35 @@ def ppc(model, variational, data, T, size=100, sess=tf.Session()):
 
     Returns
     -------
-    list
-        List containing the reference distribution, which is a Numpy
+    tuple
+        Tuple containing the reference distribution, which is a Numpy
         vector of size elements,
         (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}));
-        and the realized discrepancy, which is a NumPy array of size
+        and the realized discrepancy, which is a NumPy vector of size
         elements,
         (T(x, z^{1}), ..., T(x, z^{size})).
     """
     # TODO
-    xobs = sess.run(data.data) # TODO generalize to arbitrary data
-    Txobs = T(xobs)
-    N = len(xobs) # TODO len, or shape[0]
+    xs = data.data
+    N = xs.get_shape()[0]
+    yobs = xs
 
-    # TODO
-    # size in variational sample
-    # whether the sample method requires sess
-    zreps = latent.sample([size, 1], sess)
-    xreps = [model.sample_likelihood(zrep, N) for zrep in zreps]
-    Txreps = [T(xrep) for xrep in xreps]
-    return Txobs, Txreps
+    # 1. Sample from posterior.
+    zs, samples = variational.sample(xs, size=size)
+    feed_dict = variational.np_sample(samples, size, sess=sess)
+    # We must fetch zs out of the session because sample_likelihood()
+    # may require a SciPy-based sampler.
+    zs = sess.run(zs, feed_dict)
+    # 2. Sample from likelihood.
+    yreps = model.sample_likelihood(zs, size=N)
+    # 3. Calculate discrepancy.
+    Tyreps = []
+    Tyobs = []
+    for yrep, z in zip(yreps, tf.unpack(zs)):
+        Tyreps += [T(yrep, z)]
+        Tyobs += [T(yobs, z)]
 
-# TODO maybe it should default to prior PC if variational is not given as
-# input
-def prior_predictive_check(model, data, T):
-    """
-    Prior predictive check.
-    (Box, 1980)
-
-    It form an empirical distribution for the predictive discrepancy,
-    p(T) = \int p(T(x) | z) p(z) dz
-    by drawing replicated data sets xrep and calculating T(xrep) for
-    each data set. Then it compares it to T(xobs).
-
-    Parameters
-    ----------
-    model : Model
-        model object must have a 'sample_lik' method, which takes xs,
-        zs, size as input and returns replicated data set.
-        model object must have a 'sample_prior' method, which takes xs,
-        zs, size as input and returns...
-    data : Data
-        Observed data to check to.
-    T : function
-        Discrepancy function.
-    size : int, optional
-        number of replicated data sets
-    sess : tf.Session, optional
-        session used during inference
-
-    Returns
-    -------
-    list
-        List containing the reference distribution, which is a Numpy
-        vector of size elements,
-        (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}));
-        and the realized discrepancy, which is a NumPy array of size
-        elements,
-        (T(x, z^{1}), ..., T(x, z^{size})).
-    """
-    raise NotImplementedError()
+    return sess.run([tf.pack(Tyreps), tf.pack(Tyobs)], feed_dict)
 
 # Classification metrics
 
