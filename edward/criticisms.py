@@ -24,12 +24,8 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     n_minibatch = 100
     zs, samples = variational.sample(xs, size=n_minibatch)
     feed_dict = variational.np_sample(samples, n_minibatch, sess=sess)
-    # 2. Form a set of predictions for each sample of latent variables
-    y_pred_zs = model.predict(xs, zs)
-    # 3. Average over set of predictions
-    y_pred = tf.reduce_mean(y_pred_zs, 1)
-    # TODO
-    y_true = data.data[:, 0]
+    # 2. Make predictions, averaging over each sample of latent variables
+    y_pred, y_true = model.predict(xs, zs)
 
     # Evaluate y_pred according to y_true for all metrics.
     evaluations = []

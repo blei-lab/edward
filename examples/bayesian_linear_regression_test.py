@@ -54,19 +54,15 @@ class LinearModel:
         return log_lik + log_prior
 
     def predict(self, xs, zs):
-        """Returns a vector
-        [E_{p(xs | zs[1,:])} [xs], ..., E_{p(xs | zs[S,:])} [xs]]."""
-        x = xs[:, 1:]
+        """Returns a prediction for each data point, averaging over
+        each set of latent variables z in zs; and also return the true
+        value."""
+        y_test = xs[:, 0]
+        x_test = xs[:, 1:]
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
-        return tf.matmul(x, W) + b
-
-    def evaluation_metric(self,xs,zs):
-        """Returns a vector [d(xs, zs[1,:]), ..., d(xs, zs[S,:])]
-        where d() is the evaluation metric of choice."""
-        y = tf.expand_dims(y, 1)
-        MSE = tf.reduce_mean(tf.pow(mus - y, 2), 0)
-        return MSE
+        y_pred = tf.reduce_mean(tf.matmul(x, W) + b, 1)
+        return y_pred, y_test
 
 def build_toy_dataset(coeff, n_data=40, n_data_test=20, noise_std=0.1):
     ed.set_seed(0)
