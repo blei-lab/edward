@@ -35,7 +35,7 @@ def predict(self, xs, zs):
     """
     pass
 
-# TODO
+# TODO 3
 def sample_prior():
     pass
 
@@ -75,8 +75,14 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
         metrics = [metrics]
 
     for metric in metrics:
-        # TODO
-        # metric == 'accuracy', with binary and categorical defaulted
+        if metric == 'accuracy' or 'crossentropy':
+            # automate binary or sparse cat depending on max(y_true)
+            support = sess.run(tf.maximum(y_true))
+            if support <= 1:
+                metric = 'binary_' + metric
+            else:
+                metric = 'sparse_categorical_' + metric
+
         if metric == 'binary_accuracy':
             evaluations += [sess.run(binary_accuracy(y_true, y_pred), feed_dict)]
         elif metric == 'categorical_accuracy':
@@ -109,7 +115,7 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
             evaluations += [sess.run(poisson(y_true, y_pred), feed_dict)]
         elif metric == 'cosine' or metric == 'cosine_proximity':
             evaluations += [sess.run(cosine_proximity(y_true, y_pred), feed_dict)]
-        elif metric == 'log_lik':
+        elif metric == 'log_lik' or metric == 'log_likelihood':
             evaluations += [sess.run(y_pred, feed_dict)]
         else:
             raise NotImplementedError()
