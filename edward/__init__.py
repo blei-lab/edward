@@ -8,7 +8,7 @@ from . import util
 
 # Direct imports for convenience
 from .models import *
-from .criticisms import evaluate, cv_evaluate, ppc
+from .criticisms import evaluate, ppc
 from .data import *
 from .inferences import *
 from .util import set_seed
