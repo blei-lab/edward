@@ -100,7 +100,6 @@ plt.show(block=False)
 
 inference = ed.MFVI(model, variational, data)
 sess = inference.initialize(n_print=5)
-# TODO it gets NaN's at iteration 608 and beyond
 for t in range(600):
     loss = inference.update(sess)
     if t % inference.n_print == 0:
