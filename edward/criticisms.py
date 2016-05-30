@@ -1,6 +1,47 @@
 import numpy as np
 import tensorflow as tf
 
+from edward.util import logit
+
+# template
+def predict(self, xs, zs):
+    """
+    Parameters
+    ----------
+    xs : Data
+        N data points.
+    zs : tf.Tensor
+        S x d matrix.
+
+    Returns
+    -------
+    tf.Tensor
+        N x S matrix where entry (i, j) is the predicted
+        value for the ith data point given the jth set of latent
+        variables.
+
+        For supervised tasks, the predicted value is the mean of the
+        output's likelihood given features from the ith data point and
+        jth set of latent variables:
+            + Binary classification. The probability of the success
+            label.
+            + Multi-class classification. The probability of each
+            label, with the entire output of shape N x S x K.
+            (one-shot or label representation downstream?)
+            + Regression. The mean response.
+        For unsupervised, the predicted value is the log-likelihood
+        evaluated at the ith data point given jth set of latent
+        variables.
+    """
+    pass
+
+# TODO
+def sample_prior():
+    pass
+
+def sample_lik():
+    pass
+
 # TODO default to grabbing session from environment if it exists
 # to do this, inference will need to globally define the session
 def evaluate(metrics, model, variational, data, sess=tf.Session()):
@@ -68,6 +109,8 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
             evaluations += [sess.run(poisson(y_true, y_pred), feed_dict)]
         elif metric == 'cosine' or metric == 'cosine_proximity':
             evaluations += [sess.run(cosine_proximity(y_true, y_pred), feed_dict)]
+        elif metric == 'log_lik':
+            evaluations += [sess.run(y_pred, feed_dict)]
         else:
             raise NotImplementedError()
 
@@ -176,11 +219,10 @@ def prior_predictive_check(model, data, T):
 
 # Classification metrics
 
-# TODO maybe i should be doing these rounding stuff outside
-# for accuracy, it makes sense to hand it the actual values
-# but not for hinge of cross entropies
 def binary_accuracy(y_true, y_pred):
     """
+    Binary prediction accuracy, also known as 0/1-loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -188,12 +230,34 @@ def binary_accuracy(y_true, y_pred):
     y_pred : tf.Tensor
         Tensor of probabilities.
     """
-    return tf.reduce_mean(tf.cast(tf.equal(y_true, tf.round(y_pred)), tf.float32))
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = tf.cast(tf.round(y_pred), tf.float32)
+    return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
-# TODO double check
 def categorical_accuracy(y_true, y_pred):
     """
-    One-hot representation.
+    Multi-class prediction accuracy. One-hot representation for
+    y_true.
+
+    Parameters
+    ----------
+    y_true : tf.Tensor
+        Tensor of 0s and 1s, where the outermost dimension of size K
+        has only one 1 per row.
+    y_pred : tf.Tensor
+        Tensor of probabilities, with same shape as y_true.
+        The outermost dimension denote the categorical probabilities for
+        that data point per row.
+    """
+    y_true = tf.cast(tf.argmax(y_true, len(y_true.get_shape()) - 1), tf.float32)
+    y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
+    return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
+
+def sparse_categorical_accuracy(y_true, y_pred):
+    """
+    Multi-class prediction accuracy. Label {0, 1, .., K-1}
+    representation for y_true.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -203,35 +267,58 @@ def categorical_accuracy(y_true, y_pred):
         The outermost dimension are the categorical probabilities for
         that data point.
     """
-    return tf.reduce_mean(tf.cast(tf.equal(y_true,
-           tf.argmax(y_pred, len(y_pred.get_shape()) - 1)), tf.float32))
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
+    return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
-# TODO double check
-def sparse_categorical_accuracy(y_true, y_pred):
-    """Label {0, 1, .., K-1} representation."""
-    return tf.reduce_mean(tf.cast(tf.equal(
-           tf.reduce_max(y_true, len(y_true.get_shape()) - 1),
-           tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)),
-           tf.float32))
-
-# TODO double check
 def binary_crossentropy(y_true, y_pred):
+    """
+    Parameters
+    ----------
+    y_true : tf.Tensor
+        Tensor of 0s and 1s.
+    y_pred : tf.Tensor
+        Tensor of probabilities.
+    """
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = logit(tf.cast(y_pred, tf.float32))
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_pred, y_true))
 
-# TODO double check
 def categorical_crossentropy(y_true, y_pred):
-    """Expects a binary class matrix instead of a vector of scalar classes.
     """
-    return tf.reduce_mean(tf.categorical_crossentropy(y_pred, y_true))
+    Multi-class cross entropy. One-hot representation for y_true.
 
-# TODO double check
-def sparse_categorical_crossentropy(y_true, y_pred):
-    """expects an array of integer classes.
-    Note: labels shape must have the same number of dimensions as output shape.
-    If you get a shape error, add a length-1 dimension to labels.
+    Parameters
+    ----------
+    y_true : tf.Tensor
+        Tensor of 0s and 1s, where the outermost dimension of size K
+        has only one 1 per row.
+    y_pred : tf.Tensor
+        Tensor of probabilities, with same shape as y_true.
+        The outermost dimension denote the categorical probabilities for
+        that data point per row.
     """
-    return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
-        y_pred, tf.cast(y_true, tf.float32)))
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = logit(tf.cast(y_pred, tf.float32))
+    return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_pred, y_true))
+
+def sparse_categorical_crossentropy(y_true, y_pred):
+    """
+    Multi-class cross entropy. Label {0, 1, .., K-1} representation
+    for y_true.
+
+    Parameters
+    ----------
+    y_true : tf.Tensor
+        Tensor of integers {0, 1, ..., K-1}.
+    y_pred : tf.Tensor
+        Tensor of probabilities, with shape (y_true.get_shape(), K).
+        The outermost dimension are the categorical probabilities for
+        that data point.
+    """
+    y_true = tf.cast(y_true, tf.int32)
+    y_pred = logit(tf.cast(y_pred, tf.float32))
+    return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
 
 def hinge(y_true, y_pred):
     """
@@ -240,9 +327,11 @@ def hinge(y_true, y_pred):
     y_true : tf.Tensor
         Tensor of 0s and 1s.
     y_pred : tf.Tensor
-        Tensor of probabilities.
+        Tensor of real value.
     """
-    return tf.reduce_mean(tf.reduce_max(1.0 - y_true * y_pred, 0.0))
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = tf.cast(y_pred, tf.float32)
+    return tf.reduce_mean(tf.maximum(1.0 - y_true * y_pred, 0.0))
 
 def squared_hinge(y_true, y_pred):
     """
@@ -251,9 +340,11 @@ def squared_hinge(y_true, y_pred):
     y_true : tf.Tensor
         Tensor of 0s and 1s.
     y_pred : tf.Tensor
-        Tensor of probabilities.
+        Tensor of real value.
     """
-    return tf.reduce_mean(tf.square(tf.reduce_max(1.0 - y_true * y_pred, 0.0)))
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = tf.cast(y_pred, tf.float32)
+    return tf.reduce_mean(tf.square(tf.maximum(1.0 - y_true * y_pred, 0.0)))
 
 # Regression metrics
 
@@ -302,7 +393,7 @@ def mean_squared_logarithmic_error(y_true, y_pred):
 
 def poisson(y_true, y_pred):
     """
-    Negative log Poisson likelihood of data y_true given predictions
+    Negative Poisson log-likelihood of data y_true given predictions
     y_pred (up to proportion).
 
     Parameters
@@ -326,7 +417,3 @@ def cosine_proximity(y_true, y_pred):
     y_true = tf.nn.l2_normalize(y_true, len(y_true.get_shape()) - 1)
     y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.get_shape()) - 1)
     return tf.reduce_sum(y_true * y_pred)
-
-# Unsupervised metrics
-# TODO
-# log_likelihood(), log p(y_true) under model's marginal likelihood

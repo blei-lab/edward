@@ -171,6 +171,11 @@ def log_sum_exp(x):
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
+def logit(x):
+    """log(x / (1 - x))"""
+    x = tf.clip_by_value(x, 1e-8, 1.0 - 1e-8)
+    return tf.log(x) - tf.log(1.0 - x)
+
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     """
     Squared-exponential kernel
