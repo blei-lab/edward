@@ -35,10 +35,10 @@ class LinearModel:
         Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
-    def __init__(self, lik_variance=0.01, prior_variance=0.01):
+    def __init__(self, num_features = 10, lik_variance=0.01, prior_variance=0.01):
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
-        self.num_vars = 11
+        self.num_vars = num_features + 1
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
@@ -79,14 +79,15 @@ def build_toy_dataset(coeff,n_data=40,n_data_test=20, noise_std=0.1):
     data_test = tf.constant(data_test, dtype=tf.float32)
     return ed.Data(data,data_test)
 
-ed.set_seed(42)
-model = LinearModel()
-variational = Variational()
-variational.add(Normal(model.num_vars))
-
-coeff = np.random.randn(10)
-data = build_toy_dataset(coeff)
-
-inference = ed.MFVI(model, variational, data)
-sess = inference.run(n_iter=250, n_minibatch=5, n_print=10)
-print inference.test(sess)
+if __name__ == "__main__":
+     ed.set_seed(42)
+     model = LinearModel()
+     variational = Variational()
+     variational.add(Normal(model.num_vars))
+     
+     coeff = np.random.randn(10)
+     data = build_toy_dataset(coeff)
+     
+     inference = ed.MFVI(model, variational, data)
+     sess = inference.run(n_iter=250, n_minibatch=5, n_print=10)
+     print inference.test(sess)
