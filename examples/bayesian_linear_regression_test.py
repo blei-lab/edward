@@ -61,7 +61,7 @@ class LinearModel:
         x_test = xs[:, 1:]
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
-        y_pred = tf.reduce_mean(tf.matmul(x, W) + b, 1)
+        y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
         return y_pred, y_test
 
 def build_toy_dataset(coeff, n_data=40, n_data_test=20, noise_std=0.1):
