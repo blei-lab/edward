@@ -28,6 +28,11 @@ It supports __inference__ via
   * Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
   * Maximum a posteriori (penalized maximum likelihood, maximum likelihood)
 
+It supports __criticism__ of the model and inference via
+
+* Evaluations on both supervised and unsupervised tasks
+* Posterior predictive checks
+
 It also has __features__ including
 
 * [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
