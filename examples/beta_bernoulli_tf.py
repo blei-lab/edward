@@ -15,6 +15,9 @@ import tensorflow as tf
 from edward.models import Variational, Beta
 from edward.stats import bernoulli, beta
 
+global isess 
+isess = tf.InteractiveSession()
+
 class BetaBernoulli:
     """
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)

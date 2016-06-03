@@ -83,7 +83,7 @@ class Variational:
 
         return tf.concat(1, samples), samples
 
-    def np_sample(self, samples, size=1, sess=None):
+    def np_sample(self, samples, size=1):
         """
         Form dictionary to feed any placeholders with np.array
         samples.
@@ -91,12 +91,12 @@ class Variational:
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
-                feed_dict[sample] = layer.sample(size, sess)
+                feed_dict[sample] = layer.sample(size)
 
         return feed_dict
 
-    def print_params(self, sess):
-        [layer.print_params(sess) for layer in self.layers]
+    def print_params(self):
+        [layer.print_params() for layer in self.layers]
 
     def log_prob_zi(self, i, zs):
         start = final = 0
@@ -189,7 +189,7 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    def print_params(self, sess):
+    def print_params(self):
         raise NotImplementedError()
 
     def sample_noise(self, size=1):
@@ -218,7 +218,7 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """
         z ~ q(z | lambda)
 
@@ -296,14 +296,14 @@ class Bernoulli(Likelihood):
     def set_params(self, params):
         self.p = params[0]
 
-    def print_params(self, sess):
-        p = sess.run(self.p)
+    def print_params(self):
+        p = self.p.eval() 
         print("probability:")
         print(p)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        p = sess.run(self.p)
+        p = self.p.eval()
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = bernoulli.rvs(p[d], size=size)
@@ -343,16 +343,18 @@ class Beta(Likelihood):
         self.a = params[0]
         self.b = params[1]
 
-    def print_params(self, sess):
-        a, b = sess.run([self.a, self.b])
+    def print_params(self):
+        a = self.a.eval()
+        b = self.b.eval()
         print("shape:")
         print(a)
         print("scale:")
         print(b)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        a, b = sess.run([self.a, self.b])
+        a = self.a.eval()
+        b = self.b.eval()
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = beta.rvs(a[d], b[d], size=size)
@@ -391,14 +393,14 @@ class Dirichlet(Likelihood):
     def set_params(self, params):
         self.alpha = params[0]
 
-    def print_params(self, sess):
-        alpha = sess.run(self.alpha)
+    def print_params(self):
+        alpha = self.alpha.eval()
         print("concentration vector:")
         print(alpha)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        alpha = sess.run(self.alpha)
+        alpha = self.alpha.eval()
         z = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
@@ -442,16 +444,18 @@ class InvGamma(Likelihood):
         self.a = params[0]
         self.b = params[1]
 
-    def print_params(self, sess):
-        a, b = sess.run([self.a, self.b])
+    def print_params(self):
+        a = self.a.eval()
+        b = self.b.eval()
         print("shape:")
         print(a)
         print("scale:")
         print(b)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        a, b = sess.run([self.a, self.b])
+        a = self.a.eval()
+        b = self.b.eval()
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = invgamma.rvs(a[d], b[d], size=size)
@@ -505,14 +509,14 @@ class Multinomial(Likelihood):
     def set_params(self, params):
         self.pi = params[0]
 
-    def print_params(self, sess):
-        pi = sess.run(self.pi)
+    def print_params(self):
+        pi = self.pi.eval()
         print("probability vector:")
         print(pi)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        pi = sess.run(self.pi)
+        pi = self.pi.eval()
         z = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
@@ -556,8 +560,9 @@ class Normal(Likelihood):
         self.m = params[0]
         self.s = params[1]
 
-    def print_params(self, sess):
-        m, s = sess.run([self.m, self.s])
+    def print_params(self):
+        m = self.m.eval()
+        s = self.s.eval()
         print("mean:")
         print(m)
         print("std dev:")
@@ -612,12 +617,12 @@ class PointMass(Likelihood):
     def set_params(self, params):
         self.params = params[0]
 
-    def print_params(self, sess):
-        params = sess.run(self.params)
+    def print_params(self):
+        params = self.params.eval()
         print("parameter values:")
         print(params)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         # Return a matrix where each row is the same set of
         # parameters. This is to be compatible with probability model
         # methods which assume the input is possibly a mini-batch of
