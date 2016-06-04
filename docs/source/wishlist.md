@@ -10,7 +10,7 @@ __Inference__
     * Coordinate ascent variational inference
     * Expectation propagation
     * Generative adversarial networks
-* Empirical risk minimization
+* Bayesian risk minimization
 * Monte Carlo
     * Markov chain Monte Carlo
     * Importance sampling
