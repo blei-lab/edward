@@ -6,6 +6,7 @@
 + __Issue labeling system.__ We use [Stan's labeling system](https://github.com/stan-dev/stan/pulls). While several labels obviously don't apply to us, it's better than the default labels and it's not worth the effort to reinvent the wheel and maintain a custom system.
 
 Coding
+
 + Use [PEP 8](https://www.python.org/dev/peps/pep-0008/).
 + Be compatible with Python 3. See for example [here](http://sebastianraschka.com/Articles/2014_python_2_3_key_diff.html) to be cognizant of the main differences between 2.7.x and 3.x.
 + Aim for 70 characters per line, with some exceptions.
@@ -37,6 +38,7 @@ For this to work permanently, add this line to your `~/.bashrc` if you use Bash 
 pip install -e edward
 ```
 (We recommend not installing with `sudo`; rather [use virtualenv](http://docs.python-guide.org/en/latest/starting/install/osx/).)
+
 + __Packaging and submitting to PyPI.__ First, update the version number in `setup.py`. Second, follow [these steps](https://packaging.python.org/en/latest/distributing/#packaging-your-project). For shorthand, the sequence of commands is
 ```{bash}
 python setup.py sdist
