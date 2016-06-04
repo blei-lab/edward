@@ -54,10 +54,6 @@ To develop work on a branch privately, we suggest using a private repo that main
 Clone the private repo so you can work on it (create a repo if it does not exist).
 ```{bash}
 git clone https://github.com/yourname/private-repo.git
-cd private-repo
-make some changes
-git commit
-git push origin master
 ```
 Pull changes from the public repo. This will let the private repo have the latest code from the public repo on its master branch.
 ```{bash}
@@ -66,7 +62,7 @@ git remote add public https://github.com/exampleuser/public-repo.git
 git pull public master # Creates a merge commit
 git push origin master
 ```
-Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo following the above procedure as you develop. Make sure that as you're running Edward, you're using the Edward library pointing to the private repo so it reflects your developer changes and not pointed to the public repo where it won't see any changes.
+Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo as you develop (`git pull public master`). Make sure that as you're running Edward, you're using the Edward library pointing to the private repo so it reflects your developer changes and not pointed to the public repo where it won't see any changes.
 
 Finally, to create a pull request from a private repo's branch to the public repo, push the private branch to the public repo.
 ```{bash}
