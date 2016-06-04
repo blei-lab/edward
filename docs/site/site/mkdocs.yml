@@ -1,0 +1,15 @@
+site_name: Edward
+docs_dir: .
+theme_dir: 'theme'
+repo_url: http://github.com/blei-lab/edward
+site_url: http://edwardlib.org/
+
+pages:
+- Home: index.md
+
+extra:
+  logo: edward.png
+  logo_name: true
+  show_powered_by: false
+  include_toc: false
+  site_description: 'A library for probabilistic modeling, inference, and criticism.'
