@@ -3,7 +3,7 @@ theme: alabaster
 docs_dir: .
 repo_url: http://github.com/blei-lab/edward
 site_url: http://edwardlib.org/
-site_description: 'Documentation for Keras, the Python Deep Learning library.'
+site_description: 'A library for probabilistic modeling, inference, and criticism.'
 
 pages:
 - Home: index.md
