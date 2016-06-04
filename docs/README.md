@@ -15,14 +15,13 @@ mkdocs serve
   To do this (and assuming you have push permission), go to this
   `docs/` directory. Then run
 ```{bash}
-mkdocs gh-deploy
+mkdocs gh-deploy --clean
 ```
   We forward the main domain url to these Github
   pages, [blei-lab.github.io/edward](http://blei-lab.github.io/edward), following
   [Github's guide](https://help.github.com/articles/setting-up-a-custom-domain-with-github-pages)
-  (namely, we make a `CNAME` file in the `gh-pages` branch; then we
-  update the DNS record on the DNS provider; this is the only
-  file manually added to the `gh-pages` branch).
+  (namely, we make a `CNAME` file; then we update the DNS record on
+  the DNS provider).
 
 See [MkDocs](http://mkdocs.org) for more details, including how to
 write documentation.
