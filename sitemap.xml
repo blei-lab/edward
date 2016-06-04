@@ -9,4 +9,20 @@
     </url>
     
 
+    
+    <url>
+     <loc>http://edwardlib.org//hello/</loc>
+     <lastmod>2016-06-03</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//hello_two/</loc>
+     <lastmod>2016-06-03</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
 </urlset>

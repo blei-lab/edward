@@ -1,8 +1,10 @@
+<hr />
+
 {% macro nav_tree(nav) -%}
   <ul>
   {% for nav_item in nav %}
       {% if not nav_item.children %}
-        <li>
+        <li class="toctree-l1">
           <a href="{{ nav_item.url }}">{{ nav_item.title }}</a>
         </li>
       {% else %}
