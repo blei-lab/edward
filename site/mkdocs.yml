@@ -1,0 +1,9 @@
+site_name: Edward
+theme: alabaster
+docs_dir: .
+repo_url: http://github.com/blei-lab/edward
+site_url: http://edwardlib.org/
+site_description: 'Documentation for Keras, the Python Deep Learning library.'
+
+pages:
+- Home: index.md
