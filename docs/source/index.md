@@ -72,12 +72,12 @@ We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of t
 We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
-Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. https://github.com/blei-lab/edward
+Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. http://edwardlib.org
 ```
 @misc{tran2016edward,
   author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
   title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
   year = {2016},
-  url = {https://github.com/blei-lab/edward}
+  url = {http://edwardlib.org}
 }
 ```
