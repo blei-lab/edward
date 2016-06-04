@@ -99,12 +99,13 @@ plt.ion()
 plt.show(block=False)
 
 inference = ed.MFVI(model, variational, data)
-sess = inference.initialize(n_print=5)
+inference.initialize(n_print=5)
+sess = tf.get_default_session()
 for t in range(600):
-    loss = inference.update(sess)
+    loss = inference.update()
     if t % inference.n_print == 0:
         print("iter {:d} loss {:.2f}".format(t, loss))
-        variational.print_params(sess)
+        variational.print_params()
 
         # Sample functions from variational model
         mean, std = sess.run([variational.layers[0].m,
@@ -115,7 +116,7 @@ for t in range(600):
         inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
         mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
-        outputs = sess.run(mus)
+        outputs = mus.eval()
 
         # Get data
         y, x = sess.run([data.data[:, 0], data.data[:, 1]])

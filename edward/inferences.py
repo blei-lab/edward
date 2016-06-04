@@ -6,8 +6,10 @@ from edward.data import Data
 from edward.models import Variational, PointMass
 from edward.util import kl_multivariate_normal, log_sum_exp
 
-global isess 
-isess = tf.InteractiveSession()
+global _ED_SESSION 
+if tf.get_default_session() is None:
+    _ED_SESSION = tf.InteractiveSession()
+
 
 try:
     import prettytensor as pt
@@ -87,8 +89,6 @@ class VariationalInference(Inference):
         optimizer : str, optional
             Whether to use TensorFlow optimizer or PrettyTensor
             optimizer if using PrettyTensor. Defaults to TensorFlow.
-        sess : tf.Session, optional
-            TensorFlow session for computation.
         """
         self.n_iter = n_iter
         self.n_data = n_data
@@ -112,15 +112,11 @@ class VariationalInference(Inference):
 
         init = tf.initialize_all_variables()
         init.run()
-        #if sess == None:
-        #    sess = tf.Session()
 
-        #sess.run(init)
-        #return sess
 
     def update(self):
         self.train.run()
-        loss = self.loss.run()
+        loss = self.loss.eval()
         return loss
 
     def print_progress(self, t, loss):
@@ -163,7 +159,7 @@ class MFVI(VariationalInference):
     def update(self):
         feed_dict = self.variational.np_sample(
             self.samples, self.n_minibatch)
-        _, loss = isess.run([self.train, self.loss], feed_dict)
+        _, loss = tf.get_default_session().run([self.train, self.loss], feed_dict)
         return loss
 
     def build_loss(self):
@@ -312,10 +308,10 @@ class KLpq(VariationalInference):
         self.n_minibatch = n_minibatch
         return VariationalInference.initialize(self, *args, **kwargs)
 
-    def update(self, sess):
+    def update(self):
         feed_dict = self.variational.np_sample(
-            self.samples, self.n_minibatch, sess=sess)
-        _, loss = sess.run([self.train, self.loss], feed_dict)
+            self.samples, self.n_minibatch)
+        _, loss = tf.get_default_session().run([self.train, self.loss], feed_dict)
         return loss
 
     def build_loss(self):

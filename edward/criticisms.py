@@ -4,7 +4,11 @@ import tensorflow as tf
 from edward.data import Data
 from edward.util import logit
 
-def evaluate(metrics, model, variational, data, sess=tf.Session()):
+global _ED_SESSION 
+if tf.get_default_session() is None:
+    _ED_SESSION = tf.InteractiveSession()
+
+def evaluate(metrics, model, variational, data):
     """
     Evaluate fitted model using a set of metrics.
 
@@ -23,7 +27,7 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     xs = data.data
     n_minibatch = 100
     zs, samples = variational.sample(xs, size=n_minibatch)
-    feed_dict = variational.np_sample(samples, n_minibatch, sess=sess)
+    feed_dict = variational.np_sample(samples, n_minibatch)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred, y_true = model.predict(xs, zs)
 
@@ -35,46 +39,46 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     for metric in metrics:
         if metric == 'accuracy' or metric == 'crossentropy':
             # automate binary or sparse cat depending on max(y_true)
-            support = sess.run(tf.reduce_max(y_true))
+            support = tf.reduce_max(y_true)
             if support <= 1:
                 metric = 'binary_' + metric
             else:
                 metric = 'sparse_categorical_' + metric
 
         if metric == 'binary_accuracy':
-            evaluations += [sess.run(binary_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(binary_accuracy(y_true, y_pred), feed_dict)]
         elif metric == 'categorical_accuracy':
-            evaluations += [sess.run(categorical_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(categorical_accuracy(y_true, y_pred), feed_dict)]
         elif metric == 'sparse_categorical_accuracy':
-            evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(sparse_categorical_accuracy(y_true, y_pred), feed_dict)]
         elif metric == 'log_loss' or metric == 'binary_crossentropy':
-            evaluations += [sess.run(binary_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(binary_crossentropy(y_true, y_pred), feed_dict)]
         elif metric == 'categorical_crossentropy':
-            evaluations += [sess.run(categorical_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(categorical_crossentropy(y_true, y_pred), feed_dict)]
         elif metric == 'sparse_categorical_crossentropy':
-            evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(sparse_categorical_crossentropy(y_true, y_pred), feed_dict)]
         elif metric == 'hinge':
-            evaluations += [sess.run(hinge(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(hinge(y_true, y_pred), feed_dict)]
         elif metric == 'squared_hinge':
-            evaluations += [sess.run(squared_hinge(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(squared_hinge(y_true, y_pred), feed_dict)]
         elif metric == 'mse' or metric == 'MSE' or \
              metric == 'mean_squared_error':
-            evaluations += [sess.run(mean_squared_error(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(mean_squared_error(y_true, y_pred), feed_dict)]
         elif metric == 'mae' or metric == 'MAE' or \
              metric == 'mean_absolute_error':
-            evaluations += [sess.run(mean_absolute_error(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(mean_absolute_error(y_true, y_pred), feed_dict)]
         elif metric == 'mape' or metric == 'MAPE' or \
              metric == 'mean_absolute_percentage_error':
-            evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(mean_absolute_percentage_error(y_true, y_pred), feed_dict)]
         elif metric == 'msle' or metric == 'MSLE' or \
              metric == 'mean_squared_logarithmic_error':
-            evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(mean_squared_logarithmic_error(y_true, y_pred), feed_dict)]
         elif metric == 'poisson':
-            evaluations += [sess.run(poisson(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(poisson(y_true, y_pred), feed_dict)]
         elif metric == 'cosine' or metric == 'cosine_proximity':
-            evaluations += [sess.run(cosine_proximity(y_true, y_pred), feed_dict)]
+            evaluations += [tf.get_default_session().run(cosine_proximity(y_true, y_pred), feed_dict)]
         elif metric == 'log_lik' or metric == 'log_likelihood':
-            evaluations += [sess.run(y_pred, feed_dict)]
+            evaluations += [tf.get_default_session().run(y_pred, feed_dict)]
         else:
             raise NotImplementedError()
 
@@ -83,8 +87,7 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     else:
         return evaluations
 
-def ppc(model, variational=None, data=Data(), T=None, size=100,
-    sess=tf.Session()):
+def ppc(model, variational=None, data=Data(), T=None, size=100):
     """
     Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
@@ -143,11 +146,11 @@ def ppc(model, variational=None, data=Data(), T=None, size=100,
     # may require a SciPy-based sampler.
     if variational != None:
         zs, samples = variational.sample(y, size=size)
-        feed_dict = variational.np_sample(samples, size, sess=sess)
-        zs = sess.run(zs, feed_dict)
+        feed_dict = variational.np_sample(samples, size)
+        zs = tf.get_default_session().run(zs, feed_dict)
     else:
         zs = model.sample_prior(size=size)
-        zs = sess.run(zs)
+        zs = zs.eval()
 
     # 2. Sample from likelihood.
     yreps = model.sample_likelihood(zs, size=N)
@@ -160,9 +163,9 @@ def ppc(model, variational=None, data=Data(), T=None, size=100,
             Tys += [T(y, z)]
 
     if y == None:
-        return sess.run(tf.pack(Tyreps), feed_dict)
+        return tf.get_default_session().run(tf.pack(Tyreps), feed_dict)
     else:
-        return sess.run([tf.pack(Tyreps), tf.pack(Tys)], feed_dict)
+        return tf.get_default_session().run([tf.pack(Tyreps), tf.pack(Tys)], feed_dict)
 
 # Classification metrics
 

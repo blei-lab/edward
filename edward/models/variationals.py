@@ -5,6 +5,9 @@ import tensorflow as tf
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, Variable
 
+global _ED_SESSION 
+_ED_SESSION = tf.InteractiveSession()
+
 class Variational:
     """A stack of variational families."""
     def __init__(self, layers=[]):
