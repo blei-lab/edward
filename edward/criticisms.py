@@ -39,7 +39,7 @@ def evaluate(metrics, model, variational, data):
     for metric in metrics:
         if metric == 'accuracy' or metric == 'crossentropy':
             # automate binary or sparse cat depending on max(y_true)
-            support = tf.reduce_max(y_true)
+            support = tf.reduce_max(y_true).eval()
             if support <= 1:
                 metric = 'binary_' + metric
             else:
