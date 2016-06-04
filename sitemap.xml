@@ -4,7 +4,63 @@
     
     <url>
      <loc>http://edwardlib.org//</loc>
-     <lastmod>2016-06-03</lastmod>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//tutorial/</loc>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//tutorial_research/</loc>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//design/</loc>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//developer/</loc>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//tensorflow/</loc>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//wishlist/</loc>
+     <lastmod>2016-06-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>http://edwardlib.org//misc/</loc>
+     <lastmod>2016-06-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     

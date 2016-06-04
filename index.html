@@ -11,6 +11,8 @@
       <link rel="shortcut icon" href="./img/favicon.ico">
     
 
+    <link rel="stylesheet" href="./css/highlight.css">
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="./css/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="./css/alabaster-overrides.css" type="text/css" />
 
@@ -21,11 +23,15 @@
     
       <link href="./site/css/basic.css" rel="stylesheet">
     
+      <link href="./site/css/highlight.css" rel="stylesheet">
+    
       <link href="./site/site/css/alabaster-overrides.css" rel="stylesheet">
     
       <link href="./site/site/css/alabaster.css" rel="stylesheet">
     
       <link href="./site/site/css/basic.css" rel="stylesheet">
+    
+      <link href="./site/site/css/highlight.css" rel="stylesheet">
     
       <link href="./site/theme/css/alabaster-overrides.css" rel="stylesheet">
     
@@ -33,41 +39,15 @@
     
       <link href="./site/theme/css/basic.css" rel="stylesheet">
     
+      <link href="./site/theme/css/highlight.css" rel="stylesheet">
+    
       <link href="./theme/css/alabaster-overrides.css" rel="stylesheet">
     
       <link href="./theme/css/alabaster.css" rel="stylesheet">
     
       <link href="./theme/css/basic.css" rel="stylesheet">
     
-
-    
-      <script src="./site/js/theme.js"></script>
-    
-      <script src="./site/mkdocs/js/lunr-0.5.7.min.js"></script>
-    
-      <script src="./site/mkdocs/js/mustache.min.js"></script>
-    
-      <script src="./site/mkdocs/js/require.js"></script>
-    
-      <script src="./site/mkdocs/js/search.js"></script>
-    
-      <script src="./site/mkdocs/js/text.js"></script>
-    
-      <script src="./site/site/js/theme.js"></script>
-    
-      <script src="./site/site/mkdocs/js/lunr-0.5.7.min.js"></script>
-    
-      <script src="./site/site/mkdocs/js/mustache.min.js"></script>
-    
-      <script src="./site/site/mkdocs/js/require.js"></script>
-    
-      <script src="./site/site/mkdocs/js/search.js"></script>
-    
-      <script src="./site/site/mkdocs/js/text.js"></script>
-    
-      <script src="./site/theme/js/theme.js"></script>
-    
-      <script src="./theme/js/theme.js"></script>
+      <link href="./theme/css/highlight.css" rel="stylesheet">
     
 
     
@@ -84,7 +64,7 @@
       <div class="bodywrapper">
         <div class="body" role="main">
           
-            <p><a href="http://www.erikolofsen.com/blackbox.html"><img alt="edward" src="http://dustintran.com/img/blackbox_200.png" /></a></p>
+            <h1 id="welcome-to-edward">Welcome to Edward</h1>
 <p><strong>Edward</strong> is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
 and continuous latent variables, neural network parameterizations, and
@@ -124,9 +104,9 @@ and probabilistic programming.</p>
 <li>Examples demonstrating state-of-the-art generative models and inference</li>
 </ul>
 <h2 id="getting-started">Getting Started</h2>
-<p><a href="https://github.com/blei-lab/edward/wiki/Tutorial">You can find a tutorial here</a>
+<p><a href="tutorial/">You can find a tutorial here</a>
 for getting started with Edward, as well as a
-<a href="https://github.com/blei-lab/edward/wiki/Tutorial-for-Research">tutorial here</a>
+<a href="tutorial_research/">tutorial here</a>
 for how to use it for research. We highlight a few examples, more of
 which can be found in <a href="./examples/"><code>examples/</code></a>:</p>
 <ul>
@@ -138,7 +118,7 @@ which can be found in <a href="./examples/"><code>examples/</code></a>:</p>
 <li><a href="./examples/mixture_density_network.py">Mixture density network</a></li>
 <li><a href="./examples/convolutional_vae.py">Variational auto-encoder</a></li>
 </ul>
-<p>Read the documentation in the <a href="https://github.com/blei-lab/edward/wiki">Wiki</a>.</p>
+<p>Read the documentation on the <a href=".">website</a>.</p>
 <h2 id="installation">Installation</h2>
 <p>To install the latest stable version, run</p>
 <pre><code class="bash">pip install edward
@@ -180,7 +160,10 @@ people have been using the library and it motivates further work.</p>
 
 
 
-  <p class="blurb">A library for probabilistic modeling, inference, and criticism.</p>
+  <p class="blurb">A library for probabilistic modeling, inference, and criticism.
+      <a href="http://github.com/blei-lab/edward"><i class="fa fa-github fa-lg"
+      aria-hidden="true"></i></a>
+  </p>
 
         <hr />
 
@@ -190,6 +173,48 @@ people have been using the library and it motivates further work.</p>
       
         <li class="toctree-l1">
           <a href=".">Home</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="tutorial/">Tutorial</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="tutorial_research/">Tutorial for Research</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="design/">Design and Philosophy</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="developer/">Developer Process</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="tensorflow/">TensorFlow</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="wishlist/">Feature Wishlist</a>
+        </li>
+      
+    
+      
+        <li class="toctree-l1">
+          <a href="misc/">Miscellaneous</a>
         </li>
       
     
@@ -220,9 +245,57 @@ people have been using the library and it motivates further work.</p>
     </div>
   
 
+  <script src="./js/jquery-1.10.2.min.js"></script>
+  <script src="./js/highlight.pack.js"></script>
+  
+    <script src="./site/js/highlight.pack.js"></script>
+  
+    <script src="./site/js/jquery-1.10.2.min.js"></script>
+  
+    <script src="./site/js/theme.js"></script>
+  
+    <script src="./site/mkdocs/js/lunr-0.5.7.min.js"></script>
+  
+    <script src="./site/mkdocs/js/mustache.min.js"></script>
+  
+    <script src="./site/mkdocs/js/require.js"></script>
+  
+    <script src="./site/mkdocs/js/search.js"></script>
+  
+    <script src="./site/mkdocs/js/text.js"></script>
+  
+    <script src="./site/site/js/highlight.pack.js"></script>
+  
+    <script src="./site/site/js/jquery-1.10.2.min.js"></script>
+  
+    <script src="./site/site/js/theme.js"></script>
+  
+    <script src="./site/site/mkdocs/js/lunr-0.5.7.min.js"></script>
+  
+    <script src="./site/site/mkdocs/js/mustache.min.js"></script>
+  
+    <script src="./site/site/mkdocs/js/require.js"></script>
+  
+    <script src="./site/site/mkdocs/js/search.js"></script>
+  
+    <script src="./site/site/mkdocs/js/text.js"></script>
+  
+    <script src="./site/theme/js/highlight.pack.js"></script>
+  
+    <script src="./site/theme/js/jquery-1.10.2.min.js"></script>
+  
+    <script src="./site/theme/js/theme.js"></script>
+  
+    <script src="./theme/js/highlight.pack.js"></script>
+  
+    <script src="./theme/js/jquery-1.10.2.min.js"></script>
+  
+    <script src="./theme/js/theme.js"></script>
+  
+
   <!--
   MkDocs version      : 0.15.3
-  Docs Build Date UTC : 2016-06-04 06:25:15.848272
+  Docs Build Date UTC : 2016-06-04 07:55:47.441718
   -->
 </body>
 </html>

@@ -6,6 +6,13 @@ site_url: http://edwardlib.org/
 
 pages:
 - Home: index.md
+- Tutorial: tutorial.md
+- Tutorial for Research: tutorial_research.md
+- Design and Philosophy: design.md
+- Developer Process: developer.md
+- TensorFlow: tensorflow.md
+- Feature Wishlist: wishlist.md
+- Miscellaneous: misc.md
 
 extra:
   logo: edward.png
