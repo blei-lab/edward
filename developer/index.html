@@ -89,10 +89,6 @@ twine upload dist/*
 <p>To develop work on a branch privately, we suggest using a private repo that maintains the master branch from the public repo. Development happens on the private repo's branch, and when it is finished, you can push it to the public repo's branch to submit as a pull request. We describe this in detail.</p>
 <p>Clone the private repo so you can work on it (create a repo if it does not exist).</p>
 <pre><code class="bash">git clone https://github.com/yourname/private-repo.git
-cd private-repo
-make some changes
-git commit
-git push origin master
 </code></pre>
 
 <p>Pull changes from the public repo. This will let the private repo have the latest code from the public repo on its master branch.</p>
@@ -102,7 +98,7 @@ git pull public master # Creates a merge commit
 git push origin master
 </code></pre>
 
-<p>Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo following the above procedure as you develop. Make sure that as you're running Edward, you're using the Edward library pointing to the private repo so it reflects your developer changes and not pointed to the public repo where it won't see any changes.</p>
+<p>Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo as you develop (<code>git pull public master</code>). Make sure that as you're running Edward, you're using the Edward library pointing to the private repo so it reflects your developer changes and not pointed to the public repo where it won't see any changes.</p>
 <p>Finally, to create a pull request from a private repo's branch to the public repo, push the private branch to the public repo.</p>
 <pre><code class="bash">git clone https://github.com/exampleuser/public-repo.git
 cd public-repo
@@ -222,7 +218,7 @@ git push origin pull_request_yourname
 
   <!--
   MkDocs version      : 0.15.3
-  Docs Build Date UTC : 2016-06-04 10:04:13.729991
+  Docs Build Date UTC : 2016-06-04 20:50:46.948594
   -->
 </body>
 </html>
