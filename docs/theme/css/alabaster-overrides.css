@@ -2,3 +2,9 @@ nav li.active:not(.inactive) > a {
     border-bottom: 1px solid #000;
     color: #000;
 }
+
+tt, code {
+    background-color: #EEE;
+    color: #222;
+    /* padding: 1px 2px; */
+}
