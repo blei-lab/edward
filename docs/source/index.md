@@ -17,13 +17,12 @@ It supports __modeling languages__ including
 It supports __inference__ via
 
 * Variational inference
-  * Divergence minimization
     * Black box variational inference
     * Stochastic variational inference
     * Variational auto-encoders
     * Inclusive KL divergence (KL(p || q))
-  * Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
-  * Maximum a posteriori (penalized maximum likelihood, maximum likelihood)
+* Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
+* Maximum a posteriori (penalized maximum likelihood, maximum likelihood)
 
 It supports __criticism__ of the model and inference via
 
