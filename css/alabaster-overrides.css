@@ -5,6 +5,7 @@ nav li.active:not(.inactive) > a {
 
 tt, code {
     background-color: #EEE;
-    color: #222;
-    /* padding: 1px 2px; */
+}
+pre {
+    background: #EEE;
 }
