@@ -42,10 +42,8 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial)
-for getting started with Edward, as well as a
-[tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial-for-Research)
-for how to use it for research. We highlight a few examples, more of
+[You can find a tutorial here](http://edwardlib.org/getting-started/)
+for getting started with Edward. We highlight a few examples, more of
 which can be found in [`examples/`](examples/):
 
 * [Bayesian linear regression](examples/bayesian_linear_regression.py)
@@ -56,7 +54,7 @@ which can be found in [`examples/`](examples/):
 * [Mixture density network](examples/mixture_density_network.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)
 
-Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
+Read the documentation on the [website](http://edwardlib.org).
 
 ## Installation
 
