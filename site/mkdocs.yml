@@ -7,8 +7,6 @@ site_description: 'A library for probabilistic modeling, inference, and criticis
 
 pages:
 - Home: index.md
-- hello.md
-- hello_two.md
 
 extra:
   logo: edward.png

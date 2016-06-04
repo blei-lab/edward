@@ -24,16 +24,6 @@
             "location": "/#citation", 
             "text": "We appreciate citations for Edward because it lets us find out how\npeople have been using the library and it motivates further work.  Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. https://github.com/blei-lab/edward  @misc{tran2016edward,\n  author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},\n  title = {{Edward: A library for probabilistic modeling, inference, and criticism}},\n  year = {2016},\n  url = {https://github.com/blei-lab/edward}\n}", 
             "title": "Citation"
-        }, 
-        {
-            "location": "/hello/", 
-            "text": "adfsa", 
-            "title": "Hello"
-        }, 
-        {
-            "location": "/hello_two/", 
-            "text": "dsfjksdf;adifas", 
-            "title": "Hello two"
         }
     ]
 }
