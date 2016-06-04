@@ -43,15 +43,15 @@ It also has __features__ including
 for getting started with Edward, as well as a
 [tutorial here](tutorial_research.md)
 for how to use it for research. We highlight a few examples, more of
-which can be found in [`examples/`](examples/):
+which can be found in [`examples/`](https://github.com/blei-lab/edward/tree/master/examples):
 
-* [Bayesian linear regression](examples/bayesian_linear_regression.py)
-* [Hierarchical logistic regression](examples/hierarchical_logistic_regression.py)
-* [Mixture model of Gaussians](examples/mixture_gaussian.py)
-* [Gaussian process classification](examples/gp_classification.py)
-* [Bayesian neural network](examples/bayesian_nn.py)
-* [Mixture density network](examples/mixture_density_network.py)
-* [Variational auto-encoder](examples/convolutional_vae.py)
+* [Bayesian linear regression](https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py)
+* [Hierarchical logistic regression](https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py)
+* [Mixture model of Gaussians](https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py)
+* [Gaussian process classification](https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py)
+* [Bayesian neural network](https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py)
+* [Mixture density network](https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py)
+* [Variational auto-encoder](https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py)
 
 Read the documentation on the [website](index.md).
 
