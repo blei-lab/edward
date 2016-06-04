@@ -1,4 +1,4 @@
-[![edward](http://dustintran.com/img/blackbox_200.png)](http://www.erikolofsen.com/blackbox.html)
+# Welcome to Edward
 
 __Edward__ is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
@@ -39,9 +39,9 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial)
+[You can find a tutorial here](tutorial.md)
 for getting started with Edward, as well as a
-[tutorial here](https://github.com/blei-lab/edward/wiki/Tutorial-for-Research)
+[tutorial here](tutorial_research.md)
 for how to use it for research. We highlight a few examples, more of
 which can be found in [`examples/`](examples/):
 
@@ -53,7 +53,7 @@ which can be found in [`examples/`](examples/):
 * [Mixture density network](examples/mixture_density_network.py)
 * [Variational auto-encoder](examples/convolutional_vae.py)
 
-Read the documentation in the [Wiki](https://github.com/blei-lab/edward/wiki).
+Read the documentation on the [website](index.md).
 
 ## Installation
 
