@@ -1,5 +1,5 @@
 site_name: Edward
-docs_dir: .
+docs_dir: source
 theme_dir: 'theme'
 repo_url: http://github.com/blei-lab/edward
 site_url: http://edwardlib.org/
