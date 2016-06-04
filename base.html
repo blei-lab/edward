@@ -13,8 +13,8 @@
       <link rel="shortcut icon" href="{{ base_url }}/img/favicon.ico">
     {% endif %}
 
-    <link rel="stylesheet" href="{{ base_url }}/css/highlight.css">
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ base_url }}/css/highlight.css">
     <link rel="stylesheet" href="{{ base_url }}/css/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="{{ base_url }}/css/alabaster-overrides.css" type="text/css" />
 
@@ -77,9 +77,10 @@
 
   <script src="{{ base_url }}/js/jquery-1.10.2.min.js"></script>
   <script src="{{ base_url }}/js/highlight.pack.js"></script>
-  {% for path in extra_javascript %}
-    <script src="{{ path }}"></script>
-  {% endfor %}
+  <script src="{{ base_url }}/js/base.js"></script>
+  {%- for path in extra_javascript %}
+  <script src="{{ path }}"></script>
+  {%- endfor %}
 
   <!--
   MkDocs version      : {{ mkdocs_version }}
