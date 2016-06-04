@@ -1,4 +1,4 @@
-# Tutorial for Research
+# Getting Started for Research
 
 This is a guide to how to use Edward for research. Following Box's loop, we divide research into three components: model, inference, and criticism.
 

@@ -1,4 +1,4 @@
-# Tutorial
+# Getting Started
 
 **Edward** is a Python library for probabilistic modeling, inference, and criticism. It is named after the innovative statistician [George Edward Pelham Box](https://en.wikipedia.org/wiki/George_E._P._Box).
 
@@ -122,7 +122,7 @@ You can find more complicated examples in the [`examples/`](https://github.com/b
 * [Mixture density network](https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py)
 * [Variational auto-encoder](https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py)
 
-We think the library will make it significantly easier to do research in machine learning and statistics. You can find more about this [here](tutorial_research.md).
+We think the library will make it significantly easier to do research in machine learning and statistics. You can find more about this [here](guide-research.md).
 
 You can find more about Edward's design and philosophy, and how it relates to other software [here](design.md).
 

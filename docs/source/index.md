@@ -39,9 +39,9 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](tutorial.md)
+[You can find a tutorial here](getting-started.md)
 for getting started with Edward, as well as a
-[tutorial here](tutorial_research.md)
+[tutorial here](tutorial-research.md)
 for how to use it for research. We highlight a few examples, more of
 which can be found in [`examples/`](https://github.com/blei-lab/edward/tree/master/examples):
 
