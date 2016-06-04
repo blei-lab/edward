@@ -1,7 +1,4 @@
-[![edward](http://dustintran.com/img/blackbox_200.png)](http://www.erikolofsen.com/blackbox.html)
-
-[![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
-[![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master)](https://coveralls.io/github/blei-lab/edward?branch=master)
+# Welcome to Edward
 
 __Edward__ is a Python library for probabilistic modeling, inference,
 and criticism. It enables black box inference for models with discrete
@@ -41,19 +38,17 @@ It also has __features__ including
 
 ## Getting Started
 
-[You can find a tutorial here](http://edwardlib.org/getting-started/)
+[You can find a tutorial here](getting-started.md)
 for getting started with Edward. We highlight a few examples, more of
-which can be found in [`examples/`](examples/):
+which can be found in [`examples/`](https://github.com/blei-lab/edward/tree/master/examples):
 
-* [Bayesian linear regression](examples/bayesian_linear_regression.py)
-* [Hierarchical logistic regression](examples/hierarchical_logistic_regression.py)
-* [Mixture model of Gaussians](examples/mixture_gaussian.py)
-* [Gaussian process classification](examples/gp_classification.py)
-* [Bayesian neural network](examples/bayesian_nn.py)
-* [Mixture density network](examples/mixture_density_network.py)
-* [Variational auto-encoder](examples/convolutional_vae.py)
-
-Read the documentation on the [website](http://edwardlib.org).
+* [Bayesian linear regression](https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py)
+* [Hierarchical logistic regression](https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py)
+* [Mixture model of Gaussians](https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py)
+* [Gaussian process classification](https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py)
+* [Bayesian neural network](https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py)
+* [Mixture density network](https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py)
+* [Variational auto-encoder](https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py)
 
 ## Installation
 

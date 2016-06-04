@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='edward',
-    version='1.0.5',
+    version='1.0.6',
     description='A library for probabilistic modeling, inference, and criticism',
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
