@@ -84,6 +84,86 @@ docs/
     index.md  # The documentation homepage.
     ...       # Other markdown pages, images and other files.
 </code></pre>
+<p><a href="http://www.erikolofsen.com/blackbox.html"><img alt="edward" src="http://dustintran.com/img/blackbox_200.png" /></a></p>
+<p><a href="https://travis-ci.org/blei-lab/edward"><img alt="Build Status" src="https://travis-ci.org/blei-lab/edward.svg?branch=master" /></a>
+<a href="https://coveralls.io/github/blei-lab/edward?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master" /></a></p>
+<p><strong>Edward</strong> is a Python library for probabilistic modeling, inference,
+and criticism. It enables black box inference for models with discrete
+and continuous latent variables, neural network parameterizations, and
+infinite dimensional parameter spaces. Edward serves as a fusion of
+three fields: Bayesian statistics and machine learning, deep learning,
+and probabilistic programming.</p>
+<p>It supports <strong>modeling languages</strong> including</p>
+<ul>
+<li><a href="https://www.tensorflow.org">TensorFlow</a> (with neural network compositionality via <a href="http://keras.io">Keras</a>, <a href="https://github.com/google/prettytensor">Pretty Tensor</a>, or <a href="https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md">TensorFlow-Slim</a>)</li>
+<li><a href="http://mc-stan.org">Stan</a></li>
+<li><a href="http://pymc-devs.github.io/pymc3/">PyMC3</a></li>
+<li>original Python using <a href="http://scipy.org/">NumPy/SciPy</a></li>
+</ul>
+<p>It supports <strong>inference</strong> via</p>
+<ul>
+<li>Variational inference</li>
+<li>Divergence minimization<ul>
+<li>Black box variational inference</li>
+<li>Stochastic variational inference</li>
+<li>Variational auto-encoders</li>
+<li>Inclusive KL divergence (KL(p || q))</li>
+</ul>
+</li>
+<li>Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)</li>
+<li>Maximum a posteriori (penalized maximum likelihood, maximum likelihood)</li>
+</ul>
+<p>It supports <strong>criticism</strong> of the model and inference via</p>
+<ul>
+<li>Evaluations on both supervised and unsupervised tasks</li>
+<li>Posterior predictive checks</li>
+</ul>
+<p>It also has <strong>features</strong> including</p>
+<ul>
+<li><a href="https://www.tensorflow.org">TensorFlow</a> for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard</li>
+<li>A library for probability distributions in TensorFlow</li>
+<li>Documentation and tutorials</li>
+<li>Examples demonstrating state-of-the-art generative models and inference</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<p><a href="https://github.com/blei-lab/edward/wiki/Tutorial">You can find a tutorial here</a>
+for getting started with Edward, as well as a
+<a href="https://github.com/blei-lab/edward/wiki/Tutorial-for-Research">tutorial here</a>
+for how to use it for research. We highlight a few examples, more of
+which can be found in <a href="./examples/"><code>examples/</code></a>:</p>
+<ul>
+<li><a href="./examples/bayesian_linear_regression.py">Bayesian linear regression</a></li>
+<li><a href="./examples/hierarchical_logistic_regression.py">Hierarchical logistic regression</a></li>
+<li><a href="./examples/mixture_gaussian.py">Mixture model of Gaussians</a></li>
+<li><a href="./examples/gp_classification.py">Gaussian process classification</a></li>
+<li><a href="./examples/bayesian_nn.py">Bayesian neural network</a></li>
+<li><a href="./examples/mixture_density_network.py">Mixture density network</a></li>
+<li><a href="./examples/convolutional_vae.py">Variational auto-encoder</a></li>
+</ul>
+<p>Read the documentation in the <a href="https://github.com/blei-lab/edward/wiki">Wiki</a>.</p>
+<h2 id="installation">Installation</h2>
+<p>To install the latest stable version, run</p>
+<pre><code class="bash">pip install edward
+</code></pre>
+
+<p>To install the latest development version, run</p>
+<pre><code class="bash">pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;
+</code></pre>
+
+<h2 id="authors">Authors</h2>
+<p>Edward is led by <a href="http://dustintran.com">Dustin Tran</a> with guidance by <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>. It is under active development (by order of joining) by <a href="http://dustintran.com">Dustin Tran</a>, <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>, <a href="http://www.proditus.com/">Alp Kucukelbir</a>, <a href="http://stat.columbia.edu/~diengadji/">Adji Dieng</a>, <a href="http://maja-rita-rudolph.com/">Maja Rudolph</a>, and <a href="http://www.ee.columbia.edu/~dliang/">Dawen Liang</a>. We welcome contributions by submitting issues, feature requests, or by solving any current issues!</p>
+<p>We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of the Blei Lab for their helpful feedback and advice.</p>
+<h2 id="citation">Citation</h2>
+<p>We appreciate citations for Edward because it lets us find out how
+people have been using the library and it motivates further work.</p>
+<p>Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. https://github.com/blei-lab/edward</p>
+<pre><code>@misc{tran2016edward,
+  author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
+  title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
+  year = {2016},
+  url = {https://github.com/blei-lab/edward}
+}
+</code></pre>
             
               <h2>Navigation</h2>
 
@@ -143,7 +223,7 @@ docs/
 
   <!--
   MkDocs version      : 0.15.3
-  Docs Build Date UTC : 2016-06-04 04:32:35.916397
+  Docs Build Date UTC : 2016-06-04 05:25:54.461785
   -->
 </body>
 </html>
