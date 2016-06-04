@@ -135,7 +135,7 @@ data = ed.Data(x)
 
 inference = ed.MFVI(model, variational, data)
 with tf.variable_scope("model") as scope:
-    sess = inference.initialize(optimizer="PrettyTensor")
+    inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior(FLAGS.n_data)
 
@@ -150,7 +150,7 @@ for epoch in range(n_epoch):
     for t in range(n_iter_per_epoch):
         pbar.update(t)
         x_train, _ = mnist.train.next_batch(FLAGS.n_data)
-        _, loss = sess.run([inference.train, inference.loss],
+        _, loss = tf.get_default_session().run([inference.train, inference.loss],
                             feed_dict={x: x_train})
         avg_loss += loss
 
@@ -163,7 +163,7 @@ for epoch in range(n_epoch):
     # image.
     print("log p(x) >= {:0.3f}".format(avg_loss))
 
-    imgs = sess.run(p_rep)
+    imgs = p_rep.eval()
     for b in range(FLAGS.n_data):
         if not os.path.exists(FLAGS.img_directory):
             os.makedirs(FLAGS.img_directory)
