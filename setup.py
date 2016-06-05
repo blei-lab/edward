@@ -6,7 +6,7 @@ setup(
     description='A library for probabilistic modeling, inference, and criticism',
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
-    packages=['edward', 'edward.stats'],
+    packages=['edward', 'edward.stats', 'edward.models'],
     install_requires=['tensorflow>=0.7.0', 'numpy>=1.7', 'scipy>=0.16'],
     extras_require = {'stan': ['pystan>=2.0.1.3'],
                       'pymc3': ['pymc3>=3.0'],
