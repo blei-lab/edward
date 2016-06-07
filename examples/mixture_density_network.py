@@ -70,7 +70,7 @@ y = tf.placeholder(tf.float32, shape=(None, 1))
 data = ed.Data([X, y])
 
 inference = ed.MAP(model, data)
-sess = tf.get_default_session()
+sess = ed.get_session()
 K.set_session(sess)
 inference.initialize()
 

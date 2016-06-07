@@ -128,7 +128,7 @@ plt.show(block=False)
 
 inference = ed.MFVI(model, variational, data)
 inference.initialize(n_print=10)
-sess = tf.get_default_session()
+sess = ed.get_session()
 for t in range(1000):
     loss = inference.update()
     if t % inference.n_print == 0:
