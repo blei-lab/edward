@@ -256,6 +256,14 @@ class VarStoreMethod(object):
       self.vars[var_name] = v
       return v
 
+def get_session():
+    """Get the default session; if not already defined, then
+    the function will create an interactive session."""
+    if tf.get_default_session() is None:
+        _ED_SESSION = tf.InteractiveSession()
+    _ED_SESSION = tf.get_default_session()
+    return _ED_SESSION
+
 class VARIABLE(VarStoreMethod):
     """
     A simple wrapper to contain variables. It will create a TensorFlow

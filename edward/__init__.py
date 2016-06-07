@@ -11,4 +11,4 @@ from .models import *
 from .criticisms import evaluate, ppc
 from .data import *
 from .inferences import *
-from .util import set_seed
+from .util import set_seed, get_session

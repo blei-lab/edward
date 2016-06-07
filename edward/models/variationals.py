@@ -225,10 +225,6 @@ class Likelihood:
         """
         z ~ q(z | lambda)
 
-        Parameters
-        ----------
-        sess : tf.Session, optional
-
         Returns
         -------
         np.ndarray

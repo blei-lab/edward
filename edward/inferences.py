@@ -4,12 +4,7 @@ import tensorflow as tf
 
 from edward.data import Data
 from edward.models import Variational, PointMass
-from edward.util import kl_multivariate_normal, log_sum_exp
-
-global _ED_SESSION 
-if tf.get_default_session() is None:
-    _ED_SESSION = tf.InteractiveSession()
-
+from edward.util import kl_multivariate_normal, log_sum_exp, get_session
 
 try:
     import prettytensor as pt
@@ -30,6 +25,7 @@ class Inference:
     def __init__(self, model, data=Data()):
         self.model = model
         self.data = data
+        get_session()
 
 class MonteCarlo(Inference):
     """
@@ -157,9 +153,10 @@ class MFVI(VariationalInference):
         return VariationalInference.initialize(self, *args, **kwargs)
 
     def update(self):
+        sess = get_session()
         feed_dict = self.variational.np_sample(
             self.samples, self.n_minibatch)
-        _, loss = tf.get_default_session().run([self.train, self.loss], feed_dict)
+        _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
     def build_loss(self):
@@ -309,9 +306,10 @@ class KLpq(VariationalInference):
         return VariationalInference.initialize(self, *args, **kwargs)
 
     def update(self):
+        sess = get_session()
         feed_dict = self.variational.np_sample(
             self.samples, self.n_minibatch)
-        _, loss = tf.get_default_session().run([self.train, self.loss], feed_dict)
+        _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
     def build_loss(self):
