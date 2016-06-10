@@ -126,9 +126,9 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
+sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 inference.initialize(n_print=10)
-sess = ed.get_session()
 for t in range(1000):
     loss = inference.update()
     if t % inference.n_print == 0:

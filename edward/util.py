@@ -71,6 +71,15 @@ def get_dims(x):
     else: # array
         return [dim.value for dim in dims]
 
+def get_session():
+    """Get the session defined globally; if not already defined, then
+    the function will create a global session."""
+    global _ED_SESSION
+    if tf.get_default_session() is None:
+        _ED_SESSION = tf.InteractiveSession()
+
+    return _ED_SESSION
+
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     """
     Calculates the KL of multivariate normal distributions with
@@ -255,14 +264,6 @@ class VarStoreMethod(object):
       v.get_shape().assert_is_compatible_with(shape)
       self.vars[var_name] = v
       return v
-
-def get_session():
-    """Get the default session; if not already defined, then
-    the function will create an interactive session."""
-    if tf.get_default_session() is None:
-        _ED_SESSION = tf.InteractiveSession()
-    _ED_SESSION = tf.get_default_session()
-    return _ED_SESSION
 
 class VARIABLE(VarStoreMethod):
     """

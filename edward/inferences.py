@@ -109,7 +109,6 @@ class VariationalInference(Inference):
         init = tf.initialize_all_variables()
         init.run()
 
-
     def update(self):
         self.train.run()
         loss = self.loss.eval()
@@ -154,8 +153,7 @@ class MFVI(VariationalInference):
 
     def update(self):
         sess = get_session()
-        feed_dict = self.variational.np_sample(
-            self.samples, self.n_minibatch)
+        feed_dict = self.variational.np_sample(self.samples, self.n_minibatch)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -307,8 +305,7 @@ class KLpq(VariationalInference):
 
     def update(self):
         sess = get_session()
-        feed_dict = self.variational.np_sample(
-            self.samples, self.n_minibatch)
+        feed_dict = self.variational.np_sample(self.samples, self.n_minibatch)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 

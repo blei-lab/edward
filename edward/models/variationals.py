@@ -3,14 +3,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import cumprod, Variable
-
-global _ED_SESSION 
-_ED_SESSION = tf.InteractiveSession()
+from edward.util import cumprod, get_session, Variable
 
 class Variational:
     """A stack of variational families."""
     def __init__(self, layers=[]):
+        get_session()
         self.layers = layers
         if layers == []:
             self.num_factors = 0
@@ -136,6 +134,7 @@ class Likelihood:
         Number of factors. Default is 1.
     """
     def __init__(self, num_factors=1):
+        get_session()
         self.num_factors = num_factors
         self.num_vars = None # number of posterior latent variables
         self.num_params = None # number of variational parameters
@@ -296,7 +295,7 @@ class Bernoulli(Likelihood):
         self.p = params[0]
 
     def print_params(self):
-        p = self.p.eval() 
+        p = self.p.eval()
         print("probability:")
         print(p)
 
@@ -343,8 +342,8 @@ class Beta(Likelihood):
         self.b = params[1]
 
     def print_params(self):
-        a = self.a.eval()
-        b = self.b.eval()
+        sess = get_session()
+        a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
@@ -352,8 +351,8 @@ class Beta(Likelihood):
 
     def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        a = self.a.eval()
-        b = self.b.eval()
+        sess = get_session()
+        a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = beta.rvs(a[d], b[d], size=size)
@@ -444,8 +443,8 @@ class InvGamma(Likelihood):
         self.b = params[1]
 
     def print_params(self):
-        a = self.a.eval()
-        b = self.b.eval()
+        sess = get_session()
+        a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
@@ -453,8 +452,8 @@ class InvGamma(Likelihood):
 
     def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        a = self.a.eval()
-        b = self.b.eval()
+        sess = get_session()
+        a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = invgamma.rvs(a[d], b[d], size=size)
@@ -560,8 +559,8 @@ class Normal(Likelihood):
         self.s = params[1]
 
     def print_params(self):
-        m = self.m.eval()
-        s = self.s.eval()
+        sess = get_session()
+        m, s = sess.run([self.m, self.s])
         print("mean:")
         print(m)
         print("std dev:")

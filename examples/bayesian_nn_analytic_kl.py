@@ -124,6 +124,7 @@ plt.show(block=False)
 # model.log_lik() is defined so MFVI will do variational inference
 # assuming a standard normal prior on the weights; this enables VI
 # with an analytic KL term which provides faster inference.
+sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 inference.initialize(n_print=10)
 for t in range(1000):
@@ -132,7 +133,7 @@ for t in range(1000):
         print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
         # Sample functions from variational model
-        mean, std = ed.get_session().run([variational.layers[0].m,
+        mean, std = sess.run([variational.layers[0].m,
                               variational.layers[0].s])
         rs = np.random.RandomState(0)
         zs = rs.randn(10, variational.num_vars) * std + mean
@@ -143,7 +144,7 @@ for t in range(1000):
         outputs = mus.eval()
 
         # Get data
-        y, x = ed.get_session().run([data.data[:, 0], data.data[:, 1]])
+        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
 
         # Plot data and functions
         plt.cla()

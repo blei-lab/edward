@@ -133,6 +133,7 @@ mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 data = ed.Data(x)
 
+sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 with tf.variable_scope("model") as scope:
     inference.initialize(optimizer="PrettyTensor")
@@ -150,8 +151,8 @@ for epoch in range(n_epoch):
     for t in range(n_iter_per_epoch):
         pbar.update(t)
         x_train, _ = mnist.train.next_batch(FLAGS.n_data)
-        _, loss = tf.get_default_session().run([inference.train, inference.loss],
-                            feed_dict={x: x_train})
+        _, loss = sess.run([inference.train, inference.loss],
+                           feed_dict={x: x_train})
         avg_loss += loss
 
     # Take average over all ELBOs during the epoch, and over minibatch

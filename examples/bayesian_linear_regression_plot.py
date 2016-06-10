@@ -81,6 +81,7 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
+sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 inference.initialize(n_minibatch=5, n_print=5)
 for t in range(250):
@@ -89,7 +90,7 @@ for t in range(250):
         print("iter {:d} loss {:.2f}".format(t, loss))
 
         # Sample functions from variational model
-        mean, std = ed.get_session().run([variational.layers[0].m,
+        mean, std = sess.run([variational.layers[0].m,
                               variational.layers[0].s])
         rs = np.random.RandomState(0)
         zs = rs.randn(10, variational.num_vars) * std + mean
@@ -102,7 +103,7 @@ for t in range(250):
         outputs = mus.eval()
 
         # Get data
-        y, x = ed.get_session().run([data.data[:, 0], data.data[:, 1]])
+        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
 
         # Plot data and functions
         plt.cla()
