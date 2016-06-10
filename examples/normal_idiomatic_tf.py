@@ -34,7 +34,7 @@ variational = Variational()
 variational.add(Normal())
 
 inference = ed.MFVI(model, variational)
-sess = inference.initialize()
+inference.initialize()
 for t in range(1000):
-    loss = inference.update(sess)
-    inference.print_progress(t, loss, sess)
+    loss = inference.update()
+    inference.print_progress(t, loss)

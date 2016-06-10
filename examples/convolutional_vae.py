@@ -133,9 +133,10 @@ mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 data = ed.Data(x)
 
+sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 with tf.variable_scope("model") as scope:
-    sess = inference.initialize(optimizer="PrettyTensor")
+    inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:
     p_rep = model.sample_prior(FLAGS.n_data)
 
@@ -151,7 +152,7 @@ for epoch in range(n_epoch):
         pbar.update(t)
         x_train, _ = mnist.train.next_batch(FLAGS.n_data)
         _, loss = sess.run([inference.train, inference.loss],
-                            feed_dict={x: x_train})
+                           feed_dict={x: x_train})
         avg_loss += loss
 
     # Take average over all ELBOs during the epoch, and over minibatch
@@ -163,7 +164,7 @@ for epoch in range(n_epoch):
     # image.
     print("log p(x) >= {:0.3f}".format(avg_loss))
 
-    imgs = sess.run(p_rep)
+    imgs = p_rep.eval()
     for b in range(FLAGS.n_data):
         if not os.path.exists(FLAGS.img_directory):
             os.makedirs(FLAGS.img_directory)

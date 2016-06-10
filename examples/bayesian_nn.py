@@ -126,10 +126,11 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
+sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
-sess = inference.initialize(n_print=10)
+inference.initialize(n_print=10)
 for t in range(1000):
-    loss = inference.update(sess)
+    loss = inference.update()
     if t % inference.n_print == 0:
         print("iter {:d} loss {:.2f}".format(t, loss))
 
@@ -142,7 +143,7 @@ for t in range(1000):
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
         mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
-        outputs = sess.run(mus)
+        outputs = mus.eval()
 
         # Get data
         y, x = sess.run([data.data[:, 0], data.data[:, 1]])

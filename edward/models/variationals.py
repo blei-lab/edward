@@ -3,11 +3,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import cumprod, Variable
+from edward.util import cumprod, get_session, Variable
 
 class Variational:
     """A stack of variational families."""
     def __init__(self, layers=[]):
+        get_session()
         self.layers = layers
         if layers == []:
             self.num_factors = 0
@@ -83,7 +84,7 @@ class Variational:
 
         return tf.concat(1, samples), samples
 
-    def np_sample(self, samples, size=1, sess=None):
+    def np_sample(self, samples, size=1):
         """
         Form dictionary to feed any placeholders with np.array
         samples.
@@ -91,12 +92,12 @@ class Variational:
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
-                feed_dict[sample] = layer.sample(size, sess)
+                feed_dict[sample] = layer.sample(size)
 
         return feed_dict
 
-    def print_params(self, sess):
-        [layer.print_params(sess) for layer in self.layers]
+    def print_params(self):
+        [layer.print_params() for layer in self.layers]
 
     def log_prob_zi(self, i, zs):
         start = final = 0
@@ -133,6 +134,7 @@ class Likelihood:
         Number of factors. Default is 1.
     """
     def __init__(self, num_factors=1):
+        get_session()
         self.num_factors = num_factors
         self.num_vars = None # number of posterior latent variables
         self.num_params = None # number of variational parameters
@@ -189,7 +191,7 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    def print_params(self, sess):
+    def print_params(self):
         raise NotImplementedError()
 
     def sample_noise(self, size=1):
@@ -218,13 +220,9 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """
         z ~ q(z | lambda)
-
-        Parameters
-        ----------
-        sess : tf.Session, optional
 
         Returns
         -------
@@ -296,14 +294,14 @@ class Bernoulli(Likelihood):
     def set_params(self, params):
         self.p = params[0]
 
-    def print_params(self, sess):
-        p = sess.run(self.p)
+    def print_params(self):
+        p = self.p.eval()
         print("probability:")
         print(p)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        p = sess.run(self.p)
+        p = self.p.eval()
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = bernoulli.rvs(p[d], size=size)
@@ -343,15 +341,17 @@ class Beta(Likelihood):
         self.a = params[0]
         self.b = params[1]
 
-    def print_params(self, sess):
+    def print_params(self):
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
         print(b)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
@@ -391,14 +391,14 @@ class Dirichlet(Likelihood):
     def set_params(self, params):
         self.alpha = params[0]
 
-    def print_params(self, sess):
-        alpha = sess.run(self.alpha)
+    def print_params(self):
+        alpha = self.alpha.eval()
         print("concentration vector:")
         print(alpha)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        alpha = sess.run(self.alpha)
+        alpha = self.alpha.eval()
         z = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
@@ -442,15 +442,17 @@ class InvGamma(Likelihood):
         self.a = params[0]
         self.b = params[1]
 
-    def print_params(self, sess):
+    def print_params(self):
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
         print(b)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
@@ -505,14 +507,14 @@ class Multinomial(Likelihood):
     def set_params(self, params):
         self.pi = params[0]
 
-    def print_params(self, sess):
-        pi = sess.run(self.pi)
+    def print_params(self):
+        pi = self.pi.eval()
         print("probability vector:")
         print(pi)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        pi = sess.run(self.pi)
+        pi = self.pi.eval()
         z = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
@@ -556,7 +558,8 @@ class Normal(Likelihood):
         self.m = params[0]
         self.s = params[1]
 
-    def print_params(self, sess):
+    def print_params(self):
+        sess = get_session()
         m, s = sess.run([self.m, self.s])
         print("mean:")
         print(m)
@@ -612,15 +615,15 @@ class PointMass(Likelihood):
     def set_params(self, params):
         self.params = params[0]
 
-    def print_params(self, sess):
+    def print_params(self):
         if self.params.get_shape()[0] == 0:
             return
 
-        params = sess.run(self.params)
+        params = self.params.eval()
         print("parameter values:")
         print(params)
 
-    def sample(self, size=1, sess=None):
+    def sample(self, size=1):
         # Return a matrix where each row is the same set of
         # parameters. This is to be compatible with probability model
         # methods which assume the input is possibly a mini-batch of

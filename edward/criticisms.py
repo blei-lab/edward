@@ -2,9 +2,9 @@ import numpy as np
 import tensorflow as tf
 
 from edward.data import Data
-from edward.util import logit
+from edward.util import logit, get_session
 
-def evaluate(metrics, model, variational, data, sess=tf.Session()):
+def evaluate(metrics, model, variational, data):
     """
     Evaluate fitted model using a set of metrics.
 
@@ -18,12 +18,13 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     list or float
         A list of evaluations or a single evaluation.
     """
+    sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
     # 1. Sample a batch of latent variables from posterior
     xs = data.data
     n_minibatch = 100
     zs, samples = variational.sample(xs, size=n_minibatch)
-    feed_dict = variational.np_sample(samples, n_minibatch, sess=sess)
+    feed_dict = variational.np_sample(samples, n_minibatch)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred, y_true = model.predict(xs, zs)
 
@@ -35,7 +36,7 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     for metric in metrics:
         if metric == 'accuracy' or metric == 'crossentropy':
             # automate binary or sparse cat depending on max(y_true)
-            support = sess.run(tf.reduce_max(y_true))
+            support = tf.reduce_max(y_true).eval()
             if support <= 1:
                 metric = 'binary_' + metric
             else:
@@ -83,8 +84,7 @@ def evaluate(metrics, model, variational, data, sess=tf.Session()):
     else:
         return evaluations
 
-def ppc(model, variational=None, data=Data(), T=None, size=100,
-    sess=tf.Session()):
+def ppc(model, variational=None, data=Data(), T=None, size=100):
     """
     Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
@@ -116,8 +116,6 @@ def ppc(model, variational=None, data=Data(), T=None, size=100,
         y and optionally a set of latent variables z as input.
     size : int, optional
         number of replicated data sets
-    sess : tf.Session, optional
-        session used during inference
 
     Returns
     -------
@@ -129,6 +127,7 @@ def ppc(model, variational=None, data=Data(), T=None, size=100,
         elements,
         (T(y, z^{1}), ..., T(y, z^{size})).
     """
+    sess = get_session()
     y = data.data
     if y == None:
         N = 1
@@ -143,11 +142,11 @@ def ppc(model, variational=None, data=Data(), T=None, size=100,
     # may require a SciPy-based sampler.
     if variational != None:
         zs, samples = variational.sample(y, size=size)
-        feed_dict = variational.np_sample(samples, size, sess=sess)
+        feed_dict = variational.np_sample(samples, size)
         zs = sess.run(zs, feed_dict)
     else:
         zs = model.sample_prior(size=size)
-        zs = sess.run(zs)
+        zs = zs.eval()
 
     # 2. Sample from likelihood.
     yreps = model.sample_likelihood(zs, size=N)

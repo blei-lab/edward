@@ -87,6 +87,6 @@ coeff = np.random.randn(10)
 data, data_test = build_toy_dataset(coeff)
 
 inference = ed.MFVI(model, variational, data)
-sess = inference.run(n_iter=250, n_minibatch=5, n_print=10)
+inference.run(n_iter=250, n_minibatch=5, n_print=10)
 
-print(ed.evaluate('mse', model, variational, data_test, sess))
+print(ed.evaluate('mse', model, variational, data_test))

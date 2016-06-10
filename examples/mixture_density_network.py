@@ -70,9 +70,9 @@ y = tf.placeholder(tf.float32, shape=(None, 1))
 data = ed.Data([X, y])
 
 inference = ed.MAP(model, data)
-sess = tf.Session()
+sess = ed.get_session()
 K.set_session(sess)
-inference.initialize(sess=sess)
+inference.initialize()
 
 NEPOCH = 20
 train_loss = np.zeros(NEPOCH)

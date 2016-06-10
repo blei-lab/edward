@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from edward.data import Data
 from edward.models import Variational, PointMass
-from edward.util import kl_multivariate_normal, log_sum_exp
+from edward.util import kl_multivariate_normal, log_sum_exp, get_session
 
 try:
     import prettytensor as pt
@@ -25,6 +25,7 @@ class Inference:
     def __init__(self, model, data=Data()):
         self.model = model
         self.data = data
+        get_session()
 
 class MonteCarlo(Inference):
     """
@@ -61,15 +62,14 @@ class VariationalInference(Inference):
         """
         A simple wrapper to run the inference algorithm.
         """
-        sess = self.initialize(*args, **kwargs)
+        self.initialize(*args, **kwargs)
         for t in range(self.n_iter):
-            loss = self.update(sess)
-            self.print_progress(t, loss, sess)
+            loss = self.update()
+            self.print_progress(t, loss)
 
-        return sess
 
     def initialize(self, n_iter=1000, n_data=None, n_print=100,
-        optimizer=None, sess=None):
+        optimizer=None):
         """
         Initialize inference algorithm.
 
@@ -85,8 +85,6 @@ class VariationalInference(Inference):
         optimizer : str, optional
             Whether to use TensorFlow optimizer or PrettyTensor
             optimizer if using PrettyTensor. Defaults to TensorFlow.
-        sess : tf.Session, optional
-            TensorFlow session for computation.
         """
         self.n_iter = n_iter
         self.n_data = n_data
@@ -109,20 +107,17 @@ class VariationalInference(Inference):
             self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
         init = tf.initialize_all_variables()
-        if sess == None:
-            sess = tf.Session()
+        init.run()
 
-        sess.run(init)
-        return sess
-
-    def update(self, sess):
-        _, loss = sess.run([self.train, self.loss])
+    def update(self):
+        self.train.run()
+        loss = self.loss.eval()
         return loss
 
-    def print_progress(self, t, loss, sess):
+    def print_progress(self, t, loss):
         if t % self.n_print == 0:
             print("iter {:d} loss {:.2f}".format(t, loss))
-            self.variational.print_params(sess)
+            self.variational.print_params()
 
     def build_loss(self):
         raise NotImplementedError()
@@ -156,9 +151,9 @@ class MFVI(VariationalInference):
         self.n_minibatch = n_minibatch
         return VariationalInference.initialize(self, *args, **kwargs)
 
-    def update(self, sess):
-        feed_dict = self.variational.np_sample(
-            self.samples, self.n_minibatch, sess)
+    def update(self):
+        sess = get_session()
+        feed_dict = self.variational.np_sample(self.samples, self.n_minibatch)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -308,9 +303,9 @@ class KLpq(VariationalInference):
         self.n_minibatch = n_minibatch
         return VariationalInference.initialize(self, *args, **kwargs)
 
-    def update(self, sess):
-        feed_dict = self.variational.np_sample(
-            self.samples, self.n_minibatch, sess=sess)
+    def update(self):
+        sess = get_session()
+        feed_dict = self.variational.np_sample(self.samples, self.n_minibatch)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 

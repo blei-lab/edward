@@ -44,7 +44,7 @@ variational.add(Beta(model.num_vars))
 data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
 inference = ed.MFVI(model, variational, data)
-sess = inference.run(n_iter=200)
+inference.run(n_iter=200)
 
 T = lambda y, z=None: tf.reduce_mean(y)
-print(ed.ppc(model, variational, data, T, sess=sess))
+print(ed.ppc(model, variational, data, T))
