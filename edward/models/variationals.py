@@ -616,6 +616,9 @@ class PointMass(Likelihood):
         self.params = params[0]
 
     def print_params(self):
+        if self.params.get_shape()[0] == 0:
+            return
+
         params = self.params.eval()
         print("parameter values:")
         print(params)

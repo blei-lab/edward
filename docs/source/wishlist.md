@@ -7,11 +7,10 @@ __Modeling__
 __Inference__
 
 * Variational inference
-    * Divergence minimization
-        * Coordinate ascent variational inference
-        * Expectation propagation
-        * Generative adversarial networks
-    * Empirical risk minimization (mean squared error, classification error)
+    * Coordinate ascent variational inference
+    * Expectation propagation
+    * Generative adversarial networks
+* Bayesian risk minimization
 * Monte Carlo
     * Markov chain Monte Carlo
     * Importance sampling

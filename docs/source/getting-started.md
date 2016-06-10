@@ -1,8 +1,8 @@
 # Getting Started
 
-**Edward** is a Python library for probabilistic modeling, inference, and criticism. It is named after the innovative statistician [George Edward Pelham Box](https://en.wikipedia.org/wiki/George_E._P._Box).
-
-**Edward** follows Box's philosophy of statistics and machine learning.
+**Edward** is named after the innovative statistician
+[George Edward Pelham Box](https://en.wikipedia.org/wiki/George_E._P._Box).
+Edward follows Box's philosophy of statistics and machine learning.
 
 First gather data from a real-world process. Then cycle through Box's loop:
 
