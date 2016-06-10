@@ -27,6 +27,7 @@ class Inference:
         self.data = data
         get_session()
 
+
 class MonteCarlo(Inference):
     """
     Base class for Monte Carlo methods.
@@ -121,6 +122,17 @@ class VariationalInference(Inference):
 
     def build_loss(self):
         raise NotImplementedError()
+
+    def test(self,sess):
+        x = self.data.test_data
+        z, self.samples = self.variational.sample(x)
+    
+        eval_metric = getattr(self.model, 'evaluation_metric', None)  
+        if eval_metric is None:
+             eval_metric = getattr(self.model, 'log_prob', None)  
+
+        loss = sess.run([eval_metric(x, z)])
+        return loss[0][0]
 
 class MFVI(VariationalInference):
 # TODO this isn't MFVI so much as VI where q is analytic
