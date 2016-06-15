@@ -25,7 +25,7 @@ class BayesianNN:
     Bayesian neural network for regressing outputs y on inputs x.
 
     p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
-                  Normal(z | 0, prior_variance),
+                  Normal(z | 0, 1),
 
     where z are neural network weights, and with known lik_variance
     and prior_variance.
@@ -40,16 +40,12 @@ class BayesianNN:
     lik_variance : float, optional
         Variance of the normal likelihood; aka noise parameter,
         homoscedastic variance, scale parameter.
-    prior_variance : float, optional
-        Variance of the normal prior on weights; aka L2
-        regularization parameter, ridge penalty, scale parameter.
     """
     def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-        lik_variance=0.01, prior_variance=1):
+        lik_variance=0.01):
         self.layer_sizes = layer_sizes
         self.nonlinearity = nonlinearity
         self.lik_variance = lik_variance
-        self.prior_variance = prior_variance
 
         self.num_layers = len(layer_sizes)
         self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
@@ -89,17 +85,16 @@ class BayesianNN:
         h = tf.squeeze(h) # n_data x 1 to n_data
         return h
 
-    def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    def log_lik(self, xs, zs):
+        """Returns a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
         # Data must have labels in the first column and features in
         # subsequent columns.
         y = xs[:, 0]
         x = xs[:, 1:]
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
         # broadcasting to do mus - y (n_minibatch x n_data - n_data)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
-        return log_lik + log_prior
+        return log_lik
 
 def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
@@ -126,13 +121,16 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
+# model.log_lik() is defined so MFVI will do variational inference
+# assuming a standard normal prior on the weights; this enables VI
+# with an analytic KL term which provides faster inference.
 sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 inference.initialize(n_print=10)
 for t in range(1000):
     loss = inference.update()
     if t % inference.n_print == 0:
-        print("iter {:d} loss {:.2f}".format(t, loss))
+        print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
         # Sample functions from variational model
         mean, std = sess.run([variational.layers[0].m,

@@ -1,6 +1,22 @@
 import tensorflow as tf
 import numpy as np
 
+def cumprod(xs):
+    """
+    Cumulative product of a tensor along first dimension.
+    https://github.com/tensorflow/tensorflow/issues/813
+    """
+    values = tf.unpack(xs)
+    out = []
+    prev = tf.ones_like(values[0])
+    for val in values:
+        s = prev * val
+        out.append(s)
+        prev = s
+
+    result = tf.pack(out)
+    return result
+
 def digamma(x):
     """
     Computes the digamma function element-wise.
@@ -55,27 +71,53 @@ def get_dims(x):
     else: # array
         return [dim.value for dim in dims]
 
-def kl_multivariate_normal(loc, scale):
+def get_session():
+    """Get the session defined globally; if not already defined, then
+    the function will create a global session."""
+    global _ED_SESSION
+    if tf.get_default_session() is None:
+        _ED_SESSION = tf.InteractiveSession()
+
+    return _ED_SESSION
+
+def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     """
-    KL( N(z; loc, scale) || N(z; 0, 1) ) for vector inputs, or
-    sum_{m=1}^M KL( N(z_{m,:}; loc, scale) || N(z_{m,:}; 0, 1) ) for matrix inputs
+    Calculates the KL of multivariate normal distributions with
+    diagonal covariances.
 
     Parameters
     ----------
-    loc : tf.Tensor
+    loc_one : tf.Tensor
         n-dimensional vector, or M x n-dimensional matrix where each
         row represents the mean of a n-dimensional Gaussian
-    scale : tf.Tensor
+    scale_one : tf.Tensor
+        n-dimensional vector, or M x n-dimensional matrix where each
+        row represents the standard deviation of a n-dimensional Gaussian
+    loc_two : tf.Tensor, optional
+        n-dimensional vector, or M x n-dimensional matrix where each
+        row represents the mean of a n-dimensional Gaussian
+    scale_two : tf.Tensor, optional
         n-dimensional vector, or M x n-dimensional matrix where each
         row represents the standard deviation of a n-dimensional Gaussian
 
     Returns
     -------
     tf.Tensor
-        scalar
+        for scalar or vector inputs, outputs the scalar
+            KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )
+        for matrix inputs, outputs the vector
+            [KL( N(z; loc_one[m,:], scale_one[m,:]) ||
+                 N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M
     """
-    return -0.5 * tf.reduce_sum(1.0 + 2.0 * tf.log(scale + 1e-8) - \
-                                tf.square(loc) - tf.square(scale))
+    if loc_two == 0 and scale_two == 1:
+        return 0.5 * tf.reduce_sum(
+            tf.square(scale_one) + tf.square(loc_one) - \
+            1.0 - 2.0 * tf.log(scale_one))
+    else:
+        return 0.5 * tf.reduce_sum(
+            tf.square(scale_one/scale_two) + \
+            tf.square((loc_two - loc_one)/scale_two) - \
+            1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
 def lbeta(x):
     """
@@ -137,6 +179,11 @@ def log_sum_exp(x):
     """
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
+
+def logit(x):
+    """log(x / (1 - x))"""
+    x = tf.clip_by_value(x, 1e-8, 1.0 - 1e-8)
+    return tf.log(x) - tf.log(1.0 - x)
 
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     """

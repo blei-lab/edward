@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.stats import invgamma
+from edward.stats import gamma
 from scipy import stats
 
 sess = tf.Session()
@@ -13,17 +13,17 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_logpdf(x, a=0.5, scale=0.5):
+def _test_logpdf(x, a, scale=1):
     xtf = tf.constant(x)
-    val_true = stats.invgamma.logpdf(x, a, scale=scale)
-    _assert_eq(invgamma.logpdf(xtf, tf.constant(a), tf.constant(scale)), val_true)
-    _assert_eq(invgamma.logpdf(xtf, tf.constant([a]), tf.constant(scale)), val_true)
-    _assert_eq(invgamma.logpdf(xtf, tf.constant(a), tf.constant([scale])), val_true)
-    _assert_eq(invgamma.logpdf(xtf, tf.constant([a]), tf.constant([scale])), val_true)
+    val_true = stats.gamma.logpdf(x, a, scale=scale)
+    _assert_eq(gamma.logpdf(xtf, tf.constant(a), tf.constant(scale)), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant([a]), tf.constant(scale)), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant(a), tf.constant([scale])), val_true)
+    _assert_eq(gamma.logpdf(xtf, tf.constant([a]), tf.constant([scale])), val_true)
 
 def test_logpdf_scalar():
-    _test_logpdf(0.3)
-    _test_logpdf(0.7)
+    _test_logpdf(0.3, a=0.5)
+    _test_logpdf(0.7, a=0.5)
 
     _test_logpdf(0.3, a=1.0, scale=1.0)
     _test_logpdf(0.7, a=1.0, scale=1.0)

@@ -3,23 +3,32 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import Variable
+from edward.util import cumprod, get_session, Variable
 
 class Variational:
     """A stack of variational families."""
     def __init__(self, layers=[]):
+        get_session()
         self.layers = layers
         if layers == []:
             self.num_factors = 0
             self.num_vars = 0
             self.num_params = 0
             self.is_reparam = True
+            self.is_normal = True
+            self.is_entropy = True
+            self.sample_tensor = []
         else:
             self.num_factors = sum([layer.num_factors for layer in self.layers])
             self.num_vars = sum([layer.num_vars for layer in self.layers])
             self.num_params = sum([layer.num_params for layer in self.layers])
             self.is_reparam = all(['reparam' in layer.__class__.__dict__
                                    for layer in self.layers])
+            self.is_normal = all([isinstance(layer, Normal)
+                                  for layer in self.layers])
+            self.is_entropy = all(['entropy' in layer.__class__.__dict__
+                                   for layer in self.layers])
+            self.sample_tensor = [layer.sample_tensor for layer in self.layers]
 
     def add(self, layer):
         """
@@ -34,42 +43,61 @@ class Variational:
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
+        self.is_normal = self.is_normal and isinstance(layer, Normal)
+        self.sample_tensor += [layer.sample_tensor]
 
-    def mapping(self, x):
-        return [layer.mapping(x) for layer in self.layers]
+    def sample(self, x, size=1):
+        """
+        Draws a mix of tensors and placeholders, corresponding to
+        TensorFlow-based samplers and SciPy-based samplers depending
+        on the variational factor.
 
-    def set_params(self, params):
-        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
+        Parameters
+        ----------
+        x : Data
+        size : int, optional
 
-    def print_params(self, sess):
-        [layer.print_params(sess) for layer in self.layers]
+        Returns
+        -------
+        tf.Tensor, list
+            A tensor concatenating sample outputs of tensors and
+            placeholders. The list used to form the tensor is also
+            returned so that other procedures can feed values into the
+            placeholders.
 
-    def sample_noise(self, size):
-        eps_layers = [layer.sample_noise(size) for layer in self.layers]
-        return np.concatenate(eps_layers, axis=1)
-
-    def reparam(self, eps):
-        z_layers = []
-        start = final = 0
+        Notes
+        -----
+        This sets parameters of the variational distribution according
+        to any data points it conditions on. This means after calling
+        this method, log_prob_zi() is well-defined, even though
+        mathematically it is a function of both z and x, and it only
+        takes z as input.
+        """
+        self._set_params(self._mapping(x))
+        samples = []
         for layer in self.layers:
-            final += layer.num_vars
-            z_layers += [layer.reparam(eps[:, start:final])]
-            start = final
+            if layer.sample_tensor:
+                samples += [layer.sample(size)]
+            else:
+                samples += [tf.placeholder(tf.float32, (size, layer.num_vars))]
 
-        return tf.concat(1, z_layers)
+        return tf.concat(1, samples), samples
 
-    def sample(self, size, sess):
-        #z_layers = [layer.sample(size, sess) for layer in self.layers]
-        # This is temporary to deal with reparameterizable ones.
-        z_layers = []
-        for layer in self.layers:
-            z_layer = layer.sample(size, sess)
-            if isinstance(layer, Normal):
-                z_layer = sess.run(z_layer)
+    def np_sample(self, samples, size=1):
+        """
+        Form dictionary to feed any placeholders with np.array
+        samples.
+        """
+        feed_dict = {}
+        for sample,layer in zip(samples, self.layers):
+            if sample.name.startswith('Placeholder'):
+                feed_dict[sample] = layer.sample(size)
 
-            z_layers += [z_layer]
+        return feed_dict
 
-        return np.concatenate(z_layers, axis=1)
+    def print_params(self):
+        [layer.print_params() for layer in self.layers]
 
     def log_prob_zi(self, i, zs):
         start = final = 0
@@ -83,6 +111,19 @@ class Variational:
 
         raise IndexError()
 
+    def entropy(self):
+        out = tf.constant(0.0, dtype=tf.float32)
+        for layer in self.layers:
+            out += layer.entropy()
+
+        return out
+
+    def _mapping(self, x):
+        return [layer.mapping(x) for layer in self.layers]
+
+    def _set_params(self, params):
+        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
+
 class Likelihood:
     """
     Base class for variational likelihoods, q(z | lambda).
@@ -93,10 +134,11 @@ class Likelihood:
         Number of factors. Default is 1.
     """
     def __init__(self, num_factors=1):
+        get_session()
         self.num_factors = num_factors
         self.num_vars = None # number of posterior latent variables
-        self.num_params = None # number of local variational parameters
-        # TODO attribute for number of global variational parameters
+        self.num_params = None # number of variational parameters
+        self.sample_tensor = False
 
     def mapping(self, x):
         """
@@ -149,11 +191,10 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    # TODO use __str__(self):
-    def print_params(self, sess):
+    def print_params(self):
         raise NotImplementedError()
 
-    def sample_noise(self, size):
+    def sample_noise(self, size=1):
         """
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
@@ -179,13 +220,9 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-    def sample(self, size, sess=None):
+    def sample(self, size=1):
         """
         z ~ q(z | lambda)
-
-        Parameters
-        ----------
-        sess : tf.Session, optional
 
         Returns
         -------
@@ -224,6 +261,19 @@ class Likelihood:
         """
         raise NotImplementedError()
 
+    def entropy(self):
+        """
+        H(q(z| lambda))
+        = E_{q(z | lambda)} [ - log q(z | lambda) ]
+        = sum_{i=1}^d E_{q(z_i | lambda)} [ - log q(z_i | lambda) ]
+
+        Returns
+        -------
+        tf.Tensor
+            scalar
+        """
+        raise NotImplementedError()
+
 class Bernoulli(Likelihood):
     """
     q(z | lambda) = prod_{i=1}^d Bernoulli(z[i] | p[i])
@@ -233,6 +283,8 @@ class Bernoulli(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = self.num_factors
+        self.sample_tensor = False
+
         self.p = None
 
     def mapping(self, x):
@@ -242,14 +294,14 @@ class Bernoulli(Likelihood):
     def set_params(self, params):
         self.p = params[0]
 
-    def print_params(self, sess):
-        p = sess.run(self.p)
+    def print_params(self):
+        p = self.p.eval()
         print("probability:")
         print(p)
 
-    def sample(self, size, sess):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        p = sess.run(self.p)
+        p = self.p.eval()
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = bernoulli.rvs(p[d], size=size)
@@ -263,6 +315,9 @@ class Bernoulli(Likelihood):
 
         return bernoulli.logpmf(zs[:, i], self.p[i])
 
+    def entropy(self):
+        return tf.reduce_sum(bernoulli.entropy(self.p))
+
 class Beta(Likelihood):
     """
     q(z | lambda) = prod_{i=1}^d Beta(z[i] | a[i], b[i])
@@ -272,6 +327,8 @@ class Beta(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
+        self.sample_tensor = False
+
         self.a = None
         self.b = None
 
@@ -284,15 +341,17 @@ class Beta(Likelihood):
         self.a = params[0]
         self.b = params[1]
 
-    def print_params(self, sess):
+    def print_params(self):
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
         print(b)
 
-    def sample(self, size, sess):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
@@ -307,6 +366,9 @@ class Beta(Likelihood):
 
         return beta.logpdf(zs[:, i], self.a[i], self.b[i])
 
+    def entropy(self):
+        return tf.reduce_sum(beta.entropy(self.a, self.b))
+
 class Dirichlet(Likelihood):
     """
     q(z | lambda) = prod_{i=1}^d Dirichlet(z_i | alpha[i, :])
@@ -318,6 +380,8 @@ class Dirichlet(Likelihood):
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
+        self.sample_tensor = False
+
         self.alpha = None
 
     def mapping(self, x):
@@ -327,14 +391,14 @@ class Dirichlet(Likelihood):
     def set_params(self, params):
         self.alpha = params[0]
 
-    def print_params(self, sess):
-        alpha = sess.run(self.alpha)
+    def print_params(self):
+        alpha = self.alpha.eval()
         print("concentration vector:")
         print(alpha)
 
-    def sample(self, size, sess):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        alpha = sess.run(self.alpha)
+        alpha = self.alpha.eval()
         z = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
@@ -352,6 +416,9 @@ class Dirichlet(Likelihood):
         return dirichlet.logpdf(zs[:, (i*self.K):((i+1)*self.K)],
                                 self.alpha[i, :])
 
+    def entropy(self):
+        return tf.reduce_sum(dirichlet.entropy(self.alpha))
+
 class InvGamma(Likelihood):
     """
     q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | a[i], b[i])
@@ -361,27 +428,31 @@ class InvGamma(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
+        self.sample_tensor = False
+
         self.a = None
         self.b = None
 
     def mapping(self, x):
         alpha = Variable("alpha", [self.num_vars])
         beta = Variable("beta", [self.num_vars])
-        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
+        return [tf.nn.softplus(alpha)+1e-2, tf.nn.softplus(beta)+1e-2]
 
     def set_params(self, params):
         self.a = params[0]
         self.b = params[1]
 
-    def print_params(self, sess):
+    def print_params(self):
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         print("shape:")
         print(a)
         print("scale:")
         print(b)
 
-    def sample(self, size, sess):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
+        sess = get_session()
         a, b = sess.run([self.a, self.b])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
@@ -395,6 +466,9 @@ class InvGamma(Likelihood):
             raise IndexError()
 
         return invgamma.logpdf(zs[:, i], self.a[i], self.b[i])
+
+    def entropy(self):
+        return tf.reduce_sum(invgamma.entropy(self.a, self.b))
 
 class Multinomial(Likelihood):
     """
@@ -415,28 +489,32 @@ class Multinomial(Likelihood):
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
+        self.sample_tensor = False
+
         self.pi = None
 
     def mapping(self, x):
-        # Transform unconstrained parameters to lie on simplex.
+        # Transform a real (K-1)-vector to K-dimensional simplex.
         pi = Variable("pi", [self.num_factors, self.K-1])
-        pi_const = tf.sigmoid(pi)
-        pi_const = tf.concat(1,
-            [pi_const, tf.expand_dims(1.0 - tf.reduce_sum(pi_const), 0)])
-
-        return [pi_const]
+        eq = -tf.log(tf.cast(self.K - 1 - tf.range(self.K-1), dtype=tf.float32))
+        z = tf.sigmoid(eq + pi)
+        pil = tf.concat(1, [z, tf.ones([self.num_factors, 1])])
+        piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - z])
+        # cumulative product along 1st axis
+        S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+        return [S * pil]
 
     def set_params(self, params):
         self.pi = params[0]
 
-    def print_params(self, sess):
-        pi = sess.run(self.pi)
+    def print_params(self):
+        pi = self.pi.eval()
         print("probability vector:")
         print(pi)
 
-    def sample(self, size, sess):
+    def sample(self, size=1):
         """z ~ q(z | lambda)"""
-        pi = sess.run(self.pi)
+        pi = self.pi.eval()
         z = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
             z[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
@@ -454,6 +532,9 @@ class Multinomial(Likelihood):
         return multinomial.logpmf(zs[:, (i*self.K):((i+1)*self.K)],
                                   1, self.pi[i, :])
 
+    def entropy(self):
+        return tf.reduce_sum(multinomial.entropy(1, self.pi))
+
 class Normal(Likelihood):
     """
     q(z | lambda ) = prod_{i=1}^d Normal(z[i] | m[i], s[i])
@@ -463,6 +544,8 @@ class Normal(Likelihood):
         Likelihood.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
+        self.sample_tensor = True
+
         self.m = None
         self.s = None
 
@@ -475,22 +558,20 @@ class Normal(Likelihood):
         self.m = params[0]
         self.s = params[1]
 
-    def print_params(self, sess):
+    def print_params(self):
+        sess = get_session()
         m, s = sess.run([self.m, self.s])
         print("mean:")
         print(m)
         print("std dev:")
         print(s)
 
-    def sample_noise(self, size):
+    def sample_noise(self, size=1):
         """
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
-        # Not using this, since TensorFlow has a large overhead
-        # whenever calling sess.run().
-        #samples = sess.run(tf.random_normal(self.samples.get_shape()))
-        return norm.rvs(size=(size, self.num_vars))
+        return tf.random_normal((size, self.num_vars))
 
     def reparam(self, eps):
         """
@@ -508,13 +589,16 @@ class Normal(Likelihood):
         si = self.s[i]
         return norm.logpdf(zs[:, i], mi, si)
 
-    # TODO entropy is bugged
-    #def entropy(self):
-    #    return norm.entropy(self.transform_s(self.s_unconst))
+    def entropy(self):
+        return tf.reduce_sum(norm.entropy(scale=self.s))
 
 class PointMass(Likelihood):
     """
     Point mass variational family
+
+    q(z | lambda ) = prod_{i=1}^d Dirac(z[i] | params[i])
+    where lambda = params. Dirac(x; p) is the Dirac delta distribution
+    with density equal to 1 if x == p and 0 otherwise.
     """
     def __init__(self, num_vars=1, transform=tf.identity):
         Likelihood.__init__(self, 1)
@@ -522,6 +606,7 @@ class PointMass(Likelihood):
         self.num_params = num_vars
         self.transform = transform
         self.params = None
+        self.sample_tensor = True
 
     def mapping(self, x):
         params = Variable("params", [self.num_vars])
@@ -530,13 +615,26 @@ class PointMass(Likelihood):
     def set_params(self, params):
         self.params = params[0]
 
-    def print_params(self, sess):
-        params = sess.run(self.params)
+    def print_params(self):
+        if self.params.get_shape()[0] == 0:
+            return
+
+        params = self.params.eval()
         print("parameter values:")
         print(params)
 
-    def get_params(self):
-        # Return a matrix to be compatible with probability model
+    def sample(self, size=1):
+        # Return a matrix where each row is the same set of
+        # parameters. This is to be compatible with probability model
         # methods which assume the input is possibly a mini-batch of
-        # parameter samples (used for black box variational methods).
-        return tf.reshape(self.params, [1, self.num_params])
+        # parameter samples (as in black box variational methods).
+        return tf.pack([self.params]*size)
+
+    def log_prob_zi(self, i, zs):
+        """log q(z_i | lambda)"""
+        if i >= self.num_factors:
+            raise IndexError()
+
+        # a vector where the jth element is 1 if zs[j, i] is equal to
+        # the ith parameter, 0 otherwise
+        return tf.cast(tf.equal(zs[:, i], self.params[i]), dtype=tf.float32)

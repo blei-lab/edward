@@ -11,7 +11,7 @@ def _assert_eq(val_ed, val_true):
     with sess.as_default():
         assert np.allclose(val_ed.eval(), val_true)
 
-def _test_logpdf(x, mean, cov):
+def _test_logpdf(x, mean=None, cov=1):
     xtf = tf.constant(x)
     mean_tf = tf.convert_to_tensor(mean)
     cov_tf = tf.convert_to_tensor(cov)
