@@ -7,11 +7,14 @@ site_url: http://edwardlib.org/
 pages:
 - Home: index.md
 - Getting Started: getting-started.md
-- Guide for Research: guide-research.md
-- Design and Philosophy: design.md
-- Developer Process: developer.md
-- TensorFlow: tensorflow.md
-- Feature Wishlist: wishlist.md
+- Delving In: delving-in.md
+- How To: how-to.md
+- Advanced:  
+    - Design and Philosophy: advanced/design.md
+    - Guide for Research: advanced/guide-research.md
+    - Developer Process: advanced/developer.md
+    - Feature Wishlist: advanced/wishlist.md
+    - API: advanced/api.md
 - Miscellaneous: misc.md
 
 extra:

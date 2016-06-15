@@ -1,16 +1,8 @@
-## Advanced features
+### License
 
-Here is a list of advanced features currently supported.
+asdf
 
-+ Score function gradient
-+ Reparameterization gradient
-+ Variance reduction techniques
-    + Analytic KL's and entropy decompositions
-+ Variational models
-    + Mean-field
-    + Global parameterizations (inference networks, recognition networks, inverse mappings)
-
-## References
+### References
 
 References for the process
 

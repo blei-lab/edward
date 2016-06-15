@@ -1,4 +1,4 @@
-# Design and Philosophy
+## Design and Philosophy
 
 The __Edward__ library serves two purposes:
 
@@ -10,7 +10,7 @@ As a research tool, the code base is easily interchangeable so that we can play 
 
 As a practical tool, Edward has many desirable features such as computational graphs for automatic differentiation, GPU support and distributed implementations, support for a variety of modeling languages. It also has the fundamentals: linear model examples, data subsampling for scaling to massive data sets, mean-field variational inference, and so on.
 
-## Related Software
+### Related Software
 
 There are several notable themes in Edward.
 

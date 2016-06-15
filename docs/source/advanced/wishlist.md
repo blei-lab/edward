@@ -1,10 +1,10 @@
-# Feature Wishlist
+## Feature Wishlist
 
-__Modeling__
+#### Modeling
 
 * A graphical modeling language
 
-__Inference__
+#### Inference
 
 * Variational inference
     * Coordinate ascent variational inference
@@ -16,18 +16,18 @@ __Inference__
     * Importance sampling
     * Sequential Monte Carlo
 
-__Criticism__
+#### Criticism
 
 * Graphical checks
 * Sensitivity analysis
 * Convergence diagnostics
 
-__Miscellaneous__
+#### Miscellaneous
 
 * Visualization tools
 * A model zoo
 
-## Advanced features
+### Advanced features
 
 * Variance reduction techniques
     * Control variates

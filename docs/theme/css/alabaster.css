@@ -12,7 +12,7 @@ body {
 }
 
 div.document {
-    width: 940px;
+    width: 1000px;
     margin: 30px auto 0 auto;
 }
 
@@ -62,17 +62,18 @@ div.relations {
 
 
 div.sphinxsidebar a {
-    color: #444;
+    color: #000;
     text-decoration: none;
-    border-bottom: 1px dotted #999;
+    /*border-bottom: 1px dotted #999;*/
 }
 
 div.sphinxsidebar a:hover {
-    border-bottom: 1px solid #999;
+    color: #BBB;
+    text-decoration: none;;
 }
 
 div.sphinxsidebar {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.5;
 }
 
@@ -136,15 +137,16 @@ div.sphinxsidebar ul {
     margin: 10px 0;
     padding: 0;
     color: #000;
+    font-size: 18px;
 }
 
-div.sphinxsidebar ul li.toctree-l1 > a {
+/*div.sphinxsidebar ul li.toctree-l1 > a {
     font-size: 120%;
 }
 
 div.sphinxsidebar ul li.toctree-l2 > a {
     font-size: 110%;
-}
+}*/
 
 div.sphinxsidebar input {
     border: 1px solid #CCC;
@@ -477,7 +479,7 @@ a:hover tt, a:hover code {
 
 
 
-@media screen and (max-width: 875px) {
+@media screen and (max-width: 975px) {
 
     body {
         margin: 0;

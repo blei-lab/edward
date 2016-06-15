@@ -1,5 +1,5 @@
-# Developer Process
-## Standards
+## Developer Process
+### Standards
 
 + __Pull request and branches.__ We follow standards used in Stan. Namely, contribute by developing on a clone of the repo and writing the code in a branch. Submit a pull request when ready. See Stan's process for [how to describe the pull request](https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request). For developers with push permission to the repo, see Stan's process for [how to name branches](https://github.com/stan-dev/stan/wiki/Developer-Process#4--how-to-contribute-with-a-clone-of-the-repository).
 + __Unit testing.__ Unit testing is awesome. It's useful not only for checking code after having written it, but also in checking code as you are developing it. If you're informally writing short scripts that output various things anyways, I suggest saving the file in the `tests/` directory. This gets the momentum going as the test becomes formalized. For testing, simply run [`nose2`](http://nose2.readthedocs.io/en/latest/getting_started.html) in the repo; it will automatically find and run all tests in `tests/`. Most if not all pull requests should have unit tests.
@@ -25,7 +25,7 @@ more_code()
 + In general, any remaining tasks to be done are raised as Github issues. In other cases, write a TODO comment for things that need to be done but are so minor you'd rather not raise a Github issue; this can be helpful as you are writing code in a branch, and none of the intermediate commits which have a TODO comment will still have that TODO comment when submitting the pull request.
 + Everything in `edward.stats` uses SciPy standards. This includes, for example, the argument specification and the choice of how a distribution is parameterized.
 
-## Suggested workflow
+### Suggested workflow
 
 + __Update your Python path.__ As you make changes, it can be cumbersome to constantly reinstall the package to test these changes. We recommend adding the path to your local repo to your `PYTHONPATH`. That is, run the following on the command-line:
 ```{bash}
@@ -47,7 +47,7 @@ twine upload dist/*
 ```
 Third, tag the release on Github and note the new additions when tagging this release. You can do this by comparing commits from the previous tagged release to master. A link that compares tagged commits to master is available on the [releases page](https://github.com/blei-lab/edward/releases).
 
-## Suggested private workflow
+### Suggested private workflow
 
 To develop work on a branch privately, we suggest using a private repo that maintains the master branch from the public repo. Development happens on the private repo's branch, and when it is finished, you can push it to the public repo's branch to submit as a pull request. We describe this in detail.
 

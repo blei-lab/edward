@@ -1,10 +1,21 @@
-# Getting Started for Research
+## Guide for Research
 
 This is a guide to how to use Edward for research. Following Box's loop, we divide research into three components: model, inference, and criticism.
 
 As the library uses TensorFlow as a backend, here is a quick guide on [how to get started with it](tensorflow.md). You will most likely need to work directly in TensorFlow as you manipulate different objects and understand how certain behaviors of the new research works. Here is an [example](https://github.com/blei-lab/edward/blob/master/examples/normal_idiomatic_tf.py) with access to the TensorFlow session rather than hiding the TensorFlow internals with `inference.run`.
 
-## Developing new probabilistic models
+### Getting Started with TensorFlow
+
+If you'd like to use this library for research, you have to learn TensorFlow. Trust me. It's worth the investment. As a heuristic, it takes roughly a day to have a good grasp of the essential mechanics behind the library.
+
+Here's what I recommend for learning TensorFlow.
+
+1. Read TensorFlow's [Getting Started](https://www.tensorflow.org/versions/r0.7/get_started/index.html). It tells you the essential objects that it works with.
+2. Skim through the simple examples in these [TensorFlow tutorials](https://github.com/nlintz/TensorFlow-Tutorials). It gives you a big picture of the semantics and how the commands generally work with each other.
+3. Skim through the example code in this library! If you’re familiar with the underlying math for variational inference, going through the code base here will also teach you the mapping from math to TensorFlow.
+
+
+### Developing new probabilistic models
 
 A probabilistic model is specified by a joint distribution `p(x,z)` of data `x` and latent variables `z`. All models in Edward are written as a class; to implement a new model, it can be written in any of the currently supported modeling languages: Stan, TensorFlow, and NumPy/SciPy.
 
@@ -49,7 +60,7 @@ Here is a [toy script](https://github.com/blei-lab/edward/blob/master/examples/b
 
 For efficiency during future inferences or criticisms, we recommend using the modeling language which contains the most structure about the model; this enables the inference algorithms to automatically take advantage of any available structure if they are implemented to do so. TensorFlow will be most efficient as Edward uses it as the backend for computation.
 
-## Developing new inference algorithms
+### Developing new inference algorithms
 
 An inference algorithm calculates the posterior for a particular model and data set; it is the distribution of the latent variables given data, `p(z | x)`, and is used in all downstream analyses such as prediction. With Edward, you can develop new black box inference algorithms and also develop custom inference algorithms which are tailored to a particular model or restricted class of models.
 
@@ -67,6 +78,19 @@ Consider developing a Monte Carlo algorithm. Inherit from `MonteCarlo`.[Document
 
 Note that you can build model-specific inference algorithms and inference algorithms that are tailored to a smaller class than the general class available here. There's nothing preventing you to do so, and the general organizational paradigm and low-level functions are still useful in such a case. You can write a class that for example inherits from `Inference` directly or inherits to carry both optimization and sampling methods.
 
-## Developing new criticism techniques
+### Developing new criticism techniques
 
 [Documentation is in progress.]
+
+
+### Developing new building blocks
+
+Here is a list of advanced features currently supported.
+
++ Score function gradient
++ Reparameterization gradient
++ Variance reduction techniques
+    + Analytic KL's and entropy decompositions
++ Variational models
+    + Mean-field
+    + Global parameterizations (inference networks, recognition networks, inverse mappings)

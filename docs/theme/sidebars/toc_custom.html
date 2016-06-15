@@ -1,5 +1,15 @@
 <hr />
 
+{% macro nav_tree_inner(nav) -%}
+  <ul>
+  {% for nav_item in nav %}
+      <li class="toctree-l2">
+        <a href="{{ nav_item.url }}">{{ nav_item.title }}</a>
+      </li>
+  {% endfor %}
+  </ul>
+{%- endmacro %}
+
 {% macro nav_tree(nav) -%}
   <ul>
   {% for nav_item in nav %}
@@ -8,9 +18,9 @@
           <a href="{{ nav_item.url }}">{{ nav_item.title }}</a>
         </li>
       {% else %}
-        <li>
+        <li class="toctree-l1">
           {{ nav_item.title }}
-          {{ nav_tree(nav_item.children) }}
+          {{ nav_tree_inner(nav_item.children) }}
         </li>
       {% endif %}
     {% endfor %}
