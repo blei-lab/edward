@@ -74,7 +74,9 @@ class Variational:
         mathematically it is a function of both z and x, and it only
         takes z as input.
         """
-        self._set_params(self._mapping(x))
+        with tf.variable_scope("variational"):
+            self._set_params(self._mapping(x))
+
         samples = []
         for layer in self.layers:
             if layer.sample_tensor:

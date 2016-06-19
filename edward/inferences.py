@@ -68,7 +68,7 @@ class VariationalInference(Inference):
             self.print_progress(t, loss)
 
     def initialize(self, n_iter=1000, n_data=None, n_print=100,
-        optimizer=None):
+        optimizer=None, scope=None):
         """
         Initialize inference algorithm.
 
@@ -85,6 +85,8 @@ class VariationalInference(Inference):
         optimizer : str, optional
             Whether to use TensorFlow optimizer or PrettyTensor
             optimizer if using PrettyTensor. Defaults to TensorFlow.
+        scope : str, optional
+            Scope of TensorFlow variable objects to optimize over.
         """
         self.n_iter = n_iter
         self.n_data = n_data
@@ -94,6 +96,8 @@ class VariationalInference(Inference):
 
         loss = self.build_loss()
         if optimizer == None:
+            var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                         scope=scope)
             # Use ADAM with a decaying scale factor
             global_step = tf.Variable(0, trainable=False)
             starter_learning_rate = 0.1
@@ -101,8 +105,12 @@ class VariationalInference(Inference):
                                                 global_step,
                                                 100, 0.9, staircase=True)
             optimizer = tf.train.AdamOptimizer(learning_rate)
-            self.train = optimizer.minimize(loss, global_step=global_step)
+            self.train = optimizer.minimize(loss, global_step=global_step,
+                                            var_list=var_list)
         else:
+            if scope is not None:
+                raise NotImplementedError("PrettyTensor optimizer does not accept a variable scope.")
+
             optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
             self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
