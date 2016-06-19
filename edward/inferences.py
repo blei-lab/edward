@@ -118,8 +118,8 @@ class VariationalInference(Inference):
         init.run()
 
     def update(self):
-        self.train.run()
-        loss = self.loss.eval()
+        sess = get_session()
+        _, loss = sess.run([self.train, self.loss])
         return loss
 
     def print_progress(self, t, loss):
