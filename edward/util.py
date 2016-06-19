@@ -49,13 +49,11 @@ def dot(x, y):
     if len(x.get_shape()) == 1:
         vec = x
         mat = y
-        d = vec.get_shape()[0].value
-        return tf.matmul(tf.reshape(vec, [1, d]), mat)
+        return tf.matmul(tf.expand_dims(vec, 0), mat)
     else:
         mat = x
         vec = y
-        d = vec.get_shape()[0].value
-        return tf.matmul(mat, tf.reshape(vec, [d, 1]))
+        return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 def get_dims(x):
     """
