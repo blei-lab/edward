@@ -95,7 +95,7 @@ class VariationalInference(Inference):
         self.loss = tf.constant(0.0)
 
         loss = self.build_loss()
-        if optimizer == None:
+        if optimizer is None:
             var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                          scope=scope)
             # Use ADAM with a decaying scale factor
