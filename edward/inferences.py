@@ -63,10 +63,9 @@ class VariationalInference(Inference):
         A simple wrapper to run the inference algorithm.
         """
         self.initialize(*args, **kwargs)
-        for t in range(self.n_iter):
+        for t in range(self.n_iter+1):
             loss = self.update()
             self.print_progress(t, loss)
-
 
     def initialize(self, n_iter=1000, n_data=None, n_print=100,
         optimizer=None):
@@ -81,7 +80,8 @@ class VariationalInference(Inference):
             Number of samples for data subsampling. Default is to use all
             the data.
         n_print : int, optional
-            Number of iterations for each print progress.
+            Number of iterations for each print progress. If no print
+            progress, then specify None.
         optimizer : str, optional
             Whether to use TensorFlow optimizer or PrettyTensor
             optimizer if using PrettyTensor. Defaults to TensorFlow.
@@ -115,9 +115,10 @@ class VariationalInference(Inference):
         return loss
 
     def print_progress(self, t, loss):
-        if t % self.n_print == 0:
-            print("iter {:d} loss {:.2f}".format(t, loss))
-            self.variational.print_params()
+        if self.n_print is not None:
+            if t % self.n_print == 0:
+                print("iter {:d} loss {:.2f}".format(t, loss))
+                self.variational.print_params()
 
     def build_loss(self):
         raise NotImplementedError()
