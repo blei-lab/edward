@@ -32,8 +32,7 @@
   \textbf{Issue labeling system.} We use
   \href{https://github.com/stan-dev/stan/pulls}{Stan's labeling system}.
   While several labels obviously don't apply to us, it's better than the
-  default labels and it's not worth the effort to reinvent the wheel and
-  maintain a custom system.
+  default labels.
 \end{itemize}
 
 \subsubsection{Coding}
@@ -67,16 +66,12 @@
   8's blank line standards} with the caveat to not use more than one
   empty line to separate code. Also use a blank line to separate the end
   of an indented procedure: 
-\end{itemize}
-
 \begin{lstlisting}[language=Python]
 for i in range(5):
     do_stuff()
 
 more_code()  
 \end{lstlisting}
-
-\begin{itemize}
   \item In general, any remaining tasks to be done are raised as Github issues. In other cases, write a TODO comment for things that need to be done but are so minor you'd rather not raise a Github issue; this can be helpful as you are writing code in a branch, and none of the intermediate commits which have a TODO comment will still have that TODO comment when submitting the pull request.
   \item Everything in \texttt{edward.stats} uses SciPy standards. This includes,
   for example, the argument specification and the choice of how a distribution is parameterized.
