@@ -124,7 +124,7 @@ body {
   font-size: 1.8em; /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.5;
   font-weight: 400;
-  font-family: "Vollkorn", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Lora", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #222; }
 
 
@@ -152,8 +152,6 @@ h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
 }
 
 p { margin-top: 0; }
-
-strong { font-weight: bolder; }
 
 
 /* Links
