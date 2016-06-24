@@ -1,0 +1,130 @@
+% Define the subtitle of the page
+\title{Home}
+
+% Begin the content of the page
+\subsection{A library for probabilistic modeling, inference, and criticism.}
+Edward is a Python library that enables black box inference for models with
+discrete and continuous latent variables, neural network parameterizations, and
+infinite dimensional parameter spaces. Edward fuses three fields: Bayesian
+statistics and machine learning, deep learning, and probabilistic programming.
+
+It supports \textbf{modeling languages} including
+\begin{itemize}
+\item \href{https://www.tensorflow.org}{TensorFlow} (with neural network
+  compositionality via \href{http://keras.io}{Keras},
+  \href{https://github.com/google/prettytensor}{Pretty Tensor}, or
+  \href{https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md}{TensorFlow-Slim})
+\item \href{http://mc-stan.org}{Stan}
+\item \href{http://pymc-devs.github.io/pymc3/}{PyMC3}
+\item Python through \href{http://scipy.org/}{NumPy/SciPy}
+\end{itemize}
+
+It supports \textbf{inference} via
+\begin{itemize}
+\item Variational inference
+\begin{itemize}
+    \item Black box variational inference
+    \item Stochastic variational inference
+    \item Variational auto-encoders
+    \item Inclusive KL divergence: $\text{KL}(p\|q)$
+  \end{itemize}
+\item Marginal posterior optimization (empirical Bayes, marginal maximum
+likelihood)
+\item Maximum a posteriori estimation (penalized maximum likelihood, maximum
+  likelihood)
+\end{itemize}
+
+It supports \textbf{criticism} of the model and inference via
+\begin{itemize}
+\item Evaluations on both supervised and unsupervised tasks
+\item Posterior predictive checks
+\end{itemize}
+
+\subsubsection{Authors}
+
+Edward is led by \href{http://dustintran.com}{Dustin Tran} with guidance
+by \href{http://www.cs.columbia.edu/~blei/}{David Blei}. It is under
+active development (by order of joining) by
+\begin{itemize}
+  \item \href{http://dustintran.com}{Dustin Tran} 
+  \item \href{http://www.cs.columbia.edu/~blei/}{David Blei} 
+  \item \href{http://www.proditus.com/}{Alp Kucukelbir} 
+  \item \href{http://stat.columbia.edu/~diengadji/}{Adji Dieng} 
+  \item \href{http://maja-rita-rudolph.com/}{Maja Rudolph}
+  \item \href{http://www.ee.columbia.edu/~dliang/}{Dawen Liang}
+\end{itemize}
+We welcome contributions by submitting issues, feature requests, or by solving
+any current issues!
+
+We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other
+members of the Blei Lab for their helpful feedback and advice.
+
+\subsubsection{Citation}
+
+We appreciate citations for Edward because it lets us find out how
+people have been using the library and it motivates further work.
+
+\begin{quote}
+Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph,
+and Dawen Liang. 2016. 
+\emph{Edward: A library for probabilistic modeling, inference, and criticism. }
+http://edwardlib.org
+\end{quote}
+
+\begin{lstlisting}[class=JSON]
+@misc{tran2016edward,
+    author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
+    title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
+    year = {2016},
+    url = {http://edwardlib.org}
+}
+\end{lstlisting}
+
+
+
+% \subsubsection{Some Math}
+% \begin{align*}
+% a &= b + c\\
+% FB &\approx c^2 
+% \end{align*}
+
+% \subsubsection{a subsection}
+% lorem
+
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics[width=2in]{edward.png}
+% \end{figure}
+
+% \subsubsection{another subsection}
+% lorem
+
+% \href{other.html}{other}
+
+% \subsection{another section}
+
+% Lorem ipsum dolor sit amet, \textbf{consectetur} adipisicing elit, sed do eiusmod
+% tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+% quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+% consequat. Duis aute irure \emph{dolor} in reprehenderit in voluptate velit esse
+% cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+% proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+% \begin{lstlisting}[language=Python]
+% def dot(x, y):
+%     """
+%     x is M x N matrix and y is N-vector, or
+%     x is M-vector and y is M x N matrix
+%     """
+%     if len(x.get_shape()) == 1:
+%         vec = x
+%         mat = y
+%         d = vec.get_shape()[0].value
+%         return tf.matmul(tf.reshape(vec, [1, d]), mat)
+%     else:
+%         mat = x
+%         vec = y
+%         d = vec.get_shape()[0].value
+%         return tf.matmul(mat, tf.reshape(vec, [d, 1]))
+% \end{lstlisting}
+

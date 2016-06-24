@@ -1,0 +1,744 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>edward.models package &mdash; Edward 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0 documentation" href="index.html"/>
+        <link rel="up" title="edward package" href="edward.html"/>
+        <link rel="next" title="edward.stats package" href="edward.stats.html"/>
+        <link rel="prev" title="edward package" href="edward.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="edward.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">edward.models package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-edward.models.models">edward.models.models module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-edward.models.variationals">edward.models.variationals module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-edward.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="edward.stats.html">edward.stats package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#module-edward.criticisms">edward.criticisms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#module-edward.data">edward.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#module-edward.inferences">edward.inferences module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#module-edward.util">edward.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#module-edward">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="edward.html">edward package</a> &raquo;</li>
+      
+    <li>edward.models package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/edward.models.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="edward-models-package">
+<h1>edward.models package<a class="headerlink" href="#edward-models-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-edward.models.models">
+<span id="edward-models-models-module"></span><h2>edward.models.models module<a class="headerlink" href="#module-edward.models.models" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="edward.models.models.PyMC3Model">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PyMC3Model</code><span class="sig-paren">(</span><em>model</em>, <em>observed</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model wrapper for models written in PyMC3.</p>
+<p>model : pymc3.Model object
+observed : The shared theano tensor passed to the model likelihood</p>
+<dl class="method">
+<dt id="edward.models.models.PyMC3Model.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.models.PythonModel">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PythonModel</code><a class="headerlink" href="#edward.models.models.PythonModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model wrapper for models written in NumPy/SciPy.</p>
+<dl class="method">
+<dt id="edward.models.models.PythonModel.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PythonModel.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.models.StanModel">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">StanModel</code><span class="sig-paren">(</span><em>file=None</em>, <em>model_code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model wrapper for models written in Stan.</p>
+<p>file: see documentation for argument in pystan.stan
+model_code: see documentation for argument in pystan.stan</p>
+<dl class="method">
+<dt id="edward.models.models.StanModel.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-edward.models.variationals">
+<span id="edward-models-variationals-module"></span><h2>edward.models.variationals module<a class="headerlink" href="#module-edward.models.variationals" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="edward.models.variationals.Bernoulli">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Bernoulli</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>q(z | lambda) = prod_{i=1}^d Bernoulli(z[i] | p[i])
+where lambda = p.</p>
+<dl class="method">
+<dt id="edward.models.variationals.Bernoulli.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Bernoulli.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Bernoulli.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Bernoulli.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Bernoulli.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>z ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Bernoulli.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Bernoulli.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.Beta">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Beta</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>q(z | lambda) = prod_{i=1}^d Beta(z[i] | a[i], b[i])
+where lambda = {a, b}.</p>
+<dl class="method">
+<dt id="edward.models.variationals.Beta.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Beta.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Beta.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Beta.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Beta.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>z ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Beta.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Beta.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.Dirichlet">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Dirichlet</code><span class="sig-paren">(</span><em>num_factors</em>, <em>K</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>q(z | lambda) = prod_{i=1}^d Dirichlet(z_i | alpha[i, :])
+where z is a flattened vector such that z_i represents
+the ith factor z[(i-1)*K:i*K], and lambda = alpha.</p>
+<dl class="method">
+<dt id="edward.models.variationals.Dirichlet.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Dirichlet.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Dirichlet.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Dirichlet.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Dirichlet.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>z ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Dirichlet.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Dirichlet.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.InvGamma">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">InvGamma</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | a[i], b[i])
+where lambda = {a, b}.</p>
+<dl class="method">
+<dt id="edward.models.variationals.InvGamma.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.InvGamma.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.InvGamma.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.InvGamma.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.InvGamma.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>z ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.InvGamma.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.InvGamma.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.Likelihood">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Likelihood</code><span class="sig-paren">(</span><em>num_factors=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for variational likelihoods, q(z | lambda).</p>
+<dl class="docutils">
+<dt>num_factors</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>Number of factors. Default is 1.</dd>
+</dl>
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>H(q(z| lambda))
+= E_{q(z | lambda)} [ - log q(z | lambda) ]
+= sum_{i=1}^d E_{q(z_i | lambda)} [ - log q(z_i | lambda) ]</p>
+<dl class="docutils">
+<dt>tf.Tensor</dt>
+<dd>scalar</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)
+Note this calculates the density of the ith factor, not
+necessarily the ith latent variable (such as for multivariate
+factors).</p>
+<dl class="docutils">
+<dt>i</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>Index of the factor to take the log density of.</dd>
+<dt>zs</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span><dd>n_minibatch x num_vars</dd>
+</dl>
+<p>[log q(zs[1]_i | lambda), ..., log q(zs[S]_i | lambda)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>A mapping from data point x -&gt; lambda, the local variational
+parameters, which are parameters specific to x.</p>
+<dl class="docutils">
+<dt>x</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Data</span><dd>Data point</dd>
+</dl>
+<dl class="docutils">
+<dt>list</dt>
+<dd>A list of TensorFlow tensors, where each element is a
+particular set of local parameters.</dd>
+</dl>
+<p>In classical variational inference, the mapping can be
+interpreted as the collection of all local variational
+parameters; the output is simply the projection to the
+relevant subset of local parameters.</p>
+<p>For local variational parameters with constrained support, the
+mapping additionally acts as a transformation. The parameters
+to be optimized live on the unconstrained space; the output of
+the mapping is then constrained variational parameters.</p>
+<p>Global parameterizations are useful to prevent the parameters
+of this mapping to grow with the number of data points, and
+also as an implicit regularization. This is known as inverse
+mappings in Helmholtz machines and variational auto-encoders,
+and parameter tying in message passing. The mapping is a
+function of data point with a fixed number of parameters, and
+it tries to (in some sense) &#8220;predict&#8221; the best local
+variational parameters given this lower rank.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.reparam">
+<code class="descname">reparam</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.reparam" title="Permalink to this definition">¶</a></dt>
+<dd><p>eps = sample_noise() ~ s(eps)
+s.t. z = reparam(eps; lambda) ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>z ~ q(z | lambda)</p>
+<dl class="docutils">
+<dt>np.ndarray</dt>
+<dd>size x dim(z) array of type np.float32, where each
+row is a sample from q.</dd>
+</dl>
+<p>Unlike the other methods, this return object is a realization
+of a TensorFlow array. This is required as we rely on
+NumPy/SciPy for sampling from distributions.</p>
+<p>The method defaults to sampling noise and reparameterizing it
+(which will raise an error if this is not possible).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.sample_noise">
+<code class="descname">sample_noise</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.sample_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>eps = sample_noise() ~ s(eps)
+s.t. z = reparam(eps; lambda) ~ q(z | lambda)</p>
+<dl class="docutils">
+<dt>np.ndarray</dt>
+<dd>size x dim(lambda) array of type np.float32, where each
+row is a sample from q.</dd>
+</dl>
+<p>Unlike the other methods, this return object is a realization
+of a TensorFlow array. This is required as we rely on
+NumPy/SciPy for sampling from distributions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Likelihood.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>This sets the parameters of the variational family, for use in
+other methods of the class.</p>
+<dl class="docutils">
+<dt>params</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>Each element in the list is a particular set of local parameters.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.Multinomial">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Multinomial</code><span class="sig-paren">(</span><em>num_factors</em>, <em>K</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>q(z | lambda ) = prod_{i=1}^d Multinomial(z_i | pi[i, :])
+where z is a flattened vector such that z_i represents
+the ith factor z[(i-1)*K:i*K], and lambda = alpha.</p>
+<p>For each factor (multinomial distribution), it assumes a single
+trial (n=1) when sampling and calculating the density.</p>
+<dl class="method">
+<dt id="edward.models.variationals.Multinomial.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Multinomial.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Multinomial.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Multinomial.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Multinomial.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>z ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Multinomial.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Multinomial.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.Normal">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Normal</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>q(z | lambda ) = prod_{i=1}^d Normal(z[i] | m[i], s[i])
+where lambda = {m, s}.</p>
+<dl class="method">
+<dt id="edward.models.variationals.Normal.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Normal.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Normal.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Normal.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Normal.reparam">
+<code class="descname">reparam</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.reparam" title="Permalink to this definition">¶</a></dt>
+<dd><p>eps = sample_noise() ~ s(eps)
+s.t. z = reparam(eps; lambda) ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Normal.sample_noise">
+<code class="descname">sample_noise</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.sample_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>eps = sample_noise() ~ s(eps)
+s.t. z = reparam(eps; lambda) ~ q(z | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Normal.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Normal.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.PointMass">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>num_vars=1</em>, <em>transform=&lt;function identity&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.PointMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.models.variationals.Likelihood" title="edward.models.variationals.Likelihood"><code class="xref py py-class docutils literal"><span class="pre">edward.models.variationals.Likelihood</span></code></a></p>
+<p>Point mass variational family</p>
+<p>q(z | lambda ) = prod_{i=1}^d Dirac(z[i] | params[i])
+where lambda = params. Dirac(x; p) is the Dirac delta distribution
+with density equal to 1 if x == p and 0 otherwise.</p>
+<dl class="method">
+<dt id="edward.models.variationals.PointMass.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.PointMass.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd><p>log q(z_i | lambda)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.PointMass.mapping">
+<code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.PointMass.mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.PointMass.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.PointMass.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.PointMass.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.PointMass.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.PointMass.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.PointMass.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.variationals.Variational">
+<em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Variational</code><span class="sig-paren">(</span><em>layers=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational" title="Permalink to this definition">¶</a></dt>
+<dd><p>A stack of variational families.</p>
+<dl class="method">
+<dt id="edward.models.variationals.Variational.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer instance on top of the layer stack.</p>
+<blockquote>
+<div>layer: layer instance.</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Variational.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Variational.log_prob_zi">
+<code class="descname">log_prob_zi</code><span class="sig-paren">(</span><em>i</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.log_prob_zi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Variational.np_sample">
+<code class="descname">np_sample</code><span class="sig-paren">(</span><em>samples</em>, <em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.np_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Form dictionary to feed any placeholders with np.array
+samples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Variational.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.variationals.Variational.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>x</em>, <em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws a mix of tensors and placeholders, corresponding to
+TensorFlow-based samplers and SciPy-based samplers depending
+on the variational factor.</p>
+<p>x : Data
+size : int, optional</p>
+<dl class="docutils">
+<dt>tf.Tensor, list</dt>
+<dd>A tensor concatenating sample outputs of tensors and
+placeholders. The list used to form the tensor is also
+returned so that other procedures can feed values into the
+placeholders.</dd>
+</dl>
+<p>This sets parameters of the variational distribution according
+to any data points it conditions on. This means after calling
+this method, log_prob_zi() is well-defined, even though
+mathematically it is a function of both z and x, and it only
+takes z as input.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-edward.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-edward.models" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="edward.stats.html" class="btn btn-neutral float-right" title="edward.stats package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="edward.html" class="btn btn-neutral" title="edward package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

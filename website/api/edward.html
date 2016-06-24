@@ -1,0 +1,926 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>edward package &mdash; Edward 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0 documentation" href="index.html"/>
+        <link rel="next" title="edward.models package" href="edward.models.html"/>
+        <link rel="prev" title="Edward" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">edward package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="edward.models.html">edward.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="edward.stats.html">edward.stats package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-edward.criticisms">edward.criticisms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-edward.data">edward.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-edward.inferences">edward.inferences module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-edward.util">edward.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-edward">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>edward package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/edward.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="edward-package">
+<h1>edward package<a class="headerlink" href="#edward-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="edward.models.html">edward.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="edward.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.models.html#module-edward.models.models">edward.models.models module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.models.html#module-edward.models.variationals">edward.models.variationals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.models.html#module-edward.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edward.stats.html">edward.stats package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="edward.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.stats.html#module-edward.stats.distributions">edward.stats.distributions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.stats.html#module-edward.stats">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-edward.criticisms">
+<span id="edward-criticisms-module"></span><h2>edward.criticisms module<a class="headerlink" href="#module-edward.criticisms" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="edward.criticisms.binary_accuracy">
+<code class="descclassname">edward.criticisms.</code><code class="descname">binary_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.binary_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binary prediction accuracy, also known as 0/1-loss.</p>
+<dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.binary_crossentropy">
+<code class="descclassname">edward.criticisms.</code><code class="descname">binary_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.binary_crossentropy" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.categorical_accuracy">
+<code class="descclassname">edward.criticisms.</code><code class="descname">categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.categorical_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-class prediction accuracy. One-hot representation for
+y_true.</p>
+<dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s, where the outermost dimension of size K
+has only one 1 per row.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with same shape as y_true.
+The outermost dimension denote the categorical probabilities for
+that data point per row.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.categorical_crossentropy">
+<code class="descclassname">edward.criticisms.</code><code class="descname">categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-class cross entropy. One-hot representation for y_true.</p>
+<dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s, where the outermost dimension of size K
+has only one 1 per row.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with same shape as y_true.
+The outermost dimension denote the categorical probabilities for
+that data point per row.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.cosine_proximity">
+<code class="descclassname">edward.criticisms.</code><code class="descname">cosine_proximity</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.cosine_proximity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cosine similarity of two vectors.</p>
+<p>y_true : tf.Tensor
+y_pred : tf.Tensor</p>
+<blockquote>
+<div>Tensors of same shape and type.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.evaluate">
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>model</em>, <em>variational</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate fitted model using a set of metrics.</p>
+<dl class="docutils">
+<dt>metric</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list or str</span><dd>List of metrics or a single metric.</dd>
+</dl>
+<dl class="docutils">
+<dt>list or float</dt>
+<dd>A list of evaluations or a single evaluation.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.hinge">
+<code class="descclassname">edward.criticisms.</code><code class="descname">hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.hinge" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of real value.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.mean_absolute_error">
+<code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_absolute_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>y_true : tf.Tensor
+y_pred : tf.Tensor</p>
+<blockquote>
+<div>Tensors of same shape and type.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.mean_absolute_percentage_error">
+<code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_percentage_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_absolute_percentage_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>y_true : tf.Tensor
+y_pred : tf.Tensor</p>
+<blockquote>
+<div>Tensors of same shape and type.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.mean_squared_error">
+<code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_squared_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>y_true : tf.Tensor
+y_pred : tf.Tensor</p>
+<blockquote>
+<div>Tensors of same shape and type.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.mean_squared_logarithmic_error">
+<code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_logarithmic_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_squared_logarithmic_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>y_true : tf.Tensor
+y_pred : tf.Tensor</p>
+<blockquote>
+<div>Tensors of same shape and type.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.poisson">
+<code class="descclassname">edward.criticisms.</code><code class="descname">poisson</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.poisson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Negative Poisson log-likelihood of data y_true given predictions
+y_pred (up to proportion).</p>
+<p>y_true : tf.Tensor
+y_pred : tf.Tensor</p>
+<blockquote>
+<div>Tensors of same shape and type.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.ppc">
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Posterior predictive check.
+(Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
+If variational is not specified, it defaults to a prior predictive
+check (Box, 1980).</p>
+<p>PPC&#8217;s form an empirical distribution for the predictive discrepancy,
+p(T) = int p(T(yrep) | z) p(z | y) dz
+by drawing replicated data sets yrep and calculating T(yrep) for
+each data set. Then it compares it to T(y).</p>
+<dl class="docutils">
+<dt>model</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>class object with a &#8216;sample_likelihood&#8217; method</dd>
+<dt>variational</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Variational, optional</span><dd>latent variable distribution q(z) to sample from. It is an
+approximation to the posterior, e.g., a variational
+approximation or an empirical distribution from MCMC samples.
+If not specified, samples will be obtained from model
+with a &#8216;sample_prior&#8217; method.</dd>
+<dt>data</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>Observed data to compare to. If not specified, will return
+only the reference distribution with an assumed replicated
+data set size of 1.</dd>
+<dt>T</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">function, optional</span><dd>Discrepancy function written in TensorFlow. Default is
+identity. It is a function taking in a data set
+y and optionally a set of latent variables z as input.</dd>
+<dt>size</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>number of replicated data sets</dd>
+</dl>
+<dl class="docutils">
+<dt>list</dt>
+<dd>List containing the reference distribution, which is a Numpy
+vector of size elements,
+(T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}));
+and the realized discrepancy, which is a NumPy vector of size
+elements,
+(T(y, z^{1}), ..., T(y, z^{size})).</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.sparse_categorical_accuracy">
+<code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.sparse_categorical_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-class prediction accuracy. Label {0, 1, .., K-1}
+representation for y_true.</p>
+<dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of integers {0, 1, ..., K-1}.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with shape (y_true.get_shape(), K).
+The outermost dimension are the categorical probabilities for
+that data point.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.sparse_categorical_crossentropy">
+<code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.sparse_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-class cross entropy. Label {0, 1, .., K-1} representation
+for y_true.</p>
+<dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of integers {0, 1, ..., K-1}.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with shape (y_true.get_shape(), K).
+The outermost dimension are the categorical probabilities for
+that data point.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.criticisms.squared_hinge">
+<code class="descclassname">edward.criticisms.</code><code class="descname">squared_hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.squared_hinge" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>y_true</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
+<dt>y_pred</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of real value.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-edward.data">
+<span id="edward-data-module"></span><h2>edward.data module<a class="headerlink" href="#module-edward.data" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="edward.data.Data">
+<em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>data=None</em>, <em>shuffled=True</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for data.</p>
+<p>By default, it assumes the data is an array (or list of arrays).
+If requested will perform data subsampling according to slices of
+the first index (e.g., elements in a vector, rows in a matrix,
+y-by-z matrices in a x-by-y-by-z tensor). Use one of the derived
+classes for subsampling more complex data structures.</p>
+<dl class="docutils">
+<dt>data: tf.tensor, np.ndarray, list, dict, optional</dt>
+<dd>Data whose type depends on the type of model it is fed into.
+If TensorFlow, must be tf.tensor or list (see notes).
+If Stan, must be dict.
+If PyMC3, must be np.ndarray.
+If NumPy/SciPy, must be np.ndarray or list of np.ndarrays.</dd>
+<dt>shuffled: bool, optional</dt>
+<dd>Whether the data is shuffled.</dd>
+</dl>
+<p>For TensorFlow models, data argument can be list of placeholders
+or list of np.ndarrays. If np.ndarrays, it will use mini-batches
+of the np.arrays during computation. If placeholders, user must
+manually control mini-batches and feed in the placeholders.</p>
+<p>Data subsampling is not currently available for Stan models.</p>
+<p>Internally, self.counter stores the last accessed data index. It
+is used to obtain the next batch of data starting from
+self.counter to the size of the data set.</p>
+<dl class="method">
+<dt id="edward.data.Data.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>n_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-edward.inferences">
+<span id="edward-inferences-module"></span><h2>edward.inferences module<a class="headerlink" href="#module-edward.inferences" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="edward.inferences.Inference">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for inference methods.</p>
+<dl class="docutils">
+<dt>model</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>probability model p(x, z)</dd>
+<dt>data</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>data x</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.inferences.KLpq">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLpq</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
+<p>Kullback-Leibler divergence from posterior to variational model,
+KL( p(z <a href="#id1"><span class="problematic" id="id2">|x) ||</span></a> q(z) ).
+(Cappe et al., 2008)</p>
+<dl class="method">
+<dt id="edward.inferences.KLpq.build_loss">
+<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient inspired by adaptive importance sampling.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.KLpq.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.KLpq.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.inferences.MAP">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>transform=&lt;function identity&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
+<p>Maximum a posteriori</p>
+<dl class="method">
+<dt id="edward.inferences.MAP.build_loss">
+<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.inferences.MFVI">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MFVI</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
+<p>Mean-field variational inference
+(Ranganath et al., 2014)</p>
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_loss">
+<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_reparam_loss">
+<code class="descname">build_reparam_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient based on the reparameterization trick.
+(Kingma and Welling, 2014)</p>
+<p>ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_reparam_loss_entropy">
+<code class="descname">build_reparam_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient based on the reparameterization trick.</p>
+<p>ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
+where entropy is analytic</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_reparam_loss_kl">
+<code class="descname">build_reparam_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_kl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient based on the reparameterization trick.</p>
+<p>ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
+where KL is analytic</p>
+<p>It assumes the model prior is p(z) = N(z; 0, 1).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_score_loss">
+<code class="descname">build_score_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient based on the score function estimator.
+(Paisley et al., 2012)</p>
+<p>ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_score_loss_entropy">
+<code class="descname">build_score_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient based on the score function estimator.</p>
+<p>ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
+where entropy is analytic</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.build_score_loss_kl">
+<code class="descname">build_score_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_kl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss function to minimize, whose gradient is a stochastic
+gradient based on the score function estimator.</p>
+<p>ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
+where KL is analytic</p>
+<p>It assumes the model prior is p(z) = N(z; 0, 1).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>score=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>n_minibatch</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of samples from variational model for calculating
+stochastic gradients.</dd>
+<dt>score</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span><dd>Whether to force inference to use the score function
+gradient estimator. Otherwise default is to use the
+reparameterization gradient if available.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.MFVI.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.inferences.MonteCarlo">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MonteCarlo</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MonteCarlo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
+<p>Base class for Monte Carlo methods.</p>
+<dl class="docutils">
+<dt>model</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>probability model p(x, z)</dd>
+<dt>data</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>data x</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.inferences.VariationalInference">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
+<p>Base class for variational inference methods.</p>
+<dl class="docutils">
+<dt>model</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>probability model p(x, z)</dd>
+<dt>variational</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Variational</span><dd>variational model q(z; lambda)</dd>
+<dt>data</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>data x</dd>
+</dl>
+<dl class="method">
+<dt id="edward.inferences.VariationalInference.build_loss">
+<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.VariationalInference.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_data=None</em>, <em>n_print=100</em>, <em>optimizer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize inference algorithm.</p>
+<dl class="docutils">
+<dt>n_iter</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of iterations for optimization.</dd>
+<dt>n_data</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of samples for data subsampling. Default is to use all
+the data.</dd>
+<dt>n_print</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of iterations for each print progress.</dd>
+<dt>optimizer</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span><dd>Whether to use TensorFlow optimizer or PrettyTensor
+optimizer if using PrettyTensor. Defaults to TensorFlow.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.VariationalInference.print_progress">
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>t</em>, <em>loss</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.print_progress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.VariationalInference.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple wrapper to run the inference algorithm.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.VariationalInference.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-edward.util">
+<span id="edward-util-module"></span><h2>edward.util module<a class="headerlink" href="#module-edward.util" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="edward.util.VARIABLE">
+<em class="property">class </em><code class="descclassname">edward.util.</code><code class="descname">VARIABLE</code><a class="headerlink" href="#edward.util.VARIABLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.util.VarStoreMethod" title="edward.util.VarStoreMethod"><code class="xref py py-class docutils literal"><span class="pre">edward.util.VarStoreMethod</span></code></a></p>
+<p>A simple wrapper to contain variables. It will create a TensorFlow
+variable the first time it is called and return the variable; in
+subsequent calls, it will simply return the variable and not
+create the TensorFlow variable again.</p>
+<p>This enables variables to be stored outside of classes which
+depend on parameters. It is a useful application for parametric
+distributions whose parameters may or may not be random (e.g.,
+through a prior), and for inverse mappings such as auto-encoders
+where we&#8217;d like to store inverse mapping parameters outside of the
+distribution class.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.util.VarStoreMethod">
+<em class="property">class </em><code class="descclassname">edward.util.</code><code class="descname">VarStoreMethod</code><a class="headerlink" href="#edward.util.VarStoreMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Convenience base class for registered methods that create variables.
+This tracks the variables and requries subclasses to provide a __call__
+method.</p>
+<dl class="method">
+<dt id="edward.util.VarStoreMethod.variable">
+<code class="descname">variable</code><span class="sig-paren">(</span><em>var_name</em>, <em>shape</em>, <em>init=&lt;function _initializer&gt;</em>, <em>dt=tf.float32</em>, <em>train=True</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.VarStoreMethod.variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a named variable to this bookkeeper or returns an existing one.
+Variables marked train are returned by the training_variables method. If
+the requested name already exists and it is compatible (same shape, dt and
+train) then it is returned. In case of an incompatible type, an exception is
+thrown.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>var_name: The unique name of this variable.  If a variable with the same</dt>
+<dd>name exists, then it is returned.</dd>
+</dl>
+<p>shape: The shape of the variable.
+init: The init function to use or a Tensor to copy.
+dt: The datatype, defaults to float.  This will automatically extract the</p>
+<blockquote>
+<div>base dtype.</div></blockquote>
+<p>train: Whether or not the variable should be trained.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A TensorFlow tensor.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ValueError: if reuse is False (or unspecified and allow_reuse is False)</dt>
+<dd>and the variable already exists or if the specification of a reused
+variable does not match the original.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.cumprod">
+<code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cumulative product of a tensor along first dimension.
+<a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/813">https://github.com/tensorflow/tensorflow/issues/813</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.digamma">
+<code class="descclassname">edward.util.</code><code class="descname">digamma</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.digamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the digamma function element-wise.</p>
+<p>TensorFlow doesn&#8217;t have special functions with support for
+automatic differentiation, so use a log/exp/polynomial
+approximation.
+<a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
+<dl class="docutils">
+<dt>x</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>scalar, vector, or rank-n tensor</dd>
+</dl>
+<dl class="docutils">
+<dt>tf.Tensor</dt>
+<dd>size corresponding to size of input</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.dot">
+<code class="descclassname">edward.util.</code><code class="descname">dot</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>x is M x N matrix and y is N-vector, or
+x is M-vector and y is M x N matrix</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.get_dims">
+<code class="descclassname">edward.util.</code><code class="descname">get_dims</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.get_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get values of each dimension.</p>
+<p>x: tensor scalar or array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.get_session">
+<code class="descclassname">edward.util.</code><code class="descname">get_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.get_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the session defined globally; if not already defined, then
+the function will create a global session.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.kl_multivariate_normal">
+<code class="descclassname">edward.util.</code><code class="descname">kl_multivariate_normal</code><span class="sig-paren">(</span><em>loc_one</em>, <em>scale_one</em>, <em>loc_two=0</em>, <em>scale_two=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.kl_multivariate_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the KL of multivariate normal distributions with
+diagonal covariances.</p>
+<dl class="docutils">
+<dt>loc_one</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
+row represents the mean of a n-dimensional Gaussian</dd>
+<dt>scale_one</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
+row represents the standard deviation of a n-dimensional Gaussian</dd>
+<dt>loc_two</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor, optional</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
+row represents the mean of a n-dimensional Gaussian</dd>
+<dt>scale_two</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor, optional</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
+row represents the standard deviation of a n-dimensional Gaussian</dd>
+</dl>
+<dl class="docutils">
+<dt>tf.Tensor</dt>
+<dd><dl class="first last docutils">
+<dt>for scalar or vector inputs, outputs the scalar</dt>
+<dd>KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )</dd>
+<dt>for matrix inputs, outputs the vector</dt>
+<dd><dl class="first last docutils">
+<dt>[KL( N(z; loc_one[m,:], scale_one[m,:]) ||</dt>
+<dd>N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.lbeta">
+<code class="descclassname">edward.util.</code><code class="descname">lbeta</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.lbeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the log of Beta(x), reducing along the last dimension.</p>
+<p>TensorFlow doesn&#8217;t have special functions with support for
+automatic differentiation, so use a log/exp/polynomial
+approximation.
+<a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
+<dl class="docutils">
+<dt>x</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector or rank-n tensor</dd>
+</dl>
+<dl class="docutils">
+<dt>tf.Tensor</dt>
+<dd>scalar if vector input, rank-(n-1) if rank-n tensor input</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.lgamma">
+<code class="descclassname">edward.util.</code><code class="descname">lgamma</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.lgamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the log of Gamma(x) element-wise.</p>
+<p>TensorFlow doesn&#8217;t have special functions with support for
+automatic differentiation, so use a log/exp/polynomial
+approximation.
+<a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
+<dl class="docutils">
+<dt>x</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>scalar, vector, or rank-n tensor</dd>
+</dl>
+<dl class="docutils">
+<dt>tf.Tensor</dt>
+<dd>size corresponding to size of input</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.log_sum_exp">
+<code class="descclassname">edward.util.</code><code class="descname">log_sum_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.log_sum_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the log_sum_exp of the elements in x.</p>
+<dl class="docutils">
+<dt>Works for x with</dt>
+<dd>shape=TensorShape([Dimension(N)])
+shape=TensorShape([Dimension(N), Dimension(1)])</dd>
+</dl>
+<p>Not tested for anything beyond that.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.logit">
+<code class="descclassname">edward.util.</code><code class="descname">logit</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.logit" title="Permalink to this definition">¶</a></dt>
+<dd><p>log(x / (1 - x))</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.multivariate_rbf">
+<code class="descclassname">edward.util.</code><code class="descname">multivariate_rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.multivariate_rbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squared-exponential kernel
+k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.rbf">
+<code class="descclassname">edward.util.</code><code class="descname">rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.rbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squared-exponential kernel element-wise
+k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.set_seed">
+<code class="descclassname">edward.util.</code><code class="descname">set_seed</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.set_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set seed for both NumPy and TensorFlow.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-edward">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-edward" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="edward.models.html" class="btn btn-neutral float-right" title="edward.models package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Edward" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
