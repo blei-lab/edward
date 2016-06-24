@@ -443,7 +443,7 @@ self.counter to the size of the data set.</p>
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLpq</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Kullback-Leibler divergence from posterior to variational model,
-KL( p(z <a href="#id1"><span class="problematic" id="id2">|x) ||</span></a> q(z) ).
+KL( p(z <a href="#id5"><span class="problematic" id="id6">|x) ||</span></a> q(z) ).
 (Cappe et al., 2008)</p>
 <dl class="method">
 <dt id="edward.inferences.KLpq.build_loss">
@@ -696,8 +696,63 @@ variable does not match the original.</dd>
 <dl class="function">
 <dt id="edward.util.cumprod">
 <code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cumulative product of a tensor along first dimension.
+<dd><p>This is an example of a module level function.</p>
+<p>Cumulative product of a tensor along first dimension.
 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/813">https://github.com/tensorflow/tensorflow/issues/813</a></p>
+<p>Function parameters should be documented in the <code class="docutils literal"><span class="pre">Parameters</span></code> section.
+The name of each parameter is required. The type and description of each
+parameter is optional, but should be included if not obvious.</p>
+<p>Parameter types &#8211; if given &#8211; should be specified according to
+<a class="reference external" href="https://www.python.org/dev/peps/pep-0484/">PEP 484</a>, though <a class="reference external" href="https://www.python.org/dev/peps/pep-0484/">PEP 484</a> conformance isn&#8217;t required or enforced.</p>
+<p>If *args or **kwargs are accepted,
+they should be listed as <code class="docutils literal"><span class="pre">*args</span></code> and <code class="docutils literal"><span class="pre">**kwargs</span></code>.</p>
+<p>The format for a parameter is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="p">:</span> <span class="nb">type</span>
+    <span class="n">description</span>
+
+    <span class="n">The</span> <span class="n">description</span> <span class="n">may</span> <span class="n">span</span> <span class="n">multiple</span> <span class="n">lines</span><span class="o">.</span> <span class="n">Following</span> <span class="n">lines</span>
+    <span class="n">should</span> <span class="n">be</span> <span class="n">indented</span> <span class="n">to</span> <span class="n">match</span> <span class="n">the</span> <span class="n">first</span> <span class="n">line</span> <span class="n">of</span> <span class="n">the</span> <span class="n">description</span><span class="o">.</span>
+    <span class="n">The</span> <span class="s2">&quot;: type&quot;</span> <span class="ow">is</span> <span class="n">optional</span><span class="o">.</span>
+
+    <span class="n">Multiple</span> <span class="n">paragraphs</span> <span class="n">are</span> <span class="n">supported</span> <span class="ow">in</span> <span class="n">parameter</span>
+    <span class="n">descriptions</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>param1</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>The first parameter.</dd>
+<dt>param2</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Optional[str]</span><dd>The second parameter.</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>args</dt>
+<dd>Variable length argument list.</dd>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs</dt>
+<dd>Arbitrary keyword arguments.</dd>
+</dl>
+<dl class="docutils">
+<dt>bool</dt>
+<dd><p class="first">True if successful, False otherwise.</p>
+<p>The return type is not optional. The <code class="docutils literal"><span class="pre">Returns</span></code> section may span
+multiple lines and paragraphs. Following lines should be indented to
+match the first line of the description.</p>
+<div class="math">
+\[(a + b)^2 = a^2 + 2ab + b^2\]</div>
+<p>The <code class="docutils literal"><span class="pre">Returns</span></code> section supports any reStructuredText formatting,
+including literal blocks:</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;param1&#39;</span><span class="p">:</span> <span class="n">param1</span><span class="p">,</span>
+    <span class="s1">&#39;param2&#39;</span><span class="p">:</span> <span class="n">param2</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>AttributeError</dt>
+<dd>The <code class="docutils literal"><span class="pre">Raises</span></code> section is a list of all exceptions
+that are relevant to the interface.</dd>
+<dt>ValueError</dt>
+<dd>If <cite>param2</cite> is equal to <cite>param1</cite>.</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
