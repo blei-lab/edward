@@ -20,10 +20,10 @@ pip install pandoc beautifulsoup4 sphinx sphinx-autobuild sphinx_rtd_theme
 ```
 
 This will 
-1. run pandoc on all LaTeX files in `website/tex`
-2. run beautifulsoup4 on all output html files to clean up artifacts
-3. run sphinx's autobuild on `../sphinx` to auto-generate the API
-4. copy the API output into `website/api`
+  1. run pandoc on all LaTeX files in `website/tex`
+  2. run beautifulsoup4 on all output html files to clean up artifacts
+  3. run sphinx's autobuild on `../sphinx` to auto-generate the API
+  4. copy the API output into `website/api`
 
 ## Deploying the website
 
