@@ -1,4 +1,4 @@
-#### __Edward__ is a library for probabilistic modeling, inference, and criticism. 
+#### __Edward__ is a library for probabilistic modeling, inference, and criticism.
 
 Edward is a Python library that enables black box inference for models with discrete
 and continuous latent variables, neural network parameterizations, and
@@ -32,10 +32,7 @@ It also includes __features__ such as
 * [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
 * A library for probability distributions in TensorFlow
 * Documentation and tutorials
-* Examples demonstrating state-of-the-art generative models and inference
-
-
-
+* Examples demonstrating state-of-the-art probabilistic models and inference
 
 #### Authors
 
