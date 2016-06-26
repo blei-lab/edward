@@ -128,7 +128,7 @@ class VariationalInference(Inference):
         if self.n_print is not None:
             if t % self.n_print == 0:
                 print("iter {:d} loss {:.2f}".format(t, loss))
-                self.variational.print_params()
+                print(self.variational)
 
     def finalize(self):
         """Run steps after all updates."""
@@ -199,11 +199,11 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
+            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
@@ -218,11 +218,11 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, z)
+            q_log_prob += self.variational.log_prob_i(i, z)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) - q_log_prob)
         return -self.loss
@@ -238,15 +238,15 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
+            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         p_log_lik = self.model.log_lik(x, z)
-        mu = tf.pack([layer.m for layer in self.variational.layers])
-        sigma = tf.pack([layer.s for layer in self.variational.layers])
+        mu = tf.pack([layer.loc for layer in self.variational.layers])
+        sigma = tf.pack([layer.scale for layer in self.variational.layers])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
@@ -260,11 +260,11 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
+            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
@@ -283,10 +283,10 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
 
-        mu = tf.pack([layer.m for layer in self.variational.layers])
-        sigma = tf.pack([layer.s for layer in self.variational.layers])
+        mu = tf.pack([layer.loc for layer in self.variational.layers])
+        sigma = tf.pack([layer.scale for layer in self.variational.layers])
         self.loss = tf.reduce_mean(self.model.log_lik(x, z)) - \
                     kl_multivariate_normal(mu, sigma)
         return -self.loss
@@ -300,7 +300,7 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -338,11 +338,11 @@ class KLpq(VariationalInference):
         # gradient = - E_{q(z; lambda)} [ w_norm(z; lambda) *
         #                                 grad_{lambda} log q(z; lambda) ]
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(x, self.n_minibatch)
+        z, self.samples = self.variational.sample(self.n_minibatch)
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, z)
+            q_log_prob += self.variational.log_prob_i(i, z)
 
         # 1/B sum_{b=1}^B grad_log_q * w_norm
         # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }
@@ -359,19 +359,19 @@ class MAP(VariationalInference):
     """
     Maximum a posteriori
     """
-    def __init__(self, model, data=Data(), transform=tf.identity):
+    def __init__(self, model, data=Data(), params=None):
         if hasattr(model, 'num_vars'):
             variational = Variational()
-            variational.add(PointMass(model.num_vars, transform))
+            variational.add(PointMass(model.num_vars, params))
         else:
             variational = Variational()
-            variational.add(PointMass(0, transform))
+            variational.add(PointMass(0))
 
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample(x)
+        z, _ = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
@@ -379,21 +379,23 @@ class Laplace(VariationalInference):
     """
     Laplace approximation
     """
-    def __init__(self, model, data=Data(), transform=tf.identity):
-        variational = Variational()
-        variational.add(PointMass(model.num_vars, transform))
+    def __init__(self, model, data=Data(), params=None):
+        with tf.variable_scope("variational"):
+            variational = Variational()
+            variational.add(PointMass(model.num_vars, params))
+
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample(x)
+        z, _ = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
     def finalize(self):
         get_session()
         x = self.data.sample(self.n_data) # uses mini-batch
-        z, _ = self.variational.sample(x)
+        z, _ = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
         inv_cov = hessian(self.model.log_prob(x, z), var_list)

@@ -92,7 +92,7 @@ data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
 variational = Variational()
-variational.add(Dirichlet(1, model.K))
+variational.add(Dirichlet([1, model.K]))
 variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 
