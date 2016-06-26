@@ -246,6 +246,13 @@ def set_seed(x):
     np.random.seed(x)
     tf.set_random_seed(x)
 
+def softplus(x):
+    """
+    Softplus. TensorFlow can't currently autodiff through
+    tf.nn.softplus().
+    """
+    return tf.log(1.0 + tf.exp(x))
+
 # This is taken from PrettyTensor.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
 class VarStoreMethod(object):

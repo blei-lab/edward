@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from edward.data import Data
 from edward.models import Variational, PointMass
-from edward.util import kl_multivariate_normal, log_sum_exp, get_session
+from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp
 
 try:
     import prettytensor as pt
@@ -67,6 +67,8 @@ class VariationalInference(Inference):
             loss = self.update()
             self.print_progress(t, loss)
 
+        self.finalize()
+
     def initialize(self, n_iter=1000, n_data=None, n_print=100,
         optimizer=None, scope=None):
         """
@@ -127,6 +129,10 @@ class VariationalInference(Inference):
             if t % self.n_print == 0:
                 print("iter {:d} loss {:.2f}".format(t, loss))
                 self.variational.print_params()
+
+    def finalize(self):
+        """Run steps after all updates."""
+        pass
 
     def build_loss(self):
         raise NotImplementedError()
@@ -368,3 +374,28 @@ class MAP(VariationalInference):
         z, _ = self.variational.sample(x)
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
+
+class Laplace(VariationalInference):
+    """
+    Laplace approximation
+    """
+    def __init__(self, model, data=Data(), transform=tf.identity):
+        variational = Variational()
+        variational.add(PointMass(model.num_vars, transform))
+        VariationalInference.__init__(self, model, variational, data)
+
+    def build_loss(self):
+        x = self.data.sample(self.n_data)
+        z, _ = self.variational.sample(x)
+        self.loss = tf.squeeze(self.model.log_prob(x, z))
+        return -self.loss
+
+    def finalize(self):
+        get_session()
+        x = self.data.sample(self.n_data) # uses mini-batch
+        z, _ = self.variational.sample(x)
+        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                     scope='variational')
+        inv_cov = hessian(self.model.log_prob(x, z), var_list)
+        print("Precision matrix:")
+        print(inv_cov.eval())

@@ -11,7 +11,7 @@ Probability model
     for n = 1, ..., N
         c_n ~ Multinomial(pi)
         x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
-Inference: Maximum a posteriori
+Inference: Laplace approximation
 
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """
@@ -58,7 +58,7 @@ class MixtureGaussian:
         pi = tf.sigmoid(pi)
         pi = tf.concat(1, [pi[:, 0:(self.K-1)],
              tf.expand_dims(1.0 - tf.reduce_sum(pi[:, 0:(self.K-1)], 1), 0)])
-        sigmas = tf.nn.softplus(sigmas)
+        sigmas = ed.softplus(sigmas)
         return pi, mus, sigmas
 
     def log_prob(self, xs, zs):
@@ -88,5 +88,5 @@ x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
-inference = ed.MAP(model, data)
+inference = ed.Laplace(model, data)
 inference.run(n_iter=250, n_data=5, n_print=50)
