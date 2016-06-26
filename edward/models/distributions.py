@@ -142,12 +142,6 @@ class Distribution:
         np.ndarray
             size x dim(params) array of type np.float32, where each
             row is a sample from p.
-
-        Notes
-        -----
-        Unlike the other methods, this return object is a realization
-        of a TensorFlow array. This is required as we rely on
-        NumPy/SciPy for sampling from distributions.
         """
         raise NotImplementedError()
 
@@ -170,9 +164,11 @@ class Distribution:
 
         Notes
         -----
-        Unlike the other methods, this return object is a realization
-        of a TensorFlow array. This is required as we rely on
-        NumPy/SciPy for sampling from distributions.
+        The return object is a TensorFlow tensor if the flag
+        sample_tensor is true. Otherwise the return object is a
+        realization of a TensorFlow tensor, i.e., NumPy arrays. The
+        latter is required when we require NumPy/SciPy in order to
+        sample from distributions.
 
         The method defaults to sampling noise and reparameterizing it
         (which will raise an error if this is not possible).
@@ -182,9 +178,6 @@ class Distribution:
     def log_prob_i(self, i, xs):
         """
         log p(x_i | params)
-        Note this calculates the density of the ith factor, not
-        necessarily the ith latent variable (such as for multivariate
-        factors).
 
         Parameters
         ----------
@@ -196,6 +189,11 @@ class Distribution:
         Returns
         -------
         [log p(xs[1]_i | params), ..., log p(xs[S]_i | params)]
+
+        Notes
+        -----
+        This calculates the density of the ith factor, not necessarily
+        the ith latent variable (such as for multivariate factors).
         """
         raise NotImplementedError()
 
