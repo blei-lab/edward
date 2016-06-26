@@ -47,7 +47,7 @@ class Variational:
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.sample_tensor += [layer.sample_tensor]
 
-    def sample(self, x, size=1):
+    def sample(self, size=1):
         """
         Draws a mix of tensors and placeholders, corresponding to
         TensorFlow-based samplers and SciPy-based samplers depending
@@ -55,7 +55,6 @@ class Variational:
 
         Parameters
         ----------
-        x : Data
         size : int, optional
 
         Returns
