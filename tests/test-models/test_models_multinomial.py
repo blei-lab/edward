@@ -31,9 +31,8 @@ def multinomial_logpmf_vec(x, n, p):
                      for i in range(n_minibatch)])
 
 def _test_log_prob_i(n_minibatch, num_factors, K):
-    multinomial = Multinomial(num_factors, K)
-    multinomial.pi = tf.constant(1.0/K, shape=[num_factors, K])
-
+    multinomial = Multinomial([num_factors, K],
+                               pi=tf.constant(1.0/K, shape=[num_factors, K]))
     with sess.as_default():
         pi = multinomial.pi.eval()
         z = np.zeros((n_minibatch, K*num_factors))
