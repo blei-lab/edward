@@ -203,7 +203,7 @@ class MFVI(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
+            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
@@ -222,7 +222,7 @@ class MFVI(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, z)
+            q_log_prob += self.variational.log_prob_i(i, z)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) - q_log_prob)
         return -self.loss
@@ -242,7 +242,7 @@ class MFVI(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
+            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         p_log_lik = self.model.log_lik(x, z)
         mu = tf.pack([layer.m for layer in self.variational.layers])
@@ -264,7 +264,7 @@ class MFVI(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, tf.stop_gradient(z))
+            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
@@ -342,7 +342,7 @@ class KLpq(VariationalInference):
 
         q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
         for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_zi(i, z)
+            q_log_prob += self.variational.log_prob_i(i, z)
 
         # 1/B sum_{b=1}^B grad_log_q * w_norm
         # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }

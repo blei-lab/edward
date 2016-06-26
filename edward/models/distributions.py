@@ -6,7 +6,7 @@ from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_session, Variable
 
 class Variational:
-    """A stack of variational families."""
+    """A stack of distribution objects."""
     def __init__(self, layers=[]):
         get_session()
         self.layers = layers
@@ -51,7 +51,7 @@ class Variational:
         """
         Draws a mix of tensors and placeholders, corresponding to
         TensorFlow-based samplers and SciPy-based samplers depending
-        on the variational factor.
+        on the distribution factor.
 
         Parameters
         ----------
@@ -65,14 +65,6 @@ class Variational:
             placeholders. The list used to form the tensor is also
             returned so that other procedures can feed values into the
             placeholders.
-
-        Notes
-        -----
-        This sets parameters of the variational distribution according
-        to any data points it conditions on. This means after calling
-        this method, log_prob_zi() is well-defined, even though
-        mathematically it is a function of both z and x, and it only
-        takes z as input.
         """
         samples = []
         for layer in self.layers:
@@ -98,12 +90,12 @@ class Variational:
     def print_params(self):
         [layer.print_params() for layer in self.layers]
 
-    def log_prob_zi(self, i, zs):
+    def log_prob_i(self, i, xs):
         start = final = 0
         for layer in self.layers:
             final += layer.num_vars
             if i < layer.num_factors:
-                return layer.log_prob_zi(i, zs[:, start:final])
+                return layer.log_prob_i(i, xs[:, start:final])
 
             i = i - layer.num_factors
             start = final
@@ -119,7 +111,7 @@ class Variational:
 
 class Distribution:
     """
-    Base class for distributions, q(z | lambda).
+    Base class for distributions, p(x | params).
 
     Parameters
     ----------
@@ -139,13 +131,13 @@ class Distribution:
     def sample_noise(self, size=1):
         """
         eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        s.t. x = reparam(eps; params) ~ p(x | params)
 
         Returns
         -------
         np.ndarray
-            size x dim(lambda) array of type np.float32, where each
-            row is a sample from q.
+            size x dim(params) array of type np.float32, where each
+            row is a sample from p.
 
         Notes
         -----
@@ -158,19 +150,19 @@ class Distribution:
     def reparam(self, eps):
         """
         eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        s.t. x = reparam(eps; params) ~ p(x | params)
         """
         raise NotImplementedError()
 
     def sample(self, size=1):
         """
-        z ~ q(z | lambda)
+        x ~ p(x | params)
 
         Returns
         -------
         np.ndarray
-            size x dim(z) array of type np.float32, where each
-            row is a sample from q.
+            size x dim(x) array of type np.float32, where each
+            row is a sample from p.
 
         Notes
         -----
@@ -183,9 +175,9 @@ class Distribution:
         """
         return self.reparam(self.sample_noise(size))
 
-    def log_prob_zi(self, i, zs):
+    def log_prob_i(self, i, xs):
         """
-        log q(z_i | lambda)
+        log p(x_i | params)
         Note this calculates the density of the ith factor, not
         necessarily the ith latent variable (such as for multivariate
         factors).
@@ -194,20 +186,20 @@ class Distribution:
         ----------
         i : int
             Index of the factor to take the log density of.
-        zs : np.array
+        xs : np.array
             n_minibatch x num_vars
 
         Returns
         -------
-        [log q(zs[1]_i | lambda), ..., log q(zs[S]_i | lambda)]
+        [log p(xs[1]_i | params), ..., log p(xs[S]_i | params)]
         """
         raise NotImplementedError()
 
     def entropy(self):
         """
-        H(q(z| lambda))
-        = E_{q(z | lambda)} [ - log q(z | lambda) ]
-        = sum_{i=1}^d E_{q(z_i | lambda)} [ - log q(z_i | lambda) ]
+        H(p(x| params))
+        = E_{p(x | params)} [ - log p(x | params) ]
+        = sum_{i=1}^d E_{p(x_i | params)} [ - log p(x_i | params) ]
 
         Returns
         -------
@@ -218,8 +210,8 @@ class Distribution:
 
 class Bernoulli(Distribution):
     """
-    q(z | lambda) = prod_{i=1}^d Bernoulli(z[i] | p[i])
-    where lambda = p.
+    p(x | params) = prod_{i=1}^d Bernoulli(x[i] | p[i])
+    where params = p.
     """
     def __init__(self, num_factors=1, p=None):
         Distribution.__init__(self, num_factors)
@@ -239,28 +231,28 @@ class Bernoulli(Distribution):
         print(p)
 
     def sample(self, size=1):
-        """z ~ q(z | lambda)"""
+        """x ~ p(x | params)"""
         p = self.p.eval()
-        z = np.zeros((size, self.num_vars))
+        x = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
-            z[:, d] = bernoulli.rvs(p[d], size=size)
+            x[:, d] = bernoulli.rvs(p[d], size=size)
 
-        return z
+        return x
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        return bernoulli.logpmf(zs[:, i], self.p[i])
+        return bernoulli.logpmf(xs[:, i], self.p[i])
 
     def entropy(self):
         return tf.reduce_sum(bernoulli.entropy(self.p))
 
 class Beta(Distribution):
     """
-    q(z | lambda) = prod_{i=1}^d Beta(z[i] | alpha[i], beta[i])
-    where lambda = {alpha, beta}.
+    p(x | params) = prod_{i=1}^d Beta(x[i] | alpha[i], beta[i])
+    where params = {alpha, beta}.
     """
     def __init__(self, num_factors=1, alpha=None, beta=None):
         Distribution.__init__(self, num_factors)
@@ -288,30 +280,30 @@ class Beta(Distribution):
         print(b)
 
     def sample(self, size=1):
-        """z ~ q(z | lambda)"""
+        """x ~ p(x | params)"""
         sess = get_session()
         a, b = sess.run([self.alpha, self.beta])
-        z = np.zeros((size, self.num_vars))
+        x = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
-            z[:, d] = beta.rvs(a[d], b[d], size=size)
+            x[:, d] = beta.rvs(a[d], b[d], size=size)
 
-        return z
+        return x
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        return beta.logpdf(zs[:, i], self.alpha[i], self.beta[i])
+        return beta.logpdf(xs[:, i], self.alpha[i], self.beta[i])
 
     def entropy(self):
         return tf.reduce_sum(beta.entropy(self.alpha, self.beta))
 
 class Dirichlet(Distribution):
     """
-    q(z | lambda) = prod_{i=1}^d Dirichlet(z_i | alpha[i, :])
-    where z is a flattened vector such that z_i represents
-    the ith factor z[(i-1)*K:i*K], and lambda = alpha.
+    p(x | params) = prod_{i=1}^d Dirichlet(x_i | alpha[i, :])
+    where x is a flattened vector such that x_i represents
+    the ith factor x[(i-1)*K:i*K], and params = alpha.
     """
     def __init__(self, shape, alpha=None):
         num_factors, K = shape
@@ -333,23 +325,23 @@ class Dirichlet(Distribution):
         print(alpha)
 
     def sample(self, size=1):
-        """z ~ q(z | lambda)"""
+        """x ~ p(x | params)"""
         alpha = self.alpha.eval()
-        z = np.zeros((size, self.num_vars))
+        x = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
-            z[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
+            x[:, (i*self.K):((i+1)*self.K)] = dirichlet.rvs(alpha[i, :],
                                                             size=size)
 
-        return z
+        return x
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
-        # Note this calculates the log density with respect to z_i,
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
+        # Note this calculates the log density with respect to x_i,
         # which is the ith factor and not the ith latent variable.
         if i >= self.num_factors:
             raise IndexError()
 
-        return dirichlet.logpdf(zs[:, (i*self.K):((i+1)*self.K)],
+        return dirichlet.logpdf(xs[:, (i*self.K):((i+1)*self.K)],
                                 self.alpha[i, :])
 
     def entropy(self):
@@ -357,8 +349,8 @@ class Dirichlet(Distribution):
 
 class InvGamma(Distribution):
     """
-    q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | alpha[i], beta[i])
-    where lambda = {alpha, beta}.
+    p(x | params) = prod_{i=1}^d Inv_Gamma(x[i] | alpha[i], beta[i])
+    where params = {alpha, beta}.
     """
     def __init__(self, num_factors=1, alpha=None, beta=None):
         Distribution.__init__(self, num_factors)
@@ -386,30 +378,30 @@ class InvGamma(Distribution):
         print(b)
 
     def sample(self, size=1):
-        """z ~ q(z | lambda)"""
+        """x ~ p(x | params)"""
         sess = get_session()
         a, b = sess.run([self.alpha, self.beta])
-        z = np.zeros((size, self.num_vars))
+        x = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
-            z[:, d] = invgamma.rvs(a[d], b[d], size=size)
+            x[:, d] = invgamma.rvs(a[d], b[d], size=size)
 
-        return z
+        return x
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        return invgamma.logpdf(zs[:, i], self.alpha[i], self.beta[i])
+        return invgamma.logpdf(xs[:, i], self.alpha[i], self.beta[i])
 
     def entropy(self):
         return tf.reduce_sum(invgamma.entropy(self.alpha, self.beta))
 
 class Multinomial(Distribution):
     """
-    q(z | lambda ) = prod_{i=1}^d Multinomial(z_i | pi[i, :])
-    where z is a flattened vector such that z_i represents
-    the ith factor z[(i-1)*K:i*K], and lambda = alpha.
+    p(x | params ) = prod_{i=1}^d Multinomial(x_i | pi[i, :])
+    where x is a flattened vector such that x_i represents
+    the ith factor x[(i-1)*K:i*K], and params = alpha.
 
     Notes
     -----
@@ -431,9 +423,9 @@ class Multinomial(Distribution):
             # Transform a real (K-1)-vector to K-dimensional simplex.
             pi_unconst = Variable("pi", [self.num_factors, self.K-1])
             eq = -tf.log(tf.cast(self.K - 1 - tf.range(self.K-1), dtype=tf.float32))
-            z = tf.sigmoid(eq + pi_unconst)
-            pil = tf.concat(1, [z, tf.ones([self.num_factors, 1])])
-            piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - z])
+            x = tf.sigmoid(eq + pi_unconst)
+            pil = tf.concat(1, [x, tf.ones([self.num_factors, 1])])
+            piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - x])
             # cumulative product along 1st axis
             S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
             pi = S * pil
@@ -446,23 +438,23 @@ class Multinomial(Distribution):
         print(pi)
 
     def sample(self, size=1):
-        """z ~ q(z | lambda)"""
+        """x ~ p(x | params)"""
         pi = self.pi.eval()
-        z = np.zeros((size, self.num_vars))
+        x = np.zeros((size, self.num_vars))
         for i in range(self.num_factors):
-            z[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
+            x[:, (i*self.K):((i+1)*self.K)] = multinomial.rvs(1, pi[i, :],
                                                               size=size)
 
-        return z
+        return x
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
-        # Note this calculates the log density with respect to z_i,
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
+        # Note this calculates the log density with respect to x_i,
         # which is the ith factor and not the ith latent variable.
         if i >= self.num_factors:
             raise IndexError()
 
-        return multinomial.logpmf(zs[:, (i*self.K):((i+1)*self.K)],
+        return multinomial.logpmf(xs[:, (i*self.K):((i+1)*self.K)],
                                   1, self.pi[i, :])
 
     def entropy(self):
@@ -470,8 +462,8 @@ class Multinomial(Distribution):
 
 class Normal(Distribution):
     """
-    q(z | lambda ) = prod_{i=1}^d Normal(z[i] | loc[i], scale[i])
-    where lambda = {loc, scale}.
+    p(x | params ) = prod_{i=1}^d Normal(x[i] | loc[i], scale[i])
+    where params = {loc, scale}.
     """
     def __init__(self, num_factors=1, loc=None, scale=None):
         Distribution.__init__(self, num_factors)
@@ -500,36 +492,37 @@ class Normal(Distribution):
     def sample_noise(self, size=1):
         """
         eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        s.t. x = reparam(eps; params) ~ p(x | params)
         """
         return tf.random_normal((size, self.num_vars))
 
     def reparam(self, eps):
         """
         eps = sample_noise() ~ s(eps)
-        s.t. z = reparam(eps; lambda) ~ q(z | lambda)
+        s.t. x = reparam(eps; params) ~ p(x | params)
         """
         return self.loc + eps * self.scale
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
         if i >= self.num_factors:
             raise IndexError()
 
         loci = self.loc[i]
         scalei = self.scale[i]
-        return norm.logpdf(zs[:, i], loci, scalei)
+        return norm.logpdf(xs[:, i], loci, scalei)
 
     def entropy(self):
         return tf.reduce_sum(norm.entropy(scale=self.scale))
 
 class PointMass(Distribution):
     """
-    Point mass variational family
+    Point mass distribution
 
-    q(z | lambda ) = prod_{i=1}^d Dirac(z[i] | params[i])
-    where lambda = params. Dirac(x; p) is the Dirac delta distribution
-    with density equal to 1 if x == p and 0 otherwise.
+    p(x | params ) = prod_{i=1}^d Dirac(x[i] | params[i])
+
+    Dirac(x; p) is the Dirac delta distribution with density equal to
+    1 if x == p and 0 otherwise.
     """
     def __init__(self, num_vars=1, transform=tf.identity):
         Distribution.__init__(self, 1)
@@ -561,11 +554,11 @@ class PointMass(Distribution):
         # parameter samples (as in black box variational methods).
         return tf.pack([self.params]*size)
 
-    def log_prob_zi(self, i, zs):
-        """log q(z_i | lambda)"""
+    def log_prob_i(self, i, xs):
+        """log p(x_i | params)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        # a vector where the jth element is 1 if zs[j, i] is equal to
+        # a vector where the jth element is 1 if xs[j, i] is equal to
         # the ith parameter, 0 otherwise
-        return tf.cast(tf.equal(zs[:, i], self.params[i]), dtype=tf.float32)
+        return tf.cast(tf.equal(xs[:, i], self.params[i]), dtype=tf.float32)
