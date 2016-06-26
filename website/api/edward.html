@@ -497,41 +497,63 @@ that data point.</li>
 <dl class="class">
 <dt id="edward.data.Data">
 <em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>data=None</em>, <em>shuffled=True</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for data.</p>
+<dd><p>Base class for Edward data objects.</p>
 <p>By default, it assumes the data is an array (or list of arrays).
 If requested will perform data subsampling according to slices of
 the first index (e.g., elements in a vector, rows in a matrix,
 y-by-z matrices in a x-by-y-by-z tensor). Use one of the derived
 classes for subsampling more complex data structures.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>data</strong> (<em>tf.tensor, np.ndarray, list, dict, optional</em>) &#8211; Data whose type depends on the type of model it is fed into.
-If TensorFlow, must be tf.tensor or list (see notes).
-If Stan, must be dict.
-If PyMC3, must be np.ndarray.
-If NumPy/SciPy, must be np.ndarray or list of np.ndarrays.</li>
-<li><strong>shuffled</strong> (<em>bool, optional</em>) &#8211; Whether the data is shuffled.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Notes</p>
 <p>For TensorFlow models, data argument can be list of placeholders
 or list of np.ndarrays. If np.ndarrays, it will use mini-batches
 of the np.arrays during computation. If placeholders, user must
 manually control mini-batches and feed in the placeholders.</p>
 <p>Data subsampling is not currently available for Stan models.</p>
-<p>Internally, self.counter stores the last accessed data index. It
+<p>Internally, <code class="docutils literal"><span class="pre">self.counter</span></code> stores the last accessed data index. It
 is used to obtain the next batch of data starting from
-self.counter to the size of the data set.</p>
+<code class="docutils literal"><span class="pre">self.counter</span></code> to the size of the data set.</p>
+<p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>tf.tensor, np.ndarray, list, dict, optional</em>) &#8211; <p>Data whose type depends on the type of model it is fed into.</p>
+<p>If TensorFlow, must be <code class="docutils literal"><span class="pre">tf.tensor</span></code> or <code class="docutils literal"><span class="pre">list</span></code>.</p>
+<p>If Stan, must be <code class="docutils literal"><span class="pre">dict</span></code>.</p>
+<p>If PyMC3, must be <code class="docutils literal"><span class="pre">np.ndarray</span></code>.</p>
+<p>If NumPy/SciPy, must be <code class="docutils literal"><span class="pre">np.ndarray</span></code> or <code class="docutils literal"><span class="pre">list</span></code> of <code class="docutils literal"><span class="pre">np.ndarrays</span></code>.</p>
+</li>
+<li><strong>shuffled</strong> (<em>bool, optional</em>) &#8211; Whether the data is shuffled when sampling.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="edward.data.Data.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>n_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data.sample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Data sampling method.</p>
+<p>At any given point, the internal counter <code class="docutils literal"><span class="pre">self.counter</span></code> tracks the
+last datapoint returned by <code class="docutils literal"><span class="pre">sample</span></code>.</p>
+<p>If the requested number of datapoints <code class="docutils literal"><span class="pre">n_data</span></code> goes beyond the size
+of the dataset, the internal counter wraps around the size of the
+dataset. The returned minibatch, thus, may include datapoints from the
+beginning of the dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_data</strong> (<em>int, optional</em>) &#8211; <p>Number of datapoints to sample</p>
+<p>Defaults to total number of datapoints in <code class="docutils literal"><span class="pre">Data</span></code> object.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>minibatch</strong> &#8211; a tensor with first dimension size = <code class="docutils literal"><span class="pre">n_data</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
