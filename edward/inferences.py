@@ -359,19 +359,19 @@ class MAP(VariationalInference):
     """
     Maximum a posteriori
     """
-    def __init__(self, model, data=Data(), transform=tf.identity):
+    def __init__(self, model, data=Data(), params=None):
         if hasattr(model, 'num_vars'):
             variational = Variational()
-            variational.add(PointMass(model.num_vars, transform))
+            variational.add(PointMass(model.num_vars, params))
         else:
             variational = Variational()
-            variational.add(PointMass(0, transform))
+            variational.add(PointMass(0))
 
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample(x)
+        z, _ = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
@@ -379,10 +379,10 @@ class Laplace(VariationalInference):
     """
     Laplace approximation
     """
-    def __init__(self, model, data=Data(), transform=tf.identity):
+    def __init__(self, model, data=Data(), params=None):
         with tf.variable_scope("variational"):
             variational = Variational()
-            variational.add(PointMass(model.num_vars, transform))
+            variational.add(PointMass(model.num_vars, params))
 
         VariationalInference.__init__(self, model, variational, data)
 

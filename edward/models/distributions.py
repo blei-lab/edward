@@ -523,18 +523,14 @@ class PointMass(Distribution):
     Dirac(x; p) is the Dirac delta distribution with density equal to
     1 if x == p and 0 otherwise.
     """
-    def __init__(self, num_vars=1, transform=tf.identity):
+    def __init__(self, num_vars=1, params=None):
         Distribution.__init__(self, 1)
         self.num_vars = num_vars
         self.num_params = num_vars
         self.sample_tensor = True
 
-        # TODO
-        params = None
         if params is None:
             params = Variable("params", [self.num_vars])
-            # TODO temporary
-            params = transform(params)
 
         self.params = params
 
