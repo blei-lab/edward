@@ -74,9 +74,6 @@ class Variational:
         mathematically it is a function of both z and x, and it only
         takes z as input.
         """
-        with tf.variable_scope("variational"):
-            self._set_params(self._mapping(x))
-
         samples = []
         for layer in self.layers:
             if layer.sample_tensor:
@@ -120,12 +117,6 @@ class Variational:
 
         return out
 
-    def _mapping(self, x):
-        return [layer.mapping(x) for layer in self.layers]
-
-    def _set_params(self, params):
-        [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
-
 class Distribution:
     """
     Base class for distributions, q(z | lambda).
@@ -141,57 +132,6 @@ class Distribution:
         self.num_vars = None # number of random variables
         self.num_params = None # number of parameters
         self.sample_tensor = False
-
-    def mapping(self, x):
-        """
-        A mapping from data point x -> lambda, the local variational
-        parameters, which are parameters specific to x.
-
-        Parameters
-        ----------
-        x : Data
-            Data point
-
-        Returns
-        -------
-        list
-            A list of TensorFlow tensors, where each element is a
-            particular set of local parameters.
-
-        Notes
-        -----
-        In classical variational inference, the mapping can be
-        interpreted as the collection of all local variational
-        parameters; the output is simply the projection to the
-        relevant subset of local parameters.
-
-        For local variational parameters with constrained support, the
-        mapping additionally acts as a transformation. The parameters
-        to be optimized live on the unconstrained space; the output of
-        the mapping is then constrained variational parameters.
-
-        Global parameterizations are useful to prevent the parameters
-        of this mapping to grow with the number of data points, and
-        also as an implicit regularization. This is known as inverse
-        mappings in Helmholtz machines and variational auto-encoders,
-        and parameter tying in message passing. The mapping is a
-        function of data point with a fixed number of parameters, and
-        it tries to (in some sense) "predict" the best local
-        variational parameters given this lower rank.
-        """
-        raise NotImplementedError()
-
-    def set_params(self, params):
-        """
-        This sets the parameters of the variational family, for use in
-        other methods of the class.
-
-        Parameters
-        ----------
-        params : list
-            Each element in the list is a particular set of local parameters.
-        """
-        raise NotImplementedError()
 
     def print_params(self):
         raise NotImplementedError()
@@ -281,20 +221,17 @@ class Bernoulli(Distribution):
     q(z | lambda) = prod_{i=1}^d Bernoulli(z[i] | p[i])
     where lambda = p.
     """
-    def __init__(self, *args, **kwargs):
-        Distribution.__init__(self, *args, **kwargs)
+    def __init__(self, num_factors=1, p=None):
+        Distribution.__init__(self, num_factors)
         self.num_vars = self.num_factors
         self.num_params = self.num_factors
         self.sample_tensor = False
 
-        self.p = None
+        if p is None:
+            p_unconst = Variable("p", [self.num_params])
+            p = tf.sigmoid(p_unconst)
 
-    def mapping(self, x):
-        p = Variable("p", [self.num_params])
-        return [tf.sigmoid(p)]
-
-    def set_params(self, params):
-        self.p = params[0]
+        self.p = p
 
     def print_params(self):
         p = self.p.eval()
@@ -325,23 +262,22 @@ class Beta(Distribution):
     q(z | lambda) = prod_{i=1}^d Beta(z[i] | a[i], b[i])
     where lambda = {a, b}.
     """
-    def __init__(self, *args, **kwargs):
-        Distribution.__init__(self, *args, **kwargs)
+    def __init__(self, num_factors=1, alpha=None, beta=None):
+        Distribution.__init__(self, num_factors)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
         self.sample_tensor = False
 
-        self.a = None
-        self.b = None
+        if alpha is None:
+            alpha_unconst = Variable("alpha", [self.num_vars])
+            alpha = tf.nn.softplus(alpha_unconst)
 
-    def mapping(self, x):
-        alpha = Variable("alpha", [self.num_vars])
-        beta = Variable("beta", [self.num_vars])
-        return [tf.nn.softplus(alpha), tf.nn.softplus(beta)]
+        if beta is None:
+            beta_unconst = Variable("beta", [self.num_vars])
+            beta = tf.nn.softplus(beta_unconst)
 
-    def set_params(self, params):
-        self.a = params[0]
-        self.b = params[1]
+        self.a = alpha
+        self.b = beta
 
     def print_params(self):
         sess = get_session()
@@ -377,21 +313,19 @@ class Dirichlet(Distribution):
     where z is a flattened vector such that z_i represents
     the ith factor z[(i-1)*K:i*K], and lambda = alpha.
     """
-    def __init__(self, num_factors, K):
+    def __init__(self, shape, alpha=None):
+        num_factors, K = shape
         Distribution.__init__(self, num_factors)
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
         self.sample_tensor = False
 
-        self.alpha = None
+        if alpha is None:
+            alpha_unconst = Variable("dirichlet_alpha", [self.num_factors, self.K])
+            alpha = tf.nn.softplus(alpha_unconst)
 
-    def mapping(self, x):
-        alpha = Variable("dirichlet_alpha", [self.num_factors, self.K])
-        return [tf.nn.softplus(alpha)]
-
-    def set_params(self, params):
-        self.alpha = params[0]
+        self.alpha = alpha
 
     def print_params(self):
         alpha = self.alpha.eval()
@@ -426,23 +360,22 @@ class InvGamma(Distribution):
     q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | a[i], b[i])
     where lambda = {a, b}.
     """
-    def __init__(self, *args, **kwargs):
-        Distribution.__init__(self, *args, **kwargs)
+    def __init__(self, num_factors=1, alpha=None, beta=None):
+        Distribution.__init__(self, num_factors)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
         self.sample_tensor = False
 
-        self.a = None
-        self.b = None
+        if alpha is None:
+            alpha_unconst = Variable("alpha", [self.num_vars])
+            alpha = tf.nn.softplus(alpha_unconst) + 1e-2
 
-    def mapping(self, x):
-        alpha = Variable("alpha", [self.num_vars])
-        beta = Variable("beta", [self.num_vars])
-        return [tf.nn.softplus(alpha)+1e-2, tf.nn.softplus(beta)+1e-2]
+        if beta is None:
+            beta_unconst = Variable("beta", [self.num_vars])
+            beta = tf.nn.softplus(beta_unconst) + 1e-2
 
-    def set_params(self, params):
-        self.a = params[0]
-        self.b = params[1]
+        self.a = alpha
+        self.b = beta
 
     def print_params(self):
         sess = get_session()
@@ -483,7 +416,8 @@ class Multinomial(Distribution):
     For each factor (multinomial distribution), it assumes a single
     trial (n=1) when sampling and calculating the density.
     """
-    def __init__(self, num_factors, K):
+    def __init__(self, shape, pi=None):
+        num_factors, K = shape
         if K == 1:
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
@@ -493,21 +427,18 @@ class Multinomial(Distribution):
         self.K = K # dimension of each factor
         self.sample_tensor = False
 
-        self.pi = None
+        if pi is None:
+            # Transform a real (K-1)-vector to K-dimensional simplex.
+            pi_unconst = Variable("pi", [self.num_factors, self.K-1])
+            eq = -tf.log(tf.cast(self.K - 1 - tf.range(self.K-1), dtype=tf.float32))
+            z = tf.sigmoid(eq + pi_unconst)
+            pil = tf.concat(1, [z, tf.ones([self.num_factors, 1])])
+            piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - z])
+            # cumulative product along 1st axis
+            S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+            pi = S * pil
 
-    def mapping(self, x):
-        # Transform a real (K-1)-vector to K-dimensional simplex.
-        pi = Variable("pi", [self.num_factors, self.K-1])
-        eq = -tf.log(tf.cast(self.K - 1 - tf.range(self.K-1), dtype=tf.float32))
-        z = tf.sigmoid(eq + pi)
-        pil = tf.concat(1, [z, tf.ones([self.num_factors, 1])])
-        piu = tf.concat(1, [tf.ones([self.num_factors, 1]), 1.0 - z])
-        # cumulative product along 1st axis
-        S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
-        return [S * pil]
-
-    def set_params(self, params):
-        self.pi = params[0]
+        self.pi = pi
 
     def print_params(self):
         pi = self.pi.eval()
@@ -542,23 +473,21 @@ class Normal(Distribution):
     q(z | lambda ) = prod_{i=1}^d Normal(z[i] | m[i], s[i])
     where lambda = {m, s}.
     """
-    def __init__(self, *args, **kwargs):
-        Distribution.__init__(self, *args, **kwargs)
+    def __init__(self, num_factors=1, loc=None, scale=None):
+        Distribution.__init__(self, num_factors)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
         self.sample_tensor = True
 
-        self.m = None
-        self.s = None
+        if loc is None:
+            loc = Variable("mu", [self.num_vars])
 
-    def mapping(self, x):
-        mean = Variable("mu", [self.num_vars])
-        stddev = Variable("sigma", [self.num_vars])
-        return [tf.identity(mean), tf.nn.softplus(stddev)]
+        if scale is None:
+            scale_unconst = Variable("sigma", [self.num_vars])
+            scale = tf.nn.softplus(scale_unconst)
 
-    def set_params(self, params):
-        self.m = params[0]
-        self.s = params[1]
+        self.m = loc
+        self.s = scale
 
     def print_params(self):
         sess = get_session()
@@ -606,16 +535,16 @@ class PointMass(Distribution):
         Distribution.__init__(self, 1)
         self.num_vars = num_vars
         self.num_params = num_vars
-        self.transform = transform
-        self.params = None
         self.sample_tensor = True
 
-    def mapping(self, x):
-        params = Variable("params", [self.num_vars])
-        return [self.transform(params)]
+        # TODO
+        params = None
+        if params is None:
+            params = Variable("params", [self.num_vars])
+            # TODO temporary
+            params = transform(params)
 
-    def set_params(self, params):
-        self.params = params[0]
+        self.params = params
 
     def print_params(self):
         if self.params.get_shape()[0] == 0:
