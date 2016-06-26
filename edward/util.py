@@ -2,75 +2,22 @@ import tensorflow as tf
 import numpy as np
 
 def cumprod(xs):
-    """This is an example of a module level function.
-
-    Cumulative product of a tensor along first dimension.
+    """Cumulative product of a tensor along first dimension.
     https://github.com/tensorflow/tensorflow/issues/813
-
-    Function parameters should be documented in the ``Parameters`` section.
-    The name of each parameter is required. The type and description of each
-    parameter is optional, but should be included if not obvious.
-
-    Parameter types -- if given -- should be specified according to
-    `PEP 484`_, though `PEP 484`_ conformance isn't required or enforced.
-
-    If \*args or \*\*kwargs are accepted,
-    they should be listed as ``*args`` and ``**kwargs``.
-
-    The format for a parameter is::
-
-        name : type
-            description
-
-            The description may span multiple lines. Following lines
-            should be indented to match the first line of the description.
-            The ": type" is optional.
-
-            Multiple paragraphs are supported in parameter
-            descriptions.
 
     Parameters
     ----------
-    param1 : int
-        The first parameter.
-    param2 : Optional[str]
-        The second parameter.
-    *args
-        Variable length argument list.
-    **kwargs
-        Arbitrary keyword arguments.
+    xs : tensor
+        The input TensorFlow object.
 
     Returns
     -------
-    bool
-        True if successful, False otherwise.
-
-        The return type is not optional. The ``Returns`` section may span
-        multiple lines and paragraphs. Following lines should be indented to
-        match the first line of the description.
-
-        .. math:: (a + b)^2 = a^2 + 2ab + b^2
-
-        The ``Returns`` section supports any reStructuredText formatting,
-        including literal blocks::
-
-            {
-                'param1': param1,
-                'param2': param2
-            }
+    result : tensor
+        A TensorFlow object with `cumprod` applied to its first dimension.
 
     Raises
     ------
-    AttributeError
-        The ``Raises`` section is a list of all exceptions
-        that are relevant to the interface.
-    ValueError
-        If `param2` is equal to `param1`.
-
-
-    .. _PEP 484:
-       https://www.python.org/dev/peps/pep-0484/
-
+    Nothing
     """
     values = tf.unpack(xs)
     out = []

@@ -160,8 +160,18 @@
 <dt id="edward.models.models.PyMC3Model">
 <em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PyMC3Model</code><span class="sig-paren">(</span><em>model</em>, <em>observed</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model wrapper for models written in PyMC3.</p>
-<p>model : pymc3.Model object
-observed : The shared theano tensor passed to the model likelihood</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> (<em>pymc3.Model object</em>) &#8211; </li>
+<li><strong>observed</strong> (<em>The shared theano tensor passed to the model likelihood</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="edward.models.models.PyMC3Model.log_prob">
 <code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model.log_prob" title="Permalink to this definition">¶</a></dt>
@@ -184,8 +194,18 @@ observed : The shared theano tensor passed to the model likelihood</p>
 <dt id="edward.models.models.StanModel">
 <em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">StanModel</code><span class="sig-paren">(</span><em>file=None</em>, <em>model_code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model wrapper for models written in Stan.</p>
-<p>file: see documentation for argument in pystan.stan
-model_code: see documentation for argument in pystan.stan</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file</strong> (<em>see documentation for argument in pystan.stan</em>) &#8211; </li>
+<li><strong>model_code</strong> (<em>see documentation for argument in pystan.stan</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="edward.models.models.StanModel.log_prob">
 <code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel.log_prob" title="Permalink to this definition">¶</a></dt>
@@ -361,20 +381,30 @@ where lambda = {a, b}.</p>
 <dt id="edward.models.variationals.Likelihood">
 <em class="property">class </em><code class="descclassname">edward.models.variationals.</code><code class="descname">Likelihood</code><span class="sig-paren">(</span><em>num_factors=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for variational likelihoods, q(z | lambda).</p>
-<dl class="docutils">
-<dt>num_factors</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>Number of factors. Default is 1.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num_factors</strong> (<em>int</em>) &#8211; Number of factors. Default is 1.</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="edward.models.variationals.Likelihood.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.entropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>H(q(z| lambda))
 = E_{q(z | lambda)} [ - log q(z | lambda) ]
 = sum_{i=1}^d E_{q(z_i | lambda)} [ - log q(z_i | lambda) ]</p>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd>scalar</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">scalar</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -384,13 +414,24 @@ where lambda = {a, b}.</p>
 Note this calculates the density of the ith factor, not
 necessarily the ith latent variable (such as for multivariate
 factors).</p>
-<dl class="docutils">
-<dt>i</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>Index of the factor to take the log density of.</dd>
-<dt>zs</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span><dd>n_minibatch x num_vars</dd>
-</dl>
-<p>[log q(zs[1]_i | lambda), ..., log q(zs[S]_i | lambda)]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> (<em>int</em>) &#8211; Index of the factor to take the log density of.</li>
+<li><strong>zs</strong> (<em>np.array</em>) &#8211; n_minibatch x num_vars</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">[log q(zs[1]_i | lambda), ..., log q(zs[S]_i | lambda)]</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -398,15 +439,20 @@ factors).</p>
 <code class="descname">mapping</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.mapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>A mapping from data point x -&gt; lambda, the local variational
 parameters, which are parameters specific to x.</p>
-<dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Data</span><dd>Data point</dd>
-</dl>
-<dl class="docutils">
-<dt>list</dt>
-<dd>A list of TensorFlow tensors, where each element is a
-particular set of local parameters.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<a class="reference internal" href="edward.html#edward.data.Data" title="edward.data.Data"><em>Data</em></a>) &#8211; Data point</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of TensorFlow tensors, where each element is a
+particular set of local parameters.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>In classical variational inference, the mapping can be
 interpreted as the collection of all local variational
 parameters; the output is simply the projection to the
@@ -441,11 +487,18 @@ s.t. z = reparam(eps; lambda) ~ q(z | lambda)</p>
 <dt id="edward.models.variationals.Likelihood.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>z ~ q(z | lambda)</p>
-<dl class="docutils">
-<dt>np.ndarray</dt>
-<dd>size x dim(z) array of type np.float32, where each
-row is a sample from q.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">size x dim(z) array of type np.float32, where each
+row is a sample from q.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>Unlike the other methods, this return object is a realization
 of a TensorFlow array. This is required as we rely on
 NumPy/SciPy for sampling from distributions.</p>
@@ -458,11 +511,18 @@ NumPy/SciPy for sampling from distributions.</p>
 <code class="descname">sample_noise</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.sample_noise" title="Permalink to this definition">¶</a></dt>
 <dd><p>eps = sample_noise() ~ s(eps)
 s.t. z = reparam(eps; lambda) ~ q(z | lambda)</p>
-<dl class="docutils">
-<dt>np.ndarray</dt>
-<dd>size x dim(lambda) array of type np.float32, where each
-row is a sample from q.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">size x dim(lambda) array of type np.float32, where each
+row is a sample from q.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>Unlike the other methods, this return object is a realization
 of a TensorFlow array. This is required as we rely on
 NumPy/SciPy for sampling from distributions.</p>
@@ -473,10 +533,14 @@ NumPy/SciPy for sampling from distributions.</p>
 <code class="descname">set_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Likelihood.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>This sets the parameters of the variational family, for use in
 other methods of the class.</p>
-<dl class="docutils">
-<dt>params</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>Each element in the list is a particular set of local parameters.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>list</em>) &#8211; Each element in the list is a particular set of local parameters.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -488,6 +552,7 @@ other methods of the class.</p>
 <p>q(z | lambda ) = prod_{i=1}^d Multinomial(z_i | pi[i, :])
 where z is a flattened vector such that z_i represents
 the ith factor z[(i-1)*K:i*K], and lambda = alpha.</p>
+<p class="rubric">Notes</p>
 <p>For each factor (multinomial distribution), it assumes a single
 trial (n=1) when sampling and calculating the density.</p>
 <dl class="method">
@@ -616,8 +681,14 @@ with density equal to 1 if x == p and 0 otherwise.</p>
 <dt id="edward.models.variationals.Variational.add">
 <code class="descname">add</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.variationals.Variational.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a layer instance on top of the layer stack.</p>
-<blockquote>
-<div>layer: layer instance.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> (<em>layer instance.</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -648,15 +719,28 @@ samples.</p>
 <dd><p>Draws a mix of tensors and placeholders, corresponding to
 TensorFlow-based samplers and SciPy-based samplers depending
 on the variational factor.</p>
-<p>x : Data
-size : int, optional</p>
-<dl class="docutils">
-<dt>tf.Tensor, list</dt>
-<dd>A tensor concatenating sample outputs of tensors and
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<a class="reference internal" href="edward.html#edward.data.Data" title="edward.data.Data"><em>Data</em></a>) &#8211; </li>
+<li><strong>size</strong> (<em>int, optional</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor concatenating sample outputs of tensors and
 placeholders. The list used to form the tensor is also
 returned so that other procedures can feed values into the
-placeholders.</dd>
-</dl>
+placeholders.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor, list</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>This sets parameters of the variational distribution according
 to any data points it conditions on. This means after calling
 this method, log_prob_zi() is well-defined, even though

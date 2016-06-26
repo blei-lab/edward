@@ -171,23 +171,35 @@
 <dt id="edward.criticisms.binary_accuracy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">binary_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.binary_accuracy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Binary prediction accuracy, also known as 0/1-loss.</p>
-<dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.binary_crossentropy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">binary_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.binary_crossentropy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities.</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -195,101 +207,163 @@
 <code class="descclassname">edward.criticisms.</code><code class="descname">categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.categorical_accuracy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-class prediction accuracy. One-hot representation for
 y_true.</p>
-<dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s, where the outermost dimension of size K
-has only one 1 per row.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with same shape as y_true.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s, where the outermost dimension of size K
+has only one 1 per row.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with same shape as y_true.
 The outermost dimension denote the categorical probabilities for
-that data point per row.</dd>
-</dl>
+that data point per row.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.categorical_crossentropy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-class cross entropy. One-hot representation for y_true.</p>
-<dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s, where the outermost dimension of size K
-has only one 1 per row.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with same shape as y_true.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s, where the outermost dimension of size K
+has only one 1 per row.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with same shape as y_true.
 The outermost dimension denote the categorical probabilities for
-that data point per row.</dd>
-</dl>
+that data point per row.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.cosine_proximity">
 <code class="descclassname">edward.criticisms.</code><code class="descname">cosine_proximity</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.cosine_proximity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cosine similarity of two vectors.</p>
-<p>y_true : tf.Tensor
-y_pred : tf.Tensor</p>
-<blockquote>
-<div>Tensors of same shape and type.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.evaluate">
 <code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>model</em>, <em>variational</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
-<dl class="docutils">
-<dt>metric</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list or str</span><dd>List of metrics or a single metric.</dd>
-</dl>
-<dl class="docutils">
-<dt>list or float</dt>
-<dd>A list of evaluations or a single evaluation.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric</strong> (<em>list or str</em>) &#8211; List of metrics or a single metric.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of evaluations or a single evaluation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list or float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.hinge">
 <code class="descclassname">edward.criticisms.</code><code class="descname">hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.hinge" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of real value.</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of real value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.mean_absolute_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_absolute_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>y_true : tf.Tensor
-y_pred : tf.Tensor</p>
-<blockquote>
-<div>Tensors of same shape and type.</div></blockquote>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.mean_absolute_percentage_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_percentage_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_absolute_percentage_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>y_true : tf.Tensor
-y_pred : tf.Tensor</p>
-<blockquote>
-<div>Tensors of same shape and type.</div></blockquote>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.mean_squared_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_squared_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>y_true : tf.Tensor
-y_pred : tf.Tensor</p>
-<blockquote>
-<div>Tensors of same shape and type.</div></blockquote>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.mean_squared_logarithmic_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_logarithmic_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_squared_logarithmic_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>y_true : tf.Tensor
-y_pred : tf.Tensor</p>
-<blockquote>
-<div>Tensors of same shape and type.</div></blockquote>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -297,10 +371,18 @@ y_pred : tf.Tensor</p>
 <code class="descclassname">edward.criticisms.</code><code class="descname">poisson</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.poisson" title="Permalink to this definition">¶</a></dt>
 <dd><p>Negative Poisson log-likelihood of data y_true given predictions
 y_pred (up to proportion).</p>
-<p>y_true : tf.Tensor
-y_pred : tf.Tensor</p>
-<blockquote>
-<div>Tensors of same shape and type.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -314,35 +396,40 @@ check (Box, 1980).</p>
 p(T) = int p(T(yrep) | z) p(z | y) dz
 by drawing replicated data sets yrep and calculating T(yrep) for
 each data set. Then it compares it to T(y).</p>
-<dl class="docutils">
-<dt>model</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>class object with a &#8216;sample_likelihood&#8217; method</dd>
-<dt>variational</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Variational, optional</span><dd>latent variable distribution q(z) to sample from. It is an
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>model</strong> (<em>Model</em>) &#8211; class object with a &#8216;sample_likelihood&#8217; method</li>
+<li><strong>variational</strong> (<em>Variational, optional</em>) &#8211; latent variable distribution q(z) to sample from. It is an
 approximation to the posterior, e.g., a variational
 approximation or an empirical distribution from MCMC samples.
 If not specified, samples will be obtained from model
-with a &#8216;sample_prior&#8217; method.</dd>
-<dt>data</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>Observed data to compare to. If not specified, will return
+with a &#8216;sample_prior&#8217; method.</li>
+<li><strong>data</strong> (<em>Data, optional</em>) &#8211; Observed data to compare to. If not specified, will return
 only the reference distribution with an assumed replicated
-data set size of 1.</dd>
-<dt>T</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">function, optional</span><dd>Discrepancy function written in TensorFlow. Default is
+data set size of 1.</li>
+<li><strong>T</strong> (<em>function, optional</em>) &#8211; Discrepancy function written in TensorFlow. Default is
 identity. It is a function taking in a data set
-y and optionally a set of latent variables z as input.</dd>
-<dt>size</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>number of replicated data sets</dd>
-</dl>
-<dl class="docutils">
-<dt>list</dt>
-<dd>List containing the reference distribution, which is a Numpy
+y and optionally a set of latent variables z as input.</li>
+<li><strong>size</strong> (<em>int, optional</em>) &#8211; number of replicated data sets</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List containing the reference distribution, which is a Numpy
 vector of size elements,
 (T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}));
 and the realized discrepancy, which is a NumPy vector of size
 elements,
-(T(y, z^{1}), ..., T(y, z^{size})).</dd>
-</dl>
+(T(y, z^{1}), ..., T(y, z^{size})).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -350,14 +437,20 @@ elements,
 <code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.sparse_categorical_accuracy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-class prediction accuracy. Label {0, 1, .., K-1}
 representation for y_true.</p>
-<dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of integers {0, 1, ..., K-1}.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with shape (y_true.get_shape(), K).
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of integers {0, 1, ..., K-1}.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape (y_true.get_shape(), K).
 The outermost dimension are the categorical probabilities for
-that data point.</dd>
-</dl>
+that data point.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -365,25 +458,37 @@ that data point.</dd>
 <code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.sparse_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-class cross entropy. Label {0, 1, .., K-1} representation
 for y_true.</p>
-<dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of integers {0, 1, ..., K-1}.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of probabilities, with shape (y_true.get_shape(), K).
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of integers {0, 1, ..., K-1}.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape (y_true.get_shape(), K).
 The outermost dimension are the categorical probabilities for
-that data point.</dd>
-</dl>
+that data point.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.criticisms.squared_hinge">
 <code class="descclassname">edward.criticisms.</code><code class="descname">squared_hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.squared_hinge" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>y_true</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of 0s and 1s.</dd>
-<dt>y_pred</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>Tensor of real value.</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of real value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -398,16 +503,23 @@ If requested will perform data subsampling according to slices of
 the first index (e.g., elements in a vector, rows in a matrix,
 y-by-z matrices in a x-by-y-by-z tensor). Use one of the derived
 classes for subsampling more complex data structures.</p>
-<dl class="docutils">
-<dt>data: tf.tensor, np.ndarray, list, dict, optional</dt>
-<dd>Data whose type depends on the type of model it is fed into.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>tf.tensor, np.ndarray, list, dict, optional</em>) &#8211; Data whose type depends on the type of model it is fed into.
 If TensorFlow, must be tf.tensor or list (see notes).
 If Stan, must be dict.
 If PyMC3, must be np.ndarray.
-If NumPy/SciPy, must be np.ndarray or list of np.ndarrays.</dd>
-<dt>shuffled: bool, optional</dt>
-<dd>Whether the data is shuffled.</dd>
-</dl>
+If NumPy/SciPy, must be np.ndarray or list of np.ndarrays.</li>
+<li><strong>shuffled</strong> (<em>bool, optional</em>) &#8211; Whether the data is shuffled.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>For TensorFlow models, data argument can be list of placeholders
 or list of np.ndarrays. If np.ndarrays, it will use mini-batches
 of the np.arrays during computation. If placeholders, user must
@@ -430,12 +542,18 @@ self.counter to the size of the data set.</p>
 <dt id="edward.inferences.Inference">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for inference methods.</p>
-<dl class="docutils">
-<dt>model</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>probability model p(x, z)</dd>
-<dt>data</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>data x</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> (<em>Model</em>) &#8211; probability model p(x, z)</li>
+<li><strong>data</strong> (<em>Data, optional</em>) &#8211; data x</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
@@ -443,7 +561,7 @@ self.counter to the size of the data set.</p>
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLpq</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Kullback-Leibler divergence from posterior to variational model,
-KL( p(z <a href="#id5"><span class="problematic" id="id6">|x) ||</span></a> q(z) ).
+KL( p(z <a href="#id1"><span class="problematic" id="id2">|x) ||</span></a> q(z) ).
 (Cappe et al., 2008)</p>
 <dl class="method">
 <dt id="edward.inferences.KLpq.build_loss">
@@ -465,8 +583,25 @@ gradient inspired by adaptive importance sampling.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="edward.inferences.Laplace">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
+<p>Laplace approximation</p>
+<dl class="method">
+<dt id="edward.inferences.Laplace.build_loss">
+<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.inferences.Laplace.finalize">
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace.finalize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="edward.inferences.MAP">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>transform=&lt;function identity&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Maximum a posteriori</p>
 <dl class="method">
@@ -546,15 +681,21 @@ where KL is analytic</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>score=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>n_minibatch</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of samples from variational model for calculating
-stochastic gradients.</dd>
-<dt>score</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span><dd>Whether to force inference to use the score function
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_minibatch</strong> (<em>int, optional</em>) &#8211; Number of samples from variational model for calculating
+stochastic gradients.</li>
+<li><strong>score</strong> (<em>bool, optional</em>) &#8211; Whether to force inference to use the score function
 gradient estimator. Otherwise default is to use the
-reparameterization gradient if available.</dd>
-</dl>
+reparameterization gradient if available.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -569,12 +710,18 @@ reparameterization gradient if available.</dd>
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MonteCarlo</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MonteCarlo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
 <p>Base class for Monte Carlo methods.</p>
-<dl class="docutils">
-<dt>model</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>probability model p(x, z)</dd>
-<dt>data</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>data x</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> (<em>Model</em>) &#8211; probability model p(x, z)</li>
+<li><strong>data</strong> (<em>Data, optional</em>) &#8211; data x</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
@@ -582,35 +729,52 @@ reparameterization gradient if available.</dd>
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
 <p>Base class for variational inference methods.</p>
-<dl class="docutils">
-<dt>model</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Model</span><dd>probability model p(x, z)</dd>
-<dt>variational</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Variational</span><dd>variational model q(z; lambda)</dd>
-<dt>data</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Data, optional</span><dd>data x</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> (<em>Model</em>) &#8211; probability model p(x, z)</li>
+<li><strong>variational</strong> (<a class="reference internal" href="edward.models.html#edward.models.variationals.Variational" title="edward.models.variationals.Variational"><em>Variational</em></a>) &#8211; variational model q(z; lambda)</li>
+<li><strong>data</strong> (<em>Data, optional</em>) &#8211; data x</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.build_loss" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="edward.inferences.VariationalInference.finalize">
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.finalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run steps after all updates.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="edward.inferences.VariationalInference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_data=None</em>, <em>n_print=100</em>, <em>optimizer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_data=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize inference algorithm.</p>
-<dl class="docutils">
-<dt>n_iter</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of iterations for optimization.</dd>
-<dt>n_data</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of samples for data subsampling. Default is to use all
-the data.</dd>
-<dt>n_print</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span><dd>Number of iterations for each print progress.</dd>
-<dt>optimizer</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span><dd>Whether to use TensorFlow optimizer or PrettyTensor
-optimizer if using PrettyTensor. Defaults to TensorFlow.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_iter</strong> (<em>int, optional</em>) &#8211; Number of iterations for optimization.</li>
+<li><strong>n_data</strong> (<em>int, optional</em>) &#8211; Number of samples for data subsampling. Default is to use all
+the data.</li>
+<li><strong>n_print</strong> (<em>int, optional</em>) &#8211; Number of iterations for each print progress. If no print
+progress, then specify None.</li>
+<li><strong>optimizer</strong> (<em>str, optional</em>) &#8211; Whether to use TensorFlow optimizer or PrettyTensor
+optimizer if using PrettyTensor. Defaults to TensorFlow.</li>
+<li><strong>scope</strong> (<em>str, optional</em>) &#8211; Scope of TensorFlow variable objects to optimize over.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -665,94 +829,80 @@ Variables marked train are returned by the training_variables method. If
 the requested name already exists and it is compatible (same shape, dt and
 train) then it is returned. In case of an incompatible type, an exception is
 thrown.
-Args:</p>
+:param var_name: The unique name of this variable.  If a variable with the same</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>var_name: The unique name of this variable.  If a variable with the same</dt>
-<dd>name exists, then it is returned.</dd>
-</dl>
-<p>shape: The shape of the variable.
-init: The init function to use or a Tensor to copy.
-dt: The datatype, defaults to float.  This will automatically extract the</p>
-<blockquote>
-<div>base dtype.</div></blockquote>
-<p>train: Whether or not the variable should be trained.</p>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A TensorFlow tensor.</dd>
-<dt>Raises:</dt>
-<dd><dl class="first last docutils">
-<dt>ValueError: if reuse is False (or unspecified and allow_reuse is False)</dt>
-<dd>and the variable already exists or if the specification of a reused
-variable does not match the original.</dd>
-</dl>
-</dd>
-</dl>
+<div>name exists, then it is returned.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shape</strong> &#8211; The shape of the variable.</li>
+<li><strong>init</strong> &#8211; The init function to use or a Tensor to copy.</li>
+<li><strong>dt</strong> &#8211; The datatype, defaults to float.  This will automatically extract the
+base dtype.</li>
+<li><strong>train</strong> &#8211; Whether or not the variable should be trained.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A TensorFlow tensor.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; if reuse is False (or unspecified and allow_reuse is False)
+and the variable already exists or if the specification of a reused
+variable does not match the original.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="function">
+<dt id="edward.util.asdf">
+<code class="descclassname">edward.util.</code><code class="descname">asdf</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.asdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary line.</p>
+<p>Extended description of function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>arg1</strong> (<em>int</em>) &#8211; Description of arg1</li>
+<li><strong>arg2</strong> (<em>str</em>) &#8211; Description of arg2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Description of return value</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="edward.util.cumprod">
 <code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is an example of a module level function.</p>
-<p>Cumulative product of a tensor along first dimension.
+<dd><p>Cumulative product of a tensor along first dimension.
 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/813">https://github.com/tensorflow/tensorflow/issues/813</a></p>
-<p>Function parameters should be documented in the <code class="docutils literal"><span class="pre">Parameters</span></code> section.
-The name of each parameter is required. The type and description of each
-parameter is optional, but should be included if not obvious.</p>
-<p>Parameter types &#8211; if given &#8211; should be specified according to
-<a class="reference external" href="https://www.python.org/dev/peps/pep-0484/">PEP 484</a>, though <a class="reference external" href="https://www.python.org/dev/peps/pep-0484/">PEP 484</a> conformance isn&#8217;t required or enforced.</p>
-<p>If *args or **kwargs are accepted,
-they should be listed as <code class="docutils literal"><span class="pre">*args</span></code> and <code class="docutils literal"><span class="pre">**kwargs</span></code>.</p>
-<p>The format for a parameter is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="p">:</span> <span class="nb">type</span>
-    <span class="n">description</span>
-
-    <span class="n">The</span> <span class="n">description</span> <span class="n">may</span> <span class="n">span</span> <span class="n">multiple</span> <span class="n">lines</span><span class="o">.</span> <span class="n">Following</span> <span class="n">lines</span>
-    <span class="n">should</span> <span class="n">be</span> <span class="n">indented</span> <span class="n">to</span> <span class="n">match</span> <span class="n">the</span> <span class="n">first</span> <span class="n">line</span> <span class="n">of</span> <span class="n">the</span> <span class="n">description</span><span class="o">.</span>
-    <span class="n">The</span> <span class="s2">&quot;: type&quot;</span> <span class="ow">is</span> <span class="n">optional</span><span class="o">.</span>
-
-    <span class="n">Multiple</span> <span class="n">paragraphs</span> <span class="n">are</span> <span class="n">supported</span> <span class="ow">in</span> <span class="n">parameter</span>
-    <span class="n">descriptions</span><span class="o">.</span>
-</pre></div>
-</div>
-<dl class="docutils">
-<dt>param1</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>The first parameter.</dd>
-<dt>param2</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Optional[str]</span><dd>The second parameter.</dd>
-<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>args</dt>
-<dd>Variable length argument list.</dd>
-<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs</dt>
-<dd>Arbitrary keyword arguments.</dd>
-</dl>
-<dl class="docutils">
-<dt>bool</dt>
-<dd><p class="first">True if successful, False otherwise.</p>
-<p>The return type is not optional. The <code class="docutils literal"><span class="pre">Returns</span></code> section may span
-multiple lines and paragraphs. Following lines should be indented to
-match the first line of the description.</p>
-<div class="math">
-\[(a + b)^2 = a^2 + 2ab + b^2\]</div>
-<p>The <code class="docutils literal"><span class="pre">Returns</span></code> section supports any reStructuredText formatting,
-including literal blocks:</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s1">&#39;param1&#39;</span><span class="p">:</span> <span class="n">param1</span><span class="p">,</span>
-    <span class="s1">&#39;param2&#39;</span><span class="p">:</span> <span class="n">param2</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</dd>
-</dl>
-<dl class="docutils">
-<dt>AttributeError</dt>
-<dd>The <code class="docutils literal"><span class="pre">Raises</span></code> section is a list of all exceptions
-that are relevant to the interface.</dd>
-<dt>ValueError</dt>
-<dd>If <cite>param2</cite> is equal to <cite>param1</cite>.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xs</strong> (<em>tensor</em>) &#8211; The input TensorFlow object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>result</strong> &#8211; A TensorFlow object with <cite>cumprod</cite> applied to its first dimension.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Nothing</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -763,14 +913,18 @@ that are relevant to the interface.</dd>
 automatic differentiation, so use a log/exp/polynomial
 approximation.
 <a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
-<dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>scalar, vector, or rank-n tensor</dd>
-</dl>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd>size corresponding to size of input</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar, vector, or rank-n tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -784,7 +938,14 @@ x is M-vector and y is M x N matrix</p>
 <dt id="edward.util.get_dims">
 <code class="descclassname">edward.util.</code><code class="descname">get_dims</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.get_dims" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get values of each dimension.</p>
-<p>x: tensor scalar or array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tensor scalar or array</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -795,38 +956,65 @@ the function will create a global session.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="edward.util.hessian">
+<code class="descclassname">edward.util.</code><code class="descname">hessian</code><span class="sig-paren">(</span><em>y</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.hessian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Hessian of y with respect to each x in xs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; Tensor to calculate Hessian of.</li>
+<li><strong>xs</strong> (<em>list</em>) &#8211; List of TensorFlow variables to calculate with respect to.
+The variables can have different shapes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="edward.util.kl_multivariate_normal">
 <code class="descclassname">edward.util.</code><code class="descname">kl_multivariate_normal</code><span class="sig-paren">(</span><em>loc_one</em>, <em>scale_one</em>, <em>loc_two=0</em>, <em>scale_two=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.kl_multivariate_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the KL of multivariate normal distributions with
 diagonal covariances.</p>
-<dl class="docutils">
-<dt>loc_one</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
-row represents the mean of a n-dimensional Gaussian</dd>
-<dt>scale_one</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
-row represents the standard deviation of a n-dimensional Gaussian</dd>
-<dt>loc_two</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor, optional</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
-row represents the mean of a n-dimensional Gaussian</dd>
-<dt>scale_two</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">tf.Tensor, optional</span><dd>n-dimensional vector, or M x n-dimensional matrix where each
-row represents the standard deviation of a n-dimensional Gaussian</dd>
-</dl>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd><dl class="first last docutils">
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loc_one</strong> (<em>tf.Tensor</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the mean of a n-dimensional Gaussian</li>
+<li><strong>scale_one</strong> (<em>tf.Tensor</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the standard deviation of a n-dimensional Gaussian</li>
+<li><strong>loc_two</strong> (<em>tf.Tensor, optional</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the mean of a n-dimensional Gaussian</li>
+<li><strong>scale_two</strong> (<em>tf.Tensor, optional</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the standard deviation of a n-dimensional Gaussian</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
 <dt>for scalar or vector inputs, outputs the scalar</dt>
-<dd>KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )</dd>
+<dd><p class="first last">KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )</p>
+</dd>
 <dt>for matrix inputs, outputs the vector</dt>
 <dd><dl class="first last docutils">
 <dt>[KL( N(z; loc_one[m,:], scale_one[m,:]) ||</dt>
-<dd>N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M</dd>
-</dl>
+<dd><p class="first last">N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M</p>
 </dd>
 </dl>
 </dd>
 </dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -837,14 +1025,18 @@ row represents the standard deviation of a n-dimensional Gaussian</dd>
 automatic differentiation, so use a log/exp/polynomial
 approximation.
 <a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
-<dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector or rank-n tensor</dd>
-</dl>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd>scalar if vector input, rank-(n-1) if rank-n tensor input</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or rank-n tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, rank-(n-1) if rank-n tensor input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -855,14 +1047,18 @@ approximation.
 automatic differentiation, so use a log/exp/polynomial
 approximation.
 <a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
-<dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>scalar, vector, or rank-n tensor</dd>
-</dl>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd>size corresponding to size of input</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar, vector, or rank-n tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -901,6 +1097,13 @@ k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }</p>
 <dt id="edward.util.set_seed">
 <code class="descclassname">edward.util.</code><code class="descname">set_seed</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.set_seed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set seed for both NumPy and TensorFlow.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.softplus">
+<code class="descclassname">edward.util.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.softplus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softplus. TensorFlow can&#8217;t currently autodiff through
+tf.nn.softplus().</p>
 </dd></dl>
 
 </div>

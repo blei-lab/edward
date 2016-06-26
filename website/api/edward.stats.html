@@ -240,21 +240,31 @@
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Dirichlet.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>alpha</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Dirichlet.entropy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>alpha: np.array or tf.Tensor</dt>
-<dd>vector or matrix</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>alpha</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Dirichlet.logpdf">
 <code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>alpha</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Dirichlet.logpdf" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector or matrix</dd>
-<dt>alpha</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>alpha</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -271,19 +281,24 @@
 <dl class="method">
 <dt id="edward.stats.distributions.Distribution.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Distribution.entropy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>params</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>If univariate distribution, can be a scalar or vector.
-If multivariate distribution, can be a vector or matrix.</dd>
-</dl>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd>For univariate distributions, returns a scalar or vector
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar or vector.
+If multivariate distribution, can be a vector or matrix.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">For univariate distributions, returns a scalar or vector
 corresponding to the size of input. For multivariate
 distributions, returns a scalar if vector input and vector
 if matrix input, where each element in the vector
-evaluates a row in the matrix.</dd>
-</dl>
+evaluates a row in the matrix.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>SciPy doesn&#8217;t always enable vector inputs for
 univariate distributions or matrix inputs for multivariate
 distributions. This does.</p>
@@ -292,30 +307,45 @@ distributions. This does.</p>
 <dl class="method">
 <dt id="edward.stats.distributions.Distribution.logpmf">
 <code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Distribution.logpmf" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>If univariate distribution, can be a scalar, vector, or matrix.
-If multivariate distribution, can be a vector or matrix.</dd>
-<dt>params</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>scalar unless documented otherwise</dd>
-</dl>
-<dl class="docutils">
-<dt>tf.Tensor</dt>
-<dd>For univariate distributions, returns a scalar, vector, or
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+If multivariate distribution, can be a vector or matrix.</li>
+<li><strong>params</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar unless documented otherwise</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For univariate distributions, returns a scalar, vector, or
 matrix corresponding to the size of input. For
 multivariate distributions, returns a scalar if vector
 input and vector if matrix input, where each element in
-the vector evaluates a row in the matrix.</dd>
-</dl>
+the vector evaluates a row in the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Distribution.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Distribution.rvs" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>np.ndarray</dt>
-<dd>size-dimensional vector; scalar if size=1</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">size-dimensional vector; scalar if size=1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>This is written in NumPy/SciPy, as TensorFlow does not support
 many distributions for random number generation.</p>
 </dd></dl>
@@ -436,15 +466,20 @@ many distributions for random number generation.</p>
 <dl class="method">
 <dt id="edward.stats.distributions.Multinomial.logpmf">
 <code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Multinomial.logpmf" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector of length K, where x[i] is the number of outcomes
-in the ith bucket, or matrix with column length K</dd>
-<dt>n</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int or tf.Tensor</span><dd>number of outcomes equal to sum x[i]</dd>
-<dt>p</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector of probabilities summing to 1</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector of length K, where x[i] is the number of outcomes
+in the ith bucket, or matrix with column length K</li>
+<li><strong>n</strong> (<em>int or tf.Tensor</em>) &#8211; number of outcomes equal to sum x[i]</li>
+<li><strong>p</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector of probabilities summing to 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -462,25 +497,36 @@ in the ith bucket, or matrix with column length K</dd>
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>mean=None</em>, <em>cov=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Multivariate_Normal.entropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Note entropy does not depend on the mean.
 This is not vectorized with respect to any arguments.</p>
-<dl class="docutils">
-<dt>mean</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor, optional</span><dd>vector. Defaults to zero mean.</dd>
-<dt>cov</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor, optional</span><dd>vector or matrix. Defaults to identity.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mean</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector. Defaults to zero mean.</li>
+<li><strong>cov</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector or matrix. Defaults to identity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Multivariate_Normal.logpdf">
 <code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>mean=None</em>, <em>cov=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Multivariate_Normal.logpdf" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor</span><dd>vector or matrix</dd>
-<dt>mean</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor, optional</span><dd>vector. Defaults to zero mean.</dd>
-<dt>cov</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array or tf.Tensor, optional</span><dd>vector or matrix. Defaults to identity.</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>mean</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector. Defaults to zero mean.</li>
+<li><strong>cov</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector or matrix. Defaults to identity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
