@@ -40,10 +40,8 @@ class NormalBernoulli:
     def __init__(self, num_vars):
         self.num_vars = num_vars # number of local latent variables
 
-    def mapping(self, z):
-        """
-        p = varphi(z)
-        """
+    def neural_network(self, z):
+        """p = neural_network(z)"""
         with pt.defaults_scope(activation_fn=tf.nn.elu,
                                batch_normalize=True,
                                learned_moments_update_rate=0.0003,
@@ -65,7 +63,7 @@ class NormalBernoulli:
         log p(x | z) = log Bernoulli(x | p = varphi(z))
          = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
         """
-        return tf.reduce_sum(bernoulli.logpmf(x, p=self.mapping(z)))
+        return tf.reduce_sum(bernoulli.logpmf(x, p=self.neural_network(z)))
 
     def sample_prior(self, size):
         """
@@ -76,15 +74,16 @@ class NormalBernoulli:
         # Note the output of this is not prior samples, but just the
         # success probability, i.e., the hidden representation learned
         # by the neural network.
-        return self.mapping(z)
+        return self.neural_network(z)
 
-def mapping(self, x):
+def neural_network(x):
     """
     Inference network to parameterize variational family. It takes
-    data x as input and outputs the variational parameters lambda.
+    data as input and outputs the variational parameters.
 
-    lambda = phi(x)
+    loc, scale = neural_network(x)
     """
+    num_vars = 10
     with pt.defaults_scope(activation_fn=tf.nn.elu,
                            batch_normalize=True,
                            learned_moments_update_rate=0.0003,
@@ -97,31 +96,31 @@ def mapping(self, x):
                 conv2d(5, 128, edges='VALID').
                 dropout(0.9).
                 flatten().
-                fully_connected(self.num_local_vars * 2, activation_fn=None)).tensor
+                fully_connected(num_vars * 2, activation_fn=None)).tensor
 
     # Return list of vectors where mean[i], stddev[i] are the
     # parameters of the local variational factor for data point i.
-    mean = tf.reshape(params[:, :self.num_local_vars], [-1])
-    stddev = tf.reshape(tf.sqrt(tf.exp(params[:, self.num_local_vars:])), [-1])
-    return [mean, stddev]
+    loc = tf.reshape(params[:, :num_vars], [-1])
+    scale = tf.reshape(tf.sqrt(tf.exp(params[:, num_vars:])), [-1])
+    return [loc, scale]
 
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)
 
 # We use the variational model
 # q(z | x) = prod_{n=1}^N q(z_n | x)
-#          = prod_{n=1}^n Normal(z_n | mu, sigma = phi(x_n))
+#          = prod_{n=1}^n Normal(z_n | loc, scale = phi(x_n))
 # It is a distribution of the latent variables z_n for each data
-# point x_n. We use mapping() to globally parameterize the local
+# point x_n. We use neural_network() to globally parameterize the local
 # variational factors q(z_n | x).
 # We also do data subsampling during inference. Therefore we only need
 # to explicitly represent the corresponding variational factors for a
 # mini-batch,
-# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | mu, sigma = phi(x))
+# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = phi(x))
+x_ph = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
+loc, scale = neural_network(x_ph)
 variational = Variational()
-Normal.mapping = mapping
-Normal.num_local_vars = model.num_vars
-variational.add(Normal(model.num_vars * FLAGS.n_data))
+variational.add(Normal(model.num_vars * FLAGS.n_data, loc=loc, scale=scale))
 
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
@@ -152,7 +151,7 @@ for epoch in range(n_epoch):
         pbar.update(t)
         x_train, _ = mnist.train.next_batch(FLAGS.n_data)
         _, loss = sess.run([inference.train, inference.loss],
-                           feed_dict={x: x_train})
+                           feed_dict={x: x_train, x_ph: x_train})
         avg_loss += loss
 
     # Take average over all ELBOs during the epoch, and over minibatch

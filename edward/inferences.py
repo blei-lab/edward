@@ -245,8 +245,8 @@ class MFVI(VariationalInference):
             q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
 
         p_log_lik = self.model.log_lik(x, z)
-        mu = tf.pack([layer.m for layer in self.variational.layers])
-        sigma = tf.pack([layer.s for layer in self.variational.layers])
+        mu = tf.pack([layer.loc for layer in self.variational.layers])
+        sigma = tf.pack([layer.scale for layer in self.variational.layers])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
@@ -285,8 +285,8 @@ class MFVI(VariationalInference):
         x = self.data.sample(self.n_data)
         z, self.samples = self.variational.sample(x, self.n_minibatch)
 
-        mu = tf.pack([layer.m for layer in self.variational.layers])
-        sigma = tf.pack([layer.s for layer in self.variational.layers])
+        mu = tf.pack([layer.loc for layer in self.variational.layers])
+        sigma = tf.pack([layer.scale for layer in self.variational.layers])
         self.loss = tf.reduce_mean(self.model.log_lik(x, z)) - \
                     kl_multivariate_normal(mu, sigma)
         return -self.loss
