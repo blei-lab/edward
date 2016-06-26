@@ -91,7 +91,7 @@ def get_dims(x):
         return [dim.value for dim in dims]
 
 def get_session():
-    """Get the globally defined TensorFlow session defined globally.
+    """Get the globally defined TensorFlow session.
 
     If the session is not already defined, then the function will create 
     a global session.

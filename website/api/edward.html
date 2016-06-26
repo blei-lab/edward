@@ -149,7 +149,7 @@
 <li class="toctree-l1"><a class="reference internal" href="edward.models.html">edward.models package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="edward.models.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="edward.models.html#module-edward.models.models">edward.models.models module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="edward.models.html#module-edward.models.variationals">edward.models.variationals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="edward.models.html#edward-models-variationals-module">edward.models.variationals module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="edward.models.html#module-edward.models">Module contents</a></li>
 </ul>
 </li>
@@ -563,14 +563,16 @@ beginning of the dataset.</p>
 <dl class="class">
 <dt id="edward.inferences.Inference">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for inference methods.</p>
+<dd><p>Base class for Edward inference methods.</p>
+<p>Initialization.</p>
+<p>Calls <code class="docutils literal"><span class="pre">util.get_session()</span></code></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<em>Model</em>) &#8211; probability model p(x, z)</li>
-<li><strong>data</strong> (<em>Data, optional</em>) &#8211; data x</li>
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; probability model</li>
+<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; observed data</li>
 </ul>
 </td>
 </tr>
@@ -582,25 +584,61 @@ beginning of the dataset.</p>
 <dt id="edward.inferences.KLpq">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLpq</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
-<p>Kullback-Leibler divergence from posterior to variational model,
-KL( p(z <a href="#id1"><span class="problematic" id="id2">|x) ||</span></a> q(z) ).
-(Cappe et al., 2008)</p>
+<p>Variational inference that minimizes the Kullback-Leibler divergence
+from the posterior to the variational model (Cappe et al., 2008)</p>
+<div class="math">
+\[KL( p(z |x) || q(z) ).\]</div>
 <dl class="method">
 <dt id="edward.inferences.KLpq.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient inspired by adaptive importance sampling.</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[KL( p(z |x) || q(z) )\]</div>
+<p>based on importance sampling.</p>
+<p>Computed as</p>
+<div class="math">
+\[E_{q(z; \lambda)} [ w_{norm}(z; \lambda) *
+              ( \log p(x, z) - \log q(z; \lambda) ) ]\]</div>
+<p>where</p>
+<div class="math">
+\[ \begin{align}\begin{aligned}w_{norm}(z; \lambda) = w(z; \lambda) / \sum_z( w(z; \lambda) )\\w(z; \lambda) = p(x, z) / q(z; \lambda)\end{aligned}\end{align} \]</div>
+<p>which gives a gradient</p>
+<div class="math">
+\[- E_{q(z; \lambda)} [ w_{norm}(z; \lambda) *
+                     \partial_{\lambda} \log q(z; \lambda) ]\]</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.KLpq.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.initialize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_minibatch</strong> (<em>int, optional</em>) &#8211; Number of samples from variational model for calculating
+stochastic gradients.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.KLpq.update">
 <code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Runs one iteration of KLpq minimization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; KLpq loss function value after one iteration.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -608,16 +646,28 @@ gradient inspired by adaptive importance sampling.</p>
 <dt id="edward.inferences.Laplace">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
-<p>Laplace approximation</p>
+<p>Laplace approximation via Maximum a posteriori inference.</p>
+<p>We implement this using a <code class="docutils literal"><span class="pre">PointMass</span></code> variational distribution to
+solve the following optimization problem</p>
+<div class="math">
+\[\min_{z} - \log p(x,z)\]</div>
+<p>We then compute the hessian at the solution of the above problem.
+(The mode of the posterior.)</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Loss function to minimize.</p>
+<p>Defines the gradient of</p>
+<div class="math">
+\[- \log p(x,z)\]</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
 <code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace.finalize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to call after convergence.</p>
+<p>Computes the hessian at the mode.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -625,11 +675,19 @@ gradient inspired by adaptive importance sampling.</p>
 <dt id="edward.inferences.MAP">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
-<p>Maximum a posteriori</p>
+<p>Maximum a posteriori inference.</p>
+<p>We implement this using a <code class="docutils literal"><span class="pre">PointMass</span></code> variational distribution to
+solve the following optimization problem</p>
+<div class="math">
+\[\min_{z} - \log p(x,z)\]</div>
 <dl class="method">
 <dt id="edward.inferences.MAP.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Loss function to minimize.</p>
+<p>Defines the gradient of</p>
+<div class="math">
+\[- \log p(x,z)\]</div>
+</dd></dl>
 
 </dd></dl>
 
@@ -637,73 +695,124 @@ gradient inspired by adaptive importance sampling.</p>
 <dt id="edward.inferences.MFVI">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MFVI</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
-<p>Mean-field variational inference
-(Ranganath et al., 2014)</p>
+<p>Mean-field variational inference.</p>
+<p>This class implements a variety of &#8220;black-box&#8221; variational inference
+techniques (Ranganath et al., 2014) that maximize</p>
+<div class="math">
+\[ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Wrapper for the MFVI loss function.</p>
+<div class="math">
+\[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
+<p>MFVI supports</p>
+<ol class="arabic simple">
+<li>score function gradients</li>
+<li>reparameterization gradients</li>
+</ol>
+<p>of the loss function.</p>
+<p>If the variational model is a Gaussian distribution, then part of the
+loss function can be computed analytically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an appropriately selected loss function form</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss">
 <code class="descname">build_reparam_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient based on the reparameterization trick.
-(Kingma and Welling, 2014)</p>
-<p>ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
+<p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
+<p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
+expectation using Monte Carlo sampling.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss_entropy">
 <code class="descname">build_reparam_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient based on the reparameterization trick.</p>
-<p>ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
-where entropy is analytic</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[-ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
+            + H(q(z; \lambda)) )\]</div>
+<p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
+<p>It assumes the entropy is analytic.</p>
+<p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
+expectation using Monte Carlo sampling.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss_kl">
 <code class="descname">build_reparam_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_kl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient based on the reparameterization trick.</p>
-<p>ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
-where KL is analytic</p>
-<p>It assumes the model prior is p(z) = N(z; 0, 1).</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
+            + KL(q(z; \lambda) || p(z)) )\]</div>
+<p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
+<p>It assumes the KL is analytic.</p>
+<p>It assumes the prior is <span class="math">\(p(z) = \mathcal{N}(z; 0, 1)\)</span></p>
+<p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
+expectation using Monte Carlo sampling.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss">
 <code class="descname">build_score_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient based on the score function estimator.
-(Paisley et al., 2012)</p>
-<p>ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
+<p>based on the score function estimator. (Paisley et al., 2012)</p>
+<p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
+expectation using Monte Carlo sampling.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss_entropy">
 <code class="descname">build_score_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient based on the score function estimator.</p>
-<p>ELBO = E_{q(z; lambda)} [ log p(x, z) ] + H(q(z; lambda))
-where entropy is analytic</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x, z) ]
+            + H(q(z; \lambda)) )\]</div>
+<p>based on the score function estimator. (Paisley et al., 2012)</p>
+<p>It assumes the entropy is analytic.</p>
+<p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
+expectation using Monte Carlo sampling.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss_kl">
 <code class="descname">build_score_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_kl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize, whose gradient is a stochastic
-gradient based on the score function estimator.</p>
-<p>ELBO = E_{q(z; lambda)} [ log p(x | z) ] + KL(q(z; lambda) || p(z))
-where KL is analytic</p>
-<p>It assumes the model prior is p(z) = N(z; 0, 1).</p>
+<dd><p>Loss function to minimize.</p>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
+             + KL(q(z; \lambda) || p(z)) )\]</div>
+<p>based on the score function estimator. (Paisley et al., 2012)</p>
+<p>It assumes the KL is analytic.</p>
+<p>It assumes the prior is <span class="math">\(p(z) = \mathcal{N}(z; 0, 1)\)</span></p>
+<p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
+expectation using Monte Carlo sampling.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>score=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -723,7 +832,18 @@ reparameterization gradient if available.</li>
 <dl class="method">
 <dt id="edward.inferences.MFVI.update">
 <code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Runs one iteration of MFVI.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; MFVI loss function value after one iteration.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -731,14 +851,15 @@ reparameterization gradient if available.</li>
 <dt id="edward.inferences.MonteCarlo">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MonteCarlo</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MonteCarlo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
-<p>Base class for Monte Carlo methods.</p>
+<p>Base class for Monte Carlo inference methods.</p>
+<p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<em>Model</em>) &#8211; probability model p(x, z)</li>
-<li><strong>data</strong> (<em>Data, optional</em>) &#8211; data x</li>
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; probability model</li>
+<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; observed data</li>
 </ul>
 </td>
 </tr>
@@ -751,14 +872,15 @@ reparameterization gradient if available.</li>
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
 <p>Base class for variational inference methods.</p>
+<p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<em>Model</em>) &#8211; probability model p(x, z)</li>
-<li><strong>variational</strong> (<a class="reference internal" href="edward.models.html#edward.models.variationals.Variational" title="edward.models.variationals.Variational"><em>Variational</em></a>) &#8211; variational model q(z; lambda)</li>
-<li><strong>data</strong> (<em>Data, optional</em>) &#8211; data x</li>
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; probability model</li>
+<li><strong>variational</strong> (<em>ed.Variational</em>) &#8211; variational model or distribution</li>
+<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; observed data</li>
 </ul>
 </td>
 </tr>
@@ -767,18 +889,35 @@ reparameterization gradient if available.</li>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Build loss function.</p>
+<p>Empty method.</p>
+<p>Any class based on <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong>
+implement this method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.finalize">
 <code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.finalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run steps after all updates.</p>
+<dd><p>Finalize.</p>
+<p>Empty method. (Optional.)</p>
+<p>Any class based on <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>may</strong>
+implement this method.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_data=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize inference algorithm.</p>
+<dd><p>Initialize variational inference algorithm.</p>
+<p>Set up <code class="docutils literal"><span class="pre">tf.train.AdamOptimizer</span></code> with a decaying scale factor.</p>
+<p>Initialize all variables</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -787,10 +926,10 @@ reparameterization gradient if available.</li>
 <li><strong>n_iter</strong> (<em>int, optional</em>) &#8211; Number of iterations for optimization.</li>
 <li><strong>n_data</strong> (<em>int, optional</em>) &#8211; Number of samples for data subsampling. Default is to use all
 the data.</li>
-<li><strong>n_print</strong> (<em>int, optional</em>) &#8211; Number of iterations for each print progress. If no print
+<li><strong>n_print</strong> (<em>int, optional</em>) &#8211; Number of iterations for each print progress. To suppress print
 progress, then specify None.</li>
 <li><strong>optimizer</strong> (<em>str, optional</em>) &#8211; Whether to use TensorFlow optimizer or PrettyTensor
-optimizer if using PrettyTensor. Defaults to TensorFlow.</li>
+optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <li><strong>scope</strong> (<em>str, optional</em>) &#8211; Scope of TensorFlow variable objects to optimize over.</li>
 </ul>
 </td>
@@ -802,18 +941,60 @@ optimizer if using PrettyTensor. Defaults to TensorFlow.</li>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.print_progress">
 <code class="descname">print_progress</code><span class="sig-paren">(</span><em>t</em>, <em>loss</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.print_progress" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Print progress to output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>t</strong> (<em>int</em>) &#8211; Iteration counter</li>
+<li><strong>loss</strong> (<em>double</em>) &#8211; Loss function value at iteration <code class="docutils literal"><span class="pre">t</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.run">
 <code class="descname">run</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>A simple wrapper to run the inference algorithm.</p>
+<dd><p>A simple wrapper to run variational inference.</p>
+<ol class="arabic simple">
+<li>Initialize via <code class="docutils literal"><span class="pre">initialize</span></code></li>
+<li>Run <code class="docutils literal"><span class="pre">update</span></code> for <code class="docutils literal"><span class="pre">self.n_iter</span></code> iterations</li>
+<li>While running, <code class="docutils literal"><span class="pre">print_progress</span></code></li>
+<li>Finalize via <code class="docutils literal"><span class="pre">finalize</span></code></li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>*args</strong> &#8211; goes nowhere</li>
+<li><strong>**kwargs</strong> &#8211; passed into <code class="docutils literal"><span class="pre">initialize</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.update">
 <code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Run one iteration of optimizer for variational inference.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; variational <cite>loss function</cite> values after one iteration</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -974,7 +1155,7 @@ automatic differentiation, so use a log/exp/polynomial approximation.
 <dl class="function">
 <dt id="edward.util.get_session">
 <code class="descclassname">edward.util.</code><code class="descname">get_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.get_session" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the globally defined TensorFlow session defined globally.</p>
+<dd><p>Get the globally defined TensorFlow session.</p>
 <p>If the session is not already defined, then the function will create
 a global session.</p>
 <table class="docutils field-list" frame="void" rules="none">
