@@ -14,8 +14,8 @@ def _test_log_prob_i(n_minibatch, num_factors):
                     loc=tf.constant([0.0] * num_factors),
                     scale=tf.constant([1.0] * num_factors))
     with sess.as_default():
-        m = normal.m.eval()
-        s = normal.s.eval()
+        m = normal.loc.eval()
+        s = normal.scale.eval()
         z = np.random.randn(n_minibatch, num_factors)
         for i in range(num_factors):
             assert np.allclose(
