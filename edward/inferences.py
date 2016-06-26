@@ -128,7 +128,7 @@ class VariationalInference(Inference):
         if self.n_print is not None:
             if t % self.n_print == 0:
                 print("iter {:d} loss {:.2f}".format(t, loss))
-                self.variational.print_params()
+                print(self.variational)
 
     def finalize(self):
         """Run steps after all updates."""

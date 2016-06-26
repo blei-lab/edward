@@ -30,6 +30,17 @@ class Variational:
                                    for layer in self.layers])
             self.sample_tensor = [layer.sample_tensor for layer in self.layers]
 
+    def __str__(self):
+        string = ""
+        for i in range(len(self.layers)):
+            if i != 0:
+                string += "\n"
+
+            layer = self.layers[i]
+            string += layer.__str__()
+
+        return string
+
     def add(self, layer):
         """
         Adds a layer instance on top of the layer stack.
@@ -86,9 +97,6 @@ class Variational:
 
         return feed_dict
 
-    def print_params(self):
-        [layer.print_params() for layer in self.layers]
-
     def log_prob_i(self, i, xs):
         start = final = 0
         for layer in self.layers:
@@ -123,9 +131,6 @@ class Distribution:
         self.num_vars = None # number of random variables
         self.num_params = None # number of parameters
         self.sample_tensor = False
-
-    def print_params(self):
-        raise NotImplementedError()
 
     def sample_noise(self, size=1):
         """
@@ -224,10 +229,9 @@ class Bernoulli(Distribution):
 
         self.p = p
 
-    def print_params(self):
+    def __str__(self):
         p = self.p.eval()
-        print("probability:")
-        print(p)
+        return "probability: \n" + p.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -270,13 +274,11 @@ class Beta(Distribution):
         self.alpha = alpha
         self.beta = beta
 
-    def print_params(self):
+    def __str__(self):
         sess = get_session()
         a, b = sess.run([self.alpha, self.beta])
-        print("shape:")
-        print(a)
-        print("scale:")
-        print(b)
+        return "shape: \n" + a.__str__() + "\n" + \
+               "scale: \n" + b.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -319,10 +321,9 @@ class Dirichlet(Distribution):
 
         self.alpha = alpha
 
-    def print_params(self):
+    def __str__(self):
         alpha = self.alpha.eval()
-        print("concentration vector:")
-        print(alpha)
+        return "concentration vector: \n" + alpha.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -369,13 +370,11 @@ class InvGamma(Distribution):
         self.alpha = alpha
         self.beta = beta
 
-    def print_params(self):
+    def __str__(self):
         sess = get_session()
         a, b = sess.run([self.alpha, self.beta])
-        print("shape:")
-        print(a)
-        print("scale:")
-        print(b)
+        return "shape: \n" + a.__str__() + "\n" + \
+               "scale: \n" + b.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -433,10 +432,9 @@ class Multinomial(Distribution):
 
         self.pi = pi
 
-    def print_params(self):
+    def __str__(self):
         pi = self.pi.eval()
-        print("probability vector:")
-        print(pi)
+        return "probability vector: \n" + pi.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -482,13 +480,11 @@ class Normal(Distribution):
         self.loc = loc
         self.scale = scale
 
-    def print_params(self):
+    def __str__(self):
         sess = get_session()
         m, s = sess.run([self.loc, self.scale])
-        print("mean:")
-        print(m)
-        print("std dev:")
-        print(s)
+        return "mean: \n" + m.__str__() + "\n" + \
+               "std dev: \n" + s.__str__()
 
     def sample_noise(self, size=1):
         """
@@ -536,13 +532,12 @@ class PointMass(Distribution):
 
         self.params = params
 
-    def print_params(self):
+    def __str__(self):
         if self.params.get_shape()[0] == 0:
-            return
+            return "parameter values: \n" + "None"
 
         params = self.params.eval()
-        print("parameter values:")
-        print(params)
+        return "parameter values: \n" + params.__str__()
 
     def sample(self, size=1):
         # Return a matrix where each row is the same set of
