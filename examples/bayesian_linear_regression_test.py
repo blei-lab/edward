@@ -64,29 +64,25 @@ class LinearModel:
         y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
         return y_pred, y_test
 
-def build_toy_dataset(coeff, n_data=40, n_data_test=20, noise_std=0.1):
-    ed.set_seed(0)
+def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
-    x = np.random.randn(n_data+n_data_test, n_dim)
-    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=(n_data+n_data_test))
-    y = y.reshape((n_data+n_data_test, 1))
+    x = np.random.randn(n_data, n_dim)
+    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data)
+    y = y.reshape((n_data, 1))
 
-    data = np.concatenate((y[:n_data,:], x[:n_data,:]), axis=1)
+    data = np.concatenate((y, x), axis=1)
     data = tf.constant(data, dtype=tf.float32)
-
-    data_test = np.concatenate((y[n_data:,:], x[n_data:,:]), axis=1)
-    data_test = tf.constant(data_test, dtype=tf.float32)
-    return ed.Data(data), ed.Data(data_test)
+    return ed.Data(data)
 
 ed.set_seed(42)
 model = LinearModel()
 variational = Variational()
 variational.add(Normal(model.num_vars))
 
-coeff = np.random.randn(10)
-data, data_test = build_toy_dataset(coeff)
+data = build_toy_dataset()
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_minibatch=5, n_print=10)
 
+data_test = build_toy_dataset()
 print(ed.evaluate('mse', model, variational, data_test))
