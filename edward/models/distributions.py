@@ -305,7 +305,8 @@ class Dirichlet(Distribution):
     the ith factor x[(i-1)*K:i*K], and params = alpha.
     """
     def __init__(self, shape, alpha=None):
-        num_factors, K = shape
+        num_factors = shape[0]
+        K = shape[-1]
         Distribution.__init__(self, num_factors)
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
@@ -408,7 +409,8 @@ class Multinomial(Distribution):
     trial (n=1) when sampling and calculating the density.
     """
     def __init__(self, shape, pi=None):
-        num_factors, K = shape
+        num_factors = shape[0]
+        K = shape[-1]
         if K == 1:
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
