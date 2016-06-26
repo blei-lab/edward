@@ -188,7 +188,8 @@
 <dl class="function">
 <dt id="edward.criticisms.binary_crossentropy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">binary_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.binary_crossentropy" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Binary cross-entropy.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -205,16 +206,15 @@
 <dl class="function">
 <dt id="edward.criticisms.categorical_accuracy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.categorical_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi-class prediction accuracy. One-hot representation for
-y_true.</p>
+<dd><p>Multi-class prediction accuracy. One-hot representation for <code class="docutils literal"><span class="pre">y_true</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s, where the outermost dimension of size K
+<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s, where the outermost dimension of size <code class="docutils literal"><span class="pre">K</span></code>
 has only one 1 per row.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with same shape as y_true.
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with same shape as <code class="docutils literal"><span class="pre">y_true</span></code>.
 The outermost dimension denote the categorical probabilities for
 that data point per row.</li>
 </ul>
@@ -227,7 +227,7 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.categorical_crossentropy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi-class cross entropy. One-hot representation for y_true.</p>
+<dd><p>Multi-class cross entropy. One-hot representation for <code class="docutils literal"><span class="pre">y_true</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -271,11 +271,22 @@ that data point per row.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric</strong> (<em>list or str</em>) &#8211; List of metrics or a single metric.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>metrics</strong> (<em>list or str</em>) &#8211; List of metrics or a single metric.</li>
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; Probability model p(x, z)</li>
+<li><strong>variational</strong> (<em>ed.Variational</em>) &#8211; Variational approximation to the posterior p(z | x)</li>
+<li><strong>data</strong> (<em>ed.Data</em>) &#8211; Data to evaluate the model at</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of evaluations or a single evaluation.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of evaluations or a single evaluation.</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list or float</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list or float</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code> &#8211; if an input metric does not match an implemented metric in Edward.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -284,7 +295,8 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.hinge">
 <code class="descclassname">edward.criticisms.</code><code class="descname">hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.hinge" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Hinge loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -301,7 +313,8 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.mean_absolute_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_absolute_error" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Mean absolute error loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -318,7 +331,8 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.mean_absolute_percentage_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_percentage_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_absolute_percentage_error" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Mean absolute percentage error loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -335,7 +349,8 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.mean_squared_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_squared_error" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Mean squared error loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -352,7 +367,8 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.mean_squared_logarithmic_error">
 <code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_logarithmic_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.mean_squared_logarithmic_error" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Mean squared logarithmic error loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -369,8 +385,8 @@ that data point per row.</li>
 <dl class="function">
 <dt id="edward.criticisms.poisson">
 <code class="descclassname">edward.criticisms.</code><code class="descname">poisson</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.poisson" title="Permalink to this definition">¶</a></dt>
-<dd><p>Negative Poisson log-likelihood of data y_true given predictions
-y_pred (up to proportion).</p>
+<dd><p>Negative Poisson log-likelihood of data <code class="docutils literal"><span class="pre">y_true</span></code> given predictions
+<code class="docutils literal"><span class="pre">y_pred</span></code> (up to proportion).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -390,39 +406,44 @@ y_pred (up to proportion).</p>
 <code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Posterior predictive check.
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
-If variational is not specified, it defaults to a prior predictive
-check (Box, 1980).</p>
-<p>PPC&#8217;s form an empirical distribution for the predictive discrepancy,
-p(T) = int p(T(yrep) | z) p(z | y) dz
-by drawing replicated data sets yrep and calculating T(yrep) for
-each data set. Then it compares it to T(y).</p>
+If no posterior approximation is provided through <code class="docutils literal"><span class="pre">variational</span></code>,
+then we default to a prior predictive check (Box, 1980).</p>
+<p>PPC&#8217;s form an empirical distribution for the predictive discrepancy,</p>
+<div class="math">
+\[p(T) = \int p(T(yrep) | z) p(z | y) dz\]</div>
+<p>by drawing replicated data sets yrep and calculating
+<span class="math">\(T(yrep)\)</span> for each data set. Then it compares it to
+<span class="math">\(T(y)\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>model</strong> (<em>Model</em>) &#8211; class object with a &#8216;sample_likelihood&#8217; method</li>
-<li><strong>variational</strong> (<em>Variational, optional</em>) &#8211; latent variable distribution q(z) to sample from. It is an
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; class object that implements the <code class="docutils literal"><span class="pre">sample_likelihood</span></code> method</li>
+<li><strong>variational</strong> (<em>ed.Variational, optional</em>) &#8211; latent variable distribution q(z) to sample from. It is an
 approximation to the posterior, e.g., a variational
 approximation or an empirical distribution from MCMC samples.
-If not specified, samples will be obtained from model
-with a &#8216;sample_prior&#8217; method.</li>
-<li><strong>data</strong> (<em>Data, optional</em>) &#8211; Observed data to compare to. If not specified, will return
+If not specified, samples will be obtained from the model
+through the <code class="docutils literal"><span class="pre">sample_prior</span></code> method.</li>
+<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; Observed data to compare to. If not specified, will return
 only the reference distribution with an assumed replicated
 data set size of 1.</li>
-<li><strong>T</strong> (<em>function, optional</em>) &#8211; Discrepancy function written in TensorFlow. Default is
+<li><strong>T</strong> (<em>TensorFlow function, optional</em>) &#8211; Discrepancy function written in TensorFlow. Default is
 identity. It is a function taking in a data set
 y and optionally a set of latent variables z as input.</li>
 <li><strong>size</strong> (<em>int, optional</em>) &#8211; number of replicated data sets</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List containing the reference distribution, which is a Numpy
-vector of size elements,
-(T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}));
-and the realized discrepancy, which is a NumPy vector of size
-elements,
-(T(y, z^{1}), ..., T(y, z^{size})).</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>List containing the reference distribution, which is a Numpy
+vector of size elements,</p>
+<div class="math">
+\[(T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}))\]</div>
+<p>and the realized discrepancy, which is a NumPy vector of size
+elements,</p>
+<div class="math">
+\[(T(y, z^{1}), ..., T(y, z^{size})).\]</div>
+</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
@@ -436,14 +457,14 @@ elements,
 <dt id="edward.criticisms.sparse_categorical_accuracy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.sparse_categorical_accuracy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-class prediction accuracy. Label {0, 1, .., K-1}
-representation for y_true.</p>
+representation for <code class="docutils literal"><span class="pre">y_true</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of integers {0, 1, ..., K-1}.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape (y_true.get_shape(), K).
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape <code class="docutils literal"><span class="pre">(y_true.get_shape(),</span> <span class="pre">K)</span></code>.
 The outermost dimension are the categorical probabilities for
 that data point.</li>
 </ul>
@@ -457,14 +478,14 @@ that data point.</li>
 <dt id="edward.criticisms.sparse_categorical_crossentropy">
 <code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.sparse_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-class cross entropy. Label {0, 1, .., K-1} representation
-for y_true.</p>
+for <code class="docutils literal"><span class="pre">y_true.</span></code></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of integers {0, 1, ..., K-1}.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape (y_true.get_shape(), K).
+<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape <code class="docutils literal"><span class="pre">(y_true.get_shape(),</span> <span class="pre">K)</span></code>.
 The outermost dimension are the categorical probabilities for
 that data point.</li>
 </ul>
@@ -477,7 +498,8 @@ that data point.</li>
 <dl class="function">
 <dt id="edward.criticisms.squared_hinge">
 <code class="descclassname">edward.criticisms.</code><code class="descname">squared_hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.squared_hinge" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Squared hinge loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
