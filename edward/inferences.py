@@ -380,8 +380,10 @@ class Laplace(VariationalInference):
     Laplace approximation
     """
     def __init__(self, model, data=Data(), transform=tf.identity):
-        variational = Variational()
-        variational.add(PointMass(model.num_vars, transform))
+        with tf.variable_scope("variational"):
+            variational = Variational()
+            variational.add(PointMass(model.num_vars, transform))
+
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
