@@ -818,37 +818,45 @@ distribution class.</p>
 <dt id="edward.util.VarStoreMethod">
 <em class="property">class </em><code class="descclassname">edward.util.</code><code class="descname">VarStoreMethod</code><a class="headerlink" href="#edward.util.VarStoreMethod" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Convenience base class for registered methods that create variables.
-This tracks the variables and requries subclasses to provide a __call__
+<p>Convenience base class for registered methods that create variables.</p>
+<p>This tracks the variables and requries subclasses to provide a <code class="docutils literal"><span class="pre">__call__</span></code>
 method.</p>
+<p>This is taken from PrettyTensor.
+<a class="reference external" href="https://github.com/google/prettytensor/blob/">https://github.com/google/prettytensor/blob/</a>
+c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/
+pretty_tensor_class.py#L1497</p>
 <dl class="method">
 <dt id="edward.util.VarStoreMethod.variable">
 <code class="descname">variable</code><span class="sig-paren">(</span><em>var_name</em>, <em>shape</em>, <em>init=&lt;function _initializer&gt;</em>, <em>dt=tf.float32</em>, <em>train=True</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.VarStoreMethod.variable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a named variable to this bookkeeper or returns an existing one.
 Variables marked train are returned by the training_variables method. If
-the requested name already exists and it is compatible (same shape, dt and
-train) then it is returned. In case of an incompatible type, an exception is
-thrown.
-:param var_name: The unique name of this variable.  If a variable with the same</p>
-<blockquote>
-<div>name exists, then it is returned.</div></blockquote>
+the requested name already exists and it is compatible (same shape, dt
+and train) then it is returned. In case of an incompatible type, an
+exception is thrown.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>shape</strong> &#8211; The shape of the variable.</li>
-<li><strong>init</strong> &#8211; The init function to use or a Tensor to copy.</li>
-<li><strong>dt</strong> &#8211; The datatype, defaults to float.  This will automatically extract the
-base dtype.</li>
-<li><strong>train</strong> &#8211; Whether or not the variable should be trained.</li>
+<li><strong>var_name</strong> (<em>string</em>) &#8211; The unique name of this variable.  If a variable with the same
+name exists, then it is returned.</li>
+<li><strong>shape</strong> (<em>tf.TensorShape</em>) &#8211; The shape of the variable.</li>
+<li><strong>init</strong> &#8211; <p>The init function to use or a Tensor to copy.</p>
+<p>Defaults to <code class="docutils literal"><span class="pre">tf.random_normal_initializer()</span></code>.</p>
+</li>
+<li><strong>dt</strong> &#8211; The datatype, defaults to <code class="docutils literal"><span class="pre">tf.float32</span></code>.  This will automatically
+extract the base <code class="docutils literal"><span class="pre">dtype</span></code>.</li>
+<li><strong>train</strong> (<em>bool</em>) &#8211; Whether or not the variable should be trained.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A TensorFlow tensor.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>v</strong> &#8211; The input <cite>var_name</cite></p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; if reuse is False (or unspecified and allow_reuse is False)
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">string</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError: &#8211; if reuse is <code class="docutils literal"><span class="pre">False</span></code> (or unspecified and allow_reuse is <code class="docutils literal"><span class="pre">False</span></code>)
 and the variable already exists or if the specification of a reused
 variable does not match the original.</p>
 </td>
@@ -860,46 +868,19 @@ variable does not match the original.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="edward.util.asdf">
-<code class="descclassname">edward.util.</code><code class="descname">asdf</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.asdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summary line.</p>
-<p>Extended description of function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>arg1</strong> (<em>int</em>) &#8211; Description of arg1</li>
-<li><strong>arg2</strong> (<em>str</em>) &#8211; Description of arg2</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Description of return value</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="edward.util.cumprod">
-<code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cumulative product of a tensor along first dimension.
 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/813">https://github.com/tensorflow/tensorflow/issues/813</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xs</strong> (<em>tensor</em>) &#8211; The input TensorFlow object.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector, matrix, or n-Tensor</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>result</strong> &#8211; A TensorFlow object with <cite>cumprod</cite> applied to its first dimension.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Tensor with <cite>cumprod</cite> applied along its first dimension.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tensor</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Nothing</span></code></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
 </tbody>
 </table>
@@ -908,10 +889,9 @@ variable does not match the original.</p>
 <dl class="function">
 <dt id="edward.util.digamma">
 <code class="descclassname">edward.util.</code><code class="descname">digamma</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.digamma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the digamma function element-wise.</p>
+<dd><p>Evaluate the digamma function element-wise.</p>
 <p>TensorFlow doesn&#8217;t have special functions with support for
-automatic differentiation, so use a log/exp/polynomial
-approximation.
+automatic differentiation, so use a log/exp/polynomial approximation.
 <a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -930,8 +910,25 @@ approximation.
 <dl class="function">
 <dt id="edward.util.dot">
 <code class="descclassname">edward.util.</code><code class="descname">dot</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.dot" title="Permalink to this definition">¶</a></dt>
-<dd><p>x is M x N matrix and y is N-vector, or
-x is M-vector and y is M x N matrix</p>
+<dd><p>Compute dot product between a Tensor matrix and a Tensor vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; <cite>M x N</cite> matrix or <cite>M</cite> vector (respectively)</li>
+<li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; <cite>M</cite> vector or <cite>M x N</cite> matrix (respectively)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><cite>N</cite> vector</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -942,7 +939,11 @@ x is M-vector and y is M x N matrix</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tensor scalar or array</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Python list containing dimensions of <cite>x</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
 </tr>
 </tbody>
 </table>
@@ -951,8 +952,19 @@ x is M-vector and y is M x N matrix</p>
 <dl class="function">
 <dt id="edward.util.get_session">
 <code class="descclassname">edward.util.</code><code class="descname">get_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.get_session" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the session defined globally; if not already defined, then
-the function will create a global session.</p>
+<dd><p>Get the globally defined TensorFlow session defined globally.</p>
+<p>If the session is not already defined, then the function will create
+a global session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>_ED_SESSION</strong></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.InteractiveSession</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -963,11 +975,20 @@ the function will create a global session.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; Tensor to calculate Hessian of.</li>
 <li><strong>xs</strong> (<em>list</em>) &#8211; List of TensorFlow variables to calculate with respect to.
 The variables can have different shapes.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A matrix where each row is</p>
+<div class="math">
+\[\partial_{xs} ( [ \partial_{xs} y ]_j ).\]</div>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
 </td>
 </tr>
 </tbody>
@@ -977,7 +998,7 @@ The variables can have different shapes.</li>
 <dl class="function">
 <dt id="edward.util.kl_multivariate_normal">
 <code class="descclassname">edward.util.</code><code class="descname">kl_multivariate_normal</code><span class="sig-paren">(</span><em>loc_one</em>, <em>scale_one</em>, <em>loc_two=0</em>, <em>scale_two=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.kl_multivariate_normal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the KL of multivariate normal distributions with
+<dd><p>Calculate the KL of multivariate normal distributions with
 diagonal covariances.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -995,18 +1016,10 @@ row represents the standard deviation of a n-dimensional Gaussian</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
-<dt>for scalar or vector inputs, outputs the scalar</dt>
-<dd><p class="first last">KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )</p>
-</dd>
-<dt>for matrix inputs, outputs the vector</dt>
-<dd><dl class="first last docutils">
-<dt>[KL( N(z; loc_one[m,:], scale_one[m,:]) ||</dt>
-<dd><p class="first last">N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>for scalar or vector inputs, outputs the scalar
+<code class="docutils literal"><span class="pre">KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one,</span> <span class="pre">scale_one)</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two,</span> <span class="pre">scale_two)</span> <span class="pre">)</span></code></p>
+<p>for matrix inputs, outputs the vector
+<code class="docutils literal"><span class="pre">[KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one[m,:],</span> <span class="pre">scale_one[m,:])</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two[m,:],</span> <span class="pre">scale_two[m,:])</span> <span class="pre">)]_{m=1}^M</span></code></p>
 </p>
 </td>
 </tr>
@@ -1020,16 +1033,15 @@ row represents the standard deviation of a n-dimensional Gaussian</li>
 <dl class="function">
 <dt id="edward.util.lbeta">
 <code class="descclassname">edward.util.</code><code class="descname">lbeta</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.lbeta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the log of Beta(x), reducing along the last dimension.</p>
+<dd><p>Compute the log of the Beta function, reducing along the last dimension.</p>
 <p>TensorFlow doesn&#8217;t have special functions with support for
-automatic differentiation, so use a log/exp/polynomial
-approximation.
+automatic differentiation, so use a log/exp/polynomial approximation.
 <a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or rank-n tensor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, rank-(n-1) if rank-n tensor input</td>
 </tr>
@@ -1042,16 +1054,15 @@ approximation.
 <dl class="function">
 <dt id="edward.util.lgamma">
 <code class="descclassname">edward.util.</code><code class="descname">lgamma</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.lgamma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the log of Gamma(x) element-wise.</p>
+<dd><p>Evaluate the log of the Gamma function element-wise.</p>
 <p>TensorFlow doesn&#8217;t have special functions with support for
-automatic differentiation, so use a log/exp/polynomial
-approximation.
+automatic differentiation, so use a log/exp/polynomial approximation.
 <a class="reference external" href="http://www.machinedlearnings.com/2011/06/faster-lda.html">http://www.machinedlearnings.com/2011/06/faster-lda.html</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar, vector, or rank-n tensor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
 </tr>
@@ -1064,46 +1075,132 @@ approximation.
 <dl class="function">
 <dt id="edward.util.log_sum_exp">
 <code class="descclassname">edward.util.</code><code class="descname">log_sum_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.log_sum_exp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the log_sum_exp of the elements in x.</p>
-<dl class="docutils">
-<dt>Works for x with</dt>
-<dd>shape=TensorShape([Dimension(N)])
-shape=TensorShape([Dimension(N), Dimension(1)])</dd>
-</dl>
-<p>Not tested for anything beyond that.</p>
+<dd><p>Compute the <code class="docutils literal"><span class="pre">log_sum_exp</span></code> of the elements in x.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; <p>vector or matrix with second dimension 1</p>
+<p>shape=TensorShape([Dimension(N)])</p>
+<p>shape=TensorShape([Dimension(N), Dimension(1)])</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, vector if matrix tensor input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.util.logit">
 <code class="descclassname">edward.util.</code><code class="descname">logit</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.logit" title="Permalink to this definition">¶</a></dt>
-<dd><p>log(x / (1 - x))</p>
+<dd><p>Evaluates <span class="math">\(\log(x / (1 - x))\)</span> elementwise.</p>
+<p>Clips all elements to be between <span class="math">\((0,1)\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.util.multivariate_rbf">
 <code class="descclassname">edward.util.</code><code class="descname">multivariate_rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.multivariate_rbf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Squared-exponential kernel
-k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }</p>
+<dd><p>Squared-exponential kernel</p>
+<div class="math">
+\[k(x, y) = \sigma^2 \exp{ -1/(2l^2) \sum_i (x_i - y_i)^2 }\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>y</strong> (<em>Optional[tf.Tensor], default 0.0</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>sigma</strong> (<em>Optional[double], default 1.0</em>) &#8211; standard deviation of radial basis function</li>
+<li><strong>l</strong> (<em>Optional[double], default 1.0</em>) &#8211; lengthscale of radial basis function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">scalar if vector input, rank-(n-1) if n-Tensor input</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.util.rbf">
 <code class="descclassname">edward.util.</code><code class="descname">rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.rbf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Squared-exponential kernel element-wise
-k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }</p>
+<dd><p>Squared-exponential kernel element-wise</p>
+<div class="math">
+\[k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>y</strong> (<em>Optional[tf.Tensor], default 0.0</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>sigma</strong> (<em>Optional[double], default 1.0</em>) &#8211; standard deviation of radial basis function</li>
+<li><strong>l</strong> (<em>Optional[double], default 1.0</em>) &#8211; lengthscale of radial basis function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">size corresponding to size of input</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.util.set_seed">
 <code class="descclassname">edward.util.</code><code class="descname">set_seed</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.set_seed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set seed for both NumPy and TensorFlow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>double</em>) &#8211; seed</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="edward.util.softplus">
 <code class="descclassname">edward.util.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.softplus" title="Permalink to this definition">¶</a></dt>
-<dd><p>Softplus. TensorFlow can&#8217;t currently autodiff through
-tf.nn.softplus().</p>
+<dd><p>Elementwise Softplus function</p>
+<div class="math">
+\[\log(1 + \exp(x))\]</div>
+<p>TensorFlow can&#8217;t currently autodiff through tf.nn.softplus().</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

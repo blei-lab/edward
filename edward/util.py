@@ -1,25 +1,21 @@
 import tensorflow as tf
 import numpy as np
 
-def cumprod(xs):
+def cumprod(x):
     """Cumulative product of a tensor along first dimension.
     https://github.com/tensorflow/tensorflow/issues/813
 
     Parameters
     ----------
-    xs : tensor
-        The input TensorFlow object.
+    x : tf.Tensor
+        vector, matrix, or n-Tensor
 
     Returns
     -------
-    result : tensor
-        A TensorFlow object with `cumprod` applied to its first dimension.
-
-    Raises
-    ------
-    Nothing
+    tf.Tensor
+        A Tensor with `cumprod` applied along its first dimension.
     """
-    values = tf.unpack(xs)
+    values = tf.unpack(x)
     out = []
     prev = tf.ones_like(values[0])
     for val in values:
@@ -27,16 +23,13 @@ def cumprod(xs):
         out.append(s)
         prev = s
 
-    result = tf.pack(out)
-    return result
+    return tf.pack(out)
 
 def digamma(x):
-    """
-    Computes the digamma function element-wise.
+    """Evaluate the digamma function element-wise.
 
     TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial
-    approximation.
+    automatic differentiation, so use a log/exp/polynomial approximation.
     http://www.machinedlearnings.com/2011/06/faster-lda.html
 
     Parameters
@@ -55,10 +48,20 @@ def digamma(x):
            (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
 
 def dot(x, y):
-    """
-    x is M x N matrix and y is N-vector, or
-    x is M-vector and y is M x N matrix
-    """
+    """Compute dot product between a Tensor matrix and a Tensor vector.
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        `M x N` matrix or `M` vector (respectively)
+    y : tf.Tensor
+        `M` vector or `M x N` matrix (respectively)
+
+    Returns
+    -------
+    tf.Tensor
+        `N` vector
+    """        
     if len(x.get_shape()) == 1:
         vec = x
         mat = y
@@ -69,12 +72,17 @@ def dot(x, y):
         return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 def get_dims(x):
-    """
-    Get values of each dimension.
+    """Get values of each dimension.
 
-    Arguments
+    Parameters
     ----------
-    x: tensor scalar or array
+    x: tf.Tensor
+        scalar, vector, matrix, or n-Tensor
+
+    Returns
+    -------
+    list
+        Python list containing dimensions of `x`
     """
     dims = x.get_shape()
     if len(dims) == 0: # scalar
@@ -83,8 +91,15 @@ def get_dims(x):
         return [dim.value for dim in dims]
 
 def get_session():
-    """Get the session defined globally; if not already defined, then
-    the function will create a global session."""
+    """Get the globally defined TensorFlow session defined globally.
+
+    If the session is not already defined, then the function will create 
+    a global session.
+
+    Returns
+    -------
+    _ED_SESSION : tf.InteractiveSession
+    """
     global _ED_SESSION
     if tf.get_default_session() is None:
         _ED_SESSION = tf.InteractiveSession()
@@ -92,8 +107,7 @@ def get_session():
     return _ED_SESSION
 
 def hessian(y, xs):
-    """
-    Calculate Hessian of y with respect to each x in xs.
+    """Calculate Hessian of y with respect to each x in xs.
 
     Parameters
     ----------
@@ -102,6 +116,13 @@ def hessian(y, xs):
     xs : list
         List of TensorFlow variables to calculate with respect to.
         The variables can have different shapes.
+
+    Returns
+    -------
+    tf.Tensor
+        A matrix where each row is
+
+        .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).
     """
     # Calculate flattened vector grad_{xs} y.
     grads = tf.gradients(y, xs)
@@ -131,8 +152,7 @@ def hessian(y, xs):
     return tf.pack(mat)
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
-    """
-    Calculates the KL of multivariate normal distributions with
+    """Calculate the KL of multivariate normal distributions with
     diagonal covariances.
 
     Parameters
@@ -154,10 +174,10 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     -------
     tf.Tensor
         for scalar or vector inputs, outputs the scalar
-            KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )
+        ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``
+
         for matrix inputs, outputs the vector
-            [KL( N(z; loc_one[m,:], scale_one[m,:]) ||
-                 N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M
+        ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
     """
     if loc_two == 0 and scale_two == 1:
         return 0.5 * tf.reduce_sum(
@@ -170,18 +190,16 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
 def lbeta(x):
-    """
-    Computes the log of Beta(x), reducing along the last dimension.
+    """Compute the log of the Beta function, reducing along the last dimension.
 
     TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial
-    approximation.
+    automatic differentiation, so use a log/exp/polynomial approximation.
     http://www.machinedlearnings.com/2011/06/faster-lda.html
 
     Parameters
     ----------
     x : np.array or tf.Tensor
-        vector or rank-n tensor
+        scalar, vector, matrix, or n-Tensor
 
     Returns
     -------
@@ -195,18 +213,16 @@ def lbeta(x):
         return tf.reduce_sum(lgamma(x), 1) - lgamma(tf.reduce_sum(x, 1))
 
 def lgamma(x):
-    """
-    Computes the log of Gamma(x) element-wise.
+    """Evaluate the log of the Gamma function element-wise.
 
     TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial
-    approximation.
+    automatic differentiation, so use a log/exp/polynomial approximation.
     http://www.machinedlearnings.com/2011/06/faster-lda.html
 
     Parameters
     ----------
     x : np.array or tf.Tensor
-        scalar, vector, or rank-n tensor
+        scalar, vector, matrix, or n-Tensor
 
     Returns
     -------
@@ -218,113 +234,201 @@ def lgamma(x):
     return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log(xp3)
 
 def log_sum_exp(x):
-    """
-    Computes the log_sum_exp of the elements in x.
+    """Compute the ``log_sum_exp`` of the elements in x.
 
-    Works for x with
+    Parameters
+    ----------
+    x : tf.Tensor
+        vector or matrix with second dimension 1
+
         shape=TensorShape([Dimension(N)])
+
         shape=TensorShape([Dimension(N), Dimension(1)])
 
-    Not tested for anything beyond that.
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, vector if matrix tensor input
     """
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 def logit(x):
-    """log(x / (1 - x))"""
+    """Evaluates :math:`\log(x / (1 - x))` elementwise. 
+
+    Clips all elements to be between :math:`(0,1)`.
+    
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor 
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
+    """
     x = tf.clip_by_value(x, 1e-8, 1.0 - 1e-8)
     return tf.log(x) - tf.log(1.0 - x)
 
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
-    """
-    Squared-exponential kernel
-    k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }
+    """Squared-exponential kernel
+
+    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) \sum_i (x_i - y_i)^2 }
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor 
+    y : Optional[tf.Tensor], default 0.0
+        scalar, vector, matrix, or n-Tensor 
+    sigma : Optional[double], default 1.0
+        standard deviation of radial basis function
+    l : Optional[double], default 1.0
+        lengthscale of radial basis function
+
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, rank-(n-1) if n-Tensor input
     """
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
                   tf.reduce_sum(tf.pow(x - y , 2.0)))
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
-    """
-    Squared-exponential kernel element-wise
-    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
+    """Squared-exponential kernel element-wise
+
+    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor 
+    y : Optional[tf.Tensor], default 0.0
+        scalar, vector, matrix, or n-Tensor 
+    sigma : Optional[double], default 1.0
+        standard deviation of radial basis function
+    l : Optional[double], default 1.0
+        lengthscale of radial basis function
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
 
 def set_seed(x):
-    """
-    Set seed for both NumPy and TensorFlow.
+    """Set seed for both NumPy and TensorFlow.
+
+    Parameters
+    ----------
+    x : double
+        seed
     """
     np.random.seed(x)
     tf.set_random_seed(x)
 
 def softplus(x):
-    """
-    Softplus. TensorFlow can't currently autodiff through
-    tf.nn.softplus().
+    """Elementwise Softplus function
+
+    .. math:: \log(1 + \exp(x))
+
+    TensorFlow can't currently autodiff through tf.nn.softplus().
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor 
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
     return tf.log(1.0 + tf.exp(x))
 
-# This is taken from PrettyTensor.
-# https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
 class VarStoreMethod(object):
-  """Convenience base class for registered methods that create variables.
-  This tracks the variables and requries subclasses to provide a __call__
-  method.
-  """
+    """Convenience base class for registered methods that create variables.
 
-  def __init__(self):
-    self.vars = {}
+    This tracks the variables and requries subclasses to provide a ``__call__``
+    method.
 
-  def variable(self, var_name, shape, init=tf.random_normal_initializer(), dt=tf.float32, train=True):
-    """Adds a named variable to this bookkeeper or returns an existing one.
-    Variables marked train are returned by the training_variables method. If
-    the requested name already exists and it is compatible (same shape, dt and
-    train) then it is returned. In case of an incompatible type, an exception is
-    thrown.
-    Args:
-      var_name: The unique name of this variable.  If a variable with the same
-        name exists, then it is returned.
-      shape: The shape of the variable.
-      init: The init function to use or a Tensor to copy.
-      dt: The datatype, defaults to float.  This will automatically extract the
-        base dtype.
-      train: Whether or not the variable should be trained.
-    Returns:
-      A TensorFlow tensor.
-    Raises:
-      ValueError: if reuse is False (or unspecified and allow_reuse is False)
-        and the variable already exists or if the specification of a reused
-        variable does not match the original.
+    This is taken from PrettyTensor.
+    https://github.com/google/prettytensor/blob/
+    c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/
+    pretty_tensor_class.py#L1497
     """
-    # Make sure it is a TF dtype and convert it into a base dtype.
-    dt = tf.as_dtype(dt).base_dtype
-    if var_name in self.vars:
-      v = self.vars[var_name]
-      if v.get_shape() != shape:
-        raise ValueError(
-            'Shape mismatch: %s vs %s. Perhaps a UnboundVariable had '
-            'incompatible values within a graph.' % (v.get_shape(), shape))
-      return v
-    elif callable(init):
 
-      v = tf.get_variable(var_name,
-                          shape=shape,
-                          dtype=dt,
-                          initializer=init,
-                          trainable=train)
-      self.vars[var_name] = v
-      return v
-    else:
-      v = tf.convert_to_tensor(init, name=var_name, dtype=dt)
-      v.get_shape().assert_is_compatible_with(shape)
-      self.vars[var_name] = v
-      return v
+    def __init__(self):
+        self.vars = {}
+
+    def variable(self, var_name, shape, init=tf.random_normal_initializer(), 
+                 dt=tf.float32, train=True):
+        """Adds a named variable to this bookkeeper or returns an existing one.
+        Variables marked train are returned by the training_variables method. If
+        the requested name already exists and it is compatible (same shape, dt
+        and train) then it is returned. In case of an incompatible type, an
+        exception is thrown.
+
+        Parameters
+        ----------
+        var_name : string
+            The unique name of this variable.  If a variable with the same
+            name exists, then it is returned.
+        shape : tf.TensorShape
+            The shape of the variable.
+        init : 
+            The init function to use or a Tensor to copy.
+
+            Defaults to ``tf.random_normal_initializer()``.
+        dt : 
+            The datatype, defaults to ``tf.float32``.  This will automatically 
+            extract the base ``dtype``.
+        train : bool
+            Whether or not the variable should be trained.
+
+        Returns
+        -------
+        v : string
+          The input `var_name`
+
+        Raises
+        ------
+        ValueError: 
+            if reuse is ``False`` (or unspecified and allow_reuse is ``False``)
+            and the variable already exists or if the specification of a reused
+            variable does not match the original.
+        """
+
+        # Make sure it is a TF dtype and convert it into a base dtype.
+        dt = tf.as_dtype(dt).base_dtype
+        if var_name in self.vars:
+            v = self.vars[var_name]
+            if v.get_shape() != shape:
+                raise ValueError(
+                    'Shape mismatch: %s vs %s. Perhaps a UnboundVariable had '
+                    'incompatible values within a graph.' % (v.get_shape(), shape))
+            return v
+        elif callable(init):
+
+            v = tf.get_variable(var_name,
+                              shape=shape,
+                              dtype=dt,
+                              initializer=init,
+                              trainable=train)
+            self.vars[var_name] = v
+            return v
+        else:
+            v = tf.convert_to_tensor(init, name=var_name, dtype=dt)
+            v.get_shape().assert_is_compatible_with(shape)
+            self.vars[var_name] = v
+            return v
 
 class VARIABLE(VarStoreMethod):
-    """
-    A simple wrapper to contain variables. It will create a TensorFlow
+    """A simple wrapper to contain variables. It will create a TensorFlow
     variable the first time it is called and return the variable; in
     subsequent calls, it will simply return the variable and not
     create the TensorFlow variable again.
