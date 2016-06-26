@@ -259,8 +259,8 @@ class Bernoulli(Distribution):
 
 class Beta(Distribution):
     """
-    q(z | lambda) = prod_{i=1}^d Beta(z[i] | a[i], b[i])
-    where lambda = {a, b}.
+    q(z | lambda) = prod_{i=1}^d Beta(z[i] | alpha[i], beta[i])
+    where lambda = {alpha, beta}.
     """
     def __init__(self, num_factors=1, alpha=None, beta=None):
         Distribution.__init__(self, num_factors)
@@ -276,12 +276,12 @@ class Beta(Distribution):
             beta_unconst = Variable("beta", [self.num_vars])
             beta = tf.nn.softplus(beta_unconst)
 
-        self.a = alpha
-        self.b = beta
+        self.alpha = alpha
+        self.beta = beta
 
     def print_params(self):
         sess = get_session()
-        a, b = sess.run([self.a, self.b])
+        a, b = sess.run([self.alpha, self.beta])
         print("shape:")
         print(a)
         print("scale:")
@@ -290,7 +290,7 @@ class Beta(Distribution):
     def sample(self, size=1):
         """z ~ q(z | lambda)"""
         sess = get_session()
-        a, b = sess.run([self.a, self.b])
+        a, b = sess.run([self.alpha, self.beta])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = beta.rvs(a[d], b[d], size=size)
@@ -302,10 +302,10 @@ class Beta(Distribution):
         if i >= self.num_factors:
             raise IndexError()
 
-        return beta.logpdf(zs[:, i], self.a[i], self.b[i])
+        return beta.logpdf(zs[:, i], self.alpha[i], self.beta[i])
 
     def entropy(self):
-        return tf.reduce_sum(beta.entropy(self.a, self.b))
+        return tf.reduce_sum(beta.entropy(self.alpha, self.beta))
 
 class Dirichlet(Distribution):
     """
@@ -357,8 +357,8 @@ class Dirichlet(Distribution):
 
 class InvGamma(Distribution):
     """
-    q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | a[i], b[i])
-    where lambda = {a, b}.
+    q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | alpha[i], beta[i])
+    where lambda = {alpha, beta}.
     """
     def __init__(self, num_factors=1, alpha=None, beta=None):
         Distribution.__init__(self, num_factors)
@@ -374,12 +374,12 @@ class InvGamma(Distribution):
             beta_unconst = Variable("beta", [self.num_vars])
             beta = tf.nn.softplus(beta_unconst) + 1e-2
 
-        self.a = alpha
-        self.b = beta
+        self.alpha = alpha
+        self.beta = beta
 
     def print_params(self):
         sess = get_session()
-        a, b = sess.run([self.a, self.b])
+        a, b = sess.run([self.alpha, self.beta])
         print("shape:")
         print(a)
         print("scale:")
@@ -388,7 +388,7 @@ class InvGamma(Distribution):
     def sample(self, size=1):
         """z ~ q(z | lambda)"""
         sess = get_session()
-        a, b = sess.run([self.a, self.b])
+        a, b = sess.run([self.alpha, self.beta])
         z = np.zeros((size, self.num_vars))
         for d in range(self.num_vars):
             z[:, d] = invgamma.rvs(a[d], b[d], size=size)
@@ -400,10 +400,10 @@ class InvGamma(Distribution):
         if i >= self.num_factors:
             raise IndexError()
 
-        return invgamma.logpdf(zs[:, i], self.a[i], self.b[i])
+        return invgamma.logpdf(zs[:, i], self.alpha[i], self.beta[i])
 
     def entropy(self):
-        return tf.reduce_sum(invgamma.entropy(self.a, self.b))
+        return tf.reduce_sum(invgamma.entropy(self.alpha, self.beta))
 
 class Multinomial(Distribution):
     """
@@ -470,8 +470,8 @@ class Multinomial(Distribution):
 
 class Normal(Distribution):
     """
-    q(z | lambda ) = prod_{i=1}^d Normal(z[i] | m[i], s[i])
-    where lambda = {m, s}.
+    q(z | lambda ) = prod_{i=1}^d Normal(z[i] | loc[i], scale[i])
+    where lambda = {loc, scale}.
     """
     def __init__(self, num_factors=1, loc=None, scale=None):
         Distribution.__init__(self, num_factors)
@@ -486,12 +486,12 @@ class Normal(Distribution):
             scale_unconst = Variable("sigma", [self.num_vars])
             scale = tf.nn.softplus(scale_unconst)
 
-        self.m = loc
-        self.s = scale
+        self.loc = loc
+        self.scale = scale
 
     def print_params(self):
         sess = get_session()
-        m, s = sess.run([self.m, self.s])
+        m, s = sess.run([self.loc, self.scale])
         print("mean:")
         print(m)
         print("std dev:")
@@ -509,19 +509,19 @@ class Normal(Distribution):
         eps = sample_noise() ~ s(eps)
         s.t. z = reparam(eps; lambda) ~ q(z | lambda)
         """
-        return self.m + eps * self.s
+        return self.loc + eps * self.scale
 
     def log_prob_zi(self, i, zs):
         """log q(z_i | lambda)"""
         if i >= self.num_factors:
             raise IndexError()
 
-        mi = self.m[i]
-        si = self.s[i]
-        return norm.logpdf(zs[:, i], mi, si)
+        loci = self.loc[i]
+        scalei = self.scale[i]
+        return norm.logpdf(zs[:, i], loci, scalei)
 
     def entropy(self):
-        return tf.reduce_sum(norm.entropy(scale=self.s))
+        return tf.reduce_sum(norm.entropy(scale=self.scale))
 
 class PointMass(Distribution):
     """
