@@ -23,7 +23,7 @@ def evaluate(metrics, model, variational, data):
     # 1. Sample a batch of latent variables from posterior
     xs = data.data
     n_minibatch = 100
-    zs, samples = variational.sample(xs, size=n_minibatch)
+    zs, samples = variational.sample(size=n_minibatch)
     feed_dict = variational.np_sample(samples, n_minibatch)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred, y_true = model.predict(xs, zs)

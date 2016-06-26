@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Mixture model using mean-field variational inference.
+Mixture model using maximum a posteriori.
 
 Probability model
     Mixture of Gaussians
@@ -11,14 +11,7 @@ Probability model
     for n = 1, ..., N
         c_n ~ Multinomial(pi)
         x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
-Variational model
-    Likelihood:
-        q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
-        q(pi) = Dirichlet(alpha')
-        q(mu_k) = N(mu'_k, Sigma'_k)
-        q(sigma_k) = Inv-Gamma(a'_k, b'_k)
-    (We collapse the c_n latent variables in the probability model's
-    joint density.)
+Inference: Laplace approximation
 
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """
@@ -26,7 +19,6 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.models import Variational, Dirichlet, Normal, InvGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims
 
@@ -62,6 +54,11 @@ class MixtureGaussian:
         pi = zs[:, 0:self.K]
         mus = zs[:, self.K:(self.K+self.K*self.D)]
         sigmas = zs[:, (self.K+self.K*self.D):(self.K+2*self.K*self.D)]
+        # Do the unconstrained to constrained transformation for MAP here.
+        pi = tf.sigmoid(pi)
+        pi = tf.concat(1, [pi[:, 0:(self.K-1)],
+             tf.expand_dims(1.0 - tf.reduce_sum(pi[:, 0:(self.K-1)], 1), 0)])
+        sigmas = ed.softplus(sigmas)
         return pi, mus, sigmas
 
     def log_prob(self, xs, zs):
@@ -69,14 +66,14 @@ class MixtureGaussian:
         N = get_dims(xs)[0]
         pi, mus, sigmas = self.unpack_params(zs)
         log_prior = dirichlet.logpdf(pi, self.alpha)
-        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
-        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
 
         # Loop over each mini-batch zs[b,:]
         log_lik = []
         n_minibatch = get_dims(zs)[0]
         for s in range(n_minibatch):
-            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
+            log_lik_z = N*tf.reduce_sum(tf.log(pi))
             for k in range(self.K):
                 log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
                     mus[s, (k*self.D):((k+1)*self.D)],
@@ -91,10 +88,5 @@ x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
-variational = Variational()
-variational.add(Dirichlet([1, model.K]))
-variational.add(Normal(model.K*model.D))
-variational.add(InvGamma(model.K*model.D))
-
-inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_minibatch=5, n_data=5)
+inference = ed.Laplace(model, data)
+inference.run(n_iter=250, n_data=5, n_print=50)

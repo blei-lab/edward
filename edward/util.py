@@ -115,13 +115,11 @@ def dot(x, y):
     if len(x.get_shape()) == 1:
         vec = x
         mat = y
-        d = vec.get_shape()[0].value
-        return tf.matmul(tf.reshape(vec, [1, d]), mat)
+        return tf.matmul(tf.expand_dims(vec, 0), mat)
     else:
         mat = x
         vec = y
-        d = vec.get_shape()[0].value
-        return tf.matmul(mat, tf.reshape(vec, [d, 1]))
+        return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 def get_dims(x):
     """
@@ -145,6 +143,45 @@ def get_session():
         _ED_SESSION = tf.InteractiveSession()
 
     return _ED_SESSION
+
+def hessian(y, xs):
+    """
+    Calculate Hessian of y with respect to each x in xs.
+
+    Parameters
+    ----------
+    y : tf.Tensor
+        Tensor to calculate Hessian of.
+    xs : list
+        List of TensorFlow variables to calculate with respect to.
+        The variables can have different shapes.
+    """
+    # Calculate flattened vector grad_{xs} y.
+    grads = tf.gradients(y, xs)
+    grads = [tf.reshape(grad, [-1]) for grad in grads]
+    grads = tf.concat(0, grads)
+    # Loop over each element in the vector.
+    mat = []
+    d = grads.get_shape()[0]
+    for j in range(d):
+        # Calculate grad_{xs} ( [ grad_{xs} y ]_j ).
+        gradjgrads = tf.gradients(grads[j], xs)
+        # Flatten into vector.
+        hi = []
+        for l in range(len(xs)):
+            hij = gradjgrads[l]
+            # return 0 if gradient doesn't exist; TensorFlow returns None
+            if hij is None:
+                hij = tf.zeros(xs[l].get_shape(), dtype=tf.float32)
+
+            hij = tf.reshape(hij, [-1])
+            hi.append(hij)
+
+        hi = tf.concat(0, hi)
+        mat.append(hi)
+
+    # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
+    return tf.pack(mat)
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     """
@@ -274,6 +311,13 @@ def set_seed(x):
     """
     np.random.seed(x)
     tf.set_random_seed(x)
+
+def softplus(x):
+    """
+    Softplus. TensorFlow can't currently autodiff through
+    tf.nn.softplus().
+    """
+    return tf.log(1.0 + tf.exp(x))
 
 # This is taken from PrettyTensor.
 # https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497

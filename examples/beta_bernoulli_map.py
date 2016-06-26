@@ -30,5 +30,6 @@ ed.set_seed(42)
 model = BetaBernoulli()
 data = ed.Data(tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32))
 
-inference = ed.MAP(model, data, transform=tf.sigmoid)
+params = tf.sigmoid(tf.Variable(tf.random_normal([1])))
+inference = ed.MAP(model, data, params=params)
 inference.run(n_iter=100, n_print=10)
