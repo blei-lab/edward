@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import cumprod, get_session, Variable
+from edward.util import cumprod, get_session
 
 class Variational:
     """A stack of distribution objects."""
@@ -222,7 +222,7 @@ class Bernoulli(Distribution):
         self.sample_tensor = False
 
         if p is None:
-            p_unconst = Variable("p", [self.num_params])
+            p_unconst = tf.Variable(tf.random_normal([self.num_params]))
             p = tf.sigmoid(p_unconst)
 
         self.p = p
@@ -262,11 +262,11 @@ class Beta(Distribution):
         self.sample_tensor = False
 
         if alpha is None:
-            alpha_unconst = Variable("alpha", [self.num_vars])
+            alpha_unconst = tf.Variable(tf.random_normal([self.num_vars]))
             alpha = tf.nn.softplus(alpha_unconst)
 
         if beta is None:
-            beta_unconst = Variable("beta", [self.num_vars])
+            beta_unconst = tf.Variable(tf.random_normal([self.num_vars]))
             beta = tf.nn.softplus(beta_unconst)
 
         self.alpha = alpha
@@ -314,7 +314,7 @@ class Dirichlet(Distribution):
         self.sample_tensor = False
 
         if alpha is None:
-            alpha_unconst = Variable("dirichlet_alpha", [self.num_factors, self.K])
+            alpha_unconst = tf.Variable(tf.random_normal([self.num_factors, self.K]))
             alpha = tf.nn.softplus(alpha_unconst)
 
         self.alpha = alpha
@@ -358,11 +358,11 @@ class InvGamma(Distribution):
         self.sample_tensor = False
 
         if alpha is None:
-            alpha_unconst = Variable("alpha", [self.num_vars])
+            alpha_unconst = tf.Variable(tf.random_normal([self.num_vars]))
             alpha = tf.nn.softplus(alpha_unconst) + 1e-2
 
         if beta is None:
-            beta_unconst = Variable("beta", [self.num_vars])
+            beta_unconst = tf.Variable(tf.random_normal([self.num_vars]))
             beta = tf.nn.softplus(beta_unconst) + 1e-2
 
         self.alpha = alpha
@@ -419,7 +419,7 @@ class Multinomial(Distribution):
 
         if pi is None:
             # Transform a real (K-1)-vector to K-dimensional simplex.
-            pi_unconst = Variable("pi", [self.num_factors, self.K-1])
+            pi_unconst = tf.Variable(tf.random_normal([self.num_factors, self.K-1]))
             eq = -tf.log(tf.cast(self.K - 1 - tf.range(self.K-1), dtype=tf.float32))
             x = tf.sigmoid(eq + pi_unconst)
             pil = tf.concat(1, [x, tf.ones([self.num_factors, 1])])
@@ -469,10 +469,10 @@ class Normal(Distribution):
         self.sample_tensor = True
 
         if loc is None:
-            loc = Variable("mu", [self.num_vars])
+            loc = tf.Variable(tf.random_normal([self.num_vars]))
 
         if scale is None:
-            scale_unconst = Variable("sigma", [self.num_vars])
+            scale_unconst = tf.Variable(tf.random_normal([self.num_vars]))
             scale = tf.nn.softplus(scale_unconst)
 
         self.loc = loc
@@ -526,7 +526,7 @@ class PointMass(Distribution):
         self.sample_tensor = True
 
         if params is None:
-            params = Variable("params", [self.num_vars])
+            params = tf.Variable(tf.random_normal([self.num_vars]))
 
         self.params = params
 
