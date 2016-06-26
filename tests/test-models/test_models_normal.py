@@ -10,10 +10,9 @@ sess = tf.Session()
 ed.set_seed(98765)
 
 def _test_log_prob_i(n_minibatch, num_factors):
-    normal = Normal(num_factors)
-    normal.m = tf.constant([0.0] * num_factors)
-    normal.s = tf.constant([1.0] * num_factors)
-
+    normal = Normal(num_factors,
+                    loc=tf.constant([0.0] * num_factors),
+                    scale=tf.constant([1.0] * num_factors))
     with sess.as_default():
         m = normal.m.eval()
         s = normal.s.eval()
