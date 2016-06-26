@@ -126,9 +126,9 @@ class Variational:
     def _set_params(self, params):
         [layer.set_params(params[i]) for i,layer in enumerate(self.layers)]
 
-class Likelihood:
+class Distribution:
     """
-    Base class for variational likelihoods, q(z | lambda).
+    Base class for distributions, q(z | lambda).
 
     Parameters
     ----------
@@ -138,8 +138,8 @@ class Likelihood:
     def __init__(self, num_factors=1):
         get_session()
         self.num_factors = num_factors
-        self.num_vars = None # number of posterior latent variables
-        self.num_params = None # number of variational parameters
+        self.num_vars = None # number of random variables
+        self.num_params = None # number of parameters
         self.sample_tensor = False
 
     def mapping(self, x):
@@ -276,13 +276,13 @@ class Likelihood:
         """
         raise NotImplementedError()
 
-class Bernoulli(Likelihood):
+class Bernoulli(Distribution):
     """
     q(z | lambda) = prod_{i=1}^d Bernoulli(z[i] | p[i])
     where lambda = p.
     """
     def __init__(self, *args, **kwargs):
-        Likelihood.__init__(self, *args, **kwargs)
+        Distribution.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = self.num_factors
         self.sample_tensor = False
@@ -320,13 +320,13 @@ class Bernoulli(Likelihood):
     def entropy(self):
         return tf.reduce_sum(bernoulli.entropy(self.p))
 
-class Beta(Likelihood):
+class Beta(Distribution):
     """
     q(z | lambda) = prod_{i=1}^d Beta(z[i] | a[i], b[i])
     where lambda = {a, b}.
     """
     def __init__(self, *args, **kwargs):
-        Likelihood.__init__(self, *args, **kwargs)
+        Distribution.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
         self.sample_tensor = False
@@ -371,14 +371,14 @@ class Beta(Likelihood):
     def entropy(self):
         return tf.reduce_sum(beta.entropy(self.a, self.b))
 
-class Dirichlet(Likelihood):
+class Dirichlet(Distribution):
     """
     q(z | lambda) = prod_{i=1}^d Dirichlet(z_i | alpha[i, :])
     where z is a flattened vector such that z_i represents
     the ith factor z[(i-1)*K:i*K], and lambda = alpha.
     """
     def __init__(self, num_factors, K):
-        Likelihood.__init__(self, num_factors)
+        Distribution.__init__(self, num_factors)
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
@@ -421,13 +421,13 @@ class Dirichlet(Likelihood):
     def entropy(self):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
 
-class InvGamma(Likelihood):
+class InvGamma(Distribution):
     """
     q(z | lambda) = prod_{i=1}^d Inv_Gamma(z[i] | a[i], b[i])
     where lambda = {a, b}.
     """
     def __init__(self, *args, **kwargs):
-        Likelihood.__init__(self, *args, **kwargs)
+        Distribution.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
         self.sample_tensor = False
@@ -472,7 +472,7 @@ class InvGamma(Likelihood):
     def entropy(self):
         return tf.reduce_sum(invgamma.entropy(self.a, self.b))
 
-class Multinomial(Likelihood):
+class Multinomial(Distribution):
     """
     q(z | lambda ) = prod_{i=1}^d Multinomial(z_i | pi[i, :])
     where z is a flattened vector such that z_i represents
@@ -487,7 +487,7 @@ class Multinomial(Likelihood):
         if K == 1:
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
-        Likelihood.__init__(self, num_factors)
+        Distribution.__init__(self, num_factors)
         self.num_vars = K*num_factors
         self.num_params = K*num_factors
         self.K = K # dimension of each factor
@@ -537,13 +537,13 @@ class Multinomial(Likelihood):
     def entropy(self):
         return tf.reduce_sum(multinomial.entropy(1, self.pi))
 
-class Normal(Likelihood):
+class Normal(Distribution):
     """
     q(z | lambda ) = prod_{i=1}^d Normal(z[i] | m[i], s[i])
     where lambda = {m, s}.
     """
     def __init__(self, *args, **kwargs):
-        Likelihood.__init__(self, *args, **kwargs)
+        Distribution.__init__(self, *args, **kwargs)
         self.num_vars = self.num_factors
         self.num_params = 2*self.num_factors
         self.sample_tensor = True
@@ -594,7 +594,7 @@ class Normal(Likelihood):
     def entropy(self):
         return tf.reduce_sum(norm.entropy(scale=self.s))
 
-class PointMass(Likelihood):
+class PointMass(Distribution):
     """
     Point mass variational family
 
@@ -603,7 +603,7 @@ class PointMass(Likelihood):
     with density equal to 1 if x == p and 0 otherwise.
     """
     def __init__(self, num_vars=1, transform=tf.identity):
-        Likelihood.__init__(self, 1)
+        Distribution.__init__(self, 1)
         self.num_vars = num_vars
         self.num_params = num_vars
         self.transform = transform
