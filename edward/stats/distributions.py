@@ -122,7 +122,7 @@ class Beta:
 
 class Binom:
     def rvs(self, n, p, size=1):
-        return stats.binom.rvs(p, size=size)
+        return stats.binom.rvs(n, p, size=size)
 
     def logpmf(self, x, n, p):
         x = tf.cast(x, dtype=tf.float32)
