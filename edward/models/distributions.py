@@ -6,7 +6,7 @@ from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_session
 
 class Variational:
-    """A stack of distribution objects."""
+    """A container for collecting distribution objects."""
     def __init__(self, layers=[]):
         get_session()
         self.layers = layers
@@ -47,7 +47,7 @@ class Variational:
 
         Parameters
         ----------
-            layer: layer instance.
+        layer: layer instance.
         """
         self.layers += [layer]
         self.num_factors += layer.num_factors
@@ -62,7 +62,7 @@ class Variational:
         """
         Draws a mix of tensors and placeholders, corresponding to
         TensorFlow-based samplers and SciPy-based samplers depending
-        on the distribution factor.
+        on the layer.
 
         Parameters
         ----------
@@ -123,13 +123,13 @@ class Distribution:
     Parameters
     ----------
     num_factors : int
-        Number of factors. Default is 1.
+        Number of factors.
     """
     def __init__(self, num_factors=1):
         get_session()
         self.num_factors = num_factors
-        self.num_vars = None # number of random variables
-        self.num_params = None # number of parameters
+        self.num_vars = None
+        self.num_params = None
         self.sample_tensor = False
 
     def sample_noise(self, size=1):
@@ -139,9 +139,9 @@ class Distribution:
 
         Returns
         -------
-        np.ndarray
-            size x dim(params) array of type np.float32, where each
-            row is a sample from p.
+        tf.Tensor
+            size x shape array of type tf.float32, where each row is a
+            sample from s.
         """
         raise NotImplementedError()
 
@@ -149,6 +149,12 @@ class Distribution:
         """
         eps = sample_noise() ~ s(eps)
         s.t. x = reparam(eps; params) ~ p(x | params)
+
+        Returns
+        -------
+        tf.Tensor
+            size x shape array of type tf.float32, where each row is a
+            sample from s.
         """
         raise NotImplementedError()
 
@@ -166,12 +172,12 @@ class Distribution:
         -----
         The return object is a TensorFlow tensor if the flag
         sample_tensor is true. Otherwise the return object is a
-        realization of a TensorFlow tensor, i.e., NumPy arrays. The
+        realization of a TensorFlow tensor, i.e., NumPy array. The
         latter is required when we require NumPy/SciPy in order to
         sample from distributions.
 
         The method defaults to sampling noise and reparameterizing it
-        (which will raise an error if this is not possible).
+        (an error is raised if this is not possible).
         """
         return self.reparam(self.sample_noise(size))
 
@@ -538,10 +544,13 @@ class PointMass(Distribution):
         return "parameter values: \n" + params.__str__()
 
     def sample(self, size=1):
-        # Return a matrix where each row is the same set of
-        # parameters. This is to be compatible with probability model
-        # methods which assume the input is possibly a mini-batch of
-        # parameter samples (as in black box variational methods).
+        """
+        Return a tensor where slices along the first dimension is
+        the same set of parameters. This is to be compatible with
+        probability model methods which assume the input is possibly
+        a batch of parameter samples (as in black box variational
+        methods).
+        """
         return tf.pack([self.params]*size)
 
     def log_prob_i(self, i, xs):
@@ -550,5 +559,5 @@ class PointMass(Distribution):
             raise IndexError()
 
         # a vector where the jth element is 1 if xs[j, i] is equal to
-        # the ith parameter, 0 otherwise
+        # params[i], 0 otherwise
         return tf.cast(tf.equal(xs[:, i], self.params[i]), dtype=tf.float32)
