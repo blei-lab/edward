@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from edward.data import Data
 from edward.models import Variational, PointMass
-from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp
+from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:
     import prettytensor as pt
@@ -199,12 +199,10 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
-
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
@@ -218,13 +216,11 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, z)
-
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) - q_log_prob)
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
+                                   self.variational.log_prob(z))
         return -self.loss
 
     def build_score_loss_kl(self):
@@ -238,12 +234,10 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
-
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_lik = self.model.log_lik(x, z)
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -260,12 +254,10 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
-
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
@@ -283,7 +275,8 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -300,7 +293,8 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -346,13 +340,11 @@ class KLpq(VariationalInference):
               + w(z^b; lambda) = p(x, z^b) / q(z^b; lambda)
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
-
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
+        self.samples = self.variational.sample(self.n_minibatch)
+        z = self.samples
 
         # normalized importance weights
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         log_w = self.model.log_prob(x, z) - q_log_prob
         log_w_norm = log_w - log_sum_exp(log_w)
         w_norm = tf.exp(log_w_norm)
@@ -376,7 +368,7 @@ class MAP(VariationalInference):
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample()
+        z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
@@ -393,14 +385,14 @@ class Laplace(VariationalInference):
 
     def build_loss(self):
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample()
+        z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
     def finalize(self):
         get_session()
         x = self.data.sample(self.n_data) # uses mini-batch
-        z, _ = self.variational.sample()
+        z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
         inv_cov = hessian(self.model.log_prob(x, z), var_list)

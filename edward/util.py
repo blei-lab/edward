@@ -252,3 +252,12 @@ def softplus(x):
     tf.nn.softplus().
     """
     return tf.log(1.0 + tf.exp(x))
+
+def stop_gradient(x):
+    """
+    Apply tf.stop_gradient() element-wise.
+    """
+    if isinstance(x, tf.Tensor):
+        return tf.stop_gradient(x)
+    else: # list
+        return [tf.stop_gradient(i) for i in x]

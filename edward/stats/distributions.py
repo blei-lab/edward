@@ -12,7 +12,10 @@ class Distribution:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            If size > 1, np.array of dimension (size x shape), where
+            shape is the shape of its parameter argument.
+            If size = 1, np.array of dimension shape.
+            TODO
 
         Notes
         -----
@@ -26,25 +29,31 @@ class Distribution:
         Parameters
         ---------
         x : np.array or tf.Tensor
-            If univariate distribution, can be a scalar, vector, or matrix.
-            If multivariate distribution, can be a vector or matrix.
+            If univariate distribution, can be a scalar or tensor.
+            If multivariate distribution, can be a tensor; the outer
+            dimension carries the multivariate dimension.
+            TODO
+            do i actually need this for log_prob_idx() or can i undo
+            these spec changes?
 
         params : np.array or tf.Tensor
             scalar unless documented otherwise
+            TODO
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            If univariate distribution, returns a tensor of same
+            shape as input.
+            If multivariate distribution, returns a tensor of
+            shape[-1] from input: the outer dimension carries the
+            multivariate dimension.
         """
         raise NotImplementedError()
 
     def entropy(self):
         """
+        TODO
         Parameters
         ---------
         params : np.array or tf.Tensor
@@ -70,6 +79,11 @@ class Distribution:
 
 class Bernoulli:
     def rvs(self, p, size=1):
+        # TODO special behavior if args are >= 2d
+        # TODO unit testing
+        #if size == 1:
+        #    return stats.bernoulli.rvs(p)
+
         return stats.bernoulli.rvs(p, size=size)
 
     def logpmf(self, x, p):
