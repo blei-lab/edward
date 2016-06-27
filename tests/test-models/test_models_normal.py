@@ -9,28 +9,27 @@ from scipy import stats
 sess = tf.Session()
 ed.set_seed(98765)
 
-def _test_log_prob_zi(n_minibatch, num_factors):
-    normal = Normal(num_factors)
-    normal.m = tf.constant([0.0] * num_factors)
-    normal.s = tf.constant([1.0] * num_factors)
-
+def _test_log_prob_i(n_minibatch, num_factors):
+    normal = Normal(num_factors,
+                    loc=tf.constant([0.0] * num_factors),
+                    scale=tf.constant([1.0] * num_factors))
     with sess.as_default():
-        m = normal.m.eval()
-        s = normal.s.eval()
+        m = normal.loc.eval()
+        s = normal.scale.eval()
         z = np.random.randn(n_minibatch, num_factors)
         for i in range(num_factors):
             assert np.allclose(
-                normal.log_prob_zi(i, tf.constant(z, dtype=tf.float32)).eval(),
+                normal.log_prob_i(i, tf.constant(z, dtype=tf.float32)).eval(),
                 stats.norm.logpdf(z[:, i], m[i], s[i]))
 
-def test_log_prob_zi_1d_1v():
-    _test_log_prob_zi(1, 1)
+def test_log_prob_i_1d_1v():
+    _test_log_prob_i(1, 1)
 
-def test_log_prob_zi_2d_1v():
-    _test_log_prob_zi(2, 1)
+def test_log_prob_i_2d_1v():
+    _test_log_prob_i(2, 1)
 
-def test_log_prob_zi_1d_2v():
-    _test_log_prob_zi(1, 2)
+def test_log_prob_i_1d_2v():
+    _test_log_prob_i(1, 2)
 
-def test_log_prob_zi_2d_2v():
-    _test_log_prob_zi(2, 2)
+def test_log_prob_i_2d_2v():
+    _test_log_prob_i(2, 2)

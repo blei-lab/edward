@@ -49,13 +49,11 @@ def dot(x, y):
     if len(x.get_shape()) == 1:
         vec = x
         mat = y
-        d = vec.get_shape()[0].value
-        return tf.matmul(tf.reshape(vec, [1, d]), mat)
+        return tf.matmul(tf.expand_dims(vec, 0), mat)
     else:
         mat = x
         vec = y
-        d = vec.get_shape()[0].value
-        return tf.matmul(mat, tf.reshape(vec, [d, 1]))
+        return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 def get_dims(x):
     """
@@ -79,6 +77,45 @@ def get_session():
         _ED_SESSION = tf.InteractiveSession()
 
     return _ED_SESSION
+
+def hessian(y, xs):
+    """
+    Calculate Hessian of y with respect to each x in xs.
+
+    Parameters
+    ----------
+    y : tf.Tensor
+        Tensor to calculate Hessian of.
+    xs : list
+        List of TensorFlow variables to calculate with respect to.
+        The variables can have different shapes.
+    """
+    # Calculate flattened vector grad_{xs} y.
+    grads = tf.gradients(y, xs)
+    grads = [tf.reshape(grad, [-1]) for grad in grads]
+    grads = tf.concat(0, grads)
+    # Loop over each element in the vector.
+    mat = []
+    d = grads.get_shape()[0]
+    for j in range(d):
+        # Calculate grad_{xs} ( [ grad_{xs} y ]_j ).
+        gradjgrads = tf.gradients(grads[j], xs)
+        # Flatten into vector.
+        hi = []
+        for l in range(len(xs)):
+            hij = gradjgrads[l]
+            # return 0 if gradient doesn't exist; TensorFlow returns None
+            if hij is None:
+                hij = tf.zeros(xs[l].get_shape(), dtype=tf.float32)
+
+            hij = tf.reshape(hij, [-1])
+            hi.append(hij)
+
+        hi = tf.concat(0, hi)
+        mat.append(hi)
+
+    # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
+    return tf.pack(mat)
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     """
@@ -209,78 +246,9 @@ def set_seed(x):
     np.random.seed(x)
     tf.set_random_seed(x)
 
-# This is taken from PrettyTensor.
-# https://github.com/google/prettytensor/blob/c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/pretty_tensor_class.py#L1497
-class VarStoreMethod(object):
-  """Convenience base class for registered methods that create variables.
-  This tracks the variables and requries subclasses to provide a __call__
-  method.
-  """
-
-  def __init__(self):
-    self.vars = {}
-
-  def variable(self, var_name, shape, init=tf.random_normal_initializer(), dt=tf.float32, train=True):
-    """Adds a named variable to this bookkeeper or returns an existing one.
-    Variables marked train are returned by the training_variables method. If
-    the requested name already exists and it is compatible (same shape, dt and
-    train) then it is returned. In case of an incompatible type, an exception is
-    thrown.
-    Args:
-      var_name: The unique name of this variable.  If a variable with the same
-        name exists, then it is returned.
-      shape: The shape of the variable.
-      init: The init function to use or a Tensor to copy.
-      dt: The datatype, defaults to float.  This will automatically extract the
-        base dtype.
-      train: Whether or not the variable should be trained.
-    Returns:
-      A TensorFlow tensor.
-    Raises:
-      ValueError: if reuse is False (or unspecified and allow_reuse is False)
-        and the variable already exists or if the specification of a reused
-        variable does not match the original.
+def softplus(x):
     """
-    # Make sure it is a TF dtype and convert it into a base dtype.
-    dt = tf.as_dtype(dt).base_dtype
-    if var_name in self.vars:
-      v = self.vars[var_name]
-      if v.get_shape() != shape:
-        raise ValueError(
-            'Shape mismatch: %s vs %s. Perhaps a UnboundVariable had '
-            'incompatible values within a graph.' % (v.get_shape(), shape))
-      return v
-    elif callable(init):
-
-      v = tf.get_variable(var_name,
-                          shape=shape,
-                          dtype=dt,
-                          initializer=init,
-                          trainable=train)
-      self.vars[var_name] = v
-      return v
-    else:
-      v = tf.convert_to_tensor(init, name=var_name, dtype=dt)
-      v.get_shape().assert_is_compatible_with(shape)
-      self.vars[var_name] = v
-      return v
-
-class VARIABLE(VarStoreMethod):
+    Softplus. TensorFlow can't currently autodiff through
+    tf.nn.softplus().
     """
-    A simple wrapper to contain variables. It will create a TensorFlow
-    variable the first time it is called and return the variable; in
-    subsequent calls, it will simply return the variable and not
-    create the TensorFlow variable again.
-
-    This enables variables to be stored outside of classes which
-    depend on parameters. It is a useful application for parametric
-    distributions whose parameters may or may not be random (e.g.,
-    through a prior), and for inverse mappings such as auto-encoders
-    where we'd like to store inverse mapping parameters outside of the
-    distribution class.
-    """
-    def __call__(self, name, shape):
-        self.name = name
-        return self.variable(name, shape)
-
-Variable = VARIABLE()
+    return tf.log(1.0 + tf.exp(x))

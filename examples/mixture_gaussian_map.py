@@ -89,4 +89,4 @@ data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
 inference = ed.MAP(model, data)
-inference.run(n_iter=1000, n_data=5, n_print=50)
+inference.run(n_iter=250, n_data=5, n_print=50)

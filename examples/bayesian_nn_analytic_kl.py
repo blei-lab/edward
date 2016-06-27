@@ -133,8 +133,8 @@ for t in range(1000):
         print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
         # Sample functions from variational model
-        mean, std = sess.run([variational.layers[0].m,
-                              variational.layers[0].s])
+        mean, std = sess.run([variational.layers[0].loc,
+                              variational.layers[0].scale])
         rs = np.random.RandomState(0)
         zs = rs.randn(10, variational.num_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)

@@ -12,32 +12,33 @@ and probabilistic programming.
 
 It supports __modeling languages__ including
 
-* [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Keras](http://keras.io), [Pretty Tensor](https://github.com/google/prettytensor), or [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
-* [Stan](http://mc-stan.org)
-* [PyMC3](http://pymc-devs.github.io/pymc3/)
-* original Python using [NumPy/SciPy](http://scipy.org/)
++ [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Keras](http://keras.io), [Pretty Tensor](https://github.com/google/prettytensor), or [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
++ [Stan](http://mc-stan.org)
++ [PyMC3](http://pymc-devs.github.io/pymc3/)
++ original Python using [NumPy/SciPy](http://scipy.org/)
 
 It supports __inference__ via
 
-* Variational inference
-    * Black box variational inference
-    * Stochastic variational inference
-    * Variational auto-encoders
-    * Inclusive KL divergence (KL(p || q))
-* Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
-* Maximum a posteriori (penalized maximum likelihood, maximum likelihood)
++ Variational inference
+    + Black box variational inference
+    + Stochastic variational inference
+    + Variational auto-encoders
+    + Inclusive KL divergence (KL(p || q))
+    + Laplace approximation
++ Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
++ Maximum a posteriori (penalized maximum likelihood, maximum likelihood)
 
 It supports __criticism__ of the model and inference via
 
-* Evaluations on both supervised and unsupervised tasks
-* Posterior predictive checks
++ Evaluations on both supervised and unsupervised tasks
++ Posterior predictive checks
 
 It also has __features__ including
 
-* [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
-* A library for probability distributions in TensorFlow
-* Documentation and tutorials
-* Examples demonstrating state-of-the-art generative models and inference
++ [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
++ A library for probability distributions in TensorFlow
++ Documentation and tutorials
++ Examples demonstrating state-of-the-art generative models and inference
 
 ## Getting Started
 
@@ -45,13 +46,13 @@ It also has __features__ including
 for getting started with Edward. We highlight a few examples, more of
 which can be found in [`examples/`](examples/):
 
-* [Bayesian linear regression](examples/bayesian_linear_regression.py)
-* [Hierarchical logistic regression](examples/hierarchical_logistic_regression.py)
-* [Mixture model of Gaussians](examples/mixture_gaussian.py)
-* [Gaussian process classification](examples/gp_classification.py)
-* [Bayesian neural network](examples/bayesian_nn.py)
-* [Mixture density network](examples/mixture_density_network.py)
-* [Variational auto-encoder](examples/convolutional_vae.py)
++ [Bayesian linear regression](examples/bayesian_linear_regression.py)
++ [Hierarchical logistic regression](examples/hierarchical_logistic_regression.py)
++ [Mixture model of Gaussians](examples/mixture_gaussian.py)
++ [Gaussian process classification](examples/gp_classification.py)
++ [Bayesian neural network](examples/bayesian_nn.py)
++ [Mixture density network](examples/mixture_density_network.py)
++ [Variational auto-encoder](examples/convolutional_vae.py)
 
 Read the documentation on the [website](http://edwardlib.org).
 
