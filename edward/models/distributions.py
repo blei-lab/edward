@@ -274,6 +274,7 @@ class Distribution:
 
         # TODO loop over all possible indices
         #for l in range(len(self.shape)):
+        # Loop over each random variable.
         for i in range(self.shape[0]):
             idx = (i, )
             log_prob += self.log_prob_idx(idx, xs)
@@ -346,17 +347,14 @@ class Bernoulli(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if any(i > j for i, j in zip(idx, self.shape)):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
             full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx
         else:
             raise IndexError()
@@ -403,17 +401,14 @@ class Beta(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if any(i > j for i, j in zip(idx, self.shape)):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
             full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx
         else:
             raise IndexError()
@@ -456,18 +451,15 @@ class Dirichlet(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
-        if any(i > j for i, j in zip(idx, self.shape[:-1])):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
             # TODO can i really handle that?
             full_idx = (slice(0, None), ) + idx + (slice(0, None), )
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx + (slice(0, None), )
         else:
             raise IndexError()
@@ -512,17 +504,14 @@ class InvGamma(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if any(i > j for i, j in zip(idx, self.shape)):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
             full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx
         else:
             raise IndexError()
@@ -586,17 +575,15 @@ class Multinomial(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
-        if any(i > j for i, j in zip(idx, self.shape[:-1])):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
+            # TODO can i really handle that?
             full_idx = (slice(0, None), ) + idx + (slice(0, None), )
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx + (slice(0, None), )
         else:
             raise IndexError()
@@ -637,7 +624,10 @@ class Normal(Distribution):
         eps = sample_noise() ~ s(eps)
         s.t. x = reparam(eps; params) ~ p(x | params)
         """
-        return tf.random_normal((size, ) + self.shape)
+        if size == 1:
+            return tf.random_normal(self.shape)
+        else:
+            return tf.random_normal((size, ) + self.shape)
 
     def reparam(self, eps):
         """
@@ -648,17 +638,14 @@ class Normal(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if any(i > j for i, j in zip(idx, self.shape)):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
             full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx
         else:
             raise IndexError()
@@ -714,17 +701,14 @@ class PointMass(Distribution):
         the jth element is 1 if xs[j, idx] is equal to params[idx], 0
         otherwise. If xs has dimensions self.shape, a scalar.
         """
-        if any(i > j for i, j in zip(idx, self.shape)):
-            raise IndexError()
-
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape) + 1: # n_minibatch x shape
             full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape):
+        elif rank == len(self.shape): # shape
             full_idx = idx
         else:
             raise IndexError()
