@@ -278,27 +278,42 @@ class Distribution:
         # multivariate distribution, this is over all but the last
         # index.
         if len(self.shape) == 1:
-            if not self.is_multivariate:
-                for i in range(self.shape[0]):
-                    idx = (i, )
-                    log_prob += self.log_prob_idx(idx, xs)
-
-            else:
+            if self.is_multivariate:
                 idx = ()
                 log_prob += self.log_prob_idx(idx, xs)
-
-        elif len(self.shape) == 2:
-            if not self.is_multivariate:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[0]):
-                        idx = (i, j, )
-                        log_prob += self.log_prob_idx(idx, xs)
             else:
                 for i in range(self.shape[0]):
                     idx = (i, )
                     log_prob += self.log_prob_idx(idx, xs)
-        else: # len(self.shape) >= 3
-            # TODO there should be a generic recursive solution
+
+        elif len(self.shape) == 2:
+            if self.is_multivariate:
+                for i in range(self.shape[0]):
+                    idx = (i, )
+                    log_prob += self.log_prob_idx(idx, xs)
+
+            else:
+                for i in range(self.shape[0]):
+                    for j in range(self.shape[1]):
+                        idx = (i, j, )
+                        log_prob += self.log_prob_idx(idx, xs)
+
+        elif len(self.shape) == 3:
+            if self.is_multivariate:
+                for i in range(self.shape[0]):
+                    for j in range(self.shape[1]):
+                        idx = (i, j, )
+                        log_prob += self.log_prob_idx(idx, xs)
+
+            else:
+                for i in range(self.shape[0]):
+                    for j in range(self.shape[1]):
+                        for k in range(self.shape[2]):
+                            idx = (i, j, k, )
+                            log_prob += self.log_prob_idx(idx, xs)
+
+        else: # len(self.shape) >= 4
+            # There should be a generic recursive solution.
             raise NotImplementedError()
 
         return log_prob
