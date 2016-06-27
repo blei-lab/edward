@@ -328,7 +328,8 @@ class Distribution:
             Index of the random variable to take the log density of.
             If univariate distribution, idx is of length
             len(self.shape). If multivariate distribution, idx is of
-            length len(self.shape[:-1]).
+            length len(self.shape[:-1]); note if len(self.shape) is 1
+            for multivariate, then idx must be an empty tuple.
         xs : tf.Tensor or np.ndarray
             (n_minibatch x self.shape) or self.shape
 
@@ -400,8 +401,6 @@ class Bernoulli(Distribution):
         return bernoulli.logpmf(xs[full_idx], self.p[idx])
 
     def entropy(self):
-        # TODO double check entropy can even handle tensors with the
-        # right vectorization
         return tf.reduce_sum(bernoulli.entropy(self.p))
 
 class Beta(Distribution):
@@ -498,27 +497,13 @@ class Dirichlet(Distribution):
             rank = len(xs.shape)
 
         if rank == len(self.shape) + 1: # n_minibatch x shape
-            # TODO can i really handle that?
             full_idx = (slice(0, None), ) + idx
         elif rank == len(self.shape): # shape
             full_idx = idx
         else:
             raise IndexError()
 
-        # TODO does this only apply to multivariate?
-        # TensorFlow doesn't support subsetting when index is empty,
-        # so control indexing case-by-case.
-        if idx != () and full_idx != ():
-            # [log p(xs[1,idx] | params[idx]), ..., log p(xs[S,idx] | params[idx])]
-            return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
-        elif idx == () and full_idx != ():
-            # [log p(xs[1] | params), ..., log p(xs[S] | params)]
-            return dirichlet.logpdf(xs[full_idx], self.alpha)
-        else:
-            # log p(xs | params)
-            return dirichlet.logpdf(xs, self.alpha)
-        # TODO n_minibatch=1
-        # TODO n_minibatch=5
+        return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
 
     def entropy(self):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
@@ -631,16 +616,16 @@ class Multinomial(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
+        idx = idx + (slice(0, None), )
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
             rank = len(xs.shape)
 
         if rank == len(self.shape) + 1: # n_minibatch x shape
-            # TODO can i really handle that?
-            full_idx = (slice(0, None), ) + idx + (slice(0, None), )
+            full_idx = (slice(0, None), ) + idx
         elif rank == len(self.shape): # shape
-            full_idx = idx + (slice(0, None), )
+            full_idx = idx
         else:
             raise IndexError()
 

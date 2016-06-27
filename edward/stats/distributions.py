@@ -63,6 +63,8 @@ class Distribution:
         params : np.array or tf.Tensor
             If univariate distribution, can be a scalar or vector.
             If multivariate distribution, can be a vector or matrix.
+        # TODO double check entropy can even handle tensors with the
+        # right vectorization
 
         Returns
         -------
