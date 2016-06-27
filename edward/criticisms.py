@@ -23,8 +23,8 @@ def evaluate(metrics, model, variational, data):
     # 1. Sample a batch of latent variables from posterior
     xs = data.data
     n_minibatch = 100
-    zs, samples = variational.sample(size=n_minibatch)
-    feed_dict = variational.np_sample(samples, n_minibatch)
+    zs = variational.sample(size=n_minibatch)
+    feed_dict = variational.np_dict(zs)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred, y_true = model.predict(xs, zs)
 
@@ -141,8 +141,8 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     # We must fetch zs out of the session because sample_likelihood()
     # may require a SciPy-based sampler.
     if variational != None:
-        zs, samples = variational.sample(y, size=size)
-        feed_dict = variational.np_sample(samples, size)
+        zs = variational.sample(y, size=size)
+        feed_dict = variational.np_dict(zs)
         zs = sess.run(zs, feed_dict)
     else:
         zs = model.sample_prior(size=size)
