@@ -157,30 +157,6 @@ class Variational:
 
         return log_prob
 
-    #def log_prob_idx(self, idx, xs):
-    #    """
-    #    Parameters
-    #    ----------
-    #    idx : tuple
-    #        (element in list x shape) if more than one layer; shape if
-    #        only one layer
-    #    xs : list or tf.Tensor or np.array
-    #         If more than one layer, a list of tf.Tensors or np.array's
-    #         of dimension (batch x shape). If one layer, a tf.Tensor or
-    #         np.array of (batch x shape).
-    #    """
-    #    # TODO implement above
-    #    start = final = 0
-    #    for layer in self.layers:
-    #        final += layer.num_vars
-    #        if i < layer.num_factors:
-    #            return layer.log_prob_idx(i, xs[:, start:final])
-
-    #        i = i - layer.num_factors
-    #        start = final
-
-    #    raise IndexError()
-
     def entropy(self):
         out = tf.constant(0.0, dtype=tf.float32)
         for layer in self.layers:
@@ -301,8 +277,6 @@ class Distribution:
         # If univariate distribution, this is over all indices; if
         # multivariate distribution, this is over all but the last
         # index.
-        # TODO
-        #for l in range(len(self.shape)):
         if len(self.shape) == 1:
             if not self.is_multivariate:
                 for i in range(self.shape[0]):
@@ -323,6 +297,9 @@ class Distribution:
                 for i in range(self.shape[0]):
                     idx = (i, )
                     log_prob += self.log_prob_idx(idx, xs)
+        else: # len(self.shape) >= 3
+            # TODO there should be a generic recursive solution
+            raise NotImplementedError()
 
         return log_prob
 
