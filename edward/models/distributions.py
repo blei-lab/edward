@@ -85,7 +85,7 @@ class Variational:
 
         return tf.concat(1, samples), samples
 
-    def np_sample(self, samples, size=1):
+    def np_dict(self, samples):
         """
         Form dictionary to feed any placeholders with np.array
         samples.
@@ -93,6 +93,7 @@ class Variational:
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
+                size = sample.get_shape()[0]
                 feed_dict[sample] = layer.sample(size)
 
         return feed_dict
