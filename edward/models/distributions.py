@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import cumprod, get_session
+from edward.util import cumprod, get_dims, get_session
 
 class Variational:
     """A container for collecting distribution objects."""
@@ -18,6 +18,7 @@ class Variational:
             self.is_normal = True
             self.is_entropy = True
             self.sample_tensor = []
+            self.is_multivariate = []
         else:
             self.shape = [layer.shape for layer in self.layers]
             self.num_vars = sum([layer.num_vars for layer in self.layers])
@@ -29,6 +30,7 @@ class Variational:
             self.is_entropy = all(['entropy' in layer.__class__.__dict__
                                    for layer in self.layers])
             self.sample_tensor = [layer.sample_tensor for layer in self.layers]
+            self.is_multivariate = [layer.is_multivariate for layer in self.layers]
 
     def __str__(self):
         string = ""
@@ -57,6 +59,7 @@ class Variational:
         self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.sample_tensor += [layer.sample_tensor]
+        self.is_multivariate += [layer.is_multivariate]
 
     def sample(self, size=1):
         """
@@ -105,7 +108,10 @@ class Variational:
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
-                size = sample.get_shape()[0]
+                size = get_dims(sample)
+                if layer.is_multivariate:
+                    size = size[:-1]
+
                 feed_dict[sample] = layer.sample(size)
 
         return feed_dict
@@ -127,10 +133,23 @@ class Variational:
         if len(self.layers) == 1:
             return self.layers[0].log_prob(xs)
 
-        n_minibatch = xs[0].get_shape()[0]
-        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        # check based on first xs
+        # TODO this doesn't hold if xs[l] has different
+        # n_minibatch sizes, or one is n_minibatch x shape and
+        # another is shape; document this
+        # somewhere it assumes len(xs) = len(self.layers)
+        if isinstance(xs[0], tf.Tensor):
+            rank = len(xs[0].get_shape())
+        else: # NumPy array
+            rank = len(xs[0].shape)
+
+        if rank == len(self.shape) + 1:
+            n_minibatch = xs[0].get_shape()[0]
+            log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        else:
+            log_prob = tf.constant(0.0)
+
         for l,layer in enumerate(self.layers):
-            # TODO make sure it sums correctly if xs is self.shape
             log_prob += layer.log_prob(xs[l])
 
         return log_prob
@@ -190,6 +209,7 @@ class Distribution:
         self.num_vars = np.prod(self.shape)
         self.num_params = None
         self.sample_tensor = False
+        self.is_multivariate = False
 
     def sample_noise(self, size=1):
         """
@@ -272,12 +292,32 @@ class Distribution:
         else:
             log_prob = tf.constant(0.0)
 
-        # TODO loop over all possible indices
-        #for l in range(len(self.shape)):
         # Loop over each random variable.
-        for i in range(self.shape[0]):
-            idx = (i, )
-            log_prob += self.log_prob_idx(idx, xs)
+        # If univariate distribution, this is over all indices; if
+        # multivariate distribution, this is over all but the last
+        # index.
+        # TODO
+        #for l in range(len(self.shape)):
+        if len(self.shape) == 1:
+            if not self.is_multivariate:
+                for i in range(self.shape[0]):
+                    idx = (i, )
+                    log_prob += self.log_prob_idx(idx, xs)
+
+            else:
+                idx = ()
+                log_prob += self.log_prob_idx(idx, xs)
+
+        elif len(self.shape) == 2:
+            if not self.is_multivariate:
+                for i in range(self.shape[0]):
+                    for j in range(self.shape[0]):
+                        idx = (i, j, )
+                        log_prob += self.log_prob_idx(idx, xs)
+            else:
+                for i in range(self.shape[0]):
+                    idx = (i, )
+                    log_prob += self.log_prob_idx(idx, xs)
 
         return log_prob
 
@@ -329,6 +369,7 @@ class Bernoulli(Distribution):
         Distribution.__init__(self, shape)
         self.num_params = self.num_vars
         self.sample_tensor = False
+        self.is_multivariate = False
 
         if p is None:
             p_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -375,6 +416,7 @@ class Beta(Distribution):
         Distribution.__init__(self, shape)
         self.num_params = 2*self.num_vars
         self.sample_tensor = False
+        self.is_multivariate = False
 
         if alpha is None:
             alpha_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -430,6 +472,7 @@ class Dirichlet(Distribution):
         Distribution.__init__(self, shape)
         self.num_params = self.num_vars
         self.sample_tensor = False
+        self.is_multivariate = True
 
         if alpha is None:
             alpha_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -451,6 +494,7 @@ class Dirichlet(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
+        idx = idx + (slice(0, None), )
         if isinstance(xs, tf.Tensor):
             rank = len(xs.get_shape())
         else: # NumPy array
@@ -458,13 +502,26 @@ class Dirichlet(Distribution):
 
         if rank == len(self.shape) + 1: # n_minibatch x shape
             # TODO can i really handle that?
-            full_idx = (slice(0, None), ) + idx + (slice(0, None), )
+            full_idx = (slice(0, None), ) + idx
         elif rank == len(self.shape): # shape
-            full_idx = idx + (slice(0, None), )
+            full_idx = idx
         else:
             raise IndexError()
 
-        return dirichlet.logpdf(xs[full_idx], self.alpha)
+        # TODO does this only apply to multivariate?
+        # TensorFlow doesn't support subsetting when index is empty,
+        # so control indexing case-by-case.
+        if idx != () and full_idx != ():
+            # [log p(xs[1,idx] | params[idx]), ..., log p(xs[S,idx] | params[idx])]
+            return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
+        elif idx == () and full_idx != ():
+            # [log p(xs[1] | params), ..., log p(xs[S] | params)]
+            return dirichlet.logpdf(xs[full_idx], self.alpha)
+        else:
+            # log p(xs | params)
+            return dirichlet.logpdf(xs, self.alpha)
+        # TODO n_minibatch=1
+        # TODO n_minibatch=5
 
     def entropy(self):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
@@ -478,6 +535,7 @@ class InvGamma(Distribution):
         Distribution.__init__(self, shape)
         self.num_params = 2*self.num_vars
         self.sample_tensor = False
+        self.is_multivariate = False
 
         if alpha is None:
             alpha_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -544,6 +602,7 @@ class Multinomial(Distribution):
         K_minus_one = self.shape[-1] - 1
         self.num_params = np.prod(shape_minus) * K_minus_one
         self.sample_tensor = False
+        self.is_multivariate = True
 
         if pi is None:
             # Transform a real tensor with outer dimension (K-1) to
@@ -588,7 +647,7 @@ class Multinomial(Distribution):
         else:
             raise IndexError()
 
-        return multinomial.logpmf(xs[full_idx], 1, self.pi)
+        return multinomial.logpmf(xs[full_idx], 1, self.pi[idx])
 
     def entropy(self):
         return tf.reduce_sum(multinomial.entropy(1, self.pi))
@@ -602,6 +661,7 @@ class Normal(Distribution):
         Distribution.__init__(self, shape)
         self.num_params = 2*self.num_vars
         self.sample_tensor = True
+        self.is_multivariate = False
 
         if loc is None:
             loc = tf.Variable(tf.random_normal(self.shape))
@@ -668,6 +728,7 @@ class PointMass(Distribution):
         Distribution.__init__(self, shape)
         self.num_params = self.num_vars
         self.sample_tensor = True
+        self.is_multivariate = False
 
         if params is None:
             params = tf.Variable(tf.random_normal(self.shape))

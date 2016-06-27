@@ -57,34 +57,38 @@ class MixtureGaussian:
         self.c = 10
         self.alpha = tf.ones([K])
 
-    def unpack_params(self, zs):
-        """Unpack sets of parameters from a flattened matrix."""
-        pi = zs[:, 0:self.K]
-        mus = zs[:, self.K:(self.K+self.K*self.D)]
-        sigmas = zs[:, (self.K+self.K*self.D):(self.K+2*self.K*self.D)]
-        return pi, mus, sigmas
-
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         N = get_dims(xs)[0]
-        pi, mus, sigmas = self.unpack_params(zs)
+        pi, mus, sigmas = zs
         log_prior = dirichlet.logpdf(pi, self.alpha)
-        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
-        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+        #log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
+        #log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
 
         # Loop over each mini-batch zs[b,:]
         log_lik = []
-        n_minibatch = get_dims(zs)[0]
-        for s in range(n_minibatch):
-            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
-            for k in range(self.K):
-                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
-                    mus[s, (k*self.D):((k+1)*self.D)],
-                    sigmas[s, (k*self.D):((k+1)*self.D)]))
+        log_lik_z = N*tf.reduce_sum(tf.log(pi))
+        for k in range(self.K):
+            log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
+                mus[(k*self.D):((k+1)*self.D)],
+                sigmas[(k*self.D):((k+1)*self.D)]))
 
-            log_lik += [log_lik_z]
+        log_lik += [log_lik_z]
 
-        return log_prior + tf.pack(log_lik)
+        return tf.squeeze(log_prior + tf.pack(log_lik))
+
+        #for s in range(n_minibatch):
+        #    log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
+        #    for k in range(self.K):
+        #        log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
+        #            mus[s, (k*self.D):((k+1)*self.D)],
+        #            sigmas[s, (k*self.D):((k+1)*self.D)]))
+
+        #    log_lik += [log_lik_z]
+
+        #return log_prior + tf.pack(log_lik)
 
 ed.set_seed(42)
 x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
@@ -92,9 +96,13 @@ data = ed.Data(tf.constant(x, dtype=tf.float32))
 
 model = MixtureGaussian(K=2, D=2)
 variational = Variational()
-variational.add(Dirichlet([1, model.K]))
+#variational.add(Dirichlet([1, model.K])) # TODO should this be allowed?
+variational.add(Dirichlet(model.K))
 variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_minibatch=5, n_data=5)
+# TODO
+inference.run(n_iter=500, n_minibatch=1, n_data=5)
+# TODO
+#inference.run(n_iter=500, n_minibatch=5, n_data=5)

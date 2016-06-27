@@ -9,6 +9,10 @@ class Distribution:
     """Template for all distributions."""
     def rvs(self, size=1):
         """
+        Parameters
+        ----------
+        size : int or list
+
         Returns
         -------
         np.ndarray
