@@ -69,6 +69,8 @@ class Distribution:
         raise NotImplementedError()
 
 class Bernoulli:
+    """Bernoulli distribution
+    """    
     def rvs(self, p, size=1):
         """Random variable generator
 
@@ -132,6 +134,8 @@ class Bernoulli:
         return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
 
 class Beta:
+    """Beta distribution
+    """    
     def rvs(self, a, b, size=1):
         """Random variable generator
 
@@ -148,7 +152,6 @@ class Beta:
         -------
         np.ndarray
             size-dimensional vector; scalar if size=1    
-        
         """               
         return stats.beta.rvs(a, b, size=size)
 
@@ -213,6 +216,8 @@ class Beta:
                    tf.mul(a + b - 2.0, digamma(a+b))
 
 class Binom:
+    """Binomial distribution
+    """    
     def rvs(self, n, p, size=1):
         """Random variable generator
 
@@ -229,7 +234,6 @@ class Binom:
         -------
         np.ndarray
             size-dimensional vector; scalar if size=1    
-        
         """            
         return stats.binom.rvs(n, p, size=size)
 
@@ -270,10 +274,45 @@ class Binom:
         raise NotImplementedError()
 
 class Chi2:
+    """:math:`\chi^2` distribution
+    """    
     def rvs(self, df, size=1):
+        """Random variable generator
+
+        Parameters
+        ----------
+        df : float
+            constrained to :math:`df > 0`      
+        size : int
+            Number of random variable samples to return
+
+        Returns
+        -------
+        np.ndarray
+            size-dimensional vector; scalar if size=1    
+        """          
         return stats.chi2.rvs(df, size=size)
 
     def logpdf(self, x, df):
+        """Logarithm of probability density function
+
+        Parameters
+        ----------
+        x : np.array or tf.Tensor
+            If univariate distribution, can be a scalar, vector, or matrix.
+            If multivariate distribution, can be a vector or matrix.
+        df : float
+            constrained to :math:`df > 0`
+          
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar, vector, or
+            matrix corresponding to the size of input. For
+            multivariate distributions, returns a scalar if vector
+            input and vector if matrix input, where each element in
+            the vector evaluates a row in the matrix.
+        """          
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
         return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
@@ -288,17 +327,43 @@ class Chi2:
         raise NotImplementedError()
 
 class Dirichlet:
+    """Dirichlet distribution
+    """    
     def rvs(self, alpha, size=1):
+        """Random variable generator
+
+        Parameters
+        ----------
+        alpha : np.array or tf.Tensor
+            each :math:`\alpha` constrained to :math:`\alpha_i > 0`      
+        size : int
+            Number of random variable samples to return
+
+        Returns
+        -------
+        np.ndarray
+            size-dimensional vector; scalar if size=1    
+        """          
         return stats.dirichlet.rvs(alpha, size=size)
 
     def logpdf(self, x, alpha):
-        """
+        """Logarithm of probability density function
+
         Parameters
         ----------
         x : np.array or tf.Tensor
             vector or matrix
         alpha : np.array or tf.Tensor
-            vector
+            each :math:`\alpha` constrained to :math:`\alpha_i > 0`  
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar, vector, or
+            matrix corresponding to the size of input. For
+            multivariate distributions, returns a scalar if vector
+            input and vector if matrix input, where each element in
+            the vector evaluates a row in the matrix.
         """
         x = tf.cast(x, dtype=tf.float32)
         alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
@@ -308,11 +373,21 @@ class Dirichlet:
             return -lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
 
     def entropy(self, alpha):
-        """
-        Arguments
+        """Entropy of probability distribution
+
+        Parameters
         ----------
-        alpha: np.array or tf.Tensor
-            vector or matrix
+        alpha : np.array or tf.Tensor
+            each :math:`\alpha` constrained to :math:`\alpha_i > 0`  
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar or vector
+            corresponding to the size of input. For multivariate
+            distributions, returns a scalar if vector input and vector
+            if matrix input, where each element in the vector
+            evaluates a row in the matrix.            
         """
         alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
         if len(get_dims(alpha)) == 1:
@@ -329,10 +404,44 @@ class Dirichlet:
                    tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)), 1)
 
 class Expon:
+    """Exponential distribution
+    """
     def rvs(self, scale=1, size=1):
+        """Random variable generator
+
+        Parameters
+        ----------
+        scale : float
+            constrained to :math:`scale > 0`    
+        size : int
+            Number of random variable samples to return
+
+        Returns
+        -------
+        np.ndarray
+            size-dimensional vector; scalar if size=1    
+        """          
         return stats.expon.rvs(scale=scale, size=size)
 
     def logpdf(self, x, scale=1):
+        """Logarithm of probability density function
+
+        Parameters
+        ----------
+        x : np.array or tf.Tensor
+            vector or matrix
+        scale : float
+            constrained to :math:`scale > 0`  
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar, vector, or
+            matrix corresponding to the size of input. For
+            multivariate distributions, returns a scalar if vector
+            input and vector if matrix input, where each element in
+            the vector evaluates a row in the matrix.
+        """        
         x = tf.cast(x, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return - x/scale - tf.log(scale)
@@ -346,27 +455,118 @@ class Expon:
         raise NotImplementedError()
 
 class Gamma:
-    """Shape/scale parameterization"""
+    """Gamma distribution
+
+    Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
+    """
     def rvs(self, a, scale=1, size=1):
+        """Random variable generator
+
+        Parameters
+        ----------
+        a : float
+            **shape** parameter: constrained to :math:`a > 0`    
+        scale : float
+            **scale** parameter: constrained to :math:`scale > 0`  
+        size : int
+            Number of random variable samples to return
+
+        Returns
+        -------
+        np.ndarray
+            size-dimensional vector; scalar if size=1    
+        """           
         return stats.gamma.rvs(a, scale=scale, size=size)
 
     def logpdf(self, x, a, scale=1):
+        """Logarithm of probability density function
+
+        Parameters
+        ----------
+        x : np.array or tf.Tensor
+            vector or matrix
+        a : float
+            **shape** parameter: constrained to :math:`a > 0`    
+        scale : float
+            **scale** parameter: constrained to :math:`scale > 0`  
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar, vector, or
+            matrix corresponding to the size of input. For
+            multivariate distributions, returns a scalar if vector
+            input and vector if matrix input, where each element in
+            the vector evaluates a row in the matrix.  
+        """           
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - lgamma(a)
 
     def entropy(self, a, scale=1):
+        """Entropy of probability distribution
+
+        Parameters
+        ----------
+        a : float
+            **shape** parameter: constrained to :math:`a > 0`    
+        scale : float
+            **scale** parameter: constrained to :math:`scale > 0`  
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar or vector
+            corresponding to the size of input. For multivariate
+            distributions, returns a scalar if vector input and vector
+            if matrix input, where each element in the vector
+            evaluates a row in the matrix.            
+        """        
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return a + tf.log(scale) + lgamma(a) + \
                tf.mul(1.0 - a, digamma(a))
 
 class Geom:
+    """Geometric distribution
+    """
     def rvs(self, p, size=1):
+        """Random variable generator
+
+        Parameters
+        ----------
+        p : float
+            constrained to :math:`p\in(0,1)` 
+        size : int
+            Number of random variable samples to return
+
+        Returns
+        -------
+        np.ndarray
+            size-dimensional vector; scalar if size=1    
+        """             
         return stats.geom.rvs(p, size=size)
 
     def logpmf(self, x, p):
+        """Logarithm of probability mass function
+
+        Parameters
+        ----------
+        x : np.array or tf.Tensor
+            vector or matrix
+        p : float
+            constrained to :math:`p\in(0,1)` 
+
+        Returns
+        -------
+        tf.Tensor
+            For univariate distributions, returns a scalar, vector, or
+            matrix corresponding to the size of input. For
+            multivariate distributions, returns a scalar if vector
+            input and vector if matrix input, where each element in
+            the vector evaluates a row in the matrix.  
+        """         
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
@@ -380,7 +580,10 @@ class Geom:
         raise NotImplementedError()
 
 class InvGamma:
-    """Shape/scale parameterization"""
+    """Inverse Gamma distribution
+
+    Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
+    """
     def rvs(self, alpha, scale=1, size=1):
         x = stats.invgamma.rvs(alpha, scale=scale, size=size)
         # This is temporary to avoid returning Inf values.
