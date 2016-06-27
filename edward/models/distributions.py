@@ -129,22 +129,25 @@ class Variational:
         -----
         This method may be removed in the future in favor of indexable
         log_prob methods, e.g., for automatic Rao-Blackwellization.
+
+        This method assumes each xs[l] in xs has the same batch size,
+        i.e., dimensions (batch x shape) for fixed batch and variable
+        shape or (shape) for variable shape.
+
+        This method assumes length of xs == length of self.layers.
         """
         if len(self.layers) == 1:
             return self.layers[0].log_prob(xs)
 
-        # check based on first xs
-        # TODO this doesn't hold if xs[l] has different
-        # n_minibatch sizes, or one is n_minibatch x shape and
-        # another is shape; document this
-        # somewhere it assumes len(xs) = len(self.layers)
         if isinstance(xs[0], tf.Tensor):
-            rank = len(xs[0].get_shape())
+            shape = xs[0].get_shape()
+            rank = len(shape)
         else: # NumPy array
-            rank = len(xs[0].shape)
+            shape = xs[0].shape
+            rank = len(shape)
 
         if rank == len(self.shape) + 1:
-            n_minibatch = xs[0].get_shape()[0]
+            n_minibatch = shape[0]
             log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         else:
             log_prob = tf.constant(0.0)
@@ -282,12 +285,14 @@ class Distribution:
             sum_{idx in shape} log p(xs[idx] | params[idx])
         """
         if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
+            shape = xs.get_shape()
+            rank = len(shape)
         else: # NumPy array
-            rank = len(xs.shape)
+            shape = xs.shape
+            rank = len(shape)
 
         if rank == len(self.shape) + 1:
-            n_minibatch = xs.get_shape()[0]
+            n_minibatch = shape[0]
             log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         else:
             log_prob = tf.constant(0.0)
