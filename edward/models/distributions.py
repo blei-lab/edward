@@ -84,9 +84,9 @@ class Variational:
             if layer.sample_tensor:
                 samples += [layer.sample(size)]
             elif size == 1:
-                samples += [tf.placeholder(tf.float32, (layer.num_vars))]
+                samples += [tf.placeholder(tf.float32, layer.shape)]
             else:
-                samples += [tf.placeholder(tf.float32, (size, layer.num_vars))]
+                samples += [tf.placeholder(tf.float32, (size, ) + layer.shape)]
 
         if len(samples) == 1:
             samples = samples[0]
