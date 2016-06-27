@@ -160,17 +160,77 @@
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Bernoulli.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Bernoulli.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Entropy of probability distribution</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">For univariate distributions, returns a scalar or vector
+corresponding to the size of input. For multivariate
+distributions, returns a scalar if vector input and vector
+if matrix input, where each element in the vector
+evaluates a row in the matrix.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Bernoulli.logpmf">
 <code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Bernoulli.logpmf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Logarithm of probability mass function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+If multivariate distribution, can be a vector or matrix.</li>
+<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For univariate distributions, returns a scalar, vector, or
+matrix corresponding to the size of input. For
+multivariate distributions, returns a scalar if vector
+input and vector if matrix input, where each element in
+the vector evaluates a row in the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Bernoulli.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Bernoulli.rvs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Random variable generator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">size-dimensional vector; scalar if size=1</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -180,17 +240,85 @@
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Beta.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Beta.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Entropy of probability distribution</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>b</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For univariate distributions, returns a scalar or vector
+corresponding to the size of input. For multivariate
+distributions, returns a scalar if vector input and vector
+if matrix input, where each element in the vector
+evaluates a row in the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Beta.logpdf">
 <code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Beta.logpdf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Logarithm of probability density function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+If multivariate distribution, can be a vector or matrix.</li>
+<li><strong>a</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>b</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For univariate distributions, returns a scalar, vector, or
+matrix corresponding to the size of input. For
+multivariate distributions, returns a scalar if vector
+input and vector if matrix input, where each element in
+the vector evaluates a row in the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Beta.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Beta.rvs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Random variable generator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>b</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">size-dimensional vector; scalar if size=1</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -200,17 +328,70 @@
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Binom.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Binom.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Binom.logpmf">
 <code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Binom.logpmf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Logarithm of probability density function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+If multivariate distribution, can be a vector or matrix.</li>
+<li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
+<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For univariate distributions, returns a scalar, vector, or
+matrix corresponding to the size of input. For
+multivariate distributions, returns a scalar if vector
+input and vector if matrix input, where each element in
+the vector evaluates a row in the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Binom.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>n</em>, <em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Binom.rvs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Random variable generator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
+<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">size-dimensional vector; scalar if size=1</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -220,7 +401,15 @@
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Chi2.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Chi2.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Chi2.logpdf">
@@ -358,7 +547,15 @@ many distributions for random number generation.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Expon.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Expon.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Expon.logpdf">
@@ -399,7 +596,15 @@ many distributions for random number generation.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Geom.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Geom.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Geom.logpmf">
@@ -440,7 +645,15 @@ many distributions for random number generation.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.LogNorm.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.LogNorm.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.LogNorm.logpdf">
@@ -542,7 +755,15 @@ This is not vectorized with respect to any arguments.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.NBinom.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.NBinom.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.NBinom.logpmf">
@@ -583,7 +804,15 @@ This is not vectorized with respect to any arguments.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.Poisson.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>mu</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.Poisson.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.Poisson.logpmf">
@@ -603,7 +832,15 @@ This is not vectorized with respect to any arguments.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.T.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>df</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.T.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.T.logpdf">
@@ -623,7 +860,15 @@ This is not vectorized with respect to any arguments.</p>
 <dd><dl class="method">
 <dt id="edward.stats.distributions.TruncNorm.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.TruncNorm.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="edward.stats.distributions.TruncNorm.logpdf">
