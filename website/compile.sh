@@ -15,5 +15,6 @@ cd ..
 python strip_p_in_li.py 
 
 cd ../sphinx
+sphinx-apidoc -f -o source/ ../edward
 make html
 cp -r build/html/* ../website/api

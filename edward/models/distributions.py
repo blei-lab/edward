@@ -552,3 +552,4 @@ class PointMass(Distribution):
         # a vector where the jth element is 1 if xs[j, i] is equal to
         # the ith parameter, 0 otherwise
         return tf.cast(tf.equal(xs[:, i], self.params[i]), dtype=tf.float32)
+

@@ -4,18 +4,18 @@ edward.models package
 Submodules
 ----------
 
-edward.models.models module
----------------------------
+edward.models.distributions module
+----------------------------------
 
-.. automodule:: edward.models.models
+.. automodule:: edward.models.distributions
     :members:
     :undoc-members:
     :show-inheritance:
 
-edward.models.variationals module
----------------------------------
+edward.models.models module
+---------------------------
 
-.. automodule:: edward.models.variationals
+.. automodule:: edward.models.models
     :members:
     :undoc-members:
     :show-inheritance:
