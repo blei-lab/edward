@@ -141,7 +141,7 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     # We must fetch zs out of the session because sample_likelihood()
     # may require a SciPy-based sampler.
     if variational != None:
-        zs = variational.sample(y, size=size)
+        zs = variational.sample(size=size)
         feed_dict = variational.np_dict(zs)
         zs = sess.run(zs, feed_dict)
     else:
