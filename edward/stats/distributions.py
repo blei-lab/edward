@@ -15,6 +15,8 @@ class Distribution:
             Number of samples, in a particular shape if specified in a
             list or tuple with more than one element.
 
+        params : np.array or tf.Tensor
+
         Returns
         -------
         np.ndarray
@@ -29,6 +31,10 @@ class Distribution:
 
         size as a list or tuple of more than one element is not
         guaranteed to be supported.
+
+        params as a 3d or higher tensor is not guaranteed to be
+        supported (for either univariate or multivariate
+        distribution).
         """
         raise NotImplementedError()
 
@@ -43,7 +49,6 @@ class Distribution:
 
         params : np.array or tf.Tensor
             scalar unless documented otherwise
-            TODO
 
         Returns
         -------
@@ -63,14 +68,13 @@ class Distribution:
 
     def entropy(self):
         """
-        TODO
+        TODO double check entropy can even handle tensors with the
+        right vectorization
         Parameters
         ---------
         params : np.array or tf.Tensor
             If univariate distribution, can be a scalar or vector.
             If multivariate distribution, can be a vector or matrix.
-        # TODO double check entropy can even handle tensors with the
-        # right vectorization
 
         Returns
         -------
@@ -246,17 +250,17 @@ class Chi2:
 
 class Dirichlet:
     def rvs(self, alpha, size=1):
-        # TODO
         if len(alpha.shape) == 1:
             return stats.dirichlet.rvs(alpha, size=size)
         else:
             x = []
-            for alphaidx in np.nditer(alpha):
-                # SciPy is not guaranteed to work with non-scalar arguments.
-                x += [stats.dirichlet.rvs(alphaidx, size=size)]
+            # This doesn't work for non-matrix parameters.
+            for alpharow in alpha:
+                # SciPy is not guaranteed to work with batches of arguments.
+                x += [stats.dirichlet.rvs(alpharow, size=size)]
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+            # This only works for rank 3 tensor.
+            x = np.rollaxis(np.asarray(x), 1)
 
             # Don't have a sample outer dimension if size=1.
             if size == 1:
@@ -467,17 +471,17 @@ class LogNorm:
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
     def rvs(self, n, p, size=1):
-        # TODO
         if len(n.shape) == 1:
             return np.random.multinomial(n, p, size=size)
         else:
             x = []
-            for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
-                x += [np.random.multinomial(n, p, size=size)]
+            # This doesn't work for non-matrix parameters.
+            for nidx,prow in zip(n, p):
+                # SciPy is not guaranteed to work with batches of arguments.
+                x += [np.random.multinomial(nidx, prow, size=size)]
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+            # This only works for rank 3 tensor.
+            x = np.rollaxis(np.asarray(x), 1)
 
             # Don't have a sample outer dimension if size=1.
             if size == 1:
@@ -542,17 +546,17 @@ class Multinomial:
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
-        # TODO
         if len(mean.shape) == 1:
             return stats.multivariate_normal.rvs(mean, cov, size=size)
         else:
             x = []
-            for meanidx,covidx in zip(np.nditer(mean), np.nditer(cov)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
-                x += [stats.multivariate_normal.rvs(meanidx, covidx, size=size)]
+            # This doesn't work for non-matrix parameters.
+            for meanrow,covmat in zip(mean, cov):
+                # SciPy is not guaranteed to work with batches of arguments.
+                x += [stats.multivariate_normal.rvs(meanrow, covmat, size=size)]
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+            # This only works for rank 3 tensor.
+            x = np.rollaxis(np.asarray(x), 1)
 
             # Don't have a sample outer dimension if size=1.
             if size == 1:
