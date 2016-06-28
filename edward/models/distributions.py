@@ -105,7 +105,7 @@ class Variational:
         if not isinstance(samples, list):
             samples = [samples]
 
-        shape = samples[0].get_shape()
+        shape = get_dims(samples[0])
         rank = len(shape)
         if rank == len(self.shape[0]) + 1:
             size = shape[0]
@@ -143,7 +143,7 @@ class Variational:
             return self.layers[0].log_prob(xs)
 
         if isinstance(xs[0], tf.Tensor):
-            shape = xs[0].get_shape()
+            shape = get_dims(xs[0])
             rank = len(shape)
         else: # NumPy array
             shape = xs[0].shape
@@ -264,7 +264,7 @@ class Distribution:
             sum_{idx in shape} log p(xs[idx] | params[idx])
         """
         if isinstance(xs, tf.Tensor):
-            shape = xs.get_shape()
+            shape = get_dims(xs)
             rank = len(shape)
         else: # NumPy array
             shape = xs.shape
