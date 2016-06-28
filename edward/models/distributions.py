@@ -105,13 +105,16 @@ class Variational:
         if not isinstance(samples, list):
             samples = [samples]
 
+        shape = samples[0].get_shape()
+        rank = len(shape)
+        if rank == len(self.shape[0]) + 1:
+            size = shape[0]
+        else:
+            size = 1
+
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
-                size = get_dims(sample)
-                if layer.is_multivariate:
-                    size = size[:-1]
-
                 feed_dict[sample] = layer.sample(size)
 
         return feed_dict
@@ -146,7 +149,7 @@ class Variational:
             shape = xs[0].shape
             rank = len(shape)
 
-        if rank == len(self.shape) + 1:
+        if rank == len(self.shape[0]) + 1:
             n_minibatch = shape[0]
             log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         else:
@@ -609,7 +612,7 @@ class Multinomial(Distribution):
     def sample(self, size=1):
         """x ~ p(x | params)"""
         pi = self.pi.eval()
-        return multinomial.rvs(1, pi, size=size)
+        return multinomial.rvs(np.ones(self.shape[:-1]), pi, size=size)
 
     def log_prob_idx(self, idx, xs):
         """
@@ -629,10 +632,10 @@ class Multinomial(Distribution):
         else:
             raise IndexError()
 
-        return multinomial.logpmf(xs[full_idx], 1, self.pi[idx])
+        return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx])
 
     def entropy(self):
-        return tf.reduce_sum(multinomial.entropy(1, self.pi))
+        return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
 
 class Normal(Distribution):
     """
