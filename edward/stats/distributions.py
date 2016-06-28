@@ -401,14 +401,14 @@ class Geom:
 
 class InvGamma:
     """Shape/scale parameterization"""
-    def rvs(self, alpha, scale=1, size=1):
-        if not isinstance(alpha, np.ndarray):
-            x = stats.invgamma.rvs(alpha, scale=scale, size=size)
+    def rvs(self, a, scale=1, size=1):
+        if not isinstance(a, np.ndarray):
+            x = stats.invgamma.rvs(a, scale=scale, size=size)
         else:
             x = []
-            for alphaidx,scaleidx in zip(np.nditer(alpha), np.nditer(scale)):
+            for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
                 # SciPy is not guaranteed to work with non-scalar arguments.
-                x += [stats.invgamma.rvs(alphaidx, scale=scaleidx, size=size)]
+                x += [stats.invgamma.rvs(aidx, scale=scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
             x = np.asarray(x).transpose()
