@@ -261,3 +261,49 @@ def stop_gradient(x):
         return tf.stop_gradient(x)
     else: # list
         return [tf.stop_gradient(i) for i in x]
+
+def to_simplex(x):
+    """
+    Transform real vector of length (K-1) to a simplex of dimension K
+    using a backward stick breaking construction.
+
+    Parameters
+    ----------
+    x : tf.tensor or np.array
+        Vector or matrix.
+
+    Returns
+    -------
+    tf.Tensor
+        Same shape as input but with last dimension of size K.
+
+    Notes
+    -----
+    x as a 3d or higher tensor is not guaranteed to be supported.
+    """
+    if isinstance(x, tf.Tensor):
+        shape = get_dims(x)
+    else:
+        shape = x.shape
+
+    if len(shape) == 1:
+        n_rows = ()
+        K_minus_one = shape[0]
+        eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
+                             dtype=tf.float32))
+        z = tf.sigmoid(eq + x)
+        pil = tf.concat(0, [z, tf.constant([1.0])])
+        piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
+        S = cumprod(piu)
+        return S * pil
+    else:
+        n_rows = shape[0]
+        K_minus_one = shape[1]
+        eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
+                             dtype=tf.float32))
+        z = tf.sigmoid(eq + x)
+        pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
+        piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
+        # cumulative product along 1st axis
+        S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+        return S * pil

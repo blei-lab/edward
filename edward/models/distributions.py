@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
-from edward.util import cumprod, get_dims, get_session
+from edward.util import cumprod, get_dims, get_session, to_simplex
 
 class Variational:
     """A container for collecting distribution objects."""
@@ -583,25 +583,15 @@ class Multinomial(Distribution):
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
         Distribution.__init__(self, shape)
-        shape_minus = self.shape[:-1]
-        K_minus_one = self.shape[-1] - 1
         self.num_params = np.prod(shape_minus) * K_minus_one
         self.sample_tensor = False
         self.is_multivariate = True
 
         if pi is None:
-            # Transform a real tensor with outer dimension (K-1) to
-            # simplex tensor with outer dimension K.
-            pi_unconst = tf.Variable(tf.random_normal([real_shape, K_minus_one]))
-            logs = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
-                                   dtype=tf.float32))
-            # TODO dimensions
-            x = tf.sigmoid(pi_unconst + logs)
-            pil = tf.concat(1, [x, tf.ones([real_shape, 1])])
-            piu = tf.concat(1, [tf.ones([real_shape, 1]), 1.0 - x])
-            # cumulative product along 1st axis
-            S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
-            pi = S * pil
+            real_shape = self.shape[:-1]
+            K_minus_one = self.shape[-1] - 1
+            pi_unconst = tf.Variable(tf.random_normal([real_shape + (K_minus_one, )]))
+            pi = to_simplex(pi_unconst)
 
         self.pi = pi
 
