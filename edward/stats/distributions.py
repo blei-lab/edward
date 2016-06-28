@@ -27,14 +27,20 @@ class Distribution:
         Notes
         -----
         This is written in NumPy/SciPy, as TensorFlow does not support
-        many distributions for random number generation.
+        many distributions for random number generation. It follows
+        SciPy's naming and argument conventions.
 
-        size as a list or tuple of more than one element is not
-        guaranteed to be supported.
+        The equivalent method in SciPy is not guaranteed to be
+        supported with a batch of parameter inputs, e.g., a vector of
+        location parameters in a normal distribution, or a matrix of
+        concentration parameters in a Dirichlet. This is.
 
         params as a 3d or higher tensor is not guaranteed to be
         supported (for either univariate or multivariate
         distribution).
+
+        size as a list or tuple of more than one element is not
+        guaranteed to be supported.
         """
         raise NotImplementedError()
 
@@ -56,8 +62,8 @@ class Distribution:
             If univariate distribution, returns a tensor of same
             shape as input.
             If multivariate distribution, returns a tensor of
-            shape[-1] from input: the outer dimension carries the
-            multivariate dimension.
+            shape[-1] from input: the outer dimension representing the
+            multivariate dimension is collapsed.
 
         Notes
         -----
@@ -68,28 +74,31 @@ class Distribution:
 
     def entropy(self):
         """
-        TODO double check entropy can even handle tensors with the
-        right vectorization
         Parameters
         ---------
         params : np.array or tf.Tensor
-            If univariate distribution, can be a scalar or vector.
+            If univariate distribution, can be a scalar, vector, or
+            matrix.
             If multivariate distribution, can be a vector or matrix.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            If univariate distribution, returns a tensor of same
+            shape as input.
+            If multivariate distribution, returns a tensor of
+            shape[-1] from input: the outer dimension representing the
+            multivariate dimension is collapsed.
 
         Notes
         -----
-        SciPy doesn't always enable vector inputs for
-        univariate distributions or matrix inputs for multivariate
-        distributions. This does.
+        The equivalent method in SciPy is not guaranteed to be
+        supported for vector inputs for univariate distributions and
+        matrix inputs for multivariate distributions. This is.
+
+        params as a 3d or higher tensor is not guaranteed to be
+        supported (for either univariate or multivariate
+        distribution).
         """
         raise NotImplementedError()
 
@@ -122,7 +131,6 @@ class Bernoulli:
         else:
             x = []
             for pidx in np.nditer(p):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.bernoulli.rvs(pidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -152,7 +160,6 @@ class Beta:
         else:
             x = []
             for aidx,bidx in zip(np.nditer(a), np.nditer(b)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.beta.rvs(aidx, bidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -194,7 +201,6 @@ class Binom:
         else:
             x = []
             for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.binom.rvs(nidx, pidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -225,7 +231,6 @@ class Chi2:
         else:
             x = []
             for dfidx in np.nditer(df):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.chi2.rvs(dfidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -256,7 +261,6 @@ class Dirichlet:
             x = []
             # This doesn't work for non-matrix parameters.
             for alpharow in alpha:
-                # SciPy is not guaranteed to work with batches of arguments.
                 x += [stats.dirichlet.rvs(alpharow, size=size)]
 
             # This only works for rank 3 tensor.
@@ -314,7 +318,6 @@ class Expon:
         else:
             x = []
             for scaleidx in np.nditer(scale):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.expon.rvs(scale=scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -344,7 +347,6 @@ class Gamma:
         else:
             x = []
             for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.gamma.rvs(aidx, scale=scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -377,7 +379,6 @@ class Geom:
         else:
             x = []
             for pidx in np.nditer(p):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.geom.rvs(p, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -407,7 +408,6 @@ class InvGamma:
         else:
             x = []
             for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.invgamma.rvs(aidx, scale=scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -445,7 +445,6 @@ class LogNorm:
         else:
             x = []
             for sidx in np.nditer(s):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.lognorm.rvs(s, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -477,7 +476,6 @@ class Multinomial:
             x = []
             # This doesn't work for non-matrix parameters.
             for nidx,prow in zip(n, p):
-                # SciPy is not guaranteed to work with batches of arguments.
                 x += [np.random.multinomial(nidx, prow, size=size)]
 
             # This only works for rank 3 tensor.
@@ -552,7 +550,6 @@ class Multivariate_Normal:
             x = []
             # This doesn't work for non-matrix parameters.
             for meanrow,covmat in zip(mean, cov):
-                # SciPy is not guaranteed to work with batches of arguments.
                 x += [stats.multivariate_normal.rvs(meanrow, covmat, size=size)]
 
             # This only works for rank 3 tensor.
@@ -659,7 +656,6 @@ class NBinom:
         else:
             x = []
             for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.nbinom.rvs(nidx, pidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -690,7 +686,6 @@ class Norm:
         else:
             x = []
             for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.norm.rvs(locidx, scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -723,7 +718,6 @@ class Poisson:
         else:
             x = []
             for muidx in np.nditer(mu):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.poisson.rvs(muidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -752,7 +746,6 @@ class T:
         else:
             x = []
             for dfidx,locidx,scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.t.rvs(dfidx, loc=locidx, scale=scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -786,7 +779,6 @@ class TruncNorm:
         else:
             x = []
             for aidx,bidx,locidx,scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.truncnorm.rvs(aidx, bidx, locidx, scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
@@ -825,7 +817,6 @@ class Uniform:
         else:
             x = []
             for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
-                # SciPy is not guaranteed to work with non-scalar arguments.
                 x += [stats.uniform.rvs(locidx, scaleidx, size=size)]
 
             # Note this doesn't work for multi-dimensional sizes.
