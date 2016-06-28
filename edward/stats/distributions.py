@@ -234,7 +234,10 @@ class Chi2:
 
 class Dirichlet:
     def rvs(self, alpha, size=1):
-        # TODO for multivariate
+        if len(alpha.shape) == 1:
+            # stats.dirichlet.rvs defaults to (size x alpha.shape)
+            return stats.dirichlet.rvs(alpha, size=size)
+
         x = []
         # This doesn't work for non-matrix parameters.
         for alpharow in alpha:
@@ -410,6 +413,10 @@ class LogNorm:
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
     def rvs(self, n, p, size=1):
+        if len(p.shape) == 1:
+            # np.random.multinomial defaults to (size x p.shape)
+            return np.random.multinomial(n, p, size=size)
+
         if not isinstance(n, np.ndarray):
             n = np.asarray(n)
 
@@ -477,6 +484,15 @@ class Multinomial:
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
+        if len(mean.shape) == 1:
+            x = stats.multivariate_normal.rvs(mean, cov, size=size)
+            # stats.multivariate_normal.rvs returns (size x shape) if
+            # size > 1, and shape if size == 1.
+            if size == 1:
+                return np.expand_dims(x, axis=0)
+            else:
+                return x
+
         x = []
         # This doesn't work for non-matrix parameters.
         for meanrow,covmat in zip(mean, cov):
