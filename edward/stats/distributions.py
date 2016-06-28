@@ -15,14 +15,13 @@ class Distribution:
             Number of samples, in a particular shape if specified in a
             list or tuple with more than one element.
 
-        params : np.array or tf.Tensor
+        params : float, np.array, or tf.Tensor
 
         Returns
         -------
         np.ndarray
-            If size > 1, np.array of dimension (size x shape), where
-            shape is the shape of its parameter argument.
-            If size = 1, np.array of dimension shape.
+            np.array of dimension (size x shape), where shape is the
+            shape of its parameter argument.
 
         Notes
         -----
@@ -34,6 +33,10 @@ class Distribution:
         supported with a batch of parameter inputs, e.g., a vector of
         location parameters in a normal distribution, or a matrix of
         concentration parameters in a Dirichlet. This is.
+
+        This does not follow SciPy's behavior, e.g., the number (or
+        shape) of the draws will always be denoted by its outer
+        dimension(s).
 
         params as a 3d or higher tensor is not guaranteed to be
         supported (for either univariate or multivariate
@@ -48,12 +51,12 @@ class Distribution:
         """
         Parameters
         ---------
-        x : np.array or tf.Tensor
+        x : float, np.array, or tf.Tensor
             If univariate distribution, can be a scalar or tensor.
             If multivariate distribution, can be a tensor; the outer
             dimension carries the multivariate dimension.
 
-        params : np.array or tf.Tensor
+        params : float, np.array, or tf.Tensor
             scalar unless documented otherwise
 
         Returns
@@ -76,7 +79,7 @@ class Distribution:
         """
         Parameters
         ---------
-        params : np.array or tf.Tensor
+        params : float, np.array, or tf.Tensor
             If univariate distribution, can be a scalar, vector, or
             matrix.
             If multivariate distribution, can be a vector or matrix.
@@ -109,10 +112,10 @@ class Bernoulli:
         --------
         >>> x = bernoulli.rvs(p=0.5, size=1)
         >>> print(x.shape)
-        (1,)
+        (1, 1)
         >>> x = bernoulli.rvs(p=np.array([0.5]), size=1)
         >>> print(x.shape)
-        (1,)
+        (1, 1)
         >>> x = bernoulli.rvs(p=np.array([0.5, 0.2]), size=1)
         >>> print(x.shape)
         (1, 2)
@@ -127,22 +130,15 @@ class Bernoulli:
         (5, 4, 2)
         """
         if not isinstance(p, np.ndarray):
-            return stats.bernoulli.rvs(p, size=size)
-        else:
-            x = []
-            for pidx in np.nditer(p):
-                x += [stats.bernoulli.rvs(pidx, size=size)]
+            p = np.asarray(p)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for pidx in np.nditer(p):
+            x += [stats.bernoulli.rvs(pidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpmf(self, x, p):
         x = tf.cast(x, dtype=tf.float32)
@@ -156,22 +152,17 @@ class Bernoulli:
 class Beta:
     def rvs(self, a, b, size=1):
         if not isinstance(a, np.ndarray):
-            return stats.beta.rvs(a, b, size=size)
-        else:
-            x = []
-            for aidx,bidx in zip(np.nditer(a), np.nditer(b)):
-                x += [stats.beta.rvs(aidx, bidx, size=size)]
+            a = np.asarray(a)
+        if not isinstance(b, np.ndarray):
+            b = np.asarray(b)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for aidx,bidx in zip(np.nditer(a), np.nditer(b)):
+            x += [stats.beta.rvs(aidx, bidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, a, b):
         x = tf.cast(x, dtype=tf.float32)
@@ -197,22 +188,17 @@ class Beta:
 class Binom:
     def rvs(self, n, p, size=1):
         if not isinstance(n, np.ndarray):
-            return stats.binom.rvs(n, p, size=size)
-        else:
-            x = []
-            for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
-                x += [stats.binom.rvs(nidx, pidx, size=size)]
+            n = np.asarray(n)
+        if not isinstance(p, np.ndarray):
+            p = np.asarray(p)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
+            x += [stats.binom.rvs(nidx, pidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpmf(self, x, n, p):
         x = tf.cast(x, dtype=tf.float32)
@@ -227,22 +213,15 @@ class Binom:
 class Chi2:
     def rvs(self, df, size=1):
         if not isinstance(df, np.ndarray):
-            return stats.chi2.rvs(df, size=size)
-        else:
-            x = []
-            for dfidx in np.nditer(df):
-                x += [stats.chi2.rvs(dfidx, size=size)]
+            df = np.asarray(df)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for dfidx in np.nditer(df):
+            x += [stats.chi2.rvs(dfidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, df):
         x = tf.cast(x, dtype=tf.float32)
@@ -255,24 +234,15 @@ class Chi2:
 
 class Dirichlet:
     def rvs(self, alpha, size=1):
-        if len(alpha.shape) == 1:
-            return stats.dirichlet.rvs(alpha, size=size)
-        else:
-            x = []
-            # This doesn't work for non-matrix parameters.
-            for alpharow in alpha:
-                x += [stats.dirichlet.rvs(alpharow, size=size)]
+        # TODO for multivariate
+        x = []
+        # This doesn't work for non-matrix parameters.
+        for alpharow in alpha:
+            x += [stats.dirichlet.rvs(alpharow, size=size)]
 
-            # This only works for rank 3 tensor.
-            x = np.rollaxis(np.asarray(x), 1)
-
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # This only works for rank 3 tensor.
+        x = np.rollaxis(np.asarray(x), 1)
+        return x
 
     def logpdf(self, x, alpha):
         """
@@ -314,22 +284,15 @@ class Dirichlet:
 class Expon:
     def rvs(self, scale=1, size=1):
         if not isinstance(scale, np.ndarray):
-            return stats.expon.rvs(scale=scale, size=size)
-        else:
-            x = []
-            for scaleidx in np.nditer(scale):
-                x += [stats.expon.rvs(scale=scaleidx, size=size)]
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for scaleidx in np.nditer(scale):
+            x += [stats.expon.rvs(scale=scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, scale=1):
         x = tf.cast(x, dtype=tf.float32)
@@ -343,22 +306,17 @@ class Gamma:
     """Shape/scale parameterization"""
     def rvs(self, a, scale=1, size=1):
         if not isinstance(a, np.ndarray):
-            return stats.gamma.rvs(a, scale=scale, size=size)
-        else:
-            x = []
-            for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
-                x += [stats.gamma.rvs(aidx, scale=scaleidx, size=size)]
+            a = np.asarray(a)
+        if not isinstance(scale, np.ndarray):
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
+            x += [stats.gamma.rvs(aidx, scale=scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, a, scale=1):
         x = tf.cast(x, dtype=tf.float32)
@@ -375,22 +333,15 @@ class Gamma:
 class Geom:
     def rvs(self, p, size=1):
         if not isinstance(p, np.ndarray):
-            return stats.geom.rvs(p, size=size)
-        else:
-            x = []
-            for pidx in np.nditer(p):
-                x += [stats.geom.rvs(p, size=size)]
+            p = np.asarray(p)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for pidx in np.nditer(p):
+            x += [stats.geom.rvs(p, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpmf(self, x, p):
         x = tf.cast(x, dtype=tf.float32)
@@ -404,20 +355,16 @@ class InvGamma:
     """Shape/scale parameterization"""
     def rvs(self, a, scale=1, size=1):
         if not isinstance(a, np.ndarray):
-            x = stats.invgamma.rvs(a, scale=scale, size=size)
-        else:
-            x = []
-            for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
-                x += [stats.invgamma.rvs(aidx, scale=scaleidx, size=size)]
+            a = np.asarray(a)
+        if not isinstance(scale, np.ndarray):
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
+            x += [stats.invgamma.rvs(aidx, scale=scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
 
         # This is temporary to avoid returning Inf values.
         x[x < 1e-10] = 0.1
@@ -441,22 +388,15 @@ class InvGamma:
 class LogNorm:
     def rvs(self, s, size=1):
         if not isinstance(s, np.ndarray):
-            return stats.lognorm.rvs(s, size=size)
-        else:
-            x = []
-            for sidx in np.nditer(s):
-                x += [stats.lognorm.rvs(s, size=size)]
+            s = np.asarray(s)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for sidx in np.nditer(s):
+            x += [stats.lognorm.rvs(s, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, s):
         x = tf.cast(x, dtype=tf.float32)
@@ -470,24 +410,17 @@ class LogNorm:
 class Multinomial:
     """There is no equivalent version implemented in SciPy."""
     def rvs(self, n, p, size=1):
-        if len(n.shape) == 1:
-            return np.random.multinomial(n, p, size=size)
-        else:
-            x = []
-            # This doesn't work for non-matrix parameters.
-            for nidx,prow in zip(n, p):
-                x += [np.random.multinomial(nidx, prow, size=size)]
+        if not isinstance(n, np.ndarray):
+            n = np.asarray(n)
 
-            # This only works for rank 3 tensor.
-            x = np.rollaxis(np.asarray(x), 1)
+        x = []
+        # This doesn't work for non-matrix parameters.
+        for nidx,prow in zip(n, p):
+            x += [np.random.multinomial(nidx, prow, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # This only works for rank 3 tensor.
+        x = np.rollaxis(np.asarray(x), 1)
+        return x
 
     def logpmf(self, x, n, p):
         """
@@ -544,24 +477,14 @@ class Multinomial:
 
 class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
-        if len(mean.shape) == 1:
-            return stats.multivariate_normal.rvs(mean, cov, size=size)
-        else:
-            x = []
-            # This doesn't work for non-matrix parameters.
-            for meanrow,covmat in zip(mean, cov):
-                x += [stats.multivariate_normal.rvs(meanrow, covmat, size=size)]
+        x = []
+        # This doesn't work for non-matrix parameters.
+        for meanrow,covmat in zip(mean, cov):
+            x += [stats.multivariate_normal.rvs(meanrow, covmat, size=size)]
 
-            # This only works for rank 3 tensor.
-            x = np.rollaxis(np.asarray(x), 1)
-
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # This only works for rank 3 tensor.
+        x = np.rollaxis(np.asarray(x), 1)
+        return x
 
     def logpdf(self, x, mean=None, cov=1):
         """
@@ -652,22 +575,17 @@ class Multivariate_Normal:
 class NBinom:
     def rvs(self, n, p, size=1):
         if not isinstance(n, np.ndarray):
-            return stats.nbinom.rvs(n, p, size=size)
-        else:
-            x = []
-            for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
-                x += [stats.nbinom.rvs(nidx, pidx, size=size)]
+            n = np.asarray(n)
+        if not isinstance(p, np.ndarray):
+            p = np.asarray(p)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
+            x += [stats.nbinom.rvs(nidx, pidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpmf(self, x, n, p):
         x = tf.cast(x, dtype=tf.float32)
@@ -682,22 +600,17 @@ class NBinom:
 class Norm:
     def rvs(self, loc=0, scale=1, size=1):
         if not isinstance(loc, np.ndarray):
-            return stats.norm.rvs(loc, scale, size=size)
-        else:
-            x = []
-            for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
-                x += [stats.norm.rvs(locidx, scaleidx, size=size)]
+            loc = np.asarray(loc)
+        if not isinstance(scale, np.ndarray):
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
+            x += [stats.norm.rvs(locidx, scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, loc=0, scale=1):
         x = tf.cast(x, dtype=tf.float32)
@@ -714,22 +627,15 @@ class Norm:
 class Poisson:
     def rvs(self, mu, size=1):
         if not isinstance(mu, np.ndarray):
-            return stats.poisson.rvs(mu, size=size)
-        else:
-            x = []
-            for muidx in np.nditer(mu):
-                x += [stats.poisson.rvs(muidx, size=size)]
+            mu = np.asarray(mu)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for muidx in np.nditer(mu):
+            x += [stats.poisson.rvs(muidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpmf(self, x, mu):
         x = tf.cast(x, dtype=tf.float32)
@@ -742,22 +648,19 @@ class Poisson:
 class T:
     def rvs(self, df, loc=0, scale=1, size=1):
         if not isinstance(df, np.ndarray):
-            return stats.t.rvs(df, loc=loc, scale=scale, size=size)
-        else:
-            x = []
-            for dfidx,locidx,scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
-                x += [stats.t.rvs(dfidx, loc=locidx, scale=scaleidx, size=size)]
+            df = np.asarray(df)
+        if not isinstance(loc, np.ndarray):
+            loc = np.asarray(loc)
+        if not isinstance(scale, np.ndarray):
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for dfidx,locidx,scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
+            x += [stats.t.rvs(dfidx, loc=locidx, scale=scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, df, loc=0, scale=1):
         x = tf.cast(x, dtype=tf.float32)
@@ -775,22 +678,21 @@ class T:
 class TruncNorm:
     def rvs(self, a, b, loc=0, scale=1, size=1):
         if not isinstance(a, np.ndarray):
-            return stats.truncnorm.rvs(a, b, loc, scale, size=size)
-        else:
-            x = []
-            for aidx,bidx,locidx,scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
-                x += [stats.truncnorm.rvs(aidx, bidx, locidx, scaleidx, size=size)]
+            a = np.asarray(a)
+        if not isinstance(b, np.ndarray):
+            b = np.asarray(b)
+        if not isinstance(loc, np.ndarray):
+            loc = np.asarray(loc)
+        if not isinstance(scale, np.ndarray):
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for aidx,bidx,locidx,scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
+            x += [stats.truncnorm.rvs(aidx, bidx, locidx, scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, a, b, loc=0, scale=1):
         # Note there is no error checking if x is outside domain.
@@ -813,22 +715,17 @@ class TruncNorm:
 class Uniform:
     def rvs(self, loc=0, scale=1, size=1):
         if not isinstance(loc, np.ndarray):
-            return stats.uniform.rvs(loc, scale, size=size)
-        else:
-            x = []
-            for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
-                x += [stats.uniform.rvs(locidx, scaleidx, size=size)]
+            loc = np.asarray(loc)
+        if not isinstance(scale, np.ndarray):
+            scale = np.asarray(scale)
 
-            # Note this doesn't work for multi-dimensional sizes.
-            x = np.asarray(x).transpose()
+        x = []
+        for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
+            x += [stats.uniform.rvs(locidx, scaleidx, size=size)]
 
-            # Don't have a sample outer dimension if size=1.
-            if size == 1:
-                x = np.squeeze(x, axis=(0,))
-            elif size is (1, ) or size is [1]:
-                x = np.squeeze(x, axis=(0,))
-
-            return x
+        # Note this doesn't work for multi-dimensional sizes.
+        x = np.asarray(x).transpose()
+        return x
 
     def logpdf(self, x, loc=0, scale=1):
         # Note there is no error checking if x is outside domain.

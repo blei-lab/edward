@@ -83,8 +83,6 @@ class Variational:
         for layer in self.layers:
             if layer.sample_tensor:
                 samples += [layer.sample(size)]
-            elif size == 1:
-                samples += [tf.placeholder(tf.float32, layer.shape)]
             else:
                 samples += [tf.placeholder(tf.float32, (size, ) + layer.shape)]
 
@@ -105,13 +103,7 @@ class Variational:
         if not isinstance(samples, list):
             samples = [samples]
 
-        shape = get_dims(samples[0])
-        rank = len(shape)
-        if rank == len(self.shape[0]) + 1:
-            size = shape[0]
-        else:
-            size = 1
-
+        size = get_dims(samples[0])[0]
         feed_dict = {}
         for sample,layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
@@ -135,7 +127,7 @@ class Variational:
 
         This method assumes each xs[l] in xs has the same batch size,
         i.e., dimensions (batch x shape) for fixed batch and variable
-        shape or (shape) for variable shape.
+        shape.
 
         This method assumes length of xs == length of self.layers.
         """
@@ -149,12 +141,8 @@ class Variational:
             shape = xs[0].shape
             rank = len(shape)
 
-        if rank == len(self.shape[0]) + 1:
-            n_minibatch = shape[0]
-            log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
-        else:
-            log_prob = tf.constant(0.0)
-
+        n_minibatch = shape[0]
+        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         for l,layer in enumerate(self.layers):
             log_prob += layer.log_prob(xs[l])
 
@@ -201,9 +189,8 @@ class Distribution:
         Returns
         -------
         tf.Tensor
-            If size = 1, shape array of type tf.float32. If size > 1,
-            (size x shape) array of type tf.float32, where each slice
-            along the first dimension is a sample from s.
+            A (size x shape) array of type tf.float32, where each
+            slice along the first dimension is a sample from s.
         """
         raise NotImplementedError()
 
@@ -215,9 +202,8 @@ class Distribution:
         Returns
         -------
         tf.Tensor
-            If size = 1, shape array of type tf.float32. If size > 1,
-            (size x shape) array of type tf.float32, where each slice
-            along the first dimension is a sample from s.
+            A (size x shape) array of type tf.float32, where each
+            slice along the first dimension is a sample from p.
         """
         raise NotImplementedError()
 
@@ -228,9 +214,8 @@ class Distribution:
         Returns
         -------
         tf.Tensor or np.ndarray
-            If size = 1, shape array of type tf.float32 or np.float32.
-            If size > 1, (size x shape) array of type tf.float32, where
-            each slice along the first dimension is a sample from p.
+            A (size x shape) array of type tf.float32, where each
+            slice along the first dimension is a sample from p.
 
         Notes
         -----
@@ -252,16 +237,14 @@ class Distribution:
         Parameters
         ----------
         xs : tf.Tensor or np.ndarray
-            (n_minibatch x self.shape) or self.shape
+            n_minibatch x self.shape
 
         Returns
         -------
         tf.Tensor
-            If xs has dimensions (n_minibatch x self.shape), a vector
+            A vector
             [ sum_{idx in shape} log p(xs[1, idx] | params[idx]), ...,
               sum_{idx in shape} log p(xs[S, idx] | params[idx]) ]
-            If xs has dimensions self.shape, a scalar
-            sum_{idx in shape} log p(xs[idx] | params[idx])
         """
         if isinstance(xs, tf.Tensor):
             shape = get_dims(xs)
@@ -270,16 +253,12 @@ class Distribution:
             shape = xs.shape
             rank = len(shape)
 
-        if rank == len(self.shape) + 1:
-            n_minibatch = shape[0]
-            log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
-        else:
-            log_prob = tf.constant(0.0)
-
         # Loop over each random variable.
         # If univariate distribution, this is over all indices; if
         # multivariate distribution, this is over all but the last
         # index.
+        n_minibatch = shape[0]
+        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         if len(self.shape) == 1:
             if self.is_multivariate:
                 idx = ()
@@ -334,16 +313,14 @@ class Distribution:
             length len(self.shape[:-1]); note if len(self.shape) is 1
             for multivariate, then idx must be an empty tuple.
         xs : tf.Tensor or np.ndarray
-            (n_minibatch x self.shape) or self.shape
+            n_minibatch x self.shape
 
         Returns
         -------
         tf.Tensor
-            If xs has dimensions (n_minibatch x self.shape), a vector
+            A vector
             [ log p(xs[1, idx] | params[idx]), ...,
               log p(xs[S, idx] | params[idx]) ]
-            If xs has dimensions self.shape, a scalar
-            log p(xs[idx] | params[idx]).
         """
         raise NotImplementedError()
 
@@ -389,18 +366,7 @@ class Bernoulli(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return bernoulli.logpmf(xs[full_idx], self.p[idx])
 
     def entropy(self):
@@ -442,18 +408,7 @@ class Beta(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return beta.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
     def entropy(self):
@@ -494,18 +449,7 @@ class Dirichlet(Distribution):
         where idx is of dimension shape[:-1]
         """
         idx = idx + (slice(0, None), )
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
 
     def entropy(self):
@@ -547,18 +491,7 @@ class InvGamma(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return invgamma.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
     def entropy(self):
@@ -610,18 +543,7 @@ class Multinomial(Distribution):
         where idx is of dimension shape[:-1]
         """
         idx = idx + (slice(0, None), )
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx])
 
     def entropy(self):
@@ -659,10 +581,7 @@ class Normal(Distribution):
         eps = sample_noise() ~ s(eps)
         s.t. x = reparam(eps; params) ~ p(x | params)
         """
-        if size == 1:
-            return tf.random_normal(self.shape)
-        else:
-            return tf.random_normal((size, ) + self.shape)
+        return tf.random_normal((size, ) + self.shape)
 
     def reparam(self, eps):
         """
@@ -673,18 +592,7 @@ class Normal(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return norm.logpdf(xs[full_idx], self.loc[idx], self.scale[idx])
 
     def entropy(self):
@@ -737,16 +645,5 @@ class PointMass(Distribution):
         the jth element is 1 if xs[j, idx] is equal to params[idx], 0
         otherwise. If xs has dimensions self.shape, a scalar.
         """
-        if isinstance(xs, tf.Tensor):
-            rank = len(xs.get_shape())
-        else: # NumPy array
-            rank = len(xs.shape)
-
-        if rank == len(self.shape) + 1: # n_minibatch x shape
-            full_idx = (slice(0, None), ) + idx
-        elif rank == len(self.shape): # shape
-            full_idx = idx
-        else:
-            raise IndexError()
-
+        full_idx = (slice(0, None), ) + idx
         return tf.cast(tf.equal(xs[full_idx], self.params[idx]), dtype=tf.float32)

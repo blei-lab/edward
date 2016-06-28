@@ -62,26 +62,6 @@ class MixtureGaussian:
         N = get_dims(xs)[0]
         pi, mus, sigmas = zs
         log_prior = dirichlet.logpdf(pi, self.alpha)
-        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
-        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
-
-        # Loop over each mini-batch zs[b,:]
-        log_lik = []
-        log_lik_z = N*tf.reduce_sum(tf.log(pi))
-        for k in range(self.K):
-            log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
-                mus[(k*self.D):((k+1)*self.D)],
-                sigmas[(k*self.D):((k+1)*self.D)]))
-
-        log_lik += [log_lik_z]
-
-        return tf.squeeze(log_prior + tf.pack(log_lik))
-
-    def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        N = get_dims(xs)[0]
-        pi, mus, sigmas = zs
-        log_prior = dirichlet.logpdf(pi, self.alpha)
         log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
         log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
 
