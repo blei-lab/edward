@@ -166,7 +166,7 @@ class Distribution:
 
     Parameters
     ----------
-    shape : int or tuple, optional
+    shape : int, list, or tuple, optional
         Shape of random variable(s). For multivariate distributions,
         the outermost dimension denotes the multivariate dimension.
     """
@@ -174,6 +174,8 @@ class Distribution:
         get_session()
         if isinstance(shape, int):
             shape = (shape, )
+        elif isinstance(shape, list):
+            shape = tuple(shape)
 
         self.shape = shape
         self.num_vars = np.prod(self.shape)
