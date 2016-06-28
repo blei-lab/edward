@@ -105,7 +105,7 @@ for t in range(600):
     loss = inference.update()
     if t % inference.n_print == 0:
         print("iter {:d} loss {:.2f}".format(t, loss))
-        variational.print_params()
+        print(variational)
 
         # Sample functions from variational model
         mean, std = sess.run([variational.layers[0].loc,
