@@ -85,7 +85,7 @@ class My_Model():
         return log_like + log_prior
 
 model = My_Model(...)</code></pre>
-<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.logprob(xs,zs)</code>.</p>
+<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.log_prob(xs,zs)</code>.</p>
 <p>Next we load the data:</p>
 <pre class="python" language="Python"><code>from ed.data import load_connectome
 data = load_connectome()</code></pre>

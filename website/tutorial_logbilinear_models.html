@@ -94,7 +94,7 @@ class Latent_Space_Model():
         return log_like + log_prior
 
 model = Latent_Space_Model(...)</code></pre>
-<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.logprob(xs,zs)</code>.</p>
+<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.log_prob(xs,zs)</code>.</p>
 <p>Next we load the data:</p>
 <pre class="python" language="Python"><code>from ed.data import load_connectome
 data = load_connectome()</code></pre>
@@ -105,7 +105,8 @@ inference.run(n_iter=500, n_print=100)</code></pre>
 <h2 id="latent-space-models">Latent Space Models</h2>
 <p>networks are cool and ubiqutous. social networks. neuroscience. cite hoff (Hoff, 2002) learn a latent representation for each node</p>
 <h2 id="data-c.elegans-connectome">Data: C.Elegans Connectome</h2>
-<p>Data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">here</a>. It is a weighted, directed network representing the neural network of the nematode C. Elegans compiled by Duncan Watts and Steven Strogatz from original experimental data by White et al.</p>
+<p>Data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">here</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Duncan Watts and Steven Strogatz from original experimental data by White et al.</p>
+<p>The neural network consists of around <span class="math inline">\(300\)</span> neurons.</p>
 <h3 id="references">References</h3>
 <p>Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
 <p>Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. , 393(6684):440–442.</p>

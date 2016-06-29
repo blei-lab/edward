@@ -83,10 +83,10 @@
 <pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
 <p>See the <a href="troubleshooting.html">troubleshooting page</a> for detailed installation instructions.</p>
 <h3 id="your-first-edward-program">Your first Edward program</h3>
-<p>Let’s use Edward to cluster some data using a Bayesian mixture model. Define the likelihood of an observation <span class="math">\(x_n\)</span> to be <span class="math">\[\begin{aligned}
+<p>Let’s use Edward to cluster some data using a Bayesian mixture model. Define the likelihood of an observation <span class="math inline">\(x_n\)</span> to be <span class="math display">\[\begin{aligned}
   p(x_{n} \mid \pi, \mu, \Sigma)
   &amp;=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(x_n ; \mu_k, \Sigma_k).\end{aligned}\]</span> The latent variable <span class="math">\(\pi\)</span> mixes <span class="math">\(K\)</span> Gaussian distributions, each characterized by mean <span class="math">\(\mu_k\)</span> and covariance <span class="math">\(\Sigma_k\)</span>.</p>
+  \sum_{k=1}^K \pi_k \, \mathcal{N}(x_n ; \mu_k, \Sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> mixes <span class="math inline">\(K\)</span> Gaussian distributions, each characterized by mean <span class="math inline">\(\mu_k\)</span> and covariance <span class="math inline">\(\Sigma_k\)</span>.</p>
 <pre class="python" language="Python"><code>  asdf</code></pre>
     </div>
   </div>
