@@ -518,7 +518,7 @@ class Multinomial(Distribution):
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
         Distribution.__init__(self, shape)
-        self.num_params = np.prod(shape_minus) * K_minus_one
+        self.num_params = np.prod(shape[:-1]) * (shape[-1] -1)
         self.sample_tensor = False
         self.is_multivariate = True
 
@@ -544,9 +544,9 @@ class Multinomial(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
-        idx = idx + (slice(0, None), )
-        full_idx = (slice(0, None), ) + idx
-        return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx])
+        idx_K = idx + (slice(0, None), )
+        full_idx = (slice(0, None), ) + idx_K
+        return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx_K])
 
     def entropy(self):
         return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
