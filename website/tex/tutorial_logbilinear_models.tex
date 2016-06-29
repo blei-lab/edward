@@ -1,0 +1,80 @@
+\title{Tutorial: Latent Space Models}
+
+\subsection{Tutorial: Latent Space Models}
+
+This tutorial correponds to code found here [FIX LINK]
+  \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}{Bayesian
+  linear regression}
+
+The purpose of this tutorial is to show how one can use edward to fit a latent space model to network data from a neuroscience application.
+
+It is structured as follows.
+We first review some basic ingredients of probailistic modeling in edward.
+Next, we define the model and specify implementation details. 
+Finally we fit the model with MAP estimation.
+
+\subsection{Probabilistic Modeling in Edward}
+Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.
+
+\begin{lstlisting}[language=Python]
+import edward as ed
+import tensorflow as tf
+
+class Latent_Space_Model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self,xs,zs):
+        log_prior = ...
+        log_like = ...
+        return log_like + log_prior
+
+model = Latent_Space_Model(...)
+\end{lstlisting}
+Note that the model has two important properties. We need to specify the field \texttt{self.num\_vars} which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data \texttt{xs} and latent variables \texttt{zs}. The method is \texttt{self.log_prob(xs,zs)}.
+
+Next we load the data:
+\begin{lstlisting}[language=Python]
+from ed.data import load_connectome
+data = load_connectome()
+\end{lstlisting}
+A description of the data can be found below.
+
+Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.
+\begin{lstlisting}[language=Python]
+inference = ed.MAP(model, data)
+inference.run(n_iter=500, n_print=100)
+\end{lstlisting}
+
+\subsection{Latent Space Models}
+
+networks are cool and ubiqutous. social networks. neuroscience. 
+cite hoff (Hoff, 2002)
+learn a latent representation for each node
+
+\subsection{Data: C.Elegans Connectome}
+
+Data comes from \href{http://www-personal.umich.edu/~mejn/netdata/}{here}.
+It is a weighted, directed network representing the neural network of the nematode C. Elegans compiled by Duncan Watts and Steven Strogatz from original experimental data by White et al.
+
+\subsubsection{References}
+\begin{thebibliography}{}
+\bibitem[\protect\astroncite{Hoff et~al.}{2002}]{hoff2002latent}
+Hoff, P.~D., Raftery, A.~E., and Handcock, M.~S. (2002).
+\newblock Latent space approaches to social network analysis.
+\newblock {\em Journal of the american Statistical association},
+  97(460):1090--1098.
+
+\bibitem[\protect\astroncite{Watts and Strogatz}{1998}]{watts1998collective}
+Watts, D.~J. and Strogatz, S.~H. (1998).
+\newblock Collective dynamics of ‘small-world’networks.
+\newblock {\em nature}, 393(6684):440--442.
+
+\bibitem[\protect\astroncite{White et~al.}{1986}]{white1986structure}
+White, J.~G., Southgate, E., Thomson, J.~N., and Brenner, S. (1986).
+\newblock The structure of the nervous system of the nematode caenorhabditis
+  elegans.
+\newblock {\em Philos Trans R Soc Lond B Biol Sci}, 314(1165):1--340.
+\end{thebibliography}
+

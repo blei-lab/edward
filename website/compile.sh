@@ -18,3 +18,5 @@ cd ../sphinx
 sphinx-apidoc -f -o source/ ../edward
 make html
 cp -r build/html/* ../website/api
+
+cd ../website
