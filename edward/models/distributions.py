@@ -74,10 +74,10 @@ class Variational:
         Returns
         -------
         list or tf.Tensor
-            If more than one layer, a list of tensors, one for each
-            layer. If one layer, a single tensor. If a layer requires
-            SciPy to sample, its corresponding tensor is a
-            tf.placeholder.
+            If more than one layer, a list of tf.Tensors of dimension
+            (batch x shape), one for each layer. If one layer, a
+            tf.Tensor of (batch x shape). If a layer requires SciPy to
+            sample, its corresponding tensor is a tf.placeholder.
         """
         samples = []
         for layer in self.layers:
@@ -99,6 +99,15 @@ class Variational:
         Parameters
         ----------
         samples : list or tf.Tensor
+            If more than one layer, a list of tf.Tensors of dimension
+            (batch x shape). If one layer, a tf.Tensor of (batch x
+            shape).
+
+        Notes
+        -----
+        This method assumes each samples[l] in samples has the same
+        batch size, i.e., dimensions (batch x shape) for fixed batch
+        and varying shape.
         """
         if not isinstance(samples, list):
             samples = [samples]
@@ -117,8 +126,8 @@ class Variational:
         ----------
         xs : list or tf.Tensor or np.array
             If more than one layer, a list of tf.Tensors or np.array's
-            of dimension (batch x shape) or shape. If one layer, a
-            tf.Tensor or np.array of (batch x shape) or shape.
+            of dimension (batch x shape). If one layer, a tf.Tensor or
+            np.array of (batch x shape).
 
         Notes
         -----
@@ -126,7 +135,7 @@ class Variational:
         log_prob methods, e.g., for automatic Rao-Blackwellization.
 
         This method assumes each xs[l] in xs has the same batch size,
-        i.e., dimensions (batch x shape) for fixed batch and variable
+        i.e., dimensions (batch x shape) for fixed batch and varying
         shape.
 
         This method assumes length of xs == length of self.layers.
@@ -167,8 +176,10 @@ class Distribution:
     Parameters
     ----------
     shape : int, list, or tuple, optional
-        Shape of random variable(s). For multivariate distributions,
-        the outermost dimension denotes the multivariate dimension.
+        Shape of random variable(s). If is_multivariate=True, then the
+        inner-most (right-most) dimension indicates the dimension of
+        the multivariate random variable. Otherwise, all dimensions
+        are conceptually the same.
     """
     def __init__(self, shape=1):
         get_session()
