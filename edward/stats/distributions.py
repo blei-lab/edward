@@ -122,13 +122,13 @@ class Bernoulli:
         --------
         >>> x = bernoulli.rvs(p=0.5, size=1)
         >>> print(x.shape)
-        (1, 1)
+        (1,)
         >>> x = bernoulli.rvs(p=np.array([0.5]), size=1)
         >>> print(x.shape)
         (1, 1)
-        >>> x = bernoulli.rvs(p=np.array([0.5, 0.2]), size=1)
+        >>> x = bernoulli.rvs(p=np.array([0.5, 0.2]), size=3)
         >>> print(x.shape)
-        (1, 2)
+        (3, 2)
         """
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
