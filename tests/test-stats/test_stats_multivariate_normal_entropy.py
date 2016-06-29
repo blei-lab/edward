@@ -11,11 +11,11 @@ def _assert_eq(val_ed, val_true):
     with sess.as_default():
         assert np.allclose(val_ed.eval(), val_true)
 
-def test_entropy_empty():
+def test_empty():
     _assert_eq(multivariate_normal.entropy(),
                stats.multivariate_normal.entropy())
 
-def test_entropy_1d():
+def test_1d():
     diag = [1.0, 1.0]
     cov = tf.constant(diag)
     _assert_eq(multivariate_normal.entropy(cov=cov),
@@ -23,7 +23,7 @@ def test_entropy_1d():
     _assert_eq(multivariate_normal.entropy(cov=np.diag(diag)),
                stats.multivariate_normal.entropy(cov=np.diag(diag)))
 
-def test_entropy_2d_diag():
+def test_2d_diag():
     cm = [[1.0, 0.0], [0.0, 1.0]]
     cov = tf.constant(cm)
     _assert_eq(multivariate_normal.entropy(cov=cov),
@@ -31,7 +31,7 @@ def test_entropy_2d_diag():
     _assert_eq(multivariate_normal.entropy(cov=np.array(cm)),
                stats.multivariate_normal.entropy(cov=np.array(cm)))
 
-def test_entropy_2d_full():
+def test_2d_full():
     cm = [[1.0, 0.9], [0.9, 1.0]]
     cov = tf.constant(cm)
     _assert_eq(multivariate_normal.entropy(cov=cov),

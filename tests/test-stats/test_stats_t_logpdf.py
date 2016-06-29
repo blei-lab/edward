@@ -13,7 +13,7 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_logpdf(x, df, loc=0, scale=1):
+def _test(x, df, loc=0, scale=1):
     xtf = tf.constant(x)
     val_true = stats.t.logpdf(x, df, loc, scale)
     _assert_eq(t.logpdf(xtf, df, loc, scale), val_true)
@@ -22,12 +22,12 @@ def _test_logpdf(x, df, loc=0, scale=1):
     _assert_eq(t.logpdf(xtf, df, tf.constant(loc), tf.constant([scale])), val_true)
     _assert_eq(t.logpdf(xtf, df, tf.constant([loc]), tf.constant([scale])), val_true)
 
-def test_logpdf_scalar():
-    _test_logpdf(0.0, df=3)
-    _test_logpdf(0.623, df=3)
+def test_scalar():
+    _test(0.0, df=3)
+    _test(0.623, df=3)
 
-def test_logpdf_1d():
-    _test_logpdf([0.0, 1.0, 0.58, 2.3], df=3)
+def test_1d():
+    _test([0.0, 1.0, 0.58, 2.3], df=3)
 
-def test_logpdf_2d():
-    _test_logpdf(np.array([[0.0, 1.0, 0.58, 2.3],[0.0, 1.0, 0.58, 2.3]]), df=3)
+def test_2d():
+    _test(np.array([[0.0, 1.0, 0.58, 2.3],[0.0, 1.0, 0.58, 2.3]]), df=3)

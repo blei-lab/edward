@@ -19,7 +19,7 @@ def _assert_eq(val_ed, val_true):
     with sess.as_default():
         assert np.allclose(val_ed.eval(), val_true)
 
-def _test_entropy(loc=0, scale=1):
+def _test(loc=0, scale=1):
     val_true = uniform_entropy_vec(loc, scale)
     _assert_eq(uniform.entropy(loc, scale), val_true)
     _assert_eq(uniform.entropy(tf.constant(loc), tf.constant(scale)), val_true)
@@ -27,11 +27,11 @@ def _test_entropy(loc=0, scale=1):
     _assert_eq(uniform.entropy(tf.constant(loc), tf.constant([scale])), val_true)
     _assert_eq(uniform.entropy(tf.constant([loc]), tf.constant([scale])), val_true)
 
-def test_entropy_scalar():
-    _test_entropy()
-    _test_entropy(loc=1.0, scale=1.0)
-    _test_entropy(loc=0.5, scale=5.0)
-    _test_entropy(loc=5.0, scale=0.5)
+def test_scalar():
+    _test()
+    _test(loc=1.0, scale=1.0)
+    _test(loc=0.5, scale=5.0)
+    _test(loc=5.0, scale=0.5)
 
-def test_entropy_1d():
-    _test_entropy([0.5, 0.3, 0.8, 0.2], [0.5, 0.3, 0.8, 0.2])
+def test_1d():
+    _test([0.5, 0.3, 0.8, 0.2], [0.5, 0.3, 0.8, 0.2])

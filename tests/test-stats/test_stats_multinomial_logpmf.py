@@ -40,7 +40,7 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_logpmf(x, n, p):
+def _test(x, n, p):
     xtf = tf.constant(x)
     val_true = multinomial_logpmf_vec(x, n, p)
     _assert_eq(multinomial.logpmf(xtf, n, p),
@@ -52,18 +52,18 @@ def _test_logpmf(x, n, p):
     _assert_eq(multinomial.logpmf(xtf, n, tf.constant(p, dtype=tf.float32)),
                val_true)
 
-def test_logpmf_int_1d():
-    _test_logpmf(np.array([0, 1]), 1, np.array([0.5, 0.5]))
-    _test_logpmf(np.array([1, 0]), 1, np.array([0.75, 0.25]))
+def test_int_1d():
+    _test(np.array([0, 1]), 1, np.array([0.5, 0.5]))
+    _test(np.array([1, 0]), 1, np.array([0.75, 0.25]))
 
-def test_logpmf_float_1d():
-    _test_logpmf(np.array([0.0, 1.0]), 1, np.array([0.5, 0.5]))
-    _test_logpmf(np.array([1.0, 0.0]), 1, np.array([0.75, 0.25]))
+def test_float_1d():
+    _test(np.array([0.0, 1.0]), 1, np.array([0.5, 0.5]))
+    _test(np.array([1.0, 0.0]), 1, np.array([0.75, 0.25]))
 
-def test_logpmf_int_2d():
-    _test_logpmf(np.array([[0, 1],[1, 0]]), 1, np.array([0.5, 0.5]))
-    _test_logpmf(np.array([[1, 0],[0, 1]]), 1, np.array([0.75, 0.25]))
+def test_int_2d():
+    _test(np.array([[0, 1],[1, 0]]), 1, np.array([0.5, 0.5]))
+    _test(np.array([[1, 0],[0, 1]]), 1, np.array([0.75, 0.25]))
 
-def test_logpmf_float_2d():
-    _test_logpmf(np.array([[0.0, 1.0],[1.0, 0.0]]), 1, np.array([0.5, 0.5]))
-    _test_logpmf(np.array([[1.0, 0.0],[0.0, 1.0]]), 1, np.array([0.75, 0.25]))
+def test_float_2d():
+    _test(np.array([[0.0, 1.0],[1.0, 0.0]]), 1, np.array([0.5, 0.5]))
+    _test(np.array([[1.0, 0.0],[0.0, 1.0]]), 1, np.array([0.75, 0.25]))
