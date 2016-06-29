@@ -21,7 +21,10 @@ class Distribution:
         -------
         np.ndarray
             np.array of dimension (size x shape), where shape is the
-            shape of its parameter argument.
+            shape of its parameter argument. For multivariate
+            distributions, shape corresponds to one of the parameter
+            arguments, e.g., alpha in Dirichlet, p in Multinomial,
+            mean in Multivariate_Normal.
 
         Notes
         -----
@@ -119,15 +122,6 @@ class Bernoulli:
         >>> x = bernoulli.rvs(p=np.array([0.5, 0.2]), size=1)
         >>> print(x.shape)
         (1, 2)
-        >>> x = bernoulli.rvs(p=np.array([0.5, 0.2]), size=[1])
-        >>> print(x.shape)
-        (1, 2)
-        >>> x = bernoulli.rvs(p=np.array([0.5]), size=[1, 2])
-        >>> print(x.shape)
-        (1, 2, 1)
-        >>> x = bernoulli.rvs(p=np.array([0.5, 0.2]), size=[5, 4])
-        >>> print(x.shape)
-        (5, 4, 2)
         """
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
