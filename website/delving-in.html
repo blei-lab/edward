@@ -69,6 +69,29 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
+<h2 id="probabilistic-modeling-in-edward">Probabilistic Modeling in Edward</h2>
+<p>Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.</p>
+<pre class="python" language="Python"><code>import edward as ed
+import tensorflow as tf
+
+class My_Model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self,xs,zs):
+        log_prior = ...
+        log_like = ...
+        return log_like + log_prior
+
+model = My_Model(...)</code></pre>
+<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.logprob(xs,zs)</code>.</p>
+<p>Next we load the data:</p>
+<pre class="python" language="Python"><code>from ed.data import load_connectome
+data = load_connectome()</code></pre>
+<p>Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.</p>
+<pre class="python" language="Python"><code>inference = ed.MAP(model, data)
+inference.run(n_iter=500, n_print=100)</code></pre>
 <h2 id="delving-in">Delving In</h2>
 <p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
 <p>First gather data from a real-world process. Then cycle through Box’s loop:</p>

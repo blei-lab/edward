@@ -1,6 +1,39 @@
 % Define the subtitle of the page
 \title{Delving In}
 
+\subsection{Probabilistic Modeling in Edward}
+Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.
+
+\begin{lstlisting}[language=Python]
+import edward as ed
+import tensorflow as tf
+
+class My_Model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self,xs,zs):
+        log_prior = ...
+        log_like = ...
+        return log_like + log_prior
+
+model = My_Model(...)
+\end{lstlisting}
+Note that the model has two important properties. We need to specify the field \texttt{self.num\_vars} which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data \texttt{xs} and latent variables \texttt{zs}. The method is \texttt{self.log_prob(xs,zs)}.
+
+Next we load the data:
+\begin{lstlisting}[language=Python]
+from ed.data import load_connectome
+data = load_connectome()
+\end{lstlisting}
+
+Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.
+\begin{lstlisting}[language=Python]
+inference = ed.MAP(model, data)
+inference.run(n_iter=500, n_print=100)
+\end{lstlisting}
+
 % Begin the content of the page
 \subsection{Delving In}
 Edward is named after the innovative statistician

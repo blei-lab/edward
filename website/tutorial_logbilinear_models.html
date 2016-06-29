@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Getting Started</title>
+  <title>Edward – Tutorial: Latent Space Models</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -74,20 +74,42 @@
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
-<h2 id="getting-started">Getting Started</h2>
-<p>Getting started with Edward is easy.</p>
-<h3 id="quick-installation">Quick Installation</h3>
-<p>To install the latest stable version, run</p>
-<pre class="java" language="Java"><code>pip install edward</code></pre>
-<p>To install the latest development version, run</p>
-<pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
-<p>See the <a href="troubleshooting.html">troubleshooting page</a> for detailed installation instructions.</p>
-<h3 id="your-first-edward-program">Your first Edward program</h3>
-<p>Let’s use Edward to cluster some data using a Bayesian mixture model. Define the likelihood of an observation <span class="math">\(x_n\)</span> to be <span class="math">\[\begin{aligned}
-  p(x_{n} \mid \pi, \mu, \Sigma)
-  &amp;=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(x_n ; \mu_k, \Sigma_k).\end{aligned}\]</span> The latent variable <span class="math">\(\pi\)</span> mixes <span class="math">\(K\)</span> Gaussian distributions, each characterized by mean <span class="math">\(\mu_k\)</span> and covariance <span class="math">\(\Sigma_k\)</span>.</p>
-<pre class="python" language="Python"><code>  asdf</code></pre>
+<h2 id="tutorial-latent-space-models">Tutorial: Latent Space Models</h2>
+<p>This tutorial correponds to code found here [FIX LINK] <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a></p>
+<p>The purpose of this tutorial is to show how one can use edward to fit a latent space model to network data from a neuroscience application.</p>
+<p>It is structured as follows. We first review some basic ingredients of probailistic modeling in edward. Next, we define the model and specify implementation details. Finally we fit the model with MAP estimation.</p>
+<h2 id="probabilistic-modeling-in-edward">Probabilistic Modeling in Edward</h2>
+<p>Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.</p>
+<pre class="python" language="Python"><code>import edward as ed
+import tensorflow as tf
+
+class Latent_Space_Model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self,xs,zs):
+        log_prior = ...
+        log_like = ...
+        return log_like + log_prior
+
+model = Latent_Space_Model(...)</code></pre>
+<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.logprob(xs,zs)</code>.</p>
+<p>Next we load the data:</p>
+<pre class="python" language="Python"><code>from ed.data import load_connectome
+data = load_connectome()</code></pre>
+<p>A description of the data can be found below.</p>
+<p>Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.</p>
+<pre class="python" language="Python"><code>inference = ed.MAP(model, data)
+inference.run(n_iter=500, n_print=100)</code></pre>
+<h2 id="latent-space-models">Latent Space Models</h2>
+<p>networks are cool and ubiqutous. social networks. neuroscience. cite hoff (Hoff, 2002) learn a latent representation for each node</p>
+<h2 id="data-c.elegans-connectome">Data: C.Elegans Connectome</h2>
+<p>Data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">here</a>. It is a weighted, directed network representing the neural network of the nematode C. Elegans compiled by Duncan Watts and Steven Strogatz from original experimental data by White et al.</p>
+<h3 id="references">References</h3>
+<p>Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
+<p>Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. , 393(6684):440–442.</p>
+<p>White, J. G., Southgate, E., Thomson, J. N., and Brenner, S. (1986). The structure of the nervous system of the nematode caenorhabditis elegans. , 314(1165):1–340.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
