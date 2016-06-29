@@ -30,7 +30,7 @@ def multinomial_logpmf_vec(x, n, p):
     return np.array([multinomial_logpmf(x[i, :], n, p)
                      for i in range(n_minibatch)])
 
-def _test_log_prob_idx(shape, n_minibatch):
+def _test(shape, n_minibatch):
     K = shape[-1]
     multinomial = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
     with sess.as_default():
@@ -48,17 +48,17 @@ def _test_log_prob_idx(shape, n_minibatch):
                 multinomial_logpmf_vec(z[:, i, :], 1, pi[i, :]),
                 atol=1e-4)
 
-def test_log_prob_idx_1_2v_1d():
-    _test_log_prob_idx([1, 2], 1)
+def test_1_2v_1d():
+    _test([1, 2], 1)
 
-def test_log_prob_idx_1_3v_1d():
-    _test_log_prob_idx([1, 3], 1)
+def test_1_3v_1d():
+    _test([1, 3], 1)
 
-def test_log_prob_idx_1_2v_2d():
-    _test_log_prob_idx([1, 2], 2)
+def test_1_2v_2d():
+    _test([1, 2], 2)
 
-def test_log_prob_idx_2_2v_1d():
-    _test_log_prob_idx([2, 2], 1)
+def test_2_2v_1d():
+    _test([2, 2], 1)
 
-def test_log_prob_idx_2_2v_2d():
-    _test_log_prob_idx([2, 2], 2)
+def test_2_2v_2d():
+    _test([2, 2], 2)

@@ -9,7 +9,7 @@ from scipy import stats
 sess = tf.Session()
 ed.set_seed(98765)
 
-def _test_log_prob_idx(shape, n_minibatch):
+def _test(shape, n_minibatch):
     normal = Normal(shape,
                     loc=tf.constant([0.0] * shape),
                     scale=tf.constant([1.0] * shape))
@@ -22,14 +22,14 @@ def _test_log_prob_idx(shape, n_minibatch):
                 normal.log_prob_idx((i, ), tf.constant(z, dtype=tf.float32)).eval(),
                 stats.norm.logpdf(z[:, i], m[i], s[i]))
 
-def test_log_prob_idx_1v_1d():
-    _test_log_prob_idx(1, 1)
+def test_1v_1d():
+    _test(1, 1)
 
-def test_log_prob_idx_1v_2d():
-    _test_log_prob_idx(1, 2)
+def test_1v_2d():
+    _test(1, 2)
 
-def test_log_prob_idx_2v_1d():
-    _test_log_prob_idx(2, 1)
+def test_2v_1d():
+    _test(2, 1)
 
-def test_log_prob_idx_2v_2d():
-    _test_log_prob_idx(2, 2)
+def test_2v_2d():
+    _test(2, 2)
