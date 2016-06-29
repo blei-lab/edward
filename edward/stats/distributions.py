@@ -355,7 +355,7 @@ class Geom:
 
         x = []
         for pidx in np.nditer(p):
-            x += [stats.geom.rvs(p, size=size)]
+            x += [stats.geom.rvs(pidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
         x = np.asarray(x).transpose()
@@ -414,7 +414,7 @@ class LogNorm:
 
         x = []
         for sidx in np.nditer(s):
-            x += [stats.lognorm.rvs(s, size=size)]
+            x += [stats.lognorm.rvs(sidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
         x = np.asarray(x).transpose()
