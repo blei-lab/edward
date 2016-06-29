@@ -117,15 +117,28 @@ class Variational:
         return out
 
 class Distribution:
-    """
-    Base class for distributions, p(x | params).
+    """Base class for model distributions, 
 
-    Parameters
-    ----------
-    num_factors : int
-        Number of factors. Default is 1.
+    .. math::
+        p(x | params).
+
+    Some terminology:
+        * ``num_factors``: the dimension of the random variable 
+          :math:`x`. (e.g. 1 for a Bernoulli, K for a Dirichlet)
+        * ``num_vars``: the number of random variables :math:`x`
+        * ``num_params``: the number of parameters to describe a distribution of
+          ``num_vars`` number of :math:`x` variables.
+
+
     """
     def __init__(self, num_factors=1):
+        """Initialize
+
+        Parameters
+        ----------
+        num_factors : int
+            Number of factors (dimension of :math:. Default is 1.
+        """
         get_session()
         self.num_factors = num_factors
         self.num_vars = None # number of random variables
