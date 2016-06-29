@@ -59,18 +59,18 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_entropy(n, p):
+def _test(n, p):
     val_true = multinomial_entropy_vec(n, p)
     _assert_eq(multinomial.entropy(n, p), val_true)
     _assert_eq(multinomial.entropy(n, tf.constant(p, dtype=tf.float32)), val_true)
     _assert_eq(multinomial.entropy(n, p), val_true)
     _assert_eq(multinomial.entropy(n, tf.constant(p, dtype=tf.float32)), val_true)
 
-def test_entropy_1d():
-    _test_entropy(1, np.array([0.5, 0.5]))
-    _test_entropy(2, np.array([0.5, 0.5]))
-    _test_entropy(3, np.array([0.75, 0.25]))
+def test_1d():
+    _test(1, np.array([0.5, 0.5]))
+    _test(2, np.array([0.5, 0.5]))
+    _test(3, np.array([0.75, 0.25]))
 
-def test_entropy_2d():
-    _test_entropy(np.array([1, 3]), np.array([[0.5, 0.5],[0.75, 0.25]]))
-    _test_entropy(np.array([5, 2]), np.array([[0.5, 0.5],[0.75, 0.25]]))
+def test_2d():
+    _test(np.array([1, 3]), np.array([[0.5, 0.5],[0.75, 0.25]]))
+    _test(np.array([5, 2]), np.array([[0.5, 0.5],[0.75, 0.25]]))

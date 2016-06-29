@@ -22,34 +22,34 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_logpdf(x, alpha):
+def _test(x, alpha):
     xtf = tf.constant(x)
     val_true = dirichlet_logpdf_vec(x, alpha)
     _assert_eq(dirichlet.logpdf(xtf, alpha), val_true)
     _assert_eq(dirichlet.logpdf(xtf, tf.convert_to_tensor(alpha)), val_true)
 
-def test_logpdf_1d():
-    _test_logpdf(np.array([0.3, 0.7]), alpha=np.array([0.5, 0.5]))
-    _test_logpdf(np.array([0.2, 0.8]), alpha=np.array([0.5, 0.5]))
+def test_1d():
+    _test(np.array([0.3, 0.7]), alpha=np.array([0.5, 0.5]))
+    _test(np.array([0.2, 0.8]), alpha=np.array([0.5, 0.5]))
 
-    _test_logpdf(np.array([0.3, 0.7]), alpha=np.array([1.0, 1.0]))
-    _test_logpdf(np.array([0.2, 0.8]), alpha=np.array([1.0, 1.0]))
+    _test(np.array([0.3, 0.7]), alpha=np.array([1.0, 1.0]))
+    _test(np.array([0.2, 0.8]), alpha=np.array([1.0, 1.0]))
 
-    _test_logpdf(np.array([0.3, 0.7]), alpha=np.array([0.5, 5.0]))
-    _test_logpdf(np.array([0.2, 0.8]), alpha=np.array([0.5, 5.0]))
+    _test(np.array([0.3, 0.7]), alpha=np.array([0.5, 5.0]))
+    _test(np.array([0.2, 0.8]), alpha=np.array([0.5, 5.0]))
 
-    _test_logpdf(np.array([0.3, 0.7]), alpha=np.array([5.0, 0.5]))
-    _test_logpdf(np.array([0.2, 0.8]), alpha=np.array([5.0, 0.5]))
+    _test(np.array([0.3, 0.7]), alpha=np.array([5.0, 0.5]))
+    _test(np.array([0.2, 0.8]), alpha=np.array([5.0, 0.5]))
 
-def test_logpdf_2d():
-    _test_logpdf(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([0.5, 0.5]))
-    _test_logpdf(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([0.5, 0.5]))
+def test_2d():
+    _test(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([0.5, 0.5]))
+    _test(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([0.5, 0.5]))
 
-    _test_logpdf(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([1.0, 1.0]))
-    _test_logpdf(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([1.0, 1.0]))
+    _test(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([1.0, 1.0]))
+    _test(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([1.0, 1.0]))
 
-    _test_logpdf(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([0.5, 5.0]))
-    _test_logpdf(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([0.5, 5.0]))
+    _test(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([0.5, 5.0]))
+    _test(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([0.5, 5.0]))
 
-    _test_logpdf(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([5.0, 0.5]))
-    _test_logpdf(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([5.0, 0.5]))
+    _test(np.array([[0.3, 0.7],[0.2, 0.8]]), alpha=np.array([5.0, 0.5]))
+    _test(np.array([[0.2, 0.8],[0.3, 0.7]]), alpha=np.array([5.0, 0.5]))

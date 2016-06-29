@@ -22,24 +22,24 @@ def _assert_eq(val_ed, val_true):
         # only an approximation
         assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
-def _test_entropy(alpha):
+def _test(alpha):
     val_true = dirichlet_entropy_vec(alpha)
     _assert_eq(dirichlet.entropy(alpha), val_true)
     _assert_eq(dirichlet.entropy(tf.convert_to_tensor(alpha)), val_true)
 
-def test_entropy_1d():
-    _test_entropy(alpha=np.array([0.5, 0.5]))
-    _test_entropy(alpha=np.array([0.5, 0.5]))
+def test_1d():
+    _test(alpha=np.array([0.5, 0.5]))
+    _test(alpha=np.array([0.5, 0.5]))
 
-    _test_entropy(alpha=np.array([1.0, 1.0]))
-    _test_entropy(alpha=np.array([1.0, 1.0]))
+    _test(alpha=np.array([1.0, 1.0]))
+    _test(alpha=np.array([1.0, 1.0]))
 
-    _test_entropy(alpha=np.array([0.5, 5.0]))
-    _test_entropy(alpha=np.array([0.5, 5.0]))
+    _test(alpha=np.array([0.5, 5.0]))
+    _test(alpha=np.array([0.5, 5.0]))
 
-    _test_entropy(alpha=np.array([5.0, 0.5]))
-    _test_entropy(alpha=np.array([5.0, 0.5]))
+    _test(alpha=np.array([5.0, 0.5]))
+    _test(alpha=np.array([5.0, 0.5]))
 
-def test_entropy_2d():
-    _test_entropy(np.array([[0.3, 0.7],[0.5, 0.5]]))
-    _test_entropy(np.array([[0.2, 0.8],[0.3, 0.7]]))
+def test_2d():
+    _test(np.array([[0.3, 0.7],[0.5, 0.5]]))
+    _test(np.array([[0.2, 0.8],[0.3, 0.7]]))
