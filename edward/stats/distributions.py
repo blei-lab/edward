@@ -47,6 +47,13 @@ class Distribution:
 
         size as a list or tuple of more than one element is not
         guaranteed to be supported.
+
+        For most distributions, the parameters must be of the same
+        shape and type, e.g., n and p in Binomial must be np.arrays()
+        of same shape or both floats. For some, they may differ by one
+        dimension, e.g., n and p in Multinomial can be float and
+        np.array(), or both np.arrays, and n always has one less
+        dimension.
         """
         raise NotImplementedError()
 
@@ -125,6 +132,8 @@ class Bernoulli:
         """
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
+        if len(p.shape) == 0:
+            return stats.bernoulli.rvs(p, size=size)
 
         x = []
         for pidx in np.nditer(p):
@@ -149,6 +158,8 @@ class Beta:
             a = np.asarray(a)
         if not isinstance(b, np.ndarray):
             b = np.asarray(b)
+        if len(a.shape) == 0:
+            return stats.beta.rvs(a, b, size=size)
 
         x = []
         for aidx,bidx in zip(np.nditer(a), np.nditer(b)):
@@ -185,6 +196,8 @@ class Binom:
             n = np.asarray(n)
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
+        if len(n.shape) == 0:
+            return stats.binom.rvs(n, p, size=size)
 
         x = []
         for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
@@ -208,6 +221,8 @@ class Chi2:
     def rvs(self, df, size=1):
         if not isinstance(df, np.ndarray):
             df = np.asarray(df)
+        if len(df.shape) == 0:
+            return stats.chi2.rvs(df, size=size)
 
         x = []
         for dfidx in np.nditer(df):
@@ -282,6 +297,8 @@ class Expon:
     def rvs(self, scale=1, size=1):
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(scale.shape) == 0:
+            return stats.expon.rvs(scale=scale, size=size)
 
         x = []
         for scaleidx in np.nditer(scale):
@@ -306,6 +323,8 @@ class Gamma:
             a = np.asarray(a)
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(a.shape) == 0:
+            return stats.gamma.rvs(a, scale=scale, size=size)
 
         x = []
         for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
@@ -331,6 +350,8 @@ class Geom:
     def rvs(self, p, size=1):
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
+        if len(p.shape) == 0:
+            return stats.geom.rvs(p, size=size)
 
         x = []
         for pidx in np.nditer(p):
@@ -355,6 +376,8 @@ class InvGamma:
             a = np.asarray(a)
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(a.shape) == 0:
+            return stats.invgamma.rvs(a, scale=scale, size=size)
 
         x = []
         for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
@@ -386,6 +409,8 @@ class LogNorm:
     def rvs(self, s, size=1):
         if not isinstance(s, np.ndarray):
             s = np.asarray(s)
+        if len(s.shape) == 0:
+            return stats.lognorm.rvs(s, size=size)
 
         x = []
         for sidx in np.nditer(s):
@@ -588,6 +613,8 @@ class NBinom:
             n = np.asarray(n)
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
+        if len(n.shape) == 0:
+            return stats.nbinom.rvs(n, p, size=size)
 
         x = []
         for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
@@ -613,6 +640,8 @@ class Norm:
             loc = np.asarray(loc)
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(loc.shape) == 0:
+            return stats.norm.rvs(loc, scale, size=size)
 
         x = []
         for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
@@ -638,6 +667,8 @@ class Poisson:
     def rvs(self, mu, size=1):
         if not isinstance(mu, np.ndarray):
             mu = np.asarray(mu)
+        if len(mu.shape) == 0:
+            return stats.poisson.rvs(mu, size=size)
 
         x = []
         for muidx in np.nditer(mu):
@@ -663,6 +694,8 @@ class T:
             loc = np.asarray(loc)
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(df.shape) == 0:
+            return stats.t.rvs(df, loc=loc, scale=scale, size=size)
 
         x = []
         for dfidx,locidx,scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
@@ -695,6 +728,8 @@ class TruncNorm:
             loc = np.asarray(loc)
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(a.shape) == 0:
+            return stats.truncnorm.rvs(a, b, loc, scale, size=size)
 
         x = []
         for aidx,bidx,locidx,scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
@@ -728,6 +763,8 @@ class Uniform:
             loc = np.asarray(loc)
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
+        if len(loc.shape) == 0:
+            return stats.uniform.rvs(loc, scale, size=size)
 
         x = []
         for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
