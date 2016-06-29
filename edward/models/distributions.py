@@ -145,10 +145,8 @@ class Variational:
 
         if isinstance(xs[0], tf.Tensor):
             shape = get_dims(xs[0])
-            rank = len(shape)
         else: # NumPy array
             shape = xs[0].shape
-            rank = len(shape)
 
         n_minibatch = shape[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
@@ -261,10 +259,8 @@ class Distribution:
         """
         if isinstance(xs, tf.Tensor):
             shape = get_dims(xs)
-            rank = len(shape)
         else: # NumPy array
             shape = xs.shape
-            rank = len(shape)
 
         # Loop over each random variable.
         # If univariate distribution, this is over all indices; if
@@ -379,7 +375,7 @@ class Bernoulli(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        full_idx = (slice(0, None), ) + idx
+        full_idx = (slice(0, None), ) + idx # slice over batch size
         return bernoulli.logpmf(xs[full_idx], self.p[idx])
 
     def entropy(self):
@@ -421,7 +417,7 @@ class Beta(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        full_idx = (slice(0, None), ) + idx
+        full_idx = (slice(0, None), ) + idx # slice over batch size
         return beta.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
     def entropy(self):
@@ -461,8 +457,8 @@ class Dirichlet(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
-        idx = idx + (slice(0, None), )
-        full_idx = (slice(0, None), ) + idx
+        idx = idx + (slice(0, None), ) # slice over multivariate dimension
+        full_idx = (slice(0, None), ) + idx # slice over batch size
         return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
 
     def entropy(self):
@@ -504,7 +500,7 @@ class InvGamma(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        full_idx = (slice(0, None), ) + idx
+        full_idx = (slice(0, None), ) + idx # slice over batch size
         return invgamma.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
     def entropy(self):
@@ -555,8 +551,8 @@ class Multinomial(Distribution):
         log p(xs[:, idx, :] | params[idx, :])
         where idx is of dimension shape[:-1]
         """
-        idx_K = idx + (slice(0, None), )
-        full_idx = (slice(0, None), ) + idx_K
+        idx_K = idx + (slice(0, None), ) # slice over multivariate dimension
+        full_idx = (slice(0, None), ) + idx_K # slice over batch size
         return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx_K])
 
     def entropy(self):
@@ -605,7 +601,7 @@ class Normal(Distribution):
 
     def log_prob_idx(self, idx, xs):
         """log p(xs[:, idx] | params[idx])"""
-        full_idx = (slice(0, None), ) + idx
+        full_idx = (slice(0, None), ) + idx # slice over batch size
         return norm.logpdf(xs[full_idx], self.loc[idx], self.scale[idx])
 
     def entropy(self):
@@ -658,5 +654,5 @@ class PointMass(Distribution):
         the jth element is 1 if xs[j, idx] is equal to params[idx], 0
         otherwise. If xs has dimensions self.shape, a scalar.
         """
-        full_idx = (slice(0, None), ) + idx
+        full_idx = (slice(0, None), ) + idx # slice over batch size
         return tf.cast(tf.equal(xs[full_idx], self.params[idx]), dtype=tf.float32)

@@ -22,9 +22,9 @@ class Distribution:
         np.ndarray
             np.array of dimension (size x shape), where shape is the
             shape of its parameter argument. For multivariate
-            distributions, shape corresponds to one of the parameter
-            arguments, e.g., alpha in Dirichlet, p in Multinomial,
-            mean in Multivariate_Normal.
+            distributions, shape may correspond to only one of the
+            parameter arguments, e.g., alpha in Dirichlet, p in
+            Multinomial, mean in Multivariate_Normal.
 
         Notes
         -----
@@ -162,7 +162,7 @@ class Beta:
             return stats.beta.rvs(a, b, size=size)
 
         x = []
-        for aidx,bidx in zip(np.nditer(a), np.nditer(b)):
+        for aidx, bidx in zip(np.nditer(a), np.nditer(b)):
             x += [stats.beta.rvs(aidx, bidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -200,7 +200,7 @@ class Binom:
             return stats.binom.rvs(n, p, size=size)
 
         x = []
-        for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
+        for nidx, pidx in zip(np.nditer(n), np.nditer(p)):
             x += [stats.binom.rvs(nidx, pidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -327,7 +327,7 @@ class Gamma:
             return stats.gamma.rvs(a, scale=scale, size=size)
 
         x = []
-        for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
+        for aidx, scaleidx in zip(np.nditer(a), np.nditer(scale)):
             x += [stats.gamma.rvs(aidx, scale=scaleidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -380,7 +380,7 @@ class InvGamma:
             return stats.invgamma.rvs(a, scale=scale, size=size)
 
         x = []
-        for aidx,scaleidx in zip(np.nditer(a), np.nditer(scale)):
+        for aidx, scaleidx in zip(np.nditer(a), np.nditer(scale)):
             x += [stats.invgamma.rvs(aidx, scale=scaleidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -441,7 +441,7 @@ class Multinomial:
 
         x = []
         # This doesn't work for non-matrix parameters.
-        for nidx,prow in zip(n, p):
+        for nidx, prow in zip(n, p):
             x += [np.random.multinomial(nidx, prow, size=size)]
 
         # This only works for rank 3 tensor.
@@ -514,7 +514,7 @@ class Multivariate_Normal:
 
         x = []
         # This doesn't work for non-matrix parameters.
-        for meanrow,covmat in zip(mean, cov):
+        for meanrow, covmat in zip(mean, cov):
             x += [stats.multivariate_normal.rvs(meanrow, covmat, size=size)]
 
         # This only works for rank 3 tensor.
@@ -617,7 +617,7 @@ class NBinom:
             return stats.nbinom.rvs(n, p, size=size)
 
         x = []
-        for nidx,pidx in zip(np.nditer(n), np.nditer(p)):
+        for nidx, pidx in zip(np.nditer(n), np.nditer(p)):
             x += [stats.nbinom.rvs(nidx, pidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -644,7 +644,7 @@ class Norm:
             return stats.norm.rvs(loc, scale, size=size)
 
         x = []
-        for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
+        for locidx, scaleidx in zip(np.nditer(loc), np.nditer(scale)):
             x += [stats.norm.rvs(locidx, scaleidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -698,7 +698,7 @@ class T:
             return stats.t.rvs(df, loc=loc, scale=scale, size=size)
 
         x = []
-        for dfidx,locidx,scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
+        for dfidx, locidx, scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
             x += [stats.t.rvs(dfidx, loc=locidx, scale=scaleidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -732,7 +732,7 @@ class TruncNorm:
             return stats.truncnorm.rvs(a, b, loc, scale, size=size)
 
         x = []
-        for aidx,bidx,locidx,scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
+        for aidx, bidx, locidx, scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
             x += [stats.truncnorm.rvs(aidx, bidx, locidx, scaleidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
@@ -767,7 +767,7 @@ class Uniform:
             return stats.uniform.rvs(loc, scale, size=size)
 
         x = []
-        for locidx,scaleidx in zip(np.nditer(loc), np.nditer(scale)):
+        for locidx, scaleidx in zip(np.nditer(loc), np.nditer(scale)):
             x += [stats.uniform.rvs(locidx, scaleidx, size=size)]
 
         # Note this doesn't work for multi-dimensional sizes.
