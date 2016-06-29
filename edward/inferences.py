@@ -168,7 +168,7 @@ class MFVI(VariationalInference):
 
     def update(self):
         sess = get_session()
-        feed_dict = self.variational.np_dict(self.samples)
+        feed_dict = self.variational.np_dict(self.zs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -199,8 +199,8 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
@@ -216,8 +216,8 @@ class MFVI(VariationalInference):
         ELBO = E_{q(z; lambda)} [ log p(x, z) - log q(z; lambda) ]
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
                                    self.variational.log_prob(z))
@@ -234,8 +234,8 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_lik = self.model.log_lik(x, z)
@@ -254,8 +254,8 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_prob = self.model.log_prob(x, z)
@@ -275,8 +275,8 @@ class MFVI(VariationalInference):
         It assumes the model prior is p(z) = N(z; 0, 1).
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -293,8 +293,8 @@ class MFVI(VariationalInference):
         where entropy is analytic
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -314,7 +314,7 @@ class KLpq(VariationalInference):
 
     def update(self):
         sess = get_session()
-        feed_dict = self.variational.np_dict(self.samples)
+        feed_dict = self.variational.np_dict(self.zs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -340,8 +340,8 @@ class KLpq(VariationalInference):
               + w(z^b; lambda) = p(x, z^b) / q(z^b; lambda)
         """
         x = self.data.sample(self.n_data)
-        self.samples = self.variational.sample(self.n_minibatch)
-        z = self.samples
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         # normalized importance weights
         q_log_prob = self.variational.log_prob(stop_gradient(z))
