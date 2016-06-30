@@ -9,7 +9,9 @@ sess = tf.Session()
 
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
+        # Values may only be true up to numerical calculation of
+        # special functions.
+        assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
 
 def _test(a, b):
     val_true = stats.beta.entropy(a, b)
