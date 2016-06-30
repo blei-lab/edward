@@ -176,11 +176,11 @@ class Variational:
 
     def __str__(self):
         string = ""
-        for i in range(len(self.layers)):
-            if i != 0:
+        for l, layer in enumerate(self.layers):
+            if l != 0:
                 string += "\n"
 
-            layer = self.layers[i]
+            layer = self.layers[l]
             string += layer.__str__()
 
         return string
@@ -217,8 +217,8 @@ class Variational:
         -------
         list or tf.Tensor
             If more than one layer, a list of tf.Tensors of dimension
-            (batch x shape), one for each layer. If one layer, a
-            tf.Tensor of (batch x shape). If a layer requires SciPy to
+            (size x shape), one for each layer. If one layer, a
+            tf.Tensor of (size x shape). If a layer requires SciPy to
             sample, its corresponding tensor is a tf.placeholder.
         """
         samples = []
@@ -256,7 +256,7 @@ class Variational:
 
         size = get_dims(samples[0])[0]
         feed_dict = {}
-        for sample,layer in zip(samples, self.layers):
+        for sample, layer in zip(samples, self.layers):
             if sample.name.startswith('Placeholder'):
                 feed_dict[sample] = layer.sample(size)
 
@@ -292,7 +292,7 @@ class Variational:
 
         n_minibatch = shape[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
-        for l,layer in enumerate(self.layers):
+        for l, layer in enumerate(self.layers):
             log_prob += layer.log_prob(xs[l])
 
         return log_prob

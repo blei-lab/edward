@@ -15,7 +15,7 @@ class Distribution:
             Number of samples, in a particular shape if specified in a
             list or tuple with more than one element.
 
-        params : float, np.array, or tf.Tensor
+        params : float or np.array
 
         Returns
         -------
@@ -72,11 +72,10 @@ class Distribution:
         Returns
         -------
         tf.Tensor
-            If univariate distribution, returns a tensor of same
-            shape as input.
-            If multivariate distribution, returns a tensor of
-            shape[-1] from input: the outer dimension representing the
-            multivariate dimension is collapsed.
+            If univariate distribution, returns a tensor of same shape
+            as input. If multivariate distribution, returns a tensor
+            of shape[:-1] from input: the outer dimension representing
+            the multivariate dimension is collapsed.
 
         Notes
         -----

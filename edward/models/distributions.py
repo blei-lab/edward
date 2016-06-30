@@ -69,16 +69,15 @@ class Distribution:
         -------
         tf.Tensor or np.ndarray
             A (size x shape) array of type tf.float32, where each
-            slice along the first dimension is a sample from p.
+            slice along the first dimension is a sample from p. If
+            the flag sample_tensor is true, the return object is a
+            TensorFlow tensor. Otherwise the return object is a
+            realization of a TensorFlow tensor, i.e., NumPy array. The
+            latter is required when we require NumPy/SciPy in order to
+            sample from distributions.
 
         Notes
         -----
-        If the flag sample_tensor is true, the return object is a
-        TensorFlow tensor. Otherwise the return object is a
-        realization of a TensorFlow tensor, i.e., NumPy array. The
-        latter is required when we require NumPy/SciPy in order to
-        sample from distributions.
-
         The method defaults to sampling noise and reparameterizing it
         (an error is raised if this is not possible).
         """
@@ -96,9 +95,9 @@ class Distribution:
         Returns
         -------
         tf.Tensor
-            A vector
+            A vector for each log density evaluation,
             [ sum_{idx in shape} log p(xs[1, idx] | params[idx]), ...,
-              sum_{idx in shape} log p(xs[S, idx] | params[idx]) ]
+              sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
         """
         if isinstance(xs, tf.Tensor):
             shape = get_dims(xs)
@@ -270,9 +269,8 @@ class Dirichlet(Distribution):
     """
     p(x | params) = prod_{idx in shape[:-1]} Dirichlet(x[idx] | alpha[idx])
 
-    where x is a flattened vector such that x[idx] represents
-    a multivariate random variable, and params = params.
-    shape[-1] denotes the multivariate dimension.
+    where x[idx] represents a multivariate random variable, and params
+    = alpha. shape[-1] denotes the multivariate dimension.
     """
     def __init__(self, shape, alpha=None):
         Distribution.__init__(self, shape)
@@ -288,7 +286,7 @@ class Dirichlet(Distribution):
 
     def __str__(self):
         alpha = self.alpha.eval()
-        return "concentration vector: \n" + alpha.__str__()
+        return "concentration: \n" + alpha.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -353,9 +351,8 @@ class Multinomial(Distribution):
     """
     p(x | params ) = prod_{idx in shape[:-1]} Multinomial(x[idx] | pi[idx])
 
-    where x is a flattened vector such that x[idx] represents
-    a multivariate random variable, and params = pi.
-    shape[-1] denotes the multivariate dimension.
+    where x[idx] represents a multivariate random variable, and params
+    = pi. shape[-1] denotes the multivariate dimension.
 
     Notes
     -----
@@ -382,7 +379,7 @@ class Multinomial(Distribution):
 
     def __str__(self):
         pi = self.pi.eval()
-        return "probability vector: \n" + pi.__str__()
+        return "probability: \n" + pi.__str__()
 
     def sample(self, size=1):
         """x ~ p(x | params)"""
@@ -479,11 +476,10 @@ class PointMass(Distribution):
 
     def sample(self, size=1):
         """
-        Return a tensor where slices along the first dimension is
-        the same set of parameters. This is to be compatible with
-        probability model methods which assume the input is possibly
-        a batch of parameter samples (as in black box variational
-        methods).
+        Notes
+        -----
+        Each sample is simply the set of point masses, as all
+        probability mass is located there.
         """
         return tf.pack([self.params]*size)
 
@@ -493,9 +489,9 @@ class PointMass(Distribution):
 
         Returns
         -------
-        If xs has dimensions n_minibatch x self.shape, a vector where
-        the jth element is 1 if xs[j, idx] is equal to params[idx], 0
-        otherwise. If xs has dimensions self.shape, a scalar.
+        tf.Tensor
+            A vector where the jth element is 1 if xs[j, idx] is equal
+            to params[idx], 0 otherwise.
         """
         full_idx = (slice(0, None), ) + idx # slice over batch size
         return tf.cast(tf.equal(xs[full_idx], self.params[idx]), dtype=tf.float32)
