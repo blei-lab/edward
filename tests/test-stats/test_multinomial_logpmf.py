@@ -36,9 +36,7 @@ def multinomial_logpmf_vec(x, n, p):
 
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
-        # NOTE: since Tensorflow has no special functions, the values here are
-        # only an approximation
-        assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
+        assert np.allclose(val_ed.eval(), val_true)
 
 def _test(x, n, p):
     xtf = tf.constant(x)

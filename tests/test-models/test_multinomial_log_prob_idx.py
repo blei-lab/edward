@@ -41,12 +41,9 @@ def _test(shape, n_minibatch):
 
         z_tf = tf.constant(z, dtype=tf.float32)
         for i in range(shape[0]):
-            # NOTE: since Tensorflow has no special functions, the values here are
-            # only an approximation
             assert np.allclose(
                 multinomial.log_prob_idx((i, ), z_tf).eval(),
-                multinomial_logpmf_vec(z[:, i, :], 1, pi[i, :]),
-                atol=1e-4)
+                multinomial_logpmf_vec(z[:, i, :], 1, pi[i, :]))
 
 def test_1_2v_1d():
     _test([1, 2], 1)

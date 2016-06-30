@@ -17,30 +17,6 @@ def cumprod(xs):
     result = tf.pack(out)
     return result
 
-def digamma(x):
-    """
-    Computes the digamma function element-wise.
-
-    TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial
-    approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-
-    Parameters
-    ----------
-    x : np.array or tf.Tensor
-        scalar, vector, or rank-n tensor
-
-    Returns
-    -------
-    tf.Tensor
-        size corresponding to size of input
-    """
-    twopx = 2.0 + x
-    logterm = tf.log(twopx)
-    return - (1.0 + 2.0 * x) / (x * (1.0 + x)) - \
-           (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
-
 def dot(x, y):
     """
     x is M x N matrix and y is N-vector, or
@@ -155,54 +131,6 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             tf.square(scale_one/scale_two) + \
             tf.square((loc_two - loc_one)/scale_two) - \
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
-
-def lbeta(x):
-    """
-    Computes the log of Beta(x), reducing along the last dimension.
-
-    TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial
-    approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-
-    Parameters
-    ----------
-    x : np.array or tf.Tensor
-        vector or rank-n tensor
-
-    Returns
-    -------
-    tf.Tensor
-        scalar if vector input, rank-(n-1) if rank-n tensor input
-    """
-    x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-    if len(get_dims(x)) == 1:
-        return tf.reduce_sum(lgamma(x)) - lgamma(tf.reduce_sum(x))
-    else:
-        return tf.reduce_sum(lgamma(x), 1) - lgamma(tf.reduce_sum(x, 1))
-
-def lgamma(x):
-    """
-    Computes the log of Gamma(x) element-wise.
-
-    TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial
-    approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-
-    Parameters
-    ----------
-    x : np.array or tf.Tensor
-        scalar, vector, or rank-n tensor
-
-    Returns
-    -------
-    tf.Tensor
-        size corresponding to size of input
-    """
-    logterm = tf.log(x * (1.0 + x) * (2.0 + x))
-    xp3 = 3.0 + x
-    return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log(xp3)
 
 def log_sum_exp(x):
     """

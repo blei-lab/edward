@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from edward.util import dot, get_dims, digamma, lbeta, lgamma
+from edward.util import dot, get_dims
 from itertools import product
 from scipy import stats
 
@@ -135,12 +135,35 @@ class Bernoulli:
         if len(p.shape) == 0:
             return stats.bernoulli.rvs(p, size=size)
 
+        #x = []
+        #for pidx in np.nditer(p):
+        #    x += [stats.bernoulli.rvs(pidx, size=size)]
+        #it = np.nditer(p, flags=['multi_index'])
+        # TODO this should loop over tensor slices, rows, then
+        # elements, etc., each one forming the list and creating
+        # np.asarray()
+        #while not it.finished:
+        #    pidx = it[0]
+        #    print(it.multi_index)
+        #    print(pidx)
+        #    x += [stats.bernoulli.rvs(pidx, size=size)]
+        #    it.iternext()
         x = []
-        for pidx in np.nditer(p):
-            x += [stats.bernoulli.rvs(pidx, size=size)]
+        # TODO deal with this recursively
+        for pslice in p:
+            xslice = []
+            for pelem in pslice:
+                 xslice += [stats.bernoulli.rvs(pelem, size=size)]
+
+            # including this one
+            xslice = np.asarray(xslice)
+            x += [xslice]
 
         # Note this doesn't work for multi-dimensional sizes.
-        x = np.asarray(x).transpose()
+        # TODO deal with this (first before above)
+        # get np.asarray to pack along the inner dimensinon
+        # it seems like i'll have to initialize and then assign
+        #x = np.asarray(x)
         return x
 
     def logpmf(self, x, p):
@@ -173,22 +196,22 @@ class Beta:
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
-        return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - lbeta(tf.pack([a, b]))
+        return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - tf.lbeta(tf.pack([a, b]))
 
     def entropy(self, a, b):
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         if len(a.get_shape()) == 0:
-            return lbeta(tf.pack([a, b])) - \
-                   tf.mul(a - 1.0, digamma(a)) - \
-                   tf.mul(b - 1.0, digamma(b)) + \
-                   tf.mul(a + b - 2.0, digamma(a+b))
+            return tf.lbeta(tf.pack([a, b])) - \
+                   tf.mul(a - 1.0, tf.digamma(a)) - \
+                   tf.mul(b - 1.0, tf.digamma(b)) + \
+                   tf.mul(a + b - 2.0, tf.digamma(a+b))
         else:
-            return lbeta(tf.concat(1,
+            return tf.lbeta(tf.concat(1,
                          [tf.expand_dims(a, 1), tf.expand_dims(b, 1)])) - \
-                   tf.mul(a - 1.0, digamma(a)) - \
-                   tf.mul(b - 1.0, digamma(b)) + \
-                   tf.mul(a + b - 2.0, digamma(a+b))
+                   tf.mul(a - 1.0, tf.digamma(a)) - \
+                   tf.mul(b - 1.0, tf.digamma(b)) + \
+                   tf.mul(a + b - 2.0, tf.digamma(a+b))
 
 class Binom:
     def rvs(self, n, p, size=1):
@@ -211,7 +234,7 @@ class Binom:
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
-        return lgamma(n + 1.0) - lgamma(x + 1.0) - lgamma(n - x + 1.0) + \
+        return tf.lgamma(n + 1.0) - tf.lgamma(x + 1.0) - tf.lgamma(n - x + 1.0) + \
                tf.mul(x, tf.log(p)) + tf.mul(n - x, tf.log(1.0-p))
 
     def entropy(self, n, p):
@@ -236,7 +259,7 @@ class Chi2:
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
         return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
-               tf.mul(0.5*df, tf.log(2.0)) - lgamma(0.5*df)
+               tf.mul(0.5*df, tf.log(2.0)) - tf.lgamma(0.5*df)
 
     def entropy(self, df):
         raise NotImplementedError()
@@ -268,9 +291,9 @@ class Dirichlet:
         x = tf.cast(x, dtype=tf.float32)
         alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
         if len(get_dims(x)) == 1:
-            return -lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+            return -tf.lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
         else:
-            return -lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
+            return -tf.lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
 
     def entropy(self, alpha):
         """
@@ -283,15 +306,15 @@ class Dirichlet:
         if len(get_dims(alpha)) == 1:
             K = get_dims(alpha)[0]
             a = tf.reduce_sum(alpha)
-            return lbeta(alpha) + \
-                   tf.mul(a - K, digamma(a)) - \
-                   tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)))
+            return tf.lbeta(alpha) + \
+                   tf.mul(a - K, tf.digamma(a)) - \
+                   tf.reduce_sum(tf.mul(alpha-1, tf.digamma(alpha)))
         else:
             K = get_dims(alpha)[1]
             a = tf.reduce_sum(alpha, 1)
-            return lbeta(alpha) + \
-                   tf.mul(a - K, digamma(a)) - \
-                   tf.reduce_sum(tf.mul(alpha-1, digamma(alpha)), 1)
+            return tf.lbeta(alpha) + \
+                   tf.mul(a - K, tf.digamma(a)) - \
+                   tf.reduce_sum(tf.mul(alpha-1, tf.digamma(alpha)), 1)
 
 class Expon:
     def rvs(self, scale=1, size=1):
@@ -338,13 +361,13 @@ class Gamma:
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
-        return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - lgamma(a)
+        return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - tf.lgamma(a)
 
     def entropy(self, a, scale=1):
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
-        return a + tf.log(scale) + lgamma(a) + \
-               tf.mul(1.0 - a, digamma(a))
+        return a + tf.log(scale) + tf.lgamma(a) + \
+               tf.mul(1.0 - a, tf.digamma(a))
 
 class Geom:
     def rvs(self, p, size=1):
@@ -396,14 +419,14 @@ class InvGamma:
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
-        return tf.mul(a, tf.log(scale)) - lgamma(a) + \
+        return tf.mul(a, tf.log(scale)) - tf.lgamma(a) + \
                tf.mul(-a-1, tf.log(x)) - tf.truediv(scale, x)
 
     def entropy(self, a, scale=1):
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
-        return a + tf.log(scale*tf.exp(lgamma(a))) - \
-               (1.0 + a) * digamma(a)
+        return a + tf.log(scale*tf.exp(tf.lgamma(a))) - \
+               (1.0 + a) * tf.digamma(a)
 
 class LogNorm:
     def rvs(self, s, size=1):
@@ -464,12 +487,12 @@ class Multinomial:
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         if len(get_dims(x)) == 1:
-            return lgamma(n + 1.0) - \
-                   tf.reduce_sum(lgamma(x + 1.0)) + \
+            return tf.lgamma(n + 1.0) - \
+                   tf.reduce_sum(tf.lgamma(x + 1.0)) + \
                    tf.reduce_sum(tf.mul(x, tf.log(p)))
         else:
-            return lgamma(n + 1.0) - \
-                   tf.reduce_sum(lgamma(x + 1.0), 1) + \
+            return tf.lgamma(n + 1.0) - \
+                   tf.reduce_sum(tf.lgamma(x + 1.0), 1) + \
                    tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
 
     def entropy(self, n, p):
@@ -632,7 +655,7 @@ class NBinom:
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
-        return lgamma(x + n) - lgamma(x + 1.0) - lgamma(n) + \
+        return tf.lgamma(x + n) - tf.lgamma(x + 1.0) - tf.lgamma(n) + \
                tf.mul(n, tf.log(p)) + tf.mul(x, tf.log(1.0-p))
 
     def entropy(self, n, p):
@@ -685,7 +708,7 @@ class Poisson:
     def logpmf(self, x, mu):
         x = tf.cast(x, dtype=tf.float32)
         mu = tf.cast(mu, dtype=tf.float32)
-        return x * tf.log(mu) - mu - lgamma(x + 1.0)
+        return x * tf.log(mu) - mu - tf.lgamma(x + 1.0)
 
     def entropy(self, mu):
         raise NotImplementedError()
@@ -715,7 +738,7 @@ class T:
         loc = tf.cast(loc, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         z = (x - loc) / scale
-        return lgamma(0.5 * (df + 1.0)) - lgamma(0.5 * df) - \
+        return tf.lgamma(0.5 * (df + 1.0)) - tf.lgamma(0.5 * df) - \
                0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
                0.5 * (df + 1.0) * tf.log(1.0 + (1.0/df) * tf.square(z))
 

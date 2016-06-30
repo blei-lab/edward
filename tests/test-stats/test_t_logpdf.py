@@ -9,9 +9,7 @@ sess = tf.Session()
 
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
-        # NOTE: since Tensorflow has no special functions, the values here are
-        # only an approximation
-        assert np.allclose(val_ed.eval(), val_true, atol=1e-4)
+        assert np.allclose(val_ed.eval(), val_true)
 
 def _test(x, df, loc=0, scale=1):
     xtf = tf.constant(x)
