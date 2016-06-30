@@ -135,35 +135,11 @@ class Bernoulli:
         if len(p.shape) == 0:
             return stats.bernoulli.rvs(p, size=size)
 
-        #x = []
-        #for pidx in np.nditer(p):
-        #    x += [stats.bernoulli.rvs(pidx, size=size)]
-        #it = np.nditer(p, flags=['multi_index'])
-        # TODO this should loop over tensor slices, rows, then
-        # elements, etc., each one forming the list and creating
-        # np.asarray()
-        #while not it.finished:
-        #    pidx = it[0]
-        #    print(it.multi_index)
-        #    print(pidx)
-        #    x += [stats.bernoulli.rvs(pidx, size=size)]
-        #    it.iternext()
         x = []
-        # TODO deal with this recursively
-        for pslice in p:
-            xslice = []
-            for pelem in pslice:
-                 xslice += [stats.bernoulli.rvs(pelem, size=size)]
+        for pidx in np.nditer(p):
+            x += [stats.bernoulli.rvs(pidx, size=size)]
 
-            # including this one
-            xslice = np.asarray(xslice)
-            x += [xslice]
-
-        # Note this doesn't work for multi-dimensional sizes.
-        # TODO deal with this (first before above)
-        # get np.asarray to pack along the inner dimensinon
-        # it seems like i'll have to initialize and then assign
-        #x = np.asarray(x)
+        x = np.asarray(x).transpose()
         return x
 
     def logpmf(self, x, p):
