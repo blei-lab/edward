@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
+from .distributions import Normal
 
 try:
     import pystan
