@@ -30,35 +30,35 @@ def multinomial_logpmf_vec(x, n, p):
     return np.array([multinomial_logpmf(x[i, :], n, p)
                      for i in range(n_minibatch)])
 
-def _test_log_prob_i(n_minibatch, num_factors, K):
-    multinomial = Multinomial([num_factors, K],
-                               pi=tf.constant(1.0/K, shape=[num_factors, K]))
+def _test(shape, n_minibatch):
+    K = shape[-1]
+    multinomial = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
     with sess.as_default():
         pi = multinomial.pi.eval()
-        z = np.zeros((n_minibatch, K*num_factors))
-        for i in range(num_factors):
-            z[:, (i*K):((i+1)*K)] = np.random.multinomial(1, pi[i, :], size=n_minibatch)
+        z = np.zeros((n_minibatch, ) + tuple(shape))
+        for i in range(shape[0]):
+            z[:, i, :] = np.random.multinomial(1, pi[i, :], size=n_minibatch)
 
         z_tf = tf.constant(z, dtype=tf.float32)
-        for i in range(num_factors):
+        for i in range(shape[0]):
             # NOTE: since Tensorflow has no special functions, the values here are
             # only an approximation
             assert np.allclose(
-                multinomial.log_prob_i(i, z_tf).eval(),
-                multinomial_logpmf_vec(z[:, (i*K):((i+1)*K)], 1, pi[i, :]),
+                multinomial.log_prob_idx((i, ), z_tf).eval(),
+                multinomial_logpmf_vec(z[:, i, :], 1, pi[i, :]),
                 atol=1e-4)
 
-def test_log_prob_i_1d_1v_2k():
-    _test_log_prob_i(1, 1, 2)
+def test_1_2v_1d():
+    _test([1, 2], 1)
 
-def test_log_prob_i_1d_1v_3k():
-    _test_log_prob_i(1, 1, 3)
+def test_1_3v_1d():
+    _test([1, 3], 1)
 
-def test_log_prob_i_2d_1v_2k():
-    _test_log_prob_i(2, 1, 2)
+def test_1_2v_2d():
+    _test([1, 2], 2)
 
-def test_log_prob_i_1d_2v_2k():
-    _test_log_prob_i(1, 2, 2)
+def test_2_2v_1d():
+    _test([2, 2], 1)
 
-def test_log_prob_i_2d_2v_2k():
-    _test_log_prob_i(2, 2, 2)
+def test_2_2v_2d():
+    _test([2, 2], 2)

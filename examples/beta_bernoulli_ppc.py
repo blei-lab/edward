@@ -33,7 +33,7 @@ class BetaBernoulli:
         """x | z ~ p(x | z)"""
         out = np.zeros((zs.shape[0], size))
         for s in range(zs.shape[0]):
-            out[s,:] = bernoulli.rvs(zs[s,:], size=size)
+            out[s,:] = bernoulli.rvs(zs[s,:], size=size).reshape((size,))
 
         return out
 

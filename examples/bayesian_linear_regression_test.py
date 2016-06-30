@@ -67,7 +67,7 @@ class LinearModel:
 def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
     x = np.random.randn(n_data, n_dim)
-    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data)
+    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
     y = y.reshape((n_data, 1))
 
     data = np.concatenate((y, x), axis=1)

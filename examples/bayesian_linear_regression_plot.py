@@ -61,7 +61,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
     x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
                          np.linspace(6, 8, num=n_data/2)])
-    y = 0.075*x + norm.rvs(0, noise_std, size=n_data)
+    y = 0.075*x + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
     x = (x - 4.0) / 4.0
     x = x.reshape((n_data, 1))
     y = y.reshape((n_data, 1))
