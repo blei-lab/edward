@@ -41,7 +41,7 @@ class Distribution:
         shape) of the draws will always be denoted by its outer
         dimension(s).
 
-        params as a 3d or higher tensor is not guaranteed to be
+        params as a 2d or higher tensor is not guaranteed to be
         supported (for either univariate or multivariate
         distribution).
 
@@ -505,12 +505,16 @@ class Multivariate_Normal:
     def rvs(self, mean=None, cov=1, size=1):
         if len(mean.shape) == 1:
             x = stats.multivariate_normal.rvs(mean, cov, size=size)
+            # stats.multivariate_normal.rvs returns (size, ) if
+            # mean has shape (1,). Expand last dimension.
+            if mean.shape[0] == 1:
+                x =  np.expand_dims(x, axis=-1)
             # stats.multivariate_normal.rvs returns (size x shape) if
-            # size > 1, and shape if size == 1.
+            # size > 1, and shape if size == 1. Expand first dimension.
             if size == 1:
-                return np.expand_dims(x, axis=0)
-            else:
-                return x
+                x = np.expand_dims(x, axis=0)
+
+            return x
 
         x = []
         # This doesn't work for non-matrix parameters.
