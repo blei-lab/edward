@@ -33,8 +33,8 @@ def evaluate(metrics, model, variational, data):
     # 1. Sample a batch of latent variables from posterior
     xs = data.data
     n_minibatch = 100
-    zs, samples = variational.sample(size=n_minibatch)
-    feed_dict = variational.np_sample(samples, n_minibatch)
+    zs = variational.sample(size=n_minibatch)
+    feed_dict = variational.np_dict(zs)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred, y_true = model.predict(xs, zs)
 
@@ -158,9 +158,16 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     # 1. Sample from posterior (or prior).
     # We must fetch zs out of the session because sample_likelihood()
     # may require a SciPy-based sampler.
-    if variational != None:
-        zs, samples = variational.sample(y, size=size)
-        feed_dict = variational.np_sample(samples, size)
+    if variational is not None:
+        zs = variational.sample(size=size)
+        feed_dict = variational.np_dict(zs)
+        # This is to avoid fetching, e.g., a placeholder x with the
+        # dictionary {x: np.array()}. TensorFlow will raise an error.
+        if isinstance(zs, list):
+            zs = [tf.identity(zs_elem) for zs_elem in zs]
+        else:
+            zs = tf.identity(zs)
+
         zs = sess.run(zs, feed_dict)
     else:
         zs = model.sample_prior(size=size)

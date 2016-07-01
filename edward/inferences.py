@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from edward.data import Data
 from edward.models import Variational, PointMass
-from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp
+from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:
     import prettytensor as pt
@@ -232,7 +232,7 @@ class MFVI(VariationalInference):
             MFVI loss function value after one iteration.
         """
         sess = get_session()
-        feed_dict = self.variational.np_sample(self.samples, self.n_minibatch)
+        feed_dict = self.variational.np_dict(self.zs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -290,12 +290,10 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
-
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
@@ -315,13 +313,11 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, z)
-
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) - q_log_prob)
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
+                                   self.variational.log_prob(z))
         return -self.loss
 
     def build_score_loss_kl(self):
@@ -344,12 +340,10 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
-
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_lik = self.model.log_lik(x, z)
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -375,12 +369,10 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """        
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, tf.stop_gradient(z))
-
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
@@ -407,7 +399,8 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """        
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -433,7 +426,8 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """ 
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -470,53 +464,35 @@ class KLpq(VariationalInference):
             KLpq loss function value after one iteration.
         """        
         sess = get_session()
-        feed_dict = self.variational.np_sample(self.samples, self.n_minibatch)
+        feed_dict = self.variational.np_dict(self.zs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
     def build_loss(self):
         """Loss function to minimize. 
 
-        Defines a stochastic gradient of   
-    
-        .. math:: 
-            KL( p(z |x) || q(z) )
+        loss = E_{p(z | x)} [ log p(z | x) - log q(z; lambda) ]
 
-        based on importance sampling.                         
+        is equivalent to minimizing
 
-        Computed as
+        E_{p(z | x)} [ log p(x, z) - log q(z; lambda) ]
+        \approx 1/B sum_{b=1}^B
+            w_norm(z^b; lambda) (log p(x, z^b) - log q(z^b; lambda))
+        with gradient
+        \approx - 1/B sum_{b=1}^B
+            w_norm(z^b; lambda) grad_{lambda} log q(z^b; lambda)
 
-        .. math::
-            E_{q(z; \lambda)} [ w_{norm}(z; \lambda) *
-                          ( \log p(x, z) - \log q(z; \lambda) ) ]
-
-        where
-    
-        .. math::
-
-            w_{norm}(z; \lambda) = w(z; \lambda) / \sum_z( w(z; \lambda) )
-
-            w(z; \lambda) = p(x, z) / q(z; \lambda)
-
-        which gives a gradient
-
-        .. math::
-            - E_{q(z; \lambda)} [ w_{norm}(z; \lambda) *
-                                 \partial_{\lambda} \log q(z; \lambda) ]
-
-        """         
+        where + z^b ~ q(z^b; lambda)
+              + w_norm(z^b; lambda) = w(z^b; lambda) / sum_{b=1}^B w(z^b; lambda)
+              + w(z^b; lambda) = p(x, z^b) / q(z^b; lambda)
+        """
         x = self.data.sample(self.n_data)
-        z, self.samples = self.variational.sample(self.n_minibatch)
+        self.zs = self.variational.sample(self.n_minibatch)
+        z = self.zs
 
-        q_log_prob = tf.zeros([self.n_minibatch], dtype=tf.float32)
-        for i in range(self.variational.num_factors):
-            q_log_prob += self.variational.log_prob_i(i, z)
-
-        # 1/B sum_{b=1}^B grad_log_q * w_norm
-        # = 1/B sum_{b=1}^B grad_log_q * exp{ log(w_norm) }
+        # normalized importance weights
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
         log_w = self.model.log_prob(x, z) - q_log_prob
-
-        # normalized log importance weights
         log_w_norm = log_w - log_sum_exp(log_w)
         w_norm = tf.exp(log_w_norm)
 
@@ -552,7 +528,7 @@ class MAP(VariationalInference):
             - \log p(x,z)
         """         
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample()
+        z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
@@ -585,7 +561,7 @@ class Laplace(VariationalInference):
             - \log p(x,z)
         """              
         x = self.data.sample(self.n_data)
-        z, _ = self.variational.sample()
+        z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
@@ -596,7 +572,7 @@ class Laplace(VariationalInference):
         """              
         get_session()
         x = self.data.sample(self.n_data) # uses mini-batch
-        z, _ = self.variational.sample()
+        z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
         inv_cov = hessian(self.model.log_prob(x, z), var_list)

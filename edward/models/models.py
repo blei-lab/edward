@@ -2,6 +2,9 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
+from edward.util import get_dims, get_session
+from .distributions import Normal
+
 try:
     import pystan
     from collections import OrderedDict
@@ -145,3 +148,160 @@ class StanModel:
             lp[b] = self.model.log_prob(z_unconst, adjust_transform=False)
 
         return lp
+
+class Variational:
+    """A container for collecting distribution objects."""
+    def __init__(self, layers=[]):
+        get_session()
+        self.layers = layers
+        if layers == []:
+            self.shape = []
+            self.num_vars = 0
+            self.num_params = 0
+            self.is_reparam = True
+            self.is_normal = True
+            self.is_entropy = True
+            self.sample_tensor = []
+            self.is_multivariate = []
+        else:
+            self.shape = [layer.shape for layer in self.layers]
+            self.num_vars = sum([layer.num_vars for layer in self.layers])
+            self.num_params = sum([layer.num_params for layer in self.layers])
+            self.is_reparam = all(['reparam' in layer.__class__.__dict__
+                                   for layer in self.layers])
+            self.is_normal = all([isinstance(layer, Normal)
+                                  for layer in self.layers])
+            self.is_entropy = all(['entropy' in layer.__class__.__dict__
+                                   for layer in self.layers])
+            self.sample_tensor = [layer.sample_tensor for layer in self.layers]
+            self.is_multivariate = [layer.is_multivariate for layer in self.layers]
+
+    def __str__(self):
+        string = ""
+        for l, layer in enumerate(self.layers):
+            if l != 0:
+                string += "\n"
+
+            layer = self.layers[l]
+            string += layer.__str__()
+
+        return string
+
+    def add(self, layer):
+        """
+        Adds a layer instance on top of the layer stack.
+
+        Parameters
+        ----------
+        layer : layer instance.
+        """
+        self.layers += [layer]
+        self.shape += [layer.shape]
+        self.num_vars += layer.num_vars
+        self.num_params += layer.num_params
+        self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
+        self.is_normal = self.is_normal and isinstance(layer, Normal)
+        self.sample_tensor += [layer.sample_tensor]
+        self.is_multivariate += [layer.is_multivariate]
+
+    def sample(self, size=1):
+        """
+        Draws a mix of tensors and placeholders, corresponding to
+        TensorFlow-based samplers and SciPy-based samplers depending
+        on the layer.
+
+        Parameters
+        ----------
+        size : int, optional
+
+        Returns
+        -------
+        list or tf.Tensor
+            If more than one layer, a list of tf.Tensors of dimension
+            (size x shape), one for each layer. If one layer, a
+            tf.Tensor of (size x shape). If a layer requires SciPy to
+            sample, its corresponding tensor is a tf.placeholder.
+        """
+        samples = []
+        for layer in self.layers:
+            if layer.sample_tensor:
+                samples += [layer.sample(size)]
+            else:
+                samples += [tf.placeholder(tf.float32, (size, ) + layer.shape)]
+
+        if len(samples) == 1:
+            samples = samples[0]
+
+        return samples
+
+    def np_dict(self, samples):
+        """
+        Form dictionary to feed any placeholders with np.array
+        samples.
+
+        Parameters
+        ----------
+        samples : list or tf.Tensor
+            If more than one layer, a list of tf.Tensors of dimension
+            (batch x shape). If one layer, a tf.Tensor of (batch x
+            shape).
+
+        Notes
+        -----
+        This method assumes each samples[l] in samples has the same
+        batch size, i.e., dimensions (batch x shape) for fixed batch
+        and varying shape.
+        """
+        if not isinstance(samples, list):
+            samples = [samples]
+
+        size = get_dims(samples[0])[0]
+        feed_dict = {}
+        for sample, layer in zip(samples, self.layers):
+            if sample.name.startswith('Placeholder'):
+                feed_dict[sample] = layer.sample(size)
+
+        return feed_dict
+
+    def log_prob(self, xs):
+        """
+        Parameters
+        ----------
+        xs : list or tf.Tensor or np.array
+            If more than one layer, a list of tf.Tensors or np.array's
+            of dimension (batch x shape). If one layer, a tf.Tensor or
+            np.array of (batch x shape).
+
+        Notes
+        -----
+        This method may be removed in the future in favor of indexable
+        log_prob methods, e.g., for automatic Rao-Blackwellization.
+
+        This method assumes each xs[l] in xs has the same batch size,
+        i.e., dimensions (batch x shape) for fixed batch and varying
+        shape.
+
+        This method assumes length of xs == length of self.layers.
+        """
+        if len(self.layers) == 1:
+            return self.layers[0].log_prob(xs)
+
+        if isinstance(xs[0], tf.Tensor):
+            shape = get_dims(xs[0])
+        else: # NumPy array
+            shape = xs[0].shape
+
+        n_minibatch = shape[0]
+        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        for l, layer in enumerate(self.layers):
+            log_prob += layer.log_prob(xs[l])
+
+        return log_prob
+
+    def entropy(self):
+        out = tf.constant(0.0, dtype=tf.float32)
+        for layer in self.layers:
+            out += layer.entropy()
+
+        return out

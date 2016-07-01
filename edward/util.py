@@ -1,21 +1,12 @@
 import tensorflow as tf
 import numpy as np
 
-def cumprod(x):
-    """Cumulative product of a tensor along first dimension.
-    https://github.com/tensorflow/tensorflow/issues/813
-
-    Parameters
-    ----------
-    x : tf.Tensor
-        vector, matrix, or n-Tensor
-
-    Returns
-    -------
-    tf.Tensor
-        A Tensor with `cumprod` applied along its first dimension.
+def cumprod(xs):
     """
-    values = tf.unpack(x)
+    Cumulative product of a tensor along first dimension.
+    https://github.com/tensorflow/tensorflow/issues/813
+    """
+    values = tf.unpack(xs)
     out = []
     prev = tf.ones_like(values[0])
     for val in values:
@@ -23,45 +14,14 @@ def cumprod(x):
         out.append(s)
         prev = s
 
-    return tf.pack(out)
-
-def digamma(x):
-    """Evaluate the digamma function element-wise.
-
-    TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-
-    Parameters
-    ----------
-    x : np.array or tf.Tensor
-        scalar, vector, or rank-n tensor
-
-    Returns
-    -------
-    tf.Tensor
-        size corresponding to size of input
-    """
-    twopx = 2.0 + x
-    logterm = tf.log(twopx)
-    return - (1.0 + 2.0 * x) / (x * (1.0 + x)) - \
-           (13.0 + 6.0 * x) / (12.0 * twopx * twopx) + logterm
+    result = tf.pack(out)
+    return result
 
 def dot(x, y):
-    """Compute dot product between a Tensor matrix and a Tensor vector.
-
-    Parameters
-    ----------
-    x : tf.Tensor
-        `M x N` matrix or `M` vector (respectively)
-    y : tf.Tensor
-        `M` vector or `M x N` matrix (respectively)
-
-    Returns
-    -------
-    tf.Tensor
-        `N` vector
-    """        
+    """
+    x is M x N matrix and y is N-vector, or
+    x is M-vector and y is M x N matrix
+    """
     if len(x.get_shape()) == 1:
         vec = x
         mat = y
@@ -72,17 +32,12 @@ def dot(x, y):
         return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 def get_dims(x):
-    """Get values of each dimension.
+    """
+    Get values of each dimension.
 
-    Parameters
+    Arguments
     ----------
-    x: tf.Tensor
-        scalar, vector, matrix, or n-Tensor
-
-    Returns
-    -------
-    list
-        Python list containing dimensions of `x`
+    x: tensor scalar or array
     """
     dims = x.get_shape()
     if len(dims) == 0: # scalar
@@ -91,15 +46,8 @@ def get_dims(x):
         return [dim.value for dim in dims]
 
 def get_session():
-    """Get the globally defined TensorFlow session.
-
-    If the session is not already defined, then the function will create 
-    a global session.
-
-    Returns
-    -------
-    _ED_SESSION : tf.InteractiveSession
-    """
+    """Get the session defined globally; if not already defined, then
+    the function will create a global session."""
     global _ED_SESSION
     if tf.get_default_session() is None:
         _ED_SESSION = tf.InteractiveSession()
@@ -107,7 +55,8 @@ def get_session():
     return _ED_SESSION
 
 def hessian(y, xs):
-    """Calculate Hessian of y with respect to each x in xs.
+    """
+    Calculate Hessian of y with respect to each x in xs.
 
     Parameters
     ----------
@@ -116,13 +65,6 @@ def hessian(y, xs):
     xs : list
         List of TensorFlow variables to calculate with respect to.
         The variables can have different shapes.
-
-    Returns
-    -------
-    tf.Tensor
-        A matrix where each row is
-
-        .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).
     """
     # Calculate flattened vector grad_{xs} y.
     grads = tf.gradients(y, xs)
@@ -152,7 +94,8 @@ def hessian(y, xs):
     return tf.pack(mat)
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
-    """Calculate the KL of multivariate normal distributions with
+    """
+    Calculates the KL of multivariate normal distributions with
     diagonal covariances.
 
     Parameters
@@ -174,10 +117,10 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     -------
     tf.Tensor
         for scalar or vector inputs, outputs the scalar
-        ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``
-
+            KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )
         for matrix inputs, outputs the vector
-        ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
+            [KL( N(z; loc_one[m,:], scale_one[m,:]) ||
+                 N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M
     """
     if loc_two == 0 and scale_two == 1:
         return 0.5 * tf.reduce_sum(
@@ -189,259 +132,106 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             tf.square((loc_two - loc_one)/scale_two) - \
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
-def lbeta(x):
-    """Compute the log of the Beta function, reducing along the last dimension.
-
-    TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-
-    Parameters
-    ----------
-    x : np.array or tf.Tensor
-        scalar, vector, matrix, or n-Tensor
-
-    Returns
-    -------
-    tf.Tensor
-        scalar if vector input, rank-(n-1) if rank-n tensor input
-    """
-    x = tf.cast(tf.squeeze(x), dtype=tf.float32)
-    if len(get_dims(x)) == 1:
-        return tf.reduce_sum(lgamma(x)) - lgamma(tf.reduce_sum(x))
-    else:
-        return tf.reduce_sum(lgamma(x), 1) - lgamma(tf.reduce_sum(x, 1))
-
-def lgamma(x):
-    """Evaluate the log of the Gamma function element-wise.
-
-    TensorFlow doesn't have special functions with support for
-    automatic differentiation, so use a log/exp/polynomial approximation.
-    http://www.machinedlearnings.com/2011/06/faster-lda.html
-
-    Parameters
-    ----------
-    x : np.array or tf.Tensor
-        scalar, vector, matrix, or n-Tensor
-
-    Returns
-    -------
-    tf.Tensor
-        size corresponding to size of input
-    """
-    logterm = tf.log(x * (1.0 + x) * (2.0 + x))
-    xp3 = 3.0 + x
-    return -2.081061466 - x + 0.0833333 / xp3 - logterm + (2.5 + x) * tf.log(xp3)
-
 def log_sum_exp(x):
-    """Compute the ``log_sum_exp`` of the elements in x.
+    """
+    Computes the log_sum_exp of the elements in x.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-        vector or matrix with second dimension 1
-
+    Works for x with
         shape=TensorShape([Dimension(N)])
-
         shape=TensorShape([Dimension(N), Dimension(1)])
 
-    Returns
-    -------
-    tf.Tensor
-        scalar if vector input, vector if matrix tensor input
+    Not tested for anything beyond that.
     """
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 def logit(x):
-    """Evaluates :math:`\log(x / (1 - x))` elementwise. 
-
-    Clips all elements to be between :math:`(0,1)`.
-    
-    Parameters
-    ----------
-    x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
-
-    Returns
-    -------
-    tf.Tensor
-        size corresponding to size of input
-    """
+    """log(x / (1 - x))"""
     x = tf.clip_by_value(x, 1e-8, 1.0 - 1e-8)
     return tf.log(x) - tf.log(1.0 - x)
 
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
-    """Squared-exponential kernel
-
-    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) \sum_i (x_i - y_i)^2 }
-
-    Parameters
-    ----------
-    x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
-    y : Optional[tf.Tensor], default 0.0
-        scalar, vector, matrix, or n-Tensor 
-    sigma : Optional[double], default 1.0
-        standard deviation of radial basis function
-    l : Optional[double], default 1.0
-        lengthscale of radial basis function
-
-    Returns
-    -------
-    tf.Tensor
-        scalar if vector input, rank-(n-1) if n-Tensor input
+    """
+    Squared-exponential kernel
+    k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }
     """
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
                   tf.reduce_sum(tf.pow(x - y , 2.0)))
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
-    """Squared-exponential kernel element-wise
-
-    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }
-
-    Parameters
-    ----------
-    x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
-    y : Optional[tf.Tensor], default 0.0
-        scalar, vector, matrix, or n-Tensor 
-    sigma : Optional[double], default 1.0
-        standard deviation of radial basis function
-    l : Optional[double], default 1.0
-        lengthscale of radial basis function
-
-    Returns
-    -------
-    tf.Tensor
-        size corresponding to size of input
+    """
+    Squared-exponential kernel element-wise
+    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
     """
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
 
 def set_seed(x):
-    """Set seed for both NumPy and TensorFlow.
-
-    Parameters
-    ----------
-    x : double
-        seed
+    """
+    Set seed for both NumPy and TensorFlow.
     """
     np.random.seed(x)
     tf.set_random_seed(x)
 
 def softplus(x):
-    """Elementwise Softplus function
+    """
+    Softplus. TensorFlow can't currently autodiff through
+    tf.nn.softplus().
+    """
+    return tf.log(1.0 + tf.exp(x))
 
-    .. math:: \log(1 + \exp(x))
+def stop_gradient(x):
+    """
+    Apply tf.stop_gradient() element-wise.
+    """
+    if isinstance(x, tf.Tensor):
+        return tf.stop_gradient(x)
+    else: # list
+        return [tf.stop_gradient(i) for i in x]
 
-    TensorFlow can't currently autodiff through tf.nn.softplus().
+def to_simplex(x):
+    """
+    Transform real vector of length (K-1) to a simplex of dimension K
+    using a backward stick breaking construction.
 
     Parameters
     ----------
-    x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
+    x : tf.tensor or np.array
+        Vector or matrix.
 
     Returns
     -------
     tf.Tensor
-        size corresponding to size of input
+        Same shape as input but with last dimension of size K.
+
+    Notes
+    -----
+    x as a 3d or higher tensor is not guaranteed to be supported.
     """
-    return tf.log(1.0 + tf.exp(x))
+    if isinstance(x, tf.Tensor):
+        shape = get_dims(x)
+    else:
+        shape = x.shape
 
-class VarStoreMethod(object):
-    """Convenience base class for registered methods that create variables.
-
-    This tracks the variables and requries subclasses to provide a ``__call__``
-    method.
-
-    This is taken from PrettyTensor.
-    https://github.com/google/prettytensor/blob/
-    c9b69fade055d0eb35474fd23d07c43c892627bc/prettytensor/
-    pretty_tensor_class.py#L1497
-    """
-
-    def __init__(self):
-        self.vars = {}
-
-    def variable(self, var_name, shape, init=tf.random_normal_initializer(), 
-                 dt=tf.float32, train=True):
-        """Adds a named variable to this bookkeeper or returns an existing one.
-        Variables marked train are returned by the training_variables method. If
-        the requested name already exists and it is compatible (same shape, dt
-        and train) then it is returned. In case of an incompatible type, an
-        exception is thrown.
-
-        Parameters
-        ----------
-        var_name : string
-            The unique name of this variable.  If a variable with the same
-            name exists, then it is returned.
-        shape : tf.TensorShape
-            The shape of the variable.
-        init : 
-            The init function to use or a Tensor to copy.
-
-            Defaults to ``tf.random_normal_initializer()``.
-        dt : 
-            The datatype, defaults to ``tf.float32``.  This will automatically 
-            extract the base ``dtype``.
-        train : bool
-            Whether or not the variable should be trained.
-
-        Returns
-        -------
-        v : string
-          The input `var_name`
-
-        Raises
-        ------
-        ValueError: 
-            if reuse is ``False`` (or unspecified and allow_reuse is ``False``)
-            and the variable already exists or if the specification of a reused
-            variable does not match the original.
-        """
-
-        # Make sure it is a TF dtype and convert it into a base dtype.
-        dt = tf.as_dtype(dt).base_dtype
-        if var_name in self.vars:
-            v = self.vars[var_name]
-            if v.get_shape() != shape:
-                raise ValueError(
-                    'Shape mismatch: %s vs %s. Perhaps a UnboundVariable had '
-                    'incompatible values within a graph.' % (v.get_shape(), shape))
-            return v
-        elif callable(init):
-
-            v = tf.get_variable(var_name,
-                              shape=shape,
-                              dtype=dt,
-                              initializer=init,
-                              trainable=train)
-            self.vars[var_name] = v
-            return v
-        else:
-            v = tf.convert_to_tensor(init, name=var_name, dtype=dt)
-            v.get_shape().assert_is_compatible_with(shape)
-            self.vars[var_name] = v
-            return v
-
-class VARIABLE(VarStoreMethod):
-    """A simple wrapper to contain variables. It will create a TensorFlow
-    variable the first time it is called and return the variable; in
-    subsequent calls, it will simply return the variable and not
-    create the TensorFlow variable again.
-
-    This enables variables to be stored outside of classes which
-    depend on parameters. It is a useful application for parametric
-    distributions whose parameters may or may not be random (e.g.,
-    through a prior), and for inverse mappings such as auto-encoders
-    where we'd like to store inverse mapping parameters outside of the
-    distribution class.
-    """
-    def __call__(self, name, shape):
-        self.name = name
-        return self.variable(name, shape)
-
-Variable = VARIABLE()
+    if len(shape) == 1:
+        n_rows = ()
+        K_minus_one = shape[0]
+        eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
+                             dtype=tf.float32))
+        z = tf.sigmoid(eq + x)
+        pil = tf.concat(0, [z, tf.constant([1.0])])
+        piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
+        S = cumprod(piu)
+        return S * pil
+    else:
+        n_rows = shape[0]
+        K_minus_one = shape[1]
+        eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
+                             dtype=tf.float32))
+        z = tf.sigmoid(eq + x)
+        pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
+        piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
+        # cumulative product along 1st axis
+        S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+        return S * pil
