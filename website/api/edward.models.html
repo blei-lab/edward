@@ -158,9 +158,9 @@
 <span id="edward-models-distributions-module"></span><h2>edward.models.distributions module<a class="headerlink" href="#module-edward.models.distributions" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="edward.models.distributions.Bernoulli">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Bernoulli</code><span class="sig-paren">(</span><em>num_factors=1</em>, <em>p=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Bernoulli</code><span class="sig-paren">(</span><em>shape=1</em>, <em>p=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{i=1}^d Bernoulli(x[i] | p[i])
+<p>p(x | params) = prod_{idx in shape} Bernoulli(x[idx] | p[idx])
 where params = p.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Bernoulli.entropy">
@@ -168,9 +168,9 @@ where params = p.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Bernoulli.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.Bernoulli.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx] | params[idx])</p>
 </dd></dl>
 
 <dl class="method">
@@ -183,9 +183,9 @@ where params = p.</p>
 
 <dl class="class">
 <dt id="edward.models.distributions.Beta">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Beta</code><span class="sig-paren">(</span><em>num_factors=1</em>, <em>alpha=None</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Beta</code><span class="sig-paren">(</span><em>shape=1</em>, <em>alpha=None</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{i=1}^d Beta(x[i] | alpha[i], beta[i])
+<p>p(x | params) = prod_{idx in shape} Beta(x[idx] | alpha[idx], beta[idx])
 where params = {alpha, beta}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Beta.entropy">
@@ -193,9 +193,9 @@ where params = {alpha, beta}.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Beta.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.Beta.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx] | params[idx])</p>
 </dd></dl>
 
 <dl class="method">
@@ -210,18 +210,19 @@ where params = {alpha, beta}.</p>
 <dt id="edward.models.distributions.Dirichlet">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Dirichlet</code><span class="sig-paren">(</span><em>shape</em>, <em>alpha=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{i=1}^d Dirichlet(x_i | alpha[i, :])
-where x is a flattened vector such that x_i represents
-the ith factor x[(i-1)*K:i*K], and params = alpha.</p>
+<p>p(x | params) = prod_{idx in shape[:-1]} Dirichlet(x[idx] | alpha[idx])</p>
+<p>where x[idx] represents a multivariate random variable, and params
+= alpha. shape[-1] denotes the multivariate dimension.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Dirichlet.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet.entropy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Dirichlet.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.Dirichlet.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx, :] | params[idx, :])
+where idx is of dimension shape[:-1]</p>
 </dd></dl>
 
 <dl class="method">
@@ -234,27 +235,19 @@ the ith factor x[(i-1)*K:i*K], and params = alpha.</p>
 
 <dl class="class">
 <dt id="edward.models.distributions.Distribution">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Distribution</code><span class="sig-paren">(</span><em>num_factors=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for model distributions,</p>
-<div class="math">
-\[p(x | params).\]</div>
-<dl class="docutils">
-<dt>Some terminology:</dt>
-<dd><ul class="first last simple">
-<li><code class="docutils literal"><span class="pre">num_factors</span></code>: the dimension of the random variable
-<span class="math">\(x\)</span>. (e.g. 1 for a Bernoulli, K for a Dirichlet)</li>
-<li><code class="docutils literal"><span class="pre">num_vars</span></code>: the number of random variables <span class="math">\(x\)</span></li>
-<li><code class="docutils literal"><span class="pre">num_params</span></code>: the number of parameters to describe a distribution of
-<code class="docutils literal"><span class="pre">num_vars</span></code> number of <span class="math">\(x\)</span> variables.</li>
-</ul>
-</dd>
-</dl>
-<p>Initialize</p>
+<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Distribution</code><span class="sig-paren">(</span><em>shape=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for distributions</p>
+<p>p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])</p>
+<p>where shape is the shape of x and params[idx] denote the
+parameters of each random variable x[idx].</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num_factors</strong> (<em>int</em>) &#8211; Number of factors (dimension of :math:. Default is 1.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shape</strong> (<em>int, list, or tuple, optional</em>) &#8211; Shape of random variable(s). If is_multivariate=True, then the
+inner-most (right-most) dimension indicates the dimension of
+the multivariate random variable. Otherwise, all dimensions
+are conceptually the same.</td>
 </tr>
 </tbody>
 </table>
@@ -263,7 +256,9 @@ the ith factor x[(i-1)*K:i*K], and params = alpha.</p>
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.entropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>H(p(x| params))
 = E_{p(x | params)} [ - log p(x | params) ]
-= sum_{i=1}^d E_{p(x_i | params)} [ - log p(x_i | params) ]</p>
+= sum_{idx in shape}</p>
+<blockquote>
+<div>E_{p(x[idx] | params[idx])} [ - log p(x[idx] | params[idx]) ]</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -277,30 +272,57 @@ the ith factor x[(i-1)*K:i*K], and params = alpha.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Distribution.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.Distribution.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs | params)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xs</strong> (<em>tf.Tensor or np.ndarray</em>) &#8211; n_minibatch x self.shape</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A vector for each log density evaluation,
+[ sum_{idx in shape} log p(xs[1, idx] | params[idx]), ...,<blockquote>
+<div>sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.distributions.Distribution.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx] | params[idx])</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>int</em>) &#8211; Index of the factor to take the log density of.</li>
-<li><strong>xs</strong> (<em>np.array</em>) &#8211; n_minibatch x num_vars</li>
+<li><strong>idx</strong> (<em>tuple</em>) &#8211; Index of the random variable to take the log density of.
+If univariate distribution, idx is of length
+len(self.shape). If multivariate distribution, idx is of
+length len(self.shape[:-1]); note if len(self.shape) is 1
+for multivariate, then idx must be an empty tuple.</li>
+<li><strong>xs</strong> (<em>tf.Tensor or np.ndarray</em>) &#8211; n_minibatch x self.shape</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A vector
+[ log p(xs[1, idx] | params[idx]), ...,</p>
+<blockquote>
+<div><p>log p(xs[S, idx] | params[idx]) ]</p>
+</div></blockquote>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">[log p(xs[1]_i | params), ..., log p(xs[S]_i | params)]</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Notes</p>
-<p>This calculates the density of the ith factor, not necessarily
-the ith latent variable (such as for multivariate factors).</p>
 </dd></dl>
 
 <dl class="method">
@@ -308,6 +330,17 @@ the ith latent variable (such as for multivariate factors).</p>
 <code class="descname">reparam</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.reparam" title="Permalink to this definition">¶</a></dt>
 <dd><p>eps = sample_noise() ~ s(eps)
 s.t. x = reparam(eps; params) ~ p(x | params)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A (size x shape) array of type tf.float32, where each
+slice along the first dimension is a sample from p.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -318,21 +351,21 @@ s.t. x = reparam(eps; params) ~ p(x | params)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">size x dim(x) array of type np.float32, where each
-row is a sample from p.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A (size x shape) array of type tf.float32, where each
+slice along the first dimension is a sample from p. If
+the flag sample_tensor is true, the return object is a
+TensorFlow tensor. Otherwise the return object is a
+realization of a TensorFlow tensor, i.e., NumPy array. The
+latter is required when we require NumPy/SciPy in order to
+sample from distributions.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor or np.ndarray</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>The return object is a TensorFlow tensor if the flag
-sample_tensor is true. Otherwise the return object is a
-realization of a TensorFlow tensor, i.e., NumPy arrays. The
-latter is required when we require NumPy/SciPy in order to
-sample from distributions.</p>
 <p>The method defaults to sampling noise and reparameterizing it
-(which will raise an error if this is not possible).</p>
+(an error is raised if this is not possible).</p>
 </dd></dl>
 
 <dl class="method">
@@ -344,10 +377,10 @@ s.t. x = reparam(eps; params) ~ p(x | params)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">size x dim(params) array of type np.float32, where each
-row is a sample from p.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A (size x shape) array of type tf.float32, where each
+slice along the first dimension is a sample from s.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
 </tbody>
 </table>
@@ -357,9 +390,9 @@ row is a sample from p.</td>
 
 <dl class="class">
 <dt id="edward.models.distributions.InvGamma">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">InvGamma</code><span class="sig-paren">(</span><em>num_factors=1</em>, <em>alpha=None</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">InvGamma</code><span class="sig-paren">(</span><em>shape=1</em>, <em>alpha=None</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{i=1}^d Inv_Gamma(x[i] | alpha[i], beta[i])
+<p>p(x | params) = prod_{idx in shape} Inv_Gamma(x[idx] | alpha[idx], beta[idx])
 where params = {alpha, beta}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.InvGamma.entropy">
@@ -367,9 +400,9 @@ where params = {alpha, beta}.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.InvGamma.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.InvGamma.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx] | params[idx])</p>
 </dd></dl>
 
 <dl class="method">
@@ -384,21 +417,23 @@ where params = {alpha, beta}.</p>
 <dt id="edward.models.distributions.Multinomial">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Multinomial</code><span class="sig-paren">(</span><em>shape</em>, <em>pi=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params ) = prod_{i=1}^d Multinomial(x_i | pi[i, :])
-where x is a flattened vector such that x_i represents
-the ith factor x[(i-1)*K:i*K], and params = alpha.</p>
+<p>p(x | params ) = prod_{idx in shape[:-1]} Multinomial(x[idx] | pi[idx])</p>
+<p>where x[idx] represents a multivariate random variable, and params
+= pi. shape[-1] denotes the multivariate dimension.</p>
 <p class="rubric">Notes</p>
-<p>For each factor (multinomial distribution), it assumes a single
-trial (n=1) when sampling and calculating the density.</p>
+<p>For each slice along the last dimension (each multinomial
+distribution), it assumes a single trial (n=1) when sampling and
+calculating the density.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Multinomial.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial.entropy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Multinomial.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.Multinomial.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx, :] | params[idx, :])
+where idx is of dimension shape[:-1]</p>
 </dd></dl>
 
 <dl class="method">
@@ -411,9 +446,9 @@ trial (n=1) when sampling and calculating the density.</p>
 
 <dl class="class">
 <dt id="edward.models.distributions.Normal">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Normal</code><span class="sig-paren">(</span><em>num_factors=1</em>, <em>loc=None</em>, <em>scale=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Normal</code><span class="sig-paren">(</span><em>shape=1</em>, <em>loc=None</em>, <em>scale=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params ) = prod_{i=1}^d Normal(x[i] | loc[i], scale[i])
+<p>p(x | params ) = prod_{idx in shape} Normal(x[idx] | loc[idx], scale[idx])
 where params = {loc, scale}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Normal.entropy">
@@ -421,9 +456,9 @@ where params = {loc, scale}.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Normal.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.Normal.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx] | params[idx])</p>
 </dd></dl>
 
 <dl class="method">
@@ -444,81 +479,35 @@ s.t. x = reparam(eps; params) ~ p(x | params)</p>
 
 <dl class="class">
 <dt id="edward.models.distributions.PointMass">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>num_vars=1</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>shape=1</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
 <p>Point mass distribution</p>
-<p>p(x | params ) = prod_{i=1}^d Dirac(x[i] | params[i])</p>
+<p>p(x | params ) = prod_{idx in shape} Dirac(x[idx] | params[idx])</p>
 <p>Dirac(x; p) is the Dirac delta distribution with density equal to
 1 if x == p and 0 otherwise.</p>
 <dl class="method">
-<dt id="edward.models.distributions.PointMass.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(x_i | params)</p>
+<dt id="edward.models.distributions.PointMass.log_prob_idx">
+<code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass.log_prob_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>log p(xs[:, idx] | params[idx])</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A vector where the jth element is 1 if xs[j, idx] is equal
+to params[idx], 0 otherwise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.PointMass.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass.sample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="edward.models.distributions.Variational">
-<em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Variational</code><span class="sig-paren">(</span><em>layers=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Variational" title="Permalink to this definition">¶</a></dt>
-<dd><p>A stack of distribution objects.</p>
-<dl class="method">
-<dt id="edward.models.distributions.Variational.add">
-<code class="descname">add</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Variational.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a layer instance on top of the layer stack.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> (<em>layer instance.</em>) &#8211; </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.models.distributions.Variational.entropy">
-<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Variational.entropy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="edward.models.distributions.Variational.log_prob_i">
-<code class="descname">log_prob_i</code><span class="sig-paren">(</span><em>i</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Variational.log_prob_i" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="edward.models.distributions.Variational.np_sample">
-<code class="descname">np_sample</code><span class="sig-paren">(</span><em>samples</em>, <em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Variational.np_sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Form dictionary to feed any placeholders with np.array
-samples.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.models.distributions.Variational.sample">
-<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Variational.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Draws a mix of tensors and placeholders, corresponding to
-TensorFlow-based samplers and SciPy-based samplers depending
-on the distribution factor.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int, optional</em>) &#8211; </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A tensor concatenating sample outputs of tensors and
-placeholders. The list used to form the tensor is also
-returned so that other procedures can feed values into the
-placeholders.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor, list</td>
-</tr>
-</tbody>
-</table>
+<dd><p class="rubric">Notes</p>
+<p>Each sample is simply the set of point masses, as all
+probability mass is located there.</p>
 </dd></dl>
 
 </dd></dl>
@@ -601,6 +590,97 @@ is the log pdf evaluated at (z_{b1}, ..., z_{bd})</p>
 <dt id="edward.models.models.StanModel.log_prob">
 <code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel.log_prob" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.models.Variational">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">Variational</code><span class="sig-paren">(</span><em>layers=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational" title="Permalink to this definition">¶</a></dt>
+<dd><p>A container for collecting distribution objects.</p>
+<dl class="method">
+<dt id="edward.models.models.Variational.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer instance on top of the layer stack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> (<em>layer instance.</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xs</strong> (<em>list or tf.Tensor or np.array</em>) &#8211; If more than one layer, a list of tf.Tensors or np.array&#8217;s
+of dimension (batch x shape). If one layer, a tf.Tensor or
+np.array of (batch x shape).</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This method may be removed in the future in favor of indexable
+log_prob methods, e.g., for automatic Rao-Blackwellization.</p>
+<p>This method assumes each xs[l] in xs has the same batch size,
+i.e., dimensions (batch x shape) for fixed batch and varying
+shape.</p>
+<p>This method assumes length of xs == length of self.layers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.np_dict">
+<code class="descname">np_dict</code><span class="sig-paren">(</span><em>samples</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational.np_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Form dictionary to feed any placeholders with np.array
+samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>samples</strong> (<em>list or tf.Tensor</em>) &#8211; If more than one layer, a list of tf.Tensors of dimension
+(batch x shape). If one layer, a tf.Tensor of (batch x
+shape).</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This method assumes each samples[l] in samples has the same
+batch size, i.e., dimensions (batch x shape) for fixed batch
+and varying shape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws a mix of tensors and placeholders, corresponding to
+TensorFlow-based samplers and SciPy-based samplers depending
+on the layer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int, optional</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If more than one layer, a list of tf.Tensors of dimension
+(size x shape), one for each layer. If one layer, a
+tf.Tensor of (size x shape). If a layer requires SciPy to
+sample, its corresponding tensor is a tf.placeholder.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list or tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
