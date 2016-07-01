@@ -614,24 +614,23 @@ from the posterior to the variational model (Cappe et al., 2008)</p>
 <dt id="edward.inferences.KLpq.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.build_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loss function to minimize.</p>
-<p>loss = E_{p(z | x)} [ log p(z | x) - log q(z; lambda) ]</p>
-<p>is equivalent to minimizing</p>
-<p>E_{p(z | x)} [ log p(x, z) - log q(z; lambda) ]
-pprox 1/B sum_{b=1}^B</p>
-<blockquote>
-<div>w_norm(z^b; lambda) (log p(x, z^b) - log q(z^b; lambda))</div></blockquote>
-<p>with gradient
-pprox - 1/B sum_{b=1}^B</p>
-<blockquote>
-<div>w_norm(z^b; lambda) grad_{lambda} log q(z^b; lambda)</div></blockquote>
-<dl class="docutils">
-<dt>where + z^b ~ q(z^b; lambda)</dt>
-<dd><ul class="first last simple">
-<li>w_norm(z^b; lambda) = w(z^b; lambda) / sum_{b=1}^B w(z^b; lambda)</li>
-<li>w(z^b; lambda) = p(x, z^b) / q(z^b; lambda)</li>
-</ul>
-</dd>
-</dl>
+<p>Defines a stochastic gradient of</p>
+<div class="math">
+\[KL( p(z |x) || q(z) )
+=
+E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]\]</div>
+<p>based on importance sampling.</p>
+<p>Computed as</p>
+<div class="math">
+\[1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
+                    (\log p(x, z^b) - \log q(z^b; \lambda) ]\]</div>
+<p>where</p>
+<div class="math">
+\[ \begin{align}\begin{aligned}z^b \sim q(z^b; \lambda)\\w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B ( w(z^b; \lambda) )\\w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)\end{aligned}\end{align} \]</div>
+<p>which gives a gradient</p>
+<div class="math">
+\[- 1/B \sum_{b=1}^B
+w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)\]</div>
 </dd></dl>
 
 <dl class="method">

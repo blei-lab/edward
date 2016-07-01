@@ -471,20 +471,34 @@ class KLpq(VariationalInference):
     def build_loss(self):
         """Loss function to minimize. 
 
-        loss = E_{p(z | x)} [ log p(z | x) - log q(z; lambda) ]
+        Defines a stochastic gradient of   
+    
+        .. math:: 
+            KL( p(z |x) || q(z) ) 
+            =
+            E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]
 
-        is equivalent to minimizing
+        based on importance sampling.  
 
-        E_{p(z | x)} [ log p(x, z) - log q(z; lambda) ]
-        \approx 1/B sum_{b=1}^B
-            w_norm(z^b; lambda) (log p(x, z^b) - log q(z^b; lambda))
-        with gradient
-        \approx - 1/B sum_{b=1}^B
-            w_norm(z^b; lambda) grad_{lambda} log q(z^b; lambda)
+        Computed as
 
-        where + z^b ~ q(z^b; lambda)
-              + w_norm(z^b; lambda) = w(z^b; lambda) / sum_{b=1}^B w(z^b; lambda)
-              + w(z^b; lambda) = p(x, z^b) / q(z^b; lambda)
+        .. math::
+            1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
+                                (\log p(x, z^b) - \log q(z^b; \lambda) ]
+        where
+    
+        .. math::
+            z^b \sim q(z^b; \lambda)
+
+            w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B ( w(z^b; \lambda) )
+
+            w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)
+
+        which gives a gradient
+
+        .. math::
+            - 1/B \sum_{b=1}^B
+            w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
         """
         x = self.data.sample(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
