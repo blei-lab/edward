@@ -6,9 +6,11 @@ from itertools import product
 from scipy import stats
 
 class Distribution:
-    """Template for all distributions."""
+    """Template for all statistical distributions.
+    """
     def rvs(self, size=1):
-        """
+        """Draw random variables.
+
         Parameters
         ----------
         size : int, list, or tuple, optional
@@ -58,7 +60,8 @@ class Distribution:
         raise NotImplementedError()
 
     def logpmf(self, x):
-        """
+        """Evaluate log probability mass function.
+
         Parameters
         ---------
         x : float, np.array, or tf.Tensor
@@ -85,7 +88,8 @@ class Distribution:
         raise NotImplementedError()
 
     def entropy(self):
-        """
+        """Evaluate entropy of probability distribution.
+        
         Parameters
         ---------
         params : float, np.array, or tf.Tensor
