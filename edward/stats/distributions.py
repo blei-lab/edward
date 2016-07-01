@@ -335,7 +335,7 @@ class Dirichlet:
         Parameters
         ----------
         alpha : np.array or tf.Tensor
-            each :math:`\alpha` constrained to :math:`\alpha_i > 0`      
+            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`      
         size : int
             number of random variable samples to return
 
@@ -354,7 +354,7 @@ class Dirichlet:
         x : np.array or tf.Tensor
             vector or matrix
         alpha : np.array or tf.Tensor
-            each :math:`\alpha` constrained to :math:`\alpha_i > 0`  
+            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`  
 
         Returns
         -------
@@ -378,7 +378,7 @@ class Dirichlet:
         Parameters
         ----------
         alpha : np.array or tf.Tensor
-            each :math:`\alpha` constrained to :math:`\alpha_i > 0`  
+            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`  
 
         Returns
         -------
