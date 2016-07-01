@@ -160,8 +160,7 @@
 <dt id="edward.models.distributions.Bernoulli">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Bernoulli</code><span class="sig-paren">(</span><em>shape=1</em>, <em>p=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p><code class="docutils literal"><span class="pre">p(x</span> <span class="pre">|</span> <span class="pre">params)</span> <span class="pre">=</span> <span class="pre">prod_{idx</span> <span class="pre">in</span> <span class="pre">shape}</span> <span class="pre">Bernoulli(x[idx]</span> <span class="pre">|</span> <span class="pre">p[idx])</span></code></p>
-<p>where <code class="docutils literal"><span class="pre">params</span> <span class="pre">=</span> <span class="pre">p</span></code>.</p>
+<p>See <a class="reference internal" href="edward.stats.html#edward.stats.distributions.Bernoulli" title="edward.stats.distributions.Bernoulli"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Bernoulli</span></code></a></p>
 <dl class="method">
 <dt id="edward.models.distributions.Bernoulli.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli.entropy" title="Permalink to this definition">¶</a></dt>
@@ -170,14 +169,12 @@
 <dl class="method">
 <dt id="edward.models.distributions.Bernoulli.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx] | params[idx])</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.Bernoulli.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Bernoulli.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>x ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -185,8 +182,7 @@
 <dt id="edward.models.distributions.Beta">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Beta</code><span class="sig-paren">(</span><em>shape=1</em>, <em>alpha=None</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{idx in shape} Beta(x[idx] | alpha[idx], beta[idx])
-where params = {alpha, beta}.</p>
+<p>See <a class="reference internal" href="edward.stats.html#edward.stats.distributions.Beta" title="edward.stats.distributions.Beta"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Beta</span></code></a></p>
 <dl class="method">
 <dt id="edward.models.distributions.Beta.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta.entropy" title="Permalink to this definition">¶</a></dt>
@@ -195,14 +191,12 @@ where params = {alpha, beta}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Beta.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx] | params[idx])</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.Beta.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Beta.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>x ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -210,9 +204,7 @@ where params = {alpha, beta}.</p>
 <dt id="edward.models.distributions.Dirichlet">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Dirichlet</code><span class="sig-paren">(</span><em>shape</em>, <em>alpha=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{idx in shape[:-1]} Dirichlet(x[idx] | alpha[idx])</p>
-<p>where x[idx] represents a multivariate random variable, and params
-= alpha. shape[-1] denotes the multivariate dimension.</p>
+<p>See <a class="reference internal" href="edward.stats.html#edward.stats.distributions.Dirichlet" title="edward.stats.distributions.Dirichlet"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Dirichlet</span></code></a></p>
 <dl class="method">
 <dt id="edward.models.distributions.Dirichlet.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet.entropy" title="Permalink to this definition">¶</a></dt>
@@ -221,15 +213,14 @@ where params = {alpha, beta}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Dirichlet.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx, :] | params[idx, :])
-where idx is of dimension shape[:-1]</p>
+<dd><p><code class="docutils literal"><span class="pre">log</span> <span class="pre">p(xs[:,</span> <span class="pre">idx,</span> <span class="pre">:]</span> <span class="pre">|</span> <span class="pre">params[idx,</span> <span class="pre">:])</span></code>
+where <code class="docutils literal"><span class="pre">idx</span></code> is of dimension <code class="docutils literal"><span class="pre">shape[:-1]</span></code></p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.Dirichlet.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Dirichlet.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>x ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -458,8 +449,8 @@ slice along the first dimension is a sample from <code class="docutils literal">
 <dt id="edward.models.distributions.InvGamma">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">InvGamma</code><span class="sig-paren">(</span><em>shape=1</em>, <em>alpha=None</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params) = prod_{idx in shape} Inv_Gamma(x[idx] | alpha[idx], beta[idx])
-where params = {alpha, beta}.</p>
+<p>Inverse Gamma</p>
+<p>See <a class="reference internal" href="edward.stats.html#edward.stats.distributions.InvGamma" title="edward.stats.distributions.InvGamma"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.InvGamma</span></code></a></p>
 <dl class="method">
 <dt id="edward.models.distributions.InvGamma.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma.entropy" title="Permalink to this definition">¶</a></dt>
@@ -468,14 +459,12 @@ where params = {alpha, beta}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.InvGamma.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx] | params[idx])</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.InvGamma.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.InvGamma.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>x ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -483,9 +472,10 @@ where params = {alpha, beta}.</p>
 <dt id="edward.models.distributions.Multinomial">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Multinomial</code><span class="sig-paren">(</span><em>shape</em>, <em>pi=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params ) = prod_{idx in shape[:-1]} Multinomial(x[idx] | pi[idx])</p>
-<p>where x[idx] represents a multivariate random variable, and params
-= pi. shape[-1] denotes the multivariate dimension.</p>
+<p>See <a class="reference internal" href="edward.stats.html#edward.stats.distributions.Multinomial" title="edward.stats.distributions.Multinomial"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Multinomial</span></code></a></p>
+<p><code class="docutils literal"><span class="pre">p(x</span> <span class="pre">|</span> <span class="pre">params</span> <span class="pre">)</span> <span class="pre">=</span> <span class="pre">prod_{idx</span> <span class="pre">in</span> <span class="pre">shape[:-1]}</span> <span class="pre">Multinomial(x[idx]</span> <span class="pre">|</span> <span class="pre">pi[idx])</span></code></p>
+<p>where <code class="docutils literal"><span class="pre">x[idx]</span></code> represents a multivariate random variable, and
+<code class="docutils literal"><span class="pre">params</span> <span class="pre">=</span> <span class="pre">pi.shape[-1]</span></code> denotes the multivariate dimension.</p>
 <p class="rubric">Notes</p>
 <p>For each slice along the last dimension (each multinomial
 distribution), it assumes a single trial (n=1) when sampling and
@@ -498,15 +488,14 @@ calculating the density.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Multinomial.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx, :] | params[idx, :])
-where idx is of dimension shape[:-1]</p>
+<dd><p><code class="docutils literal"><span class="pre">log</span> <span class="pre">p(xs[:,</span> <span class="pre">idx,</span> <span class="pre">:]</span> <span class="pre">|</span> <span class="pre">params[idx,</span> <span class="pre">:])</span></code>
+where <code class="docutils literal"><span class="pre">idx</span></code> is of dimension <code class="docutils literal"><span class="pre">shape[:-1]</span></code></p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.Multinomial.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Multinomial.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>x ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -514,8 +503,7 @@ where idx is of dimension shape[:-1]</p>
 <dt id="edward.models.distributions.Normal">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Normal</code><span class="sig-paren">(</span><em>shape=1</em>, <em>loc=None</em>, <em>scale=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
-<p>p(x | params ) = prod_{idx in shape} Normal(x[idx] | loc[idx], scale[idx])
-where params = {loc, scale}.</p>
+<p>See <a class="reference internal" href="edward.stats.html#edward.stats.distributions.Norm" title="edward.stats.distributions.Norm"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Norm</span></code></a></p>
 <dl class="method">
 <dt id="edward.models.distributions.Normal.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.entropy" title="Permalink to this definition">¶</a></dt>
@@ -524,22 +512,17 @@ where params = {loc, scale}.</p>
 <dl class="method">
 <dt id="edward.models.distributions.Normal.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx] | params[idx])</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.Normal.reparam">
 <code class="descname">reparam</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.reparam" title="Permalink to this definition">¶</a></dt>
-<dd><p>eps = sample_noise() ~ s(eps)
-s.t. x = reparam(eps; params) ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="edward.models.distributions.Normal.sample_noise">
 <code class="descname">sample_noise</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.sample_noise" title="Permalink to this definition">¶</a></dt>
-<dd><p>eps = sample_noise() ~ s(eps)
-s.t. x = reparam(eps; params) ~ p(x | params)</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -548,13 +531,21 @@ s.t. x = reparam(eps; params) ~ p(x | params)</p>
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>shape=1</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.models.distributions.Distribution" title="edward.models.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.distributions.Distribution</span></code></a></p>
 <p>Point mass distribution</p>
-<p>p(x | params ) = prod_{idx in shape} Dirac(x[idx] | params[idx])</p>
-<p>Dirac(x; p) is the Dirac delta distribution with density equal to
+<p><code class="docutils literal"><span class="pre">p(x</span> <span class="pre">|</span> <span class="pre">params</span> <span class="pre">)</span> <span class="pre">=</span> <span class="pre">prod_{idx</span> <span class="pre">in</span> <span class="pre">shape}</span> <span class="pre">Dirac(x[idx]</span> <span class="pre">|</span> <span class="pre">params[idx])</span></code></p>
+<p><code class="docutils literal"><span class="pre">Dirac(x;</span> <span class="pre">p)</span></code> is the Dirac delta distribution with density equal to
 1 if x == p and 0 otherwise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>tf.Variable, optional</em>) &#8211; if not specified, everything initialized to <span class="math">\(\mathcal{N}(0,1)\)</span></td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="edward.models.distributions.PointMass.log_prob_idx">
 <code class="descname">log_prob_idx</code><span class="sig-paren">(</span><em>idx</em>, <em>xs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass.log_prob_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>log p(xs[:, idx] | params[idx])</p>
+<dd><p>Log probability at an index of a point mass distribution.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -571,9 +562,17 @@ to params[idx], 0 otherwise.</td>
 <dl class="method">
 <dt id="edward.models.distributions.PointMass.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.PointMass.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Notes</p>
+<dd><p>Sample from a point mass distribution.</p>
 <p>Each sample is simply the set of point masses, as all
 probability mass is located there.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int</em>) &#8211; number of samples</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

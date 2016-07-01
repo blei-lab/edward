@@ -485,6 +485,7 @@ class KLpq(VariationalInference):
         .. math::
             1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
                                 (\log p(x, z^b) - \log q(z^b; \lambda) ]
+                                
         where
     
         .. math::
@@ -499,6 +500,7 @@ class KLpq(VariationalInference):
         .. math::
             - 1/B \sum_{b=1}^B
             w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
+
         """
         x = self.data.sample(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
