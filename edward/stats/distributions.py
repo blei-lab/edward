@@ -9,6 +9,14 @@ class Distribution:
     """Template for all distributions."""
     def rvs(self, size=1):
         """
+        Parameters
+        ----------
+        size : int, list, or tuple, optional
+            Number of samples, in a particular shape if specified in a
+            list or tuple with more than one element.
+
+        params : float or np.array
+
         Returns
         -------
         np.ndarray
@@ -22,7 +30,8 @@ class Distribution:
         -----
         This is written in NumPy/SciPy, as TensorFlow does not support
         many distributions for random number generation. It follows
-        SciPy's naming and argument conventions.
+        SciPy's naming and argument conventions. It does not support
+        taking in tf.Tensors as input.
 
         The equivalent method in SciPy is not guaranteed to be
         supported with a batch of parameter inputs, e.g., a vector of
@@ -67,11 +76,11 @@ class Distribution:
             as input. If multivariate distribution, returns a tensor
             of shape[:-1] from input: the outer dimension representing
             the multivariate dimension is collapsed.
-        
+
         Notes
         -----
         x as a 3d or higher tensor is not guaranteed to be supported
-        (for either univariate or multivariate distribution).           
+        (for either univariate or multivariate distribution).
         """
         raise NotImplementedError()
 
@@ -94,23 +103,26 @@ class Distribution:
 
         Notes
         -----
-        If univariate distribution, returns a tensor of same
-        shape as input.
-        If multivariate distribution, returns a tensor of
-        shape[-1] from input: the outer dimension representing the
-        multivariate dimension is collapsed.
+        The equivalent method in SciPy is not guaranteed to be
+        supported for vector inputs for univariate distributions and
+        matrix inputs for multivariate distributions. This is.
+
+        params as a 2d or higher tensor is not guaranteed to be
+        supported for univariate distributions. params as a 3d or
+        higher tensor is not guaranteed to be supported for
+        multivariate distributions.
         """
         raise NotImplementedError()
 
 class Bernoulli:
     """Bernoulli distribution
-    """    
+    """
     def rvs(self, p, size=1):
         """Random variable generator
 
         Parameters
         ----------
-        p : float, np.array, tf.Tensor
+        p : float or np.array
             constrained to :math:`p\in(0,1)`
         size : int
             number of random variable samples to return
@@ -118,8 +130,8 @@ class Bernoulli:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        
+            size-dimensional vector; scalar if size=1
+
         Examples
         --------
         >>> x = bernoulli.rvs(p=0.5, size=1)
@@ -154,7 +166,7 @@ class Bernoulli:
             If multivariate distribution, can be a vector or matrix.
         p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)`
-        
+
         Returns
         -------
         tf.Tensor
@@ -184,30 +196,30 @@ class Bernoulli:
             distributions, returns a scalar if vector input and vector
             if matrix input, where each element in the vector
             evaluates a row in the matrix.
-        """        
+        """
         p = tf.cast(p, dtype=tf.float32)
         return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
 
 class Beta:
     """Beta distribution
-    """    
+    """
     def rvs(self, a, b, size=1):
         """Random variable generator
 
         Parameters
         ----------
-        a : float, np.array, tf.Tensor
+        a : float or np.array
             constrained to :math:`a > 0`
-        b : float, np.array, tf.Tensor
-            constrained to :math:`b > 0`            
+        b : float or np.array
+            constrained to :math:`b > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """               
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
         if not isinstance(b, np.ndarray):
@@ -234,8 +246,8 @@ class Beta:
         a : float, np.array, tf.Tensor
             constrained to :math:`a > 0`
         b : float, np.array, tf.Tensor
-            constrained to :math:`b > 0` 
-        
+            constrained to :math:`b > 0`
+
         Returns
         -------
         tf.Tensor
@@ -244,7 +256,7 @@ class Beta:
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
-        """        
+        """
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
@@ -258,7 +270,7 @@ class Beta:
         a : float, np.array, tf.Tensor
             constrained to :math:`a > 0`
         b : float, np.array, tf.Tensor
-            constrained to :math:`b > 0` 
+            constrained to :math:`b > 0`
 
         Returns
         -------
@@ -268,7 +280,7 @@ class Beta:
             distributions, returns a scalar if vector input and vector
             if matrix input, where each element in the vector
             evaluates a row in the matrix.
-        """          
+        """
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         if len(a.get_shape()) == 0:
@@ -285,24 +297,24 @@ class Beta:
 
 class Binom:
     """Binomial distribution
-    """    
+    """
     def rvs(self, n, p, size=1):
         """Random variable generator
 
         Parameters
         ----------
-        n : int
+        n : int or np.array
             constrained to :math:`n > 0`
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`      
+        p : float or np.array
+            constrained to :math:`p\in(0,1)`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """            
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(n, np.ndarray):
             n = np.asarray(n)
         if not isinstance(p, np.ndarray):
@@ -329,8 +341,8 @@ class Binom:
         n : int
             constrained to :math:`n > 0`
         p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`      
-        
+            constrained to :math:`p\in(0,1)`
+
         Returns
         -------
         tf.Tensor
@@ -339,7 +351,7 @@ class Binom:
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
-        """            
+        """
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
@@ -356,22 +368,22 @@ class Binom:
 
 class Chi2:
     """:math:`\chi^2` distribution
-    """    
+    """
     def rvs(self, df, size=1):
         """Random variable generator
 
         Parameters
         ----------
-        df : float, np.array, tf.Tensor
-            constrained to :math:`df > 0`      
+        df : float or np.array
+            constrained to :math:`df > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """          
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(df, np.ndarray):
             df = np.asarray(df)
         if len(df.shape) == 0:
@@ -395,7 +407,7 @@ class Chi2:
             If multivariate distribution, can be a vector or matrix.
         df : float, np.array, tf.Tensor
             constrained to :math:`df > 0`
-          
+
         Returns
         -------
         tf.Tensor
@@ -404,7 +416,7 @@ class Chi2:
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
-        """          
+        """
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
         return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
@@ -415,27 +427,27 @@ class Chi2:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class Dirichlet:
     """Dirichlet distribution
-    """    
+    """
     def rvs(self, alpha, size=1):
         """Random variable generator
 
         Parameters
         ----------
-        alpha : np.array or tf.Tensor
-            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`      
+        alpha : np.array
+            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """          
+            size-dimensional vector; scalar if size=1
+        """
         if len(alpha.shape) == 1:
             # stats.dirichlet.rvs defaults to (size x alpha.shape)
             return stats.dirichlet.rvs(alpha, size=size)
@@ -457,7 +469,7 @@ class Dirichlet:
         x : float, np.array, tf.Tensor
             vector or matrix
         alpha : np.array or tf.Tensor
-            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`  
+            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`
 
         Returns
         -------
@@ -481,7 +493,7 @@ class Dirichlet:
         Parameters
         ----------
         alpha : np.array or tf.Tensor
-            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`  
+            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`
 
         Returns
         -------
@@ -490,7 +502,7 @@ class Dirichlet:
             corresponding to the size of input. For multivariate
             distributions, returns a scalar if vector input and vector
             if matrix input, where each element in the vector
-            evaluates a row in the matrix.            
+            evaluates a row in the matrix.
         """
         alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
         if len(get_dims(alpha)) == 1:
@@ -514,16 +526,16 @@ class Expon:
 
         Parameters
         ----------
-        scale : float, np.array, tf.Tensor
-            constrained to :math:`scale > 0`    
+        scale : float or np.array
+            constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """          
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
         if len(scale.shape) == 0:
@@ -545,7 +557,7 @@ class Expon:
         x : float, np.array, tf.Tensor
             vector or matrix
         scale : float, np.array, tf.Tensor
-            constrained to :math:`scale > 0`  
+            constrained to :math:`scale > 0`
 
         Returns
         -------
@@ -555,7 +567,7 @@ class Expon:
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
-        """        
+        """
         x = tf.cast(x, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return - x/scale - tf.log(scale)
@@ -565,7 +577,7 @@ class Expon:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class Gamma:
@@ -578,18 +590,18 @@ class Gamma:
 
         Parameters
         ----------
-        a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`    
-        scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`  
+        a : float or np.array
+            **shape** parameter: constrained to :math:`a > 0`
+        scale : float or np.array
+            **scale** parameter: constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """           
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
         if not isinstance(scale, np.ndarray):
@@ -613,9 +625,9 @@ class Gamma:
         x : float, np.array, tf.Tensor
             vector or matrix
         a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`    
+            **shape** parameter: constrained to :math:`a > 0`
         scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`  
+            **scale** parameter: constrained to :math:`scale > 0`
 
         Returns
         -------
@@ -624,8 +636,8 @@ class Gamma:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
-        """           
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
@@ -637,9 +649,9 @@ class Gamma:
         Parameters
         ----------
         a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`    
+            **shape** parameter: constrained to :math:`a > 0`
         scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`  
+            **scale** parameter: constrained to :math:`scale > 0`
 
         Returns
         -------
@@ -648,8 +660,8 @@ class Gamma:
             corresponding to the size of input. For multivariate
             distributions, returns a scalar if vector input and vector
             if matrix input, where each element in the vector
-            evaluates a row in the matrix.            
-        """        
+            evaluates a row in the matrix.
+        """
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return a + tf.log(scale) + tf.lgamma(a) + \
@@ -663,16 +675,16 @@ class Geom:
 
         Parameters
         ----------
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)` 
+        p : float or np.array
+            constrained to :math:`p\in(0,1)`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """             
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
         if len(p.shape) == 0:
@@ -694,7 +706,7 @@ class Geom:
         x : float, np.array, tf.Tensor
             vector or matrix
         p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)` 
+            constrained to :math:`p\in(0,1)`
 
         Returns
         -------
@@ -703,8 +715,8 @@ class Geom:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
-        """         
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
@@ -714,7 +726,7 @@ class Geom:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class InvGamma:
@@ -727,18 +739,18 @@ class InvGamma:
 
         Parameters
         ----------
-        a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`    
+        a : float or np.array
+            **shape** parameter: constrained to :math:`a > 0`
         scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`  
+            **scale** parameter: constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """          
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
         if not isinstance(scale, np.ndarray):
@@ -767,9 +779,9 @@ class InvGamma:
         x : float, np.array, tf.Tensor
             vector or matrix
         a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`    
+            **shape** parameter: constrained to :math:`a > 0`
         scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`  
+            **scale** parameter: constrained to :math:`scale > 0`
 
         Returns
         -------
@@ -778,8 +790,8 @@ class InvGamma:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
-        """            
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
@@ -792,9 +804,9 @@ class InvGamma:
         Parameters
         ----------
         a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`    
+            **shape** parameter: constrained to :math:`a > 0`
         scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`  
+            **scale** parameter: constrained to :math:`scale > 0`
 
         Returns
         -------
@@ -803,8 +815,8 @@ class InvGamma:
             corresponding to the size of input. For multivariate
             distributions, returns a scalar if vector input and vector
             if matrix input, where each element in the vector
-            evaluates a row in the matrix.            
-        """          
+            evaluates a row in the matrix.
+        """
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return a + tf.log(scale*tf.exp(tf.lgamma(a))) - \
@@ -817,17 +829,17 @@ class LogNorm:
         """Random variable generator
 
         Parameters
-        ---------- 
-        s : float, np.array, tf.Tensor
-            constrained to :math:`s > 0`  
+        ----------
+        s : float or np.array
+            constrained to :math:`s > 0`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """           
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(s, np.ndarray):
             s = np.asarray(s)
         if len(s.shape) == 0:
@@ -849,7 +861,7 @@ class LogNorm:
         x : float, np.array, tf.Tensor
             vector or matrix
         s : float, np.array, tf.Tensor
-            constrained to :math:`s > 0`  
+            constrained to :math:`s > 0`
 
         Returns
         -------
@@ -858,8 +870,8 @@ class LogNorm:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
-        """           
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         s = tf.cast(s, dtype=tf.float32)
         return -0.5*tf.log(2*np.pi) - tf.log(s) - tf.log(x) - \
@@ -870,7 +882,7 @@ class LogNorm:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class Multinomial:
@@ -882,19 +894,19 @@ class Multinomial:
         """Random variable generator
 
         Parameters
-        ---------- 
-        n : int, tf.Tensor
+        ----------
+        n : int or np.array
             constrained to :math:`n > 0`
-        p : np.array, tf.Tensor
-            constrained to :math:`\sum_i p_k = 1`  
+        p : np.array
+            constrained to :math:`\sum_i p_k = 1`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """          
+            size-dimensional vector; scalar if size=1
+        """
         if len(p.shape) == 1:
             # np.random.multinomial defaults to (size x p.shape)
             return np.random.multinomial(n, p, size=size)
@@ -931,8 +943,8 @@ class Multinomial:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
-        """  
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
@@ -983,10 +995,10 @@ class Multivariate_Normal:
         """Random variable generator
 
         Parameters
-        ---------- 
-        mean : np.array or tf.Tensor, optional
+        ----------
+        mean : np.array, optional
             vector. Defaults to zero mean.
-        cov : np.array or tf.Tensor, optional
+        cov : np.array, optional
             vector or matrix. Defaults to identity matrix.
         size : int
             number of random variable samples to return
@@ -994,8 +1006,8 @@ class Multivariate_Normal:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """  
+            size-dimensional vector; scalar if size=1
+        """
         if len(mean.shape) == 1:
             x = stats.multivariate_normal.rvs(mean, cov, size=size)
             # stats.multivariate_normal.rvs returns (size, ) if
@@ -1037,7 +1049,7 @@ class Multivariate_Normal:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
+            the vector evaluates a row in the matrix.
         """
         x = tf.cast(tf.convert_to_tensor(x), dtype=tf.float32)
         x_shape = get_dims(x)
@@ -1108,7 +1120,7 @@ class Multivariate_Normal:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
+            the vector evaluates a row in the matrix.
         """
         if cov is 1:
             d = 1
@@ -1130,19 +1142,19 @@ class NBinom:
         """Random variable generator
 
         Parameters
-        ---------- 
-        n : int
+        ----------
+        n : int or np.array
             constrained to :math:`n > 0`
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)` 
+        p : float or np.array
+            constrained to :math:`p\in(0,1)`
         size : int
             number of random variable samples to return
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """          
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(n, np.ndarray):
             n = np.asarray(n)
         if not isinstance(p, np.ndarray):
@@ -1168,7 +1180,7 @@ class NBinom:
         n : int
             constrained to :math:`n > 0`
         p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)` 
+            constrained to :math:`p\in(0,1)`
 
         Returns
         -------
@@ -1177,8 +1189,8 @@ class NBinom:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
-        """        
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
@@ -1190,7 +1202,7 @@ class NBinom:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class Norm:
@@ -1200,10 +1212,10 @@ class Norm:
         """Random variable generator
 
         Parameters
-        ---------- 
-        loc : float, np.array, tf.Tensor
+        ----------
+        loc : float or np.array
             mean
-        scale : float, np.array, tf.Tensor
+        scale : float or np.array
             standard deviation, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1211,8 +1223,8 @@ class Norm:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """            
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(loc, np.ndarray):
             loc = np.asarray(loc)
         if not isinstance(scale, np.ndarray):
@@ -1247,8 +1259,8 @@ class Norm:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
-        """         
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         loc = tf.cast(loc, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
@@ -1272,7 +1284,7 @@ class Norm:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
+            the vector evaluates a row in the matrix.
         """
         scale = tf.cast(scale, dtype=tf.float32)
         return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
@@ -1284,8 +1296,8 @@ class Poisson:
         """Random variable generator
 
         Parameters
-        ---------- 
-        mu : float, np.array, tf.Tensor
+        ----------
+        mu : float or np.array
             parameter, constrained to :math:`mu > 0`
         size : int
             number of random variable samples to return
@@ -1293,8 +1305,8 @@ class Poisson:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """  
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(mu, np.ndarray):
             mu = np.asarray(mu)
         if len(mu.shape) == 0:
@@ -1325,8 +1337,8 @@ class Poisson:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
-        """          
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         mu = tf.cast(mu, dtype=tf.float32)
         return x * tf.log(mu) - mu - tf.lgamma(x + 1.0)
@@ -1336,7 +1348,7 @@ class Poisson:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class T:
@@ -1346,12 +1358,12 @@ class T:
         """Random variable generator
 
         Parameters
-        ---------- 
-        df : float, np.array, tf.Tensor
-            constrained to :math:`df > 0`  
-        loc : float, np.array, tf.Tensor
+        ----------
+        df : float or np.array
+            constrained to :math:`df > 0`
+        loc : float or np.array
             mean
-        scale : float, np.array, tf.Tensor
+        scale : float or np.array
             standard deviation, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1359,8 +1371,8 @@ class T:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """                
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(df, np.ndarray):
             df = np.asarray(df)
         if not isinstance(loc, np.ndarray):
@@ -1386,7 +1398,7 @@ class T:
         x : float, np.array, tf.Tensor
             vector or matrix
         df : float, np.array, tf.Tensor
-            constrained to :math:`df > 0`  
+            constrained to :math:`df > 0`
         loc : float, np.array, tf.Tensor
             mean
         scale : float, np.array, tf.Tensor
@@ -1399,8 +1411,8 @@ class T:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
-        """         
+            the vector evaluates a row in the matrix.
+        """
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
         loc = tf.cast(loc, dtype=tf.float32)
@@ -1415,7 +1427,7 @@ class T:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class TruncNorm:
@@ -1425,14 +1437,14 @@ class TruncNorm:
         """Random variable generator
 
         Parameters
-        ---------- 
-        a : float, np.array, tf.Tensor
+        ----------
+        a : float or np.array
             left boundary, with respect to the standard normal
-        b : float, np.array, tf.Tensor
+        b : float or np.array
             right boundary, with respect to the standard normal
-        loc : float, np.array, tf.Tensor
+        loc : float or np.array
             mean
-        scale : float, np.array, tf.Tensor
+        scale : float or np.array
             standard deviation, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1440,8 +1452,8 @@ class TruncNorm:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """           
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
         if not isinstance(b, np.ndarray):
@@ -1484,8 +1496,8 @@ class TruncNorm:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
-        """         
+            the vector evaluates a row in the matrix.
+        """
         # Note there is no error checking if x is outside domain.
         x = tf.cast(x, dtype=tf.float32)
         # This is slow, as we require use of stats.norm.cdf.
@@ -1505,7 +1517,7 @@ class TruncNorm:
         Raises
         ------
         NotImplementedError
-        """        
+        """
         raise NotImplementedError()
 
 class Uniform:
@@ -1517,10 +1529,10 @@ class Uniform:
         """Random variable generator
 
         Parameters
-        ---------- 
-        loc : float, np.array, tf.Tensor
+        ----------
+        loc : float or np.array
             left boundary
-        scale : float, np.array, tf.Tensor
+        scale : float or np.array
             width of distribution, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1528,8 +1540,8 @@ class Uniform:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1    
-        """         
+            size-dimensional vector; scalar if size=1
+        """
         if not isinstance(loc, np.ndarray):
             loc = np.asarray(loc)
         if not isinstance(scale, np.ndarray):
@@ -1564,8 +1576,8 @@ class Uniform:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.              
-        """          
+            the vector evaluates a row in the matrix.
+        """
         # Note there is no error checking if x is outside domain.
         scale = tf.cast(scale, dtype=tf.float32)
         return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
@@ -1587,7 +1599,7 @@ class Uniform:
             matrix corresponding to the size of input. For
             multivariate distributions, returns a scalar if vector
             input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.  
+            the vector evaluates a row in the matrix.
         """
         scale = tf.cast(scale, dtype=tf.float32)
         return tf.log(scale)
