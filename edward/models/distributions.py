@@ -18,7 +18,7 @@ class Distribution:
     shape : tuple
         shape of random variable(s); see below
     num_vars : int
-        the number of variables; equals the product of ``shape`` 
+        the number of variables; equals the product of ``shape``
     num_params : int
         the number of parameters
     sample_tensor : bool
@@ -56,8 +56,8 @@ class Distribution:
 
         .. math::
             \epsilon \sim s(\epsilon),
-    
-        where :math:`s` is a standard parameterization of ``Distribution`` 
+
+        where :math:`s` is a standard parameterization of ``Distribution``
         that has no parameters.
 
         Passing :math:`\epsilon` into ``reparam`` then transforms the draw
@@ -76,20 +76,20 @@ class Distribution:
 
         Raises
         ------
-        NotImplementedError            
+        NotImplementedError
         """
         raise NotImplementedError()
 
     def reparam(self, eps):
         """Reparameterizes a sample from a standard version of ``Distribution``.
 
-        For example, if ``epsilon = sample_noise()``, then calling 
+        For example, if ``epsilon = sample_noise()``, then calling
         ``x = reparam(epsilon)`` reparameterizes ``epsilon`` such that
 
         .. math::
             x \sim p(x | \\text{params})
 
-        where ``params`` are the parameters that govern this 
+        where ``params`` are the parameters that govern this
         ``Distribution`` object.
 
         Parameters
@@ -101,7 +101,7 @@ class Distribution:
         -------
         tf.Tensor
             A ``[size x shape]`` array of type ``tf.float32``, where each
-            slice along the first dimension is a sample from 
+            slice along the first dimension is a sample from
             ``p(x | params)``.
 
         Raises
@@ -117,13 +117,13 @@ class Distribution:
             x \sim p(x | \\text{params})
 
         Defaults to sampling noise via ``sample_noise`` and reparameterizing via
-        ``reparam``. Otherwise expects a derived class to implement its own 
+        ``reparam``. Otherwise expects a derived class to implement its own
         method.
 
         Parameters
         ----------
         size : int, optional
-            Number of samples to return.        
+            Number of samples to return.
 
         Returns
         -------
@@ -155,7 +155,7 @@ class Distribution:
 
             .. code-block:: none
 
-                [ sum_{idx in shape} log p(xs[1, idx] | params[idx]), 
+                [ sum_{idx in shape} log p(xs[1, idx] | params[idx]),
                 ...,
                 sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
         """
@@ -234,8 +234,8 @@ class Distribution:
 
             .. code-block:: none
 
-                [ log p(xs[1, idx] | params[idx]), 
-                ..., 
+                [ log p(xs[1, idx] | params[idx]),
+                ...,
                 log p(xs[S, idx] | params[idx]) ]
 
         Raises
@@ -261,10 +261,10 @@ class Distribution:
         raise NotImplementedError()
 
 class Bernoulli(Distribution):
-    """Bernoulli 
+    """Bernoulli
 
     See :class:`edward.stats.distributions.Bernoulli`
-        
+
     """
     def __init__(self, shape=1, p=None):
         Distribution.__init__(self, shape)
@@ -417,7 +417,7 @@ class Multinomial(Distribution):
 
     ``p(x | params ) = prod_{idx in shape[:-1]} Multinomial(x[idx] | pi[idx])``
 
-    where ``x[idx]`` represents a multivariate random variable, and 
+    where ``x[idx]`` represents a multivariate random variable, and
     ``params = pi.shape[-1]`` denotes the multivariate dimension.
 
     Notes
@@ -464,7 +464,7 @@ class Multinomial(Distribution):
         return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
 
 class Normal(Distribution):
-    """Normal 
+    """Normal
 
     See :class:`edward.stats.distributions.Norm`
     """
@@ -513,8 +513,8 @@ class PointMass(Distribution):
 
     Parameters
     ----------
-    params : np.ndarray, tf.Variable, optional
-        if not specified, everything initialized to :math:`\mathcal{N}(0,1)`
+    params : np.ndarray or tf.Tensor, optional
+             If not specified, everything initialized to :math:`\mathcal{N}(0,1)`.
     """
     def __init__(self, shape=1, params=None):
         Distribution.__init__(self, shape)
@@ -536,14 +536,14 @@ class PointMass(Distribution):
 
     def sample(self, size=1):
         """Sample from a point mass distribution.
-        
+
         Each sample is simply the set of point masses, as all
         probability mass is located there.
 
         Parameters
         ----------
         size: int
-            number of samples        
+            number of samples
         """
         return tf.pack([self.params]*size)
 

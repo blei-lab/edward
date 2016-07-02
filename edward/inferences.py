@@ -18,7 +18,7 @@ class Inference:
         """Initialization.
 
         Calls ``util.get_session()``
-        
+
         Parameters
         ----------
         model : ed.Model
@@ -58,7 +58,7 @@ class VariationalInference(Inference):
         variational : ed.Variational
             variational model or distribution
         data : ed.Data, optional
-            observed data        
+            observed data
         """
         Inference.__init__(self, model, data)
         self.variational = variational
@@ -67,7 +67,7 @@ class VariationalInference(Inference):
         """A simple wrapper to run variational inference.
 
         1. Initialize via ``initialize``
-        2. Run ``update`` for ``self.n_iter`` iterations 
+        2. Run ``update`` for ``self.n_iter`` iterations
         3. While running, ``print_progress``
         4. Finalize via ``finalize``
 
@@ -139,7 +139,7 @@ class VariationalInference(Inference):
 
     def update(self):
         """Run one iteration of optimizer for variational inference.
-    
+
         Returns
         -------
         loss : double
@@ -151,7 +151,7 @@ class VariationalInference(Inference):
 
     def print_progress(self, t, loss):
         """Print progress to output.
-        
+
         Parameters
         ----------
         t : int
@@ -169,17 +169,17 @@ class VariationalInference(Inference):
 
         Empty method. (Optional.)
 
-        Any class based on ``VariationalInference`` **may** 
+        Any class based on ``VariationalInference`` **may**
         implement this method.
         """
         pass
 
     def build_loss(self):
-        """Build loss function. 
+        """Build loss function.
 
-        Empty method. 
+        Empty method.
 
-        Any class based on ``VariationalInference`` **must** 
+        Any class based on ``VariationalInference`` **must**
         implement this method.
 
         Raises
@@ -193,15 +193,15 @@ class MFVI(VariationalInference):
     """Mean-field variational inference.
 
     This class implements a variety of "black-box" variational inference
-    techniques (Ranganath et al., 2014) that minmize
+    techniques (Ranganath et al., 2014) that minimize
 
     .. math::
 
         KL( q(z; \lambda) || p(z | x) ).
 
-    This is equivalent to maximize a related objective function (Jordan, 1999)    
+    This is equivalent to maximizing the objective function (Jordan et al., 1999)
 
-    .. math:: 
+    .. math::
 
         ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].
     """
@@ -245,7 +245,7 @@ class MFVI(VariationalInference):
     def build_loss(self):
         """Wrapper for the MFVI loss function.
 
-        .. math:: 
+        .. math::
 
             -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
@@ -257,11 +257,11 @@ class MFVI(VariationalInference):
         of the loss function.
 
         If the variational model is a Gaussian distribution, then part of the
-        loss function can be computed analytically.  
+        loss function can be computed analytically.
 
-        If the variational model is a normal distribution and the prior is 
-        standard normal, then part of the loss function can be computed 
-        analytically following Kingma and Welling (2014), 
+        If the variational model is a normal distribution and the prior is
+        standard normal, then part of the loss function can be computed
+        analytically following Kingma and Welling (2014),
 
         .. math::
 
@@ -271,7 +271,7 @@ class MFVI(VariationalInference):
 
         Returns
         -------
-        result : 
+        result :
             an appropriately selected loss function form
         """
         if self.score:
@@ -292,16 +292,16 @@ class MFVI(VariationalInference):
                 return self.build_reparam_loss()
 
     def build_score_loss(self):
-        """Defines a loss function whose automatic differentiation 
+        """Defines a loss function whose automatic differentiation
         is the stochastic gradient of
-    
-        .. math:: 
+
+        .. math::
 
             -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
         based on the score function estimator. (Paisley et al., 2012)
 
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
+        Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
         x = self.data.sample(self.n_data)
@@ -314,16 +314,16 @@ class MFVI(VariationalInference):
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
     def build_reparam_loss(self):
-        """Defines a loss function whose automatic differentiation 
+        """Defines a loss function whose automatic differentiation
         is the stochastic gradient of
-    
-        .. math:: 
+
+        .. math::
 
             -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
-        based on the reparameterization trick. (Kingma and Welling, 2014)            
+        based on the reparameterization trick. (Kingma and Welling, 2014)
 
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
+        Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
         x = self.data.sample(self.n_data)
@@ -335,21 +335,21 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_score_loss_kl(self):
-        """Defines a loss function whose automatic differentiation 
+        """Defines a loss function whose automatic differentiation
         is the stochastic gradient of
-    
-        .. math:: 
+
+        .. math::
 
             -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
                          + KL(q(z; \lambda) || p(z)) )
 
-        based on the score function estimator. (Paisley et al., 2012)                         
+        based on the score function estimator. (Paisley et al., 2012)
 
         It assumes the KL is analytic.
 
         It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`.
 
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
+        Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
         x = self.data.sample(self.n_data)
@@ -365,21 +365,21 @@ class MFVI(VariationalInference):
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
-        """Defines a loss function whose automatic differentiation 
+        """Defines a loss function whose automatic differentiation
         is the stochastic gradient of
-    
-        .. math:: 
+
+        .. math::
 
             -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x, z) ]
                         + H(q(z; \lambda)) )
 
-        based on the score function estimator. (Paisley et al., 2012)                    
+        based on the score function estimator. (Paisley et al., 2012)
 
         It assumes the entropy is analytic.
 
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
+        Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
-        """        
+        """
         x = self.data.sample(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
@@ -392,23 +392,23 @@ class MFVI(VariationalInference):
                  q_entropy)
 
     def build_reparam_loss_kl(self):
-        """Defines a loss function whose automatic differentiation 
+        """Defines a loss function whose automatic differentiation
         is the stochastic gradient of
-    
-        .. math:: 
+
+        .. math::
 
             -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
                         + KL(q(z; \lambda) || p(z)) )
 
-        based on the reparameterization trick. (Kingma and Welling, 2014)                             
+        based on the reparameterization trick. (Kingma and Welling, 2014)
 
         It assumes the KL is analytic.
 
         It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`
 
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
+        Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
-        """        
+        """
         x = self.data.sample(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
@@ -420,21 +420,21 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_reparam_loss_entropy(self):
-        """Defines a loss function whose automatic differentiation 
+        """Defines a loss function whose automatic differentiation
         is the stochastic gradient of
-    
-        .. math:: 
+
+        .. math::
 
             -ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
                         + H(q(z; \lambda)) )
 
-        based on the reparameterization trick. (Kingma and Welling, 2014)                         
+        based on the reparameterization trick. (Kingma and Welling, 2014)
 
         It assumes the entropy is analytic.
 
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
+        Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
-        """ 
+        """
         x = self.data.sample(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
@@ -443,7 +443,7 @@ class MFVI(VariationalInference):
         return -self.loss
 
 class KLpq(VariationalInference):
-    """A variational inference method that minimizes the Kullback-Leibler 
+    """A variational inference method that minimizes the Kullback-Leibler
     divergence from the posterior to the variational model (Cappe et al., 2008)
 
     .. math::
@@ -461,7 +461,7 @@ class KLpq(VariationalInference):
         n_minibatch : int, optional
             Number of samples from variational model for calculating
             stochastic gradients.
-        """        
+        """
         self.n_minibatch = n_minibatch
         return VariationalInference.initialize(self, *args, **kwargs)
 
@@ -472,32 +472,32 @@ class KLpq(VariationalInference):
         -------
         loss : double
             KLpq loss function value after one iteration.
-        """        
+        """
         sess = get_session()
         feed_dict = self.variational.np_dict(self.zs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
     def build_loss(self):
-        """Loss function to minimize. 
+        """Loss function to minimize.
 
-        Defines a stochastic gradient of   
-    
-        .. math:: 
-            KL( p(z |x) || q(z) ) 
+        Defines a stochastic gradient of
+
+        .. math::
+            KL( p(z |x) || q(z) )
             =
             E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]
 
-        based on importance sampling.  
+        based on importance sampling.
 
         Computed as
 
         .. math::
             1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
                                 (\log p(x, z^b) - \log q(z^b; \lambda) ]
-                                
+
         where
-    
+
         .. math::
             z^b \sim q(z^b; \lambda)
 
@@ -528,7 +528,7 @@ class KLpq(VariationalInference):
 class MAP(VariationalInference):
     """Maximum a posteriori inference.
 
-    We implement this using a ``PointMass`` variational distribution to 
+    We implement this using a ``PointMass`` variational distribution to
     solve the following optimization problem
 
     .. math::
@@ -546,13 +546,13 @@ class MAP(VariationalInference):
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
-        """Loss function to minimize. 
+        """Loss function to minimize.
 
-        Defines the gradient of   
-    
-        .. math:: 
+        Defines the gradient of
+
+        .. math::
             - \log p(x,z)
-        """         
+        """
         x = self.data.sample(self.n_data)
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
@@ -561,14 +561,14 @@ class MAP(VariationalInference):
 class Laplace(VariationalInference):
     """Laplace approximation via Maximum a posteriori inference.
 
-    We implement this using a ``PointMass`` variational distribution to 
+    We implement this using a ``PointMass`` variational distribution to
     solve the following optimization problem
 
     .. math::
 
         \min_{z} - \log p(x,z)
 
-    We then compute the hessian at the solution of the above problem. 
+    We then compute the hessian at the solution of the above problem.
     (The mode of the posterior.)
     """
     def __init__(self, model, data=Data(), params=None):
@@ -579,13 +579,13 @@ class Laplace(VariationalInference):
         VariationalInference.__init__(self, model, variational, data)
 
     def build_loss(self):
-        """Loss function to minimize. 
+        """Loss function to minimize.
 
-        Defines the gradient of   
-    
-        .. math:: 
+        Defines the gradient of
+
+        .. math::
             - \log p(x,z)
-        """              
+        """
         x = self.data.sample(self.n_data)
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
@@ -595,7 +595,7 @@ class Laplace(VariationalInference):
         """Function to call after convergence.
 
         Computes the hessian at the mode.
-        """              
+        """
         get_session()
         x = self.data.sample(self.n_data) # uses mini-batch
         z = self.variational.sample()
