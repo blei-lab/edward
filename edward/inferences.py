@@ -74,7 +74,7 @@ class VariationalInference(Inference):
         Parameters
         ----------
         *args :
-            goes nowhere
+            passed into ``initialize``
         **kwargs :
             passed into ``initialize``
         """
