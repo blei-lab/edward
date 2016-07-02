@@ -123,10 +123,11 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
         data set size of 1.
-    T : TensorFlow function, optional
-        Discrepancy function written in TensorFlow. Default is
-        identity. It is a function taking in a data set
-        y and optionally a set of latent variables z as input.
+    T : function, optional
+        Discrepancy function taking tf.Tensor inputs and returning
+        a tf.Tensor output. Default is the identity function. 
+        In general this is a function taking in a data set ``y`` 
+        and optionally a set of latent variables ``z`` as input.
     size : int, optional
         number of replicated data sets
 
