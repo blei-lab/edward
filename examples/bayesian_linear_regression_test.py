@@ -13,7 +13,7 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.models import Variational, Normal
+from edward.models import Model, Normal
 from edward.stats import norm
 
 class LinearModel:
@@ -76,7 +76,7 @@ def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel()
-variational = Variational()
+variational = Model()
 variational.add(Normal(model.num_vars))
 
 data = build_toy_dataset()

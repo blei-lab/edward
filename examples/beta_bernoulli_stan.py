@@ -10,7 +10,7 @@ Variational model
     Likelihood: Mean-field Beta
 """
 import edward as ed
-from edward.models import Variational, Beta
+from edward.models import Model, Beta
 
 model_code = """
     data {
@@ -28,7 +28,7 @@ model_code = """
 """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
-variational = Variational()
+variational = Model()
 variational.add(Beta())
 data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 

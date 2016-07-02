@@ -16,7 +16,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
-from edward.models import Variational, Normal
+from edward.models import Model, Normal
 from edward.stats import norm
 from edward.util import rbf
 
@@ -111,7 +111,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
-variational = Variational()
+variational = Model()
 variational.add(Normal(model.num_vars))
 data = build_toy_dataset()
 

@@ -6,7 +6,7 @@ of 100,000 samples (!).
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Variational, Bernoulli
+from edward.models import Model, Bernoulli
 from edward.stats import bernoulli
 
 class BernoulliModel:
@@ -22,7 +22,7 @@ class BernoulliModel:
 ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliModel(p)
-variational = Variational()
+variational = Model()
 variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)

@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.data import Data
-from edward.models import Variational, PointMass
+from edward.models import Model, PointMass
 from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:

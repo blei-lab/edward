@@ -12,7 +12,7 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Model, Normal
 from edward.stats import norm
 
 class NormalPosterior:
@@ -30,7 +30,7 @@ ed.set_seed(42)
 mu = tf.constant(1.0)
 std = tf.constant(1.0)
 model = NormalPosterior(mu, std)
-variational = Variational()
+variational = Model()
 variational.add(Normal())
 
 inference = ed.MFVI(model, variational)

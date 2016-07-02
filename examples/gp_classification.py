@@ -13,7 +13,7 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.models import Variational, Normal
+from edward.models import Model, Normal
 from edward.stats import bernoulli, multivariate_normal
 from edward.util import multivariate_rbf
 
@@ -76,7 +76,7 @@ df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
 data = ed.Data(tf.constant(df, dtype=tf.float32))
 
 model = GaussianProcess(N=len(df))
-variational = Variational()
+variational = Model()
 variational.add(Normal(model.num_vars))
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

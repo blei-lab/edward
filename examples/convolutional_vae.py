@@ -16,7 +16,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward.models import Variational, Normal
+from edward.models import Model, Normal
 from edward.stats import bernoulli
 from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
@@ -119,7 +119,7 @@ model = NormalBernoulli(num_vars=10)
 # q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = phi(x))
 x_ph = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 loc, scale = neural_network(x_ph)
-variational = Variational()
+variational = Model()
 variational.add(Normal(model.num_vars * FLAGS.n_data, loc=loc, scale=scale))
 
 if not os.path.exists(FLAGS.data_directory):

@@ -8,7 +8,7 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Variational, Bernoulli
+from edward.models import Model, Bernoulli
 from edward.stats import bernoulli
 
 class BernoulliPosterior:
@@ -24,7 +24,7 @@ class BernoulliPosterior:
 ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliPosterior(p)
-variational = Variational()
+variational = Model()
 variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)

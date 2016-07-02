@@ -14,7 +14,7 @@ import pymc3 as pm
 import numpy as np
 import theano
 
-from edward.models import PyMC3Model, Variational, Beta
+from edward.models import PyMC3Model, Model, Beta
 
 data_shared = theano.shared(np.zeros(1))
 
@@ -26,7 +26,7 @@ with pm.Model() as model:
 
 data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 m = PyMC3Model(model, data_shared)
-variational = Variational()
+variational = Model()
 variational.add(Beta())
 
 inference = ed.MFVI(m, variational, data)

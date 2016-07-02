@@ -8,7 +8,7 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Model, Normal
 from edward.stats import multivariate_normal
 from edward.util import get_dims
 
@@ -30,7 +30,7 @@ Sigma = tf.constant(
 [[1.0, 0.1],
  [0.1, 1.0]])
 model = NormalPosterior(mu, Sigma)
-variational = Variational()
+variational = Model()
 variational.add(Normal(model.num_vars))
 
 inference = ed.MFVI(model, variational)

@@ -12,7 +12,7 @@ Variational model
 import edward as ed
 import numpy as np
 
-from edward.models import PythonModel, Variational, Beta
+from edward.models import PythonModel, Model, Beta
 from scipy.stats import beta, bernoulli
 
 class BetaBernoulli(PythonModel):
@@ -33,7 +33,7 @@ class BetaBernoulli(PythonModel):
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Variational()
+variational = Model()
 variational.add(Beta())
 data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
 
