@@ -3,20 +3,22 @@
 
 % Begin the content of the page
 \subsection{A library for probabilistic modeling, inference, and criticism.}
-Edward is a Python library that enables black box inference for models with
-discrete and continuous latent variables, neural network parameterizations, and
-infinite dimensional parameter spaces. Edward fuses three fields: Bayesian
-statistics and machine learning, deep learning, and probabilistic programming.
+Edward is a Python library for probabilistic modeling, inference, and
+criticism. It enables black box inference for models with discrete and
+continuous latent variables, neural network parameterizations, and
+infinite dimensional parameter spaces. Edward fuses three fields:
+Bayesian statistics and machine learning, deep learning, and
+probabilistic programming.
+
 
 It supports \textbf{modeling languages} including
 \begin{itemize}
-\item \href{https://www.tensorflow.org}{TensorFlow} (with neural network
-  compositionality via \href{http://keras.io}{Keras},
+\item \href{https://www.tensorflow.org}{TensorFlow} (via \href{http://keras.io}{Keras},
   \href{https://github.com/google/prettytensor}{Pretty Tensor}, or
   \href{https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md}{TensorFlow-Slim})
 \item \href{http://mc-stan.org}{Stan}
 \item \href{http://pymc-devs.github.io/pymc3/}{PyMC3}
-\item Python through \href{http://scipy.org/}{NumPy/SciPy}
+\item Python, through \href{http://scipy.org/}{NumPy/SciPy}
 \end{itemize}
 
 It supports \textbf{inference} via
@@ -44,15 +46,13 @@ It supports \textbf{criticism} of the model and inference via
 \subsubsection{Authors}
 
 Edward is led by \href{http://dustintran.com}{Dustin Tran} with guidance
-by \href{http://www.cs.columbia.edu/~blei/}{David Blei}. It is under
-active development (by order of joining) by
+by \href{http://www.cs.columbia.edu/~blei/}{David Blei}. The other developers
+are
 \begin{itemize}
-  \item \href{http://dustintran.com}{Dustin Tran} 
-  \item \href{http://www.cs.columbia.edu/~blei/}{David Blei} 
-  \item \href{http://www.proditus.com/}{Alp Kucukelbir} 
   \item \href{http://stat.columbia.edu/~diengadji/}{Adji Dieng} 
-  \item \href{http://maja-rita-rudolph.com/}{Maja Rudolph}
+  \item \href{http://www.proditus.com/}{Alp Kucukelbir} 
   \item \href{http://www.ee.columbia.edu/~dliang/}{Dawen Liang}
+  \item \href{http://maja-rita-rudolph.com/}{Maja Rudolph}
 \end{itemize}
 We welcome contributions by submitting issues, feature requests, or by solving
 any current issues!
@@ -66,15 +66,15 @@ We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.
 
 \begin{quote}
-Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph,
-and Dawen Liang. 2016. 
+Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M.
+Blei. 2016. 
 \emph{Edward: A library for probabilistic modeling, inference, and criticism. }
 http://edwardlib.org
 \end{quote}
 
 \begin{lstlisting}[class=JSON]
 @misc{tran2016edward,
-    author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
+    author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
     title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
     year = {2016},
     url = {http://edwardlib.org}
