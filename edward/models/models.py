@@ -23,7 +23,7 @@ class PyMC3Model:
         """
         Parameters
         ----------
-        model : pymc3.Model 
+        model : pymc3.Model
             The probability model
         observed : Theano tensor
             The shared theano tensor passed to the model likelihood
@@ -73,7 +73,7 @@ class PythonModel:
             a TensorFlow op wrapped as a Python function that returns
             n_minibatch array of type np.float32, where each element
             is the log pdf evaluated at (z_{b1}, ..., z_{bd})
-        """        
+        """
         return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
 
     def _py_log_prob(self, xs, zs):

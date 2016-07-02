@@ -69,14 +69,14 @@ class Data:
     def sample(self, n_data=None):
         """Data sampling method.
 
-        At any given point, the internal counter ``self.counter`` tracks the 
+        At any given point, the internal counter ``self.counter`` tracks the
         last datapoint returned by ``sample``.
 
-        If the requested number of datapoints ``n_data`` goes beyond the size 
-        of the dataset, the internal counter wraps around the size of the 
-        dataset. The returned minibatch, thus, may include datapoints from the 
+        If the requested number of datapoints ``n_data`` goes beyond the size
+        of the dataset, the internal counter wraps around the size of the
+        dataset. The returned minibatch, thus, may include datapoints from the
         beginning of the dataset.
-        
+
         Parameters
         ----------
         n_data : int, optional

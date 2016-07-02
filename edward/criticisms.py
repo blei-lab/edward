@@ -97,7 +97,7 @@ def evaluate(metrics, model, variational, data):
 def ppc(model, variational=None, data=Data(), T=None, size=100):
     """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
-    If no posterior approximation is provided through ``variational``, 
+    If no posterior approximation is provided through ``variational``,
     then we default to a prior predictive check (Box, 1980).
 
     PPC's form an empirical distribution for the predictive discrepancy,
@@ -105,8 +105,8 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     .. math::
         p(T) = \int p(T(yrep) | z) p(z | y) dz
 
-    by drawing replicated data sets yrep and calculating 
-    :math:`T(yrep)` for each data set. Then it compares it to 
+    by drawing replicated data sets yrep and calculating
+    :math:`T(yrep)` for each data set. Then it compares it to
     :math:`T(y)`.
 
     Parameters
@@ -125,8 +125,8 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
         data set size of 1.
     T : function, optional
         Discrepancy function taking tf.Tensor inputs and returning
-        a tf.Tensor output. Default is the identity function. 
-        In general this is a function taking in a data set ``y`` 
+        a tf.Tensor output. Default is the identity function.
+        In general this is a function taking in a data set ``y``
         and optionally a set of latent variables ``z`` as input.
     size : int, optional
         number of replicated data sets

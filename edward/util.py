@@ -32,7 +32,7 @@ def dot(x, y):
 
     If x is a ``[M x N]`` matrix, then y is a ``M``-vector.
 
-    If x is a ``M``-vector, then y is a ``[M x N]`` matrix.    
+    If x is a ``M``-vector, then y is a ``[M x N]`` matrix.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ def dot(x, y):
     -------
     tf.Tensor
         ``N``-vector
-    """      
+    """
     if len(x.get_shape()) == 1:
         vec = x
         mat = y
@@ -190,14 +190,14 @@ def log_sum_exp(x):
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 def logit(x):
-    """Evaluate :math:`\log(x / (1 - x))` elementwise. 
+    """Evaluate :math:`\log(x / (1 - x))` elementwise.
 
     Clips all elements to be between :math:`(0,1)`.
-    
+
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
+        scalar, vector, matrix, or n-Tensor
 
     Returns
     -------
@@ -215,9 +215,9 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
+        scalar, vector, matrix, or n-Tensor
     y : Optional[tf.Tensor], default 0.0
-        scalar, vector, matrix, or n-Tensor 
+        scalar, vector, matrix, or n-Tensor
     sigma : Optional[double], default 1.0
         standard deviation of radial basis function
     l : Optional[double], default 1.0
@@ -240,9 +240,9 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
+        scalar, vector, matrix, or n-Tensor
     y : Optional[tf.Tensor], default 0.0
-        scalar, vector, matrix, or n-Tensor 
+        scalar, vector, matrix, or n-Tensor
     sigma : Optional[double], default 1.0
         standard deviation of radial basis function
     l : Optional[double], default 1.0
@@ -277,7 +277,7 @@ def softplus(x):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor 
+        scalar, vector, matrix, or n-Tensor
 
     Returns
     -------
@@ -293,7 +293,7 @@ def stop_gradient(x):
     ----------
     x : tf.Tensor or list
         scalar, vector, matrix, or n-Tensor or list thereof
-        
+
     Returns
     -------
     tf.Tensor or list
@@ -320,7 +320,7 @@ def to_simplex(x):
 
     Notes
     -----
-    x as a 3d or higher tensor is not guaranteed to be supported.        
+    x as a 3d or higher tensor is not guaranteed to be supported.
     """
     if isinstance(x, tf.Tensor):
         shape = get_dims(x)
