@@ -30,17 +30,21 @@ def cumprod(xs):
 def dot(x, y):
     """Compute dot product between a Tensor matrix and a Tensor vector.
 
+    If x is a ``[M x N]`` matrix, then y is a ``M``-vector.
+
+    If x is a ``M``-vector, then y is a ``[M x N]`` matrix.    
+
     Parameters
     ----------
     x : tf.Tensor
-        `M x N` matrix or `M` vector (respectively)
+        ``M x N`` matrix or ``M`` vector (see above)
     y : tf.Tensor
-        `M` vector or `M x N` matrix (respectively)
+        ``M`` vector or ``M x N`` matrix (see above)
 
     Returns
     -------
     tf.Tensor
-        `N` vector
+        ``N``-vector
     """      
     if len(x.get_shape()) == 1:
         vec = x
@@ -186,7 +190,7 @@ def log_sum_exp(x):
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 def logit(x):
-    """Evaluates :math:`\log(x / (1 - x))` elementwise. 
+    """Evaluate :math:`\log(x / (1 - x))` elementwise. 
 
     Clips all elements to be between :math:`(0,1)`.
     
@@ -257,7 +261,7 @@ def set_seed(x):
 
     Parameters
     ----------
-    x : double
+    x : int, float
         seed
     """
     np.random.seed(x)
@@ -294,7 +298,6 @@ def stop_gradient(x):
     -------
     tf.Tensor or list
         size corresponding to size of input
-
     """
     if isinstance(x, tf.Tensor):
         return tf.stop_gradient(x)
@@ -314,6 +317,10 @@ def to_simplex(x):
     -------
     tf.Tensor
         Same shape as input but with last dimension of size ``K``.
+
+    Notes
+    -----
+    x as a 3d or higher tensor is not guaranteed to be supported.        
     """
     if isinstance(x, tf.Tensor):
         shape = get_dims(x)

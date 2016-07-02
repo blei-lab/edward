@@ -227,7 +227,7 @@ where <code class="docutils literal"><span class="pre">idx</span></code> is of d
 <dl class="class">
 <dt id="edward.models.distributions.Distribution">
 <em class="property">class </em><code class="descclassname">edward.models.distributions.</code><code class="descname">Distribution</code><span class="sig-paren">(</span><em>shape=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for Edward model distributions.</p>
+<dd><p>Base class for Edward distributions.</p>
 <p><code class="docutils literal"><span class="pre">p(x</span> <span class="pre">|</span> <span class="pre">params)</span> <span class="pre">=</span> <span class="pre">prod_{idx</span> <span class="pre">in</span> <span class="pre">shape}</span> <span class="pre">p(x[idx]</span> <span class="pre">|</span> <span class="pre">params[idx])</span></code></p>
 <p>where <code class="docutils literal"><span class="pre">shape</span></code> is the shape of <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">params[idx]</span></code> denote the
 parameters of each random variable <code class="docutils literal"><span class="pre">x[idx]</span></code>.</p>
@@ -538,7 +538,7 @@ where <code class="docutils literal"><span class="pre">idx</span></code> is of d
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>tf.Variable, optional</em>) &#8211; if not specified, everything initialized to <span class="math">\(\mathcal{N}(0,1)\)</span></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>np.ndarray, tf.Variable, optional</em>) &#8211; if not specified, everything initialized to <span class="math">\(\mathcal{N}(0,1)\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -621,7 +621,7 @@ latent variables.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a TensorFlow op wrapped as a Python function taht returns
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a TensorFlow op wrapped as a Python function that returns
 n_minibatch array of type np.float32, where each element
 is the log pdf evaluated at (z_{b1}, ..., z_{bd})</p>
 </td>

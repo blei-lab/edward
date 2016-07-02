@@ -26,7 +26,7 @@ def evaluate(metrics, model, variational, data):
     Raises
     ------
     NotImplementedError
-        if an input metric does not match an implemented metric in Edward.
+        If an input metric does not match an implemented metric in Edward.
     """
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
@@ -192,7 +192,7 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
 # Classification metrics
 
 def binary_accuracy(y_true, y_pred):
-    """ Binary prediction accuracy, also known as 0/1-loss.
+    """Binary prediction accuracy, also known as 0/1-loss.
 
     Parameters
     ----------

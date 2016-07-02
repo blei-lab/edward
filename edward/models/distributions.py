@@ -6,7 +6,7 @@ from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_dims, get_session, to_simplex
 
 class Distribution:
-    """Base class for Edward model distributions.
+    """Base class for Edward distributions.
 
     ``p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])``
 
@@ -513,7 +513,7 @@ class PointMass(Distribution):
 
     Parameters
     ----------
-    params : tf.Variable, optional
+    params : np.ndarray, tf.Variable, optional
         if not specified, everything initialized to :math:`\mathcal{N}(0,1)`
     """
     def __init__(self, shape=1, params=None):

@@ -285,7 +285,7 @@ that data point per row.</li>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list or float</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code> &#8211; if an input metric does not match an implemented metric in Edward.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code> &#8211; If an input metric does not match an implemented metric in Edward.</p>
 </td>
 </tr>
 </tbody>
@@ -428,9 +428,10 @@ through the <code class="docutils literal"><span class="pre">sample_prior</span>
 <li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; Observed data to compare to. If not specified, will return
 only the reference distribution with an assumed replicated
 data set size of 1.</li>
-<li><strong>T</strong> (<em>TensorFlow function, optional</em>) &#8211; Discrepancy function written in TensorFlow. Default is
-identity. It is a function taking in a data set
-y and optionally a set of latent variables z as input.</li>
+<li><strong>T</strong> (<em>function, optional</em>) &#8211; Discrepancy function taking tf.Tensor inputs and returning
+a tf.Tensor output. Default is the identity function.
+In general this is a function taking in a data set <code class="docutils literal"><span class="pre">y</span></code>
+and optionally a set of latent variables <code class="docutils literal"><span class="pre">z</span></code> as input.</li>
 <li><strong>size</strong> (<em>int, optional</em>) &#8211; number of replicated data sets</li>
 </ul>
 </td>
@@ -606,8 +607,8 @@ beginning of the dataset.</p>
 <dt id="edward.inferences.KLpq">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLpq</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
-<p>Variational inference that minimizes the Kullback-Leibler divergence
-from the posterior to the variational model (Cappe et al., 2008)</p>
+<p>A variational inference method that minimizes the Kullback-Leibler
+divergence from the posterior to the variational model (Cappe et al., 2008)</p>
 <div class="math">
 \[KL( p(z |x) || q(z) ).\]</div>
 <dl class="method">
@@ -721,9 +722,12 @@ solve the following optimization problem</p>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Mean-field variational inference.</p>
 <p>This class implements a variety of &#8220;black-box&#8221; variational inference
-techniques (Ranganath et al., 2014) that maximize</p>
+techniques (Ranganath et al., 2014) that minmize</p>
 <div class="math">
-\[ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
+\[KL( q(z; \lambda) || p(z | x) ).\]</div>
+<p>This is equivalent to maximize a related objective function (Jordan, 1999)</p>
+<div class="math">
+\[ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].\]</div>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_loss" title="Permalink to this definition">¶</a></dt>
@@ -738,6 +742,12 @@ techniques (Ranganath et al., 2014) that maximize</p>
 <p>of the loss function.</p>
 <p>If the variational model is a Gaussian distribution, then part of the
 loss function can be computed analytically.</p>
+<p>If the variational model is a normal distribution and the prior is
+standard normal, then part of the loss function can be computed
+analytically following Kingma and Welling (2014),</p>
+<div class="math">
+\[E[\log p(x | z) + KL],\]</div>
+<p>where the KL term is computed analytically.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -753,8 +763,8 @@ loss function can be computed analytically.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss">
 <code class="descname">build_reparam_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Defines a loss function whose automatic differentiation
+is the stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
 <p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
@@ -765,8 +775,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss_entropy">
 <code class="descname">build_reparam_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Defines a loss function whose automatic differentiation
+is the stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
             + H(q(z; \lambda)) )\]</div>
@@ -779,8 +789,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss_kl">
 <code class="descname">build_reparam_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_kl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Defines a loss function whose automatic differentiation
+is the stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
             + KL(q(z; \lambda) || p(z)) )\]</div>
@@ -794,8 +804,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss">
 <code class="descname">build_score_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Defines a loss function whose automatic differentiation
+is the stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
 <p>based on the score function estimator. (Paisley et al., 2012)</p>
@@ -806,8 +816,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss_entropy">
 <code class="descname">build_score_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Defines a loss function whose automatic differentiation
+is the stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x, z) ]
             + H(q(z; \lambda)) )\]</div>
@@ -820,14 +830,14 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss_kl">
 <code class="descname">build_score_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_kl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Defines a loss function whose automatic differentiation
+is the stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
              + KL(q(z; \lambda) || p(z)) )\]</div>
 <p>based on the score function estimator. (Paisley et al., 2012)</p>
 <p>It assumes the KL is analytic.</p>
-<p>It assumes the prior is <span class="math">\(p(z) = \mathcal{N}(z; 0, 1)\)</span></p>
+<p>It assumes the prior is <span class="math">\(p(z) = \mathcal{N}(z; 0, 1)\)</span>.</p>
 <p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
 expectation using Monte Carlo sampling.</p>
 </dd></dl>
@@ -1012,7 +1022,7 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; variational <cite>loss function</cite> values after one iteration</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; Loss function values after one iteration</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
 </tr>
@@ -1048,17 +1058,19 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <dt id="edward.util.dot">
 <code class="descclassname">edward.util.</code><code class="descname">dot</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.dot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute dot product between a Tensor matrix and a Tensor vector.</p>
+<p>If <code class="docutils literal"><span class="pre">x</span></code> is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix, then <code class="docutils literal"><span class="pre">y</span></code> is a <code class="docutils literal"><span class="pre">M</span></code>-vector.</p>
+<p>If <code class="docutils literal"><span class="pre">x</span></code> is a <code class="docutils literal"><span class="pre">M</span></code>-vector, then <code class="docutils literal"><span class="pre">y</span></code> is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; <cite>M x N</cite> matrix or <cite>M</cite> vector (respectively)</li>
-<li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; <cite>M</cite> vector or <cite>M x N</cite> matrix (respectively)</li>
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; <code class="docutils literal"><span class="pre">M</span> <span class="pre">x</span> <span class="pre">N</span></code> matrix or <code class="docutils literal"><span class="pre">M</span></code> vector (see above)</li>
+<li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; <code class="docutils literal"><span class="pre">M</span></code> vector or <code class="docutils literal"><span class="pre">M</span> <span class="pre">x</span> <span class="pre">N</span></code> matrix (see above)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><cite>N</cite> vector</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">N</span></code>-vector</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>

@@ -12,12 +12,40 @@ class Distribution:
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            np.array of dimension (size x shape), where shape is the
+            shape of its parameter argument. For multivariate
+            distributions, shape may correspond to only one of the
+            parameter arguments, e.g., alpha in Dirichlet, p in
+            Multinomial, mean in Multivariate_Normal.
 
         Notes
         -----
         This is written in NumPy/SciPy, as TensorFlow does not support
-        many distributions for random number generation.
+        many distributions for random number generation. It follows
+        SciPy's naming and argument conventions.
+
+        The equivalent method in SciPy is not guaranteed to be
+        supported with a batch of parameter inputs, e.g., a vector of
+        location parameters in a normal distribution, or a matrix of
+        concentration parameters in a Dirichlet. This is.
+
+        This does not follow SciPy's behavior, e.g., the number (or
+        shape) of the draws will always be denoted by its outer
+        dimension(s).
+
+        params as a 2d or higher tensor is not guaranteed to be
+        supported (for either univariate or multivariate
+        distribution).
+
+        size as a list or tuple of more than one element is not
+        guaranteed to be supported.
+
+        For most distributions, the parameters must be of the same
+        shape and type, e.g., n and p in Binomial must be np.arrays()
+        of same shape or both floats. For some, they may differ by one
+        dimension, e.g., n and p in Multinomial can be float and
+        np.array(), or both np.arrays, and n always has one less
+        dimension.
         """
         raise NotImplementedError()
 
@@ -25,21 +53,25 @@ class Distribution:
         """
         Parameters
         ---------
-        x : np.array or tf.Tensor
-            If univariate distribution, can be a scalar, vector, or matrix.
-            If multivariate distribution, can be a vector or matrix.
-
-        params : np.array or tf.Tensor
+        x : float, np.array or tf.Tensor
+            If univariate distribution, can be a scalar or tensor.
+            If multivariate distribution, can be a tensor; the outer
+            dimension carries the multivariate dimension.
+        params : float, np.array or tf.Tensor
             scalar unless documented otherwise
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            If univariate distribution, returns a tensor of same shape
+            as input. If multivariate distribution, returns a tensor
+            of shape[:-1] from input: the outer dimension representing
+            the multivariate dimension is collapsed.
+        
+        Notes
+        -----
+        x as a 3d or higher tensor is not guaranteed to be supported
+        (for either univariate or multivariate distribution).           
         """
         raise NotImplementedError()
 
@@ -47,24 +79,26 @@ class Distribution:
         """
         Parameters
         ---------
-        params : np.array or tf.Tensor
+        params : float, np.array or tf.Tensor
             If univariate distribution, can be a scalar or vector.
             If multivariate distribution, can be a vector or matrix.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            If univariate distribution, returns a tensor of same
+            shape as input.
+            If multivariate distribution, returns a tensor of
+            shape[-1] from input: the outer dimension representing the
+            multivariate dimension is collapsed.
 
         Notes
         -----
-        SciPy doesn't always enable vector inputs for
-        univariate distributions or matrix inputs for multivariate
-        distributions. This does.
+        If univariate distribution, returns a tensor of same
+        shape as input.
+        If multivariate distribution, returns a tensor of
+        shape[-1] from input: the outer dimension representing the
+        multivariate dimension is collapsed.
         """
         raise NotImplementedError()
 
@@ -76,7 +110,7 @@ class Bernoulli:
 
         Parameters
         ----------
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)`
         size : int
             number of random variable samples to return
@@ -115,10 +149,10 @@ class Bernoulli:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)`
         
         Returns
@@ -139,7 +173,7 @@ class Bernoulli:
 
         Parameters
         ----------
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)`
 
         Returns
@@ -162,9 +196,9 @@ class Beta:
 
         Parameters
         ----------
-        a : float
+        a : float, np.array, tf.Tensor
             constrained to :math:`a > 0`
-        b : float
+        b : float, np.array, tf.Tensor
             constrained to :math:`b > 0`            
         size : int
             number of random variable samples to return
@@ -194,12 +228,12 @@ class Beta:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
-        a : float
+        a : float, np.array, tf.Tensor
             constrained to :math:`a > 0`
-        b : float
+        b : float, np.array, tf.Tensor
             constrained to :math:`b > 0` 
         
         Returns
@@ -221,9 +255,9 @@ class Beta:
 
         Parameters
         ----------
-        a : float
+        a : float, np.array, tf.Tensor
             constrained to :math:`a > 0`
-        b : float
+        b : float, np.array, tf.Tensor
             constrained to :math:`b > 0` 
 
         Returns
@@ -259,7 +293,7 @@ class Binom:
         ----------
         n : int
             constrained to :math:`n > 0`
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)`      
         size : int
             number of random variable samples to return
@@ -289,12 +323,12 @@ class Binom:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
         n : int
             constrained to :math:`n > 0`
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)`      
         
         Returns
@@ -328,7 +362,7 @@ class Chi2:
 
         Parameters
         ----------
-        df : float
+        df : float, np.array, tf.Tensor
             constrained to :math:`df > 0`      
         size : int
             number of random variable samples to return
@@ -356,10 +390,10 @@ class Chi2:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             If univariate distribution, can be a scalar, vector, or matrix.
             If multivariate distribution, can be a vector or matrix.
-        df : float
+        df : float, np.array, tf.Tensor
             constrained to :math:`df > 0`
           
         Returns
@@ -420,7 +454,7 @@ class Dirichlet:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
         alpha : np.array or tf.Tensor
             each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`  
@@ -480,7 +514,7 @@ class Expon:
 
         Parameters
         ----------
-        scale : float
+        scale : float, np.array, tf.Tensor
             constrained to :math:`scale > 0`    
         size : int
             number of random variable samples to return
@@ -508,9 +542,9 @@ class Expon:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        scale : float
+        scale : float, np.array, tf.Tensor
             constrained to :math:`scale > 0`  
 
         Returns
@@ -544,9 +578,9 @@ class Gamma:
 
         Parameters
         ----------
-        a : float
+        a : float, np.array, tf.Tensor
             **shape** parameter: constrained to :math:`a > 0`    
-        scale : float
+        scale : float, np.array, tf.Tensor
             **scale** parameter: constrained to :math:`scale > 0`  
         size : int
             number of random variable samples to return
@@ -576,11 +610,11 @@ class Gamma:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        a : float
+        a : float, np.array, tf.Tensor
             **shape** parameter: constrained to :math:`a > 0`    
-        scale : float
+        scale : float, np.array, tf.Tensor
             **scale** parameter: constrained to :math:`scale > 0`  
 
         Returns
@@ -602,9 +636,9 @@ class Gamma:
 
         Parameters
         ----------
-        a : float
+        a : float, np.array, tf.Tensor
             **shape** parameter: constrained to :math:`a > 0`    
-        scale : float
+        scale : float, np.array, tf.Tensor
             **scale** parameter: constrained to :math:`scale > 0`  
 
         Returns
@@ -629,7 +663,7 @@ class Geom:
 
         Parameters
         ----------
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)` 
         size : int
             number of random variable samples to return
@@ -657,9 +691,9 @@ class Geom:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)` 
 
         Returns
@@ -693,9 +727,9 @@ class InvGamma:
 
         Parameters
         ----------
-        a : float
+        a : float, np.array, tf.Tensor
             **shape** parameter: constrained to :math:`a > 0`    
-        scale : float
+        scale : float, np.array, tf.Tensor
             **scale** parameter: constrained to :math:`scale > 0`  
         size : int
             number of random variable samples to return
@@ -730,11 +764,11 @@ class InvGamma:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        a : float
+        a : float, np.array, tf.Tensor
             **shape** parameter: constrained to :math:`a > 0`    
-        scale : float
+        scale : float, np.array, tf.Tensor
             **scale** parameter: constrained to :math:`scale > 0`  
 
         Returns
@@ -757,9 +791,9 @@ class InvGamma:
 
         Parameters
         ----------
-        a : float
+        a : float, np.array, tf.Tensor
             **shape** parameter: constrained to :math:`a > 0`    
-        scale : float
+        scale : float, np.array, tf.Tensor
             **scale** parameter: constrained to :math:`scale > 0`  
 
         Returns
@@ -784,7 +818,7 @@ class LogNorm:
 
         Parameters
         ---------- 
-        s : float
+        s : float, np.array, tf.Tensor
             constrained to :math:`s > 0`  
         size : int
             number of random variable samples to return
@@ -812,9 +846,9 @@ class LogNorm:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        s : float
+        s : float, np.array, tf.Tensor
             constrained to :math:`s > 0`  
 
         Returns
@@ -849,9 +883,9 @@ class Multinomial:
 
         Parameters
         ---------- 
-        n : int
+        n : int, tf.Tensor
             constrained to :math:`n > 0`
-        p : np.array
+        p : np.array, tf.Tensor
             constrained to :math:`\sum_i p_k = 1`  
         size : int
             number of random variable samples to return
@@ -882,12 +916,12 @@ class Multinomial:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector of length K, where x[i] is the number of outcomes
             in the ith bucket, or matrix with column length K
-        n : int or tf.Tensor
+        n : int, tf.Tensor
             number of outcomes equal to sum x[i]
-        p : np.array or tf.Tensor
+        p : np.array, tf.Tensor
             vector of probabilities summing to 1
 
         Returns
@@ -989,7 +1023,7 @@ class Multivariate_Normal:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
         mean : np.array or tf.Tensor, optional
             vector. Defaults to zero mean.
@@ -1099,7 +1133,7 @@ class NBinom:
         ---------- 
         n : int
             constrained to :math:`n > 0`
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)` 
         size : int
             number of random variable samples to return
@@ -1129,11 +1163,11 @@ class NBinom:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
         n : int
             constrained to :math:`n > 0`
-        p : float
+        p : float, np.array, tf.Tensor
             constrained to :math:`p\in(0,1)` 
 
         Returns
@@ -1167,9 +1201,9 @@ class Norm:
 
         Parameters
         ---------- 
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1199,11 +1233,11 @@ class Norm:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
 
         Returns
@@ -1226,9 +1260,9 @@ class Norm:
 
         Parameters
         ----------
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
 
         Returns
@@ -1251,7 +1285,7 @@ class Poisson:
 
         Parameters
         ---------- 
-        mu : float
+        mu : float, np.array, tf.Tensor
             parameter, constrained to :math:`mu > 0`
         size : int
             number of random variable samples to return
@@ -1279,9 +1313,9 @@ class Poisson:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        mu : float
+        mu : float, np.array, tf.Tensor
             parameter, constrained to :math:`mu > 0`
 
         Returns
@@ -1306,18 +1340,18 @@ class Poisson:
         raise NotImplementedError()
 
 class T:
-    """Student T distribution
+    """Student-t distribution.
     """
     def rvs(self, df, loc=0, scale=1, size=1):
         """Random variable generator
 
         Parameters
         ---------- 
-        df : float
+        df : float, np.array, tf.Tensor
             constrained to :math:`df > 0`  
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1349,13 +1383,13 @@ class T:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        df : float
+        df : float, np.array, tf.Tensor
             constrained to :math:`df > 0`  
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
 
         Returns
@@ -1392,13 +1426,13 @@ class TruncNorm:
 
         Parameters
         ---------- 
-        a : float
+        a : float, np.array, tf.Tensor
             left boundary, with respect to the standard normal
-        b : float
+        b : float, np.array, tf.Tensor
             right boundary, with respect to the standard normal
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1432,15 +1466,15 @@ class TruncNorm:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        a : float
+        a : float, np.array, tf.Tensor
             left boundary, with respect to the standard normal
-        b : float
+        b : float, np.array, tf.Tensor
             right boundary, with respect to the standard normal
-        loc : float
+        loc : float, np.array, tf.Tensor
             mean
-        scale : float
+        scale : float, np.array, tf.Tensor
             standard deviation, constrained to :math:`scale > 0`
 
         Returns
@@ -1484,9 +1518,9 @@ class Uniform:
 
         Parameters
         ---------- 
-        loc : float
+        loc : float, np.array, tf.Tensor
             left boundary
-        scale : float
+        scale : float, np.array, tf.Tensor
             width of distribution, constrained to :math:`scale > 0`
         size : int
             number of random variable samples to return
@@ -1516,11 +1550,11 @@ class Uniform:
 
         Parameters
         ----------
-        x : np.array or tf.Tensor
+        x : float, np.array, tf.Tensor
             vector or matrix
-        loc : float
+        loc : float, np.array, tf.Tensor
             left boundary
-        scale : float
+        scale : float, np.array, tf.Tensor
             width of distribution, constrained to :math:`scale > 0`
 
         Returns
@@ -1541,9 +1575,9 @@ class Uniform:
 
         Parameters
         ----------
-        loc : float
+        loc : float, np.array, tf.Tensor
             left boundary
-        scale : float
+        scale : float, np.array, tf.Tensor
             width of distribution, constrained to :math:`scale > 0`
 
         Returns

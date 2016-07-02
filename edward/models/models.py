@@ -70,7 +70,7 @@ class PythonModel:
         Returns
         -------
         tf.py_func
-            a TensorFlow op wrapped as a Python function taht returns
+            a TensorFlow op wrapped as a Python function that returns
             n_minibatch array of type np.float32, where each element
             is the log pdf evaluated at (z_{b1}, ..., z_{bd})
         """        

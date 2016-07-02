@@ -143,7 +143,7 @@ class VariationalInference(Inference):
         Returns
         -------
         loss : double
-            variational `loss function` values after one iteration
+            Loss function values after one iteration
         """
         sess = get_session()
         _, loss = sess.run([self.train, self.loss])
@@ -193,11 +193,17 @@ class MFVI(VariationalInference):
     """Mean-field variational inference.
 
     This class implements a variety of "black-box" variational inference
-    techniques (Ranganath et al., 2014) that maximize
+    techniques (Ranganath et al., 2014) that minmize
+
+    .. math::
+
+        KL( q(z; \lambda) || p(z | x) ).
+
+    This is equivalent to maximize a related objective function (Jordan, 1999)    
 
     .. math:: 
 
-        ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
+        ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].
     """
     def __init__(self, *args, **kwargs):
         VariationalInference.__init__(self, *args, **kwargs)
@@ -253,6 +259,16 @@ class MFVI(VariationalInference):
         If the variational model is a Gaussian distribution, then part of the
         loss function can be computed analytically.  
 
+        If the variational model is a normal distribution and the prior is 
+        standard normal, then part of the loss function can be computed 
+        analytically following Kingma and Welling (2014), 
+
+        .. math::
+
+            E[\log p(x | z) + KL],
+
+        where the KL term is computed analytically.
+
         Returns
         -------
         result : 
@@ -276,9 +292,8 @@ class MFVI(VariationalInference):
                 return self.build_reparam_loss()
 
     def build_score_loss(self):
-        """Loss function to minimize. 
-
-        Defines a stochastic gradient of
+        """Defines a loss function whose automatic differentiation 
+        is the stochastic gradient of
     
         .. math:: 
 
@@ -299,9 +314,8 @@ class MFVI(VariationalInference):
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
     def build_reparam_loss(self):
-        """Loss function to minimize. 
-
-        Defines a stochastic gradient of
+        """Defines a loss function whose automatic differentiation 
+        is the stochastic gradient of
     
         .. math:: 
 
@@ -321,9 +335,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_score_loss_kl(self):
-        """Loss function to minimize. 
-
-        Defines a stochastic gradient of 
+        """Defines a loss function whose automatic differentiation 
+        is the stochastic gradient of
     
         .. math:: 
 
@@ -334,7 +347,7 @@ class MFVI(VariationalInference):
 
         It assumes the KL is analytic.
 
-        It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`
+        It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`.
 
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the 
         expectation using Monte Carlo sampling.
@@ -352,9 +365,8 @@ class MFVI(VariationalInference):
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
-        """Loss function to minimize. 
-
-        Defines a stochastic gradient of
+        """Defines a loss function whose automatic differentiation 
+        is the stochastic gradient of
     
         .. math:: 
 
@@ -380,9 +392,8 @@ class MFVI(VariationalInference):
                  q_entropy)
 
     def build_reparam_loss_kl(self):
-        """Loss function to minimize. 
-
-        Defines a stochastic gradient of
+        """Defines a loss function whose automatic differentiation 
+        is the stochastic gradient of
     
         .. math:: 
 
@@ -409,9 +420,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_reparam_loss_entropy(self):
-        """Loss function to minimize. 
-
-        Defines a stochastic gradient of   
+        """Defines a loss function whose automatic differentiation 
+        is the stochastic gradient of
     
         .. math:: 
 
@@ -433,8 +443,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
 class KLpq(VariationalInference):
-    """Variational inference that minimizes the Kullback-Leibler divergence 
-    from the posterior to the variational model (Cappe et al., 2008)
+    """A variational inference method that minimizes the Kullback-Leibler 
+    divergence from the posterior to the variational model (Cappe et al., 2008)
 
     .. math::
 
