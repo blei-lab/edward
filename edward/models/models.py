@@ -182,7 +182,6 @@ class Variational:
             if l != 0:
                 string += "\n"
 
-            layer = self.layers[l]
             string += layer.__str__()
 
         return string
