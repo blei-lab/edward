@@ -38,15 +38,18 @@ primary objects that enable the above analysis.
 
 \subsubsection{Data}
 
-\texttt{Data} objects are containers that contain measurements. The
-structure of these objects must match the inputs of the probabilistic
-model.
+\texttt{Data} objects contain measurements. The structure of these objects must
+match the inputs of the probabilistic model. For example, 
 
-\begin{verbatim}
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
-\end{verbatim}
+\begin{lstlisting}[language=Python]
+data_np = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+data = ed.Data(tf.constant(data_np, dtype=tf.float32))
+\end{lstlisting}
 
-\paragraph{Models}\label{models}
+\texttt{Data} objects define a \texttt{sample} method that specifies how to
+sample minibatches of observations from the dataset.
+
+\subsubsection{Models}\label{models}
 
 There are two types of model objects in Edward:
 
@@ -54,38 +57,44 @@ There are two types of model objects in Edward:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Probability models of data
+  Probability models of data, $p(x,z)$
 \item
-  Variational models of latent variables
+  Variational models of latent variables $q(z\;;\;\lambda)$
 \end{enumerate}
 
-We can specify probability models of data using NumPy/SciPy, TensorFlow,
-PyMC3, or Stan. Here is a model of coin flips using a
-\href{https://en.wikipedia.org/wiki/Beta-binomial_distribution}{Beta-Bernoulli
-distribution} in NumPy/Scipy.
+Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3,
+or Stan. A probability model has the following structure.
+\begin{lstlisting}[language=Python]
+import edward as ed
+import tensorflow as tf
 
-\begin{verbatim}
-class BetaBernoulli(PythonModel):
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
-    def _py_log_prob(self, xs, zs):
-        n_samples = zs.shape[0]
-        lp = np.zeros(n_samples, dtype=np.float32)
-        for s in range(n_samples):
-            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
-            for n in range(len(xs)):
-                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
-        return lp
-\end{verbatim}
+class probability_model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self, xs, zs):
+        log_prior = ...
+        log_likelihood = ...
+        return log_prior + log_likelihood
 
-This describes a Bayesian model, which is a joint distribution of data
-and latent variables \texttt{z}. With this model and data of coin flips,
-we aim to reason about \texttt{z}, the probability that the coin lands
-heads. The posterior distribution of \texttt{z} captures our reasoning:
-its mean describes our best guess of the probability, and its variance
-describes our uncertainty around our best guess. In this toy model, we
-know that the posterior is a Beta distribution. Let us assume we do not
-know its parameters in closed form.
+model = probability_model(...)
+\end{lstlisting}
+The field \texttt{self.num\_vars} holds the number of latent variables in the
+probability model. For example, a model with a Gaussian likelihood with latent
+mean and variance would have \texttt{self.num\_vars=2*N} latent variables for 
+\texttt{N} observations.
+
+The method \texttt{self.log_prob(xs, zs)} calculates the log probability of the
+joint density $\log p(x,z)$. Here \texttt{xs} contains the data and \texttt{zs}
+are the latent variables.
+
+This describes the probability model, which is a joint distribution of data $x$
+and latent variables $z$. Given a model, we aim to reason about $z$ given some
+data: the latent patterns conditioned on some data. The posterior distribution
+$p(z \mid x)$ captures our reasoning: its mean describes our best guess of the
+latent patterns, and its variance describes our uncertainty around our best
+guess. 
 
 Edward can employ variational inference to infer this posterior, which
 finds the closest distribution within a specified family. Initialize an
@@ -101,7 +110,7 @@ With this syntax, we can build rich variational models to describe the
 latent variables in our data models. (More documentation on this coming
 soon.)
 
-\paragraph{Inference}\label{inference}
+\subsubsection{Inference}\label{inference}
 
 \texttt{Inference} objects infer latent variables of models given data.
 Edward currently supports a variety of variational inference algorithms.
@@ -122,7 +131,7 @@ convergence. It recovers a Beta distribution with mean 0.25 and variance
 0.12. 0.25 is our best guess of the probability that the coin lands
 heads.
 
-\paragraph{Criticism}\label{criticism}
+\subsubsection{Criticism}\label{criticism}
 
 {[}In Progress{]}
 

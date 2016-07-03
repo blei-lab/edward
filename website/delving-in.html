@@ -82,38 +82,45 @@
 <p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
 <p>This process defines the design of Edward. Here are the four primary objects that enable the above analysis.</p>
 <h3 id="data">Data</h3>
-<p><code>Data</code> objects are containers that contain measurements. The structure of these objects must match the inputs of the probabilistic model.</p>
-<pre><code>data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))</code></pre>
-<h4 id="models">Models</h4>
+<p><code>Data</code> objects contain measurements. The structure of these objects must match the inputs of the probabilistic model. For example,</p>
+<pre class="python" language="Python"><code>data_np = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+data = ed.Data(tf.constant(data_np, dtype=tf.float32))</code></pre>
+<p><code>Data</code> objects define a <code>sample</code> method that specifies how to sample minibatches of observations from the dataset.</p>
+<h3 id="models">Models</h3>
 <p>There are two types of model objects in Edward:</p>
 <ol>
-<li>Probability models of data</li>
-<li>Variational models of latent variables</li>
+<li>Probability models of data, <span class="math inline">\(p(x,z)\)</span></li>
+<li>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></li>
 </ol>
-<p>We can specify probability models of data using NumPy/SciPy, TensorFlow, PyMC3, or Stan. Here is a model of coin flips using a <a href="https://en.wikipedia.org/wiki/Beta-binomial_distribution">Beta-Bernoulli distribution</a> in NumPy/Scipy.</p>
-<pre><code>class BetaBernoulli(PythonModel):
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
-    def _py_log_prob(self, xs, zs):
-        n_samples = zs.shape[0]
-        lp = np.zeros(n_samples, dtype=np.float32)
-        for s in range(n_samples):
-            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
-            for n in range(len(xs)):
-                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
-        return lp</code></pre>
-<p>This describes a Bayesian model, which is a joint distribution of data and latent variables <code>z</code>. With this model and data of coin flips, we aim to reason about <code>z</code>, the probability that the coin lands heads. The posterior distribution of <code>z</code> captures our reasoning: its mean describes our best guess of the probability, and its variance describes our uncertainty around our best guess. In this toy model, we know that the posterior is a Beta distribution. Let us assume we do not know its parameters in closed form.</p>
+<p>Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3, or Stan. A probability model has the following structure.</p>
+<pre class="python" language="Python"><code>import edward as ed
+import tensorflow as tf
+
+class probability_model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self, xs, zs):
+        log_prior = ...
+        log_likelihood = ...
+        return log_prior + log_likelihood
+
+model = probability_model(...)</code></pre>
+<p>The field <code>self.num_vars</code> holds the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>self.num_vars=2*N</code> latent variables for <code>N</code> observations.</p>
+<p>The method <code>self.log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables.</p>
+<p>This describes the probability model, which is a joint distribution of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Given a model, we aim to reason about <span class="math inline">\(z\)</span> given some data: the latent patterns conditioned on some data. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the latent patterns, and its variance describes our uncertainty around our best guess.</p>
 <p>Edward can employ variational inference to infer this posterior, which finds the closest distribution within a specified family. Initialize an empty <code>Variational()</code> model. Then add a Beta distribution to the variational model.</p>
 <pre><code>variational = Variational()
 variational.add(Beta())</code></pre>
 <p>With this syntax, we can build rich variational models to describe the latent variables in our data models. (More documentation on this coming soon.)</p>
-<h4 id="inference">Inference</h4>
+<h3 id="inference">Inference</h3>
 <p><code>Inference</code> objects infer latent variables of models given data. Edward currently supports a variety of variational inference algorithms. These take as input a probability model, a variational model, and data.</p>
 <p>Here we use mean-field variational inference.</p>
 <pre><code>inference = ed.MFVI(model, variational, data)</code></pre>
 <p>(For the technical audience, the mean-field assumption of a fully factorized approximation is moot here. We’re dealing with a one-dimensional latent variable.)</p>
 <p>Calling <code>inference.run</code> runs the inference algorithm until convergence. It recovers a Beta distribution with mean 0.25 and variance 0.12. 0.25 is our best guess of the probability that the coin lands heads.</p>
-<h4 id="criticism">Criticism</h4>
+<h3 id="criticism">Criticism</h3>
 <p><span>[</span>In Progress<span>]</span></p>
 <p>It also includes <strong>features</strong> such as</p>
 <ul>
