@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Delving In</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/edward.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="probabilistic-modeling-in-edward">Probabilistic Modeling in Edward</h2>
+<p>Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.</p>
+<pre class="python" language="Python"><code>import edward as ed
+import tensorflow as tf
+
+class My_Model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self,xs,zs):
+        log_prior = ...
+        log_like = ...
+        return log_like + log_prior
+
+model = My_Model(...)</code></pre>
+<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.log_prob(xs,zs)</code>.</p>
+<p>Next we load the data:</p>
+<pre class="python" language="Python"><code>from ed.data import load_connectome
+data = load_connectome()</code></pre>
+<p>Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.</p>
+<pre class="python" language="Python"><code>inference = ed.MAP(model, data)
+inference.run(n_iter=500, n_print=100)</code></pre>
+<h2 id="delving-in">Delving In</h2>
+<p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
+<p>First gather data from a real-world process. Then cycle through Box’s loop:</p>
+<ol>
+<li>Build a probabilistic model of the process</li>
+<li>Reason about the process given model and data</li>
+<li>Criticize the model, revise and repeat</li>
+</ol>
+<p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
+<p>This process defines the design of Edward. Here are the four primary objects that enable the above analysis. (More <code>edward</code> syntax follows in a complete example.)</p>
+<h3 id="data">Data</h3>
+<p><code>Data</code> objects are containers that contain measurements. The structure of these objects must match the inputs of the probabilistic model.</p>
+<pre><code>data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))</code></pre>
+<h4 id="models">Models</h4>
+<p>There are two types of model objects in Edward:</p>
+<ol>
+<li>Probability models of data</li>
+<li>Variational models of latent variables</li>
+</ol>
+<p>We can specify probability models of data using NumPy/SciPy, TensorFlow, PyMC3, or Stan. Here is a model of coin flips using a <a href="https://en.wikipedia.org/wiki/Beta-binomial_distribution">Beta-Bernoulli distribution</a> in NumPy/Scipy.</p>
+<pre><code>class BetaBernoulli(PythonModel):
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
+    """
+    def _py_log_prob(self, xs, zs):
+        n_samples = zs.shape[0]
+        lp = np.zeros(n_samples, dtype=np.float32)
+        for s in range(n_samples):
+            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
+            for n in range(len(xs)):
+                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
+        return lp</code></pre>
+<p>This describes a Bayesian model, which is a joint distribution of data and latent variables <code>z</code>. With this model and data of coin flips, we aim to reason about <code>z</code>, the probability that the coin lands heads. The posterior distribution of <code>z</code> captures our reasoning: its mean describes our best guess of the probability, and its variance describes our uncertainty around our best guess. In this toy model, we know that the posterior is a Beta distribution. Let us assume we do not know its parameters in closed form.</p>
+<p>Edward can employ variational inference to infer this posterior, which finds the closest distribution within a specified family. Initialize an empty <code>Variational()</code> model. Then add a Beta distribution to the variational model.</p>
+<pre><code>variational = Variational()
+variational.add(Beta())</code></pre>
+<p>With this syntax, we can build rich variational models to describe the latent variables in our data models. (More documentation on this coming soon.)</p>
+<h4 id="inference">Inference</h4>
+<p><code>Inference</code> objects infer latent variables of models given data. Edward currently supports a variety of variational inference algorithms. These take as input a probability model, a variational model, and data.</p>
+<p>Here we use mean-field variational inference.</p>
+<pre><code>inference = ed.MFVI(model, variational, data)</code></pre>
+<p>(For the technical audience, the mean-field assumption of a fully factorized approximation is moot here. We’re dealing with a one-dimensional latent variable.)</p>
+<p>Calling <code>inference.run</code> runs the inference algorithm until convergence. It recovers a Beta distribution with mean 0.25 and variance 0.12. 0.25 is our best guess of the probability that the coin lands heads.</p>
+<h4 id="criticism">Criticism</h4>
+<p><span>[</span>In Progress<span>]</span></p>
+<p>It also includes <strong>features</strong> such as</p>
+<ul>
+<li><a href="https://www.tensorflow.org">TensorFlow</a> for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard</li>
+<li>A library for probability distributions in TensorFlow</li>
+<li>Documentation and tutorials</li>
+<li>Examples demonstrating state-of-the-art generative models and inference</li>
+</ul>
+<h3 id="a-complete-example-the-beta-bernoulli-model">A complete example: the Beta-Bernoulli model</h3>
+<p>Here is a complete script, defining the data, model, and the variational model. We run mean-field variational inference for <code>10000</code> iterations at the end. The same example is also available in cases where the model is written in <a href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py">Stan</a>, <a href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py">PyMC3</a> and <a href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py">TensorFlow</a> respectively.</p>
+<pre><code>"""A simple coin flipping example. The model is written in NumPy/SciPy.
+
+Probability model
+    Prior: Beta
+    Likelihood: Bernoulli
+Variational model
+    Likelihood: Mean-field Beta
+"""
+import edward as ed
+import numpy as np
+
+from edward.models import PythonModel, Variational, Beta
+from scipy.stats import beta, bernoulli
+
+class BetaBernoulli(PythonModel):
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
+    """
+    def _py_log_prob(self, xs, zs):
+        # This example is pedagogical.
+        # We recommend vectorizing operations in practice.
+        n_minibatch = zs.shape[0]
+        lp = np.zeros(n_minibatch, dtype=np.float32)
+        for s in range(n_minibatch):
+            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
+            for n in range(len(xs)):
+                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
+        return lp
+
+data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+model = BetaBernoulli()
+variational = Variational()
+variational.add(Beta())
+inference = ed.MFVI(model, variational, data)
+
+inference.run(n_iter=10000)</code></pre>
+<h3 id="more-links">More Links</h3>
+<p>You can find more complicated examples in the <a href="https://github.com/blei-lab/edward/tree/master/examples"><code>examples/</code></a> directory. We highlight several here:</p>
+<ul>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py">Hierarchical logistic regression</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">Mixture model of Gaussians</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">Gaussian process classification</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">Bayesian neural network</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py">Mixture density network</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">Variational auto-encoder</a></li>
+</ul>
+<p>We think the library will make it significantly easier to do research in machine learning and statistics. You can find more about this <a href="guide-research.md">here</a>.</p>
+<p>You can find more about Edward’s design and philosophy, and how it relates to other software <a href="design.md">here</a>.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>David M Blei. Build, compute, critique, repeat: data analysis with latent variable models. Annual Review of Statistics and Its Application, 1:203-232, 2014.</li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

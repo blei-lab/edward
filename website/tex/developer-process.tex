@@ -1,0 +1,179 @@
+% Define the subtitle of the page
+\title{Developer Process}
+
+% Begin the content of the page
+\subsection{Developer Process}
+
+\subsubsection{Standards}
+
+\begin{itemize}
+\item
+  \textbf{Pull request and branches.} We follow standards used in 
+  \href{http://mc-stan.org/}{Stan}.
+  Namely, contribute by developing on a clone of the repo and writing
+  the code in a branch. Submit a pull request when ready. See Stan's
+  process for
+  \href{https://github.com/stan-dev/stan/wiki/Developer-Process\#information-to-include-in-pull-request}{how
+  to describe the pull request}. For developers with push permission to
+  the repo, see Stan's process for
+  \href{https://github.com/stan-dev/stan/wiki/Developer-Process\#4--how-to-contribute-with-a-clone-of-the-repository}{how
+  to name branches}.
+\item
+  \textbf{Unit testing.} Unit testing is awesome. It's useful not only
+  for checking code after having written it, but also in checking code
+  as you are developing it. If you're informally writing short scripts
+  that output various things anyways, I suggest saving the file in the
+  \texttt{tests/} directory. This gets the momentum going as the test
+  becomes formalized. For testing, simply run
+  \href{http://nose2.readthedocs.io/en/latest/getting_started.html}{\texttt{nose2}}
+  in the repo; it will automatically find and run all tests in
+  \texttt{tests/}. Most if not all pull requests should have unit tests.
+\item
+  \textbf{Issue labeling system.} We use
+  \href{https://github.com/stan-dev/stan/pulls}{Stan's labeling system}.
+  While several labels obviously don't apply to us, it's better than the
+  default labels.
+\end{itemize}
+
+\subsubsection{Coding}
+
+\begin{itemize}
+\item
+  Use \href{https://www.python.org/dev/peps/pep-0008/}{PEP 8}.
+\item
+  Be compatible with Python 3. See for example
+  \href{http://sebastianraschka.com/Articles/2014_python_2_3_key_diff.html}{here}
+  for a good summary of the main differences between 2.7.x and 3.x.
+\item
+  Aim for 70 characters per line, with some exceptions.
+\item
+  \textbf{docstrings.} We follow \href
+  {https://github.com/numpy/numpy/blob/master/doc/HOWTO\_DOCUMENT.rst.txt}
+  {Numpy/SciPy standards}.
+\item
+  \textbf{Naming variables.} For arguments that are positive integers,
+  use \texttt{n\_}, e.g., \texttt{n\_minibatch}, \texttt{n\_print}, to
+  represent ``number of {[}\ldots{}{]}''.
+\item
+  \textbf{``Private methods''.} Python of course doesn't really enforce
+  private methods but as convention prefix all methods with \texttt{\_}
+  that are used internally and are not aimed to be exposed to the user.
+\item
+  \href{http://programmers.stackexchange.com/questions/75919/should-package-names-be-singular-or-plural}{Package
+  names are almost always plural, with the exception of} \texttt{util.py}.
+\item
+  Use \href{https://www.python.org/dev/peps/pep-0008/\#blank-lines}{PEP
+  8's blank line standards} with the caveat to not use more than one
+  empty line to separate code. Also use a blank line to separate the end
+  of an indented procedure: 
+\begin{lstlisting}[language=Python]
+for i in range(5):
+    do_stuff()
+
+more_code()  
+\end{lstlisting}
+  \item In general, any remaining tasks to be done are raised as Github issues. In other cases, write a TODO comment for things that need to be done but are so minor you'd rather not raise a Github issue; this can be helpful as you are writing code in a branch, and none of the intermediate commits which have a TODO comment will still have that TODO comment when submitting the pull request.
+  \item Everything in \texttt{edward.stats} uses SciPy standards. This includes,
+  for example, the argument specification and the choice of how a distribution is parameterized.
+\end{itemize}
+
+
+
+
+\subsubsection{Suggested workflow}\label{suggested-workflow}
+
+\begin{itemize}
+\item
+  \textbf{Update your Python path.} As you make changes, it can be
+  cumbersome to constantly reinstall the package to test these changes.
+  We recommend adding the path to your local repo to your
+  \texttt{PYTHONPATH}. That is, run the following on the command-line:
+
+\begin{lstlisting}[class=JSON]
+export PYTHONPATH="${PYTHONPATH}:/path/to/repo"
+\end{lstlisting}
+
+  For this to work permanently, add this line to your
+  \texttt{\textasciitilde{}/.bashrc} if you use Bash or
+  \texttt{\textasciitilde{}/.zshenv} if you use zsh. Any time you import
+  the package, it will look for the package locally via this directory
+  path.
+\item
+  \textbf{Local installation.} Sometimes it does make sense to check the
+  installation. To install locally, run the following when at the parent
+  directory of the repo:
+
+\begin{verbatim}
+pip install -e edward
+\end{verbatim}
+
+  (We recommend not installing with \texttt{sudo}; rather
+  \href{http://docs.python-guide.org/en/latest/starting/install/osx/}{use
+  virtualenv}.)
+\item
+  \textbf{Packaging and submitting to PyPI.} First, update the version
+  number in \texttt{setup.py}. Second, follow
+  \href{https://packaging.python.org/en/latest/distributing/\#packaging-your-project}{these
+  steps}. For shorthand, the sequence of commands is
+
+\begin{lstlisting}[class=JSON]
+python setup.py sdist
+python setup.py bdist_wheel
+twine upload dist/*
+\end{lstlisting}
+
+  Third, tag the release on Github and note the new additions when
+  tagging this release. You can do this by comparing commits from the
+  previous tagged release to master. A link that compares tagged commits
+  to master is available on the
+  \href{https://github.com/blei-lab/edward/releases}{releases page}.
+\end{itemize}
+
+\subsubsection{Suggested private
+workflow}\label{suggested-private-workflow}
+
+To develop work on a branch privately, we suggest using a private repo
+that maintains the master branch from the public repo. Development
+happens on the private repo's branch, and when it is finished, you can
+push it to the public repo's branch to submit as a pull request. We
+describe this in detail.
+
+Clone the private repo so you can work on it (create a repo if it does
+not exist).
+
+\begin{lstlisting}[class=JSON]
+git clone https://github.com/yourname/private-repo.git
+\end{lstlisting}
+
+Pull changes from the public repo. This will let the private repo have
+the latest code from the public repo on its master branch.
+
+\begin{lstlisting}[class=JSON]
+cd private-repo
+git remote add public https://github.com/exampleuser/public-repo.git
+git pull public master # Creates a merge commit
+git push origin master
+\end{lstlisting}
+
+Now create your branch on the private repo, develop stuff, and pull any
+latest changes from the public repo as you develop
+(\texttt{git\ pull\ public\ master}). Make sure that as you're running
+Edward, you're using the Edward library pointing to the private repo so
+it reflects your developer changes and not pointed to the public repo
+where it won't see any changes.
+
+Finally, to create a pull request from a private repo's branch to the
+public repo, push the private branch to the public repo.
+
+\begin{lstlisting}[class=JSON]
+git clone https://github.com/exampleuser/public-repo.git
+cd public-repo
+git remote add private_repo_yourname https://github.com/yourname/private-repo.git
+git checkout -b pull_request_yourname
+git pull private_repo_yourname master
+git push origin pull_request_yourname
+\end{lstlisting}
+
+Now simply create a pull request via the Github UI on the public repo.
+Once project owners review the pull request, they can merge it.
+\href{http://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private/30352360\#30352360}{Source}

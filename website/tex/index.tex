@@ -1,0 +1,82 @@
+% Define the subtitle of the page
+\title{Home}
+
+% Begin the content of the page
+\subsection{A library for probabilistic modeling, inference, and criticism.}
+Edward is a Python library for probabilistic modeling, inference, and
+criticism. It enables black box inference for models with discrete and
+continuous latent variables, neural network parameterizations, and
+infinite dimensional parameter spaces. Edward fuses three fields:
+Bayesian statistics and machine learning, deep learning, and
+probabilistic programming.
+
+
+It supports \textbf{modeling languages} including
+\begin{itemize}
+\item \href{https://www.tensorflow.org}{TensorFlow} (via \href{http://keras.io}{Keras},
+  \href{https://github.com/google/prettytensor}{Pretty Tensor}, or
+  \href{https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md}{TensorFlow-Slim})
+\item \href{http://mc-stan.org}{Stan}
+\item \href{http://pymc-devs.github.io/pymc3/}{PyMC3}
+\item Python, through \href{http://scipy.org/}{NumPy/SciPy}
+\end{itemize}
+
+It supports \textbf{inference} via
+\begin{itemize}
+\item Variational inference
+\begin{itemize}
+    \item Black box variational inference
+    \item Stochastic variational inference
+    \item Variational auto-encoders
+    \item Inclusive KL divergence: $\text{KL}(p\|q)$
+    \item Laplace approximation
+  \end{itemize}
+\item Marginal posterior optimization (empirical Bayes, marginal maximum
+likelihood)
+\item Maximum a posteriori estimation (penalized maximum likelihood, maximum
+  likelihood)
+\end{itemize}
+
+It supports \textbf{criticism} of the model and inference via
+\begin{itemize}
+\item Evaluations on both supervised and unsupervised tasks
+\item Posterior predictive checks
+\end{itemize}
+
+\subsubsection{Authors}
+
+Edward is led by \href{http://dustintran.com}{Dustin Tran} with guidance
+by \href{http://www.cs.columbia.edu/~blei/}{David Blei}. The other developers
+are
+\begin{itemize}
+  \item \href{http://stat.columbia.edu/~diengadji/}{Adji Dieng} 
+  \item \href{http://www.proditus.com/}{Alp Kucukelbir} 
+  \item \href{http://www.ee.columbia.edu/~dliang/}{Dawen Liang}
+  \item \href{http://maja-rita-rudolph.com/}{Maja Rudolph}
+\end{itemize}
+We welcome contributions by submitting issues, feature requests, or by solving
+any current issues!
+
+We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other
+members of the Blei Lab for their helpful feedback and advice.
+
+\subsubsection{Citation}
+
+We appreciate citations for Edward because it lets us find out how
+people have been using the library and it motivates further work.
+
+\begin{quote}
+Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M.
+Blei. 2016. 
+\emph{Edward: A library for probabilistic modeling, inference, and criticism. }
+http://edwardlib.org
+\end{quote}
+
+\begin{lstlisting}[class=JSON]
+@misc{tran2016edward,
+    author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
+    title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
+    year = {2016},
+    url = {http://edwardlib.org}
+}
+\end{lstlisting}

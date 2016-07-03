@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Tutorial: Latent Space Models</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+    
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="icons/manifest.json">
+  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="index.html">Edward</a></h1> 
+    <a href="index.html">
+    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
+    </a>
+    <a class="button u-full-width" href="index.html">Home</a>
+    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
+    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
+    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
+    <a class="button u-full-width" href="api/edward.html">API</a> 
+    <a class="button u-full-width" href="#">Advanced</a> 
+    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
+    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
+    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
+    <a class="button2 u-full-width" href="license.html">License</a> 
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a href="https://github.com/blei-lab/edward">
+    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
+    alt="Edward on Github" />
+    <!-- </object> -->
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+<h2 id="tutorial-latent-space-models">Tutorial: Latent Space Models</h2>
+<p>This tutorial correponds to code found here [FIX LINK] <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a></p>
+<p>The purpose of this tutorial is to show how one can use edward to fit a latent space model to network data from a neuroscience application.</p>
+<p>It is structured as follows. We first review some basic ingredients of probailistic modeling in edward. Next, we define the model and specify implementation details. Finally we fit the model with MAP estimation.</p>
+<h2 id="probabilistic-modeling-in-edward">Probabilistic Modeling in Edward</h2>
+<p>Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.</p>
+<pre class="python" language="Python"><code>import edward as ed
+import tensorflow as tf
+
+class Latent_Space_Model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self,xs,zs):
+        log_prior = ...
+        log_like = ...
+        return log_like + log_prior
+
+model = Latent_Space_Model(...)</code></pre>
+<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.log_prob(xs,zs)</code>.</p>
+<p>Next we load the data:</p>
+<pre class="python" language="Python"><code>from ed.data import load_connectome
+data = load_connectome()</code></pre>
+<p>A description of the data can be found below.</p>
+<p>Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.</p>
+<pre class="python" language="Python"><code>inference = ed.MAP(model, data)
+inference.run(n_iter=500, n_print=100)</code></pre>
+<h2 id="latent-space-models">Latent Space Models</h2>
+<p>networks are cool and ubiqutous. social networks. neuroscience. cite hoff (Hoff, 2002) learn a latent representation for each node</p>
+<h2 id="data-c.elegans-connectome">Data: C.Elegans Connectome</h2>
+<p>Data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">here</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Duncan Watts and Steven Strogatz from original experimental data by White et al.</p>
+<p>The neural network consists of around <span class="math inline">\(300\)</span> neurons.</p>
+<h3 id="references">References</h3>
+<p>Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
+<p>Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. , 393(6684):440–442.</p>
+<p>White, J. G., Southgate, E., Thomson, J. N., and Brenner, S. (1986). The structure of the nervous system of the nematode caenorhabditis elegans. , 314(1165):1–340.</p>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script> 
+</body>
+</html>
