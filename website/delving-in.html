@@ -80,7 +80,7 @@
 </ol>
 <p><img alt="image" src="images/model_infer_criticize.png"/></p>
 <p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
-<p>This process defines the design of Edward. Here are the four primary objects that enable the above analysis. (More <code>edward</code> syntax follows in a complete example.)</p>
+<p>This process defines the design of Edward. Here are the four primary objects that enable the above analysis.</p>
 <h3 id="data">Data</h3>
 <p><code>Data</code> objects are containers that contain measurements. The structure of these objects must match the inputs of the probabilistic model.</p>
 <pre><code>data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))</code></pre>
