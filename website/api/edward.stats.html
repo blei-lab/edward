@@ -166,7 +166,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">For univariate distributions, returns a scalar or vector
 corresponding to the size of input. For multivariate
@@ -189,9 +189,9 @@ evaluates a row in the matrix.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
 If multivariate distribution, can be a vector or matrix.</li>
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>p</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 </ul>
 </td>
 </tr>
@@ -218,7 +218,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>p</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -260,8 +260,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>b</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>b</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -288,10 +288,10 @@ evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
 If multivariate distribution, can be a vector or matrix.</li>
-<li><strong>a</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>b</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>b</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -318,8 +318,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>b</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>b</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(b &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -362,10 +362,10 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
 If multivariate distribution, can be a vector or matrix.</li>
 <li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>p</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 </ul>
 </td>
 </tr>
@@ -392,8 +392,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>n</strong> (<em>int or np.array</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
+<li><strong>p</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -436,9 +436,9 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
 If multivariate distribution, can be a vector or matrix.</li>
-<li><strong>df</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
+<li><strong>df</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -465,7 +465,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
+<li><strong>df</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -517,7 +517,7 @@ evaluates a row in the matrix.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
 <li><strong>alpha</strong> (<em>np.array or tf.Tensor</em>) &#8211; each <span class="math">\(\alpha\)</span> constrained to <span class="math">\(\alpha_i &gt; 0\)</span></li>
 </ul>
 </td>
@@ -545,7 +545,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>alpha</strong> (<em>np.array or tf.Tensor</em>) &#8211; each <span class="math">\(\alpha\)</span> constrained to <span class="math">\(\alpha_i &gt; 0\)</span></li>
+<li><strong>alpha</strong> (<em>np.array</em>) &#8211; each <span class="math">\(\alpha\)</span> constrained to <span class="math">\(\alpha_i &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -573,23 +573,27 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar or vector.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> (<em>float, np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar or vector.
 If multivariate distribution, can be a vector or matrix.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">For univariate distributions, returns a scalar or vector
-corresponding to the size of input. For multivariate
-distributions, returns a scalar if vector input and vector
-if matrix input, where each element in the vector
-evaluates a row in the matrix.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If univariate distribution, returns a tensor of same
+shape as input.
+If multivariate distribution, returns a tensor of
+shape[-1] from input: the outer dimension representing the
+multivariate dimension is collapsed.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>SciPy doesn&#8217;t always enable vector inputs for
-univariate distributions or matrix inputs for multivariate
-distributions. This does.</p>
+<p>The equivalent method in SciPy is not guaranteed to be
+supported for vector inputs for univariate distributions and
+matrix inputs for multivariate distributions. This is.</p>
+<p>params as a 2d or higher tensor is not guaranteed to be
+supported for univariate distributions. params as a 3d or
+higher tensor is not guaranteed to be supported for
+multivariate distributions.</p>
 </dd></dl>
 
 <dl class="method">
@@ -600,17 +604,17 @@ distributions. This does.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar, vector, or matrix.
-If multivariate distribution, can be a vector or matrix.</li>
-<li><strong>params</strong> (<em>np.array or tf.Tensor</em>) &#8211; scalar unless documented otherwise</li>
+<li><strong>x</strong> (<em>float, np.array or tf.Tensor</em>) &#8211; If univariate distribution, can be a scalar or tensor.
+If multivariate distribution, can be a tensor; the outer
+dimension carries the multivariate dimension.</li>
+<li><strong>params</strong> (<em>float, np.array or tf.Tensor</em>) &#8211; scalar unless documented otherwise</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For univariate distributions, returns a scalar, vector, or
-matrix corresponding to the size of input. For
-multivariate distributions, returns a scalar if vector
-input and vector if matrix input, where each element in
-the vector evaluates a row in the matrix.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If univariate distribution, returns a tensor of same shape
+as input. If multivariate distribution, returns a tensor
+of shape[:-1] from input: the outer dimension representing
+the multivariate dimension is collapsed.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
@@ -618,6 +622,9 @@ the vector evaluates a row in the matrix.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>x as a 3d or higher tensor is not guaranteed to be supported
+(for either univariate or multivariate distribution).</p>
 </dd></dl>
 
 <dl class="method">
@@ -627,15 +634,48 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">size-dimensional vector; scalar if size=1</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>size</strong> (<em>int, list, or tuple, optional</em>) &#8211; Number of samples, in a particular shape if specified in a
+list or tuple with more than one element.</li>
+<li><strong>params</strong> (<em>float or np.array</em>) &#8211; </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">np.array of dimension (size x shape), where shape is the
+shape of its parameter argument. For multivariate
+distributions, shape may correspond to only one of the
+parameter arguments, e.g., alpha in Dirichlet, p in
+Multinomial, mean in Multivariate_Normal.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
 <p>This is written in NumPy/SciPy, as TensorFlow does not support
-many distributions for random number generation.</p>
+many distributions for random number generation. It follows
+SciPy&#8217;s naming and argument conventions. It does not support
+taking in tf.Tensors as input.</p>
+<p>The equivalent method in SciPy is not guaranteed to be
+supported with a batch of parameter inputs, e.g., a vector of
+location parameters in a normal distribution, or a matrix of
+concentration parameters in a Dirichlet. This is.</p>
+<p>This does not follow SciPy&#8217;s behavior, e.g., the number (or
+shape) of the draws will always be denoted by its outer
+dimension(s).</p>
+<p>params as a 2d or higher tensor is not guaranteed to be
+supported (for either univariate or multivariate
+distribution).</p>
+<p>size as a list or tuple of more than one element is not
+guaranteed to be supported.</p>
+<p>For most distributions, the parameters must be of the same
+shape and type, e.g., n and p in Binomial must be np.arrays()
+of same shape or both floats. For some, they may differ by one
+dimension, e.g., n and p in Multinomial can be float and
+np.array(), or both np.arrays, and n always has one less
+dimension.</p>
 </dd></dl>
 
 </dd></dl>
@@ -666,8 +706,8 @@ many distributions for random number generation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -694,7 +734,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>scale</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -725,8 +765,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -753,9 +793,9 @@ evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>a</strong> (<em>float</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -782,8 +822,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float or np.array</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float or np.array</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -826,8 +866,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>p</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 </ul>
 </td>
 </tr>
@@ -854,7 +894,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>p</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -885,8 +925,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -913,9 +953,9 @@ evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>a</strong> (<em>float</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -942,8 +982,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float or np.array</em>) &#8211; <strong>shape</strong> parameter: constrained to <span class="math">\(a &gt; 0\)</span></li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; <strong>scale</strong> parameter: constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -986,8 +1026,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>s</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(s &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>s</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(s &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1014,7 +1054,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>s</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(s &gt; 0\)</span></li>
+<li><strong>s</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(s &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1051,10 +1091,10 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector of length K, where x[i] is the number of outcomes
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector of length K, where x[i] is the number of outcomes
 in the ith bucket, or matrix with column length K</li>
-<li><strong>n</strong> (<em>int or tf.Tensor</em>) &#8211; number of outcomes equal to sum x[i]</li>
-<li><strong>p</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector of probabilities summing to 1</li>
+<li><strong>n</strong> (<em>int, tf.Tensor</em>) &#8211; number of outcomes equal to sum x[i]</li>
+<li><strong>p</strong> (<em>np.array, tf.Tensor</em>) &#8211; vector of probabilities summing to 1</li>
 </ul>
 </td>
 </tr>
@@ -1081,7 +1121,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
+<li><strong>n</strong> (<em>int or np.array</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
 <li><strong>p</strong> (<em>np.array</em>) &#8211; constrained to <span class="math">\(\sum_i p_k = 1\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
@@ -1141,7 +1181,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
 <li><strong>mean</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector. Defaults to zero mean.</li>
 <li><strong>cov</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector or matrix. Defaults to identity matrix.</li>
 </ul>
@@ -1170,8 +1210,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>mean</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector. Defaults to zero mean.</li>
-<li><strong>cov</strong> (<em>np.array or tf.Tensor, optional</em>) &#8211; vector or matrix. Defaults to identity matrix.</li>
+<li><strong>mean</strong> (<em>np.array, optional</em>) &#8211; vector. Defaults to zero mean.</li>
+<li><strong>cov</strong> (<em>np.array, optional</em>) &#8211; vector or matrix. Defaults to identity matrix.</li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1214,9 +1254,9 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
 <li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>p</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1243,8 +1283,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<em>int</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
-<li><strong>p</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
+<li><strong>n</strong> (<em>int or np.array</em>) &#8211; constrained to <span class="math">\(n &gt; 0\)</span></li>
+<li><strong>p</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(p\in(0,1)\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1274,8 +1314,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>loc</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1302,9 +1342,9 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>loc</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1331,8 +1371,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>loc</strong> (<em>float or np.array</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float or np.array</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1375,8 +1415,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>mu</strong> (<em>float</em>) &#8211; parameter, constrained to <span class="math">\(mu &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>mu</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; parameter, constrained to <span class="math">\(mu &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1403,7 +1443,7 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>mu</strong> (<em>float</em>) &#8211; parameter, constrained to <span class="math">\(mu &gt; 0\)</span></li>
+<li><strong>mu</strong> (<em>float or np.array</em>) &#8211; parameter, constrained to <span class="math">\(mu &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1423,7 +1463,7 @@ the vector evaluates a row in the matrix.</p>
 <dl class="class">
 <dt id="edward.stats.distributions.T">
 <em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">T</code><a class="headerlink" href="#edward.stats.distributions.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>Student T distribution</p>
+<dd><p>Student-t distribution.</p>
 <dl class="method">
 <dt id="edward.stats.distributions.T.entropy">
 <code class="descname">entropy</code><span class="sig-paren">(</span><em>df</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.stats.distributions.T.entropy" title="Permalink to this definition">¶</a></dt>
@@ -1446,10 +1486,10 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>df</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>df</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
+<li><strong>loc</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1476,9 +1516,9 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> (<em>float</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>df</strong> (<em>float or np.array</em>) &#8211; constrained to <span class="math">\(df &gt; 0\)</span></li>
+<li><strong>loc</strong> (<em>float or np.array</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float or np.array</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1521,11 +1561,11 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>a</strong> (<em>float</em>) &#8211; left boundary, with respect to the standard normal</li>
-<li><strong>b</strong> (<em>float</em>) &#8211; right boundary, with respect to the standard normal</li>
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>a</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; left boundary, with respect to the standard normal</li>
+<li><strong>b</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; right boundary, with respect to the standard normal</li>
+<li><strong>loc</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1552,10 +1592,10 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) &#8211; left boundary, with respect to the standard normal</li>
-<li><strong>b</strong> (<em>float</em>) &#8211; right boundary, with respect to the standard normal</li>
-<li><strong>loc</strong> (<em>float</em>) &#8211; mean</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>a</strong> (<em>float or np.array</em>) &#8211; left boundary, with respect to the standard normal</li>
+<li><strong>b</strong> (<em>float or np.array</em>) &#8211; right boundary, with respect to the standard normal</li>
+<li><strong>loc</strong> (<em>float or np.array</em>) &#8211; mean</li>
+<li><strong>scale</strong> (<em>float or np.array</em>) &#8211; standard deviation, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>
@@ -1586,8 +1626,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>loc</strong> (<em>float</em>) &#8211; left boundary</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; width of distribution, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>loc</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; left boundary</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; width of distribution, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1614,9 +1654,9 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>np.array or tf.Tensor</em>) &#8211; vector or matrix</li>
-<li><strong>loc</strong> (<em>float</em>) &#8211; left boundary</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; width of distribution, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>x</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; vector or matrix</li>
+<li><strong>loc</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; left boundary</li>
+<li><strong>scale</strong> (<em>float, np.array, tf.Tensor</em>) &#8211; width of distribution, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 </ul>
 </td>
 </tr>
@@ -1643,8 +1683,8 @@ the vector evaluates a row in the matrix.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>loc</strong> (<em>float</em>) &#8211; left boundary</li>
-<li><strong>scale</strong> (<em>float</em>) &#8211; width of distribution, constrained to <span class="math">\(scale &gt; 0\)</span></li>
+<li><strong>loc</strong> (<em>float or np.array</em>) &#8211; left boundary</li>
+<li><strong>scale</strong> (<em>float or np.array</em>) &#8211; width of distribution, constrained to <span class="math">\(scale &gt; 0\)</span></li>
 <li><strong>size</strong> (<em>int</em>) &#8211; number of random variable samples to return</li>
 </ul>
 </td>

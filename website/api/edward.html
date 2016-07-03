@@ -722,10 +722,10 @@ solve the following optimization problem</p>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Mean-field variational inference.</p>
 <p>This class implements a variety of &#8220;black-box&#8221; variational inference
-techniques (Ranganath et al., 2014) that minmize</p>
+techniques (Ranganath et al., 2014) that minimize</p>
 <div class="math">
 \[KL( q(z; \lambda) || p(z | x) ).\]</div>
-<p>This is equivalent to maximize a related objective function (Jordan, 1999)</p>
+<p>This is equivalent to maximizing the objective function (Jordan et al., 1999)</p>
 <div class="math">
 \[ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].\]</div>
 <dl class="method">
@@ -1005,7 +1005,7 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>*args</strong> &#8211; goes nowhere</li>
+<li><strong>*args</strong> &#8211; passed into <code class="docutils literal"><span class="pre">initialize</span></code></li>
 <li><strong>**kwargs</strong> &#8211; passed into <code class="docutils literal"><span class="pre">initialize</span></code></li>
 </ul>
 </td>
@@ -1058,8 +1058,8 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <dt id="edward.util.dot">
 <code class="descclassname">edward.util.</code><code class="descname">dot</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.dot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute dot product between a Tensor matrix and a Tensor vector.</p>
-<p>If <code class="docutils literal"><span class="pre">x</span></code> is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix, then <code class="docutils literal"><span class="pre">y</span></code> is a <code class="docutils literal"><span class="pre">M</span></code>-vector.</p>
-<p>If <code class="docutils literal"><span class="pre">x</span></code> is a <code class="docutils literal"><span class="pre">M</span></code>-vector, then <code class="docutils literal"><span class="pre">y</span></code> is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix.</p>
+<p>If x is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix, then y is a <code class="docutils literal"><span class="pre">M</span></code>-vector.</p>
+<p>If x is a <code class="docutils literal"><span class="pre">M</span></code>-vector, then y is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1199,7 +1199,7 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <dl class="function">
 <dt id="edward.util.logit">
 <code class="descclassname">edward.util.</code><code class="descname">logit</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.logit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates <span class="math">\(\log(x / (1 - x))\)</span> elementwise.</p>
+<dd><p>Evaluate <span class="math">\(\log(x / (1 - x))\)</span> elementwise.</p>
 <p>Clips all elements to be between <span class="math">\((0,1)\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1279,7 +1279,7 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>double</em>) &#8211; seed</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>int, float</em>) &#8211; seed</td>
 </tr>
 </tbody>
 </table>
@@ -1341,6 +1341,8 @@ using a backward stick breaking construction.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>x as a 3d or higher tensor is not guaranteed to be supported.</p>
 </dd></dl>
 
 </div>
