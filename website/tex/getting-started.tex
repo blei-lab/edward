@@ -26,7 +26,7 @@ installation instructions.
 
 Let's use Edward to fit a simple Bayesian neural network regression model.
 
-First, import Edward, TensorFlow, and Numpy
+First, import Edward, TensorFlow, and Numpy.
 \begin{lstlisting}[language=Python]
 import edward as ed
 import tensorflow as tf
@@ -55,7 +55,10 @@ independent standard normal prior gives the following joint density
 \end{align*}
 
 Here is one way to write this model in Edward. (This is abridged;
-full code HERE.)
+full code 
+\href
+{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
+{HERE}.)
 
 \begin{lstlisting}[language=Python]
 class BayesianNN:
@@ -85,8 +88,10 @@ model = BayesianNN(layer_sizes=[1, 2, 2, 1])
 defines a two-layer a Bayesian neural network regression model with $\tanh$
 activation functions.
 
+[STATEMENT/PICTURE OF WHAT THIS PRECISELY MEANS.]
+
 Next, specify a variational approximation to the posterior. A mean-field normal
-approximation is reasonable:
+approximation is reasonable.
 \begin{lstlisting}[language=Python]
 variational = Variational()
 variational.add(Normal(model.num_vars))  
@@ -107,21 +112,28 @@ def build_toy_dataset(n_data=50, noise_std=0.1):
     return ed.Data(data)  
 \end{lstlisting}
 
-The data look like:
+Plotting the data shows the relationship between $x$ and $y$.
 
 \includegraphics[width=700px]{images/getting-started-fig0.png}
 
-We now have all the ingredients to infer the posterior of this model for this
-toy dataset. Edward \texttt{Inference} takes three things as input: a model, a
-variational model, and data. Here we run mean-field variational inference
-for \texttt{1000} iterations, by subsampling \texttt{5} datapoints at each
-iteration, and by printing a status report to the terminal every \texttt{100}
+We now have all the ingredients to infer the posterior of this model. 
+Edward \texttt{Inference} classes take three things as input: a
+probability model, a variational model, and data. Here we run mean-field
+variational inference for \texttt{1000} iterations, by subsampling \texttt{5}
+datapoints at each
+iteration. We also print a status report to the terminal every \texttt{100}
 iterations
 \begin{lstlisting}[language=Python]
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=5, n_print=100)  
 \end{lstlisting}
 
-After convergence, we can draw samples from the posterior:
+Drawing samples from the posterior shows how the neural network has adapted to
+the cosine nonlinearity. 
 
 \includegraphics[width=700px]{images/getting-started-fig2.png}
+
+To learn more about Edward, \href{delving-in.html}{delve in}!
+
+If you prefer to learn via examples, then check out our 
+\href{tutorials.html}{tutorials}.

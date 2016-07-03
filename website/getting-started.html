@@ -84,7 +84,7 @@
 <p>See the <a href="troubleshooting.html">troubleshooting page</a> for detailed installation instructions.</p>
 <h3 id="your-first-edward-program">Your first Edward program</h3>
 <p>Let’s use Edward to fit a simple Bayesian neural network regression model.</p>
-<p>First, import Edward, TensorFlow, and Numpy</p>
+<p>First, import Edward, TensorFlow, and Numpy.</p>
 <pre class="python" language="Python"><code>import edward as ed
 import tensorflow as tf
 import numpy as np  </code></pre>
@@ -99,7 +99,7 @@ import numpy as np  </code></pre>
   \times
   \prod_{n=1}^N
   \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2).\end{aligned}\]</span></p>
-<p>Here is one way to write this model in Edward. (This is abridged; full code HERE.)</p>
+<p>Here is one way to write this model in Edward. (This is abridged; full code <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">HERE</a>.)</p>
 <pre class="python" language="Python"><code>class BayesianNN:
     &quot;&quot;&quot;A Bayesian neural network regression model (abridged)&quot;&quot;&quot;
 
@@ -121,7 +121,8 @@ import numpy as np  </code></pre>
 <p>Instantiating this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>
 <p>defines a two-layer a Bayesian neural network regression model with <span class="math inline">\(\tanh\)</span> activation functions.</p>
-<p>Next, specify a variational approximation to the posterior. A mean-field normal approximation is reasonable:</p>
+<p>[STATEMENT/PICTURE OF WHAT THIS PRECISELY MEANS.]</p>
+<p>Next, specify a variational approximation to the posterior. A mean-field normal approximation is reasonable.</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Normal(model.num_vars))  </code></pre>
 <p>Finally, simulate a toy dataset of 50 observations with a cosine nonlinearity and some measurement noise.</p>
@@ -134,13 +135,15 @@ variational.add(Normal(model.num_vars))  </code></pre>
     data = np.concatenate((y, x), axis=1)
     data = tf.constant(data, dtype=tf.float32)
     return ed.Data(data)  </code></pre>
-<p>The data look like:</p>
+<p>Plotting the data shows the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
-<p>We now have all the ingredients to infer the posterior of this model for this toy dataset. Edward <code>Inference</code> takes three things as input: a model, a variational model, and data. Here we run mean-field variational inference for <code>1000</code> iterations, by subsampling <code>5</code> datapoints at each iteration, and by printing a status report to the terminal every <code>100</code> iterations</p>
+<p>We now have all the ingredients to infer the posterior of this model. Edward <code>Inference</code> classes take three things as input: a probability model, a variational model, and data. Here we run mean-field variational inference for <code>1000</code> iterations, by subsampling <code>5</code> datapoints at each iteration. We also print a status report to the terminal every <code>100</code> iterations</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=5, n_print=100)  </code></pre>
-<p>After convergence, we can draw samples from the posterior:</p>
+<p>Drawing samples from the posterior shows how the neural network has adapted to the cosine nonlinearity.</p>
 <p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
+<p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
+<p>If you prefer to learn via examples, then check out our <a href="tutorials.html">tutorials</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

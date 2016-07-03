@@ -69,30 +69,8 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="probabilistic-modeling-in-edward">Probabilistic Modeling in Edward</h2>
-<p>Fitting a model in edward requires few ingredients: Defining the model, loading the data into an edward data object and defining an inference procedure and running it.</p>
-<pre class="python" language="Python"><code>import edward as ed
-import tensorflow as tf
-
-class My_Model():
-    def __init__(...):
-        ...
-        self.num_vars = ...
- 
-    def log_prob(self,xs,zs):
-        log_prior = ...
-        log_like = ...
-        return log_like + log_prior
-
-model = My_Model(...)</code></pre>
-<p>Note that the model has two important properties. We need to specify the field <code>self.num_vars</code> which holds the number of model variables. We also need to specify a method for calculating the log probability of the model given data <code>xs</code> and latent variables <code>zs</code>. The method is <code>self.log_prob(xs,zs)</code>.</p>
-<p>Next we load the data:</p>
-<pre class="python" language="Python"><code>from ed.data import load_connectome
-data = load_connectome()</code></pre>
-<p>Finally, we can instantiate a MAP inference algorithm for the model and the data and run it.</p>
-<pre class="python" language="Python"><code>inference = ed.MAP(model, data)
-inference.run(n_iter=500, n_print=100)</code></pre>
 <h2 id="delving-in">Delving In</h2>
+<p>Edward enables black box inference for probability models. Its design reflects the building blocks for inference and model checking. Here we describe the motivation behind Edward’s design and specify its internal workings.</p>
 <p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
 <p>First gather data from a real-world process. Then cycle through Box’s loop:</p>
 <ol>
@@ -100,6 +78,7 @@ inference.run(n_iter=500, n_print=100)</code></pre>
 <li>Reason about the process given model and data</li>
 <li>Criticize the model, revise and repeat</li>
 </ol>
+<p><img alt="image" src="images/model_infer_criticize.png"/></p>
 <p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
 <p>This process defines the design of Edward. Here are the four primary objects that enable the above analysis. (More <code>edward</code> syntax follows in a complete example.)</p>
 <h3 id="data">Data</h3>
@@ -195,7 +174,7 @@ inference.run(n_iter=10000)</code></pre>
 <p>You can find more about Edward’s design and philosophy, and how it relates to other software <a href="design.md">here</a>.</p>
 <h3 id="references">References</h3>
 <ul>
-<li>David M Blei. Build, compute, critique, repeat: data analysis with latent variable models. Annual Review of Statistics and Its Application, 1:203-232, 2014.</li>
+<li>David M Blei. Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics and Its Application, 1:203-232, 2014.</li>
 </ul>
 </div>
 </div>
