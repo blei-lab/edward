@@ -17,15 +17,17 @@ except ImportError:
     pass
 
 class PyMC3Model:
-    """
-    Model wrapper for models written in PyMC3.
-
-    Arguments
-    ----------
-    model : pymc3.Model object
-    observed : The shared theano tensor passed to the model likelihood
+    """Model wrapper for models written in PyMC3.
     """
     def __init__(self, model, observed):
+        """
+        Parameters
+        ----------
+        model : pymc3.Model
+            The probability model
+        observed : Theano tensor
+            The shared theano tensor passed to the model likelihood
+        """
         self.model = model
         self.observed = observed
 
@@ -50,18 +52,14 @@ class PyMC3Model:
         return lp
 
 class PythonModel:
-    """
-    Model wrapper for models written in NumPy/SciPy.
+    """Model wrapper for models written in NumPy/SciPy.
     """
     def __init__(self):
         self.num_vars = None
 
     def log_prob(self, xs, zs):
-        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
-
-    def _py_log_prob(self, xs, zs):
         """
-        Arguments
+        Parameters
         ----------
         xs : np.ndarray
 
@@ -71,22 +69,26 @@ class PythonModel:
 
         Returns
         -------
-        np.ndarray
+        tf.py_func
+            a TensorFlow op wrapped as a Python function that returns
             n_minibatch array of type np.float32, where each element
             is the log pdf evaluated at (z_{b1}, ..., z_{bd})
         """
+        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
+
+    def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
 
 class StanModel:
-    """
-    Model wrapper for models written in Stan.
-
-    Arguments
-    ----------
-    file: see documentation for argument in pystan.stan
-    model_code: see documentation for argument in pystan.stan
+    """Model wrapper for models written in Stan.
     """
     def __init__(self, file=None, model_code=None):
+        """
+        Parameters
+        ----------
+        file: see documentation for argument in pystan.stan
+        model_code: see documentation for argument in pystan.stan
+        """
         if file is not None:
             self.file =  file
         elif model_code is not None:

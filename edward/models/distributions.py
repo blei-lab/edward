@@ -6,23 +6,37 @@ from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_dims, get_session, to_simplex
 
 class Distribution:
-    """
-    Base class for distributions
+    """Base class for Edward distributions.
 
-    p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])
+    ``p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])``
 
-    where shape is the shape of x and params[idx] denote the
-    parameters of each random variable x[idx].
+    where ``shape`` is the shape of ``x`` and ``params[idx]`` denote the
+    parameters of each random variable ``x[idx]``.
 
-    Parameters
+    Attributes
     ----------
-    shape : int, list, or tuple, optional
-        Shape of random variable(s). If is_multivariate=True, then the
-        inner-most (right-most) dimension indicates the dimension of
-        the multivariate random variable. Otherwise, all dimensions
-        are conceptually the same.
+    shape : tuple
+        shape of random variable(s); see below
+    num_vars : int
+        the number of variables; equals the product of ``shape``
+    num_params : int
+        the number of parameters
+    sample_tensor : bool
+        ``True`` if sampling returns a ``tf.Tensor``; see :func:`sample`
+    is_multivariate : bool
+        ``True`` if ``Distribution`` is multivariate
     """
     def __init__(self, shape=1):
+        """Initialize.
+
+        Parameters
+        ----------
+        shape : int, list, or tuple, optional
+            Shape of random variable(s). If ``is_multivariate=True``, then the
+            inner-most (right-most) dimension indicates the dimension of
+            the multivariate random variable. Otherwise, all dimensions
+            are conceptually the same.
+        """
         get_session()
         if isinstance(shape, int):
             shape = (shape, )
@@ -36,34 +50,80 @@ class Distribution:
         self.is_multivariate = False
 
     def sample_noise(self, size=1):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. x = reparam(eps; params) ~ p(x | params)
+        """Sample from a standard parameterization of ``Distribution``.
+
+        For example, if ``epsilon = sample_noise()``, then
+
+        .. math::
+            \epsilon \sim s(\epsilon),
+
+        where :math:`s` is a standard parameterization of ``Distribution``
+        that has no parameters.
+
+        Passing :math:`\epsilon` into ``reparam`` then transforms the draw
+        according to some parameters.
+
+        Parameters
+        ----------
+        size : int, optional
+            Number of samples to return.
 
         Returns
         -------
         tf.Tensor
-            A (size x shape) array of type tf.float32, where each
-            slice along the first dimension is a sample from s.
+            A ``[size x shape]`` array of type ``tf.float32``, where each
+            slice along the first dimension is a sample from ``s(epsilon)``.
+
+        Raises
+        ------
+        NotImplementedError
         """
         raise NotImplementedError()
 
     def reparam(self, eps):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. x = reparam(eps; params) ~ p(x | params)
+        """Reparameterizes a sample from a standard version of ``Distribution``.
+
+        For example, if ``epsilon = sample_noise()``, then calling
+        ``x = reparam(epsilon)`` reparameterizes ``epsilon`` such that
+
+        .. math::
+            x \sim p(x | \\text{params})
+
+        where ``params`` are the parameters that govern this
+        ``Distribution`` object.
+
+        Parameters
+        ----------
+        eps : tf.Tensor
+            A draw from ``sample_noise`` of this ``Distribution`` object.
 
         Returns
         -------
         tf.Tensor
-            A (size x shape) array of type tf.float32, where each
-            slice along the first dimension is a sample from p.
+            A ``[size x shape]`` array of type ``tf.float32``, where each
+            slice along the first dimension is a sample from
+            ``p(x | params)``.
+
+        Raises
+        ------
+        NotImplementedError
         """
         raise NotImplementedError()
 
     def sample(self, size=1):
-        """
-        x ~ p(x | params)
+        """Sample from ``Distribution``.
+
+        .. math::
+            x \sim p(x | \\text{params})
+
+        Defaults to sampling noise via ``sample_noise`` and reparameterizing via
+        ``reparam``. Otherwise expects a derived class to implement its own
+        method.
+
+        Parameters
+        ----------
+        size : int, optional
+            Number of samples to return.
 
         Returns
         -------
@@ -75,17 +135,13 @@ class Distribution:
             realization of a TensorFlow tensor, i.e., NumPy array. The
             latter is required when we require NumPy/SciPy in order to
             sample from distributions.
-
-        Notes
-        -----
-        The method defaults to sampling noise and reparameterizing it
-        (an error is raised if this is not possible).
         """
         return self.reparam(self.sample_noise(size))
 
     def log_prob(self, xs):
-        """
-        log p(xs | params)
+        """Evaluate log probability.
+
+            ``log p(xs | params)``
 
         Parameters
         ----------
@@ -96,8 +152,12 @@ class Distribution:
         -------
         tf.Tensor
             A vector for each log density evaluation,
-            [ sum_{idx in shape} log p(xs[1, idx] | params[idx]), ...,
-              sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
+
+            .. code-block:: none
+
+                [ sum_{idx in shape} log p(xs[1, idx] | params[idx]),
+                ...,
+                sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
         """
         if isinstance(xs, tf.Tensor):
             shape = get_dims(xs)
@@ -152,8 +212,9 @@ class Distribution:
         return log_prob
 
     def log_prob_idx(self, idx, xs):
-        """
-        log p(xs[:, idx] | params[idx])
+        """Log probability (single index)
+
+            ``log p(xs[:, idx] | params[idx])``
 
         Parameters
         ----------
@@ -164,23 +225,33 @@ class Distribution:
             length len(self.shape[:-1]); note if len(self.shape) is 1
             for multivariate, then idx must be an empty tuple.
         xs : tf.Tensor or np.ndarray
-            n_minibatch x self.shape
+            of size ``[n_minibatch x self.shape]``
 
         Returns
         -------
         tf.Tensor
             A vector
-            [ log p(xs[1, idx] | params[idx]), ...,
-              log p(xs[S, idx] | params[idx]) ]
+
+            .. code-block:: none
+
+                [ log p(xs[1, idx] | params[idx]),
+                ...,
+                log p(xs[S, idx] | params[idx]) ]
+
+        Raises
+        ------
+        NotImplementedError
         """
         raise NotImplementedError()
 
     def entropy(self):
-        """
-        H(p(x| params))
-        = E_{p(x | params)} [ - log p(x | params) ]
-        = sum_{idx in shape}
-          E_{p(x[idx] | params[idx])} [ - log p(x[idx] | params[idx]) ]
+        """Entropy.
+
+        .. code-block:: none
+
+            H(p(x| params))
+            = E_{p(x | params)} [ - log p(x | params) ]
+            = sum_{idx in shape} E_{p(x[idx] | params[idx])} [ - log p(x[idx] | params[idx]) ]
 
         Returns
         -------
@@ -190,9 +261,10 @@ class Distribution:
         raise NotImplementedError()
 
 class Bernoulli(Distribution):
-    """
-    p(x | params) = prod_{idx in shape} Bernoulli(x[idx] | p[idx])
-    where params = p.
+    """Bernoulli
+
+    See :class:`edward.stats.distributions.Bernoulli`
+
     """
     def __init__(self, shape=1, p=None):
         Distribution.__init__(self, shape)
@@ -211,12 +283,10 @@ class Bernoulli(Distribution):
         return "probability: \n" + p.__str__()
 
     def sample(self, size=1):
-        """x ~ p(x | params)"""
         p = self.p.eval()
         return bernoulli.rvs(p, size=size)
 
     def log_prob_idx(self, idx, xs):
-        """log p(xs[:, idx] | params[idx])"""
         full_idx = (slice(0, None), ) + idx # slice over batch size
         return bernoulli.logpmf(xs[full_idx], self.p[idx])
 
@@ -224,9 +294,9 @@ class Bernoulli(Distribution):
         return tf.reduce_sum(bernoulli.entropy(self.p))
 
 class Beta(Distribution):
-    """
-    p(x | params) = prod_{idx in shape} Beta(x[idx] | alpha[idx], beta[idx])
-    where params = {alpha, beta}.
+    """Beta
+
+    See :class:`edward.stats.distributions.Beta`
     """
     def __init__(self, shape=1, alpha=None, beta=None):
         Distribution.__init__(self, shape)
@@ -252,13 +322,11 @@ class Beta(Distribution):
                "scale: \n" + b.__str__()
 
     def sample(self, size=1):
-        """x ~ p(x | params)"""
         sess = get_session()
         a, b = sess.run([self.alpha, self.beta])
         return beta.rvs(a, b, size=size)
 
     def log_prob_idx(self, idx, xs):
-        """log p(xs[:, idx] | params[idx])"""
         full_idx = (slice(0, None), ) + idx # slice over batch size
         return beta.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
@@ -266,11 +334,9 @@ class Beta(Distribution):
         return tf.reduce_sum(beta.entropy(self.alpha, self.beta))
 
 class Dirichlet(Distribution):
-    """
-    p(x | params) = prod_{idx in shape[:-1]} Dirichlet(x[idx] | alpha[idx])
+    """Dirichlet
 
-    where x[idx] represents a multivariate random variable, and params
-    = alpha. shape[-1] denotes the multivariate dimension.
+    See :class:`edward.stats.distributions.Dirichlet`
     """
     def __init__(self, shape, alpha=None):
         Distribution.__init__(self, shape)
@@ -289,14 +355,13 @@ class Dirichlet(Distribution):
         return "concentration: \n" + alpha.__str__()
 
     def sample(self, size=1):
-        """x ~ p(x | params)"""
         alpha = self.alpha.eval()
         return dirichlet.rvs(alpha, size=size)
 
     def log_prob_idx(self, idx, xs):
         """
-        log p(xs[:, idx, :] | params[idx, :])
-        where idx is of dimension shape[:-1]
+        ``log p(xs[:, idx, :] | params[idx, :])``
+        where ``idx`` is of dimension ``shape[:-1]``
         """
         idx = idx + (slice(0, None), ) # slice over multivariate dimension
         full_idx = (slice(0, None), ) + idx # slice over batch size
@@ -306,9 +371,9 @@ class Dirichlet(Distribution):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
 
 class InvGamma(Distribution):
-    """
-    p(x | params) = prod_{idx in shape} Inv_Gamma(x[idx] | alpha[idx], beta[idx])
-    where params = {alpha, beta}.
+    """Inverse Gamma
+
+    See :class:`edward.stats.distributions.InvGamma`
     """
     def __init__(self, shape=1, alpha=None, beta=None):
         Distribution.__init__(self, shape)
@@ -334,13 +399,11 @@ class InvGamma(Distribution):
                "scale: \n" + b.__str__()
 
     def sample(self, size=1):
-        """x ~ p(x | params)"""
         sess = get_session()
         a, b = sess.run([self.alpha, self.beta])
         return invgamma.rvs(a, b, size=size)
 
     def log_prob_idx(self, idx, xs):
-        """log p(xs[:, idx] | params[idx])"""
         full_idx = (slice(0, None), ) + idx # slice over batch size
         return invgamma.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
@@ -348,11 +411,14 @@ class InvGamma(Distribution):
         return tf.reduce_sum(invgamma.entropy(self.alpha, self.beta))
 
 class Multinomial(Distribution):
-    """
-    p(x | params ) = prod_{idx in shape[:-1]} Multinomial(x[idx] | pi[idx])
+    """Multinomial
 
-    where x[idx] represents a multivariate random variable, and params
-    = pi. shape[-1] denotes the multivariate dimension.
+    See :class:`edward.stats.distributions.Multinomial`
+
+    ``p(x | params ) = prod_{idx in shape[:-1]} Multinomial(x[idx] | pi[idx])``
+
+    where ``x[idx]`` represents a multivariate random variable, and
+    ``params = pi.shape[-1]`` denotes the multivariate dimension.
 
     Notes
     -----
@@ -382,14 +448,13 @@ class Multinomial(Distribution):
         return "probability: \n" + pi.__str__()
 
     def sample(self, size=1):
-        """x ~ p(x | params)"""
         pi = self.pi.eval()
         return multinomial.rvs(np.ones(self.shape[:-1]), pi, size=size)
 
     def log_prob_idx(self, idx, xs):
         """
-        log p(xs[:, idx, :] | params[idx, :])
-        where idx is of dimension shape[:-1]
+        ``log p(xs[:, idx, :] | params[idx, :])``
+        where ``idx`` is of dimension ``shape[:-1]``
         """
         idx_K = idx + (slice(0, None), ) # slice over multivariate dimension
         full_idx = (slice(0, None), ) + idx_K # slice over batch size
@@ -399,9 +464,9 @@ class Multinomial(Distribution):
         return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
 
 class Normal(Distribution):
-    """
-    p(x | params ) = prod_{idx in shape} Normal(x[idx] | loc[idx], scale[idx])
-    where params = {loc, scale}.
+    """Normal
+
+    See :class:`edward.stats.distributions.Norm`
     """
     def __init__(self, shape=1, loc=None, scale=None):
         Distribution.__init__(self, shape)
@@ -426,21 +491,12 @@ class Normal(Distribution):
                "std dev: \n" + s.__str__()
 
     def sample_noise(self, size=1):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. x = reparam(eps; params) ~ p(x | params)
-        """
         return tf.random_normal((size, ) + self.shape)
 
     def reparam(self, eps):
-        """
-        eps = sample_noise() ~ s(eps)
-        s.t. x = reparam(eps; params) ~ p(x | params)
-        """
         return self.loc + eps * self.scale
 
     def log_prob_idx(self, idx, xs):
-        """log p(xs[:, idx] | params[idx])"""
         full_idx = (slice(0, None), ) + idx # slice over batch size
         return norm.logpdf(xs[full_idx], self.loc[idx], self.scale[idx])
 
@@ -448,13 +504,17 @@ class Normal(Distribution):
         return tf.reduce_sum(norm.entropy(scale=self.scale))
 
 class PointMass(Distribution):
-    """
-    Point mass distribution
+    """Point mass distribution
 
-    p(x | params ) = prod_{idx in shape} Dirac(x[idx] | params[idx])
+    ``p(x | params ) = prod_{idx in shape} Dirac(x[idx] | params[idx])``
 
-    Dirac(x; p) is the Dirac delta distribution with density equal to
+    ``Dirac(x; p)`` is the Dirac delta distribution with density equal to
     1 if x == p and 0 otherwise.
+
+    Parameters
+    ----------
+    params : np.ndarray or tf.Tensor, optional
+             If not specified, everything initialized to :math:`\mathcal{N}(0,1)`.
     """
     def __init__(self, shape=1, params=None):
         Distribution.__init__(self, shape)
@@ -475,17 +535,20 @@ class PointMass(Distribution):
         return "parameter values: \n" + params.__str__()
 
     def sample(self, size=1):
-        """
-        Notes
-        -----
+        """Sample from a point mass distribution.
+
         Each sample is simply the set of point masses, as all
         probability mass is located there.
+
+        Parameters
+        ----------
+        size: int
+            number of samples
         """
         return tf.pack([self.params]*size)
 
     def log_prob_idx(self, idx, xs):
-        """
-        log p(xs[:, idx] | params[idx])
+        """Log probability at an index of a point mass distribution.
 
         Returns
         -------

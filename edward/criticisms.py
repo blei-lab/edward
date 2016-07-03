@@ -5,18 +5,28 @@ from edward.data import Data
 from edward.util import logit, get_session
 
 def evaluate(metrics, model, variational, data):
-    """
-    Evaluate fitted model using a set of metrics.
+    """Evaluate fitted model using a set of metrics.
 
     Parameters
     ----------
-    metric : list or str
+    metrics : list or str
         List of metrics or a single metric.
+    model : ed.Model
+        Probability model p(x, z)
+    variational : ed.Variational
+        Variational approximation to the posterior p(z | x)
+    data : ed.Data
+        Data to evaluate the model at
 
     Returns
     -------
     list or float
         A list of evaluations or a single evaluation.
+
+    Raises
+    ------
+    NotImplementedError
+        If an input metric does not match an implemented metric in Edward.
     """
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
@@ -85,35 +95,39 @@ def evaluate(metrics, model, variational, data):
         return evaluations
 
 def ppc(model, variational=None, data=Data(), T=None, size=100):
-    """
-    Posterior predictive check.
+    """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
-    If variational is not specified, it defaults to a prior predictive
-    check (Box, 1980).
+    If no posterior approximation is provided through ``variational``,
+    then we default to a prior predictive check (Box, 1980).
 
     PPC's form an empirical distribution for the predictive discrepancy,
-    p(T) = \int p(T(yrep) | z) p(z | y) dz
-    by drawing replicated data sets yrep and calculating T(yrep) for
-    each data set. Then it compares it to T(y).
+
+    .. math::
+        p(T) = \int p(T(yrep) | z) p(z | y) dz
+
+    by drawing replicated data sets yrep and calculating
+    :math:`T(yrep)` for each data set. Then it compares it to
+    :math:`T(y)`.
 
     Parameters
     ----------
-    model : Model
-        class object with a 'sample_likelihood' method
-    variational : Variational, optional
+    model : ed.Model
+        class object that implements the ``sample_likelihood`` method
+    variational : ed.Variational, optional
         latent variable distribution q(z) to sample from. It is an
         approximation to the posterior, e.g., a variational
         approximation or an empirical distribution from MCMC samples.
-        If not specified, samples will be obtained from model
-        with a 'sample_prior' method.
-    data : Data, optional
+        If not specified, samples will be obtained from the model
+        through the ``sample_prior`` method.
+    data : ed.Data, optional
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
         data set size of 1.
     T : function, optional
-        Discrepancy function written in TensorFlow. Default is
-        identity. It is a function taking in a data set
-        y and optionally a set of latent variables z as input.
+        Discrepancy function taking tf.Tensor inputs and returning
+        a tf.Tensor output. Default is the identity function.
+        In general this is a function taking in a data set ``y``
+        and optionally a set of latent variables ``z`` as input.
     size : int, optional
         number of replicated data sets
 
@@ -122,10 +136,15 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     list
         List containing the reference distribution, which is a Numpy
         vector of size elements,
-        (T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}));
+
+        .. math::
+            (T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}))
+
         and the realized discrepancy, which is a NumPy vector of size
         elements,
-        (T(y, z^{1}), ..., T(y, z^{size})).
+
+        .. math::
+            (T(y, z^{1}), ..., T(y, z^{size})).
     """
     sess = get_session()
     y = data.data
@@ -173,8 +192,7 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
 # Classification metrics
 
 def binary_accuracy(y_true, y_pred):
-    """
-    Binary prediction accuracy, also known as 0/1-loss.
+    """Binary prediction accuracy, also known as 0/1-loss.
 
     Parameters
     ----------
@@ -188,17 +206,15 @@ def binary_accuracy(y_true, y_pred):
     return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 def categorical_accuracy(y_true, y_pred):
-    """
-    Multi-class prediction accuracy. One-hot representation for
-    y_true.
+    """Multi-class prediction accuracy. One-hot representation for ``y_true``.
 
     Parameters
     ----------
     y_true : tf.Tensor
-        Tensor of 0s and 1s, where the outermost dimension of size K
+        Tensor of 0s and 1s, where the outermost dimension of size ``K``
         has only one 1 per row.
     y_pred : tf.Tensor
-        Tensor of probabilities, with same shape as y_true.
+        Tensor of probabilities, with same shape as ``y_true``.
         The outermost dimension denote the categorical probabilities for
         that data point per row.
     """
@@ -207,16 +223,15 @@ def categorical_accuracy(y_true, y_pred):
     return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 def sparse_categorical_accuracy(y_true, y_pred):
-    """
-    Multi-class prediction accuracy. Label {0, 1, .., K-1}
-    representation for y_true.
+    """Multi-class prediction accuracy. Label {0, 1, .., K-1}
+    representation for ``y_true``.
 
     Parameters
     ----------
     y_true : tf.Tensor
         Tensor of integers {0, 1, ..., K-1}.
     y_pred : tf.Tensor
-        Tensor of probabilities, with shape (y_true.get_shape(), K).
+        Tensor of probabilities, with shape ``(y_true.get_shape(), K)``.
         The outermost dimension are the categorical probabilities for
         that data point.
     """
@@ -225,7 +240,8 @@ def sparse_categorical_accuracy(y_true, y_pred):
     return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 def binary_crossentropy(y_true, y_pred):
-    """
+    """Binary cross-entropy.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -238,8 +254,7 @@ def binary_crossentropy(y_true, y_pred):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_pred, y_true))
 
 def categorical_crossentropy(y_true, y_pred):
-    """
-    Multi-class cross entropy. One-hot representation for y_true.
+    """Multi-class cross entropy. One-hot representation for ``y_true``.
 
     Parameters
     ----------
@@ -256,16 +271,15 @@ def categorical_crossentropy(y_true, y_pred):
     return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_pred, y_true))
 
 def sparse_categorical_crossentropy(y_true, y_pred):
-    """
-    Multi-class cross entropy. Label {0, 1, .., K-1} representation
-    for y_true.
+    """Multi-class cross entropy. Label {0, 1, .., K-1} representation
+    for ``y_true.``
 
     Parameters
     ----------
     y_true : tf.Tensor
         Tensor of integers {0, 1, ..., K-1}.
     y_pred : tf.Tensor
-        Tensor of probabilities, with shape (y_true.get_shape(), K).
+        Tensor of probabilities, with shape ``(y_true.get_shape(), K)``.
         The outermost dimension are the categorical probabilities for
         that data point.
     """
@@ -274,7 +288,8 @@ def sparse_categorical_crossentropy(y_true, y_pred):
     return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
 
 def hinge(y_true, y_pred):
-    """
+    """Hinge loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -287,7 +302,8 @@ def hinge(y_true, y_pred):
     return tf.reduce_mean(tf.maximum(1.0 - y_true * y_pred, 0.0))
 
 def squared_hinge(y_true, y_pred):
-    """
+    """Squared hinge loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -302,7 +318,8 @@ def squared_hinge(y_true, y_pred):
 # Regression metrics
 
 def mean_squared_error(y_true, y_pred):
-    """
+    """Mean squared error loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -312,7 +329,8 @@ def mean_squared_error(y_true, y_pred):
     return tf.reduce_mean(tf.square(y_pred - y_true))
 
 def mean_absolute_error(y_true, y_pred):
-    """
+    """Mean absolute error loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -322,7 +340,8 @@ def mean_absolute_error(y_true, y_pred):
     return tf.reduce_mean(tf.abs(y_pred - y_true))
 
 def mean_absolute_percentage_error(y_true, y_pred):
-    """
+    """Mean absolute percentage error loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -333,7 +352,8 @@ def mean_absolute_percentage_error(y_true, y_pred):
     return 100.0 * tf.reduce_mean(diff)
 
 def mean_squared_logarithmic_error(y_true, y_pred):
-    """
+    """Mean squared logarithmic error loss.
+
     Parameters
     ----------
     y_true : tf.Tensor
@@ -345,9 +365,8 @@ def mean_squared_logarithmic_error(y_true, y_pred):
     return tf.reduce_mean(tf.square(first_log - second_log))
 
 def poisson(y_true, y_pred):
-    """
-    Negative Poisson log-likelihood of data y_true given predictions
-    y_pred (up to proportion).
+    """Negative Poisson log-likelihood of data ``y_true`` given predictions
+    ``y_pred`` (up to proportion).
 
     Parameters
     ----------
@@ -358,8 +377,7 @@ def poisson(y_true, y_pred):
     return tf.reduce_sum(y_pred - y_true * tf.log(y_pred + 1e-8))
 
 def cosine_proximity(y_true, y_pred):
-    """
-    Cosine similarity of two vectors.
+    """Cosine similarity of two vectors.
 
     Parameters
     ----------
