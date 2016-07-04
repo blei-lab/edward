@@ -2,8 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 class Data:
-    """
-    Base class for data.
+    """Base class for Edward data objects.
 
     By default, it assumes the data is an array (or list of arrays).
     If requested will perform data subsampling according to slices of
@@ -11,19 +10,6 @@ class Data:
     y-by-z matrices in a x-by-y-by-z tensor). Use one of the derived
     classes for subsampling more complex data structures.
 
-    Arguments
-    ----------
-    data: tf.tensor, np.ndarray, list, dict, optional
-        Data whose type depends on the type of model it is fed into.
-        If TensorFlow, must be tf.tensor or list (see notes).
-        If Stan, must be dict.
-        If PyMC3, must be np.ndarray.
-        If NumPy/SciPy, must be np.ndarray or list of np.ndarrays.
-    shuffled: bool, optional
-        Whether the data is shuffled.
-
-    Notes
-    -----
     For TensorFlow models, data argument can be list of placeholders
     or list of np.ndarrays. If np.ndarrays, it will use mini-batches
     of the np.arrays during computation. If placeholders, user must
@@ -31,11 +17,29 @@ class Data:
 
     Data subsampling is not currently available for Stan models.
 
-    Internally, self.counter stores the last accessed data index. It
+    Internally, ``self.counter`` stores the last accessed data index. It
     is used to obtain the next batch of data starting from
-    self.counter to the size of the data set.
+    ``self.counter`` to the size of the data set.
     """
     def __init__(self, data=None, shuffled=True):
+        """Initialization.
+
+        Parameters
+        ----------
+        data : tf.tensor, np.ndarray, list, dict, optional
+            Data whose type depends on the type of model it is fed into.
+
+            If TensorFlow, must be ``tf.tensor`` or ``list``.
+
+            If Stan, must be ``dict``.
+
+            If PyMC3, must be ``np.ndarray``.
+
+            If NumPy/SciPy, must be ``np.ndarray`` or ``list`` of ``np.ndarrays``.
+
+        shuffled: bool, optional
+            Whether the data is shuffled when sampling.
+        """
         self.data = data
         if not shuffled:
             # TODO
@@ -63,6 +67,28 @@ class Data:
             raise NotImplementedError()
 
     def sample(self, n_data=None):
+        """Data sampling method.
+
+        At any given point, the internal counter ``self.counter`` tracks the
+        last datapoint returned by ``sample``.
+
+        If the requested number of datapoints ``n_data`` goes beyond the size
+        of the dataset, the internal counter wraps around the size of the
+        dataset. The returned minibatch, thus, may include datapoints from the
+        beginning of the dataset.
+
+        Parameters
+        ----------
+        n_data : int, optional
+            Number of datapoints to sample
+
+            Defaults to total number of datapoints in ``Data`` object.
+
+        Returns
+        -------
+        minibatch : tf.Tensor
+            a tensor with first dimension size = ``n_data``
+        """
         # TODO
         # In general, there should be a scale factor due to data
         # subsampling, so that

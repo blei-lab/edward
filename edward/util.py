@@ -2,9 +2,19 @@ import tensorflow as tf
 import numpy as np
 
 def cumprod(xs):
-    """
-    Cumulative product of a tensor along first dimension.
+    """Cumulative product of a tensor along first dimension.
+
     https://github.com/tensorflow/tensorflow/issues/813
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        vector, matrix, or n-Tensor
+
+    Returns
+    -------
+    tf.Tensor
+        A Tensor with `cumprod` applied along its first dimension.
     """
     values = tf.unpack(xs)
     out = []
@@ -18,9 +28,23 @@ def cumprod(xs):
     return result
 
 def dot(x, y):
-    """
-    x is M x N matrix and y is N-vector, or
-    x is M-vector and y is M x N matrix
+    """Compute dot product between a Tensor matrix and a Tensor vector.
+
+    If x is a ``[M x N]`` matrix, then y is a ``M``-vector.
+
+    If x is a ``M``-vector, then y is a ``[M x N]`` matrix.
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        ``M x N`` matrix or ``M`` vector (see above)
+    y : tf.Tensor
+        ``M`` vector or ``M x N`` matrix (see above)
+
+    Returns
+    -------
+    tf.Tensor
+        ``N``-vector
     """
     if len(x.get_shape()) == 1:
         vec = x
@@ -32,12 +56,17 @@ def dot(x, y):
         return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 def get_dims(x):
-    """
-    Get values of each dimension.
+    """Get values of each dimension.
 
-    Arguments
+    Parameters
     ----------
-    x: tensor scalar or array
+    x: tf.Tensor
+        scalar, vector, matrix, or n-Tensor
+
+    Returns
+    -------
+    list
+        Python list containing dimensions of `x`
     """
     dims = x.get_shape()
     if len(dims) == 0: # scalar
@@ -46,8 +75,15 @@ def get_dims(x):
         return [dim.value for dim in dims]
 
 def get_session():
-    """Get the session defined globally; if not already defined, then
-    the function will create a global session."""
+    """Get the globally defined TensorFlow session.
+
+    If the session is not already defined, then the function will create
+    a global session.
+
+    Returns
+    -------
+    _ED_SESSION : tf.InteractiveSession
+    """
     global _ED_SESSION
     if tf.get_default_session() is None:
         _ED_SESSION = tf.InteractiveSession()
@@ -55,8 +91,7 @@ def get_session():
     return _ED_SESSION
 
 def hessian(y, xs):
-    """
-    Calculate Hessian of y with respect to each x in xs.
+    """Calculate Hessian of y with respect to each x in xs.
 
     Parameters
     ----------
@@ -65,6 +100,12 @@ def hessian(y, xs):
     xs : list
         List of TensorFlow variables to calculate with respect to.
         The variables can have different shapes.
+
+    Returns
+    -------
+    tf.Tensor
+        A matrix where each row is
+        .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).
     """
     # Calculate flattened vector grad_{xs} y.
     grads = tf.gradients(y, xs)
@@ -94,8 +135,7 @@ def hessian(y, xs):
     return tf.pack(mat)
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
-    """
-    Calculates the KL of multivariate normal distributions with
+    """Calculate the KL of multivariate normal distributions with
     diagonal covariances.
 
     Parameters
@@ -117,10 +157,9 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
     -------
     tf.Tensor
         for scalar or vector inputs, outputs the scalar
-            KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )
+        ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``
         for matrix inputs, outputs the vector
-            [KL( N(z; loc_one[m,:], scale_one[m,:]) ||
-                 N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M
+        ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
     """
     if loc_two == 0 and scale_two == 1:
         return 0.5 * tf.reduce_sum(
@@ -133,57 +172,132 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
 def log_sum_exp(x):
-    """
-    Computes the log_sum_exp of the elements in x.
+    """Compute the ``log_sum_exp`` of the elements in x.
 
-    Works for x with
+    Parameters
+    ----------
+    x : tf.Tensor
+        vector or matrix with second dimension 1
         shape=TensorShape([Dimension(N)])
         shape=TensorShape([Dimension(N), Dimension(1)])
 
-    Not tested for anything beyond that.
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, vector if matrix tensor input
     """
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 def logit(x):
-    """log(x / (1 - x))"""
+    """Evaluate :math:`\log(x / (1 - x))` elementwise.
+
+    Clips all elements to be between :math:`(0,1)`.
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
+    """
     x = tf.clip_by_value(x, 1e-8, 1.0 - 1e-8)
     return tf.log(x) - tf.log(1.0 - x)
 
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
-    """
-    Squared-exponential kernel
-    k(x, y) = sigma^2 exp{ -1/(2l^2) sum_i (x_i - y_i)^2 }
+    """Squared-exponential kernel
+
+    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) \sum_i (x_i - y_i)^2 }
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor
+    y : Optional[tf.Tensor], default 0.0
+        scalar, vector, matrix, or n-Tensor
+    sigma : Optional[double], default 1.0
+        standard deviation of radial basis function
+    l : Optional[double], default 1.0
+        lengthscale of radial basis function
+
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, rank-(n-1) if n-Tensor input
     """
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
                   tf.reduce_sum(tf.pow(x - y , 2.0)))
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
-    """
-    Squared-exponential kernel element-wise
-    k(x, y) = sigma^2 exp{ -1/(2l^2) (x_i - y_i)^2 }
+    """Squared-exponential kernel element-wise
+
+    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor
+    y : Optional[tf.Tensor], default 0.0
+        scalar, vector, matrix, or n-Tensor
+    sigma : Optional[double], default 1.0
+        standard deviation of radial basis function
+    l : Optional[double], default 1.0
+        lengthscale of radial basis function
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
     return tf.pow(sigma, 2.0) * \
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
 
 def set_seed(x):
-    """
-    Set seed for both NumPy and TensorFlow.
+    """Set seed for both NumPy and TensorFlow.
+
+    Parameters
+    ----------
+    x : int, float
+        seed
     """
     np.random.seed(x)
     tf.set_random_seed(x)
 
 def softplus(x):
-    """
-    Softplus. TensorFlow can't currently autodiff through
-    tf.nn.softplus().
+    """Elementwise Softplus function
+
+    .. math:: \log(1 + \exp(x))
+
+    TensorFlow can't currently autodiff through ``tf.nn.softplus()``.
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        scalar, vector, matrix, or n-Tensor
+
+    Returns
+    -------
+    tf.Tensor
+        size corresponding to size of input
     """
     return tf.log(1.0 + tf.exp(x))
 
 def stop_gradient(x):
-    """
-    Apply tf.stop_gradient() element-wise.
+    """Apply ``tf.stop_gradient()`` element-wise.
+
+    Parameters
+    ----------
+    x : tf.Tensor or list
+        scalar, vector, matrix, or n-Tensor or list thereof
+
+    Returns
+    -------
+    tf.Tensor or list
+        size corresponding to size of input
     """
     if isinstance(x, tf.Tensor):
         return tf.stop_gradient(x)
@@ -191,19 +305,18 @@ def stop_gradient(x):
         return [tf.stop_gradient(i) for i in x]
 
 def to_simplex(x):
-    """
-    Transform real vector of length (K-1) to a simplex of dimension K
+    """Transform real vector of length ``(K-1)`` to a simplex of dimension ``K``
     using a backward stick breaking construction.
 
     Parameters
     ----------
     x : tf.tensor or np.array
-        Vector or matrix.
+        scalar, vector, or matrix
 
     Returns
     -------
     tf.Tensor
-        Same shape as input but with last dimension of size K.
+        Same shape as input but with last dimension of size ``K``.
 
     Notes
     -----
