@@ -151,10 +151,10 @@ class StanModel:
 
 class Variational:
     """A container for collecting distribution objects."""
-    def __init__(self, layers=[]):
+    def __init__(self, layers=None):
         get_session()
-        self.layers = layers
-        if layers == []:
+        if layers is None:
+            self.layers = []
             self.shape = []
             self.num_vars = 0
             self.num_params = 0
@@ -164,6 +164,7 @@ class Variational:
             self.sample_tensor = []
             self.is_multivariate = []
         else:
+            self.layers = layers
             self.shape = [layer.shape for layer in self.layers]
             self.num_vars = sum([layer.num_vars for layer in self.layers])
             self.num_params = sum([layer.num_params for layer in self.layers])
