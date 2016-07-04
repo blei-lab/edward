@@ -1,11 +1,15 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_dims, get_session, to_simplex
 
-class Distribution:
+
+class Distribution(object):
     """Base class for Edward distributions.
 
     ``p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])``
@@ -260,6 +264,7 @@ class Distribution:
         """
         raise NotImplementedError()
 
+
 class Bernoulli(Distribution):
     """Bernoulli
 
@@ -267,7 +272,7 @@ class Bernoulli(Distribution):
 
     """
     def __init__(self, shape=1, p=None):
-        Distribution.__init__(self, shape)
+        super(Bernoulli, self).__init__(shape)
         self.num_params = self.num_vars
         self.sample_tensor = False
         self.is_multivariate = False
@@ -293,13 +298,14 @@ class Bernoulli(Distribution):
     def entropy(self):
         return tf.reduce_sum(bernoulli.entropy(self.p))
 
+
 class Beta(Distribution):
     """Beta
 
     See :class:`edward.stats.distributions.Beta`
     """
     def __init__(self, shape=1, alpha=None, beta=None):
-        Distribution.__init__(self, shape)
+        super(Beta, self).__init__(shape)
         self.num_params = 2*self.num_vars
         self.sample_tensor = False
         self.is_multivariate = False
@@ -333,13 +339,14 @@ class Beta(Distribution):
     def entropy(self):
         return tf.reduce_sum(beta.entropy(self.alpha, self.beta))
 
+
 class Dirichlet(Distribution):
     """Dirichlet
 
     See :class:`edward.stats.distributions.Dirichlet`
     """
     def __init__(self, shape, alpha=None):
-        Distribution.__init__(self, shape)
+        super(Dirichlet, self).__init__(shape)
         self.num_params = self.num_vars
         self.sample_tensor = False
         self.is_multivariate = True
@@ -370,13 +377,14 @@ class Dirichlet(Distribution):
     def entropy(self):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
 
+
 class InvGamma(Distribution):
     """Inverse Gamma
 
     See :class:`edward.stats.distributions.InvGamma`
     """
     def __init__(self, shape=1, alpha=None, beta=None):
-        Distribution.__init__(self, shape)
+        super(InvGamma, self).__init__(shape)
         self.num_params = 2*self.num_vars
         self.sample_tensor = False
         self.is_multivariate = False
@@ -410,6 +418,7 @@ class InvGamma(Distribution):
     def entropy(self):
         return tf.reduce_sum(invgamma.entropy(self.alpha, self.beta))
 
+
 class Multinomial(Distribution):
     """Multinomial
 
@@ -430,7 +439,7 @@ class Multinomial(Distribution):
         if shape[-1] == 1:
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
-        Distribution.__init__(self, shape)
+        super(Multinomial, self).__init__(shape)
         self.num_params = np.prod(shape[:-1]) * (shape[-1] -1)
         self.sample_tensor = False
         self.is_multivariate = True
@@ -463,13 +472,14 @@ class Multinomial(Distribution):
     def entropy(self):
         return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
 
+
 class Normal(Distribution):
     """Normal
 
     See :class:`edward.stats.distributions.Norm`
     """
     def __init__(self, shape=1, loc=None, scale=None):
-        Distribution.__init__(self, shape)
+        super(Normal, self).__init__(shape)
         self.num_params = 2*self.num_vars
         self.sample_tensor = True
         self.is_multivariate = False
@@ -503,6 +513,7 @@ class Normal(Distribution):
     def entropy(self):
         return tf.reduce_sum(norm.entropy(scale=self.scale))
 
+
 class PointMass(Distribution):
     """Point mass distribution
 
@@ -517,7 +528,7 @@ class PointMass(Distribution):
              If not specified, everything initialized to :math:`\mathcal{N}(0,1)`.
     """
     def __init__(self, shape=1, params=None):
-        Distribution.__init__(self, shape)
+        super(PointMass, self).__init__(shape)
         self.num_params = self.num_vars
         self.sample_tensor = True
         self.is_multivariate = False

@@ -1,7 +1,12 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
-class Data:
+
+class Data(object):
     """Base class for Edward data objects.
 
     By default, it assumes the data is an array (or list of arrays).

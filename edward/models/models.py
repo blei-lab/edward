@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
-from .distributions import Normal
+from edward.models.distributions import Normal
 
 try:
     import pystan
@@ -16,7 +19,8 @@ try:
 except ImportError:
     pass
 
-class Model:
+
+class Model(object):
     """A container for collecting distribution objects."""
     def __init__(self, layers=None):
         get_session()
@@ -182,7 +186,8 @@ class Model:
 
         return out
 
-class PyMC3Model:
+
+class PyMC3Model(object):
     """
     Model wrapper for models written in PyMC3.
 
@@ -215,7 +220,8 @@ class PyMC3Model:
 
         return lp
 
-class PythonModel:
+
+class PythonModel(object):
     """
     Model wrapper for models written in NumPy/SciPy.
     """
@@ -243,7 +249,8 @@ class PythonModel:
         """
         raise NotImplementedError()
 
-class StanModel:
+
+class StanModel(object):
     """
     Model wrapper for models written in Stan.
 
