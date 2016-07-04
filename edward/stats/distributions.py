@@ -10,7 +10,7 @@ from itertools import product
 from scipy import stats
 
 
-class Distribution:
+class Distribution(object):
     """Template for all distributions."""
     def rvs(self, size=1):
         """
@@ -120,7 +120,7 @@ class Distribution:
         raise NotImplementedError()
 
 
-class Bernoulli:
+class Bernoulli(object):
     """Bernoulli distribution
     """
     def rvs(self, p, size=1):
@@ -207,7 +207,7 @@ class Bernoulli:
         return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
 
 
-class Beta:
+class Beta(object):
     """Beta distribution
     """
     def rvs(self, a, b, size=1):
@@ -303,7 +303,7 @@ class Beta:
                    tf.mul(a + b - 2.0, tf.digamma(a+b))
 
 
-class Binom:
+class Binom(object):
     """Binomial distribution
     """
     def rvs(self, n, p, size=1):
@@ -375,7 +375,7 @@ class Binom:
         raise NotImplementedError()
 
 
-class Chi2:
+class Chi2(object):
     """:math:`\chi^2` distribution
     """
     def rvs(self, df, size=1):
@@ -440,7 +440,7 @@ class Chi2:
         raise NotImplementedError()
 
 
-class Dirichlet:
+class Dirichlet(object):
     """Dirichlet distribution
     """
     def rvs(self, alpha, size=1):
@@ -529,7 +529,7 @@ class Dirichlet:
                    tf.reduce_sum(tf.mul(alpha-1, tf.digamma(alpha)), 1)
 
 
-class Expon:
+class Expon(object):
     """Exponential distribution
     """
     def rvs(self, scale=1, size=1):
@@ -592,7 +592,7 @@ class Expon:
         raise NotImplementedError()
 
 
-class Gamma:
+class Gamma(object):
     """Gamma distribution
 
     Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
@@ -680,7 +680,7 @@ class Gamma:
                tf.mul(1.0 - a, tf.digamma(a))
 
 
-class Geom:
+class Geom(object):
     """Geometric distribution
     """
     def rvs(self, p, size=1):
@@ -743,7 +743,7 @@ class Geom:
         raise NotImplementedError()
 
 
-class InvGamma:
+class InvGamma(object):
     """Inverse Gamma distribution
 
     Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
@@ -837,7 +837,7 @@ class InvGamma:
                (1.0 + a) * tf.digamma(a)
 
 
-class LogNorm:
+class LogNorm(object):
     """LogNormal distribution
     """
     def rvs(self, s, size=1):
@@ -901,7 +901,7 @@ class LogNorm:
         raise NotImplementedError()
 
 
-class Multinomial:
+class Multinomial(object):
     """Multinomial distribution
 
     Note: there is no equivalent version implemented in SciPy.
@@ -1005,7 +1005,7 @@ class Multinomial:
             return tf.pack(out)
 
 
-class Multivariate_Normal:
+class Multivariate_Normal(object):
     """Multivariate Normal distribution
     """
     def rvs(self, mean=None, cov=1, size=1):
@@ -1153,7 +1153,7 @@ class Multivariate_Normal:
         return 0.5 * (d + d*tf.log(2*np.pi) + tf.log(det_cov))
 
 
-class NBinom:
+class NBinom(object):
     """Negative binomial distribution
     """
     def rvs(self, n, p, size=1):
@@ -1224,7 +1224,7 @@ class NBinom:
         raise NotImplementedError()
 
 
-class Norm:
+class Norm(object):
     """Normal (Gaussian) distribution
     """
     def rvs(self, loc=0, scale=1, size=1):
@@ -1309,7 +1309,7 @@ class Norm:
         return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
 
 
-class Poisson:
+class Poisson(object):
     """Poisson distribution
     """
     def rvs(self, mu, size=1):
@@ -1372,7 +1372,7 @@ class Poisson:
         raise NotImplementedError()
 
 
-class T:
+class T(object):
     """Student-t distribution.
     """
     def rvs(self, df, loc=0, scale=1, size=1):
@@ -1452,7 +1452,7 @@ class T:
         raise NotImplementedError()
 
 
-class TruncNorm:
+class TruncNorm(object):
     """Truncated Normal (Gaussian) distribution
     """
     def rvs(self, a, b, loc=0, scale=1, size=1):
@@ -1543,7 +1543,7 @@ class TruncNorm:
         raise NotImplementedError()
 
 
-class Uniform:
+class Uniform(object):
     """Uniform distribution (continous)
 
     This distribution is constant between ``loc`` and ``loc + scale``

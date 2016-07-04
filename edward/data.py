@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 
-class Data:
+class Data(object):
     """Base class for Edward data objects.
 
     By default, it assumes the data is an array (or list of arrays).

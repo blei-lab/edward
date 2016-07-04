@@ -20,7 +20,7 @@ except ImportError:
     pass
 
 
-class PyMC3Model:
+class PyMC3Model(object):
     """Model wrapper for models written in PyMC3.
     """
     def __init__(self, model, observed):
@@ -56,7 +56,7 @@ class PyMC3Model:
         return lp
 
 
-class PythonModel:
+class PythonModel(object):
     """Model wrapper for models written in NumPy/SciPy.
     """
     def __init__(self):
@@ -85,7 +85,7 @@ class PythonModel:
         raise NotImplementedError()
 
 
-class StanModel:
+class StanModel(object):
     """Model wrapper for models written in Stan.
     """
     def __init__(self, file=None, model_code=None):
@@ -156,7 +156,7 @@ class StanModel:
         return lp
 
 
-class Variational:
+class Variational(object):
     """A container for collecting distribution objects."""
     def __init__(self, layers=None):
         get_session()

@@ -15,7 +15,7 @@ except ImportError:
     pass
 
 
-class Inference:
+class Inference(object):
     """Base class for Edward inference methods.
     """
     def __init__(self, model, data=Data()):
@@ -48,7 +48,7 @@ class MonteCarlo(Inference):
         data : ed.Data, optional
             observed data
         """
-        Inference.__init__(self, *args, **kwargs)
+        super(MonteCarlo, self).__init__(*args, **kwargs)
 
 
 class VariationalInference(Inference):
@@ -66,7 +66,7 @@ class VariationalInference(Inference):
         data : ed.Data, optional
             observed data
         """
-        Inference.__init__(self, model, data)
+        super(VariationalInference, self).__init__(model, data)
         self.variational = variational
 
     def run(self, *args, **kwargs):
@@ -213,7 +213,7 @@ class MFVI(VariationalInference):
         ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].
     """
     def __init__(self, *args, **kwargs):
-        VariationalInference.__init__(self, *args, **kwargs)
+        super(MFVI, self).__init__(*args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
         """Initialization.
@@ -459,7 +459,7 @@ class KLpq(VariationalInference):
         KL( p(z |x) || q(z) ).
     """
     def __init__(self, *args, **kwargs):
-        VariationalInference.__init__(self, *args, **kwargs)
+        super(KLpq, self).__init__(*args, **kwargs)
 
     def initialize(self, n_minibatch=1, *args, **kwargs):
         """Initialization.
@@ -552,7 +552,7 @@ class MAP(VariationalInference):
             variational = Variational()
             variational.add(PointMass(0))
 
-        VariationalInference.__init__(self, model, variational, data)
+        super(MAP, self).__init__(model, variational, data)
 
     def build_loss(self):
         """Loss function to minimize.
@@ -586,7 +586,7 @@ class Laplace(VariationalInference):
             variational = Variational()
             variational.add(PointMass(model.num_vars, params))
 
-        VariationalInference.__init__(self, model, variational, data)
+        super(Laplace, self).__init__(model, variational, data)
 
     def build_loss(self):
         """Loss function to minimize.
