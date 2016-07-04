@@ -81,24 +81,20 @@ class Model:
         Parameters
         ----------
         size : int, optional
+            Number of samples to draw.
 
         Returns
         -------
-        list or tf.Tensor
-            If more than one layer, a list of tf.Tensors of dimension
-            (size x shape), one for each layer. If one layer, a
-            tf.Tensor of (size x shape). If a layer requires SciPy to
-            sample, its corresponding tensor is a tf.placeholder.
+        dict
+            Dictionary of distribution objects in the container assigned
+            to a tf.Tensor. Each tf.Tensor is of size size x shape.
         """
-        samples = []
+        samples = {}
         for layer in self.layers:
             if layer.sample_tensor:
-                samples += [layer.sample(size)]
+                samples[layer] = layer.sample(size)
             else:
-                samples += [tf.placeholder(tf.float32, (size, ) + layer.shape)]
-
-        if len(samples) == 1:
-            samples = samples[0]
+                samples[layer] = tf.placeholder(tf.float32, (size, ) + layer.shape)
 
         return samples
 
@@ -109,10 +105,15 @@ class Model:
 
         Parameters
         ----------
-        samples : list or tf.Tensor
-            If more than one layer, a list of tf.Tensors of dimension
-            (batch x shape). If one layer, a tf.Tensor of (batch x
-            shape).
+        samples : dict
+            Dictionary of distribution objects in the container assigned
+            to a tf.Tensor. Each tf.Tensor is of size batch x shape.
+
+        Return
+        ------
+        dict
+            Dictionary of tf.placeholders in `samples` binded to SciPy
+            samples.
 
         Notes
         -----
@@ -120,49 +121,57 @@ class Model:
         batch size, i.e., dimensions (batch x shape) for fixed batch
         and varying shape.
         """
-        if not isinstance(samples, list):
-            samples = [samples]
-
-        size = get_dims(samples[0])[0]
+        size = get_dims(samples.values()[0])[0]
         feed_dict = {}
-        for sample, layer in zip(samples, self.layers):
+        for layer, sample in samples.iteritems():
             if sample.name.startswith('Placeholder'):
                 feed_dict[sample] = layer.sample(size)
 
+        # TODO technically this doesn't require anything from self
         return feed_dict
 
-    def log_prob(self, xs):
+    def log_prob(self, data_dict):
         """
         Parameters
         ----------
-        xs : list or tf.Tensor or np.array
-            If more than one layer, a list of tf.Tensors or np.array's
-            of dimension (batch x shape). If one layer, a tf.Tensor or
-            np.array of (batch x shape).
+        data_dict : dict
+            Dictionary which binds all random variables (distribution
+            objects) in the model (container object) to realizations
+            (tf.Tensor or np.ndarray's). For each random variable of
+            dimensions `shape`, its corresponding realization has either
+            dimensions `shape` or `batch x shape`. Any optional outer
+            dimension `batch` must be the same number for the optional
+            outer dimension of each realization.
+
+        Returns
+        -------
+        tf.Tensor
+            If there is an outer dimension batch for at least one
+            realization, return object is a vector of batch elements,
+            evaluating the log density for each relization in that set of
+            realizations and vectorize-summing over the reset. Otherwise a
+            scalar.
 
         Notes
         -----
         This method may be removed in the future in favor of indexable
         log_prob methods, e.g., for automatic Rao-Blackwellization.
 
-        This method assumes each xs[l] in xs has the same batch size,
-        i.e., dimensions (batch x shape) for fixed batch and varying
-        shape.
-
-        This method assumes length of xs == length of self.layers.
+        This method assumes length of data_dict == length of self.layers and
+        each item corresponds to a layer in self.layers.
         """
-        if len(self.layers) == 1:
-            return self.layers[0].log_prob(xs)
-
-        if isinstance(xs[0], tf.Tensor):
-            shape = get_dims(xs[0])
+        # Get batch size from the first item in the dictionary. For now we
+        # assume the outer dimension always has the batch size.
+        if isinstance(data_dict.values()[0], tf.Tensor):
+            shape = get_dims(data_dict.values()[0])
         else: # NumPy array
-            shape = xs[0].shape
+            shape = data_dict.values()[0].shape
 
+        # Sum over the log-density of each distribution in container.
         n_minibatch = shape[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
-        for l, layer in enumerate(self.layers):
-            log_prob += layer.log_prob(xs[l])
+        for layer in self.layers:
+            log_prob += layer.log_prob(data_dict[layer])
 
         return log_prob
 

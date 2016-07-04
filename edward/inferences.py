@@ -326,12 +326,17 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
+        # Collect dictionary binding each random variable in the
+        # probability model to its realization.
+        xz = self.data
+        for key, value in self.zs.iteritems():
+            xz[self.mapping[key]] = value
 
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
-                                   self.variational.log_prob(z))
+        p_log_prob = self.model.log_prob(xz)
+        q_log_prob = self.variational.log_prob(z)
+        self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
         return -self.loss
 
     def build_score_loss_kl(self):
