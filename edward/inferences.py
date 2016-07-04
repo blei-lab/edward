@@ -196,7 +196,6 @@ class VariationalInference(Inference):
         raise NotImplementedError()
 
 
-# TODO this isn't MFVI so much as VI where q is analytic
 class MFVI(VariationalInference):
     """Mean-field variational inference.
 
