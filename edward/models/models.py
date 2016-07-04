@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
-from .distributions import Normal
+from edward.models.distributions import Normal
 
 try:
     import pystan
