@@ -291,18 +291,24 @@ def stop_gradient(x):
 
     Parameters
     ----------
-    x : tf.Tensor or list
-        scalar, vector, matrix, or n-Tensor or list thereof
+    x : tf.Tensor or list or dictionary
+        scalar, vector, matrix, or n-Tensor or list or dictionary
+        thereof. In the case of a dictionary, tf.stop_gradient() is
+        applied to its values element-wise.
 
     Returns
     -------
-    tf.Tensor or list
-        size corresponding to size of input
+    tf.Tensor or list or dictionary
+        size and type corresponding to size and type of input
     """
     if isinstance(x, tf.Tensor):
         return tf.stop_gradient(x)
-    else: # list
+    elif isinstance(x, list):
         return [tf.stop_gradient(i) for i in x]
+    elif isinstance(x, dict):
+        return {key: tf.stop_gradient(value) for key, value in x.items()}
+    else:
+        raise NotImplementedError()
 
 def to_simplex(x):
     """Transform real vector of length ``(K-1)`` to a simplex of dimension ``K``
