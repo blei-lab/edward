@@ -1,8 +1,13 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
 from edward.data import Data
 from edward.util import logit, get_session
+
 
 def evaluate(metrics, model, variational, data):
     """Evaluate fitted model using a set of metrics.
@@ -93,6 +98,7 @@ def evaluate(metrics, model, variational, data):
         return evaluations[0]
     else:
         return evaluations
+
 
 def ppc(model, variational=None, data=Data(), T=None, size=100):
     """Posterior predictive check.
@@ -189,7 +195,9 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     else:
         return sess.run([tf.pack(Tyreps), tf.pack(Tys)], feed_dict)
 
+
 # Classification metrics
+
 
 def binary_accuracy(y_true, y_pred):
     """Binary prediction accuracy, also known as 0/1-loss.
@@ -204,6 +212,7 @@ def binary_accuracy(y_true, y_pred):
     y_true = tf.cast(y_true, tf.float32)
     y_pred = tf.cast(tf.round(y_pred), tf.float32)
     return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
+
 
 def categorical_accuracy(y_true, y_pred):
     """Multi-class prediction accuracy. One-hot representation for ``y_true``.
@@ -222,6 +231,7 @@ def categorical_accuracy(y_true, y_pred):
     y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
     return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
+
 def sparse_categorical_accuracy(y_true, y_pred):
     """Multi-class prediction accuracy. Label {0, 1, .., K-1}
     representation for ``y_true``.
@@ -239,6 +249,7 @@ def sparse_categorical_accuracy(y_true, y_pred):
     y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
     return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
+
 def binary_crossentropy(y_true, y_pred):
     """Binary cross-entropy.
 
@@ -252,6 +263,7 @@ def binary_crossentropy(y_true, y_pred):
     y_true = tf.cast(y_true, tf.float32)
     y_pred = logit(tf.cast(y_pred, tf.float32))
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_pred, y_true))
+
 
 def categorical_crossentropy(y_true, y_pred):
     """Multi-class cross entropy. One-hot representation for ``y_true``.
@@ -270,6 +282,7 @@ def categorical_crossentropy(y_true, y_pred):
     y_pred = logit(tf.cast(y_pred, tf.float32))
     return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_pred, y_true))
 
+
 def sparse_categorical_crossentropy(y_true, y_pred):
     """Multi-class cross entropy. Label {0, 1, .., K-1} representation
     for ``y_true.``
@@ -287,6 +300,7 @@ def sparse_categorical_crossentropy(y_true, y_pred):
     y_pred = logit(tf.cast(y_pred, tf.float32))
     return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
 
+
 def hinge(y_true, y_pred):
     """Hinge loss.
 
@@ -300,6 +314,7 @@ def hinge(y_true, y_pred):
     y_true = tf.cast(y_true, tf.float32)
     y_pred = tf.cast(y_pred, tf.float32)
     return tf.reduce_mean(tf.maximum(1.0 - y_true * y_pred, 0.0))
+
 
 def squared_hinge(y_true, y_pred):
     """Squared hinge loss.
@@ -315,7 +330,9 @@ def squared_hinge(y_true, y_pred):
     y_pred = tf.cast(y_pred, tf.float32)
     return tf.reduce_mean(tf.square(tf.maximum(1.0 - y_true * y_pred, 0.0)))
 
+
 # Regression metrics
+
 
 def mean_squared_error(y_true, y_pred):
     """Mean squared error loss.
@@ -328,6 +345,7 @@ def mean_squared_error(y_true, y_pred):
     """
     return tf.reduce_mean(tf.square(y_pred - y_true))
 
+
 def mean_absolute_error(y_true, y_pred):
     """Mean absolute error loss.
 
@@ -338,6 +356,7 @@ def mean_absolute_error(y_true, y_pred):
         Tensors of same shape and type.
     """
     return tf.reduce_mean(tf.abs(y_pred - y_true))
+
 
 def mean_absolute_percentage_error(y_true, y_pred):
     """Mean absolute percentage error loss.
@@ -350,6 +369,7 @@ def mean_absolute_percentage_error(y_true, y_pred):
     """
     diff = tf.abs((y_true - y_pred) / tf.clip_by_value(tf.abs(y_true), 1e-8, np.inf))
     return 100.0 * tf.reduce_mean(diff)
+
 
 def mean_squared_logarithmic_error(y_true, y_pred):
     """Mean squared logarithmic error loss.
@@ -364,6 +384,7 @@ def mean_squared_logarithmic_error(y_true, y_pred):
     second_log = tf.log(tf.clip_by_value(y_true, 1e-8, np.inf) + 1.0)
     return tf.reduce_mean(tf.square(first_log - second_log))
 
+
 def poisson(y_true, y_pred):
     """Negative Poisson log-likelihood of data ``y_true`` given predictions
     ``y_pred`` (up to proportion).
@@ -375,6 +396,7 @@ def poisson(y_true, y_pred):
         Tensors of same shape and type.
     """
     return tf.reduce_sum(y_pred - y_true * tf.log(y_pred + 1e-8))
+
 
 def cosine_proximity(y_true, y_pred):
     """Cosine similarity of two vectors.

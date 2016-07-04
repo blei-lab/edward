@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
@@ -11,7 +14,8 @@ try:
 except ImportError:
     pass
 
-class Inference:
+
+class Inference(object):
     """Base class for Edward inference methods.
     """
     def __init__(self, model, data=Data()):
@@ -30,6 +34,7 @@ class Inference:
         self.data = data
         get_session()
 
+
 class MonteCarlo(Inference):
     """Base class for Monte Carlo inference methods.
     """
@@ -43,7 +48,8 @@ class MonteCarlo(Inference):
         data : ed.Data, optional
             observed data
         """
-        Inference.__init__(self, *args, **kwargs)
+        super(MonteCarlo, self).__init__(*args, **kwargs)
+
 
 class VariationalInference(Inference):
     """Base class for variational inference methods.
@@ -60,7 +66,7 @@ class VariationalInference(Inference):
         data : ed.Data, optional
             observed data
         """
-        Inference.__init__(self, model, data)
+        super(VariationalInference, self).__init__(model, data)
         self.variational = variational
 
     def run(self, *args, **kwargs):
@@ -82,6 +88,7 @@ class VariationalInference(Inference):
         for t in range(self.n_iter+1):
             loss = self.update()
             self.print_progress(t, loss)
+
         self.finalize()
 
     def initialize(self, n_iter=1000, n_data=None, n_print=100,
@@ -188,7 +195,7 @@ class VariationalInference(Inference):
         """
         raise NotImplementedError()
 
-# TODO this isn't MFVI so much as VI where q is analytic
+
 class MFVI(VariationalInference):
     """Mean-field variational inference.
 
@@ -206,7 +213,7 @@ class MFVI(VariationalInference):
         ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].
     """
     def __init__(self, *args, **kwargs):
-        VariationalInference.__init__(self, *args, **kwargs)
+        super(MFVI, self).__init__(*args, **kwargs)
 
     def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
         """Initialization.
@@ -442,6 +449,7 @@ class MFVI(VariationalInference):
                     self.variational.entropy()
         return -self.loss
 
+
 class KLpq(VariationalInference):
     """A variational inference method that minimizes the Kullback-Leibler
     divergence from the posterior to the variational model (Cappe et al., 2008)
@@ -451,7 +459,7 @@ class KLpq(VariationalInference):
         KL( p(z |x) || q(z) ).
     """
     def __init__(self, *args, **kwargs):
-        VariationalInference.__init__(self, *args, **kwargs)
+        super(KLpq, self).__init__(*args, **kwargs)
 
     def initialize(self, n_minibatch=1, *args, **kwargs):
         """Initialization.
@@ -525,6 +533,7 @@ class KLpq(VariationalInference):
         self.loss = tf.reduce_mean(w_norm * log_w)
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 
+
 class MAP(VariationalInference):
     """Maximum a posteriori inference.
 
@@ -536,14 +545,15 @@ class MAP(VariationalInference):
         \min_{z} - \log p(x,z)
     """
     def __init__(self, model, data=Data(), params=None):
-        if hasattr(model, 'num_vars'):
-            variational = Variational()
-            variational.add(PointMass(model.num_vars, params))
-        else:
-            variational = Variational()
-            variational.add(PointMass(0))
+        with tf.variable_scope("variational"):
+            if hasattr(model, 'num_vars'):
+                variational = Variational()
+                variational.add(PointMass(model.num_vars, params))
+            else:
+                variational = Variational()
+                variational.add(PointMass(0))
 
-        VariationalInference.__init__(self, model, variational, data)
+        super(MAP, self).__init__(model, variational, data)
 
     def build_loss(self):
         """Loss function to minimize.
@@ -558,43 +568,25 @@ class MAP(VariationalInference):
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
 
-class Laplace(VariationalInference):
-    """Laplace approximation via Maximum a posteriori inference.
 
-    We implement this using a ``PointMass`` variational distribution to
-    solve the following optimization problem
+class Laplace(MAP):
+    """Laplace approximation.
 
-    .. math::
+    It approximates the posterior distribution using a normal
+    distribution centered at the mode of the posterior.
 
-        \min_{z} - \log p(x,z)
-
-    We then compute the hessian at the solution of the above problem.
-    (The mode of the posterior.)
+    We implement this by running ``MAP`` to find the posterior mode.
+    This forms the mean of the normal approximation. We then compute
+    the Hessian at the mode of the posterior. This forms the
+    covariance of the normal approximation.
     """
     def __init__(self, model, data=Data(), params=None):
-        with tf.variable_scope("variational"):
-            variational = Variational()
-            variational.add(PointMass(model.num_vars, params))
-
-        VariationalInference.__init__(self, model, variational, data)
-
-    def build_loss(self):
-        """Loss function to minimize.
-
-        Defines the gradient of
-
-        .. math::
-            - \log p(x,z)
-        """
-        x = self.data.sample(self.n_data)
-        z = self.variational.sample()
-        self.loss = tf.squeeze(self.model.log_prob(x, z))
-        return -self.loss
+        super(Laplace, self).__init__(model, data, params)
 
     def finalize(self):
         """Function to call after convergence.
 
-        Computes the hessian at the mode.
+        Computes the Hessian at the mode.
         """
         get_session()
         x = self.data.sample(self.n_data) # uses mini-batch
