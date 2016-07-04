@@ -39,7 +39,7 @@ Now, consider the likelihood of an observation $(y_n, x_n)$
   &=
   \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)
 \end{align*} 
-where $\mu$ is a neural network with weights (latent variables) 
+where $\mu$ is a neural network with weights (latent) variables 
 $\mathbf{z}$. Here $x_n$ is the (known) covariate and $\sigma^2$ is the
 (known) variance of the observation.
 
@@ -65,10 +65,10 @@ class BayesianNN:
     """A Bayesian neural network regression model (abridged)"""
 
     def log_prob(self, xs, zs):
-        # Specify the prior
+        # Specify the prior on latent variables zs
         log_prior = tf.reduce_sum(norm.logpdf(zs, loc=0, scale=1), 1)
 
-        # Extract (y,x) from data
+        # Extract (y,x) from data xs
         y = xs[:, 0]
         x = xs[:, 1:]
 
@@ -91,7 +91,7 @@ activation functions. Specifically
   h_{11} &= \tanh(w_{11} x_n + b_{11})\\
   h_{12} &= \tanh(w_{12} x_n + b_{12})\\
   h_{21} &= \tanh(w_{211} h_{11} + w_{212} h_{12} + b_{21})\\
-  h_{22} &= \tanh(w_{211} h_{11} + w_{212} h_{12} + b_{22})\\
+  h_{22} &= \tanh(w_{221} h_{11} + w_{222} h_{12} + b_{22})\\
   \mu &= \tanh(w_{31} h_{21} + w_{32} h_{22} + b_3)
 \end{align*}
 where $\mathbf{z} = (w_{1:}, w_{2::}, w_{3:}, b_{1:}, b_{2:}, b_3)$.
@@ -110,7 +110,7 @@ and some measurement noise.
 def build_toy_dataset(n_data=50, noise_std=0.1):
     x = np.linspace(-3, 3, num=n_data)
     y = np.cos(x) 
-    y = y + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    y = y + ed.stats.norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
     x = x.reshape((n_data, 1))
     y = y.reshape((n_data, 1))
     data = np.concatenate((y, x), axis=1)
@@ -134,8 +134,8 @@ inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=5, n_print=100)  
 \end{lstlisting}
 
-Drawing samples from the posterior shows how the neural network has adapted to
-the cosine nonlinearity. 
+Drawing samples from the posterior shows how the Bayesian neural network has
+learned the cosine nonlinearity. 
 
 \includegraphics[width=700px]{images/getting-started-fig2.png}
 
