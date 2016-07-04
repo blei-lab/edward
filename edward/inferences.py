@@ -88,6 +88,7 @@ class VariationalInference(Inference):
         for t in range(self.n_iter+1):
             loss = self.update()
             self.print_progress(t, loss)
+
         self.finalize()
 
     def initialize(self, n_iter=1000, n_data=None, n_print=100,
@@ -545,12 +546,13 @@ class MAP(VariationalInference):
         \min_{z} - \log p(x,z)
     """
     def __init__(self, model, data=Data(), params=None):
-        if hasattr(model, 'num_vars'):
-            variational = Variational()
-            variational.add(PointMass(model.num_vars, params))
-        else:
-            variational = Variational()
-            variational.add(PointMass(0))
+        with tf.variable_scope("variational"):
+            if hasattr(model, 'num_vars'):
+                variational = Variational()
+                variational.add(PointMass(model.num_vars, params))
+            else:
+                variational = Variational()
+                variational.add(PointMass(0))
 
         super(MAP, self).__init__(model, variational, data)
 
@@ -568,43 +570,24 @@ class MAP(VariationalInference):
         return -self.loss
 
 
-class Laplace(VariationalInference):
-    """Laplace approximation via Maximum a posteriori inference.
+class Laplace(MAP):
+    """Laplace approximation.
 
-    We implement this using a ``PointMass`` variational distribution to
-    solve the following optimization problem
+    It approximates the posterior distribution using a normal
+    distribution centered at the mode of the posterior.
 
-    .. math::
-
-        \min_{z} - \log p(x,z)
-
-    We then compute the hessian at the solution of the above problem.
-    (The mode of the posterior.)
+    We implement this by running ``MAP`` to find the posterior mode.
+    This forms the mean of the normal approximation. We then compute
+    the Hessian at the mode of the posterior. This forms the
+    covariance of the normal approximation.
     """
     def __init__(self, model, data=Data(), params=None):
-        with tf.variable_scope("variational"):
-            variational = Variational()
-            variational.add(PointMass(model.num_vars, params))
-
-        super(Laplace, self).__init__(model, variational, data)
-
-    def build_loss(self):
-        """Loss function to minimize.
-
-        Defines the gradient of
-
-        .. math::
-            - \log p(x,z)
-        """
-        x = self.data.sample(self.n_data)
-        z = self.variational.sample()
-        self.loss = tf.squeeze(self.model.log_prob(x, z))
-        return -self.loss
+        super(Laplace, self).__init__(model, data, params)
 
     def finalize(self):
         """Function to call after convergence.
 
-        Computes the hessian at the mode.
+        Computes the Hessian at the mode.
         """
         get_session()
         x = self.data.sample(self.n_data) # uses mini-batch
