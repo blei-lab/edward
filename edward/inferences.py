@@ -14,6 +14,7 @@ try:
 except ImportError:
     pass
 
+
 class Inference:
     """Base class for Edward inference methods.
     """
@@ -33,6 +34,7 @@ class Inference:
         self.data = data
         get_session()
 
+
 class MonteCarlo(Inference):
     """Base class for Monte Carlo inference methods.
     """
@@ -47,6 +49,7 @@ class MonteCarlo(Inference):
             observed data
         """
         Inference.__init__(self, *args, **kwargs)
+
 
 class VariationalInference(Inference):
     """Base class for variational inference methods.
@@ -190,6 +193,7 @@ class VariationalInference(Inference):
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 # TODO this isn't MFVI so much as VI where q is analytic
 class MFVI(VariationalInference):
@@ -445,6 +449,7 @@ class MFVI(VariationalInference):
                     self.variational.entropy()
         return -self.loss
 
+
 class KLpq(VariationalInference):
     """A variational inference method that minimizes the Kullback-Leibler
     divergence from the posterior to the variational model (Cappe et al., 2008)
@@ -528,6 +533,7 @@ class KLpq(VariationalInference):
         self.loss = tf.reduce_mean(w_norm * log_w)
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 
+
 class MAP(VariationalInference):
     """Maximum a posteriori inference.
 
@@ -560,6 +566,7 @@ class MAP(VariationalInference):
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
+
 
 class Laplace(VariationalInference):
     """Laplace approximation via Maximum a posteriori inference.

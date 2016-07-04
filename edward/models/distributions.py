@@ -8,6 +8,7 @@ import tensorflow as tf
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_dims, get_session, to_simplex
 
+
 class Distribution:
     """Base class for Edward distributions.
 
@@ -263,6 +264,7 @@ class Distribution:
         """
         raise NotImplementedError()
 
+
 class Bernoulli(Distribution):
     """Bernoulli
 
@@ -295,6 +297,7 @@ class Bernoulli(Distribution):
 
     def entropy(self):
         return tf.reduce_sum(bernoulli.entropy(self.p))
+
 
 class Beta(Distribution):
     """Beta
@@ -336,6 +339,7 @@ class Beta(Distribution):
     def entropy(self):
         return tf.reduce_sum(beta.entropy(self.alpha, self.beta))
 
+
 class Dirichlet(Distribution):
     """Dirichlet
 
@@ -372,6 +376,7 @@ class Dirichlet(Distribution):
 
     def entropy(self):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
+
 
 class InvGamma(Distribution):
     """Inverse Gamma
@@ -412,6 +417,7 @@ class InvGamma(Distribution):
 
     def entropy(self):
         return tf.reduce_sum(invgamma.entropy(self.alpha, self.beta))
+
 
 class Multinomial(Distribution):
     """Multinomial
@@ -466,6 +472,7 @@ class Multinomial(Distribution):
     def entropy(self):
         return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
 
+
 class Normal(Distribution):
     """Normal
 
@@ -505,6 +512,7 @@ class Normal(Distribution):
 
     def entropy(self):
         return tf.reduce_sum(norm.entropy(scale=self.scale))
+
 
 class PointMass(Distribution):
     """Point mass distribution

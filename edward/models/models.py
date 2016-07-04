@@ -19,6 +19,7 @@ try:
 except ImportError:
     pass
 
+
 class PyMC3Model:
     """Model wrapper for models written in PyMC3.
     """
@@ -54,6 +55,7 @@ class PyMC3Model:
 
         return lp
 
+
 class PythonModel:
     """Model wrapper for models written in NumPy/SciPy.
     """
@@ -81,6 +83,7 @@ class PythonModel:
 
     def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
+
 
 class StanModel:
     """Model wrapper for models written in Stan.
@@ -151,6 +154,7 @@ class StanModel:
             lp[b] = self.model.log_prob(z_unconst, adjust_transform=False)
 
         return lp
+
 
 class Variational:
     """A container for collecting distribution objects."""

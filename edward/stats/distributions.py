@@ -9,6 +9,7 @@ from edward.util import dot, get_dims
 from itertools import product
 from scipy import stats
 
+
 class Distribution:
     """Template for all distributions."""
     def rvs(self, size=1):
@@ -118,6 +119,7 @@ class Distribution:
         """
         raise NotImplementedError()
 
+
 class Bernoulli:
     """Bernoulli distribution
     """
@@ -203,6 +205,7 @@ class Bernoulli:
         """
         p = tf.cast(p, dtype=tf.float32)
         return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
+
 
 class Beta:
     """Beta distribution
@@ -299,6 +302,7 @@ class Beta:
                    tf.mul(b - 1.0, tf.digamma(b)) + \
                    tf.mul(a + b - 2.0, tf.digamma(a+b))
 
+
 class Binom:
     """Binomial distribution
     """
@@ -370,6 +374,7 @@ class Binom:
         """
         raise NotImplementedError()
 
+
 class Chi2:
     """:math:`\chi^2` distribution
     """
@@ -433,6 +438,7 @@ class Chi2:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class Dirichlet:
     """Dirichlet distribution
@@ -522,6 +528,7 @@ class Dirichlet:
                    tf.mul(a - K, tf.digamma(a)) - \
                    tf.reduce_sum(tf.mul(alpha-1, tf.digamma(alpha)), 1)
 
+
 class Expon:
     """Exponential distribution
     """
@@ -583,6 +590,7 @@ class Expon:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class Gamma:
     """Gamma distribution
@@ -671,6 +679,7 @@ class Gamma:
         return a + tf.log(scale) + tf.lgamma(a) + \
                tf.mul(1.0 - a, tf.digamma(a))
 
+
 class Geom:
     """Geometric distribution
     """
@@ -732,6 +741,7 @@ class Geom:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class InvGamma:
     """Inverse Gamma distribution
@@ -826,6 +836,7 @@ class InvGamma:
         return a + tf.log(scale*tf.exp(tf.lgamma(a))) - \
                (1.0 + a) * tf.digamma(a)
 
+
 class LogNorm:
     """LogNormal distribution
     """
@@ -888,6 +899,7 @@ class LogNorm:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class Multinomial:
     """Multinomial distribution
@@ -991,6 +1003,7 @@ class Multinomial:
                 out += [tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))]
 
             return tf.pack(out)
+
 
 class Multivariate_Normal:
     """Multivariate Normal distribution
@@ -1139,6 +1152,7 @@ class Multivariate_Normal:
 
         return 0.5 * (d + d*tf.log(2*np.pi) + tf.log(det_cov))
 
+
 class NBinom:
     """Negative binomial distribution
     """
@@ -1208,6 +1222,7 @@ class NBinom:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class Norm:
     """Normal (Gaussian) distribution
@@ -1293,6 +1308,7 @@ class Norm:
         scale = tf.cast(scale, dtype=tf.float32)
         return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
 
+
 class Poisson:
     """Poisson distribution
     """
@@ -1354,6 +1370,7 @@ class Poisson:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class T:
     """Student-t distribution.
@@ -1433,6 +1450,7 @@ class T:
         NotImplementedError
         """
         raise NotImplementedError()
+
 
 class TruncNorm:
     """Truncated Normal (Gaussian) distribution
@@ -1524,6 +1542,7 @@ class TruncNorm:
         """
         raise NotImplementedError()
 
+
 class Uniform:
     """Uniform distribution (continous)
 
@@ -1607,6 +1626,7 @@ class Uniform:
         """
         scale = tf.cast(scale, dtype=tf.float32)
         return tf.log(scale)
+
 
 bernoulli = Bernoulli()
 beta = Beta()
