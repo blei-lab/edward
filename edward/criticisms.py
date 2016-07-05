@@ -130,9 +130,7 @@ def ppc(model, variational=None, data=None, T=None, size=100):
     T : function, optional
         Discrepancy function, which takes a data dictionary and list
         of latent variables as input and outputs a tf.Tensor. Default
-        is the identity function. In general this is a function
-        taking in a data set ``y`` and optionally a set of latent
-        variables ``z`` as input.
+        is the identity function.
     size : int, optional
         number of replicated data sets
 
@@ -152,12 +150,13 @@ def ppc(model, variational=None, data=None, T=None, size=100):
             (T(y, z^{1}), ..., T(y, z^{size})).
     """
     sess = get_session()
-    y = data
-    if y is None:
+    if data is None:
         N = 1
+        y = {}
     else:
         # Assume all values have the same data set size.
         N = get_dims(data.values()[0])[0]
+        y = data
 
     if T is None:
         # TODO this doesn't work because y is a data dictionary

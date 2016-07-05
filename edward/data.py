@@ -58,7 +58,7 @@ class Data(object):
 
         If the requested number of datapoints ``n_data`` goes beyond the size
         of the dataset, the internal counter wraps around the size of the
-        dataset. The returned minibatch, thus, may include datapoints from the
+        dataset. The returned batch, thus, may include datapoints from the
         beginning of the dataset.
 
         Parameters
@@ -77,12 +77,9 @@ class Data(object):
         -----
         If data dictionary has any tf.placeholder's, the user must
         control batches by feeding in the tf.placeholder's manually.
-        Always use this method with ``n_data`` set to None.
+        In such a case, always use this method with ``n_data`` set to
+        None.
         """
-        # TODO
-        # In general, there should be a scale factor due to data
-        # subsampling, so that
-        # log_lik \approx self.N / n_data * ( mini-batch log_lik )
         if n_data is None or not self.data: # n_data=None or empty dictionary
             return self.data
 
@@ -93,20 +90,20 @@ class Data(object):
             if isinstance(value, tf.Tensor):
                 counter_new = counter_old + n_data
                 if counter_new <= N:
-                    minibatch = tf.gather(value,
+                    batch_value = tf.gather(value,
                                           list(range(counter_old, counter_new)))
                 else:
                     counter_new = counter_new - N
-                    minibatch = tf.gather(value,
+                    batch_value = tf.gather(value,
                                           list(range(self.counter, self.N)) + \
                                           list(range(0, counter_new)))
             elif isinstance(value, np.ndarray):
                 counter_new = counter_old + n_data
                 if counter_new <= N:
-                    minibatch = value[counter_old:counter_new]
+                    batch_value = value[counter_old:counter_new]
                 else:
                     counter_new = counter_new - N
-                    minibatch = np.concatenate((value[counter_old:],
+                    batch_value = np.concatenate((value[counter_old:],
                                                 value[:counter_new]))
             else:
                 raise NotImplementedError()
