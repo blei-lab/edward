@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
-from .distributions import Normal
+from edward.models.distributions import Normal
 
 try:
     import pystan
@@ -16,7 +19,8 @@ try:
 except ImportError:
     pass
 
-class PyMC3Model:
+
+class PyMC3Model(object):
     """Model wrapper for models written in PyMC3.
     """
     def __init__(self, model, observed):
@@ -51,7 +55,8 @@ class PyMC3Model:
 
         return lp
 
-class PythonModel:
+
+class PythonModel(object):
     """Model wrapper for models written in NumPy/SciPy.
     """
     def __init__(self):
@@ -79,7 +84,8 @@ class PythonModel:
     def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
 
-class StanModel:
+
+class StanModel(object):
     """Model wrapper for models written in Stan.
     """
     def __init__(self, file=None, model_code=None):
@@ -149,12 +155,13 @@ class StanModel:
 
         return lp
 
-class Variational:
+
+class Variational(object):
     """A container for collecting distribution objects."""
-    def __init__(self, layers=[]):
+    def __init__(self, layers=None):
         get_session()
-        self.layers = layers
-        if layers == []:
+        if layers is None:
+            self.layers = []
             self.shape = []
             self.num_vars = 0
             self.num_params = 0
@@ -164,6 +171,7 @@ class Variational:
             self.sample_tensor = []
             self.is_multivariate = []
         else:
+            self.layers = layers
             self.shape = [layer.shape for layer in self.layers]
             self.num_vars = sum([layer.num_vars for layer in self.layers])
             self.num_params = sum([layer.num_params for layer in self.layers])

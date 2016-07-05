@@ -79,12 +79,12 @@
 <li>Criticize the model, revise and repeat</li>
 </ol>
 <p><img alt="image" src="images/model_infer_criticize.png"/></p>
-<p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
-<p>This process defines the design of Edward. Here are the four primary objects that enable the above analysis.</p>
+<p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to reason about the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
+<p>This process defines the design of Edward. Four primary objects enable the above analysis.</p>
 <h3 id="data">Data</h3>
 <p><code>Data</code> objects contain measurements. The structure of these objects must match the inputs of the probabilistic model. For example,</p>
 <pre class="python" language="Python"><code>data_np = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-data = ed.Data(tf.constant(data_np, dtype=tf.float32))</code></pre>
+my_data = ed.Data(tf.constant(data_np, dtype=tf.float32))</code></pre>
 <p><code>Data</code> objects define a <code>sample</code> method that specifies how to sample minibatches of observations from the dataset.</p>
 <h3 id="models">Models</h3>
 <p>There are two types of model objects in Edward:</p>
@@ -92,7 +92,7 @@ data = ed.Data(tf.constant(data_np, dtype=tf.float32))</code></pre>
 <li>Probability models of data, <span class="math inline">\(p(x,z)\)</span></li>
 <li>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></li>
 </ol>
-<p>Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3, or Stan. A probability model has the following structure.</p>
+<p><strong>Probability Models.</strong> Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3, or Stan. A probability model has the following structure.</p>
 <pre class="python" language="Python"><code>import edward as ed
 import tensorflow as tf
 
@@ -106,82 +106,66 @@ class probability_model():
         log_likelihood = ...
         return log_prior + log_likelihood
 
-model = probability_model(...)</code></pre>
+my_model = probability_model(...)</code></pre>
 <p>The field <code>self.num_vars</code> holds the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>self.num_vars=2*N</code> latent variables for <code>N</code> observations.</p>
 <p>The method <code>self.log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables.</p>
 <p>This describes the probability model, which is a joint distribution of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Given a model, we aim to reason about <span class="math inline">\(z\)</span> given some data: the latent patterns conditioned on some data. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the latent patterns, and its variance describes our uncertainty around our best guess.</p>
-<p>Edward can employ variational inference to infer this posterior, which finds the closest distribution within a specified family. Initialize an empty <code>Variational()</code> model. Then add a Beta distribution to the variational model.</p>
-<pre><code>variational = Variational()
-variational.add(Beta())</code></pre>
-<p>With this syntax, we can build rich variational models to describe the latent variables in our data models. (More documentation on this coming soon.)</p>
+<p><strong>Variational Models.</strong> Edward uses variational inference to approximate the posterior. To this end, Edward implements a foundational <code>Variational()</code> class and a library of <code>Distribution()</code> objects. Variational models combine these using the <code>add()</code> syntax.</p>
+<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math display">\[\begin{aligned}
+  q(z \;;\; \lambda) 
+  &amp;=
+  \text{Dirichlet}(z_\pi)
+  \times
+  \mathcal{N}(z_\mu)
+  \times
+  \text{LogNorm}(z_\sigma)\end{aligned}\]</span> we would write</p>
+<pre class="python" language="Python"><code>from edward.models import Variational, Dirichlet, Normal, LogNorm
+
+my_variational = Variational()
+my_variational.add(Dirichlet(K))
+my_variational.add(Normal(K*D))
+my_variational.add(LogNorm(K*D))</code></pre>
+<p>Ordering matters; variational models must match the same ordering as latent variable declarations in <code>probability_model.log_prob(xs, zs)</code>.</p>
 <h3 id="inference">Inference</h3>
-<p><code>Inference</code> objects infer latent variables of models given data. Edward currently supports a variety of variational inference algorithms. These take as input a probability model, a variational model, and data.</p>
-<p>Here we use mean-field variational inference.</p>
-<pre><code>inference = ed.MFVI(model, variational, data)</code></pre>
-<p>(For the technical audience, the mean-field assumption of a fully factorized approximation is moot here. We’re dealing with a one-dimensional latent variable.)</p>
-<p>Calling <code>inference.run</code> runs the inference algorithm until convergence. It recovers a Beta distribution with mean 0.25 and variance 0.12. 0.25 is our best guess of the probability that the coin lands heads.</p>
+<p>Edward implements a variety of inference procedures. Current techniques leverage variational inference, which seeks to match the variational model <span class="math inline">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math inline">\(p(z \mid x)\)</span>.</p>
+<p><img alt="image" src="images/inference_structure.png"/></p>
+<p>Each algorithm minimizes a different loss metric between the variational model and the posterior. Algorithms that derive from <code>VariationInference()</code> take as input a probability model, a variational model, and data.</p>
+<p>For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
+  \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we would write</p>
+<pre class="python" language="Python"><code>inference = ed.KLpq(my_model, my_variational, my_data)
+inference.run(n_iter=500, n_minibatch=5)</code></pre>
+<p>which runs the <code>KLpq</code> minimization algorithm for <code>500</code> iterations, drawing minibatches of <code>5</code> samples from the data at every iteration.</p>
+<p>Edward offers many inference procedures; these are best explored through <a href="tutorials.html">tutorials</a>.</p>
 <h3 id="criticism">Criticism</h3>
-<p><span>[</span>In Progress<span>]</span></p>
-<p>It also includes <strong>features</strong> such as</p>
-<ul>
-<li><a href="https://www.tensorflow.org">TensorFlow</a> for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard</li>
-<li>A library for probability distributions in TensorFlow</li>
-<li>Documentation and tutorials</li>
-<li>Examples demonstrating state-of-the-art generative models and inference</li>
-</ul>
-<h3 id="a-complete-example-the-beta-bernoulli-model">A complete example: the Beta-Bernoulli model</h3>
-<p>Here is a complete script, defining the data, model, and the variational model. We run mean-field variational inference for <code>10000</code> iterations at the end. The same example is also available in cases where the model is written in <a href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py">Stan</a>, <a href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py">PyMC3</a> and <a href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py">TensorFlow</a> respectively.</p>
-<pre><code>"""A simple coin flipping example. The model is written in NumPy/SciPy.
-
-Probability model
-    Prior: Beta
-    Likelihood: Bernoulli
-Variational model
-    Likelihood: Mean-field Beta
-"""
-import edward as ed
-import numpy as np
-
-from edward.models import PythonModel, Variational, Beta
-from scipy.stats import beta, bernoulli
-
-class BetaBernoulli(PythonModel):
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
-    def _py_log_prob(self, xs, zs):
-        # This example is pedagogical.
-        # We recommend vectorizing operations in practice.
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for s in range(n_minibatch):
-            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
-            for n in range(len(xs)):
-                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
-        return lp
-
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
-model = BetaBernoulli()
-variational = Variational()
-variational.add(Beta())
-inference = ed.MFVI(model, variational, data)
-
-inference.run(n_iter=10000)</code></pre>
-<h3 id="more-links">More Links</h3>
-<p>You can find more complicated examples in the <a href="https://github.com/blei-lab/edward/tree/master/examples"><code>examples/</code></a> directory. We highlight several here:</p>
-<ul>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py">Hierarchical logistic regression</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">Mixture model of Gaussians</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">Gaussian process classification</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">Bayesian neural network</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py">Mixture density network</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">Variational auto-encoder</a></li>
-</ul>
-<p>We think the library will make it significantly easier to do research in machine learning and statistics. You can find more about this <a href="guide-research.md">here</a>.</p>
-<p>You can find more about Edward’s design and philosophy, and how it relates to other software <a href="design.md">here</a>.</p>
+<p>Edward actively encourages criticizing models and inference procedures. To that end, Edward provides a <code>criticisms</code> module that implements:</p>
+<ol>
+<li>posterior predictive checks</li>
+<li>metric-based evaluations (e.g. mean squared error, binary accuracy)</li>
+</ol>
+<p><strong>Posterior predictive checks (PPC).</strong> The simplest PPC works by studying the posterior predictive distribution <span class="math display">\[\begin{aligned}
+  p(x_\text{new} \mid x)
+  &amp;=
+  \int
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z\end{aligned}\]</span> through a discrepancy function, such as <span class="math inline">\(T(x_\text{new}) = \max(x_\text{new})\)</span>.</p>
+<p>One way to use a PPC is to compare <span class="math inline">\(T(x_\text{new})\)</span> to the observed value of the discrepancy on the data <span class="math inline">\(T(x)\)</span>.</p>
+<p><img alt="image" src="images/ppc.png"/></p>
+<p>Here <span class="math inline">\(T(x)\)</span> falls in a low probability region of the posterior predictive discrepancy distribution. This indicates a direction for potential improvement.</p>
+<p>Edward implements PPCs through the <code>sample_likelihood()</code> function in the probability model. This method samples a dataset from the model likelihood <span class="math display">\[\begin{aligned}
+  x \sim p(x \mid z).\end{aligned}\]</span> The <code>criticisms.ppc()</code> method then provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution. See the <a href="tutorials.html">tutorial</a> page for examples.</p>
+<p><strong>Metric-based evaluations.</strong> Edward also supports metric-based evaluations. The simplest example is to think of a classification model. After inferring the posterior, the model predicts a label for each observation in the data. Edward makes it easy to compute a variety of metrics, such as classification error and mean absolute error.</p>
+<p>First implement a <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span>. Then call</p>
+<pre class="python" language="Python"><code>print(ed.evaluate('categorical_accuracy', my_model, my_variational, my_data))
+print(ed.evaluate('mean_absolute_error', my_model, my_variational, my_data))</code></pre>
+<p>to evaluate these metrics. Swapping <code>my_data</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
+<p>Edward offers many evaluation metrics; these are best explored through <a href="tutorials.html">tutorials</a>.</p>
 <h3 id="references">References</h3>
 <ul>
-<li>David M Blei. Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics and Its Application, 1:203-232, 2014.</li>
+<li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>
+<li>Box, G.E.P. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.</li>
+<li>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. Statistica Sinica.</li>
+<li>David M Blei. (2014). Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics, 1:203-232</li>
 </ul>
 </div>
 </div>

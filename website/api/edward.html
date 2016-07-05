@@ -403,7 +403,7 @@ that data point per row.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=&lt;edward.data.Data object&gt;</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Posterior predictive check.
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
 If no posterior approximation is provided through <code class="docutils literal"><span class="pre">variational</span></code>,
@@ -520,7 +520,8 @@ that data point.</li>
 <dl class="class">
 <dt id="edward.data.Data">
 <em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>data=None</em>, <em>shuffled=True</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for Edward data objects.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for Edward data objects.</p>
 <p>By default, it assumes the data is an array (or list of arrays).
 If requested will perform data subsampling according to slices of
 the first index (e.g., elements in a vector, rows in a matrix,
@@ -585,8 +586,9 @@ beginning of the dataset.</p>
 <span id="edward-inferences-module"></span><h2>edward.inferences module<a class="headerlink" href="#module-edward.inferences" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="edward.inferences.Inference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for Edward inference methods.</p>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for Edward inference methods.</p>
 <p>Initialization.</p>
 <p>Calls <code class="docutils literal"><span class="pre">util.get_session()</span></code></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -669,36 +671,27 @@ stochastic gradients.</td>
 
 <dl class="class">
 <dt id="edward.inferences.Laplace">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
-<p>Laplace approximation via Maximum a posteriori inference.</p>
-<p>We implement this using a <code class="docutils literal"><span class="pre">PointMass</span></code> variational distribution to
-solve the following optimization problem</p>
-<div class="math">
-\[\min_{z} - \log p(x,z)\]</div>
-<p>We then compute the hessian at the solution of the above problem.
-(The mode of the posterior.)</p>
-<dl class="method">
-<dt id="edward.inferences.Laplace.build_loss">
-<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines the gradient of</p>
-<div class="math">
-\[- \log p(x,z)\]</div>
-</dd></dl>
-
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data object&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#edward.inferences.MAP" title="edward.inferences.MAP"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.MAP</span></code></a></p>
+<p>Laplace approximation.</p>
+<p>It approximates the posterior distribution using a normal
+distribution centered at the mode of the posterior.</p>
+<p>We implement this by running <code class="docutils literal"><span class="pre">MAP</span></code> to find the posterior mode.
+This forms the mean of the normal approximation. We then compute
+the Hessian at the mode of the posterior. This forms the
+covariance of the normal approximation.</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
 <code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace.finalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to call after convergence.</p>
-<p>Computes the hessian at the mode.</p>
+<p>Computes the Hessian at the mode.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="edward.inferences.MAP">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data instance&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data object&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Maximum a posteriori inference.</p>
 <p>We implement this using a <code class="docutils literal"><span class="pre">PointMass</span></code> variational distribution to
@@ -903,7 +896,7 @@ reparameterization gradient if available.</li>
 
 <dl class="class">
 <dt id="edward.inferences.VariationalInference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=&lt;edward.data.Data instance&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=&lt;edward.data.Data object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
 <p>Base class for variational inference methods.</p>
 <p>Initialization.</p>

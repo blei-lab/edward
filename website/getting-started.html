@@ -91,7 +91,7 @@ import numpy as np  </code></pre>
 <p>Now, consider the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> <span class="math display">\[\begin{aligned}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &amp;=
-  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\mu\)</span> is a neural network with weights (latent variables) <span class="math inline">\(\mathbf{z}\)</span>. Here <span class="math inline">\(x_n\)</span> is the (known) covariate and <span class="math inline">\(\sigma^2\)</span> is the (known) variance of the observation.</p>
+  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\mu\)</span> is a neural network with weights (latent) variables <span class="math inline">\(\mathbf{z}\)</span>. Here <span class="math inline">\(x_n\)</span> is the (known) covariate and <span class="math inline">\(\sigma^2\)</span> is the (known) variance of the observation.</p>
 <p>A Bayesian neural network further posits a prior on the weights. Assuming an independent standard normal prior gives the following joint density <span class="math display">\[\begin{aligned}
   p(\mathbf{z}, \mathbf{y} \;;\; \mathbf{x}, \sigma^2)
   &amp;=
@@ -104,10 +104,10 @@ import numpy as np  </code></pre>
     &quot;&quot;&quot;A Bayesian neural network regression model (abridged)&quot;&quot;&quot;
 
     def log_prob(self, xs, zs):
-        # Specify the prior
+        # Specify the prior on latent variables zs
         log_prior = tf.reduce_sum(norm.logpdf(zs, loc=0, scale=1), 1)
 
-        # Extract (y,x) from data
+        # Extract (y,x) from data xs
         y = xs[:, 0]
         x = xs[:, 1:]
 
@@ -124,7 +124,7 @@ import numpy as np  </code></pre>
   h_{11} &amp;= \tanh(w_{11} x_n + b_{11})\\
   h_{12} &amp;= \tanh(w_{12} x_n + b_{12})\\
   h_{21} &amp;= \tanh(w_{211} h_{11} + w_{212} h_{12} + b_{21})\\
-  h_{22} &amp;= \tanh(w_{211} h_{11} + w_{212} h_{12} + b_{22})\\
+  h_{22} &amp;= \tanh(w_{221} h_{11} + w_{222} h_{12} + b_{22})\\
   \mu &amp;= \tanh(w_{31} h_{21} + w_{32} h_{22} + b_3)\end{aligned}\]</span> where <span class="math inline">\(\mathbf{z} = (w_{1:}, w_{2::}, w_{3:}, b_{1:}, b_{2:}, b_3)\)</span>.</p>
 <p>Next, specify a variational approximation to the posterior. A mean-field normal approximation is reasonable.</p>
 <pre class="python" language="Python"><code>variational = Variational()
@@ -133,7 +133,7 @@ variational.add(Normal(model.num_vars))  </code></pre>
 <pre class="python" language="Python"><code>def build_toy_dataset(n_data=50, noise_std=0.1):
     x = np.linspace(-3, 3, num=n_data)
     y = np.cos(x) 
-    y = y + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    y = y + ed.stats.norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
     x = x.reshape((n_data, 1))
     y = y.reshape((n_data, 1))
     data = np.concatenate((y, x), axis=1)
@@ -144,7 +144,7 @@ variational.add(Normal(model.num_vars))  </code></pre>
 <p>We now have all the ingredients to infer the posterior of this model. Edward <code>Inference</code> classes take three things as input: a probability model, a variational model, and data. Here we run mean-field variational inference for <code>1000</code> iterations, by subsampling <code>5</code> datapoints at each iteration. We also print a status report to the terminal every <code>100</code> iterations</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=5, n_print=100)  </code></pre>
-<p>Drawing samples from the posterior shows how the neural network has adapted to the cosine nonlinearity.</p>
+<p>Drawing samples from the posterior shows how the Bayesian neural network has learned the cosine nonlinearity.</p>
 <p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out our <a href="tutorials.html">tutorials</a>.</p>
