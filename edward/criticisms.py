@@ -148,6 +148,10 @@ def ppc(model, variational=None, data=None, T=None, size=100):
 
         .. math::
             (T(y, z^{1}), ..., T(y, z^{size})).
+
+        If the discrepancy function is not specified, then the list
+        contains the full data distribution where each element is a
+        data set (dictionary).
     """
     sess = get_session()
     if data is None:
@@ -157,10 +161,6 @@ def ppc(model, variational=None, data=None, T=None, size=100):
         # Assume all values have the same data set size.
         N = get_dims(data.values()[0])[0]
         y = data
-
-    if T is None:
-        # TODO this doesn't work because y is a data dictionary
-        T = lambda y, z=None: y
 
     # 1. Sample from posterior (or prior).
     # We must fetch zs out of the session because sample_likelihood()
@@ -182,7 +182,14 @@ def ppc(model, variational=None, data=None, T=None, size=100):
 
     # 2. Sample from likelihood.
     yreps = model.sample_likelihood(zs, size=N)
+
     # 3. Calculate discrepancy.
+    if T is None:
+        if y is None:
+            return yreps
+        else:
+            return [yreps, y]
+
     Tyreps = []
     Tys = []
     for yrep, z in zip(yreps, tf.unpack(zs)):
