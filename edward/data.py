@@ -95,7 +95,7 @@ class DataGenerator(object):
                 else:
                     counter_new = counter_new - N
                     batch_value = tf.gather(value,
-                                          list(range(self.counter, self.N)) + \
+                                          list(range(counter_old, N)) + \
                                           list(range(0, counter_new)))
             elif isinstance(value, np.ndarray):
                 counter_new = counter_old + n_data
