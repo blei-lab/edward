@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Tutorials</title>
+<title>Edward – Hierarchical Logistic Regression</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,38 +69,94 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="tutorials">Tutorials</h2>
-<p>Edward supports a variety of probability models, inference algorithms, and criticism procedures. Here we show a few key examples from each category. We recommend <a href="getting-started.html">Getting Started</a> and <a href="delving-in.html">Delving In</a> before trying any of the tutorials below.</p>
-<h3 id="models">Models</h3>
+<h2 id="hierarchical-logistic-regression">Hierarchical Logistic Regression</h2>
+<h2 id="on-hold">(ON HOLD)</h2>
 <ul>
-<li><a href="tut_bayesian_linear_regression.html">Bayesian linear regression</a></li>
-<li><a href="tut_hierarchical_logistic_regression.html">(ON HOLD) Hierarchical logistic regression</a></li>
-<li><a href="tut_mixture_gaussian.html">Mixture of Gaussians</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">Gaussian process classification</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">Bayesian neural network</a></li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py">Mixture density network</a></li>
+<li><strong>Probability Model:</strong> Hierarchical logistic regression</li>
+<li><strong>Variational Model:</strong> Fully factorized normal</li>
+<li><strong>Data:</strong> Simulated data</li>
+<li><strong>Inference:</strong> Mean-field variational inference</li>
+<li><strong>Criticism:</strong> None</li>
 </ul>
-<p>want</p>
-<ul>
-<li>Maja’s log bilinear network model (the simple one)</li>
-<li>LDA (hold off because we don’t have SVI)</li>
-</ul>
+<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">bayesian_linear_regression.py</a></p>
+<h3 id="probability-model">Probability Model</h3>
+<p>Define the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> as <span class="math display">\[\begin{aligned}
+  p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
+  &amp;=
+  \mathcal{N}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
+<p>Define the prior to be a fully factorized normal <span class="math display">\[\begin{aligned}
+  p(\mathbf{z})
+  &amp;=
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
+<p>The model in Edward is</p>
+<pre class="python" language="Python"><code>class BayesianLinearRegressionModel:
+    """
+    Bayesian linear regression for outputs y on inputs x.
+
+    p((x,y), z) = Normal(y | x*z, lik_variance) *
+                  Normal(z | 0, prior_variance),
+
+    where z are weights, and with known lik_variance and
+    prior_variance.
+
+    Parameters
+    ----------
+    lik_variance : float, optional
+        Variance of the normal likelihood; aka noise parameter,
+        homoscedastic variance, scale parameter.
+    prior_variance : float, optional
+        Variance of the normal prior on weights; aka L2
+        regularization parameter, ridge penalty, scale parameter.
+    """
+    def __init__(self, lik_variance=0.01, prior_variance=0.01):
+        self.lik_variance = lik_variance
+        self.prior_variance = prior_variance
+        self.num_vars = 2
+
+    def log_prob(self, xs, zs):
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        # Data has output in first column and input in second column.
+        y = xs[:, 0]
+        x = xs[:, 1]
+        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        # broadcasting to do (x*W) + b (n_data x n_minibatch - n_minibatch)
+        x = tf.expand_dims(x, 1)
+        W = tf.expand_dims(zs[:, 0], 0)
+        b = zs[:, 1]
+        mus = tf.matmul(x, W) + b
+        # broadcasting to do mus - y (n_data x n_minibatch - n_data)
+        y = tf.expand_dims(y, 1)
+        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
+        return log_lik + log_prior
+
+model = BayesianLinearRegressionModel()</code></pre>
+<h3 id="variational-model">Variational Model</h3>
+<p>Define the variational model to be a fully factorized normal <span class="math display">\[\begin{aligned}
+  q(\mathbf{z} \;;\; \lambda)
+  &amp;=
+  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).\end{aligned}\]</span></p>
+<p>The model in Edward is</p>
+<pre class="python" language="Python"><code>variational = Variational()
+variational.add(Normal(model.num_vars))</code></pre>
+<h3 id="data">Data</h3>
+<p>Consider a simulated dataset</p>
+<pre class="python" language="Python"><code>def build_toy_dataset(n_data=40, noise_std=0.1):
+    ed.set_seed(0)
+    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
+                         np.linspace(6, 8, num=n_data/2)])
+    y = 0.075*x + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    x = (x - 4.0) / 4.0
+    x = x.reshape((n_data, 1))
+    y = y.reshape((n_data, 1))
+    data = np.concatenate((y, x), axis=1) # n_data x 2
+    data = tf.constant(data, dtype=tf.float32)
+    return ed.Data(data)
+
+data = build_toy_dataset()</code></pre>
 <h3 id="inference">Inference</h3>
-<ul>
-<li>MAP</li>
-<li>Laplace approximation</li>
-<li>Coordinate ascent variational inference</li>
-<li>BBVI</li>
-<li>KLpq</li>
-<li><a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">Variational auto-encoder</a></li>
-<li>ADVI (we definitely don’t have transformations yet)</li>
-<li>SVI (don’t have yet)</li>
-</ul>
-<h3 id="criticism">Criticism</h3>
-<ul>
-<li>Posterior predictive check (DO)</li>
-<li>Scoring rules</li>
-</ul>
+<p>Inference is mean-field variational inference</p>
+<pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
+inference.run(n_iter=250, n_minibatch=5, n_print=10)</code></pre>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

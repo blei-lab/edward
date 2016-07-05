@@ -5,7 +5,7 @@
 \subsection{Delving In}
 
 Edward enables black box inference for probability models. Its design reflects
-the building blocks for inference and model checking. Here we describe the
+the building blocks for inference and model criticism. Here we describe the
 motivation behind Edward's design and specify its internal workings.
 
 Edward is named after the innovative statistician
@@ -22,7 +22,7 @@ loop:
 \item Criticize the model, revise and repeat
 \end{enumerate}
 
-\hspace*{100px}\includegraphics{images/model_infer_criticize.png}
+\includegraphics{images/model_infer_criticize.png}
 
 Here's a toy example. A child flips a coin ten times, with the data of
 outcomes being \texttt{{[}0,\ 1,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 1{]}}. We
@@ -89,7 +89,7 @@ This describes the probability model, which is a joint distribution of data $x$
 and latent variables $z$. Given a model, we aim to reason about $z$ given some
 data: the latent patterns conditioned on some data. The posterior distribution
 $p(z \mid x)$ captures our reasoning: its mean describes our best guess of the
-latent patterns, and its variance describes our uncertainty around our best
+latent patterns, and its variance describes the uncertainty around our best
 guess. 
 
 \textbf{Variational Models.}
@@ -130,7 +130,7 @@ $p(z \mid x)$.
 \includegraphics{images/inference_structure.png}
 
 Each algorithm minimizes a different loss metric between the variational model
-and the posterior. Algorithms that derive from \texttt{VariationInference()}
+and the posterior. Algorithms that derive from \texttt{VariationalInference()}
 take as input a probability model, a variational model, and data. 
 
 For example, to minimize the Kullback-Leibler divergence
@@ -145,7 +145,7 @@ inference.run(n_iter=500, n_minibatch=5)
 which runs the \texttt{KLpq} minimization algorithm for \texttt{500} iterations,
 drawing minibatches of \texttt{5} samples from the data at every iteration.
 
-Edward offers many inference procedures; these are best explored through 
+Edward offers many inference procedures; they are best explored through 
 \href{tutorials.html}{tutorials}.
 
 \subsubsection{Criticism}\label{criticism}
@@ -190,10 +190,11 @@ predictive distribution. See the \href{tutorials.html}{tutorial} page for
 examples.
 
 \textbf{Metric-based evaluations.} 
-Edward also supports metric-based evaluations. The simplest example is to think
-of a classification model. After inferring the posterior, the model predicts a
-label for each observation in the data. Edward makes it easy to compute a
-variety of metrics, such as classification error and mean absolute error.
+Edward also supports metric-based evaluations. The simplest example is 
+a classification model. After inferring the posterior, we can predict the
+label for each observation in the data. Edward implements a
+variety of metrics, such as classification error and mean absolute error, based
+on these predictions.
 
 First implement a \texttt{predict()} function in the probability model. This
 predicts the label given samples from the posterior $p(z \mid x)$. Then call
@@ -204,8 +205,8 @@ print(ed.evaluate('mean_absolute_error', my_model, my_variational, my_data))
 to evaluate these metrics. Swapping \texttt{my_data} with held-out data makes it
 easy to implement cross-validation and other model assessment techniques.
 
-Edward offers many evaluation metrics; these are best explored through 
-\href{tutorials.html}{tutorials}.
+Edward offers many evaluation metrics; see the  
+\href{tutorials.html}{tutorials} for more examples.
 
 \subsubsection{References}\label{references}
 
