@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Delving In</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/edward.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="delving-in">Delving In</h2>
+<p>Edward enables black box inference for probability models. Its design reflects the building blocks for inference and model criticism. Here we describe the motivation behind Edward’s design and specify its internal workings.</p>
+<p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
+<p>First gather data from a real-world process. Then cycle through Box’s loop:</p>
+<ol>
+<li>Build a probabilistic model of the process</li>
+<li>Reason about the process given model and data</li>
+<li>Criticize the model, revise and repeat</li>
+</ol>
+<p><img alt="image" src="images/model_infer_criticize.png"/></p>
+<p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to reason about the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
+<p>This process defines the design of Edward. Four primary objects enable the above analysis.</p>
+<h3 id="data">Data</h3>
+<p><code>Data</code> objects contain measurements. The structure of these objects must match the inputs of the probabilistic model. For example,</p>
+<pre class="python" language="Python"><code>data_np = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+my_data = ed.Data(tf.constant(data_np, dtype=tf.float32))</code></pre>
+<p><code>Data</code> objects define a <code>sample</code> method that specifies how to sample minibatches of observations from the dataset.</p>
+<h3 id="models">Models</h3>
+<p>There are two types of model objects in Edward:</p>
+<ol>
+<li>Probability models of data, <span class="math">\(p(x,z)\)</span></li>
+<li>Variational models of latent variables <span class="math">\(q(z\;;\;\lambda)\)</span></li>
+</ol>
+<p><strong>Probability Models.</strong> Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3, or Stan. A probability model has the following structure.</p>
+<pre class="python" language="Python"><code>import edward as ed
+import tensorflow as tf
+
+class probability_model():
+    def __init__(...):
+        ...
+        self.num_vars = ...
+ 
+    def log_prob(self, xs, zs):
+        log_prior = ...
+        log_likelihood = ...
+        return log_prior + log_likelihood
+
+my_model = probability_model(...)</code></pre>
+<p>The field <code>self.num_vars</code> holds the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>self.num_vars=2*N</code> latent variables for <code>N</code> observations.</p>
+<p>The method <code>self.logprob(xs, zs)</code> calculates the log probability of the joint density <span class="math">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables.</p>
+<p>This describes the probability model, which is a joint distribution of data <span class="math">\(x\)</span> and latent variables <span class="math">\(z\)</span>. Given a model, we aim to reason about <span class="math">\(z\)</span> given some data: the latent patterns conditioned on some data. The posterior distribution <span class="math">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the latent patterns, and its variance describes the uncertainty around our best guess.</p>
+<p><strong>Variational Models.</strong> Edward uses variational inference to approximate the posterior. To this end, Edward implements a foundational <code>Variational()</code> class and a library of <code>Distribution()</code> objects. Variational models combine these using the <code>add()</code> syntax.</p>
+<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math">\[\begin{aligned}
+  q(z \;;\; \lambda) 
+  &amp;=
+  \text{Dirichlet}(z_\pi)
+  \times
+  \mathcal{N}(z_\mu)
+  \times
+  \text{LogNorm}(z_\sigma)\end{aligned}\]</span> we would write</p>
+<pre class="python" language="Python"><code>from edward.models import Variational, Dirichlet, Normal, LogNorm
+
+my_variational = Variational()
+my_variational.add(Dirichlet(K))
+my_variational.add(Normal(K*D))
+my_variational.add(LogNorm(K*D))</code></pre>
+<p>Ordering matters; variational models must match the same ordering as latent variable declarations in <code>probabilitymodel.logprob(xs, zs)</code>.</p>
+<h3 id="inference">Inference</h3>
+<p>Edward implements a variety of inference procedures. Current techniques leverage variational inference, which seeks to match the variational model <span class="math">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math">\(p(z \mid x)\)</span>.</p>
+<p><img alt="image" src="images/inference_structure.png"/></p>
+<p>Each algorithm minimizes a different loss metric between the variational model and the posterior. Algorithms that derive from <code>VariationalInference()</code> take as input a probability model, a variational model, and data.</p>
+<p>For example, to minimize the Kullback-Leibler divergence <span class="math">\[\begin{aligned}
+  \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we would write</p>
+<pre class="python" language="Python"><code>inference = ed.KLpq(my_model, my_variational, my_data)
+inference.run(n_iter=500, n_minibatch=5)</code></pre>
+<p>which runs the <code>KLpq</code> minimization algorithm for <code>500</code> iterations, drawing minibatches of <code>5</code> samples from the data at every iteration.</p>
+<p>Edward offers many inference procedures; they are best explored through <a href="tutorials.html">tutorials</a>.</p>
+<h3 id="criticism">Criticism</h3>
+<p>Edward actively encourages criticizing models and inference procedures. To that end, Edward provides a <code>criticisms</code> module that implements:</p>
+<ol>
+<li>posterior predictive checks</li>
+<li>metric-based evaluations (e.g. mean squared error, binary accuracy)</li>
+</ol>
+<p><strong>Posterior predictive checks (PPC).</strong> The simplest PPC works by studying the posterior predictive distribution <span class="math">\[\begin{aligned}
+  p(x_\text{new} \mid x)
+  &amp;=
+  \int
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z\end{aligned}\]</span> through a discrepancy function, such as <span class="math">\(T(x_\text{new}) = \max(x_\text{new})\)</span>.</p>
+<p>One way to use a PPC is to compare <span class="math">\(T(x_\text{new})\)</span> to the observed value of the discrepancy on the data <span class="math">\(T(x)\)</span>.</p>
+<p><img alt="image" src="images/ppc.png"/></p>
+<p>Here <span class="math">\(T(x)\)</span> falls in a low probability region of the posterior predictive discrepancy distribution. This indicates a direction for potential improvement.</p>
+<p>Edward implements PPCs through the <code>samplelikelihood()</code> function in the probability model. This method samples a dataset from the model likelihood <span class="math">\[\begin{aligned}
+  x \sim p(x \mid z).\end{aligned}\]</span> The <code>criticisms.ppc()</code> method then provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution. See the <a href="tutorials.html">tutorial</a> page for examples.</p>
+<p><strong>Metric-based evaluations.</strong> Edward also supports metric-based evaluations. The simplest example is a classification model. After inferring the posterior, we can predict the label for each observation in the data. Edward implements a variety of metrics, such as classification error and mean absolute error, based on these predictions.</p>
+<p>First implement a <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math">\(p(z \mid x)\)</span>. Then call</p>
+<pre class="python" language="Python"><code>print(ed.evaluate('categorical_accuracy', my_model, my_variational, my_data))
+print(ed.evaluate('mean_absolute_error', my_model, my_variational, my_data))</code></pre>
+<p>to evaluate these metrics. Swapping <code>mydata</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
+<p>Edward offers many evaluation metrics; see the <a href="tutorials.html">tutorials</a> for more examples.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>
+<li>Box, G.E.P. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.</li>
+<li>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. Statistica Sinica.</li>
+<li>David M Blei. (2014). Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics, 1:203-232</li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
