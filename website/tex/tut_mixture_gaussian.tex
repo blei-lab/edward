@@ -1,0 +1,147 @@
+% Define the subtitle of the page
+\title{Mixture of Gaussians}
+
+% Begin the content of the page
+\subsection{Mixture of Gaussians}
+
+\begin{itemize}
+  \item \textbf{Probability Model:} Mixture of Gaussians
+  \item \textbf{Variational Model:} Dirichlet $\times$ factorized normal
+  $\times$ factorized inverse gamma
+  \item \textbf{Data:} Simulated data
+  \item \textbf{Inference:} Mean-field variational inference
+  \item \textbf{Criticism:} None
+\end{itemize}
+
+Full Python code in: 
+\href{https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py}
+{mixture_gaussian.py}
+
+
+\subsubsection{Probability Model}
+Define the likelihood of an observation $x_n$
+to be
+\begin{align*}
+  p(x_{n} \mid \pi, \mu, \Sigma)
+  &=
+  \sum_{k=1}^K \pi_k \, \mathcal{N}(x_n ; \mu_k, \sigma_k).
+\end{align*}
+The latent variable $\pi$ mixes $K$ Gaussian distributions, each 
+characterized by mean $\mu_k$ and variance $\sigma_k$.
+
+Define the prior on $\pi$ to be a Dirichlet 
+\begin{align*}
+  p(\pi)
+  &=
+  \text{Dirichlet}(\pi \;;\; \alpha \mathbf{1}_{K \times 1}).
+\end{align*} 
+
+Define the prior on $\mu$ to be a factorized normal 
+\begin{align*}
+  p(\mu)
+  &=
+  \prod_{k=1}^{K} \mathcal{N}(\mu_k \;;\; 0, \sigma^2).
+\end{align*} 
+
+Define the prior on $\sigma$ to be a factorized inverse gamma
+\begin{align*}
+  p(\sigma)
+  &=
+  \prod_{k=1}^{K} \text{InvGamma}(\sigma_k \;;\; a, b).
+\end{align*} 
+
+The model in Edward is 
+\begin{lstlisting}[language=Python]
+class MixtureGaussian:
+    """
+    Mixture of Gaussians
+
+    p(x, z) = [ prod_{n=1}^N N(x_n; mu_{c_n}, sigma_{c_n}) Multinomial(c_n; pi) ]
+              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
+              Dirichlet(pi; alpha)
+
+    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
+
+    Parameters
+    ----------
+    K : int
+        Number of mixture components.
+    D : float, optional
+        Dimension of the Gaussians.
+    """
+    def __init__(self, K, D):
+        self.K = K
+        self.D = D
+        self.num_vars = (2*D + 1) * K
+
+        self.a = 1
+        self.b = 1
+        self.c = 10
+        self.alpha = tf.ones([K])
+
+    def log_prob(self, xs, zs):
+        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        N = get_dims(xs)[0]
+        pi, mus, sigmas = zs
+        log_prior = dirichlet.logpdf(pi, self.alpha)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+
+        # Loop over each mini-batch zs[b,:]
+        log_lik = []
+        n_minibatch = get_dims(zs[0])[0]
+        for s in range(n_minibatch):
+            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
+            for k in range(self.K):
+                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
+                    mus[s, (k*self.D):((k+1)*self.D)],
+                    sigmas[s, (k*self.D):((k+1)*self.D)]))
+
+            log_lik += [log_lik_z]
+
+        return log_prior + tf.pack(log_lik)
+
+model = MixtureGaussian(K=2, D=2)
+\end{lstlisting}
+
+
+\subsubsection{Variational Model}
+The latent variables are $\mathbf{z} = (\pi, \mu, \sigma)$.
+
+Define the variational model to be a Dirichlet $\times$ factorized normal
+$\times$ factorized inverse gamma
+\begin{align*}
+  q(\mathbf{z} \;;\; \lambda) 
+  &=
+  \text{Dirichlet}(\mathbf{z}_\pi) 
+  \times
+  \mathcal{N}(\mathbf{z}_\mu)
+  \times
+  \text{InvGamma}(\mathbf{z}_\sigma)
+\end{align*}
+
+The model in Edward is
+\begin{lstlisting}[language=Python]
+variational = Variational()
+variational.add(Dirichlet(model.K))
+variational.add(Normal(model.K*model.D))
+variational.add(InvGamma(model.K*model.D)).
+\end{lstlisting}
+
+
+\subsubsection{Data}
+
+Consider a simulated (pre-generated) dataset
+\begin{lstlisting}[language=Python]
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
+data = ed.Data(tf.constant(x, dtype=tf.float32))
+\end{lstlisting}
+
+
+\subsubsection{Inference}
+
+Inference is mean-field variational inference
+\begin{lstlisting}[language=Python]
+inference = ed.MFVI(model, variational, data)
+inference.run(n_iter=500, n_minibatch=5, n_data=5)
+\end{lstlisting}
