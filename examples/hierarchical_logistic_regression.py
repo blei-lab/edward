@@ -73,7 +73,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
     x  = np.linspace(-3, 3, num=n_data)
-    y = np.tanh(x) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    y = np.tanh(x) + norm.rvs(0, noise_std, size=n_data)
     y[y < 0.5] = 0
     y[y >= 0.5] = 1
     x = (x - 4.0) / 4.0
