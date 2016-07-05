@@ -163,16 +163,11 @@ class Distribution(object):
                 ...,
                 sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
         """
-        if isinstance(xs, tf.Tensor):
-            shape = get_dims(xs)
-        else: # NumPy array
-            shape = xs.shape
-
         # Loop over each random variable.
         # If univariate distribution, this is over all indices; if
         # multivariate distribution, this is over all but the last
         # index.
-        n_minibatch = shape[0]
+        n_minibatch = get_dims(xs)[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         if len(self.shape) == 1:
             if self.is_multivariate:

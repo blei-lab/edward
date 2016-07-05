@@ -294,12 +294,7 @@ class Variational(object):
         if len(self.layers) == 1:
             return self.layers[0].log_prob(xs)
 
-        if isinstance(xs[0], tf.Tensor):
-            shape = get_dims(xs[0])
-        else: # NumPy array
-            shape = xs[0].shape
-
-        n_minibatch = shape[0]
+        n_minibatch = get_dims(xs[0])[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
         for l, layer in enumerate(self.layers):
             log_prob += layer.log_prob(xs[l])

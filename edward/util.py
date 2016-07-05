@@ -67,19 +67,25 @@ def get_dims(x):
 
     Parameters
     ----------
-    x: tf.Tensor
-        scalar, vector, matrix, or n-Tensor
+    x : tf.Tensor or np.ndarray
+        scalar, vector, matrix, or n-tensor
 
     Returns
     -------
     list
         Python list containing dimensions of `x`
     """
-    dims = x.get_shape()
-    if len(dims) == 0: # scalar
-        return [1]
-    else: # array
-        return [dim.value for dim in dims]
+    if isinstance(x, tf.Tensor):
+        dims = x.get_shape()
+        if len(dims) == 0: # scalar
+            return []
+        else: # array
+            return [dim.value for dim in dims]
+
+    elif isinstance(x, np.ndarray):
+        return list(x.shape)
+    else:
+        raise NotImplementedError()
 
 
 def get_session():
