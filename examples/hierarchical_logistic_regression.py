@@ -80,11 +80,9 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     y[y < 0.5] = 0
     y[y >= 0.5] = 1
     x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, D))
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)
+    x = tf.constant(x.reshape((n_data, D)), dtype=tf.float32)
+    y = tf.constant(y.reshape((n_data, 1)), dtype=tf.float32)
+    return {'x': x, 'y': y}
 
 ed.set_seed(42)
 model = HierarchicalLogistic(weight_dim=[1,1])

@@ -5,8 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.data import Data
-from edward.util import logit, get_session
+from edward.util import logit, get_dims, get_session
 
 
 def evaluate(metrics, model, variational, data):
@@ -20,7 +19,7 @@ def evaluate(metrics, model, variational, data):
         Probability model p(x, z)
     variational : ed.Variational
         Variational approximation to the posterior p(z | x)
-    data : ed.Data
+    data : dict
         Data to evaluate the model at
 
     Returns
@@ -36,12 +35,11 @@ def evaluate(metrics, model, variational, data):
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
     # 1. Sample a batch of latent variables from posterior
-    xs = data.data
     n_minibatch = 100
     zs = variational.sample(size=n_minibatch)
     feed_dict = variational.np_dict(zs)
     # 2. Make predictions, averaging over each sample of latent variables
-    y_pred, y_true = model.predict(xs, zs)
+    y_pred, y_true = model.predict(data, zs)
 
     # Evaluate y_pred according to y_true for all metrics.
     evaluations = []
@@ -100,7 +98,7 @@ def evaluate(metrics, model, variational, data):
         return evaluations
 
 
-def ppc(model, variational=None, data=Data(), T=None, size=100):
+def ppc(model, variational=None, data=None, T=None, size=100):
     """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
     If no posterior approximation is provided through ``variational``,
@@ -125,15 +123,16 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
         approximation or an empirical distribution from MCMC samples.
         If not specified, samples will be obtained from the model
         through the ``sample_prior`` method.
-    data : ed.Data, optional
+    data : dict, optional
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
         data set size of 1.
     T : function, optional
-        Discrepancy function taking tf.Tensor inputs and returning
-        a tf.Tensor output. Default is the identity function.
-        In general this is a function taking in a data set ``y``
-        and optionally a set of latent variables ``z`` as input.
+        Discrepancy function, which takes a data dictionary and list
+        of latent variables as input and outputs a tf.Tensor. Default
+        is the identity function. In general this is a function
+        taking in a data set ``y`` and optionally a set of latent
+        variables ``z`` as input.
     size : int, optional
         number of replicated data sets
 
@@ -153,13 +152,15 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
             (T(y, z^{1}), ..., T(y, z^{size})).
     """
     sess = get_session()
-    y = data.data
+    y = data
     if y is None:
         N = 1
     else:
-        N = data.N
+        # Assume all values have the same data set size.
+        N = get_dims(data.values()[0])[0]
 
     if T is None:
+        # TODO this doesn't work because y is a data dictionary
         T = lambda y, z=None: y
 
     # 1. Sample from posterior (or prior).

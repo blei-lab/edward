@@ -73,7 +73,8 @@ class GaussianProcess:
 
 ed.set_seed(42)
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
-data = ed.Data(tf.constant(df, dtype=tf.float32))
+# TODO
+data = {'x': tf.constant(df[:, 1:], dtype=tf.float32), 'y': tf.constant(df[:, 0], dtype=tf.float32)}
 
 model = GaussianProcess(N=len(df))
 variational = Variational()

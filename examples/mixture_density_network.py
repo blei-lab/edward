@@ -42,7 +42,7 @@ class MixtureDensityNetwork:
         """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
         # Note there are no parameters we're being Bayesian about. The
         # parameters are baked into how we specify the neural networks.
-        X, y = xs
+        X, y = xs['X'], xs['y']
         self.mapping(X)
         result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
         result = tf.mul(result, self.pi)
@@ -67,7 +67,7 @@ print("Size of output in test data: {:s}".format(y_test.shape))
 
 X = tf.placeholder(tf.float32, shape=(None, 1))
 y = tf.placeholder(tf.float32, shape=(None, 1))
-data = ed.Data([X, y])
+data = {'X': X, 'y': y}
 
 inference = ed.MAP(model, data)
 sess = ed.get_session()

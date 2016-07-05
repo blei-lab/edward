@@ -18,7 +18,7 @@ except ImportError:
 class Inference(object):
     """Base class for Edward inference methods.
     """
-    def __init__(self, model, data=Data()):
+    def __init__(self, model, data=None):
         """Initialization.
 
         Calls ``util.get_session()``
@@ -30,9 +30,12 @@ class Inference(object):
         data : ed.Data, optional
             observed data
         """
-        self.model = model
-        self.data = data
         get_session()
+        self.model = model
+        if data is None:
+            data = {}
+
+        self.data = Data(data)
 
 
 class MonteCarlo(Inference):
@@ -54,7 +57,7 @@ class MonteCarlo(Inference):
 class VariationalInference(Inference):
     """Base class for variational inference methods.
     """
-    def __init__(self, model, variational, data=Data()):
+    def __init__(self, model, variational, data=None):
         """Initialization.
 
         Parameters
@@ -544,7 +547,7 @@ class MAP(VariationalInference):
 
         \min_{z} - \log p(x,z)
     """
-    def __init__(self, model, data=Data(), params=None):
+    def __init__(self, model, data=None, params=None):
         with tf.variable_scope("variational"):
             if hasattr(model, 'num_vars'):
                 variational = Variational()
@@ -580,7 +583,7 @@ class Laplace(MAP):
     the Hessian at the mode of the posterior. This forms the
     covariance of the normal approximation.
     """
-    def __init__(self, model, data=Data(), params=None):
+    def __init__(self, model, data=None, params=None):
         super(Laplace, self).__init__(model, data, params)
 
     def finalize(self):

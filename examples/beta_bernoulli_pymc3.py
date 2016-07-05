@@ -24,7 +24,7 @@ with pm.Model() as model:
                        beta,
                        observed=data_shared)
 
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+data = {'TODO': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 m = PyMC3Model(model, data_shared)
 variational = Variational()
 variational.add(Beta())

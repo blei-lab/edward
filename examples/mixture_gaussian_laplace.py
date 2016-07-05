@@ -63,7 +63,7 @@ class MixtureGaussian:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        N = get_dims(xs)[0]
+        N = get_dims(xs['x'])[0]
         pi, mus, sigmas = self.unpack_params(zs)
         log_prior = dirichlet.logpdf(pi, self.alpha)
         log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
@@ -75,7 +75,7 @@ class MixtureGaussian:
         for s in range(n_minibatch):
             log_lik_z = N*tf.reduce_sum(tf.log(pi))
             for k in range(self.K):
-                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
+                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs['x'],
                     mus[s, (k*self.D):((k+1)*self.D)],
                     sigmas[s, (k*self.D):((k+1)*self.D)]))
 
@@ -85,7 +85,7 @@ class MixtureGaussian:
 
 ed.set_seed(42)
 x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
-data = ed.Data(tf.constant(x, dtype=tf.float32))
+data = {'x': tf.constant(x, dtype=tf.float32)}
 
 model = MixtureGaussian(K=2, D=2)
 inference = ed.Laplace(model, data)
