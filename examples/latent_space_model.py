@@ -9,24 +9,21 @@ from edward.stats import norm, poisson
 
 class Latent_Space_Model():
     """
-    p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; \exp(s_iTt_j) ) ]
-              [ prod_{i=1}^N N(s_i; 0, var) N(t_i; 0, var) ]
+    p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; 1/||z_i - z_j|| ) ]
+              [ prod_{i=1}^N N(z_i; 0, I)) ]
               
-    where z = {s,t}.
     """
     
-    def __init__(self,N,K,var=0.01, 
+    def __init__(self,N,K,var=1.0, 
                  like ='Poisson', 
                  prior='Lognormal', 
-                 dist = 'euclidean',
-                 interaction ='additive'):
+                 dist = 'euclidean'):
         self.num_vars = N * K
         self.N = N
         self.K = K
         self.prior_variance = var
         self.like = like
         self.prior = prior
-        self.interaction = interaction
         self.dist = dist
 
 
@@ -43,16 +40,13 @@ class Latent_Space_Model():
         if self.dist == 'euclidean':
             xp = tf.matmul(tf.ones([1,self.N]),tf.reduce_sum(z*z,1,keep_dims=True))
             xp = xp + tf.transpose(xp) - 2*tf.matmul(z,z,transpose_b = True)
+            xp = 1.0/xp
         elif self.dist == 'cosine':
             xp = tf.matmul(z,z,transpose_b = True)
-        if self.interaction == 'multiplicative':
-            xp = tf.exp(xp)
-        elif self.interaction != 'additive':
-            raise NotImplementedError("interaction type unknown.")
         if self.like == 'Gaussian':
             log_lik = tf.reduce_sum(norm.logpdf(xs,xp))
         elif self.like == 'Poisson':
-            if not (self.interaction == "additive" or self.prior == "Lognormal"):
+            if not (self.dist == 'euclidean' or  self.prior == "Lognormal"):
                 raise NotImplementedError("Rate of Poisson has to be nonnegatve.")
             log_lik = tf.reduce_sum(poisson.logpmf(xs,xp))
         else:
@@ -68,9 +62,8 @@ ed.set_seed(42)
 data, N = load_celegans_brain()
 K = 3 
 model = Latent_Space_Model(N,K,
-                           like='Gaussian',
-                           prior='Gaussian',
-                           interaction='additive')
+                           like='Poisson',
+                           prior='Gaussian')
 
 inference = ed.MAP(model, data)
 
