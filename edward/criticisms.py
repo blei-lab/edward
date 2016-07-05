@@ -8,7 +8,7 @@ import tensorflow as tf
 from edward.util import logit, get_dims, get_session
 
 
-def evaluate(metrics, model, variational, data):
+def evaluate(metrics, model, variational, data, y_true=None):
     """Evaluate fitted model using a set of metrics.
 
     Parameters
@@ -20,7 +20,9 @@ def evaluate(metrics, model, variational, data):
     variational : ed.Variational
         Variational approximation to the posterior p(z | x)
     data : dict
-        Data to evaluate the model at
+        Data to make model predictions with
+    y_true : np.ndarray or tf.Tensor
+        True values to compare to in supervised learning tasks.
 
     Returns
     -------
@@ -39,7 +41,7 @@ def evaluate(metrics, model, variational, data):
     zs = variational.sample(size=n_minibatch)
     feed_dict = variational.np_dict(zs)
     # 2. Make predictions, averaging over each sample of latent variables
-    y_pred, y_true = model.predict(data, zs)
+    y_pred = model.predict(data, zs)
 
     # Evaluate y_pred according to y_true for all metrics.
     evaluations = []

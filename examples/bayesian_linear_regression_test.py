@@ -60,7 +60,7 @@ class LinearModel:
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
         y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
-        return y_pred, y_test
+        return y_pred
 
 def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
@@ -81,4 +81,5 @@ inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_minibatch=5, n_print=10)
 
 data_test = build_toy_dataset()
-print(ed.evaluate('mse', model, variational, {'x': data_test['x']}))
+x_test, y_test = data_test['x'], data_test['y']
+print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))
