@@ -8,16 +8,16 @@ import tensorflow as tf
 from edward.util import get_dims
 
 
-class Data(object):
-    """Base class for Edward data objects.
+class DataGenerator(object):
+    """Base class for Edward data generators.
 
-    It is a data generator in that its only method is sample(), which
-    returns a batch of data. By default, the method returns all the
-    data. If requested, batches are given by data subsampling all
-    values in the dictionary according to slices of the first index
-    (e.g., elements in a vector, rows in a matrix, y-by-z matrices in
-    a x-by-y-by-z tensor). Use one of the derived classes for
-    subsampling more complex data structures.
+    Its only method is next(), which returns a batch of data. By
+    default, the method returns all the data. If requested, batches
+    are given by data subsampling all values in the dictionary
+    according to slices of the first index (e.g., elements in a
+    vector, rows in a matrix, y-by-z matrices in a x-by-y-by-z
+    tensor). Use one of the derived classes for subsampling more
+    complex data structures.
 
     Data subsampling is not currently available for Stan models.
 
@@ -50,11 +50,11 @@ class Data(object):
             self.N[key] = get_dims(value)[0]
             self.counter[key] = 0
 
-    def sample(self, n_data=None):
+    def next(self, n_data=None):
         """Data sampling method.
 
         At any given point, the internal counter ``self.counter`` tracks the
-        last datapoint returned by ``sample``.
+        last datapoint returned by ``next``.
 
         If the requested number of datapoints ``n_data`` goes beyond the size
         of the dataset, the internal counter wraps around the size of the
@@ -66,7 +66,7 @@ class Data(object):
         n_data : int, optional
             Number of datapoints to sample
 
-            Defaults to total number of datapoints in ``Data`` object.
+            Defaults to total number of datapoints in object.
 
         Returns
         -------

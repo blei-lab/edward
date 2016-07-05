@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.data import Data
+from edward.data import DataGenerator
 from edward.models import Variational, PointMass
 from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
@@ -27,7 +27,7 @@ class Inference(object):
         ----------
         model : ed.Model
             probability model
-        data : ed.Data, optional
+        data : dict, optional
             observed data
         """
         get_session()
@@ -35,7 +35,7 @@ class Inference(object):
         if data is None:
             data = {}
 
-        self.data = Data(data)
+        self.data = DataGenerator(data)
 
 
 class MonteCarlo(Inference):
@@ -48,7 +48,7 @@ class MonteCarlo(Inference):
         ----------
         model : ed.Model
             probability model
-        data : ed.Data, optional
+        data : dict, optional
             observed data
         """
         super(MonteCarlo, self).__init__(*args, **kwargs)
@@ -66,7 +66,7 @@ class VariationalInference(Inference):
             probability model
         variational : ed.Variational
             variational model or distribution
-        data : ed.Data, optional
+        data : dict, optional
             observed data
         """
         super(VariationalInference, self).__init__(model, data)
@@ -314,7 +314,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
 
@@ -336,7 +336,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
 
@@ -362,7 +362,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
 
@@ -390,7 +390,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
 
@@ -419,7 +419,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
 
@@ -445,7 +445,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
@@ -523,7 +523,7 @@ class KLpq(VariationalInference):
             w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
 
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         self.zs = self.variational.sample(self.n_minibatch)
         z = self.zs
 
@@ -566,7 +566,7 @@ class MAP(VariationalInference):
         .. math::
             - \log p(x,z)
         """
-        x = self.data.sample(self.n_data)
+        x = self.data.next(self.n_data)
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
@@ -592,7 +592,7 @@ class Laplace(MAP):
         Computes the Hessian at the mode.
         """
         get_session()
-        x = self.data.sample(self.n_data) # uses mini-batch
+        x = self.data.next(self.n_data) # uses mini-batch
         z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
