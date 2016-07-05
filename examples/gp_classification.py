@@ -63,8 +63,6 @@ class GaussianProcess:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
         x, y = xs['x'], xs['y']
         log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(

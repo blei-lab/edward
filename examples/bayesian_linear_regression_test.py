@@ -42,12 +42,13 @@ class LinearModel:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data has output in first column and input in remaining columns.
         x, y = xs['x'], xs['y']
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        # broadcasting to do (x*W) + b (n_data x n_minibatch - n_minibatch)
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
         mus = tf.matmul(x, W) + b
+        # broadcasting to do mus - y (n_data x n_minibatch - n_data x 1)
         y = tf.expand_dims(y, 1)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
         return log_lik + log_prior
@@ -65,9 +66,9 @@ class LinearModel:
 def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
     x = np.random.randn(n_data, n_dim)
-    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data)
     x = tf.constant(x, dtype=tf.float32)
-    y = tf.constant(y.reshape((n_data, 1)), dtype=tf.float32)
+    y = tf.constant(y, dtype=tf.float32)
     return {'x': x, 'y': y}
 
 ed.set_seed(42)
@@ -75,11 +76,12 @@ model = LinearModel()
 variational = Variational()
 variational.add(Normal(model.num_vars))
 
-data = build_toy_dataset()
+coeff = np.random.randn(10)
+data = build_toy_dataset(coeff=coeff)
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=250, n_minibatch=5, n_print=10)
+inference.run(n_iter=1, n_minibatch=5, n_print=10)
 
-data_test = build_toy_dataset()
+data_test = build_toy_dataset(coeff=coeff)
 x_test, y_test = data_test['x'], data_test['y']
 print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))

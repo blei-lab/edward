@@ -87,8 +87,6 @@ class BayesianNN:
 
     def log_lik(self, xs, zs):
         """Returns a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
         x, y = xs['x'], xs['y']
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
         # broadcasting to do mus - y (n_minibatch x n_data - n_data)
@@ -103,7 +101,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     y = np.cos(x) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
     x = (x - 4.0) / 4.0
     x = tf.constant(x.reshape((n_data, D)), dtype=tf.float32)
-    y = tf.constant(y.reshape((n_data, 1)), dtype=tf.float32)
+    y = tf.constant(y, dtype=tf.float32)
     return {'x': x, 'y': y}
 
 ed.set_seed(42)
@@ -141,7 +139,7 @@ for t in range(1000):
         outputs = mus.eval()
 
         # Get data
-        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
+        x, y = sess.run([data['x'], data['y']])
 
         # Plot data and functions
         plt.cla()
