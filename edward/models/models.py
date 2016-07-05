@@ -135,6 +135,7 @@ class StanModel(object):
             raise NotImplementedError()
 
         self.flag_init = False
+        self.num_vars = None
 
     def log_prob(self, xs, zs):
         """
