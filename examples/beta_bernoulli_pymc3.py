@@ -21,6 +21,7 @@ with pm.Model() as pm_model:
     beta = pm.Beta('beta', 1, 1, transform=None)
     x = pm.Bernoulli('x', beta, observed=x_obs)
 
+ed.set_seed(42)
 model = PyMC3Model(pm_model)
 variational = Variational()
 variational.add(Beta())
