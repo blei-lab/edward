@@ -154,12 +154,12 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     """
     sess = get_session()
     y = data.data
-    if y == None:
+    if y is None:
         N = 1
     else:
         N = data.N
 
-    if T == None:
+    if T is None:
         T = lambda y, z=None: y
 
     # 1. Sample from posterior (or prior).
@@ -187,10 +187,10 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
     Tys = []
     for yrep, z in zip(yreps, tf.unpack(zs)):
         Tyreps += [T(yrep, z)]
-        if y != None:
+        if y is not None:
             Tys += [T(y, z)]
 
-    if y == None:
+    if y is None:
         return sess.run(tf.pack(Tyreps), feed_dict)
     else:
         return sess.run([tf.pack(Tyreps), tf.pack(Tys)], feed_dict)
