@@ -83,9 +83,5 @@ inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_minibatch=5, n_print=10)
 
 data_test = build_toy_dataset(coeff=coeff)
-<<<<<<< HEAD
 x_test, y_test = data_test['x'], data_test['y']
 print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))
-=======
-print(ed.evaluate('mse', model, variational, data_test))
->>>>>>> 50b35332eb3f29f8c864f616c2752bd90dd34fc4
