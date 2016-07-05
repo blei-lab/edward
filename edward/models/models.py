@@ -46,8 +46,9 @@ class PyMC3Model(object):
         Parameters
         ----------
         xs : dict
-            Dictionary of observations whose key and values are
-            according to the user.
+            Dictionary where each key is an observation (Theano shared
+            variable) of the PyMC3 model, and each value is the
+            corresponding realization (np.ndarray).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -67,8 +68,6 @@ class PyMC3Model(object):
         for key, value in xs.items():
             key.set_value(value)
 
-        # TODO what if zs is itself a list of tf.Tensor's?
-        # for all 3 model classes
         return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
 
     def _py_log_prob(self, zs):
@@ -130,7 +129,7 @@ class StanModel(object):
         model_code : see documentation for argument in pystan.stan
         """
         if file is not None:
-            self.file =  file
+            self.file = file
         elif model_code is not None:
             self.model_code = model_code
         else:
@@ -144,8 +143,8 @@ class StanModel(object):
         Parameters
         ----------
         xs : dict
-            Dictionary of observations whose key and values are
-            according to the user.
+            Dictionary defining the observations according to the data
+            block of the Stan program.
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
