@@ -28,28 +28,50 @@ class PyMC3Model(object):
         Parameters
         ----------
         model : pymc3.Model
-            The probability model
+            The probability model, written with Theano shared
+            variables to form any observations. The Theano shared
+            variables are set during inference.
         observed : Theano tensor
-            The shared theano tensor passed to the model likelihood
+            The shared Theano tensor passed to the model.
         """
         self.model = model
         self.observed = observed
 
         vars = pm.inputvars(model.cont_vars)
+        self.num_vars = len(vars)
 
         bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
         self.logp = bij.mapf(model.fastlogp)
         self.dlogp = bij.mapf(model.fastdlogp(vars))
 
-        self.num_vars = len(vars)
-
     def log_prob(self, xs, zs):
-        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
+        """
+        Parameters
+        ----------
+        xs : np.ndarray
+            A single np.ndarray binding to the observed value in the
+            PyMC3 model.
+        zs : list or tf.Tensor
+            A list of tf.Tensor's if multiple varational families,
+            otherwise a tf.Tensor if single variational family.
 
-    def _py_log_prob(self, xs, zs):
+        Returns
+        -------
+        tf.Tensor
+            S-vector of type tf.float32,
+            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+
+        Notes
+        -----
+        It wraps around a Python function. The Python function takes
+        as input zs of type np.ndarray, and outputs a np.ndarray.
+        """
+        self.observed.set_value(xs)
+        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+
+    def _py_log_prob(self, zs):
         n_minibatch = zs.shape[0]
         lp = np.zeros(n_minibatch, dtype=np.float32)
-        self.observed.set_value(xs)
         for s in range(n_minibatch):
             lp[s] = self.logp(zs[s, :])
 
@@ -66,20 +88,30 @@ class PythonModel(object):
         """
         Parameters
         ----------
-        xs : np.ndarray
-
-        zs : np.ndarray
-            n_minibatch x dim(z) array, where each row is a set of
-            latent variables.
+        xs : any
+            A batch of data points, as any data type the user interfaces with
+            when defining this method.
+        zs : list or tf.Tensor
+            A list of tf.Tensor's if multiple varational families,
+            otherwise a tf.Tensor if single variational family.
 
         Returns
         -------
-        tf.py_func
-            a TensorFlow op wrapped as a Python function that returns
-            n_minibatch array of type np.float32, where each element
-            is the log pdf evaluated at (z_{b1}, ..., z_{bd})
+        tf.Tensor
+            S-vector of type tf.float32,
+            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+
+        Notes
+        -----
+        It wraps around a Python function. The Python function takes
+        as input zs of type np.ndarray, and outputs a np.ndarray.
         """
-        return tf.py_func(self._py_log_prob, [xs, zs], [tf.float32])[0]
+        # Store data in order to later pass data to Python function.
+        self.xs = xs
+        return tf.py_func(self._py_log_prob_z, [zs], [tf.float32])[0]
+
+    def _py_log_prob_z(self, zs):
+        return self._py_log_prob(self.xs, zs)
 
     def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
@@ -92,19 +124,40 @@ class StanModel(object):
         """
         Parameters
         ----------
-        file: see documentation for argument in pystan.stan
-        model_code: see documentation for argument in pystan.stan
+        file : see documentation for argument in pystan.stan
+        model_code : see documentation for argument in pystan.stan
         """
         if file is not None:
-            self.file =  file
+            self.file = file
         elif model_code is not None:
             self.model_code = model_code
         else:
-            raise
+            raise NotImplementedError()
 
         self.flag_init = False
 
     def log_prob(self, xs, zs):
+        """
+        Parameters
+        ----------
+        xs : dict
+            Dictionary defining the observations according to the data
+            block of the Stan program.
+        zs : list or tf.Tensor
+            A list of tf.Tensor's if multiple varational families,
+            otherwise a tf.Tensor if single variational family.
+
+        Returns
+        -------
+        tf.Tensor
+            S-vector of type tf.float32,
+            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+
+        Notes
+        -----
+        It wraps around a Python function. The Python function takes
+        as input zs of type np.ndarray, and outputs a np.ndarray.
+        """
         if self.flag_init is False:
             self._initialize(xs)
 
@@ -119,7 +172,7 @@ class StanModel(object):
             self.model = pystan.stan(model_code=self.model_code,
                                      data=xs, iter=1, chains=1)
 
-        self.num_vars = sum([sum(dim) if sum(dim) != 0 else 1 \
+        self.num_vars = sum([sum(dim) if sum(dim) != 0 else 1
                              for dim in self.model.par_dims])
         self.flag_init = True
 
