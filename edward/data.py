@@ -30,12 +30,9 @@ class DataGenerator(object):
 
         Parameters
         ----------
-        data : dict of tf.Tensor's or np.ndarray's, optional
+        data : dict of np.ndarray's, optional
             Dictionary which binds named keys of data to their values.
-            If TensorFlow, the type of each value can be ``tf.Tensor``
-            or ``np.ndarray`. Otherwise if Stan, PyMC3, or
-            NumPy/SciPy, the types of all values must be
-            ``np.ndarray``.
+            TODO or tf.placeholder for TensorFlow
         """
         if data is None:
             self.data = {}
@@ -50,7 +47,7 @@ class DataGenerator(object):
             self.N[key] = get_dims(value)[0]
             self.counter[key] = 0
 
-    def next(self, n_data=None):
+    def next(self, xs):
         """Data sampling method.
 
         At any given point, the internal counter ``self.counter`` tracks the
@@ -70,7 +67,7 @@ class DataGenerator(object):
 
         Returns
         -------
-        dict of tf.Tensor's or np.ndarray's
+        dict of np.ndarray's
             Dictionary whose values are all subsampled.
 
         Notes
@@ -80,24 +77,18 @@ class DataGenerator(object):
         In such a case, always use this method with ``n_data`` set to
         None.
         """
-        if n_data is None or not self.data: # n_data=None or empty dictionary
-            return self.data
+        #if n_data is None or not self.data: # n_data=None or empty dictionary
+        #    return self.data
 
         batch = {}
         for key, value in self.data.items():
             N = self.N[key]
+            n_data = get_dims(xs[key])[0] # TODO
+            if n_data is None:
+                n_data = N
+
             counter_old = self.counter[key]
-            if isinstance(value, tf.Tensor):
-                counter_new = counter_old + n_data
-                if counter_new <= N:
-                    batch_value = tf.gather(value,
-                                          list(range(counter_old, counter_new)))
-                else:
-                    counter_new = counter_new - N
-                    batch_value = tf.gather(value,
-                                          list(range(counter_old, N)) + \
-                                          list(range(0, counter_new)))
-            elif isinstance(value, np.ndarray):
+            if isinstance(value, np.ndarray):
                 counter_new = counter_old + n_data
                 if counter_new <= N:
                     batch_value = value[counter_old:counter_new]
@@ -109,6 +100,21 @@ class DataGenerator(object):
                 raise NotImplementedError()
 
             self.counter[key] = counter_new
-            batch[key] = batch_value
+            batch[xs[key]] = batch_value
 
         return batch
+
+    def make_placeholders(self, n_data=None):
+        placeholder_dict = {}
+        for key, value in self.data.items():
+            # TODO maybe not best place
+            if isinstance(value, tf.Tensor):
+                if value.name.startswith('Placeholder'):
+                    placeholder_dict[key] = value
+            else:
+                placeholder_dict[key] = tf.placeholder(tf.float32,
+                                                       (n_data, ) + value.shape[1:])
+
+        return placeholder_dict
+        #return {key: tf.placeholder(tf.float32, (n_data, ) + value.shape[1:])
+        #        for key, value in self.data.items()}

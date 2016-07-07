@@ -248,7 +248,9 @@ class MFVI(VariationalInference):
             MFVI loss function value after one iteration.
         """
         sess = get_session()
-        feed_dict = self.variational.np_dict(self.zs)
+        x_dict = self.data.next(self.xs)
+        z_dict = self.variational.np_dict(self.zs)
+        feed_dict = dict(x_dict, **z_dict)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -314,9 +316,8 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
@@ -336,9 +337,8 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
                                    self.variational.log_prob(z))
@@ -362,9 +362,8 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_lik = self.model.log_lik(x, z)
@@ -390,9 +389,8 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_prob = self.model.log_prob(x, z)
@@ -419,9 +417,8 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -445,9 +442,8 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -485,7 +481,9 @@ class KLpq(VariationalInference):
             KLpq loss function value after one iteration.
         """
         sess = get_session()
-        feed_dict = self.variational.np_dict(self.zs)
+        x_dict = self.data.next(self.xs)
+        z_dict = self.variational.np_dict(self.zs)
+        feed_dict = dict(x_dict, **z_dict)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -523,9 +521,8 @@ class KLpq(VariationalInference):
             w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
 
         """
-        x = self.data.next(self.n_data)
-        self.zs = self.variational.sample(self.n_minibatch)
-        z = self.zs
+        x = self.xs = self.data.make_placeholders(self.n_data)
+        z = self.zs = self.variational.sample(self.n_minibatch)
 
         # normalized importance weights
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -558,6 +555,21 @@ class MAP(VariationalInference):
 
         super(MAP, self).__init__(model, variational, data)
 
+    def update(self):
+        """Runs one iteration of MAP optimization.
+
+        Returns
+        -------
+        loss : double
+            MAP loss function value after one iteration.
+        """
+        sess = get_session()
+        x_dict = self.data.next(self.xs)
+        z_dict = self.variational.np_dict(self.zs)
+        feed_dict = dict(x_dict, **z_dict)
+        _, loss = sess.run([self.train, self.loss], feed_dict)
+        return loss
+
     def build_loss(self):
         """Loss function to minimize.
 
@@ -566,7 +578,7 @@ class MAP(VariationalInference):
         .. math::
             - \log p(x,z)
         """
-        x = self.data.next(self.n_data)
+        x = self.xs = self.data.make_placeholders(self.n_data)
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
@@ -592,6 +604,7 @@ class Laplace(MAP):
         Computes the Hessian at the mode.
         """
         get_session()
+        # TODO
         x = self.data.next(self.n_data) # uses mini-batch
         z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
