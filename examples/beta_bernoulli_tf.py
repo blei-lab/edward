@@ -10,6 +10,7 @@ Variational model
     Likelihood: Mean-field Beta
 """
 import edward as ed
+import numpy as np
 import tensorflow as tf
 
 from edward.models import Variational, Beta
@@ -29,7 +30,7 @@ ed.set_seed(42)
 model = BetaBernoulli()
 variational = Variational()
 variational.add(Beta())
-data = {'x': tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)}
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

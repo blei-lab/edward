@@ -9,6 +9,7 @@ Probability model
 Inference: Maximum a posteriori
 """
 import edward as ed
+import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta
@@ -28,7 +29,7 @@ class BetaBernoulli:
 
 ed.set_seed(42)
 model = BetaBernoulli()
-data = {'x': tf.constant((0, 1, 0, 0, 0, 0, 0, 0, 0, 1), dtype=tf.float32)}
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 params = tf.sigmoid(tf.Variable(tf.random_normal([1])))
 inference = ed.MAP(model, data, params=params)

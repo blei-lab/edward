@@ -10,8 +10,8 @@ Variational model
     Likelihood: Mean-field Normal
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
@@ -59,8 +59,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
                          np.linspace(6, 8, num=n_data/2)])
     y = 0.075*x + norm.rvs(0, noise_std, size=n_data)
     x = (x - 4.0) / 4.0
-    x = tf.constant(x.reshape((n_data, 1)), dtype=tf.float32)
-    y = tf.constant(y, dtype=tf.float32)
+    x = x.reshape((n_data, 1))
     return {'x': x, 'y': y}
 
 ed.set_seed(42)

@@ -10,8 +10,8 @@ Variational model
     Likelihood: Mean-field Normal
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
@@ -65,10 +65,8 @@ class LinearModel:
 
 def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
-    x = np.random.randn(n_data, n_dim)
+    x = np.random.randn(n_data, n_dim).astype(np.float32)
     y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data)
-    x = tf.constant(x, dtype=tf.float32)
-    y = tf.constant(y, dtype=tf.float32)
     return {'x': x, 'y': y}
 
 ed.set_seed(42)

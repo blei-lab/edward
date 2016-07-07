@@ -10,8 +10,8 @@ Variational model
     Likelihood: Mean-field Normal
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import bernoulli, multivariate_normal
@@ -72,8 +72,7 @@ class GaussianProcess:
 
 ed.set_seed(42)
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
-data = {'x': tf.constant(df[:, 1:], dtype=tf.float32),
-        'y': tf.constant(df[:, 0], dtype=tf.float32)}
+data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 model = GaussianProcess(N=len(df))
 variational = Variational()
