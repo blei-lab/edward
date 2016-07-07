@@ -25,8 +25,6 @@ class Distribution(object):
         the number of variables; equals the product of ``shape``
     num_params : int
         the number of parameters
-    sample_tensor : bool
-        ``True`` if sampling returns a ``tf.Tensor``; see :func:`sample`
     is_multivariate : bool
         ``True`` if ``Distribution`` is multivariate
     """
@@ -50,7 +48,6 @@ class Distribution(object):
         self.shape = shape
         self.num_vars = np.prod(self.shape)
         self.num_params = None
-        self.sample_tensor = False
         self.is_multivariate = False
 
     def sample_noise(self, size=1):
@@ -131,14 +128,9 @@ class Distribution(object):
 
         Returns
         -------
-        tf.Tensor or np.ndarray
+        tf.Tensor
             A (size x shape) array of type tf.float32, where each
-            slice along the first dimension is a sample from p. If
-            the flag sample_tensor is true, the return object is a
-            TensorFlow tensor. Otherwise the return object is a
-            realization of a TensorFlow tensor, i.e., NumPy array. The
-            latter is required when we require NumPy/SciPy in order to
-            sample from distributions.
+            slice along the first dimension is a sample from p.
         """
         return self.reparam(self.sample_noise(size))
 
@@ -269,7 +261,6 @@ class Bernoulli(Distribution):
     def __init__(self, shape=1, p=None):
         super(Bernoulli, self).__init__(shape)
         self.num_params = self.num_vars
-        self.sample_tensor = False
         self.is_multivariate = False
 
         if p is None:
@@ -283,8 +274,16 @@ class Bernoulli(Distribution):
         return "probability: \n" + p.__str__()
 
     def sample(self, size=1):
-        p = self.p.eval()
-        return bernoulli.rvs(p, size=size)
+        # Define Python function which returns samples as a Numpy
+        # array. This is necessary for sampling from distributions
+        # unavailable in TensorFlow natively.
+        def np_sample(p):
+            # get `size` from lexical scoping
+            return bernoulli.rvs(p, size=size).astype(np.float32)
+
+        x = tf.py_func(np_sample, [self.p], [tf.float32])[0]
+        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        return x
 
     def log_prob_idx(self, idx, xs):
         full_idx = (slice(0, None), ) + idx # slice over batch size
@@ -302,7 +301,6 @@ class Beta(Distribution):
     def __init__(self, shape=1, alpha=None, beta=None):
         super(Beta, self).__init__(shape)
         self.num_params = 2*self.num_vars
-        self.sample_tensor = False
         self.is_multivariate = False
 
         if alpha is None:
@@ -323,9 +321,16 @@ class Beta(Distribution):
                "scale: \n" + b.__str__()
 
     def sample(self, size=1):
-        sess = get_session()
-        a, b = sess.run([self.alpha, self.beta])
-        return beta.rvs(a, b, size=size)
+        # Define Python function which returns samples as a Numpy
+        # array. This is necessary for sampling from distributions
+        # unavailable in TensorFlow natively.
+        def np_sample(a, b):
+            # get `size` from lexical scoping
+            return beta.rvs(a, b, size=size).astype(np.float32)
+
+        x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
+        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        return x
 
     def log_prob_idx(self, idx, xs):
         full_idx = (slice(0, None), ) + idx # slice over batch size
@@ -343,7 +348,6 @@ class Dirichlet(Distribution):
     def __init__(self, shape, alpha=None):
         super(Dirichlet, self).__init__(shape)
         self.num_params = self.num_vars
-        self.sample_tensor = False
         self.is_multivariate = True
 
         if alpha is None:
@@ -357,8 +361,16 @@ class Dirichlet(Distribution):
         return "concentration: \n" + alpha.__str__()
 
     def sample(self, size=1):
-        alpha = self.alpha.eval()
-        return dirichlet.rvs(alpha, size=size)
+        # Define Python function which returns samples as a Numpy
+        # array. This is necessary for sampling from distributions
+        # unavailable in TensorFlow natively.
+        def np_sample(alpha):
+            # get `size` from lexical scoping
+            return dirichlet.rvs(alpha, size=size).astype(np.float32)
+
+        x = tf.py_func(np_sample, [self.alpha], [tf.float32])[0]
+        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        return x
 
     def log_prob_idx(self, idx, xs):
         """
@@ -381,7 +393,6 @@ class InvGamma(Distribution):
     def __init__(self, shape=1, alpha=None, beta=None):
         super(InvGamma, self).__init__(shape)
         self.num_params = 2*self.num_vars
-        self.sample_tensor = False
         self.is_multivariate = False
 
         if alpha is None:
@@ -402,9 +413,16 @@ class InvGamma(Distribution):
                "scale: \n" + b.__str__()
 
     def sample(self, size=1):
-        sess = get_session()
-        a, b = sess.run([self.alpha, self.beta])
-        return invgamma.rvs(a, b, size=size)
+        # Define Python function which returns samples as a Numpy
+        # array. This is necessary for sampling from distributions
+        # unavailable in TensorFlow natively.
+        def np_sample(a, scale):
+            # get `size` from lexical scoping
+            return invgamma.rvs(a, scale=scale, size=size).astype(np.float32)
+
+        x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
+        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        return x
 
     def log_prob_idx(self, idx, xs):
         full_idx = (slice(0, None), ) + idx # slice over batch size
@@ -436,7 +454,6 @@ class Multinomial(Distribution):
 
         super(Multinomial, self).__init__(shape)
         self.num_params = np.prod(shape[:-1]) * (shape[-1] -1)
-        self.sample_tensor = False
         self.is_multivariate = True
 
         if pi is None:
@@ -452,8 +469,16 @@ class Multinomial(Distribution):
         return "probability: \n" + pi.__str__()
 
     def sample(self, size=1):
-        pi = self.pi.eval()
-        return multinomial.rvs(np.ones(self.shape[:-1]), pi, size=size)
+        # Define Python function which returns samples as a Numpy
+        # array. This is necessary for sampling from distributions
+        # unavailable in TensorFlow natively.
+        def np_sample(p):
+            # get `size` from lexical scoping
+            return multinomial.rvs(np.ones(self.shape[:-1]), p, size=size).astype(np.float32)
+
+        x = tf.py_func(np_sample, [self.pi], [tf.float32])[0]
+        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        return x
 
     def log_prob_idx(self, idx, xs):
         """
@@ -476,7 +501,6 @@ class Normal(Distribution):
     def __init__(self, shape=1, loc=None, scale=None):
         super(Normal, self).__init__(shape)
         self.num_params = 2*self.num_vars
-        self.sample_tensor = True
         self.is_multivariate = False
 
         if loc is None:
@@ -525,7 +549,6 @@ class PointMass(Distribution):
     def __init__(self, shape=1, params=None):
         super(PointMass, self).__init__(shape)
         self.num_params = self.num_vars
-        self.sample_tensor = True
         self.is_multivariate = False
 
         if params is None:
