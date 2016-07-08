@@ -89,8 +89,8 @@ my_data = ed.Data(tf.constant(data_np, dtype=tf.float32))</code></pre>
 <h3 id="models">Models</h3>
 <p>There are two types of model objects in Edward:</p>
 <ol>
-<li>Probability models of data, <span class="math">\(p(x,z)\)</span></li>
-<li>Variational models of latent variables <span class="math">\(q(z\;;\;\lambda)\)</span></li>
+<li>Probability models of data, <span class="math inline">\(p(x,z)\)</span></li>
+<li>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></li>
 </ol>
 <p><strong>Probability Models.</strong> Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3, or Stan. A probability model has the following structure.</p>
 <pre class="python" language="Python"><code>import edward as ed
@@ -108,10 +108,10 @@ class probability_model():
 
 my_model = probability_model(...)</code></pre>
 <p>The field <code>self.num_vars</code> holds the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>self.num_vars=2*N</code> latent variables for <code>N</code> observations.</p>
-<p>The method <code>self.logprob(xs, zs)</code> calculates the log probability of the joint density <span class="math">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables.</p>
-<p>This describes the probability model, which is a joint distribution of data <span class="math">\(x\)</span> and latent variables <span class="math">\(z\)</span>. Given a model, we aim to reason about <span class="math">\(z\)</span> given some data: the latent patterns conditioned on some data. The posterior distribution <span class="math">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the latent patterns, and its variance describes the uncertainty around our best guess.</p>
+<p>The method <code>self.log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables.</p>
+<p>This describes the probability model, which is a joint distribution of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Given a model, we aim to reason about <span class="math inline">\(z\)</span> given some data: the latent patterns conditioned on some data. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the latent patterns, and its variance describes the uncertainty around our best guess.</p>
 <p><strong>Variational Models.</strong> Edward uses variational inference to approximate the posterior. To this end, Edward implements a foundational <code>Variational()</code> class and a library of <code>Distribution()</code> objects. Variational models combine these using the <code>add()</code> syntax.</p>
-<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math">\[\begin{aligned}
+<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math display">\[\begin{aligned}
   q(z \;;\; \lambda) 
   &amp;=
   \text{Dirichlet}(z_\pi)
@@ -125,12 +125,12 @@ my_variational = Variational()
 my_variational.add(Dirichlet(K))
 my_variational.add(Normal(K*D))
 my_variational.add(LogNorm(K*D))</code></pre>
-<p>Ordering matters; variational models must match the same ordering as latent variable declarations in <code>probabilitymodel.logprob(xs, zs)</code>.</p>
+<p>Ordering matters; variational models must match the same ordering as latent variable declarations in <code>probability_model.log_prob(xs, zs)</code>.</p>
 <h3 id="inference">Inference</h3>
-<p>Edward implements a variety of inference procedures. Current techniques leverage variational inference, which seeks to match the variational model <span class="math">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math">\(p(z \mid x)\)</span>.</p>
+<p>Edward implements a variety of inference procedures. Current techniques leverage variational inference, which seeks to match the variational model <span class="math inline">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math inline">\(p(z \mid x)\)</span>.</p>
 <p><img alt="image" src="images/inference_structure.png"/></p>
 <p>Each algorithm minimizes a different loss metric between the variational model and the posterior. Algorithms that derive from <code>VariationalInference()</code> take as input a probability model, a variational model, and data.</p>
-<p>For example, to minimize the Kullback-Leibler divergence <span class="math">\[\begin{aligned}
+<p>For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
   \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we would write</p>
 <pre class="python" language="Python"><code>inference = ed.KLpq(my_model, my_variational, my_data)
 inference.run(n_iter=500, n_minibatch=5)</code></pre>
@@ -142,23 +142,23 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <li>posterior predictive checks</li>
 <li>metric-based evaluations (e.g. mean squared error, binary accuracy)</li>
 </ol>
-<p><strong>Posterior predictive checks (PPC).</strong> The simplest PPC works by studying the posterior predictive distribution <span class="math">\[\begin{aligned}
+<p><strong>Posterior predictive checks (PPC).</strong> The simplest PPC works by studying the posterior predictive distribution <span class="math display">\[\begin{aligned}
   p(x_\text{new} \mid x)
   &amp;=
   \int
   p(x_\text{new} \mid z)
   p(z \mid x)
-  \text{d} z\end{aligned}\]</span> through a discrepancy function, such as <span class="math">\(T(x_\text{new}) = \max(x_\text{new})\)</span>.</p>
-<p>One way to use a PPC is to compare <span class="math">\(T(x_\text{new})\)</span> to the observed value of the discrepancy on the data <span class="math">\(T(x)\)</span>.</p>
+  \text{d} z\end{aligned}\]</span> through a discrepancy function, such as <span class="math inline">\(T(x_\text{new}) = \max(x_\text{new})\)</span>.</p>
+<p>One way to use a PPC is to compare <span class="math inline">\(T(x_\text{new})\)</span> to the observed value of the discrepancy on the data <span class="math inline">\(T(x)\)</span>.</p>
 <p><img alt="image" src="images/ppc.png"/></p>
-<p>Here <span class="math">\(T(x)\)</span> falls in a low probability region of the posterior predictive discrepancy distribution. This indicates a direction for potential improvement.</p>
-<p>Edward implements PPCs through the <code>samplelikelihood()</code> function in the probability model. This method samples a dataset from the model likelihood <span class="math">\[\begin{aligned}
+<p>Here <span class="math inline">\(T(x)\)</span> falls in a low probability region of the posterior predictive discrepancy distribution. This indicates a direction for potential improvement.</p>
+<p>Edward implements PPCs through the <code>sample_likelihood()</code> function in the probability model. This method samples a dataset from the model likelihood <span class="math display">\[\begin{aligned}
   x \sim p(x \mid z).\end{aligned}\]</span> The <code>criticisms.ppc()</code> method then provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution. See the <a href="tutorials.html">tutorial</a> page for examples.</p>
 <p><strong>Metric-based evaluations.</strong> Edward also supports metric-based evaluations. The simplest example is a classification model. After inferring the posterior, we can predict the label for each observation in the data. Edward implements a variety of metrics, such as classification error and mean absolute error, based on these predictions.</p>
-<p>First implement a <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math">\(p(z \mid x)\)</span>. Then call</p>
+<p>First implement a <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span>. Then call</p>
 <pre class="python" language="Python"><code>print(ed.evaluate('categorical_accuracy', my_model, my_variational, my_data))
 print(ed.evaluate('mean_absolute_error', my_model, my_variational, my_data))</code></pre>
-<p>to evaluate these metrics. Swapping <code>mydata</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
+<p>to evaluate these metrics. Swapping <code>my_data</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
 <p>Edward offers many evaluation metrics; see the <a href="tutorials.html">tutorials</a> for more examples.</p>
 <h3 id="references">References</h3>
 <ul>

@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Mixture of Gaussians</title>
+<title>Edward – Gaussian process classification</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,7 +69,8 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="mixture-of-gaussians">Mixture of Gaussians</h2>
+<h2 id="gaussian-process-classification">Gaussian process classification</h2>
+<h2 id="on-hold">(ON HOLD)</h2>
 <ul>
 <li><strong>Probability Model:</strong> Mixture of Gaussians</li>
 <li><strong>Variational Model:</strong> Dirichlet <span class="math inline">\(\times\)</span> factorized normal <span class="math inline">\(\times\)</span> factorized inverse gamma</li>
@@ -77,7 +78,7 @@
 <li><strong>Inference:</strong> Mean-field variational inference</li>
 <li><strong>Criticism:</strong> None</li>
 </ul>
-<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture_gaussian.py</a></p>
+<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">gp_classification.py</a></p>
 <h3 id="probability-model">Probability Model</h3>
 <p>Define the likelihood of an observation <span class="math inline">\(x_n\)</span> to be <span class="math display">\[\begin{aligned}
   p(x_{n} \mid \pi, \mu, \Sigma)

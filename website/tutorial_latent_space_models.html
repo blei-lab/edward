@@ -80,17 +80,17 @@
 <p>It is structured as follows. We first describe the neuroscience data we use in this tutorial and introduce the idea behind latent space models for networks. Next, we define the model and specify implementation details. Finally we fit the model with MAP estimation and mention how one would go about using variational inference.</p>
 <h3 id="data-c.elegans-connectome">Data: C.Elegans Connectome</h3>
 <p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">here</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Duncan Watts and Steven Strogatz [2] from original experimental data by White et al. [3].</p>
-<p>The neural network consists of around <span class="math">\(300\)</span> neurons. Each connection is associated with a weight (positive integer) capturing the strength of the connection.</p>
+<p>The neural network consists of around <span class="math inline">\(300\)</span> neurons. Each connection is associated with a weight (positive integer) capturing the strength of the connection.</p>
 <p>In the example we load the data with:</p>
 <pre class="python" language="Python"><code>data, N = load_celegans_brain()</code></pre>
 <h3 id="latent-space-models">Latent Space Models</h3>
 <p>Many interesting data sets are networks. For example, social networks or biological neural networks like the one we study here.</p>
 <p>Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model [1]. Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.</p>
 <p>Here we will fit such a model to the C.Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.</p>
-<p>Each neuron <span class="math">\(n\)</span> is a node in the network and is associated with a latent <span class="math">\(K\)</span>-dimensional vector <span class="math">\(z_n\)</span>.</p>
-<p>We place a Gaussian prior on each of the latent vectors. In [1] the log-odds of an edge between node <span class="math">\(i\)</span> and <span class="math">\(j\)</span> is proportional to the euclidean distance between the latent representations of the nodes <span class="math">\(|z_i- z_j|\)</span>. Here, we model instead model the weights (<span class="math">\(Y_{ij}\)</span>) of the edges with a Poisson likelihood. The rate is the reciprocal of the distance in latent space. This is the generative process:</p>
-<p>For each node <span class="math">\(n\)</span>: <span class="math">\[\begin{aligned}
-z_n \sim N(0,I)\end{aligned}\]</span> For each edge <span class="math">\((i,j)\)</span>: <span class="math">\[\begin{aligned}
+<p>Each neuron <span class="math inline">\(n\)</span> is a node in the network and is associated with a latent <span class="math inline">\(K\)</span>-dimensional vector <span class="math inline">\(z_n\)</span>.</p>
+<p>We place a Gaussian prior on each of the latent vectors. In [1] the log-odds of an edge between node <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is proportional to the euclidean distance between the latent representations of the nodes <span class="math inline">\(|z_i- z_j|\)</span>. Here, we model instead model the weights (<span class="math inline">\(Y_{ij}\)</span>) of the edges with a Poisson likelihood. The rate is the reciprocal of the distance in latent space. This is the generative process:</p>
+<p>For each node <span class="math inline">\(n\)</span>: <span class="math display">\[\begin{aligned}
+z_n \sim N(0,I)\end{aligned}\]</span> For each edge <span class="math inline">\((i,j)\)</span>: <span class="math display">\[\begin{aligned}
 Y_{ij} \sim \text{Poisson}(\frac{1}{|z_i - z_j|})\end{aligned}\]</span></p>
 <p>In Edward the model can be defined and instantiated as follows:</p>
 <pre class="python" language="Python"><code>class Latent_Space_Model():

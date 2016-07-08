@@ -88,11 +88,11 @@
 <pre class="python" language="Python"><code>import edward as ed
 import tensorflow as tf
 import numpy as np  </code></pre>
-<p>Now, consider the likelihood of an observation <span class="math">\((y_n, x_n)\)</span> <span class="math">\[\begin{aligned}
+<p>Now, consider the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> <span class="math display">\[\begin{aligned}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &amp;=
-  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)\end{aligned}\]</span> where <span class="math">\(\mu\)</span> is a neural network with weights (latent) variables <span class="math">\(\mathbf{z}\)</span>. Here <span class="math">\(x_n\)</span> is the (known) covariate and <span class="math">\(\sigma^2\)</span> is the (known) variance of the observation.</p>
-<p>A Bayesian neural network further posits a prior on the weights. Assuming an independent standard normal prior gives the following joint density <span class="math">\[\begin{aligned}
+  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\mu\)</span> is a neural network with weights (latent) variables <span class="math inline">\(\mathbf{z}\)</span>. Here <span class="math inline">\(x_n\)</span> is the (known) covariate and <span class="math inline">\(\sigma^2\)</span> is the (known) variance of the observation.</p>
+<p>A Bayesian neural network further posits a prior on the weights. Assuming an independent standard normal prior gives the following joint density <span class="math display">\[\begin{aligned}
   p(\mathbf{z}, \mathbf{y} \;;\; \mathbf{x}, \sigma^2)
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I)
@@ -120,12 +120,12 @@ import numpy as np  </code></pre>
         return log_prior + log_lik</code></pre>
 <p>Instantiating this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>
-<p>defines a two-layer a Bayesian neural network regression model with <span class="math">\(\tanh\)</span> activation functions. Specifically <span class="math">\[\begin{aligned}
+<p>defines a two-layer a Bayesian neural network regression model with <span class="math inline">\(\tanh\)</span> activation functions. Specifically <span class="math display">\[\begin{aligned}
   h_{11} &amp;= \tanh(w_{11} x_n + b_{11})\\
   h_{12} &amp;= \tanh(w_{12} x_n + b_{12})\\
   h_{21} &amp;= \tanh(w_{211} h_{11} + w_{212} h_{12} + b_{21})\\
   h_{22} &amp;= \tanh(w_{221} h_{11} + w_{222} h_{12} + b_{22})\\
-  \mu &amp;= \tanh(w_{31} h_{21} + w_{32} h_{22} + b_3)\end{aligned}\]</span> where <span class="math">\(\mathbf{z} = (w_{1:}, w_{2::}, w_{3:}, b_{1:}, b_{2:}, b_3)\)</span>.</p>
+  \mu &amp;= \tanh(w_{31} h_{21} + w_{32} h_{22} + b_3)\end{aligned}\]</span> where <span class="math inline">\(\mathbf{z} = (w_{1:}, w_{2::}, w_{3:}, b_{1:}, b_{2:}, b_3)\)</span>.</p>
 <p>Next, specify a variational approximation to the posterior. A mean-field normal approximation is reasonable.</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Normal(model.num_vars))  </code></pre>
@@ -139,13 +139,13 @@ variational.add(Normal(model.num_vars))  </code></pre>
     data = np.concatenate((y, x), axis=1)
     data = tf.constant(data, dtype=tf.float32)
     return ed.Data(data)  </code></pre>
-<p>Plotting the data shows the relationship between <span class="math">\(x\)</span> and <span class="math">\(y\)</span>.</p>
-<p><img src="images/getting-started-fig0.png" alt="image" /></p>
+<p>Plotting the data shows the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
 <p>We now have all the ingredients to infer the posterior of this model. Edward <code>Inference</code> classes take three things as input: a probability model, a variational model, and data. Here we run mean-field variational inference for <code>1000</code> iterations, by subsampling <code>5</code> datapoints at each iteration. We also print a status report to the terminal every <code>100</code> iterations</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=5, n_print=100)  </code></pre>
 <p>Drawing samples from the posterior shows how the Bayesian neural network has learned the cosine nonlinearity.</p>
-<p><img src="images/getting-started-fig2.png" alt="image" /></p>
+<p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="tutorials.html">tutorials</a>.</p>
     </div>

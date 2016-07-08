@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Mixture of Gaussians</title>
+<title>Edward – Bayesian neural network</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,106 +69,135 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="mixture-of-gaussians">Mixture of Gaussians</h2>
+<h2 id="bayesian-neural-network">Bayesian neural network</h2>
 <ul>
-<li><strong>Probability Model:</strong> Mixture of Gaussians</li>
-<li><strong>Variational Model:</strong> Dirichlet <span class="math inline">\(\times\)</span> factorized normal <span class="math inline">\(\times\)</span> factorized inverse gamma</li>
+<li><strong>Probability Model:</strong> Bayesian neural network regression</li>
+<li><strong>Variational Model:</strong> Fully factorized normal</li>
 <li><strong>Data:</strong> Simulated data</li>
 <li><strong>Inference:</strong> Mean-field variational inference</li>
 <li><strong>Criticism:</strong> None</li>
 </ul>
-<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture_gaussian.py</a></p>
+<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">bayesian_nn.py</a></p>
 <h3 id="probability-model">Probability Model</h3>
-<p>Define the likelihood of an observation <span class="math inline">\(x_n\)</span> to be <span class="math display">\[\begin{aligned}
-  p(x_{n} \mid \pi, \mu, \Sigma)
+<p>Define the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> <span class="math display">\[\begin{aligned}
+  p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &amp;=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(x_n ; \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> mixes <span class="math inline">\(K\)</span> Gaussian distributions, each characterized by mean <span class="math inline">\(\mu_k\)</span> and variance <span class="math inline">\(\sigma_k\)</span>.</p>
-<p>Define the prior on <span class="math inline">\(\pi\)</span> to be a Dirichlet <span class="math display">\[\begin{aligned}
-  p(\pi)
+  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\mu\)</span> is a neural network with weights (latent) variables <span class="math inline">\(\mathbf{z}\)</span>. Here <span class="math inline">\(x_n\)</span> is the (known) covariate and <span class="math inline">\(\sigma^2\)</span> is the (known) variance of the observation.</p>
+<p>Define the prior on <span class="math inline">\(\mathbf{z}\)</span> to be a factorized normal <span class="math display">\[\begin{aligned}
+  p(\mathbf{z})
   &amp;=
-  \text{Dirichlet}(\pi \;;\; \alpha \mathbf{1}_{K \times 1}).\end{aligned}\]</span></p>
-<p>Define the prior on <span class="math inline">\(\mu\)</span> to be a factorized normal <span class="math display">\[\begin{aligned}
-  p(\mu)
-  &amp;=
-  \prod_{k=1}^{K} \mathcal{N}(\mu_k \;;\; 0, \sigma^2).\end{aligned}\]</span></p>
-<p>Define the prior on <span class="math inline">\(\sigma\)</span> to be a factorized inverse gamma <span class="math display">\[\begin{aligned}
-  p(\sigma)
-  &amp;=
-  \prod_{k=1}^{K} \text{InvGamma}(\sigma_k \;;\; a, b).\end{aligned}\]</span></p>
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I)\end{aligned}\]</span></p>
 <p>The model in Edward is</p>
-<pre class="python" language="Python"><code>class MixtureGaussian:
+<pre class="python" language="Python"><code>class BayesianNN:
     """
-    Mixture of Gaussians
+    Bayesian neural network for regressing outputs y on inputs x.
 
-    p(x, z) = [ prod_{n=1}^N N(x_n; mu_{c_n}, sigma_{c_n}) Multinomial(c_n; pi) ]
-              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-              Dirichlet(pi; alpha)
+    p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
+                  Normal(z | 0, prior_variance),
 
-    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
+    where z are neural network weights, and with known lik_variance
+    and prior_variance.
 
     Parameters
     ----------
-    K : int
-        Number of mixture components.
-    D : float, optional
-        Dimension of the Gaussians.
+    layer_sizes : list
+        The size of each layer, ordered from input to output.
+    nonlinearity : function, optional
+        Non-linearity after each linear transformation in the neural
+        network; aka activation function.
+    lik_variance : float, optional
+        Variance of the normal likelihood; aka noise parameter,
+        homoscedastic variance, scale parameter.
+    prior_variance : float, optional
+        Variance of the normal prior on weights; aka L2
+        regularization parameter, ridge penalty, scale parameter.
     """
-    def __init__(self, K, D):
-        self.K = K
-        self.D = D
-        self.num_vars = (2*D + 1) * K
+    def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
+        lik_variance=0.01, prior_variance=1):
+        self.layer_sizes = layer_sizes
+        self.nonlinearity = nonlinearity
+        self.lik_variance = lik_variance
+        self.prior_variance = prior_variance
 
-        self.a = 1
-        self.b = 1
-        self.c = 10
-        self.alpha = tf.ones([K])
+        self.num_layers = len(layer_sizes)
+        self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
+        self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
+
+    def unpack_weights(self, z):
+        """Unpack weight matrices and biases from a flattened vector."""
+        for m, n in self.weight_dims:
+            yield tf.reshape(z[:m*n],        [m, n]), \
+                  tf.reshape(z[m*n:(m*n+n)], [1, n])
+            z = z[(m+1)*n:]
+
+    def mapping(self, x, z):
+        """
+        mu = NN(x; z)
+
+        Note this is one sample of z at a time.
+
+        Parameters
+        -------
+        x : tf.tensor
+            n_data x D
+
+        z : tf.tensor
+            num_vars
+
+        Returns
+        -------
+        tf.tensor
+            vector of length n_data
+        """
+        h = x
+        for W, b in self.unpack_weights(z):
+            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
+            h = self.nonlinearity(tf.matmul(h, W) + b)
+
+        h = tf.squeeze(h) # n_data x 1 to n_data
+        return h
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        N = get_dims(xs)[0]
-        pi, mus, sigmas = zs
-        log_prior = dirichlet.logpdf(pi, self.alpha)
-        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
-        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+        # Data must have labels in the first column and features in
+        # subsequent columns.
+        y = xs[:, 0]
+        x = xs[:, 1:]
+        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
+        # broadcasting to do mus - y (n_minibatch x n_data - n_data)
+        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
+        return log_lik + log_prior
 
-        # Loop over each mini-batch zs[b,:]
-        log_lik = []
-        n_minibatch = get_dims(zs[0])[0]
-        for s in range(n_minibatch):
-            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
-            for k in range(self.K):
-                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs,
-                    mus[s, (k*self.D):((k+1)*self.D)],
-                    sigmas[s, (k*self.D):((k+1)*self.D)]))
-
-            log_lik += [log_lik_z]
-
-        return log_prior + tf.pack(log_lik)
-
-model = MixtureGaussian(K=2, D=2)</code></pre>
+model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)</code></pre>
 <h3 id="variational-model">Variational Model</h3>
-<p>The latent variables are <span class="math inline">\(\mathbf{z} = (\pi, \mu, \sigma)\)</span>.</p>
-<p>Define the variational model to be a Dirichlet <span class="math inline">\(\times\)</span> factorized normal <span class="math inline">\(\times\)</span> factorized inverse gamma <span class="math display">\[\begin{aligned}
-  q(\mathbf{z} \;;\; \lambda) 
+<p>Define the variational model to be a fully factorized normal <span class="math display">\[\begin{aligned}
+  q(\mathbf{z} \;;\; \lambda)
   &amp;=
-  \text{Dirichlet}(\mathbf{z}_\pi) 
-  \times
-  \mathcal{N}(\mathbf{z}_\mu)
-  \times
-  \text{InvGamma}(\mathbf{z}_\sigma)\end{aligned}\]</span></p>
+  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2} I).\end{aligned}\]</span></p>
 <p>The model in Edward is</p>
 <pre class="python" language="Python"><code>variational = Variational()
-variational.add(Dirichlet(model.K))
-variational.add(Normal(model.K*model.D))
-variational.add(InvGamma(model.K*model.D)).</code></pre>
+variational.add(Normal(model.num_vars))</code></pre>
 <h3 id="data">Data</h3>
-<p>Consider a simulated (pre-generated) dataset</p>
-<pre class="python" language="Python"><code>x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
-data = ed.Data(tf.constant(x, dtype=tf.float32))</code></pre>
+<p>Consider a simulated dataset</p>
+<pre class="python" language="Python"><code>def build_toy_dataset(n_data=40, noise_std=0.1):
+    ed.set_seed(0)
+    D = 1
+    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
+                         np.linspace(6, 8, num=n_data/2)])
+    y = np.cos(x) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    x = (x - 4.0) / 4.0
+    x = x.reshape((n_data, D))
+    y = y.reshape((n_data, 1))
+    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
+    data = tf.constant(data, dtype=tf.float32)
+    return ed.Data(data)
+
+data = build_toy_dataset()</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Inference is mean-field variational inference</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_minibatch=5, n_data=5)</code></pre>
+inference.run(n_iter=1000, n_print=10)</code></pre>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

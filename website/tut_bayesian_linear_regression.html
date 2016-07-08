@@ -133,7 +133,7 @@ model = BayesianLinearRegressionModel()</code></pre>
 <p>Define the variational model to be a fully factorized normal <span class="math display">\[\begin{aligned}
   q(\mathbf{z} \;;\; \lambda)
   &amp;=
-  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).\end{aligned}\]</span></p>
+  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2} I).\end{aligned}\]</span></p>
 <p>The model in Edward is</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Normal(model.num_vars))</code></pre>
