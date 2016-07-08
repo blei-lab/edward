@@ -36,15 +36,16 @@ class Inference(object):
             data = {}
 
         # `self.xs` : dict
-        #     The data dictionary used for constructing the
-        #     computational graph; uses placeholders to let data
-        #     inputs vary at runtime.
+        #     Dictionary of TensorFlow placeholders. The computational graph
+        #     uses this dictionary so that the data inputs may vary
+        #     when specified at runtime.
         # `self.data` : dict
-        #     Forms the data generators for each data structure; they
-        #     are binded to each placeholder in order to feed them at
-        #     runtime. If the data dictionary is already composed of
-        #     placeholders, then it is empty, and the user will have
-        #     to manually feed in the placeholders at runtime.
+        #     Dictionary where each placeholder in `self.xs` is binded
+        #     to a data generator formed from `data`. The data
+        #     generators generate data to feed the placeholders at
+        #     runtime. If `data` is already composed of placeholders,
+        #     then `self.data` is empty: the user will have to
+        #     manually feed the placeholders at runtime.
         self.xs = {}
         self.data = {}
         for key, value in data.items():

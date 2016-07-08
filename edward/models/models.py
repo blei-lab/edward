@@ -46,8 +46,8 @@ class PyMC3Model(object):
         Parameters
         ----------
         xs : dict
-            Dictionary where each key is an observation (Theano shared
-            variable) of the PyMC3 model, and each value is the
+            Dictionary where each key is a data placeholder (Theano
+            shared variable) in the PyMC3 model, and each value is the
             corresponding realization (np.ndarray).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
