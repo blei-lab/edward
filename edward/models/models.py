@@ -223,7 +223,6 @@ class Variational(object):
             self.is_reparam = True
             self.is_normal = True
             self.is_entropy = True
-            self.sample_tensor = []
             self.is_multivariate = []
         else:
             self.layers = layers
@@ -236,7 +235,6 @@ class Variational(object):
                                   for layer in self.layers])
             self.is_entropy = all(['entropy' in layer.__class__.__dict__
                                    for layer in self.layers])
-            self.sample_tensor = [layer.sample_tensor for layer in self.layers]
             self.is_multivariate = [layer.is_multivariate for layer in self.layers]
 
     def __str__(self):
@@ -264,7 +262,6 @@ class Variational(object):
         self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
         self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)
-        self.sample_tensor += [layer.sample_tensor]
         self.is_multivariate += [layer.is_multivariate]
 
     def sample(self, size=1):
@@ -285,46 +282,11 @@ class Variational(object):
             tf.Tensor of (size x shape). If a layer requires SciPy to
             sample, its corresponding tensor is a tf.placeholder.
         """
-        samples = []
-        for layer in self.layers:
-            if layer.sample_tensor:
-                samples += [layer.sample(size)]
-            else:
-                samples += [tf.placeholder(tf.float32, (size, ) + layer.shape)]
-
+        samples = [layer.sample(size) for layer in self.layers]
         if len(samples) == 1:
             samples = samples[0]
 
         return samples
-
-    def np_dict(self, samples):
-        """
-        Form dictionary to feed any placeholders with np.array
-        samples.
-
-        Parameters
-        ----------
-        samples : list or tf.Tensor
-            If more than one layer, a list of tf.Tensors of dimension
-            (batch x shape). If one layer, a tf.Tensor of (batch x
-            shape).
-
-        Notes
-        -----
-        This method assumes each samples[l] in samples has the same
-        batch size, i.e., dimensions (batch x shape) for fixed batch
-        and varying shape.
-        """
-        if not isinstance(samples, list):
-            samples = [samples]
-
-        size = get_dims(samples[0])[0]
-        feed_dict = {}
-        for sample, layer in zip(samples, self.layers):
-            if sample.name.startswith('Placeholder'):
-                feed_dict[sample] = layer.sample(size)
-
-        return feed_dict
 
     def log_prob(self, xs):
         """

@@ -248,9 +248,7 @@ class MFVI(VariationalInference):
             MFVI loss function value after one iteration.
         """
         sess = get_session()
-        x_dict = self.data.next(self.xs)
-        z_dict = self.variational.np_dict(self.zs)
-        feed_dict = dict(x_dict, **z_dict)
+        feed_dict = self.data.next(self.xs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -481,9 +479,7 @@ class KLpq(VariationalInference):
             KLpq loss function value after one iteration.
         """
         sess = get_session()
-        x_dict = self.data.next(self.xs)
-        z_dict = self.variational.np_dict(self.zs)
-        feed_dict = dict(x_dict, **z_dict)
+        feed_dict = self.data.next(self.xs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -564,9 +560,7 @@ class MAP(VariationalInference):
             MAP loss function value after one iteration.
         """
         sess = get_session()
-        x_dict = self.data.next(self.xs)
-        z_dict = self.variational.np_dict(self.zs)
-        feed_dict = dict(x_dict, **z_dict)
+        feed_dict = self.data.next(self.xs)
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 

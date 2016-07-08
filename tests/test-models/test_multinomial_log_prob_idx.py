@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import edward as ed
 import tensorflow as tf
 import numpy as np
@@ -8,6 +11,7 @@ from scipy.special import gammaln
 
 sess = tf.Session()
 ed.set_seed(98765)
+
 
 def multinomial_logpmf(x, n, p):
     """
@@ -25,10 +29,12 @@ def multinomial_logpmf(x, n, p):
            np.sum(gammaln(x + 1.0)) + \
            np.sum(x * np.log(p))
 
+
 def multinomial_logpmf_vec(x, n, p):
     n_minibatch = x.shape[0]
     return np.array([multinomial_logpmf(x[i, :], n, p)
                      for i in range(n_minibatch)])
+
 
 def _test(shape, n_minibatch):
     K = shape[-1]
@@ -45,17 +51,22 @@ def _test(shape, n_minibatch):
                 multinomial.log_prob_idx((i, ), z_tf).eval(),
                 multinomial_logpmf_vec(z[:, i, :], 1, pi[i, :]))
 
+
 def test_1_2v_1d():
     _test([1, 2], 1)
+
 
 def test_1_3v_1d():
     _test([1, 3], 1)
 
+
 def test_1_2v_2d():
     _test([1, 2], 2)
 
+
 def test_2_2v_1d():
     _test([2, 2], 1)
+
 
 def test_2_2v_2d():
     _test([2, 2], 2)

@@ -39,7 +39,6 @@ def evaluate(metrics, model, variational, data, y_true=None):
     # 1. Sample a batch of latent variables from posterior
     n_minibatch = 100
     zs = variational.sample(size=n_minibatch)
-    feed_dict = variational.np_dict(zs)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred = model.predict(data, zs)
 
@@ -58,39 +57,39 @@ def evaluate(metrics, model, variational, data, y_true=None):
                 metric = 'sparse_categorical_' + metric
 
         if metric == 'binary_accuracy':
-            evaluations += [sess.run(binary_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(binary_accuracy(y_true, y_pred))]
         elif metric == 'categorical_accuracy':
-            evaluations += [sess.run(categorical_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(categorical_accuracy(y_true, y_pred))]
         elif metric == 'sparse_categorical_accuracy':
-            evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred))]
         elif metric == 'log_loss' or metric == 'binary_crossentropy':
-            evaluations += [sess.run(binary_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(binary_crossentropy(y_true, y_pred))]
         elif metric == 'categorical_crossentropy':
-            evaluations += [sess.run(categorical_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(categorical_crossentropy(y_true, y_pred))]
         elif metric == 'sparse_categorical_crossentropy':
-            evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred))]
         elif metric == 'hinge':
-            evaluations += [sess.run(hinge(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(hinge(y_true, y_pred))]
         elif metric == 'squared_hinge':
-            evaluations += [sess.run(squared_hinge(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(squared_hinge(y_true, y_pred))]
         elif metric == 'mse' or metric == 'MSE' or \
              metric == 'mean_squared_error':
-            evaluations += [sess.run(mean_squared_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
         elif metric == 'mae' or metric == 'MAE' or \
              metric == 'mean_absolute_error':
-            evaluations += [sess.run(mean_absolute_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
         elif metric == 'mape' or metric == 'MAPE' or \
              metric == 'mean_absolute_percentage_error':
-            evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
         elif metric == 'msle' or metric == 'MSLE' or \
              metric == 'mean_squared_logarithmic_error':
-            evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
         elif metric == 'poisson':
-            evaluations += [sess.run(poisson(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(poisson(y_true, y_pred))]
         elif metric == 'cosine' or metric == 'cosine_proximity':
-            evaluations += [sess.run(cosine_proximity(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(cosine_proximity(y_true, y_pred))]
         elif metric == 'log_lik' or metric == 'log_likelihood':
-            evaluations += [sess.run(y_pred, feed_dict)]
+            evaluations += [sess.run(y_pred)]
         else:
             raise NotImplementedError()
 
@@ -169,7 +168,6 @@ def ppc(model, variational=None, data=None, T=None, size=100):
     # may require a SciPy-based sampler.
     if variational is not None:
         zs = variational.sample(size=size)
-        feed_dict = variational.np_dict(zs)
         # This is to avoid fetching, e.g., a placeholder x with the
         # dictionary {x: np.array()}. TensorFlow will raise an error.
         if isinstance(zs, list):
@@ -177,7 +175,7 @@ def ppc(model, variational=None, data=None, T=None, size=100):
         else:
             zs = tf.identity(zs)
 
-        zs = sess.run(zs, feed_dict)
+        zs = sess.run(zs)
     else:
         zs = model.sample_prior(size=size)
         zs = zs.eval()
@@ -200,9 +198,9 @@ def ppc(model, variational=None, data=None, T=None, size=100):
             Tys += [T(y, z)]
 
     if y is None:
-        return sess.run(tf.pack(Tyreps), feed_dict)
+        return sess.run(tf.pack(Tyreps))
     else:
-        return sess.run([tf.pack(Tyreps), tf.pack(Tys)], feed_dict)
+        return sess.run([tf.pack(Tyreps), tf.pack(Tys)])
 
 
 # Classification metrics

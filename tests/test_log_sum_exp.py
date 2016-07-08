@@ -1,9 +1,13 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
-import unittest
-import tensorflow as tf
+
 import numpy as np
+import tensorflow as tf
+import unittest
 
 from edward.util import log_sum_exp
+
 
 class test_log_sum_exp(unittest.TestCase):
 
@@ -16,6 +20,7 @@ class test_log_sum_exp(unittest.TestCase):
     hand_derived_result = -0.5598103014388045
 
     self.assertAlmostEqual(result.eval(), hand_derived_result)
+
 
 if __name__ == '__main__':
     unittest.main()

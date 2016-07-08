@@ -12,7 +12,7 @@ from edward.stats import norm
 
 class NormalModel:
     """
-    p(x, z) = Normal(x; z, std)Normal(z; mu, std)
+    p(x, z) = Normal(x; z, std) Normal(z; mu, std)
     """
     def __init__(self, mu, std):
         self.mu = mu

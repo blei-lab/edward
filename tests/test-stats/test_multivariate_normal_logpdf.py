@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
@@ -7,9 +10,11 @@ from scipy import stats
 
 sess = tf.Session()
 
+
 def _assert_eq(val_ed, val_true):
     with sess.as_default():
         assert np.allclose(val_ed.eval(), val_true)
+
 
 def _test(x, mean=None, cov=1):
     xtf = tf.constant(x)
@@ -21,6 +26,7 @@ def _test(x, mean=None, cov=1):
     _assert_eq(multivariate_normal.logpdf(xtf, mean, cov_tf), val_true)
     _assert_eq(multivariate_normal.logpdf(xtf, mean_tf, cov_tf), val_true)
 
+
 def test_int_1d():
     x = [0, 0]
     _test(x, np.zeros([2]), np.ones([2]))
@@ -31,6 +37,7 @@ def test_int_1d():
 
     _test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
 
+
 def test_float_1d():
     x = [0.0, 0.0]
     _test(x, np.zeros([2]), np.ones([2]))
@@ -40,6 +47,7 @@ def test_float_1d():
     _assert_eq(multivariate_normal.logpdf(xtf), val_true)
 
     _test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
+
 
 def test_float_2d():
     x = np.array([[0.3, 0.7],[0.2, 0.8]])
