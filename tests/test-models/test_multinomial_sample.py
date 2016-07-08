@@ -25,7 +25,7 @@ def test_1d():
 
 
 #def test_2d():
-#    _test(np.array([3]), np.array([[0.4, 0.6]]), 1)
-#    _test(np.array([3]), np.array([[0.4, 0.6]]), 5)
-#    _test(np.array([3, 2]), np.array([[0.2, 0.8], [0.6, 0.4]]), 1)
-#    _test(np.array([3, 2]), np.array([[0.2, 0.8], [0.6, 0.4]]), 10)
+#    _test((1, 2), np.array([[0.4, 0.6]]), 1)
+#    _test((1, 2), np.array([[0.4, 0.6]]), 5)
+#    _test((2, 2), np.array([[0.2, 0.8], [0.6, 0.4]]), 1)
+#    _test((2, 2), np.array([[0.2, 0.8], [0.6, 0.4]]), 10)
