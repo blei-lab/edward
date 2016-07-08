@@ -1,0 +1,81 @@
+% Define the subtitle of the page
+\title{Bayesian Inference}
+
+% Begin the content of the page
+\subsection{Bayesian Inference}
+
+This tutorial introduces the class of models supported in Edward, namely
+Bayesian probability models. It asks the question: what does it mean to do
+inference in Bayesian models? This sets the stage for
+understanding how to develop and implement inference procedures in Edward.
+
+\subsubsection{Bayesian models}
+
+A Bayesian model has two components. The \emph{likelihood}
+\begin{align*}
+  p(x \mid z)
+\end{align*}
+is a probability distribution that describes how the data $x$ depend on some
+latent random variables $z$. The likelihood models a random data generating
+process, where the data $x$ are observed random variables conditioned on a
+particular hidden pattern described by $z$. For example, consider measuring your
+weight on a cheap scale; the likelihood model would describe the imprecisions
+of the scale that reflect into the measurements.
+
+Bayesian models additional posit a \emph{prior}
+\begin{align*}
+  p(z).
+\end{align*}
+The prior is another probability distribution that captures our prior beliefs on
+the latent random variables $z$. It describes the kind of hidden patterns we
+expect to have produced the data $x$. Continuing our example, the prior would
+capture your prior belief about your (latent) weight. A potential prior might be
+a normal distribution centered at the average weight of adults on Earth (
+which is $\approx62$ kilograms).
+
+Combining the likelihood and the prior specifies a Bayesian model,
+\begin{align*}
+  p(x,z)
+  &=
+  p(x \mid z)
+  p(z)
+\end{align*}
+as a joint density over observed and latent random variables. 
+
+\subsubsection{The posterior}
+
+How can we use a model $p(x,z)$ to analyze some data $x$? In other words,
+what hidden patterns $z$ explain the data? We seek to infer these
+hidden patterns using the model.
+
+The Bayesian approach to inference leverages Bayes rule to define the 
+\emph{posterior}
+\begin{align*}
+  p(z \mid x)
+  &=
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.
+\end{align*}
+The posterior is the distribution of the latent variables $z$, conditioned on
+some (observed) data $x$. It provides a probabilistic description of the hidden
+patterns that explain the data. Wrapping up our example, say you measured your
+weight $7$ times and the posterior of your weight turns out to be
+\begin{align*}
+  p(z \mid x) &= \mathcal{N}(z\;;\; 68.21, 2.19).
+\end{align*}
+This is a complete description of the model's estimate of your weight and its
+uncertainty around it.
+
+
+\subsubsection{Computing the posterior}
+
+Now we know what the posterior represents. How do we compute it? This is the
+central computational challenge in Bayesian inference.
+
+The posterior difficult to compute because of the integral in the denominator.
+This is often a high-dimensional integral that lacks an analytic (closed-form)
+solution. Thus, computing the posterior means \emph{approximating} the
+posterior.
+
+There are many methods to approximate the posterior. Edward provides a scaffold
+for these methods. We describe them in detail in the other inference 
+\href{tutorials.html}{tutorials}.

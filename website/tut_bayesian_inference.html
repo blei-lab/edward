@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Bayesian Inference</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+    
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="icons/manifest.json">
+  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="index.html">Edward</a></h1> 
+    <a href="index.html">
+    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
+    </a>
+    <a class="button u-full-width" href="index.html">Home</a>
+    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
+    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
+    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
+    <a class="button u-full-width" href="api/edward.html">API</a> 
+    <a class="button u-full-width" href="#">Advanced</a> 
+    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
+    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
+    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
+    <a class="button2 u-full-width" href="license.html">License</a> 
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a href="https://github.com/blei-lab/edward">
+    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
+    alt="Edward on Github" />
+    <!-- </object> -->
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+<h2 id="bayesian-inference">Bayesian Inference</h2>
+<p>This tutorial introduces the class of models supported in Edward, namely Bayesian probability models. It asks the question: what does it mean to do inference in Bayesian models? This sets the stage for understanding how to develop and implement inference procedures in Edward.</p>
+<h3 id="bayesian-models">Bayesian models</h3>
+<p>A Bayesian model has two components. The <em>likelihood</em> <span class="math display">\[\begin{aligned}
+  p(x \mid z)\end{aligned}\]</span> is a probability distribution that describes how the data <span class="math inline">\(x\)</span> depend on some latent random variables <span class="math inline">\(z\)</span>. The likelihood models a random data generating process, where the data <span class="math inline">\(x\)</span> are observed random variables conditioned on a particular hidden pattern described by <span class="math inline">\(z\)</span>. For example, consider measuring your weight on a cheap scale; the likelihood model would describe the imprecisions of the scale that reflect into the measurements.</p>
+<p>Bayesian models additional posit a <em>prior</em> <span class="math display">\[\begin{aligned}
+  p(z).\end{aligned}\]</span> The prior is another probability distribution that captures our prior beliefs on the latent random variables <span class="math inline">\(z\)</span>. It describes the kind of hidden patterns we expect to have produced the data <span class="math inline">\(x\)</span>. Continuing our example, the prior would capture your prior belief about your (latent) weight. A potential prior might be a normal distribution centered at the average weight of adults on Earth ( which is <span class="math inline">\(\approx62\)</span> kilograms).</p>
+<p>Combining the likelihood and the prior specifies a Bayesian model, <span class="math display">\[\begin{aligned}
+  p(x,z)
+  &amp;=
+  p(x \mid z)
+  p(z)\end{aligned}\]</span> as a joint density over observed and latent random variables.</p>
+<h3 id="the-posterior">The posterior</h3>
+<p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden patterns <span class="math inline">\(z\)</span> explain the data? We seek to infer these hidden patterns using the model.</p>
+<p>The Bayesian approach to inference leverages Bayes rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
+  p(z \mid x)
+  &amp;=
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math inline">\(z\)</span>, conditioned on some (observed) data <span class="math inline">\(x\)</span>. It provides a probabilistic description of the hidden patterns that explain the data. Wrapping up our example, say you measured your weight <span class="math inline">\(7\)</span> times and the posterior of your weight turns out to be <span class="math display">\[\begin{aligned}
+  p(z \mid x) &amp;= \mathcal{N}(z\;;\; 68.21, 2.19).\end{aligned}\]</span> This is a complete description of the model’s estimate of your weight and its uncertainty around it.</p>
+<h3 id="computing-the-posterior">Computing the posterior</h3>
+<p>Now we know what the posterior represents. How do we compute it? This is the central computational challenge in Bayesian inference.</p>
+<p>The posterior difficult to compute because of the integral in the denominator. This is often a high-dimensional integral that lacks an analytic (closed-form) solution. Thus, computing the posterior means <em>approximating</em> the posterior.</p>
+<p>There are many methods to approximate the posterior. Edward provides a scaffold for these methods. We describe them in detail in the other inference <a href="tutorials.html">tutorials</a>.</p>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script> 
+</body>
+</html>

@@ -251,12 +251,6 @@ parameters of each random variable <code class="docutils literal"><span class="p
 </dd></dl>
 
 <dl class="attribute">
-<dt id="edward.models.distributions.Distribution.sample_tensor">
-<code class="descname">sample_tensor</code><a class="headerlink" href="#edward.models.distributions.Distribution.sample_tensor" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>bool</em> &#8211; <code class="docutils literal"><span class="pre">True</span></code> if sampling returns a <code class="docutils literal"><span class="pre">tf.Tensor</span></code>; see <a class="reference internal" href="#edward.models.distributions.Distribution.sample" title="edward.models.distributions.Distribution.sample"><code class="xref py py-func docutils literal"><span class="pre">sample()</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="edward.models.distributions.Distribution.is_multivariate">
 <code class="descname">is_multivariate</code><a class="headerlink" href="#edward.models.distributions.Distribution.is_multivariate" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>bool</em> &#8211; <code class="docutils literal"><span class="pre">True</span></code> if <code class="docutils literal"><span class="pre">Distribution</span></code> is multivariate</p>
@@ -403,14 +397,9 @@ method.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int, optional</em>) &#8211; Number of samples to return.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A (size x shape) array of type tf.float32, where each
-slice along the first dimension is a sample from p. If
-the flag sample_tensor is true, the return object is a
-TensorFlow tensor. Otherwise the return object is a
-realization of a TensorFlow tensor, i.e., NumPy array. The
-latter is required when we require NumPy/SciPy in order to
-sample from distributions.</td>
+slice along the first dimension is a sample from p.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor or np.ndarray</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
 </tbody>
 </table>
@@ -759,27 +748,6 @@ log_prob methods, e.g., for automatic Rao-Blackwellization.</p>
 i.e., dimensions (batch x shape) for fixed batch and varying
 shape.</p>
 <p>This method assumes length of xs == length of self.layers.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.models.models.Variational.np_dict">
-<code class="descname">np_dict</code><span class="sig-paren">(</span><em>samples</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.Variational.np_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Form dictionary to feed any placeholders with np.array
-samples.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>samples</strong> (<em>list or tf.Tensor</em>) &#8211; If more than one layer, a list of tf.Tensors of dimension
-(batch x shape). If one layer, a tf.Tensor of (batch x
-shape).</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Notes</p>
-<p>This method assumes each samples[l] in samples has the same
-batch size, i.e., dimensions (batch x shape) for fixed batch
-and varying shape.</p>
 </dd></dl>
 
 <dl class="method">
