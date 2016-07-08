@@ -23,8 +23,8 @@ Variational model
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Dirichlet, Normal, InvGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
