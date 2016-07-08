@@ -27,6 +27,9 @@ class Distribution(object):
         the number of parameters
     is_multivariate : bool
         ``True`` if ``Distribution`` is multivariate
+    is_reparameterized : bool
+        ``True`` if sampling from ``Distribution`` is done by
+        reparameterizing random noise drawn from another distribution
     """
     def __init__(self, shape=1):
         """Initialize.
@@ -49,77 +52,13 @@ class Distribution(object):
         self.num_vars = np.prod(self.shape)
         self.num_params = None
         self.is_multivariate = False
-
-    def sample_noise(self, size=1):
-        """Sample from a standard parameterization of ``Distribution``.
-
-        For example, if ``epsilon = sample_noise()``, then
-
-        .. math::
-            \epsilon \sim s(\epsilon),
-
-        where :math:`s` is a standard parameterization of ``Distribution``
-        that has no parameters.
-
-        Passing :math:`\epsilon` into ``reparam`` then transforms the draw
-        according to some parameters.
-
-        Parameters
-        ----------
-        size : int, optional
-            Number of samples to return.
-
-        Returns
-        -------
-        tf.Tensor
-            A ``[size x shape]`` array of type ``tf.float32``, where each
-            slice along the first dimension is a sample from ``s(epsilon)``.
-
-        Raises
-        ------
-        NotImplementedError
-        """
-        raise NotImplementedError()
-
-    def reparam(self, eps):
-        """Reparameterizes a sample from a standard version of ``Distribution``.
-
-        For example, if ``epsilon = sample_noise()``, then calling
-        ``x = reparam(epsilon)`` reparameterizes ``epsilon`` such that
-
-        .. math::
-            x \sim p(x | \\text{params})
-
-        where ``params`` are the parameters that govern this
-        ``Distribution`` object.
-
-        Parameters
-        ----------
-        eps : tf.Tensor
-            A draw from ``sample_noise`` of this ``Distribution`` object.
-
-        Returns
-        -------
-        tf.Tensor
-            A ``[size x shape]`` array of type ``tf.float32``, where each
-            slice along the first dimension is a sample from
-            ``p(x | params)``.
-
-        Raises
-        ------
-        NotImplementedError
-        """
-        raise NotImplementedError()
+        self.is_reparameterized = False
 
     def sample(self, size=1):
         """Sample from ``Distribution``.
 
         .. math::
             x \sim p(x | \\text{params})
-
-        Defaults to sampling noise via ``sample_noise`` and reparameterizing via
-        ``reparam``. Otherwise expects a derived class to implement its own
-        method.
 
         Parameters
         ----------
@@ -132,7 +71,7 @@ class Distribution(object):
             A (size x shape) array of type tf.float32, where each
             slice along the first dimension is a sample from p.
         """
-        return self.reparam(self.sample_noise(size))
+        raise NotImplementedError()
 
     def log_prob(self, xs):
         """Evaluate log probability.
@@ -262,6 +201,7 @@ class Bernoulli(Distribution):
         super(Bernoulli, self).__init__(shape)
         self.num_params = self.num_vars
         self.is_multivariate = False
+        self.is_reparameterized = False
 
         if p is None:
             p_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -302,6 +242,7 @@ class Beta(Distribution):
         super(Beta, self).__init__(shape)
         self.num_params = 2*self.num_vars
         self.is_multivariate = False
+        self.is_reparameterized = False
 
         if alpha is None:
             alpha_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -349,6 +290,7 @@ class Dirichlet(Distribution):
         super(Dirichlet, self).__init__(shape)
         self.num_params = self.num_vars
         self.is_multivariate = True
+        self.is_reparameterized = False
 
         if alpha is None:
             alpha_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -394,6 +336,7 @@ class InvGamma(Distribution):
         super(InvGamma, self).__init__(shape)
         self.num_params = 2*self.num_vars
         self.is_multivariate = False
+        self.is_reparameterized = False
 
         if alpha is None:
             alpha_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -455,6 +398,7 @@ class Multinomial(Distribution):
         super(Multinomial, self).__init__(shape)
         self.num_params = np.prod(shape[:-1]) * (shape[-1] -1)
         self.is_multivariate = True
+        self.is_reparameterized = False
 
         if pi is None:
             real_shape = self.shape[:-1]
@@ -502,6 +446,7 @@ class Normal(Distribution):
         super(Normal, self).__init__(shape)
         self.num_params = 2*self.num_vars
         self.is_multivariate = False
+        self.is_reparameterized = True
 
         if loc is None:
             loc = tf.Variable(tf.random_normal(self.shape))
@@ -519,11 +464,8 @@ class Normal(Distribution):
         return "mean: \n" + m.__str__() + "\n" + \
                "std dev: \n" + s.__str__()
 
-    def sample_noise(self, size=1):
-        return tf.random_normal((size, ) + self.shape)
-
-    def reparam(self, eps):
-        return self.loc + eps * self.scale
+    def sample(self, size=1):
+        return self.loc + tf.random_normal((size, ) + self.shape) * self.scale
 
     def log_prob_idx(self, idx, xs):
         full_idx = (slice(0, None), ) + idx # slice over batch size
@@ -550,6 +492,7 @@ class PointMass(Distribution):
         super(PointMass, self).__init__(shape)
         self.num_params = self.num_vars
         self.is_multivariate = False
+        self.is_reparameterized = True
 
         if params is None:
             params = tf.Variable(tf.random_normal(self.shape))

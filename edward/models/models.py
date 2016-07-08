@@ -219,7 +219,7 @@ class Variational(object):
             self.shape = []
             self.num_vars = 0
             self.num_params = 0
-            self.is_reparam = True
+            self.is_reparameterized = True
             self.is_normal = True
             self.is_entropy = True
             self.is_multivariate = []
@@ -228,8 +228,8 @@ class Variational(object):
             self.shape = [layer.shape for layer in self.layers]
             self.num_vars = sum([layer.num_vars for layer in self.layers])
             self.num_params = sum([layer.num_params for layer in self.layers])
-            self.is_reparam = all(['reparam' in layer.__class__.__dict__
-                                   for layer in self.layers])
+            self.is_reparameterized = all([layer.is_reparameterized
+                                           for layer in self.layers])
             self.is_normal = all([isinstance(layer, Normal)
                                   for layer in self.layers])
             self.is_entropy = all(['entropy' in layer.__class__.__dict__
@@ -258,7 +258,7 @@ class Variational(object):
         self.shape += [layer.shape]
         self.num_vars += layer.num_vars
         self.num_params += layer.num_params
-        self.is_reparam = self.is_reparam and 'reparam' in layer.__class__.__dict__
+        self.is_reparameterized = self.is_reparameterized and layer.is_reparameterized
         self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.is_multivariate += [layer.is_multivariate]
