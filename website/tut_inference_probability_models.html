@@ -88,7 +88,7 @@
   p(z)\end{aligned}\]</span> as a joint density over observed and latent random variables.</p>
 <h3 id="the-posterior">The posterior</h3>
 <p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden patterns <span class="math inline">\(z\)</span> explain the data? We seek to infer these hidden patterns using the model.</p>
-<p>Inference for probability models leverages Bayes rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
+<p>Inference for probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
   p(z \mid x)
   &amp;=
   \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math inline">\(z\)</span>, conditioned on some (observed) data <span class="math inline">\(x\)</span>. It provides a probabilistic description of the hidden patterns that explain the data. Wrapping up our example, say you measured your weight <span class="math inline">\(7\)</span> times and the posterior of your weight turns out to be <span class="math display">\[\begin{aligned}

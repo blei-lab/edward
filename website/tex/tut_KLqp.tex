@@ -5,14 +5,16 @@
 \subsection{$\text{KL}(q\|p)$ minimization}
 
 (We recommend reading the 
-\href{tut_bayesian_inference.html}{Bayesian inference} tutorial first.)
+\href{tut_inference_probability_models.html}{inference of probability models}
+tutorial first.)
 
 Variational inference is a powerful approach to approximating the posterior. The
-core idea has two steps:
+core idea involves two steps:
 \begin{enumerate}
    \item propose a tractable approximation to the posterior $q(z\;;\;\lambda)$,
    and
-   \item match the approximation to the posterior.
+   \item match it to the posterior by tuning the variational
+   parameters $\lambda$.
  \end{enumerate} 
 This strategy converts the problem of computing the posterior $p(z \mid x)$ into
 an optimization problem of minimizing some divergence metric
@@ -33,16 +35,72 @@ One form of variational inference minimizes the Kullback-Leibler divergence
   &=
   \arg\min_\lambda \text{KL}( 
   q(z\;;\;\lambda)
-  \|
+  \;\|\;
   p(z \mid x)
   )\\
-  &=
+  &=\;
   \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
-  \log p(z \mid x)
-  -
   \log q(z\;;\;\lambda)
+  -
+  \log p(z \mid x)
   \big].
 \end{align*}
 The KL divergence is a non-symmetric, information theoretic metric of
-similiarity between two probability distributions.
+similiarity between two probability distributions. 
+
+\subsubsection{The Evidence Lower Bound}
+
+The above optimization problem is intractable because it directly depends on the
+posterior $p(z \mid x)$. To tackle this, consider the following relationship
+\begin{align*}
+  \log p(x)
+  &=
+  \text{KL}( 
+  q(z\;;\;\lambda)
+  \;\|\;
+  p(z \mid x)
+  )\\
+  &\quad+\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big]
+\end{align*}
+where the left hand side is the logarithm of the evidence 
+$p(x) = \int p(x,z) \text{d}z$. (Try deriving this using Bayes rule!)
+
+Since the evidence does not depend on the variational parameters $\lambda$,
+we can minimize $\text{KL}(q\|p)$ by instead maximizing
+\begin{align*}
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],
+\end{align*}
+the Evidence Lower BOund. Here, both $p(x,z)$ and $q(z\;;\;\lambda)$ are
+tractable, by design. The optimization problem we seek to solve becomes
+\begin{align*}
+  \lambda^*
+  &=
+  \arg \max_\lambda \text{ELBO}(\lambda).
+\end{align*}
+
+What does maximizing the ELBO do? Expanding the ELBO reveals
+\begin{align*}
+  \text{ELBO}(\lambda) 
+  &=\;
+  \mathbb{E}_{q(z \;;\; \lambda)}[\log p(x \mid z)]  
+  - \text{KL}(q(z \;;\; \lambda) \;\|\; p(z)).
+\end{align*}
+Maximizing the ELBO encourages $q$ to place its mass to explain the data through
+the likelihood $p(x \mid z)$. But the KL term penalizes $q$ as it drifts away
+from the prior $p(z)$. 
+
+
