@@ -256,7 +256,6 @@ class Bernoulli(Distribution):
     """Bernoulli
 
     See :class:`edward.stats.distributions.Bernoulli`
-
     """
     def __init__(self, shape=1, p=None):
         super(Bernoulli, self).__init__(shape)

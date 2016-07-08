@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.data import DataGenerator
-from edward.models import Variational, PointMass
+from edward.models import StanModel, Variational, PointMass
 from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:
@@ -17,6 +17,22 @@ except ImportError:
 
 class Inference(object):
     """Base class for Edward inference methods.
+
+    Attributes
+    ----------
+    model : ed.Model
+        probability model
+    xs : dict
+        Dictionary of TensorFlow placeholders. The computational graph
+        uses this dictionary so that the data inputs may vary
+        when specified at runtime.
+    data : dict
+        Dictionary where each placeholder in `xs` is binded to a data
+        generator formed from the original data. The data generators
+        generate data to feed the placeholders at runtime. If the
+        original data is already composed of placeholders, then `data`
+        is empty: the user will have to manually feed the placeholders
+        at runtime.
     """
     def __init__(self, model, data=None):
         """Initialization.
@@ -28,34 +44,36 @@ class Inference(object):
         model : ed.Model
             probability model
         data : dict, optional
-            observed data
+            Data dictionary. For TensorFlow, Python, and Stan models,
+            the key type is a string; for PyMC3, the key type is a
+            Theano shared variable. For TensorFlow, Python, and PyMC3
+            models, the value type is a NumPy array or TensorFlow
+            placeholder; for Stan, the value type is the type
+            according to the Stan program's data block.
         """
         get_session()
         self.model = model
         if data is None:
             data = {}
 
-        # `self.xs` : dict
-        #     Dictionary of TensorFlow placeholders. The computational graph
-        #     uses this dictionary so that the data inputs may vary
-        #     when specified at runtime.
-        # `self.data` : dict
-        #     Dictionary where each placeholder in `self.xs` is binded
-        #     to a data generator formed from `data`. The data
-        #     generators generate data to feed the placeholders at
-        #     runtime. If `data` is already composed of placeholders,
-        #     then `self.data` is empty: the user will have to
-        #     manually feed the placeholders at runtime.
-        self.xs = {}
-        self.data = {}
-        for key, value in data.items():
-            if isinstance(value, tf.Tensor):
-                if value.name.startswith('Placeholder'):
-                    self.xs[key] = value
-            else:
-                placeholder = tf.placeholder(tf.float32, (None, ) + value.shape[1:])
-                self.xs[key] = placeholder
-                self.data[placeholder] = DataGenerator(value)
+        if isinstance(model, StanModel):
+            # Stan models do not support data subsampling. Therefore
+            # fix the data dictionary `self.xs` at compile time
+            # instead of using placeholders. No placeholders need to
+            # feeded with `self.data` so it is empty.
+            self.xs = data
+            self.data = {}
+        else:
+            self.xs = {}
+            self.data = {}
+            for key, value in data.items():
+                if isinstance(value, tf.Tensor):
+                    if value.name.startswith('Placeholder'):
+                        self.xs[key] = value
+                else:
+                    placeholder = tf.placeholder(tf.float32, (None, ) + value.shape[1:])
+                    self.xs[key] = placeholder
+                    self.data[placeholder] = DataGenerator(value)
 
 
 class MonteCarlo(Inference):
@@ -69,7 +87,12 @@ class MonteCarlo(Inference):
         model : ed.Model
             probability model
         data : dict, optional
-            observed data
+            Data dictionary. For TensorFlow, Python, and Stan models,
+            the key type is a string; for PyMC3, the key type is a
+            Theano shared variable. For TensorFlow, Python, and PyMC3
+            models, the value type is a NumPy array or TensorFlow
+            placeholder; for Stan, the value type is the type
+            according to the Stan program's data block.
         """
         super(MonteCarlo, self).__init__(*args, **kwargs)
 
@@ -87,7 +110,12 @@ class VariationalInference(Inference):
         variational : ed.Variational
             variational model or distribution
         data : dict, optional
-            observed data
+            Data dictionary. For TensorFlow, Python, and Stan models,
+            the key type is a string; for PyMC3, the key type is a
+            Theano shared variable. For TensorFlow, Python, and PyMC3
+            models, the value type is a NumPy array or TensorFlow
+            placeholder; for Stan, the value type is the type
+            according to the Stan program's data block.
         """
         super(VariationalInference, self).__init__(model, data)
         self.variational = variational
@@ -144,8 +172,9 @@ class VariationalInference(Inference):
         self.loss = tf.constant(0.0)
 
         # Set shape of data placeholder's according to batch size.
-        for value in self.xs.values():
-            value.set_shape([self.n_data] + get_dims(value)[1:])
+        if not isinstance(self.model, StanModel):
+            for value in self.xs.values():
+                value.set_shape([self.n_data] + get_dims(value)[1:])
 
         loss = self.build_loss()
         if optimizer is None:

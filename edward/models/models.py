@@ -46,9 +46,10 @@ class PyMC3Model(object):
         Parameters
         ----------
         xs : dict
-            Dictionary where each key is a data placeholder (Theano
-            shared variable) in the PyMC3 model, and each value is the
-            corresponding realization (np.ndarray).
+            Data dictionary. Each key is a data placeholder (Theano
+            shared variable) in the PyMC3 model, and its value is the
+            corresponding realization (np.ndarray or TensorFlow
+            placeholder).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -90,8 +91,9 @@ class PythonModel(object):
         Parameters
         ----------
         xs : dict
-            Dictionary of observations whose key and values are
-            according to the user.
+            Data dictionary. Each key names a data structure used in
+            the model (str), and its value is the corresponding
+            realization (np.ndarray or TensorFlow placeholder).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -143,8 +145,9 @@ class StanModel(object):
         Parameters
         ----------
         xs : dict
-            Dictionary defining the observations according to the data
-            block of the Stan program.
+            Data dictionary. Each key and value is according to
+            the Stan program's data block. The key type is str; the
+            value type is any supported in the data block.
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.

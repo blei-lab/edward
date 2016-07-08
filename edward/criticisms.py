@@ -20,7 +20,12 @@ def evaluate(metrics, model, variational, data, y_true=None):
     variational : ed.Variational
         Variational approximation to the posterior p(z | x)
     data : dict
-        Data to make model predictions with
+        Data dictionary to evaluate model with. For TensorFlow,
+        Python, and Stan models, the key type is a string; for PyMC3,
+        the key type is a Theano shared variable. For TensorFlow,
+        Python, and PyMC3 models, the value type is a NumPy array or
+        TensorFlow placeholder; for Stan, the value type is the type
+        according to the Stan program's data block.
     y_true : np.ndarray or tf.Tensor
         True values to compare to in supervised learning tasks.
 
@@ -127,7 +132,12 @@ def ppc(model, variational=None, data=None, T=None, size=100):
     data : dict, optional
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
-        data set size of 1.
+        data set size of 1. For TensorFlow, Python, and Stan models,
+        the key type is a string; for PyMC3, the key type is a Theano
+        shared variable. For TensorFlow, Python, and PyMC3 models, the
+        value type is a NumPy array or TensorFlow placeholder; for
+        Stan, the value type is the type according to the Stan
+        program's data block.
     T : function, optional
         Discrepancy function, which takes a data dictionary and list
         of latent variables as input and outputs a tf.Tensor. Default
