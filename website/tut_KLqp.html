@@ -92,7 +92,8 @@
   \;\|\;
   p(z \mid x)
   )\\
-  &amp;=\;
+  &amp;=
+  \arg\min_\lambda\;
   \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
   \log q(z\;;\;\lambda)
@@ -127,11 +128,12 @@
   \lambda^*
   &amp;=
   \arg \max_\lambda \text{ELBO}(\lambda).\end{aligned}\]</span></p>
-<p>What does maximizing the ELBO do? Expanding the ELBO reveals <span class="math display">\[\begin{aligned}
+<p>What does maximizing the ELBO do? Expanding the ELBO reveals a tradeoff <span class="math display">\[\begin{aligned}
   \text{ELBO}(\lambda) 
   &amp;=\;
   \mathbb{E}_{q(z \;;\; \lambda)}[\log p(x \mid z)]  
   - \text{KL}(q(z \;;\; \lambda) \;\|\; p(z)).\end{aligned}\]</span> Maximizing the ELBO encourages <span class="math inline">\(q\)</span> to place its mass to explain the data through the likelihood <span class="math inline">\(p(x \mid z)\)</span>. But the KL term penalizes <span class="math inline">\(q\)</span> as it drifts away from the prior <span class="math inline">\(p(z)\)</span>.</p>
+<p>There are various strategies of maximizing the ELBO. We describe them in sub-tutorials that are acessible from the <a href="tutorials.html">tutorials</a> page.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

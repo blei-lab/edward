@@ -1,0 +1,23 @@
+% Define the subtitle of the page
+\title{Score function estimator}
+
+% Begin the content of the page
+\subsection{Score function estimator}
+
+(This tutorial follows the
+\href{tut_KLqp.html}{$\text{KL}(q\|p)$ minimization} tutorial.)
+
+We seek to maximize the ELBO,
+\begin{align*}
+  \lambda^*
+  &=
+  \arg \max_\lambda \text{ELBO}(\lambda)\\
+  &=\;
+  \arg \max_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big].
+\end{align*}
