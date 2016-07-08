@@ -14,9 +14,9 @@ def _next_onepass(data, n_data, N=10):
         n_data = N
 
     samples = []
-    for _ in range(N / n_data):
+    for _ in range(int(N / n_data)):
         # NOTE: the test will only work if N % n_data == 0
-        samples.append(data.next(n_data)['x'])
+        samples.append(data.next(n_data))
 
     return samples
 
@@ -29,15 +29,15 @@ def _test(data, n_data):
 
 
 def test_single_next():
-    data = ed.DataGenerator({'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])})
+    data = ed.DataGenerator(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
     _test(data, 1)
 
 
 def test_multiple_next():
-    data = ed.DataGenerator({'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])})
+    data = ed.DataGenerator(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
     _test(data, 2)
 
 
 def test_all_next():
-    data = ed.DataGenerator({'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])})
+    data = ed.DataGenerator(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
     _test(data, None)
