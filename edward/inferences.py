@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.data import DataGenerator
 from edward.models import Variational, PointMass
-from edward.util import get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
+from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:
     import prettytensor as pt
@@ -52,13 +52,9 @@ class Inference(object):
                 if value.name.startswith('Placeholder'):
                     self.xs[key] = value
             else:
-                # TODO size; it's definitely known when initializing
-                # with self.n_data; but then no longer is `data`
-                # exposed
-                # (self.n_data, ) + value.shape[1:])
-                x_ph = tf.placeholder(tf.float32)
-                self.xs[key] = x_ph
-                self.data[x_ph] = DataGenerator(value)
+                placeholder = tf.placeholder(tf.float32, (None, ) + value.shape[1:])
+                self.xs[key] = placeholder
+                self.data[placeholder] = DataGenerator(value)
 
 
 class MonteCarlo(Inference):
@@ -144,8 +140,11 @@ class VariationalInference(Inference):
         self.n_iter = n_iter
         self.n_data = n_data
         self.n_print = n_print
-
         self.loss = tf.constant(0.0)
+
+        # Set shape of data placeholder's according to batch size.
+        for value in self.xs.values():
+            value.set_shape([self.n_data] + get_dims(value)[1:])
 
         loss = self.build_loss()
         if optimizer is None:
@@ -179,7 +178,7 @@ class VariationalInference(Inference):
             Loss function values after one iteration
         """
         sess = get_session()
-        feed_dict = {key: value.next() for key, value in self.data.items()}
+        feed_dict = {key: value.next(self.n_data) for key, value in self.data.items()}
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
