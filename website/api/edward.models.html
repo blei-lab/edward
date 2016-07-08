@@ -591,8 +591,10 @@ probability mass is located there.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<em>pymc3.Model</em>) &#8211; The probability model</li>
-<li><strong>observed</strong> (<em>Theano tensor</em>) &#8211; The shared theano tensor passed to the model likelihood</li>
+<li><strong>model</strong> (<em>pymc3.Model</em>) &#8211; The probability model, written with Theano shared
+variables to form any observations. The Theano shared
+variables are set during inference.</li>
+<li><strong>observed</strong> (<em>Theano tensor</em>) &#8211; The shared Theano tensor passed to the model.</li>
 </ul>
 </td>
 </tr>
@@ -601,7 +603,31 @@ probability mass is located there.</p>
 <dl class="method">
 <dt id="edward.models.models.PyMC3Model.log_prob">
 <code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model.log_prob" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xs</strong> (<em>np.ndarray</em>) &#8211; A single np.ndarray binding to the observed value in the
+PyMC3 model.</li>
+<li><strong>zs</strong> (<em>list or tf.Tensor</em>) &#8211; A list of tf.Tensor&#8217;s if multiple varational families,
+otherwise a tf.Tensor if single variational family.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">S-vector of type tf.float32,
+[log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It wraps around a Python function. The Python function takes
+as input zs of type np.ndarray, and outputs a np.ndarray.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -618,22 +644,25 @@ probability mass is located there.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xs</strong> (<em>np.ndarray</em>) &#8211; </li>
-<li><strong>zs</strong> (<em>np.ndarray</em>) &#8211; n_minibatch x dim(z) array, where each row is a set of
-latent variables.</li>
+<li><strong>xs</strong> (<em>any</em>) &#8211; A batch of data points, as any data type the user interfaces with
+when defining this method.</li>
+<li><strong>zs</strong> (<em>list or tf.Tensor</em>) &#8211; A list of tf.Tensor&#8217;s if multiple varational families,
+otherwise a tf.Tensor if single variational family.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a TensorFlow op wrapped as a Python function that returns
-n_minibatch array of type np.float32, where each element
-is the log pdf evaluated at (z_{b1}, ..., z_{bd})</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">S-vector of type tf.float32,
+[log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.py_func</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>It wraps around a Python function. The Python function takes
+as input zs of type np.ndarray, and outputs a np.ndarray.</p>
 </dd></dl>
 
 </dd></dl>
@@ -658,7 +687,31 @@ is the log pdf evaluated at (z_{b1}, ..., z_{bd})</p>
 <dl class="method">
 <dt id="edward.models.models.StanModel.log_prob">
 <code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel.log_prob" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Dictionary defining the observations according to the data
+block of the Stan program.</li>
+<li><strong>zs</strong> (<em>list or tf.Tensor</em>) &#8211; A list of tf.Tensor&#8217;s if multiple varational families,
+otherwise a tf.Tensor if single variational family.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">S-vector of type tf.float32,
+[log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It wraps around a Python function. The Python function takes
+as input zs of type np.ndarray, and outputs a np.ndarray.</p>
+</dd></dl>
 
 </dd></dl>
 
