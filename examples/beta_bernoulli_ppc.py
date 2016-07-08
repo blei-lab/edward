@@ -10,8 +10,8 @@ Variational model
     Likelihood: Mean-field Beta
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Beta
 from edward.stats import bernoulli, beta

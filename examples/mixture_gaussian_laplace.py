@@ -16,8 +16,8 @@ Inference: Laplace approximation
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims

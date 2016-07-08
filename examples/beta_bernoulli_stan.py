@@ -10,6 +10,7 @@ Variational model
     Likelihood: Mean-field Beta
 """
 import edward as ed
+
 from edward.models import Variational, Beta
 
 model_code = """

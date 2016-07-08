@@ -10,8 +10,8 @@ Variational model
     Likelihood: Mean-field Normal
 """
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
