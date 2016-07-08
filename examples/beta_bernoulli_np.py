@@ -26,7 +26,7 @@ class BetaBernoulli(PythonModel):
         lp = np.zeros(n_minibatch, dtype=np.float32)
         for b in range(n_minibatch):
             lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-            for n in range(len(xs['x'])):
+            for n in range(xs['x'].shape[0]):
                 lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
 
         return lp

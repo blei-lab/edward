@@ -48,8 +48,7 @@ class PyMC3Model(object):
         xs : dict
             Data dictionary. Each key is a data placeholder (Theano
             shared variable) in the PyMC3 model, and its value is the
-            corresponding realization (np.ndarray or TensorFlow
-            placeholder).
+            corresponding realization (np.ndarray or tf.Tensor).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -63,15 +62,36 @@ class PyMC3Model(object):
         Notes
         -----
         It wraps around a Python function. The Python function takes
-        as input zs of type np.ndarray, and outputs a np.ndarray.
+        inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Set realizations of the observed random variables.
-        for key, value in xs.items():
+        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # data value corresponds to a key.
+        self.keys = xs.keys()
+        if isinstance(xs.values()[0], np.ndarray):
+            # If `xs` is a dictionary of NumPy arrays, then store
+            # their values to pass into `_py_log_prob_args`.
+            self.values = xs.values()
+            inp = [zs]
+        else:
+            # If `xs` is a dictionary of TensorFlow tensors, then
+            # pass the tensors into tf.py_func.
+            inp = [zs] + xs.values()
+
+        return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
+
+    def _py_log_prob_args(self, zs, *args):
+        # Set `values` to NumPy arrays that were passed in via
+        # `self.values` or via `*args`.
+        if hasattr(self, 'values'):
+            values = self.values
+        else:
+            values = args
+
+        # Set data placeholders in PyMC3 model (Theano shared
+        # variable) to their realizations (NumPy array).
+        for key, value in zip(self.keys, values):
             key.set_value(value)
 
-        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
-
-    def _py_log_prob(self, zs):
         n_minibatch = zs.shape[0]
         lp = np.zeros(n_minibatch, dtype=np.float32)
         for s in range(n_minibatch):
@@ -93,7 +113,7 @@ class PythonModel(object):
         xs : dict
             Data dictionary. Each key names a data structure used in
             the model (str), and its value is the corresponding
-            realization (np.ndarray or TensorFlow placeholder).
+            corresponding realization (np.ndarray or tf.Tensor).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -107,14 +127,33 @@ class PythonModel(object):
         Notes
         -----
         It wraps around a Python function. The Python function takes
-        as input zs of type np.ndarray, and outputs a np.ndarray.
+        inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Store data in order to later pass data to Python function.
-        self.xs = xs
-        return tf.py_func(self._py_log_prob_z, [zs], [tf.float32])[0]
+        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # data value corresponds to a key.
+        self.keys = xs.keys()
+        if isinstance(xs.values()[0], np.ndarray):
+            # If `xs` is a dictionary of NumPy arrays, then store
+            # their values to pass into `_py_log_prob_args`.
+            self.values = xs.values()
+            inp = [zs]
+        else:
+            # If `xs` is a dictionary of TensorFlow tensors, then
+            # pass the tensors into tf.py_func.
+            inp = [zs] + xs.values()
 
-    def _py_log_prob_z(self, zs):
-        return self._py_log_prob(self.xs, zs)
+        return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
+
+    def _py_log_prob_args(self, zs, *args):
+        # Set `values` to NumPy arrays that were passed in via
+        # `self.values` or via `*args`.
+        if hasattr(self, 'values'):
+            values = self.values
+        else:
+            values = args
+
+        xs = {key: value for key, value in zip(self.keys, values)}
+        return self._py_log_prob(xs, zs)
 
     def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
