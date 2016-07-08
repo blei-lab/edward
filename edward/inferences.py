@@ -30,9 +30,9 @@ class Inference(object):
         Dictionary where each placeholder in `data` is binded to a data
         generator formed from the original data. The data generators
         generate data to feed the placeholders at runtime. If the
-        original data is already composed of placeholders, then `data`
-        is empty: the user will have to manually feed the placeholders
-        at runtime.
+        original data is already composed of placeholders, then
+        `data_gen` is empty: the user will have to manually feed the
+        placeholders at runtime.
     """
     def __init__(self, model, data=None):
         """Initialization.
@@ -59,8 +59,8 @@ class Inference(object):
         if isinstance(model, StanModel):
             # Stan models do not support data subsampling. Therefore
             # fix the data dictionary `self.data` at compile time to
-            # `data`. No placeholders need to feeded with
-            # `self.data_gen` so it is empty.
+            # `data`. No placeholders need to be fed so
+            # `self.data_gen` is empty.
             self.data = data
             self.data_gen = {}
         else:
@@ -69,12 +69,12 @@ class Inference(object):
             for key, value in data.items():
                 if isinstance(value, tf.Tensor):
                     if value.name.startswith('Placeholder'):
-                        # If `data` already uses TensorFlow
-                        # placeholders, then set each `self.data`
-                        # value to them. `self.data_gen` will be empty
-                        # as there is no data to form the data
-                        # generator. The user will have to manually
-                        # feed the placeholders at runtime.
+                        # If `data` already has TensorFlow
+                        # placeholders, then set `self.data` to them.
+                        # In such a case, there is no data to form
+                        # data generators so `self.data_gen` is empty.
+                        # The user will have to manually feed the
+                        # placeholders at runtime.
                         self.data[key] = value
                 else:
                     placeholder = tf.placeholder(tf.float32, (None, ) + value.shape[1:])
@@ -177,7 +177,7 @@ class VariationalInference(Inference):
         self.n_print = n_print
         self.loss = tf.constant(0.0)
 
-        # Set shape of data placeholder's according to batch size.
+        # Set shape of data placeholders according to batch size.
         if not isinstance(self.model, StanModel):
             for value in self.data.values():
                 value.set_shape([self.n_data] + get_dims(value)[1:])
