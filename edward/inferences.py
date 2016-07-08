@@ -581,12 +581,13 @@ class Laplace(MAP):
 
         Computes the Hessian at the mode.
         """
-        get_session()
-        # TODO
-        x = self.data.next(self.n_data) # uses mini-batch
+        x = self.xs
         z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
         inv_cov = hessian(self.model.log_prob(x, z), var_list)
+        sess = get_session()
+        # use only a batch of data to estimate hessian
+        feed_dict = {key: value.next(self.n_data) for key, value in self.data.items()}
         print("Precision matrix:")
-        print(inv_cov.eval())
+        print(sess.run(inv_cov, feed_dict))
