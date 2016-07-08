@@ -1,17 +1,17 @@
 % Define the subtitle of the page
-\title{Bayesian Inference}
+\title{Inference of probability models}
 
 % Begin the content of the page
-\subsection{Bayesian Inference}
+\subsection{Inference of probability models}
 
 This tutorial introduces the class of models supported in Edward, namely
-Bayesian probability models. It asks the question: what does it mean to do
-inference in Bayesian models? This sets the stage for
+probability models. It asks the question: what does it mean to do
+inference in probability models? This sets the stage for
 understanding how to develop and implement inference procedures in Edward.
 
-\subsubsection{Bayesian models}
+\subsubsection{Probability models}
 
-A Bayesian model has two components. The \emph{likelihood}
+A probability model has two components. The \emph{likelihood}
 \begin{align*}
   p(x \mid z)
 \end{align*}
@@ -22,18 +22,18 @@ particular hidden pattern described by $z$. For example, consider measuring your
 weight on a cheap scale; the likelihood model would describe the imprecisions
 of the scale that reflect into the measurements.
 
-Bayesian models additional posit a \emph{prior}
+The \emph{prior}
 \begin{align*}
-  p(z).
+  p(z)
 \end{align*}
-The prior is another probability distribution that captures our prior beliefs on
+is another probability distribution that captures our prior beliefs on
 the latent random variables $z$. It describes the kind of hidden patterns we
 expect to have produced the data $x$. Continuing our example, the prior would
 capture your prior belief about your (latent) weight. A potential prior might be
 a normal distribution centered at the average weight of adults on Earth (
 which is $\approx62$ kilograms).
 
-Combining the likelihood and the prior specifies a Bayesian model,
+Combining the likelihood and the prior specifies a probability model,
 \begin{align*}
   p(x,z)
   &=
@@ -48,7 +48,7 @@ How can we use a model $p(x,z)$ to analyze some data $x$? In other words,
 what hidden patterns $z$ explain the data? We seek to infer these
 hidden patterns using the model.
 
-The Bayesian approach to inference leverages Bayes rule to define the 
+Inference for probability models leverages Bayes rule to define the 
 \emph{posterior}
 \begin{align*}
   p(z \mid x)
@@ -69,7 +69,7 @@ uncertainty around it.
 \subsubsection{Computing the posterior}
 
 Now we know what the posterior represents. How do we compute it? This is the
-central computational challenge in Bayesian inference.
+central computational challenge in inference.
 
 The posterior difficult to compute because of the integral in the denominator.
 This is often a high-dimensional integral that lacks an analytic (closed-form)
