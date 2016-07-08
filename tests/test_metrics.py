@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
@@ -28,6 +32,7 @@ all_regression_metrics = [
 
 sess = tf.Session()
 
+
 def test_classification_metrics():
     y_a = tf.convert_to_tensor(np.random.randint(0, 7, (6, 7)), dtype=tf.float32)
     y_b = tf.convert_to_tensor(np.random.random((6, 7)))
@@ -35,12 +40,14 @@ def test_classification_metrics():
         with sess.as_default():
             assert metric(y_a, y_b).eval().shape == ()
 
+
 def test_sparse_classification_metrics():
     y_a = tf.convert_to_tensor(np.random.randint(0, 7, (6,)), dtype=tf.float32)
     y_b = tf.convert_to_tensor(np.random.random((6, 7)))
     for metric in all_sparse_metrics:
         with sess.as_default():
             assert metric(y_a, y_b).eval().shape == ()
+
 
 def test_regression_metrics():
     y_a = tf.convert_to_tensor(np.random.random((6, 7)))

@@ -46,9 +46,11 @@ class LinearModel:
         y = xs[:, 0]
         x = xs[:, 1:]
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        # broadcasting to do (x*W) + b (n_data x n_minibatch - n_minibatch)
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
         mus = tf.matmul(x, W) + b
+        # broadcasting to do mus - y (n_data x n_minibatch - n_data x 1)
         y = tf.expand_dims(y, 1)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
         return log_lik + log_prior
@@ -67,9 +69,8 @@ class LinearModel:
 def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
     x = np.random.randn(n_data, n_dim)
-    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
+    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data)
     y = y.reshape((n_data, 1))
-
     data = np.concatenate((y, x), axis=1)
     data = tf.constant(data, dtype=tf.float32)
     return ed.Data(data)
@@ -79,10 +80,11 @@ model = LinearModel()
 variational = Variational()
 variational.add(Normal(model.num_vars))
 
-data = build_toy_dataset()
+coeff = np.random.randn(10)
+data = build_toy_dataset(coeff=coeff)
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_minibatch=5, n_print=10)
 
-data_test = build_toy_dataset()
+data_test = build_toy_dataset(coeff=coeff)
 print(ed.evaluate('mse', model, variational, data_test))
