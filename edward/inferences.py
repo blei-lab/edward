@@ -361,7 +361,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
@@ -382,7 +382,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
                                    self.variational.log_prob(z))
@@ -407,7 +407,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_lik = self.model.log_lik(x, z)
@@ -434,7 +434,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_prob = self.model.log_prob(x, z)
@@ -462,7 +462,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -487,7 +487,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -551,7 +551,7 @@ class KLpq(VariationalInference):
 
         """
         x = self.data
-        z = self.zs = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_minibatch)
 
         # normalized importance weights
         q_log_prob = self.variational.log_prob(stop_gradient(z))
