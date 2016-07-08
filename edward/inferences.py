@@ -236,19 +236,6 @@ class MFVI(VariationalInference):
         self.n_minibatch = n_minibatch
         return VariationalInference.initialize(self, *args, **kwargs)
 
-    def update(self):
-        """Runs one iteration of MFVI.
-
-        Returns
-        -------
-        loss : double
-            MFVI loss function value after one iteration.
-        """
-        sess = get_session()
-        feed_dict = self.variational.np_dict(self.zs)
-        _, loss = sess.run([self.train, self.loss], feed_dict)
-        return loss
-
     def build_loss(self):
         """Wrapper for the MFVI loss function.
 
@@ -472,19 +459,6 @@ class KLpq(VariationalInference):
         """
         self.n_minibatch = n_minibatch
         return VariationalInference.initialize(self, *args, **kwargs)
-
-    def update(self):
-        """Runs one iteration of KLpq minimization.
-
-        Returns
-        -------
-        loss : double
-            KLpq loss function value after one iteration.
-        """
-        sess = get_session()
-        feed_dict = self.variational.np_dict(self.zs)
-        _, loss = sess.run([self.train, self.loss], feed_dict)
-        return loss
 
     def build_loss(self):
         """Loss function to minimize.
