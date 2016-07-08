@@ -22,12 +22,12 @@ class Inference(object):
     ----------
     model : ed.Model
         probability model
-    xs : dict
+    data : dict
         Dictionary of TensorFlow placeholders. The computational graph
         uses this dictionary so that the data inputs may vary
         when specified at runtime.
-    data : dict
-        Dictionary where each placeholder in `xs` is binded to a data
+    data_gen : dict
+        Dictionary where each placeholder in `data` is binded to a data
         generator formed from the original data. The data generators
         generate data to feed the placeholders at runtime. If the
         original data is already composed of placeholders, then `data`
@@ -58,22 +58,28 @@ class Inference(object):
 
         if isinstance(model, StanModel):
             # Stan models do not support data subsampling. Therefore
-            # fix the data dictionary `self.xs` at compile time
-            # instead of using placeholders. No placeholders need to
-            # feeded with `self.data` so it is empty.
-            self.xs = data
-            self.data = {}
+            # fix the data dictionary `self.data` at compile time to
+            # `data`. No placeholders need to feeded with
+            # `self.data_gen` so it is empty.
+            self.data = data
+            self.data_gen = {}
         else:
-            self.xs = {}
             self.data = {}
+            self.data_gen = {}
             for key, value in data.items():
                 if isinstance(value, tf.Tensor):
                     if value.name.startswith('Placeholder'):
-                        self.xs[key] = value
+                        # If `data` already uses TensorFlow
+                        # placeholders, then set each `self.data`
+                        # value to them. `self.data_gen` will be empty
+                        # as there is no data to form the data
+                        # generator. The user will have to manually
+                        # feed the placeholders at runtime.
+                        self.data[key] = value
                 else:
                     placeholder = tf.placeholder(tf.float32, (None, ) + value.shape[1:])
-                    self.xs[key] = placeholder
-                    self.data[placeholder] = DataGenerator(value)
+                    self.data[key] = placeholder
+                    self.data_gen[placeholder] = DataGenerator(value)
 
 
 class MonteCarlo(Inference):
@@ -173,7 +179,7 @@ class VariationalInference(Inference):
 
         # Set shape of data placeholder's according to batch size.
         if not isinstance(self.model, StanModel):
-            for value in self.xs.values():
+            for value in self.data.values():
                 value.set_shape([self.n_data] + get_dims(value)[1:])
 
         loss = self.build_loss()
@@ -208,7 +214,7 @@ class VariationalInference(Inference):
             Loss function values after one iteration
         """
         sess = get_session()
-        feed_dict = {key: value.next(self.n_data) for key, value in self.data.items()}
+        feed_dict = {key: value.next(self.n_data) for key, value in self.data_gen.items()}
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -354,7 +360,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -375,7 +381,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
@@ -400,7 +406,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -427,7 +433,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -455,7 +461,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
@@ -480,7 +486,7 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
@@ -544,7 +550,7 @@ class KLpq(VariationalInference):
             w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
 
         """
-        x = self.xs
+        x = self.data
         z = self.zs = self.variational.sample(self.n_minibatch)
 
         # normalized importance weights
@@ -586,7 +592,7 @@ class MAP(VariationalInference):
         .. math::
             - \log p(x,z)
         """
-        x = self.xs
+        x = self.data
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss
@@ -611,13 +617,13 @@ class Laplace(MAP):
 
         Computes the Hessian at the mode.
         """
-        x = self.xs
+        x = self.data
         z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
         inv_cov = hessian(self.model.log_prob(x, z), var_list)
         sess = get_session()
         # use only a batch of data to estimate hessian
-        feed_dict = {key: value.next(self.n_data) for key, value in self.data.items()}
+        feed_dict = {key: value.next(self.n_data) for key, value in self.data_gen.items()}
         print("Precision matrix:")
         print(sess.run(inv_cov, feed_dict))
