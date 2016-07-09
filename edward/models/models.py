@@ -23,7 +23,7 @@ except ImportError:
 class PyMC3Model(object):
     """Model wrapper for models written in PyMC3.
     """
-    def __init__(self, model, observed):
+    def __init__(self, model):
         """
         Parameters
         ----------
@@ -31,11 +31,8 @@ class PyMC3Model(object):
             The probability model, written with Theano shared
             variables to form any observations. The Theano shared
             variables are set during inference.
-        observed : Theano tensor
-            The shared Theano tensor passed to the model.
         """
         self.model = model
-        self.observed = observed
 
         vars = pm.inputvars(model.cont_vars)
         self.num_vars = len(vars)
@@ -48,9 +45,10 @@ class PyMC3Model(object):
         """
         Parameters
         ----------
-        xs : np.ndarray
-            A single np.ndarray binding to the observed value in the
-            PyMC3 model.
+        xs : dict
+            Data dictionary. Each key is a data placeholder (Theano
+            shared variable) in the PyMC3 model, and its value is the
+            corresponding realization (np.ndarray or tf.Tensor).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -64,12 +62,36 @@ class PyMC3Model(object):
         Notes
         -----
         It wraps around a Python function. The Python function takes
-        as input zs of type np.ndarray, and outputs a np.ndarray.
+        inputs of type np.ndarray and outputs a np.ndarray.
         """
-        self.observed.set_value(xs)
-        return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
+        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # data value corresponds to a key.
+        self.keys = xs.keys()
+        if isinstance(xs.values()[0], np.ndarray):
+            # If `xs` is a dictionary of NumPy arrays, then store
+            # their values to pass into `_py_log_prob_args`.
+            self.values = xs.values()
+            inp = [zs]
+        else:
+            # If `xs` is a dictionary of TensorFlow tensors, then
+            # pass the tensors into tf.py_func.
+            inp = [zs] + xs.values()
 
-    def _py_log_prob(self, zs):
+        return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
+
+    def _py_log_prob_args(self, zs, *args):
+        # Set `values` to NumPy arrays that were passed in via
+        # `self.values` or via `*args`.
+        if hasattr(self, 'values'):
+            values = self.values
+        else:
+            values = args
+
+        # Set data placeholders in PyMC3 model (Theano shared
+        # variable) to their realizations (NumPy array).
+        for key, value in zip(self.keys, values):
+            key.set_value(value)
+
         n_minibatch = zs.shape[0]
         lp = np.zeros(n_minibatch, dtype=np.float32)
         for s in range(n_minibatch):
@@ -88,9 +110,10 @@ class PythonModel(object):
         """
         Parameters
         ----------
-        xs : any
-            A batch of data points, as any data type the user interfaces with
-            when defining this method.
+        xs : dict
+            Data dictionary. Each key names a data structure used in
+            the model (str), and its value is the corresponding
+            corresponding realization (np.ndarray or tf.Tensor).
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.
@@ -104,14 +127,33 @@ class PythonModel(object):
         Notes
         -----
         It wraps around a Python function. The Python function takes
-        as input zs of type np.ndarray, and outputs a np.ndarray.
+        inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Store data in order to later pass data to Python function.
-        self.xs = xs
-        return tf.py_func(self._py_log_prob_z, [zs], [tf.float32])[0]
+        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # data value corresponds to a key.
+        self.keys = xs.keys()
+        if isinstance(xs.values()[0], np.ndarray):
+            # If `xs` is a dictionary of NumPy arrays, then store
+            # their values to pass into `_py_log_prob_args`.
+            self.values = xs.values()
+            inp = [zs]
+        else:
+            # If `xs` is a dictionary of TensorFlow tensors, then
+            # pass the tensors into tf.py_func.
+            inp = [zs] + xs.values()
 
-    def _py_log_prob_z(self, zs):
-        return self._py_log_prob(self.xs, zs)
+        return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
+
+    def _py_log_prob_args(self, zs, *args):
+        # Set `values` to NumPy arrays that were passed in via
+        # `self.values` or via `*args`.
+        if hasattr(self, 'values'):
+            values = self.values
+        else:
+            values = args
+
+        xs = {key: value for key, value in zip(self.keys, values)}
+        return self._py_log_prob(xs, zs)
 
     def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
@@ -142,8 +184,9 @@ class StanModel(object):
         Parameters
         ----------
         xs : dict
-            Dictionary defining the observations according to the data
-            block of the Stan program.
+            Data dictionary. Each key and value is according to
+            the Stan program's data block. The key type is str; the
+            value type is any supported in the data block.
         zs : list or tf.Tensor
             A list of tf.Tensor's if multiple varational families,
             otherwise a tf.Tensor if single variational family.

@@ -55,7 +55,7 @@ class NormalBernoulli:
                     deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
                     flatten()).tensor
 
-    def log_lik(self, x, z):
+    def log_lik(self, xs, z):
         """
         Bernoulli log-likelihood, summing over every image n and pixel i
         in image n.
@@ -63,7 +63,7 @@ class NormalBernoulli:
         log p(x | z) = log Bernoulli(x | p = varphi(z))
          = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
         """
-        return tf.reduce_sum(bernoulli.logpmf(x, p=self.neural_network(z)))
+        return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
 
     def sample_prior(self, size):
         """
@@ -130,7 +130,7 @@ mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
 # data uses placeholder in order to build inference's computational
 # graph. np.arrays of data are fed in during computation.
 x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
-data = ed.Data(x)
+data = {'x': x}
 
 sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)

@@ -63,10 +63,7 @@ class GaussianProcess:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
+        x, y = xs['x'], xs['y']
         log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(
             bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
@@ -75,7 +72,7 @@ class GaussianProcess:
 
 ed.set_seed(42)
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
-data = ed.Data(tf.constant(df, dtype=tf.float32))
+data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 model = GaussianProcess(N=len(df))
 variational = Variational()

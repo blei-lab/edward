@@ -22,10 +22,10 @@ with pm.Model() as pm_model:
     x = pm.Bernoulli('x', beta, observed=x_obs)
 
 ed.set_seed(42)
-model = PyMC3Model(pm_model, x_obs)
+model = PyMC3Model(pm_model)
 variational = Variational()
 variational.add(Beta())
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)
