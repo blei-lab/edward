@@ -298,7 +298,7 @@ class MFVI(VariationalInference):
             self.score = True
 
         self.n_minibatch = n_minibatch
-        return VariationalInference.initialize(self, *args, **kwargs)
+        return super(MFVI, self).initialize(*args, **kwargs)
 
     def build_loss(self):
         """Wrapper for the MFVI loss function.
@@ -350,8 +350,8 @@ class MFVI(VariationalInference):
                 return self.build_reparam_loss()
 
     def build_score_loss(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -371,8 +371,8 @@ class MFVI(VariationalInference):
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
     def build_reparam_loss(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -391,8 +391,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_score_loss_kl(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -420,8 +420,8 @@ class MFVI(VariationalInference):
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -446,8 +446,8 @@ class MFVI(VariationalInference):
                  q_entropy)
 
     def build_reparam_loss_kl(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -473,8 +473,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_reparam_loss_entropy(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -516,12 +516,11 @@ class KLpq(VariationalInference):
             stochastic gradients.
         """
         self.n_minibatch = n_minibatch
-        return VariationalInference.initialize(self, *args, **kwargs)
+        return super(KLpq, self).initialize(*args, **kwargs)
 
     def build_loss(self):
-        """Loss function to minimize.
-
-        Defines a stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
             KL( p(z |x) || q(z) )
@@ -587,9 +586,8 @@ class MAP(VariationalInference):
         super(MAP, self).__init__(model, variational, data)
 
     def build_loss(self):
-        """Loss function to minimize.
-
-        Defines the gradient of
+        """Build loss function. Its automatic differentiation
+        is the gradient of
 
         .. math::
             - \log p(x,z)
