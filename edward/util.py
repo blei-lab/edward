@@ -251,7 +251,6 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
                   tf.reduce_sum(tf.pow(x - y , 2.0)))
 
-
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
     """Squared-exponential kernel element-wise
 
