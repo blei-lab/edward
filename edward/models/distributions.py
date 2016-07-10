@@ -81,7 +81,7 @@ class Distribution(object):
         Parameters
         ----------
         xs : tf.Tensor or np.ndarray
-            n_minibatch x self.shape
+            n_samples x self.shape
 
         Returns
         -------
@@ -92,14 +92,14 @@ class Distribution(object):
 
                 [ sum_{idx in shape} log p(xs[1, idx] | params[idx]),
                 ...,
-                sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
+                sum_{idx in shape} log p(xs[n_samples, idx] | params[idx]) ]
         """
         # Loop over each random variable.
         # If univariate distribution, this is over all indices; if
         # multivariate distribution, this is over all but the last
         # index.
-        n_minibatch = get_dims(xs)[0]
-        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        n_samples = get_dims(xs)[0]
+        log_prob = tf.zeros([n_samples], dtype=tf.float32)
         if len(self.shape) == 1:
             if self.is_multivariate:
                 idx = ()
@@ -155,7 +155,7 @@ class Distribution(object):
             length len(self.shape[:-1]); note if len(self.shape) is 1
             for multivariate, then idx must be an empty tuple.
         xs : tf.Tensor or np.ndarray
-            of size ``[n_minibatch x self.shape]``
+            of size ``[n_samples x self.shape]``
 
         Returns
         -------

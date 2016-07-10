@@ -92,9 +92,9 @@ class PyMC3Model(object):
         for key, value in zip(self.keys, values):
             key.set_value(value)
 
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for s in range(n_minibatch):
+        n_samples = zs.shape[0]
+        lp = np.zeros(n_samples, dtype=np.float32)
+        for s in range(n_samples):
             lp[s] = self.logp(zs[s, :])
 
         return lp
@@ -353,8 +353,8 @@ class Variational(object):
         if len(self.layers) == 1:
             return self.layers[0].log_prob(xs)
 
-        n_minibatch = get_dims(xs[0])[0]
-        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        n_samples = get_dims(xs[0])[0]
+        log_prob = tf.zeros([n_samples], dtype=tf.float32)
         for l, layer in enumerate(self.layers):
             log_prob += layer.log_prob(xs[l])
 
