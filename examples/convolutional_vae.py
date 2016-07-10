@@ -10,8 +10,9 @@ Variational model
     Likelihood: Mean-field Normal parameterized by convolutional NN
 """
 from __future__ import print_function
-import os
+
 import edward as ed
+import os
 import prettytensor as pt
 import tensorflow as tf
 
@@ -35,7 +36,7 @@ class NormalBernoulli:
     of a neural network that takes samples from a normal prior as
     input.
 
-    p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
+    p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
     """
     def __init__(self, num_vars):
         self.num_vars = num_vars # number of local latent variables
@@ -60,7 +61,7 @@ class NormalBernoulli:
         Bernoulli log-likelihood, summing over every image n and pixel i
         in image n.
 
-        log p(x | z) = log Bernoulli(x | p = varphi(z))
+        log p(x | z) = log Bernoulli(x | p = neural_network(z))
          = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
         """
         return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
@@ -68,7 +69,7 @@ class NormalBernoulli:
     def sample_prior(self, size):
         """
         p ~ some complex distribution induced by
-        z ~ N(0, 1), p = varphi(z)
+        z ~ N(0, 1), p = neural_network(z)
         """
         z = tf.random_normal([size, self.num_vars])
         # Note the output of this is not prior samples, but just the
@@ -107,28 +108,24 @@ def neural_network(x):
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)
 
-# We use the variational model
-# q(z | x) = prod_{n=1}^N q(z_n | x)
-#          = prod_{n=1}^n Normal(z_n | loc, scale = phi(x_n))
+# Use the variational model
+# q(z | x) = prod_{n=1}^n Normal(z_n | loc, scale = neural_network(x_n))
 # It is a distribution of the latent variables z_n for each data
 # point x_n. We use neural_network() to globally parameterize the local
 # variational factors q(z_n | x).
 # We also do data subsampling during inference. Therefore we only need
-# to explicitly represent the corresponding variational factors for a
-# mini-batch,
-# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = phi(x))
+# to explicitly represent the variational factors for a mini-batch,
+# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = neural_network(x_m))
 x_ph = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 loc, scale = neural_network(x_ph)
 variational = Variational()
 variational.add(Normal(model.num_vars * FLAGS.n_data, loc=loc, scale=scale))
 
+# MNIST batches are fed at training time.
 if not os.path.exists(FLAGS.data_directory):
     os.makedirs(FLAGS.data_directory)
 
 mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
-
-# data uses placeholder in order to build inference's computational
-# graph. np.arrays of data are fed in during computation.
 x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
 data = {'x': x}
 
