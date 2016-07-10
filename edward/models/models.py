@@ -67,7 +67,12 @@ class PyMC3Model(object):
         # Store `xs.keys()` so that `_py_log_prob_args` knows how each
         # data value corresponds to a key.
         self.keys = xs.keys()
-        if isinstance(xs.values()[0], np.ndarray):
+        if not xs:
+            # If `xs` is an empty dictionary, then store their (empty)
+            # values to pass into `_py_log_prob_args`.
+            self.values = xs.values()
+            inp = [zs]
+        elif isinstance(xs.values()[0], np.ndarray):
             # If `xs` is a dictionary of NumPy arrays, then store
             # their values to pass into `_py_log_prob_args`.
             self.values = xs.values()
@@ -132,7 +137,12 @@ class PythonModel(object):
         # Store `xs.keys()` so that `_py_log_prob_args` knows how each
         # data value corresponds to a key.
         self.keys = xs.keys()
-        if isinstance(xs.values()[0], np.ndarray):
+        if not xs:
+            # If `xs` is an empty dictionary, then store their (empty)
+            # values to pass into `_py_log_prob_args`.
+            self.values = xs.values()
+            inp = [zs]
+        elif isinstance(xs.values()[0], np.ndarray):
             # If `xs` is a dictionary of NumPy arrays, then store
             # their values to pass into `_py_log_prob_args`.
             self.values = xs.values()
