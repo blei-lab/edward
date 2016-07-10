@@ -26,4 +26,4 @@ variational = Variational()
 variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)
-inference.run(n_minibatch=int(1e5))
+inference.run(n_samples=int(1e5))

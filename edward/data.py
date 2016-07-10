@@ -34,20 +34,20 @@ class DataGenerator(object):
         self.N = data.shape[0]
         self.counter = 0
 
-    def next(self, n_data=None):
+    def next(self, n_minibatch=None):
         """Data sampling method.
 
         At any given point, the internal counter ``self.counter`` tracks the
         last datapoint returned by ``next``.
 
-        If the requested number of datapoints ``n_data`` goes beyond the size
+        If the requested number of datapoints ``n_minibatch`` goes beyond the size
         of the dataset, the internal counter wraps around the size of the
         dataset. The returned batch, thus, may include datapoints from the
         beginning of the dataset.
 
         Parameters
         ----------
-        n_data : int, optional
+        n_minibatch : int, optional
             Number of datapoints to sample.
 
             Defaults to total number of datapoints in object.
@@ -57,11 +57,11 @@ class DataGenerator(object):
         np.ndarray
             Array whose values are all subsampled.
         """
-        if n_data is None:
+        if n_minibatch is None:
             return self.data
 
         counter_old = self.counter
-        counter_new = counter_old + n_data
+        counter_new = counter_old + n_minibatch
         if counter_new <= self.N:
             batch = self.data[counter_old:counter_new]
         else:

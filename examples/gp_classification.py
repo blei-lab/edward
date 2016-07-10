@@ -42,7 +42,7 @@ class GaussianProcess:
         self.sigma = sigma
         self.l = l
 
-        self.num_vars = N
+        self.n_vars = N
         self.inverse_link = tf.sigmoid
 
     def kernel(self, x):
@@ -76,7 +76,7 @@ data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 model = GaussianProcess(N=len(df))
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=500)

@@ -21,9 +21,9 @@ class Distribution(object):
     ----------
     shape : tuple
         shape of random variable(s); see below
-    num_vars : int
+    n_vars : int
         the number of variables; equals the product of ``shape``
-    num_params : int
+    n_params : int
         the number of parameters
     is_multivariate : bool
         ``True`` if ``Distribution`` is multivariate
@@ -49,8 +49,8 @@ class Distribution(object):
             shape = tuple(shape)
 
         self.shape = shape
-        self.num_vars = np.prod(self.shape)
-        self.num_params = None
+        self.n_vars = np.prod(self.shape)
+        self.n_params = None
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -198,7 +198,7 @@ class Bernoulli(Distribution):
     """
     def __init__(self, shape=1, p=None):
         super(Bernoulli, self).__init__(shape)
-        self.num_params = self.num_vars
+        self.n_params = self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -239,7 +239,7 @@ class Beta(Distribution):
     """
     def __init__(self, shape=1, alpha=None, beta=None):
         super(Beta, self).__init__(shape)
-        self.num_params = 2*self.num_vars
+        self.n_params = 2*self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -287,7 +287,7 @@ class Dirichlet(Distribution):
     """
     def __init__(self, shape, alpha=None):
         super(Dirichlet, self).__init__(shape)
-        self.num_params = self.num_vars
+        self.n_params = self.n_vars
         self.is_multivariate = True
         self.is_reparameterized = False
 
@@ -333,7 +333,7 @@ class InvGamma(Distribution):
     """
     def __init__(self, shape=1, alpha=None, beta=None):
         super(InvGamma, self).__init__(shape)
-        self.num_params = 2*self.num_vars
+        self.n_params = 2*self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -395,7 +395,7 @@ class Multinomial(Distribution):
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
         super(Multinomial, self).__init__(shape)
-        self.num_params = np.prod(shape[:-1]) * (shape[-1] -1)
+        self.n_params = np.prod(shape[:-1]) * (shape[-1] -1)
         self.is_multivariate = True
         self.is_reparameterized = False
 
@@ -443,7 +443,7 @@ class Normal(Distribution):
     """
     def __init__(self, shape=1, loc=None, scale=None):
         super(Normal, self).__init__(shape)
-        self.num_params = 2*self.num_vars
+        self.n_params = 2*self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = True
 
@@ -489,7 +489,7 @@ class PointMass(Distribution):
     """
     def __init__(self, shape=1, params=None):
         super(PointMass, self).__init__(shape)
-        self.num_params = self.num_vars
+        self.n_params = self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = True
 

@@ -35,7 +35,7 @@ class PyMC3Model(object):
         self.model = model
 
         vars = pm.inputvars(model.cont_vars)
-        self.num_vars = len(vars)
+        self.n_vars = len(vars)
 
         bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
         self.logp = bij.mapf(model.fastlogp)
@@ -104,7 +104,7 @@ class PythonModel(object):
     """Model wrapper for models written in NumPy/SciPy.
     """
     def __init__(self):
-        self.num_vars = None
+        self.n_vars = None
 
     def log_prob(self, xs, zs):
         """
@@ -177,7 +177,7 @@ class StanModel(object):
             raise NotImplementedError()
 
         self.flag_init = False
-        self.num_vars = None
+        self.n_vars = None
 
     def log_prob(self, xs, zs):
         """
@@ -216,7 +216,7 @@ class StanModel(object):
             self.model = pystan.stan(model_code=self.model_code,
                                      data=xs, iter=1, chains=1)
 
-        self.num_vars = sum([sum(dim) if sum(dim) != 0 else 1
+        self.n_vars = sum([sum(dim) if sum(dim) != 0 else 1
                              for dim in self.model.par_dims])
         self.flag_init = True
 
@@ -260,8 +260,8 @@ class Variational(object):
         if layers is None:
             self.layers = []
             self.shape = []
-            self.num_vars = 0
-            self.num_params = 0
+            self.n_vars = 0
+            self.n_params = 0
             self.is_reparameterized = True
             self.is_normal = True
             self.is_entropy = True
@@ -269,8 +269,8 @@ class Variational(object):
         else:
             self.layers = layers
             self.shape = [layer.shape for layer in self.layers]
-            self.num_vars = sum([layer.num_vars for layer in self.layers])
-            self.num_params = sum([layer.num_params for layer in self.layers])
+            self.n_vars = sum([layer.n_vars for layer in self.layers])
+            self.n_params = sum([layer.n_params for layer in self.layers])
             self.is_reparameterized = all([layer.is_reparameterized
                                            for layer in self.layers])
             self.is_normal = all([isinstance(layer, Normal)
@@ -299,8 +299,8 @@ class Variational(object):
         """
         self.layers += [layer]
         self.shape += [layer.shape]
-        self.num_vars += layer.num_vars
-        self.num_params += layer.num_params
+        self.n_vars += layer.n_vars
+        self.n_params += layer.n_params
         self.is_reparameterized = self.is_reparameterized and layer.is_reparameterized
         self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)

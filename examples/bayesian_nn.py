@@ -53,7 +53,7 @@ class BayesianNN:
 
         self.num_layers = len(layer_sizes)
         self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
-        self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
+        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):
         """Unpack weight matrices and biases from a flattened vector."""
@@ -71,22 +71,22 @@ class BayesianNN:
         Parameters
         -------
         x : tf.tensor
-            n_data x D
+            n_minibatch x D
 
         z : tf.tensor
-            num_vars
+            n_vars
 
         Returns
         -------
         tf.tensor
-            vector of length n_data
+            vector of length n_minibatch
         """
         h = x
         for W, b in self.unpack_weights(z):
             # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
             h = self.nonlinearity(tf.matmul(h, W) + b)
 
-        h = tf.squeeze(h) # n_data x 1 to n_data
+        h = tf.squeeze(h) # n_minibatch x 1 to n_minibatch
         return h
 
     def log_prob(self, xs, zs):
@@ -94,24 +94,24 @@ class BayesianNN:
         x, y = xs['x'], xs['y']
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
-        # broadcasting to do mus - y (n_minibatch x n_data - n_data)
+        # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
 
-def build_toy_dataset(n_data=40, noise_std=0.1):
+def build_toy_dataset(n_minibatch=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
-                         np.linspace(6, 8, num=n_data/2)])
-    y = np.cos(x) + norm.rvs(0, noise_std, size=n_data)
+    x  = np.concatenate([np.linspace(0, 2, num=n_minibatch/2),
+                         np.linspace(6, 8, num=n_minibatch/2)])
+    y = np.cos(x) + norm.rvs(0, noise_std, size=n_minibatch)
     x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, D))
+    x = x.reshape((n_minibatch, D))
     return {'x': x, 'y': y}
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 data = build_toy_dataset()
 
 # Set up figure
@@ -132,7 +132,7 @@ for t in range(1000):
         mean, std = sess.run([variational.layers[0].loc,
                               variational.layers[0].scale])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, variational.num_vars) * std + mean
+        zs = rs.randn(10, variational.n_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
