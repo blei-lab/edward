@@ -51,7 +51,7 @@ class BayesianNN:
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
 
-        self.num_layers = len(layer_sizes)
+        self.n_layers = len(layer_sizes)
         self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
