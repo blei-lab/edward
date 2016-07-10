@@ -172,21 +172,28 @@ class PythonModel(object):
 class StanModel(object):
     """Model wrapper for models written in Stan.
     """
-    def __init__(self, file=None, model_code=None):
+    def __init__(self, model=None, *args, **kwargs):
         """
         Parameters
         ----------
-        file : see documentation for argument in pystan.stan
-        model_code : see documentation for argument in pystan.stan
+        model : pystan.StanModel, optional
+            An already compiled Stan model. This is useful to avoid
+            recompilation of Stan models both within a session (using
+            this argument) and across sessions (by pickling the
+            pystan.StanModel object and passing it in here, or by
+            picking the ed.StanModel object).
+        args
+            See documentation for argument in pystan.StanModel.
+        kwargs
+            See documentation for argument in pystan.StanModel.
         """
-        if file is not None:
-            self.file = file
-        elif model_code is not None:
-            self.model_code = model_code
+        if model is None:
+            self.model = pystan.StanModel(*args, **kwargs)
         else:
-            raise NotImplementedError()
+            self.model = model
 
-        self.flag_init = False
+        self.modelfit = None
+        self.is_initialized = False
         self.num_vars = None
 
     def log_prob(self, xs, zs):
@@ -210,25 +217,19 @@ class StanModel(object):
         Notes
         -----
         It wraps around a Python function. The Python function takes
-        as input zs of type np.ndarray, and outputs a np.ndarray.
+        inputs of type np.ndarray and outputs a np.ndarray.
         """
-        if self.flag_init is False:
-            self._initialize(xs)
+        print("The empty sampling message exists for accessing Stan's log_prob method.")
+        self.modelfit = self.model.sampling(data=xs, iter=1, chains=1)
+        if not self.is_initialized:
+            self._initialize()
 
         return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
 
-    def _initialize(self, xs):
-        print("The following message exists as Stan instantiates the model.")
-        if hasattr(self, 'file'):
-            self.model = pystan.stan(file=self.file,
-                                     data=xs, iter=1, chains=1)
-        else:
-            self.model = pystan.stan(model_code=self.model_code,
-                                     data=xs, iter=1, chains=1)
-
+    def _initialize(self):
+        self.is_initialized = True
         self.num_vars = sum([sum(dim) if sum(dim) != 0 else 1
-                             for dim in self.model.par_dims])
-        self.flag_init = True
+                             for dim in self.modelfit.par_dims])
 
     def _py_log_prob(self, zs):
         """
@@ -248,7 +249,7 @@ class StanModel(object):
         for b, z in enumerate(zs):
             z_dict = OrderedDict()
             idx = 0
-            for dim, par in zip(self.model.par_dims, self.model.model_pars):
+            for dim, par in zip(self.modelfit.par_dims, self.modelfit.model_pars):
                 elems = np.sum(dim)
                 if elems == 0:
                     z_dict[par] = float(z[idx])
@@ -257,8 +258,8 @@ class StanModel(object):
                     z_dict[par] = z[idx:(idx+elems)].reshape(dim)
                     idx += elems
 
-            z_unconst = self.model.unconstrain_pars(z_dict)
-            lp[b] = self.model.log_prob(z_unconst, adjust_transform=False)
+            z_unconst = self.modelfit.unconstrain_pars(z_dict)
+            lp[b] = self.modelfit.log_prob(z_unconst, adjust_transform=False)
 
         return lp
 

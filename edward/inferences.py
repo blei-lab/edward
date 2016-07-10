@@ -57,10 +57,12 @@ class Inference(object):
             data = {}
 
         if isinstance(model, StanModel):
-            # Stan models do not support data subsampling. Therefore
-            # fix the data dictionary `self.data` at compile time to
-            # `data`. No placeholders need to be fed so
-            # `self.data_gen` is empty.
+            # Stan models do no support data subsampling because they
+            # take arbitrary data structure types in the data block
+            # and not just NumPy arrays (this makes it unamenable to
+            # TensorFlow placeholders). Therefore fix the data
+            # dictionary `self.data` at compile time to `data`. No
+            # placeholders need to be fed so `self.data_gen` is empty.
             self.data = data
             self.data_gen = {}
         else:
