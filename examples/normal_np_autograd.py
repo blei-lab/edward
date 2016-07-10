@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-The model is written in NumPy/SciPy.
+The model is written in native Python. Gradients are given by
+default via autograd.
 
 Probability model
     Posterior: (1-dimensional) Normal

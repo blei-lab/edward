@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-The model is written in NumPy/SciPy.
+The model is written in PyMC3.
 
 Probability model
     Posterior: (1-dimensional) Normal
