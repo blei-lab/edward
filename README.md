@@ -53,6 +53,7 @@ which can be found in [`examples/`](examples/):
 + [Bayesian neural network](examples/bayesian_nn.py)
 + [Mixture density network](examples/mixture_density_network.py)
 + [Variational auto-encoder](examples/convolutional_vae.py)
++ [Importance-weighted variational inference](examples/iwvi.py)
 
 Read the documentation on the [website](http://edwardlib.org).
 
