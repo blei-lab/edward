@@ -131,17 +131,17 @@ class VariationalInference(Inference):
     def run(self, *args, **kwargs):
         """A simple wrapper to run variational inference.
 
-        1. Initialize via ``initialize``
-        2. Run ``update`` for ``self.n_iter`` iterations
-        3. While running, ``print_progress``
-        4. Finalize via ``finalize``
+        1. Initialize via ``initialize``.
+        2. Run ``update`` for ``self.n_iter`` iterations.
+        3. While running, ``print_progress``.
+        4. Finalize via ``finalize``.
 
         Parameters
         ----------
-        *args :
-            passed into ``initialize``
-        **kwargs :
-            passed into ``initialize``
+        *args
+            Passed into ``initialize``.
+        **kwargs
+            Passed into ``initialize``.
         """
         self.initialize(*args, **kwargs)
         for t in range(self.n_iter+1):

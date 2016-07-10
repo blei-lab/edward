@@ -179,13 +179,14 @@ class StanModel(object):
         model : pystan.StanModel, optional
             An already compiled Stan model. This is useful to avoid
             recompilation of Stan models both within a session (using
-            this argument) and across sessions (by pickling the
-            pystan.StanModel object and passing it in here, or by
-            picking the ed.StanModel object).
-        args
-            See documentation for argument in pystan.StanModel.
-        kwargs
-            See documentation for argument in pystan.StanModel.
+            this argument) and across sessions (by loading a pickled
+            pystan.StanModel object and passing it in here).
+            Alternatively, one can also pickle the ed.StanModel object
+            altogether.
+        *args
+            Passed into pystan.StanModel.
+        **kwargs
+            Passed into pystan.StanModel.
         """
         if model is None:
             self.model = pystan.StanModel(*args, **kwargs)
