@@ -53,7 +53,7 @@ class BayesianNN:
         self.lik_variance = lik_variance
 
         self.num_layers = len(layer_sizes)
-        self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
+        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
         self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):

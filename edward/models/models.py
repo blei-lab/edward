@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
@@ -66,21 +67,21 @@ class PyMC3Model(object):
         """
         # Store `xs.keys()` so that `_py_log_prob_args` knows how each
         # data value corresponds to a key.
-        self.keys = xs.keys()
+        self.keys = list(six.iterkeys(xs))
         if not xs:
             # If `xs` is an empty dictionary, then store their (empty)
             # values to pass into `_py_log_prob_args`.
-            self.values = xs.values()
+            self.values = list(six.itervalues(xs))
             inp = [zs]
-        elif isinstance(xs.values()[0], np.ndarray):
+        elif isinstance(list(six.itervalues(xs))[0], np.ndarray):
             # If `xs` is a dictionary of NumPy arrays, then store
             # their values to pass into `_py_log_prob_args`.
-            self.values = xs.values()
+            self.values = list(six.itervalues(xs))
             inp = [zs]
         else:
             # If `xs` is a dictionary of TensorFlow tensors, then
             # pass the tensors into tf.py_func.
-            inp = [zs] + xs.values()
+            inp = [zs] + list(six.itervalues(xs))
 
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 
@@ -136,21 +137,21 @@ class PythonModel(object):
         """
         # Store `xs.keys()` so that `_py_log_prob_args` knows how each
         # data value corresponds to a key.
-        self.keys = xs.keys()
+        self.keys = list(six.iterkeys(xs))
         if not xs:
             # If `xs` is an empty dictionary, then store their (empty)
             # values to pass into `_py_log_prob_args`.
-            self.values = xs.values()
+            self.values = list(six.itervalues(xs))
             inp = [zs]
-        elif isinstance(xs.values()[0], np.ndarray):
+        elif isinstance(list(six.itervalues(xs))[0], np.ndarray):
             # If `xs` is a dictionary of NumPy arrays, then store
             # their values to pass into `_py_log_prob_args`.
-            self.values = xs.values()
+            self.values = list(six.itervalues(xs))
             inp = [zs]
         else:
             # If `xs` is a dictionary of TensorFlow tensors, then
             # pass the tensors into tf.py_func.
-            inp = [zs] + xs.values()
+            inp = [zs] + list(six.itervalues(xs))
 
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 

@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 from edward.util import logit, get_dims, get_session
@@ -170,7 +171,7 @@ def ppc(model, variational=None, data=None, T=None, size=100):
         y = {}
     else:
         # Assume all values have the same data set size.
-        N = get_dims(data.values()[0])[0]
+        N = get_dims(list(six.itervalues(data))[0])[0]
         y = data
 
     # 1. Sample from posterior (or prior).

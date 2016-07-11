@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 from edward.data import DataGenerator
@@ -68,7 +69,7 @@ class Inference(object):
         else:
             self.data = {}
             self.data_gen = {}
-            for key, value in data.items():
+            for key, value in six.iteritems(data):
                 if isinstance(value, tf.Tensor):
                     if value.name.startswith('Placeholder'):
                         # If `data` already has TensorFlow
@@ -181,7 +182,7 @@ class VariationalInference(Inference):
 
         # Set shape of data placeholders according to batch size.
         if not isinstance(self.model, StanModel):
-            for value in self.data.values():
+            for value in six.itervalues(self.data):
                 value.set_shape([self.n_data] + get_dims(value)[1:])
 
         loss = self.build_loss()
@@ -216,7 +217,8 @@ class VariationalInference(Inference):
             Loss function values after one iteration
         """
         sess = get_session()
-        feed_dict = {key: value.next(self.n_data) for key, value in self.data_gen.items()}
+        feed_dict = {key: value.next(self.n_data)
+                     for key, value in six.iteritems(self.data_gen)}
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -624,6 +626,7 @@ class Laplace(MAP):
         inv_cov = hessian(self.model.log_prob(x, z), var_list)
         sess = get_session()
         # use only a batch of data to estimate hessian
-        feed_dict = {key: value.next(self.n_data) for key, value in self.data_gen.items()}
+        feed_dict = {key: value.next(self.n_data)
+                     for key, value in six.iteritems(self.data_gen)}
         print("Precision matrix:")
         print(sess.run(inv_cov, feed_dict))
