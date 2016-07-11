@@ -31,19 +31,19 @@ def multinomial_logpmf(x, n, p):
 
 
 def multinomial_logpmf_vec(x, n, p):
-    n_minibatch = x.shape[0]
+    n = x.shape[0]
     return np.array([multinomial_logpmf(x[i, :], n, p)
-                     for i in range(n_minibatch)])
+                     for i in range(n)])
 
 
-def _test(shape, n_minibatch):
+def _test(shape, n):
     K = shape[-1]
     multinomial = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
     with sess.as_default():
         pi = multinomial.pi.eval()
-        z = np.zeros((n_minibatch, ) + tuple(shape))
+        z = np.zeros((n, ) + tuple(shape))
         for i in range(shape[0]):
-            z[:, i, :] = np.random.multinomial(1, pi[i, :], size=n_minibatch)
+            z[:, i, :] = np.random.multinomial(1, pi[i, :], size=n)
 
         z_tf = tf.constant(z, dtype=tf.float32)
         for i in range(shape[0]):

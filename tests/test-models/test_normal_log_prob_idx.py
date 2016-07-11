@@ -13,14 +13,14 @@ sess = tf.Session()
 ed.set_seed(98765)
 
 
-def _test(shape, n_minibatch):
+def _test(shape, n):
     normal = Normal(shape,
                     loc=tf.constant([0.0] * shape),
                     scale=tf.constant([1.0] * shape))
     with sess.as_default():
         m = normal.loc.eval()
         s = normal.scale.eval()
-        z = np.random.randn(n_minibatch, shape)
+        z = np.random.randn(n, shape)
         for i in range(shape):
             assert np.allclose(
                 normal.log_prob_idx((i, ), tf.constant(z, dtype=tf.float32)).eval(),

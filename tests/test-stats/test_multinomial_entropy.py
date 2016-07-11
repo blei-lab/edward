@@ -55,9 +55,9 @@ def multinomial_entropy_vec(n, p):
     if isinstance(n, float) or isinstance(n, int):
         return multinomial_entropy(n, p)
     else:
-        n_minibatch = n.shape[0]
+        n = n.shape[0]
         return np.array([multinomial_entropy(n[i], p[i, :])
-                         for i in range(n_minibatch)])
+                         for i in range(n)])
 
 
 def _assert_eq(val_ed, val_true):
