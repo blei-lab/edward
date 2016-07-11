@@ -43,7 +43,7 @@ def _test(shape, n):
         pi = multinomial.pi.eval()
         z = np.zeros((n, ) + tuple(shape))
         for i in range(shape[0]):
-            z[:, i, :] = np.random.multinomial(1, pi[i, :], size=n)
+            z[:, i, :] = np.random.multinomial(1, pi[i, :], n=n)
 
         z_tf = tf.constant(z, dtype=tf.float32)
         for i in range(shape[0]):

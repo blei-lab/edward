@@ -11,9 +11,9 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(p, size):
-    val_est = geom.rvs(p, size=size).shape
-    val_true = (size, ) + np.asarray(p).shape
+def _test(p, n):
+    val_est = geom.rvs(p, n=n).shape
+    val_true = (n, ) + np.asarray(p).shape
     assert val_est == val_true
 
 

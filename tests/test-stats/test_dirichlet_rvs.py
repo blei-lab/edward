@@ -11,9 +11,9 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(alpha, size):
-    val_est = dirichlet.rvs(alpha, size=size).shape
-    val_true = (size, ) + np.asarray(alpha).shape
+def _test(alpha, n):
+    val_est = dirichlet.rvs(alpha, n=n).shape
+    val_true = (n, ) + np.asarray(alpha).shape
     assert val_est == val_true
 
 

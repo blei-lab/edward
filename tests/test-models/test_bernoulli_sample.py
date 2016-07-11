@@ -11,10 +11,10 @@ from edward.util import get_dims
 sess = tf.Session()
 
 
-def _test(shape, p, size):
+def _test(shape, p, n):
     x = Bernoulli(shape, p)
-    val_est = tuple(get_dims(x.sample(size=size)))
-    val_true = (size, ) + shape
+    val_est = tuple(get_dims(x.sample(n=n)))
+    val_true = (n, ) + shape
     assert val_est == val_true
 
 

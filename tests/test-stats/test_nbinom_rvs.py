@@ -11,9 +11,9 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(n, p, size):
-    val_est = nbinom.rvs(n, p, size=size).shape
-    val_true = (size, ) + np.asarray(n).shape
+def _test(n, p, n):
+    val_est = nbinom.rvs(n, p, n=n).shape
+    val_true = (n, ) + np.asarray(n).shape
     assert val_est == val_true
 
 

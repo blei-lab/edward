@@ -11,9 +11,9 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(mean, cov, size):
-    val_est = multivariate_normal.rvs(mean, cov, size=size).shape
-    val_true = (size, ) + np.asarray(mean).shape
+def _test(mean, cov, n):
+    val_est = multivariate_normal.rvs(mean, cov, n=n).shape
+    val_true = (n, ) + np.asarray(mean).shape
     assert val_est == val_true
 
 

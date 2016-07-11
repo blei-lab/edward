@@ -11,9 +11,9 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(a, scale, size):
-    val_est = invgamma.rvs(a, scale, size=size).shape
-    val_true = (size, ) + np.asarray(a).shape
+def _test(a, scale, n):
+    val_est = invgamma.rvs(a, scale, n=n).shape
+    val_true = (n, ) + np.asarray(a).shape
     assert val_est == val_true
 
 

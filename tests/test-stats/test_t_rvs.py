@@ -11,9 +11,9 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(df, loc, scale, size):
-    val_est = t.rvs(df, loc, scale, size=size).shape
-    val_true = (size, ) + np.asarray(df).shape
+def _test(df, loc, scale, n):
+    val_est = t.rvs(df, loc, scale, n=n).shape
+    val_true = (n, ) + np.asarray(df).shape
     assert val_est == val_true
 
 
