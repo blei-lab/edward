@@ -63,10 +63,10 @@ class LinearModel:
         y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
         return y_pred
 
-def build_toy_dataset(n_minibatch=40, coeff=np.random.randn(10), noise_std=0.1):
+def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
-    x = np.random.randn(n_minibatch, n_dim).astype(np.float32)
-    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_minibatch)
+    x = np.random.randn(N, n_dim).astype(np.float32)
+    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
     return {'x': x, 'y': y}
 
 ed.set_seed(42)

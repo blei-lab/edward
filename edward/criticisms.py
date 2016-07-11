@@ -28,7 +28,9 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
         according to the Stan program's data block.
     y_true : np.ndarray or tf.Tensor
         True values to compare to in supervised learning tasks.
-    n_samples : number of posterior samples
+    n_samples : int, optional 
+        Number of posterior samples for making predictions 
+        via the posterior predictive distribution
 
     Returns
     -------

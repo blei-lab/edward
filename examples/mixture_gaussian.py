@@ -65,7 +65,7 @@ class MixtureGaussian:
         log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
         log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
 
-        # Loop over each mini-batch zs[b,:]
+        # Loop over each sample zs[b,:]
         log_lik = []
         n_samples = get_dims(zs[0])[0]
         for s in range(n_samples):

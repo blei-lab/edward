@@ -93,14 +93,14 @@ class BayesianNN:
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik
 
-def build_toy_dataset(n_minibatch=40, noise_std=0.1):
+def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_minibatch/2),
-                         np.linspace(6, 8, num=n_minibatch/2)])
-    y = np.cos(x) + norm.rvs(0, noise_std, size=n_minibatch)
+    x  = np.concatenate([np.linspace(0, 2, num=N/2),
+                         np.linspace(6, 8, num=N/2)])
+    y = np.cos(x) + norm.rvs(0, noise_std, size=N)
     x = (x - 4.0) / 4.0
-    x = x.reshape((n_minibatch, D))
+    x = x.reshape((N, D))
     return {'x': x, 'y': y}
 
 ed.set_seed(42)

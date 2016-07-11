@@ -114,7 +114,7 @@ model = NormalBernoulli(n_vars=10)
 # point x_n. We use neural_network() to globally parameterize the local
 # variational factors q(z_n | x).
 # We also do data subsampling during inference. Therefore we only need
-# to explicitly represent the variational factors for a mini-batch,
+# to explicitly represent the variational factors for a subsample,
 # q(z_{batch} | x) = prod_{m=1}^{n_minibatch} Normal(z_m | loc, scale = neural_network(x_m))
 x_ph = tf.placeholder(tf.float32, [FLAGS.n_minibatch, 28 * 28])
 loc, scale = neural_network(x_ph)
