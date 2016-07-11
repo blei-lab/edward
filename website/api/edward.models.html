@@ -256,6 +256,13 @@ parameters of each random variable <code class="docutils literal"><span class="p
 <dd><p><em>bool</em> &#8211; <code class="docutils literal"><span class="pre">True</span></code> if <code class="docutils literal"><span class="pre">Distribution</span></code> is multivariate</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="edward.models.distributions.Distribution.is_reparameterized">
+<code class="descname">is_reparameterized</code><a class="headerlink" href="#edward.models.distributions.Distribution.is_reparameterized" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; <code class="docutils literal"><span class="pre">True</span></code> if sampling from <code class="docutils literal"><span class="pre">Distribution</span></code> is done by
+reparameterizing random noise drawn from another distribution</p>
+</dd></dl>
+
 <p>Initialize.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -354,42 +361,11 @@ log p(xs[S, idx] | params[idx]) ]
 </dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Distribution.reparam">
-<code class="descname">reparam</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.reparam" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reparameterizes a sample from a standard version of <code class="docutils literal"><span class="pre">Distribution</span></code>.</p>
-<p>For example, if <code class="docutils literal"><span class="pre">epsilon</span> <span class="pre">=</span> <span class="pre">sample_noise()</span></code>, then calling
-<code class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">reparam(epsilon)</span></code> reparameterizes <code class="docutils literal"><span class="pre">epsilon</span></code> such that</p>
-<div class="math">
-\[x \sim p(x | \text{params})\]</div>
-<p>where <code class="docutils literal"><span class="pre">params</span></code> are the parameters that govern this
-<code class="docutils literal"><span class="pre">Distribution</span></code> object.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eps</strong> (<em>tf.Tensor</em>) &#8211; A draw from <code class="docutils literal"><span class="pre">sample_noise</span></code> of this <code class="docutils literal"><span class="pre">Distribution</span></code> object.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <code class="docutils literal"><span class="pre">[size</span> <span class="pre">x</span> <span class="pre">shape]</span></code> array of type <code class="docutils literal"><span class="pre">tf.float32</span></code>, where each
-slice along the first dimension is a sample from
-<code class="docutils literal"><span class="pre">p(x</span> <span class="pre">|</span> <span class="pre">params)</span></code>.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="edward.models.distributions.Distribution.sample">
 <code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sample from <code class="docutils literal"><span class="pre">Distribution</span></code>.</p>
 <div class="math">
 \[x \sim p(x | \text{params})\]</div>
-<p>Defaults to sampling noise via <code class="docutils literal"><span class="pre">sample_noise</span></code> and reparameterizing via
-<code class="docutils literal"><span class="pre">reparam</span></code>. Otherwise expects a derived class to implement its own
-method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -400,34 +376,6 @@ method.</p>
 slice along the first dimension is a sample from p.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.models.distributions.Distribution.sample_noise">
-<code class="descname">sample_noise</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Distribution.sample_noise" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sample from a standard parameterization of <code class="docutils literal"><span class="pre">Distribution</span></code>.</p>
-<p>For example, if <code class="docutils literal"><span class="pre">epsilon</span> <span class="pre">=</span> <span class="pre">sample_noise()</span></code>, then</p>
-<div class="math">
-\[\epsilon \sim s(\epsilon),\]</div>
-<p>where <span class="math">\(s\)</span> is a standard parameterization of <code class="docutils literal"><span class="pre">Distribution</span></code>
-that has no parameters.</p>
-<p>Passing <span class="math">\(\epsilon\)</span> into <code class="docutils literal"><span class="pre">reparam</span></code> then transforms the draw
-according to some parameters.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int, optional</em>) &#8211; Number of samples to return.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <code class="docutils literal"><span class="pre">[size</span> <span class="pre">x</span> <span class="pre">shape]</span></code> array of type <code class="docutils literal"><span class="pre">tf.float32</span></code>, where each
-slice along the first dimension is a sample from <code class="docutils literal"><span class="pre">s(epsilon)</span></code>.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -505,13 +453,8 @@ where <code class="docutils literal"><span class="pre">idx</span></code> is of d
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="edward.models.distributions.Normal.reparam">
-<code class="descname">reparam</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.reparam" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="edward.models.distributions.Normal.sample_noise">
-<code class="descname">sample_noise</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.sample_noise" title="Permalink to this definition">¶</a></dt>
+<dt id="edward.models.distributions.Normal.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.distributions.Normal.sample" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -572,20 +515,16 @@ probability mass is located there.</p>
 <span id="edward-models-models-module"></span><h2>edward.models.models module<a class="headerlink" href="#module-edward.models.models" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="edward.models.models.PyMC3Model">
-<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PyMC3Model</code><span class="sig-paren">(</span><em>model</em>, <em>observed</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PyMC3Model</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.PyMC3Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Model wrapper for models written in PyMC3.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<em>pymc3.Model</em>) &#8211; The probability model, written with Theano shared
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>pymc3.Model</em>) &#8211; The probability model, written with Theano shared
 variables to form any observations. The Theano shared
-variables are set during inference.</li>
-<li><strong>observed</strong> (<em>Theano tensor</em>) &#8211; The shared Theano tensor passed to the model.</li>
-</ul>
-</td>
+variables are set during inference.</td>
 </tr>
 </tbody>
 </table>
@@ -597,8 +536,9 @@ variables are set during inference.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xs</strong> (<em>np.ndarray</em>) &#8211; A single np.ndarray binding to the observed value in the
-PyMC3 model.</li>
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Data dictionary. Each key is a data placeholder (Theano
+shared variable) in the PyMC3 model, and its value is the
+corresponding realization (np.ndarray or tf.Tensor).</li>
 <li><strong>zs</strong> (<em>list or tf.Tensor</em>) &#8211; A list of tf.Tensor&#8217;s if multiple varational families,
 otherwise a tf.Tensor if single variational family.</li>
 </ul>
@@ -615,7 +555,7 @@ otherwise a tf.Tensor if single variational family.</li>
 </table>
 <p class="rubric">Notes</p>
 <p>It wraps around a Python function. The Python function takes
-as input zs of type np.ndarray, and outputs a np.ndarray.</p>
+inputs of type np.ndarray and outputs a np.ndarray.</p>
 </dd></dl>
 
 </dd></dl>
@@ -633,8 +573,9 @@ as input zs of type np.ndarray, and outputs a np.ndarray.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xs</strong> (<em>any</em>) &#8211; A batch of data points, as any data type the user interfaces with
-when defining this method.</li>
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Data dictionary. Each key names a data structure used in
+the model (str), and its value is the corresponding
+corresponding realization (np.ndarray or tf.Tensor).</li>
 <li><strong>zs</strong> (<em>list or tf.Tensor</em>) &#8211; A list of tf.Tensor&#8217;s if multiple varational families,
 otherwise a tf.Tensor if single variational family.</li>
 </ul>
@@ -651,14 +592,14 @@ otherwise a tf.Tensor if single variational family.</li>
 </table>
 <p class="rubric">Notes</p>
 <p>It wraps around a Python function. The Python function takes
-as input zs of type np.ndarray, and outputs a np.ndarray.</p>
+inputs of type np.ndarray and outputs a np.ndarray.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="edward.models.models.StanModel">
-<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">StanModel</code><span class="sig-paren">(</span><em>file=None</em>, <em>model_code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">StanModel</code><span class="sig-paren">(</span><em>model=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.models.StanModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Model wrapper for models written in Stan.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -666,8 +607,14 @@ as input zs of type np.ndarray, and outputs a np.ndarray.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>file</strong> (<em>see documentation for argument in pystan.stan</em>) &#8211; </li>
-<li><strong>model_code</strong> (<em>see documentation for argument in pystan.stan</em>) &#8211; </li>
+<li><strong>model</strong> (<em>pystan.StanModel, optional</em>) &#8211; An already compiled Stan model. This is useful to avoid
+recompilation of Stan models both within a session (using
+this argument) and across sessions (by loading a pickled
+pystan.StanModel object and passing it in here).
+Alternatively, one can also pickle the ed.StanModel object
+altogether.</li>
+<li><strong>*args</strong> &#8211; Passed into pystan.StanModel.</li>
+<li><strong>**kwargs</strong> &#8211; Passed into pystan.StanModel.</li>
 </ul>
 </td>
 </tr>
@@ -681,8 +628,9 @@ as input zs of type np.ndarray, and outputs a np.ndarray.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xs</strong> (<em>dict</em>) &#8211; Dictionary defining the observations according to the data
-block of the Stan program.</li>
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Data dictionary. Each key and value is according to
+the Stan program&#8217;s data block. The key type is str; the
+value type is any supported in the data block.</li>
 <li><strong>zs</strong> (<em>list or tf.Tensor</em>) &#8211; A list of tf.Tensor&#8217;s if multiple varational families,
 otherwise a tf.Tensor if single variational family.</li>
 </ul>
@@ -699,7 +647,7 @@ otherwise a tf.Tensor if single variational family.</li>
 </table>
 <p class="rubric">Notes</p>
 <p>It wraps around a Python function. The Python function takes
-as input zs of type np.ndarray, and outputs a np.ndarray.</p>
+inputs of type np.ndarray and outputs a np.ndarray.</p>
 </dd></dl>
 
 </dd></dl>

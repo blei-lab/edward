@@ -265,7 +265,7 @@ that data point per row.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>model</em>, <em>variational</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>model</em>, <em>variational</em>, <em>data</em>, <em>y_true=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -275,7 +275,13 @@ that data point per row.</li>
 <li><strong>metrics</strong> (<em>list or str</em>) &#8211; List of metrics or a single metric.</li>
 <li><strong>model</strong> (<em>ed.Model</em>) &#8211; Probability model p(x, z)</li>
 <li><strong>variational</strong> (<em>ed.Variational</em>) &#8211; Variational approximation to the posterior p(z | x)</li>
-<li><strong>data</strong> (<em>ed.Data</em>) &#8211; Data to evaluate the model at</li>
+<li><strong>data</strong> (<em>dict</em>) &#8211; Data dictionary to evaluate model with. For TensorFlow,
+Python, and Stan models, the key type is a string; for PyMC3,
+the key type is a Theano shared variable. For TensorFlow,
+Python, and PyMC3 models, the value type is a NumPy array or
+TensorFlow placeholder; for Stan, the value type is the type
+according to the Stan program&#8217;s data block.</li>
+<li><strong>y_true</strong> (<em>np.ndarray or tf.Tensor</em>) &#8211; True values to compare to in supervised learning tasks.</li>
 </ul>
 </td>
 </tr>
@@ -403,7 +409,7 @@ that data point per row.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=&lt;edward.data.Data object&gt;</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=None</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Posterior predictive check.
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
 If no posterior approximation is provided through <code class="docutils literal"><span class="pre">variational</span></code>,
@@ -425,13 +431,17 @@ approximation to the posterior, e.g., a variational
 approximation or an empirical distribution from MCMC samples.
 If not specified, samples will be obtained from the model
 through the <code class="docutils literal"><span class="pre">sample_prior</span></code> method.</li>
-<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; Observed data to compare to. If not specified, will return
+<li><strong>data</strong> (<em>dict, optional</em>) &#8211; Observed data to compare to. If not specified, will return
 only the reference distribution with an assumed replicated
-data set size of 1.</li>
-<li><strong>T</strong> (<em>function, optional</em>) &#8211; Discrepancy function taking tf.Tensor inputs and returning
-a tf.Tensor output. Default is the identity function.
-In general this is a function taking in a data set <code class="docutils literal"><span class="pre">y</span></code>
-and optionally a set of latent variables <code class="docutils literal"><span class="pre">z</span></code> as input.</li>
+data set size of 1. For TensorFlow, Python, and Stan models,
+the key type is a string; for PyMC3, the key type is a Theano
+shared variable. For TensorFlow, Python, and PyMC3 models, the
+value type is a NumPy array or TensorFlow placeholder; for
+Stan, the value type is the type according to the Stan
+program&#8217;s data block.</li>
+<li><strong>T</strong> (<em>function, optional</em>) &#8211; Discrepancy function, which takes a data dictionary and list
+of latent variables as input and outputs a tf.Tensor. Default
+is the identity function.</li>
 <li><strong>size</strong> (<em>int, optional</em>) &#8211; number of replicated data sets</li>
 </ul>
 </td>
@@ -444,6 +454,9 @@ vector of size elements,</p>
 elements,</p>
 <div class="math">
 \[(T(y, z^{1}), ..., T(y, z^{size})).\]</div>
+<p>If the discrepancy function is not specified, then the list
+contains the full data distribution where each element is a
+data set (dictionary).</p>
 </p>
 </td>
 </tr>
@@ -518,62 +531,49 @@ that data point.</li>
 <div class="section" id="module-edward.data">
 <span id="edward-data-module"></span><h2>edward.data module<a class="headerlink" href="#module-edward.data" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="edward.data.Data">
-<em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>data=None</em>, <em>shuffled=True</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data" title="Permalink to this definition">¶</a></dt>
+<dt id="edward.data.DataGenerator">
+<em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">DataGenerator</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.DataGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Base class for Edward data objects.</p>
-<p>By default, it assumes the data is an array (or list of arrays).
-If requested will perform data subsampling according to slices of
-the first index (e.g., elements in a vector, rows in a matrix,
-y-by-z matrices in a x-by-y-by-z tensor). Use one of the derived
-classes for subsampling more complex data structures.</p>
-<p>For TensorFlow models, data argument can be list of placeholders
-or list of np.ndarrays. If np.ndarrays, it will use mini-batches
-of the np.arrays during computation. If placeholders, user must
-manually control mini-batches and feed in the placeholders.</p>
-<p>Data subsampling is not currently available for Stan models.</p>
-<p>Internally, <code class="docutils literal"><span class="pre">self.counter</span></code> stores the last accessed data index. It
-is used to obtain the next batch of data starting from
+<p>Base class for Edward data generators.</p>
+<p>Its only method is next(), which returns a batch of data. By
+default, the method returns all the data. If requested, a batch is
+given by data subsampling according to slices of the first index
+(e.g., elements in a vector, rows in a matrix, y-by-z matrices in
+a x-by-y-by-z tensor). Use one of the derived classes for
+subsampling more complex data structures.</p>
+<p>Internally, <code class="docutils literal"><span class="pre">self.counter</span></code> stores the last accessed data index.
+It is used to obtain the next batch of data starting from
 <code class="docutils literal"><span class="pre">self.counter</span></code> to the size of the data set.</p>
 <p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>data</strong> (<em>tf.tensor, np.ndarray, list, dict, optional</em>) &#8211; <p>Data whose type depends on the type of model it is fed into.</p>
-<p>If TensorFlow, must be <code class="docutils literal"><span class="pre">tf.tensor</span></code> or <code class="docutils literal"><span class="pre">list</span></code>.</p>
-<p>If Stan, must be <code class="docutils literal"><span class="pre">dict</span></code>.</p>
-<p>If PyMC3, must be <code class="docutils literal"><span class="pre">np.ndarray</span></code>.</p>
-<p>If NumPy/SciPy, must be <code class="docutils literal"><span class="pre">np.ndarray</span></code> or <code class="docutils literal"><span class="pre">list</span></code> of <code class="docutils literal"><span class="pre">np.ndarrays</span></code>.</p>
-</li>
-<li><strong>shuffled</strong> (<em>bool, optional</em>) &#8211; Whether the data is shuffled when sampling.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>np.ndarray</em>) &#8211; </td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="edward.data.Data.sample">
-<code class="descname">sample</code><span class="sig-paren">(</span><em>n_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.Data.sample" title="Permalink to this definition">¶</a></dt>
+<dt id="edward.data.DataGenerator.next">
+<code class="descname">next</code><span class="sig-paren">(</span><em>n_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.DataGenerator.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sampling method.</p>
 <p>At any given point, the internal counter <code class="docutils literal"><span class="pre">self.counter</span></code> tracks the
-last datapoint returned by <code class="docutils literal"><span class="pre">sample</span></code>.</p>
+last datapoint returned by <code class="docutils literal"><span class="pre">next</span></code>.</p>
 <p>If the requested number of datapoints <code class="docutils literal"><span class="pre">n_data</span></code> goes beyond the size
 of the dataset, the internal counter wraps around the size of the
-dataset. The returned minibatch, thus, may include datapoints from the
+dataset. The returned batch, thus, may include datapoints from the
 beginning of the dataset.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_data</strong> (<em>int, optional</em>) &#8211; <p>Number of datapoints to sample</p>
-<p>Defaults to total number of datapoints in <code class="docutils literal"><span class="pre">Data</span></code> object.</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_data</strong> (<em>int, optional</em>) &#8211; <p>Number of datapoints to sample.</p>
+<p>Defaults to total number of datapoints in object.</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>minibatch</strong> &#8211; a tensor with first dimension size = <code class="docutils literal"><span class="pre">n_data</span></code></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Array whose values are all subsampled.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
 </tr>
 </tbody>
 </table>
@@ -586,9 +586,34 @@ beginning of the dataset.</p>
 <span id="edward-inferences-module"></span><h2>edward.inferences module<a class="headerlink" href="#module-edward.inferences" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="edward.inferences.Inference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>model</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Inference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base class for Edward inference methods.</p>
+<dl class="attribute">
+<dt id="edward.inferences.Inference.model">
+<code class="descname">model</code><a class="headerlink" href="#edward.inferences.Inference.model" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>ed.Model</em> &#8211; probability model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="edward.inferences.Inference.data">
+<code class="descname">data</code><a class="headerlink" href="#edward.inferences.Inference.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; Dictionary of TensorFlow placeholders. The computational graph
+uses this dictionary so that the data inputs may vary
+when specified at runtime.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="edward.inferences.Inference.data_gen">
+<code class="descname">data_gen</code><a class="headerlink" href="#edward.inferences.Inference.data_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; Dictionary where each placeholder in <cite>data</cite> is binded to a data
+generator formed from the original data. The data generators
+generate data to feed the placeholders at runtime. If the
+original data is already composed of placeholders, then
+<cite>data_gen</cite> is empty: the user will have to manually feed the
+placeholders at runtime.</p>
+</dd></dl>
+
 <p>Initialization.</p>
 <p>Calls <code class="docutils literal"><span class="pre">util.get_session()</span></code></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -597,7 +622,12 @@ beginning of the dataset.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>model</strong> (<em>ed.Model</em>) &#8211; probability model</li>
-<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; observed data</li>
+<li><strong>data</strong> (<em>dict, optional</em>) &#8211; Data dictionary. For TensorFlow, Python, and Stan models,
+the key type is a string; for PyMC3, the key type is a
+Theano shared variable. For TensorFlow, Python, and PyMC3
+models, the value type is a NumPy array or TensorFlow
+placeholder; for Stan, the value type is the type
+according to the Stan program&#8217;s data block.</li>
 </ul>
 </td>
 </tr>
@@ -616,8 +646,8 @@ divergence from the posterior to the variational model (Cappe et al., 2008)</p>
 <dl class="method">
 <dt id="edward.inferences.KLpq.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.KLpq.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines a stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[KL( p(z |x) || q(z) )
 =
@@ -655,7 +685,7 @@ stochastic gradients.</td>
 
 <dl class="class">
 <dt id="edward.inferences.Laplace">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data object&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>model</em>, <em>data=None</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.Laplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.MAP" title="edward.inferences.MAP"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.MAP</span></code></a></p>
 <p>Laplace approximation.</p>
 <p>It approximates the posterior distribution using a normal
@@ -675,7 +705,7 @@ covariance of the normal approximation.</p>
 
 <dl class="class">
 <dt id="edward.inferences.MAP">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=&lt;edward.data.Data object&gt;</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>model</em>, <em>data=None</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a></p>
 <p>Maximum a posteriori inference.</p>
 <p>We implement this using a <code class="docutils literal"><span class="pre">PointMass</span></code> variational distribution to
@@ -685,8 +715,8 @@ solve the following optimization problem</p>
 <dl class="method">
 <dt id="edward.inferences.MAP.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MAP.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function to minimize.</p>
-<p>Defines the gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is the gradient of</p>
 <div class="math">
 \[- \log p(x,z)\]</div>
 </dd></dl>
@@ -740,8 +770,8 @@ analytically following Kingma and Welling (2014),</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss">
 <code class="descname">build_reparam_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loss function whose automatic differentiation
-is the stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
 <p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
@@ -752,8 +782,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss_entropy">
 <code class="descname">build_reparam_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loss function whose automatic differentiation
-is the stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
             + H(q(z; \lambda)) )\]</div>
@@ -766,8 +796,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_reparam_loss_kl">
 <code class="descname">build_reparam_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_reparam_loss_kl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loss function whose automatic differentiation
-is the stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
             + KL(q(z; \lambda) || p(z)) )\]</div>
@@ -781,8 +811,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss">
 <code class="descname">build_score_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loss function whose automatic differentiation
-is the stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
 <p>based on the score function estimator. (Paisley et al., 2012)</p>
@@ -793,8 +823,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss_entropy">
 <code class="descname">build_score_loss_entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loss function whose automatic differentiation
-is the stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x, z) ]
             + H(q(z; \lambda)) )\]</div>
@@ -807,8 +837,8 @@ expectation using Monte Carlo sampling.</p>
 <dl class="method">
 <dt id="edward.inferences.MFVI.build_score_loss_kl">
 <code class="descname">build_score_loss_kl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.MFVI.build_score_loss_kl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loss function whose automatic differentiation
-is the stochastic gradient of</p>
+<dd><p>Build loss function. Its automatic differentiation
+is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
              + KL(q(z; \lambda) || p(z)) )\]</div>
@@ -854,7 +884,12 @@ reparameterization gradient if available.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>model</strong> (<em>ed.Model</em>) &#8211; probability model</li>
-<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; observed data</li>
+<li><strong>data</strong> (<em>dict, optional</em>) &#8211; Data dictionary. For TensorFlow, Python, and Stan models,
+the key type is a string; for PyMC3, the key type is a
+Theano shared variable. For TensorFlow, Python, and PyMC3
+models, the value type is a NumPy array or TensorFlow
+placeholder; for Stan, the value type is the type
+according to the Stan program&#8217;s data block.</li>
 </ul>
 </td>
 </tr>
@@ -864,7 +899,7 @@ reparameterization gradient if available.</li>
 
 <dl class="class">
 <dt id="edward.inferences.VariationalInference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=&lt;edward.data.Data object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>model</em>, <em>variational</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></p>
 <p>Base class for variational inference methods.</p>
 <p>Initialization.</p>
@@ -875,7 +910,12 @@ reparameterization gradient if available.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>model</strong> (<em>ed.Model</em>) &#8211; probability model</li>
 <li><strong>variational</strong> (<em>ed.Variational</em>) &#8211; variational model or distribution</li>
-<li><strong>data</strong> (<em>ed.Data, optional</em>) &#8211; observed data</li>
+<li><strong>data</strong> (<em>dict, optional</em>) &#8211; Data dictionary. For TensorFlow, Python, and Stan models,
+the key type is a string; for PyMC3, the key type is a
+Theano shared variable. For TensorFlow, Python, and PyMC3
+models, the value type is a NumPy array or TensorFlow
+placeholder; for Stan, the value type is the type
+according to the Stan program&#8217;s data block.</li>
 </ul>
 </td>
 </tr>
@@ -956,18 +996,18 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <code class="descname">run</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.inferences.VariationalInference.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>A simple wrapper to run variational inference.</p>
 <ol class="arabic simple">
-<li>Initialize via <code class="docutils literal"><span class="pre">initialize</span></code></li>
-<li>Run <code class="docutils literal"><span class="pre">update</span></code> for <code class="docutils literal"><span class="pre">self.n_iter</span></code> iterations</li>
-<li>While running, <code class="docutils literal"><span class="pre">print_progress</span></code></li>
-<li>Finalize via <code class="docutils literal"><span class="pre">finalize</span></code></li>
+<li>Initialize via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
+<li>Run <code class="docutils literal"><span class="pre">update</span></code> for <code class="docutils literal"><span class="pre">self.n_iter</span></code> iterations.</li>
+<li>While running, <code class="docutils literal"><span class="pre">print_progress</span></code>.</li>
+<li>Finalize via <code class="docutils literal"><span class="pre">finalize</span></code>.</li>
 </ol>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>*args</strong> &#8211; passed into <code class="docutils literal"><span class="pre">initialize</span></code></li>
-<li><strong>**kwargs</strong> &#8211; passed into <code class="docutils literal"><span class="pre">initialize</span></code></li>
+<li><strong>*args</strong> &#8211; Passed into <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
+<li><strong>**kwargs</strong> &#8211; Passed into <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
 </ul>
 </td>
 </tr>
@@ -1132,6 +1172,26 @@ for matrix inputs, outputs the vector
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.log_mean_exp">
+<code class="descclassname">edward.util.</code><code class="descname">log_mean_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.util.log_mean_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <code class="docutils literal"><span class="pre">log_mean_exp</span></code> of the elements in x.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector or matrix with second dimension 1
+shape=TensorShape([Dimension(N)])
+shape=TensorShape([Dimension(N), Dimension(1)])</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, vector if matrix tensor input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
 </tbody>
 </table>
