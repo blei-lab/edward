@@ -24,12 +24,12 @@ def _test(x, mu):
     _assert_eq(poisson.logpmf(xtf, tf.constant([mu])), val_true)
 
 
-def test_int_scalar():
+def test_int_0d():
     _test(0, 0.5)
     _test(1, 0.75)
 
 
-def test_float_scalar():
+def test_float_0d():
     _test(0.0, 0.5)
     _test(1.0, 0.75)
 

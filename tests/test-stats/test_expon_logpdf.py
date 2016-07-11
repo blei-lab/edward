@@ -23,7 +23,7 @@ def _test(x, scale=1):
     _assert_eq(expon.logpdf(xtf, scale=tf.constant([scale])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.3)
     _test(0.7)
 

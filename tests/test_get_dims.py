@@ -13,7 +13,7 @@ def _test(x, val_true):
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     x = tf.constant(0.0)
     _test(x, [])
     x = np.array(0.0)

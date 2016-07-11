@@ -27,7 +27,7 @@ def _test(a, b):
     _assert_eq(beta.entropy(tf.constant([a]), tf.constant([b])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(a=0.5, b=0.5)
     _test(a=1.0, b=1.0)
     _test(a=0.5, b=5.0)

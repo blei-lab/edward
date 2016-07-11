@@ -9,12 +9,17 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
+
 
 class LinearModel:
     """
@@ -42,9 +47,7 @@ class LinearModel:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data has output in first column and input in remaining columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
+        x, y = xs['x'], xs['y']
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
         # broadcasting to do (x*W) + b (n_data x n_minibatch - n_minibatch)
         b = zs[:, 0]
@@ -59,21 +62,19 @@ class LinearModel:
         """Returns a prediction for each data point, averaging over
         each set of latent variables z in zs; and also return the true
         value."""
-        y_test = xs[:, 0]
-        x_test = xs[:, 1:]
+        x_test = xs['x']
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
         y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
-        return y_pred, y_test
+        return y_pred
+
 
 def build_toy_dataset(n_data=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
-    x = np.random.randn(n_data, n_dim)
+    x = np.random.randn(n_data, n_dim).astype(np.float32)
     y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=n_data)
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)
+    return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = LinearModel()
@@ -87,4 +88,5 @@ inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_minibatch=5, n_print=10)
 
 data_test = build_toy_dataset(coeff=coeff)
-print(ed.evaluate('mse', model, variational, data_test))
+x_test, y_test = data_test['x'], data_test['y']
+print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))

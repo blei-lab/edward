@@ -38,7 +38,7 @@ def test_empty():
     _assert_eq(norm.entropy(), stats.norm.entropy())
 
 
-def test_scalar():
+def test_0d():
     _test(1.0, 1.0)
     _test(1.0, 1.0)
 

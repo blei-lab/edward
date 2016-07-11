@@ -3,144 +3,71 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-import tensorflow as tf
 
 
-class Data(object):
-    """Base class for Edward data objects.
+class DataGenerator(object):
+    """Base class for Edward data generators.
 
-    By default, it assumes the data is an array (or list of arrays).
-    If requested will perform data subsampling according to slices of
-    the first index (e.g., elements in a vector, rows in a matrix,
-    y-by-z matrices in a x-by-y-by-z tensor). Use one of the derived
-    classes for subsampling more complex data structures.
+    Its only method is next(), which returns a batch of data. By
+    default, the method returns all the data. If requested, a batch is
+    given by data subsampling according to slices of the first index
+    (e.g., elements in a vector, rows in a matrix, y-by-z matrices in
+    a x-by-y-by-z tensor). Use one of the derived classes for
+    subsampling more complex data structures.
 
-    For TensorFlow models, data argument can be list of placeholders
-    or list of np.ndarrays. If np.ndarrays, it will use mini-batches
-    of the np.arrays during computation. If placeholders, user must
-    manually control mini-batches and feed in the placeholders.
-
-    Data subsampling is not currently available for Stan models.
-
-    Internally, ``self.counter`` stores the last accessed data index. It
-    is used to obtain the next batch of data starting from
+    Internally, ``self.counter`` stores the last accessed data index.
+    It is used to obtain the next batch of data starting from
     ``self.counter`` to the size of the data set.
     """
-    def __init__(self, data=None, shuffled=True):
+    def __init__(self, data):
         """Initialization.
 
         Parameters
         ----------
-        data : tf.tensor, np.ndarray, list, dict, optional
-            Data whose type depends on the type of model it is fed into.
-
-            If TensorFlow, must be ``tf.tensor`` or ``list``.
-
-            If Stan, must be ``dict``.
-
-            If PyMC3, must be ``np.ndarray``.
-
-            If NumPy/SciPy, must be ``np.ndarray`` or ``list`` of ``np.ndarrays``.
-
-        shuffled: bool, optional
-            Whether the data is shuffled when sampling.
+        data : np.ndarray
         """
-        self.data = data
-        if not shuffled:
-            # TODO
-            # shuffle self.data
-            raise NotImplementedError()
-
-        if self.data is None:
-            pass
-        elif isinstance(self.data, tf.Tensor):
-            self.N = self.data.get_shape()[0].value
-            self.counter = 0
-        elif isinstance(self.data, np.ndarray):
-            self.N = self.data.shape[0]
-            self.counter = 0
-        elif isinstance(self.data, list):
-            if isinstance(self.data[0], np.ndarray):
-                self.N = [x.shape[0] for x in self.data]
-                self.counter = [0]*len(self.data)
-            else: # list of placeholders
-                # need data set size to scale gradients appropriately
-                pass
-        elif isinstance(self.data, dict):
-            pass
+        if isinstance(data, np.ndarray):
+            self.data = data
         else:
             raise NotImplementedError()
 
-    def sample(self, n_data=None):
+        self.N = data.shape[0]
+        self.counter = 0
+
+    def next(self, n_data=None):
         """Data sampling method.
 
         At any given point, the internal counter ``self.counter`` tracks the
-        last datapoint returned by ``sample``.
+        last datapoint returned by ``next``.
 
         If the requested number of datapoints ``n_data`` goes beyond the size
         of the dataset, the internal counter wraps around the size of the
-        dataset. The returned minibatch, thus, may include datapoints from the
+        dataset. The returned batch, thus, may include datapoints from the
         beginning of the dataset.
 
         Parameters
         ----------
         n_data : int, optional
-            Number of datapoints to sample
+            Number of datapoints to sample.
 
-            Defaults to total number of datapoints in ``Data`` object.
+            Defaults to total number of datapoints in object.
 
         Returns
         -------
-        minibatch : tf.Tensor
-            a tensor with first dimension size = ``n_data``
+        np.ndarray
+            Array whose values are all subsampled.
         """
-        # TODO
-        # In general, there should be a scale factor due to data
-        # subsampling, so that
-        # log_lik \approx self.N / n_data * ( mini-batch log_lik )
-        if n_data is None or self.data is None:
+        if n_data is None:
             return self.data
 
-        if isinstance(self.data, tf.Tensor):
-            counter_new = self.counter + n_data
-            if counter_new <= self.N:
-                minibatch = tf.gather(self.data,
-                                      list(range(self.counter, counter_new)))
-            else:
-                counter_new = counter_new - self.N
-                minibatch = tf.gather(self.data,
-                                      list(range(self.counter, self.N)) + \
-                                      list(range(0, counter_new)))
+        counter_old = self.counter
+        counter_new = counter_old + n_data
+        if counter_new <= self.N:
+            batch = self.data[counter_old:counter_new]
+        else:
+            counter_new = counter_new - self.N
+            batch = np.concatenate((self.data[counter_old:],
+                                    self.data[:counter_new]))
 
-            self.counter = counter_new
-            return minibatch
-        elif isinstance(self.data, np.ndarray):
-            counter_new = self.counter + n_data
-            if counter_new <= self.N:
-                minibatch = self.data[self.counter:counter_new]
-            else:
-                counter_new = counter_new - self.N
-                minibatch = np.concatenate((self.data[self.counter:],
-                                            self.data[:counter_new]))
-
-            self.counter = counter_new
-            return minibatch
-        elif isinstance(self.data, list):
-            if isinstance(self.data[0], np.ndarray):
-                minibatch = [0]*len(self.data)
-                for i in range(len(self.data)):
-                    counter_new = self.counter[i] + n_data
-                    if counter_new <= self.N[i]:
-                        minibatch[i] = self.data[i][self.counter[i]:counter_new]
-                    else:
-                        counter_new = counter_new - self.N[i]
-                        minibatch[i] = np.concatenate((self.data[i][self.counter[i]:],
-                                                       self.data[i][:counter_new]))
-
-                    self.counter[i] = counter_new
-
-                return minibatch
-            else: # list of placeholders
-                raise NotImplementedError()
-        else: # dict
-            raise NotImplementedError()
+        self.counter = counter_new
+        return batch

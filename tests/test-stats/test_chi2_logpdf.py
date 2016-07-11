@@ -24,7 +24,7 @@ def _test(x, df):
     _assert_eq(chi2.logpdf(xtf, tf.constant([df])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.2, df=2)
     _test(0.623, df=2)
 

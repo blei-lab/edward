@@ -11,6 +11,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,6 +23,7 @@ import tensorflow as tf
 from edward.models import Variational, Normal
 from edward.stats import norm
 from edward.util import rbf
+
 
 class BayesianNN:
     """
@@ -52,7 +57,7 @@ class BayesianNN:
         self.prior_variance = prior_variance
 
         self.num_layers = len(layer_sizes)
-        self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
+        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
         self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):
@@ -91,15 +96,13 @@ class BayesianNN:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
+        x, y = xs['x'], xs['y']
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
         # broadcasting to do mus - y (n_minibatch x n_data - n_data)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
+
 
 def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
@@ -109,10 +112,8 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     y = np.cos(x) + norm.rvs(0, noise_std, size=n_data)
     x = (x - 4.0) / 4.0
     x = x.reshape((n_data, D))
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)
+    return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
@@ -146,7 +147,7 @@ for t in range(1000):
         outputs = mus.eval()
 
         # Get data
-        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
+        x, y = data['x'], data['y']
 
         # Plot data and functions
         plt.cla()

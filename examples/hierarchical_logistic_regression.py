@@ -9,13 +9,18 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
-import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import bernoulli, norm
+
 
 class HierarchicalLogistic:
     """
@@ -59,10 +64,7 @@ class HierarchicalLogistic:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
+        x, y = xs['x'], xs['y']
         log_lik = []
         for z in tf.unpack(zs):
             p = self.mapping(x, z)
@@ -71,6 +73,7 @@ class HierarchicalLogistic:
         log_lik = tf.pack(log_lik)
         log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
         return log_lik + log_prior
+
 
 def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
@@ -81,10 +84,8 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     y[y >= 0.5] = 1
     x = (x - 4.0) / 4.0
     x = x.reshape((n_data, D))
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)
+    return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = HierarchicalLogistic(weight_dim=[1,1])
@@ -119,7 +120,7 @@ for t in range(600):
         outputs = mus.eval()
 
         # Get data
-        y, x = sess.run([data.data[:, 0], data.data[:, 1]])
+        x, y = data['x'], data['y']
 
         # Plot data and functions
         plt.cla()

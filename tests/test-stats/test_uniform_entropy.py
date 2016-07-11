@@ -34,7 +34,7 @@ def _test(loc=0, scale=1):
     _assert_eq(uniform.entropy(tf.constant([loc]), tf.constant([scale])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test()
     _test(loc=1.0, scale=1.0)
     _test(loc=0.5, scale=5.0)
