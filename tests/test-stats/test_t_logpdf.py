@@ -26,7 +26,7 @@ def _test(x, df, loc=0, scale=1):
     _assert_eq(t.logpdf(xtf, df, tf.constant([loc]), tf.constant([scale])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.0, df=3)
     _test(0.623, df=3)
 

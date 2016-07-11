@@ -26,7 +26,7 @@ def _test(x, a, b):
     _assert_eq(beta.logpdf(xtf, tf.constant([a]), tf.constant([b])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.3, a=0.5, b=0.5)
     _test(0.7, a=0.5, b=0.5)
 

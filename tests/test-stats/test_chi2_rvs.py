@@ -17,7 +17,7 @@ def _test(df, size):
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     _test(3, 1)
     _test(np.array(3), 1)
 

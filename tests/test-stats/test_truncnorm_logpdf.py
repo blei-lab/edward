@@ -26,7 +26,7 @@ def _test(x, a, b, loc=0, scale=1):
     _assert_eq(truncnorm.logpdf(xtf, a, b, tf.constant([loc]), tf.constant([scale])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.0, a=-1.0, b=3.0)
     _test(0.623, a=-1.0, b=3.0)
 
