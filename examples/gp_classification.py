@@ -9,6 +9,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
@@ -16,6 +20,7 @@ import tensorflow as tf
 from edward.models import Variational, Normal
 from edward.stats import bernoulli, multivariate_normal
 from edward.util import multivariate_rbf
+
 
 class GaussianProcess:
     """
@@ -69,6 +74,7 @@ class GaussianProcess:
             bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
             ) for z in tf.unpack(zs)])
         return log_prior + log_lik
+
 
 ed.set_seed(42)
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]

@@ -9,11 +9,16 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 
 from edward.models import PythonModel, Variational, Beta
 from scipy.stats import beta, bernoulli
+
 
 class BetaBernoulli(PythonModel):
     """
@@ -30,6 +35,7 @@ class BetaBernoulli(PythonModel):
                 lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
 
         return lp
+
 
 ed.set_seed(42)
 model = BetaBernoulli()

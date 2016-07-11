@@ -4,11 +4,16 @@ Probability model
     Posterior: (1-dimensional) Normal
 Inference: Maximum a posteriori
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
 
 from edward.stats import norm
+
 
 class NormalModel:
     """
@@ -23,6 +28,7 @@ class NormalModel:
         log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], z, self.std))
                            for z in tf.unpack(zs)])
         return log_lik + log_prior
+
 
 ed.set_seed(42)
 mu = tf.constant(3.0)

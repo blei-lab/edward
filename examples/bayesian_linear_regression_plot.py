@@ -9,6 +9,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +20,7 @@ import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
+
 
 class LinearModel:
     """
@@ -54,6 +59,7 @@ class LinearModel:
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
         return log_lik + log_prior
 
+
 def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
     x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
@@ -62,6 +68,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     x = (x - 4.0) / 4.0
     x = x.reshape((n_data, 1))
     return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = LinearModel()

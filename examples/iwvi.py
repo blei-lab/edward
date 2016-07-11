@@ -3,6 +3,10 @@
 A simple demonstration of how to implement new inference algorithms in
 Edward. Here we implement importance-weighted variational inference.
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
@@ -11,6 +15,7 @@ from edward.inferences import MFVI
 from edward.models import Variational, Beta
 from edward.stats import bernoulli, beta
 from edward.util import log_mean_exp, stop_gradient
+
 
 class IWVI(MFVI):
     """
@@ -108,6 +113,7 @@ class IWVI(MFVI):
         self.loss = tf.reduce_mean(losses)
         return -self.loss
 
+
 class BetaBernoulli:
     """
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
@@ -117,6 +123,7 @@ class BetaBernoulli:
         log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
                            for z in tf.unpack(zs)])
         return log_lik + log_prior
+
 
 ed.set_seed(42)
 model = BetaBernoulli()

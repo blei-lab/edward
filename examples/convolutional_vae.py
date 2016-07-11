@@ -9,6 +9,8 @@ Probability model
 Variational model
     Likelihood: Mean-field Normal parameterized by convolutional NN
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 import edward as ed
@@ -27,6 +29,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 N_DATA = 128
 DATA_DIR = "data/mnist"
 IMG_DIR = "img"
+
 
 class NormalBernoulli:
     """
@@ -76,6 +79,7 @@ class NormalBernoulli:
         # by the neural network.
         return self.neural_network(z)
 
+
 def neural_network(x):
     """
     Inference network to parameterize variational family. It takes
@@ -103,6 +107,7 @@ def neural_network(x):
     loc = tf.reshape(params[:, :num_vars], [-1])
     scale = tf.reshape(tf.sqrt(tf.exp(params[:, num_vars:])), [-1])
     return [loc, scale]
+
 
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)

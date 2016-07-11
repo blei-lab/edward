@@ -11,6 +11,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,6 +23,7 @@ import tensorflow as tf
 from edward.models import Variational, Normal
 from edward.stats import norm
 from edward.util import rbf
+
 
 class BayesianNN:
     """
@@ -98,6 +103,7 @@ class BayesianNN:
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
 
+
 def build_toy_dataset(n_data=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
@@ -107,6 +113,7 @@ def build_toy_dataset(n_data=40, noise_std=0.1):
     x = (x - 4.0) / 4.0
     x = x.reshape((n_data, D))
     return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)

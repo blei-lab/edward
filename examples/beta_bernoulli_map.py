@@ -8,11 +8,16 @@ Probability model
     Likelihood: Bernoulli
 Inference: Maximum a posteriori
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
 
 from edward.stats import bernoulli, beta
+
 
 class BetaBernoulli:
     """
@@ -26,6 +31,7 @@ class BetaBernoulli:
         log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
                            for z in tf.unpack(zs)])
         return log_lik + log_prior
+
 
 ed.set_seed(42)
 model = BetaBernoulli()
