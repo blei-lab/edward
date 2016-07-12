@@ -19,26 +19,14 @@ def log_prob(zs, stanfit):
     return lp
 
 
-def _test(ed_model, pystan_model, data):
+def _test(ed_model, pystan_model, data, zs):
     stanfit = pystan_model.sampling(data=data, iter=1, chains=1)
+    val_ed = ed_model.log_prob(data, zs)
+    val_true = log_prob(zs, stanfit)
     with sess.as_default():
-        zs = np.array([[0.5]])
-        val_ed = ed_model.log_prob(data, zs)
-        val_true = log_prob(zs, stanfit)
-        print(val_ed.eval(), val_true)
         assert np.allclose(val_ed.eval(), val_true)
         zs_tf = tf.constant(zs, dtype=tf.float32)
         val_ed = ed_model.log_prob(data, zs_tf)
-        print(val_ed.eval(), val_true)
-        assert np.allclose(val_ed.eval(), val_true)
-        zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
-        val_ed = ed_model.log_prob(data, zs)
-        val_true = log_prob(zs, stanfit)
-        print(val_ed.eval(), val_true)
-        assert np.allclose(val_ed.eval(), val_true)
-        zs_tf = tf.constant(zs, dtype=tf.float32)
-        val_ed = ed_model.log_prob(data, zs_tf)
-        print(val_ed.eval(), val_true)
         assert np.allclose(val_ed.eval(), val_true)
 
 
@@ -60,4 +48,7 @@ def test_1d():
     pystan_model = pystan.StanModel(model_code=model_code)
     ed_model = ed.StanModel(model=pystan_model)
     data = {'N': 10, 'y': [0, 1, 0, 1, 0, 1, 0, 1, 1, 1]}
-    _test(ed_model, pystan_model, data)
+    zs = np.array([[0.5]])
+    _test(ed_model, pystan_model, data, zs)
+    zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
+    _test(ed_model, pystan_model, data, zs)

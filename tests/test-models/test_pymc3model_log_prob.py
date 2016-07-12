@@ -14,22 +14,12 @@ from edward.models import PyMC3Model
 sess = tf.Session()
 
 
-def _test(model, data):
+def _test(model, data, zs):
+    val_ed = model.log_prob(data, zs)
+    model.keys = list(six.iterkeys(data))
+    model.values = list(six.itervalues(data))
+    val_true = model._py_log_prob_args(zs)
     with sess.as_default():
-        zs = np.array([[0.5]])
-        val_ed = model.log_prob(data, zs)
-        model.keys = list(six.iterkeys(data))
-        model.values = list(six.itervalues(data))
-        val_true = model._py_log_prob_args(zs)
-        assert np.allclose(val_ed.eval(), val_true)
-        zs_tf = tf.constant(zs, dtype=tf.float32)
-        val_ed = model.log_prob(data, zs_tf)
-        assert np.allclose(val_ed.eval(), val_true)
-        zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
-        val_ed = model.log_prob(data, zs)
-        model.keys = list(six.iterkeys(data))
-        model.values = list(six.itervalues(data))
-        val_true = model._py_log_prob_args(zs)
         assert np.allclose(val_ed.eval(), val_true)
         zs_tf = tf.constant(zs, dtype=tf.float32)
         val_ed = model.log_prob(data, zs_tf)
@@ -44,4 +34,7 @@ def test_1d():
 
     model = PyMC3Model(pm_model)
     data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-    _test(model, data)
+    zs = np.array([[0.5]])
+    _test(model, data, zs)
+    zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
+    _test(model, data, zs)
