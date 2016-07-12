@@ -24,6 +24,7 @@ before_install:
     - pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp27-none-linux_x86_64.whl
     - pip install python-coveralls
     - pip install numpydoc
+    - pip install git+https://github.com/pymc-devs/pymc3
 
 install:
     - pip install -e .
