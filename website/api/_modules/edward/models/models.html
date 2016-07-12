@@ -1,0 +1,573 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>edward.models.models &mdash; Edward 1.0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0.9 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Building Probabilistic Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../edward.html">edward package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>edward.models.models</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for edward.models.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="kn">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span>
+<span class="kn">from</span> <span class="nn">edward.models.distributions</span> <span class="kn">import</span> <span class="n">Normal</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pystan</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="PyMC3Model"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PyMC3Model">[docs]</a><span class="k">class</span> <span class="nc">PyMC3Model</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model wrapper for models written in PyMC3.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : pymc3.Model</span>
+<span class="sd">            The probability model, written with Theano shared</span>
+<span class="sd">            variables to form any observations. The Theano shared</span>
+<span class="sd">            variables are set during inference.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="nb">vars</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">inputvars</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cont_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
+
+        <span class="n">bij</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">DictToArrayBijection</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">ArrayOrdering</span><span class="p">(</span><span class="nb">vars</span><span class="p">),</span> <span class="n">model</span><span class="o">.</span><span class="n">test_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logp</span> <span class="o">=</span> <span class="n">bij</span><span class="o">.</span><span class="n">mapf</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fastlogp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dlogp</span> <span class="o">=</span> <span class="n">bij</span><span class="o">.</span><span class="n">mapf</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fastdlogp</span><span class="p">(</span><span class="nb">vars</span><span class="p">))</span>
+
+<div class="viewcode-block" id="PyMC3Model.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PyMC3Model.log_prob">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : dict</span>
+<span class="sd">            Data dictionary. Each key is a data placeholder (Theano</span>
+<span class="sd">            shared variable) in the PyMC3 model, and its value is the</span>
+<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        It wraps around a Python function. The Python function takes</span>
+<span class="sd">        inputs of type np.ndarray and outputs a np.ndarray.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Store `xs.keys()` so that `_py_log_prob_args` knows how each</span>
+        <span class="c1"># data value corresponds to a key.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xs</span><span class="p">:</span>
+            <span class="c1"># If `xs` is an empty dictionary, then store their (empty)</span>
+            <span class="c1"># values to pass into `_py_log_prob_args`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c1"># If `xs` is a dictionary of NumPy arrays, then store</span>
+            <span class="c1"># their values to pass into `_py_log_prob_args`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If `xs` is a dictionary of TensorFlow tensors, then</span>
+            <span class="c1"># pass the tensors into tf.py_func.</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob_args</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="c1"># Set `values` to NumPy arrays that were passed in via</span>
+        <span class="c1"># `self.values` or via `*args`.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">args</span>
+
+        <span class="c1"># Set data placeholders in PyMC3 model (Theano shared</span>
+        <span class="c1"># variable) to their realizations (NumPy array).</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="n">key</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_minibatch</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_minibatch</span><span class="p">):</span>
+            <span class="n">lp</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">lp</span></div>
+
+
+<div class="viewcode-block" id="PythonModel"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PythonModel">[docs]</a><span class="k">class</span> <span class="nc">PythonModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model wrapper for models written in NumPy/SciPy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="PythonModel.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PythonModel.log_prob">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : dict</span>
+<span class="sd">            Data dictionary. Each key names a data structure used in</span>
+<span class="sd">            the model (str), and its value is the corresponding</span>
+<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        It wraps around a Python function. The Python function takes</span>
+<span class="sd">        inputs of type np.ndarray and outputs a np.ndarray.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Store `xs.keys()` so that `_py_log_prob_args` knows how each</span>
+        <span class="c1"># data value corresponds to a key.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xs</span><span class="p">:</span>
+            <span class="c1"># If `xs` is an empty dictionary, then store their (empty)</span>
+            <span class="c1"># values to pass into `_py_log_prob_args`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c1"># If `xs` is a dictionary of NumPy arrays, then store</span>
+            <span class="c1"># their values to pass into `_py_log_prob_args`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If `xs` is a dictionary of TensorFlow tensors, then</span>
+            <span class="c1"># pass the tensors into tf.py_func.</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob_args</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="c1"># Set `values` to NumPy arrays that were passed in via</span>
+        <span class="c1"># `self.values` or via `*args`.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">args</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="StanModel"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.StanModel">[docs]</a><span class="k">class</span> <span class="nc">StanModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model wrapper for models written in Stan.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : pystan.StanModel, optional</span>
+<span class="sd">            An already compiled Stan model. This is useful to avoid</span>
+<span class="sd">            recompilation of Stan models both within a session (using</span>
+<span class="sd">            this argument) and across sessions (by loading a pickled</span>
+<span class="sd">            pystan.StanModel object and passing it in here).</span>
+<span class="sd">            Alternatively, one can also pickle the ed.StanModel object</span>
+<span class="sd">            altogether.</span>
+<span class="sd">        *args</span>
+<span class="sd">            Passed into pystan.StanModel.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Passed into pystan.StanModel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pystan</span><span class="o">.</span><span class="n">StanModel</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="StanModel.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.StanModel.log_prob">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : dict</span>
+<span class="sd">            Data dictionary. Each key and value is according to</span>
+<span class="sd">            the Stan program&#39;s data block. The key type is str; the</span>
+<span class="sd">            value type is any supported in the data block.</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        It wraps around a Python function. The Python function takes</span>
+<span class="sd">        inputs of type np.ndarray and outputs a np.ndarray.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The empty sampling message exists for accessing Stan&#39;s log_prob method.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sampling</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob</span><span class="p">,</span> <span class="p">[</span><span class="n">zs</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+                             <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">par_dims</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The log_prob() method in Stan requires the input to be a</span>
+<span class="sd">        dictionary data type, with each parameter named</span>
+<span class="sd">        correspondingly; this is because zs lives on the original</span>
+<span class="sd">        (constrained) latent variable space.</span>
+
+<span class="sd">        Ideally, in Stan it would have log_prob() for both this</span>
+<span class="sd">        input and a flattened vector. Internally, Stan always assumes</span>
+<span class="sd">        unconstrained parameters are flattened vectors, and</span>
+<span class="sd">        constrained parameters are named data structures.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zs</span><span class="p">):</span>
+            <span class="n">z_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">par</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">par_dims</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">model_pars</span><span class="p">):</span>
+                <span class="n">elems</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">elems</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">z_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                    <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">z_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">idx</span><span class="p">:(</span><span class="n">idx</span><span class="o">+</span><span class="n">elems</span><span class="p">)]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+                    <span class="n">idx</span> <span class="o">+=</span> <span class="n">elems</span>
+
+            <span class="n">z_unconst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">unconstrain_pars</span><span class="p">(</span><span class="n">z_dict</span><span class="p">)</span>
+            <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z_unconst</span><span class="p">,</span> <span class="n">adjust_transform</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lp</span></div>
+
+
+<div class="viewcode-block" id="Variational"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.Variational">[docs]</a><span class="k">class</span> <span class="nc">Variational</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A container for collecting distribution objects.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">get_session</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_normal</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_entropy</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">layers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">layer</span><span class="o">.</span><span class="n">num_vars</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">layer</span><span class="o">.</span><span class="n">num_params</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="n">layer</span><span class="o">.</span><span class="n">is_reparameterized</span>
+                                           <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_normal</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">Normal</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_entropy</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="s1">&#39;entropy&#39;</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span>
+                                   <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">l</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">string</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+            <span class="n">string</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">string</span>
+
+<div class="viewcode-block" id="Variational.add"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.Variational.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a layer instance on top of the layer stack.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layer : layer instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">layer</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">+=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vars</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">num_vars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">num_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">.</span><span class="n">is_reparameterized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_entropy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_entropy</span> <span class="ow">and</span> <span class="s1">&#39;entropy&#39;</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_normal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_normal</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">Normal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">+=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">is_multivariate</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Variational.sample"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.Variational.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws a mix of tensors and placeholders, corresponding to</span>
+<span class="sd">        TensorFlow-based samplers and SciPy-based samplers depending</span>
+<span class="sd">        on the layer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int, optional</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list or tf.Tensor</span>
+<span class="sd">            If more than one layer, a list of tf.Tensors of dimension</span>
+<span class="sd">            (size x shape), one for each layer. If one layer, a</span>
+<span class="sd">            tf.Tensor of (size x shape). If a layer requires SciPy to</span>
+<span class="sd">            sample, its corresponding tensor is a tf.placeholder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">samples</span></div>
+
+<div class="viewcode-block" id="Variational.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.Variational.log_prob">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : list or tf.Tensor or np.array</span>
+<span class="sd">            If more than one layer, a list of tf.Tensors or np.array&#39;s</span>
+<span class="sd">            of dimension (batch x shape). If one layer, a tf.Tensor or</span>
+<span class="sd">            np.array of (batch x shape).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method may be removed in the future in favor of indexable</span>
+<span class="sd">        log_prob methods, e.g., for automatic Rao-Blackwellization.</span>
+
+<span class="sd">        This method assumes each xs[l] in xs has the same batch size,</span>
+<span class="sd">        i.e., dimensions (batch x shape) for fixed batch and varying</span>
+<span class="sd">        shape.</span>
+
+<span class="sd">        This method assumes length of xs == length of self.layers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+
+        <span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_minibatch</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+            <span class="n">log_prob</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">l</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">log_prob</span></div>
+
+<div class="viewcode-block" id="Variational.entropy"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.Variational.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">out</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

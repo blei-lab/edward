@@ -1,6 +1,11 @@
 edward package
 ==============
 
+.. automodule:: edward
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -12,43 +17,10 @@ Subpackages
 Submodules
 ----------
 
-edward.criticisms module
-------------------------
+.. toctree::
 
-.. automodule:: edward.criticisms
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   edward.criticisms
+   edward.data
+   edward.inferences
+   edward.util
 
-edward.data module
-------------------
-
-.. automodule:: edward.data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-edward.inferences module
-------------------------
-
-.. automodule:: edward.inferences
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-edward.util module
-------------------
-
-.. automodule:: edward.util
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: edward
-    :members:
-    :undoc-members:
-    :show-inheritance:
