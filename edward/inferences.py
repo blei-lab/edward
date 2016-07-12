@@ -23,10 +23,8 @@ class Inference(object):
     ----------
     model : ed.Model
         probability model
-    data : dict
-        Dictionary of TensorFlow variables. The computational graph
-        uses this dictionary so that the data inputs may vary
-        at each step of inference.
+    data : dict of tf.Tensor
+        Data dictionary whose values may vary at each session run.
     """
     def __init__(self, model, data=None):
         """Initialization.
@@ -42,14 +40,20 @@ class Inference(object):
             the key type is a string; for PyMC3, the key type is a
             Theano shared variable. For TensorFlow, Python, and PyMC3
             models, the value type is a NumPy array or TensorFlow
-            placeholder; for Stan, the value type is the type
+            tensor; for Stan, the value type is the type
             according to the Stan program's data block.
 
         Notes
         -----
-        If `data` is not passed in, the dictionary is empty. If `data`
-        is passed in with any TensorFlow placeholders, the user must
-        manually feed the placeholders at each step of inference.
+        If `data` is not passed in, the dictionary is empty.
+
+        Three options are available for batch training:
+        1. internally if user passes in data as a dictionary of NumPy
+           arrays;
+        2. externally if user passes in data as a dictionary of
+           TensorFlow placeholders (and manually feeds them);
+        3. externally if user passes in data as TensorFlow tensors
+           which are the outputs of data readers.
         """
         sess = get_session()
         self.model = model
@@ -67,19 +71,22 @@ class Inference(object):
             self.data = {}
             for key, value in six.iteritems(data):
                 if isinstance(value, tf.Tensor):
-                    if value.name.startswith('Placeholder'):
-                        # If `data` has TensorFlow placeholders, then
-                        # set `self.data` to them. The user must
-                        # manually feed the placeholders at each step
-                        # of inference.
-                        self.data[key] = value
-                    else:
-                        raise NotImplementedError()
-                else:
+                    # If `data` has TensorFlow placeholders, the user
+                    # must manually feed them at each step of
+                    # inference.
+                    # If `data` has tensors that are the output of
+                    # data readers, then batch training operates
+                    # according to the reader.
+                    self.data[key] = value
+                elif isinstance(value, np.ndarray):
+                    # If `data` has NumPy arrays, store the data
+                    # in the computational graph.
                     placeholder = tf.placeholder(tf.float32, value.shape)
                     var = tf.Variable(placeholder, trainable=False, collections=[])
                     self.data[key] = var
                     sess.run(var.initializer, {placeholder: value})
+                else:
+                    raise NotImplementedError()
 
 
 class MonteCarlo(Inference):
@@ -162,7 +169,9 @@ class VariationalInference(Inference):
             Number of iterations for optimization.
         n_data : int, optional
             Number of samples for data subsampling. Default is to use
-            all the data. For subsampling details, see
+            all the data. Subsampling is available only if all data
+            passed in are NumPy arrays and the model is not a Stan
+            model. For subsampling details, see
             `tf.train.slice_input_producer` and `tf.train.batch`.
         n_print : int, optional
             Number of iterations for each print progress. To suppress print
