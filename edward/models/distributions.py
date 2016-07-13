@@ -7,6 +7,7 @@ import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_dims, get_session, to_simplex
+from itertools import product
 
 
 class Distribution(object):
@@ -105,38 +106,29 @@ class Distribution(object):
                 idx = ()
                 log_prob += self.log_prob_idx(idx, xs)
             else:
-                for i in range(self.shape[0]):
-                    idx = (i, )
+                for idx in product(range(self.shape[0])):
                     log_prob += self.log_prob_idx(idx, xs)
 
         elif len(self.shape) == 2:
             if self.is_multivariate:
-                for i in range(self.shape[0]):
-                    idx = (i, )
+                for idx in product(range(self.shape[0])):
                     log_prob += self.log_prob_idx(idx, xs)
 
             else:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[1]):
-                        idx = (i, j, )
-                        log_prob += self.log_prob_idx(idx, xs)
+                for idx in product(range(self.shape[0]), range(self.shape[1])):
+                    log_prob += self.log_prob_idx(idx, xs)
 
         elif len(self.shape) == 3:
             if self.is_multivariate:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[1]):
-                        idx = (i, j, )
-                        log_prob += self.log_prob_idx(idx, xs)
+                for idx in product(range(self.shape[0]), range(self.shape[1])):
+                    log_prob += self.log_prob_idx(idx, xs)
 
             else:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[1]):
-                        for k in range(self.shape[2]):
-                            idx = (i, j, k, )
-                            log_prob += self.log_prob_idx(idx, xs)
+                for idx in product(range(self.shape[0]), range(self.shape[1]), range(self.shape[2])):
+                    log_prob += self.log_prob_idx(idx, xs)
 
         else: # len(self.shape) >= 4
-            # There should be a generic recursive solution.
+            # There should be a generic solution.
             raise NotImplementedError()
 
         return log_prob
