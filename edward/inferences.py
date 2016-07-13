@@ -369,7 +369,7 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         p_log_prob = self.model.log_prob(xz)
@@ -395,7 +395,7 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         p_log_prob = self.model.log_prob(xz)
@@ -425,7 +425,7 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         p_log_lik = self.model.log_lik(xz)
@@ -456,7 +456,7 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         p_log_prob = self.model.log_prob(xz)
@@ -488,7 +488,7 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
@@ -517,7 +517,7 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         self.loss = tf.reduce_mean(self.model.log_prob(xz)) + \
@@ -585,7 +585,7 @@ class KLpq(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         # normalized importance weights
@@ -630,7 +630,7 @@ class MAP(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in z.iteritems():
+        for key, value in six.iteritems(z):
             xz[self.mapping[key]] = value
 
         self.loss = tf.squeeze(self.model.log_prob(xz))
