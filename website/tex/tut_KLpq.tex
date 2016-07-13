@@ -1,0 +1,75 @@
+% Define the subtitle of the page
+\title{KL(p||q) minimization}
+
+% Begin the content of the page
+\subsection{$\text{KL}(p\|q)$ minimization}
+
+(We recommend reading the 
+\href{tut_inference_probability_models.html}{inference of probability models}
+tutorial first.)
+
+Variational inference is a powerful approach to approximating the posterior. The
+core idea involves two steps:
+\begin{enumerate}
+   \item propose a tractable approximation to the posterior $q(z\;;\;\lambda)$,
+   and
+   \item match it to the posterior by tuning the variational
+   parameters $\lambda$.
+ \end{enumerate} 
+This strategy converts the problem of computing the posterior $p(z \mid x)$ into
+an optimization problem of minimizing some divergence metric
+\begin{align*}
+  \lambda^* 
+  &=
+  \arg\min_\lambda \text{divergence}( 
+  p(z \mid x)
+  ,
+  q(z\;;\;\lambda)
+  ).
+\end{align*}
+
+One form of variational inference minimizes the Kullback-Leibler divergence 
+\textbf{from} $p(z \mid x)$ \textbf{to} $q(z\;;\;\lambda)$,
+\begin{align*}
+  \lambda^* 
+  &=
+  \arg\min_\lambda \text{KL}( 
+  p(z \mid x)
+  \;\|\;
+  q(z\;;\;\lambda)
+  )\\
+  &=
+  \arg\min_\lambda\;
+  \mathbb{E}_{p(z \mid x)}
+  \big[
+  \log p(z \mid x)
+  -
+  \log q(z\;;\;\lambda)
+  \big].
+\end{align*}
+The KL divergence is a non-symmetric, information theoretic metric of
+similarity between two probability distributions. 
+
+\subsubsection{Minimizing an intractable objective function}
+
+The $\text{KL}(p\|q)$ objective we seek to minimize is intractable; it directly
+involves the posterior $p(z \mid x)$. Ignoring this for the moment, consider its
+gradient
+\begin{align*}
+  \nabla_\lambda\;
+  \text{KL}( 
+  p(z \mid x)
+  \;\|\;
+  q(z\;;\;\lambda)
+  )
+  &=
+  -
+  \mathbb{E}_{p(z \mid x)}
+  \big[
+  \nabla_\lambda\;
+  \log q(z\;;\;\lambda)
+  \big].
+\end{align*}
+While this gradient is still intractable, we can follow it to a (local) minimum
+of $\text{KL}(p\|q)$ using
+\href{tut_KLpq_ais.html}{adaptive importance sampling}.
