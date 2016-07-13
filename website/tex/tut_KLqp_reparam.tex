@@ -130,8 +130,8 @@ $g(\epsilon\;;\;\lambda)$. The TensorFlow method \texttt{reduce_mean} then
 computes the Monte Carlo summation. 
 
 This method implicitly specifies the gradient of the ELBO as well. TensorFlow's
-automatic differentation will apply to \texttt{z}, thus applying the chain rule
-of differentation to compute the gradient of the ELBO. Unlike the
+automatic differentiation will apply to \texttt{z}, thus applying the chain rule
+of differentiation to compute the gradient of the ELBO. Unlike the
 \href{tut_KLqp_score.html}{score function method},
 we do not have to use TensorFlow's \texttt{stop_gradient} method.
 
