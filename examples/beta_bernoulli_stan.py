@@ -9,8 +9,14 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
+
 from edward.models import Model, Beta
+
 
 model_code = """
     data {
@@ -30,7 +36,7 @@ ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
 variational = Model()
 variational.add(Beta())
-data = ed.Data(dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

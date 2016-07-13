@@ -9,9 +9,12 @@ Probability model
 Variational model
     Likelihood: Mean-field Normal parameterized by convolutional NN
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
-import os
+
 import edward as ed
+import os
 import prettytensor as pt
 import tensorflow as tf
 
@@ -23,10 +26,10 @@ from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 
-tf.flags.DEFINE_integer("n_data", 128, "Mini-batch size for data subsampling.")
-tf.flags.DEFINE_string("data_directory", "data/mnist", "Directory to store data.")
-tf.flags.DEFINE_string("img_directory", "img", "Directory to store sampled images.")
-FLAGS = tf.flags.FLAGS
+N_DATA = 128
+DATA_DIR = "data/mnist"
+IMG_DIR = "img"
+
 
 class NormalBernoulli:
     """
@@ -35,7 +38,7 @@ class NormalBernoulli:
     of a neural network that takes samples from a normal prior as
     input.
 
-    p(x, z) = Bernoulli(x | p = varphi(z)) Normal(z; 0, I)
+    p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
     """
     def __init__(self, num_vars):
         self.num_vars = num_vars # number of local latent variables
@@ -48,33 +51,34 @@ class NormalBernoulli:
                                variance_epsilon=0.001,
                                scale_after_normalization=True):
             return (pt.wrap(z).
-                    reshape([FLAGS.n_data, 1, 1, self.num_vars]).
+                    reshape([N_DATA, 1, 1, self.num_vars]).
                     deconv2d(3, 128, edges='VALID').
                     deconv2d(5, 64, edges='VALID').
                     deconv2d(5, 32, stride=2).
                     deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
                     flatten()).tensor
 
-    def log_lik(self, x, z):
+    def log_lik(self, xs, z):
         """
         Bernoulli log-likelihood, summing over every image n and pixel i
         in image n.
 
-        log p(x | z) = log Bernoulli(x | p = varphi(z))
+        log p(x | z) = log Bernoulli(x | p = neural_network(z))
          = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
         """
-        return tf.reduce_sum(bernoulli.logpmf(x, p=self.neural_network(z)))
+        return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
 
     def sample_prior(self, size):
         """
         p ~ some complex distribution induced by
-        z ~ N(0, 1), p = varphi(z)
+        z ~ N(0, 1), p = neural_network(z)
         """
         z = tf.random_normal([size, self.num_vars])
         # Note the output of this is not prior samples, but just the
         # success probability, i.e., the hidden representation learned
         # by the neural network.
         return self.neural_network(z)
+
 
 def neural_network(x):
     """
@@ -90,7 +94,7 @@ def neural_network(x):
                            variance_epsilon=0.001,
                            scale_after_normalization=True):
         params = (pt.wrap(x).
-                reshape([FLAGS.n_data, 28, 28, 1]).
+                reshape([N_DATA, 28, 28, 1]).
                 conv2d(5, 32, stride=2).
                 conv2d(5, 64, stride=2).
                 conv2d(5, 128, edges='VALID').
@@ -104,40 +108,37 @@ def neural_network(x):
     scale = tf.reshape(tf.sqrt(tf.exp(params[:, num_vars:])), [-1])
     return [loc, scale]
 
+
 ed.set_seed(42)
 model = NormalBernoulli(num_vars=10)
 
-# We use the variational model
-# q(z | x) = prod_{n=1}^N q(z_n | x)
-#          = prod_{n=1}^n Normal(z_n | loc, scale = phi(x_n))
+# Use the variational model
+# q(z | x) = prod_{n=1}^n Normal(z_n | loc, scale = neural_network(x_n))
 # It is a distribution of the latent variables z_n for each data
 # point x_n. We use neural_network() to globally parameterize the local
 # variational factors q(z_n | x).
 # We also do data subsampling during inference. Therefore we only need
-# to explicitly represent the corresponding variational factors for a
-# mini-batch,
-# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = phi(x))
-x_ph = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
+# to explicitly represent the variational factors for a mini-batch,
+# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = neural_network(x_m))
+x_ph = tf.placeholder(tf.float32, [N_DATA, 28 * 28])
 loc, scale = neural_network(x_ph)
 variational = Model()
 variational.add(Normal(model.num_vars * FLAGS.n_data, loc=loc, scale=scale))
 
-if not os.path.exists(FLAGS.data_directory):
-    os.makedirs(FLAGS.data_directory)
+# MNIST batches are fed at training time.
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-mnist = input_data.read_data_sets(FLAGS.data_directory, one_hot=True)
-
-# data uses placeholder in order to build inference's computational
-# graph. np.arrays of data are fed in during computation.
-x = tf.placeholder(tf.float32, [FLAGS.n_data, 28 * 28])
-data = ed.Data(x)
+mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
+x = tf.placeholder(tf.float32, [N_DATA, 28 * 28])
+data = {'x': x}
 
 sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
 with tf.variable_scope("model") as scope:
     inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:
-    p_rep = model.sample_prior(FLAGS.n_data)
+    p_rep = model.sample_prior(N_DATA)
 
 n_epoch = 100
 n_iter_per_epoch = 1000
@@ -149,7 +150,7 @@ for epoch in range(n_epoch):
     pbar.start()
     for t in range(n_iter_per_epoch):
         pbar.update(t)
-        x_train, _ = mnist.train.next_batch(FLAGS.n_data)
+        x_train, _ = mnist.train.next_batch(N_DATA)
         _, loss = sess.run([inference.train, inference.loss],
                            feed_dict={x: x_train, x_ph: x_train})
         avg_loss += loss
@@ -157,16 +158,16 @@ for epoch in range(n_epoch):
     # Take average over all ELBOs during the epoch, and over minibatch
     # of data points (images).
     avg_loss = avg_loss / n_iter_per_epoch
-    avg_loss = avg_loss / FLAGS.n_data
+    avg_loss = avg_loss / N_DATA
 
     # Print a lower bound to the average marginal likelihood for an
     # image.
     print("log p(x) >= {:0.3f}".format(avg_loss))
 
     imgs = p_rep.eval()
-    for b in range(FLAGS.n_data):
-        if not os.path.exists(FLAGS.img_directory):
-            os.makedirs(FLAGS.img_directory)
+    for b in range(N_DATA):
+        if not os.path.exists(IMG_DIR):
+            os.makedirs(IMG_DIR)
 
-        imsave(os.path.join(FLAGS.img_directory, '%d.png') % b,
+        imsave(os.path.join(IMG_DIR, '%d.png') % b,
                imgs[b].reshape(28, 28))

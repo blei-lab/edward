@@ -5,11 +5,16 @@ Probability model
 Variational model
     Likelihood: Mean-field Bernoulli
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import tensorflow as tf
 
 from edward.models import Model, Bernoulli
 from edward.stats import bernoulli
+
 
 class BernoulliPosterior:
     """
@@ -20,6 +25,7 @@ class BernoulliPosterior:
 
     def log_prob(self, xs, zs):
         return bernoulli.logpmf(zs, p)
+
 
 ed.set_seed(42)
 p = tf.constant(0.6)

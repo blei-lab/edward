@@ -3,13 +3,13 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
-from edward.data import Data
-from edward.util import logit, get_session
+from edward.util import logit, get_dims, get_session
 
 
-def evaluate(metrics, model, variational, data):
+def evaluate(metrics, model, variational, data, y_true=None):
     """Evaluate fitted model using a set of metrics.
 
     Parameters
@@ -20,8 +20,15 @@ def evaluate(metrics, model, variational, data):
         Probability model p(x, z)
     variational : ed.Variational
         Variational approximation to the posterior p(z | x)
-    data : ed.Data
-        Data to evaluate the model at
+    data : dict
+        Data dictionary to evaluate model with. For TensorFlow,
+        Python, and Stan models, the key type is a string; for PyMC3,
+        the key type is a Theano shared variable. For TensorFlow,
+        Python, and PyMC3 models, the value type is a NumPy array or
+        TensorFlow placeholder; for Stan, the value type is the type
+        according to the Stan program's data block.
+    y_true : np.ndarray or tf.Tensor
+        True values to compare to in supervised learning tasks.
 
     Returns
     -------
@@ -36,12 +43,10 @@ def evaluate(metrics, model, variational, data):
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
     # 1. Sample a batch of latent variables from posterior
-    xs = data.data
     n_minibatch = 100
     zs = variational.sample(size=n_minibatch)
-    feed_dict = variational.np_dict(zs)
     # 2. Make predictions, averaging over each sample of latent variables
-    y_pred, y_true = model.predict(xs, zs)
+    y_pred = model.predict(data, zs)
 
     # Evaluate y_pred according to y_true for all metrics.
     evaluations = []
@@ -58,39 +63,39 @@ def evaluate(metrics, model, variational, data):
                 metric = 'sparse_categorical_' + metric
 
         if metric == 'binary_accuracy':
-            evaluations += [sess.run(binary_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(binary_accuracy(y_true, y_pred))]
         elif metric == 'categorical_accuracy':
-            evaluations += [sess.run(categorical_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(categorical_accuracy(y_true, y_pred))]
         elif metric == 'sparse_categorical_accuracy':
-            evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred))]
         elif metric == 'log_loss' or metric == 'binary_crossentropy':
-            evaluations += [sess.run(binary_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(binary_crossentropy(y_true, y_pred))]
         elif metric == 'categorical_crossentropy':
-            evaluations += [sess.run(categorical_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(categorical_crossentropy(y_true, y_pred))]
         elif metric == 'sparse_categorical_crossentropy':
-            evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred))]
         elif metric == 'hinge':
-            evaluations += [sess.run(hinge(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(hinge(y_true, y_pred))]
         elif metric == 'squared_hinge':
-            evaluations += [sess.run(squared_hinge(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(squared_hinge(y_true, y_pred))]
         elif metric == 'mse' or metric == 'MSE' or \
              metric == 'mean_squared_error':
-            evaluations += [sess.run(mean_squared_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
         elif metric == 'mae' or metric == 'MAE' or \
              metric == 'mean_absolute_error':
-            evaluations += [sess.run(mean_absolute_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
         elif metric == 'mape' or metric == 'MAPE' or \
              metric == 'mean_absolute_percentage_error':
-            evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
         elif metric == 'msle' or metric == 'MSLE' or \
              metric == 'mean_squared_logarithmic_error':
-            evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
         elif metric == 'poisson':
-            evaluations += [sess.run(poisson(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(poisson(y_true, y_pred))]
         elif metric == 'cosine' or metric == 'cosine_proximity':
-            evaluations += [sess.run(cosine_proximity(y_true, y_pred), feed_dict)]
+            evaluations += [sess.run(cosine_proximity(y_true, y_pred))]
         elif metric == 'log_lik' or metric == 'log_likelihood':
-            evaluations += [sess.run(y_pred, feed_dict)]
+            evaluations += [sess.run(y_pred)]
         else:
             raise NotImplementedError()
 
@@ -100,7 +105,7 @@ def evaluate(metrics, model, variational, data):
         return evaluations
 
 
-def ppc(model, variational=None, data=Data(), T=None, size=100):
+def ppc(model, variational=None, data=None, T=None, size=100):
     """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
     If no posterior approximation is provided through ``variational``,
@@ -125,15 +130,19 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
         approximation or an empirical distribution from MCMC samples.
         If not specified, samples will be obtained from the model
         through the ``sample_prior`` method.
-    data : ed.Data, optional
+    data : dict, optional
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
-        data set size of 1.
+        data set size of 1. For TensorFlow, Python, and Stan models,
+        the key type is a string; for PyMC3, the key type is a Theano
+        shared variable. For TensorFlow, Python, and PyMC3 models, the
+        value type is a NumPy array or TensorFlow placeholder; for
+        Stan, the value type is the type according to the Stan
+        program's data block.
     T : function, optional
-        Discrepancy function taking tf.Tensor inputs and returning
-        a tf.Tensor output. Default is the identity function.
-        In general this is a function taking in a data set ``y``
-        and optionally a set of latent variables ``z`` as input.
+        Discrepancy function, which takes a data dictionary and list
+        of latent variables as input and outputs a tf.Tensor. Default
+        is the identity function.
     size : int, optional
         number of replicated data sets
 
@@ -151,23 +160,25 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
 
         .. math::
             (T(y, z^{1}), ..., T(y, z^{size})).
+
+        If the discrepancy function is not specified, then the list
+        contains the full data distribution where each element is a
+        data set (dictionary).
     """
     sess = get_session()
-    y = data.data
-    if y == None:
+    if data is None:
         N = 1
+        y = {}
     else:
-        N = data.N
-
-    if T == None:
-        T = lambda y, z=None: y
+        # Assume all values have the same data set size.
+        N = get_dims(list(six.itervalues(data))[0])[0]
+        y = data
 
     # 1. Sample from posterior (or prior).
     # We must fetch zs out of the session because sample_likelihood()
     # may require a SciPy-based sampler.
     if variational is not None:
         zs = variational.sample(size=size)
-        feed_dict = variational.np_dict(zs)
         # This is to avoid fetching, e.g., a placeholder x with the
         # dictionary {x: np.array()}. TensorFlow will raise an error.
         if isinstance(zs, list):
@@ -175,25 +186,32 @@ def ppc(model, variational=None, data=Data(), T=None, size=100):
         else:
             zs = tf.identity(zs)
 
-        zs = sess.run(zs, feed_dict)
+        zs = sess.run(zs)
     else:
         zs = model.sample_prior(size=size)
         zs = zs.eval()
 
     # 2. Sample from likelihood.
     yreps = model.sample_likelihood(zs, size=N)
+
     # 3. Calculate discrepancy.
+    if T is None:
+        if y is None:
+            return yreps
+        else:
+            return [yreps, y]
+
     Tyreps = []
     Tys = []
     for yrep, z in zip(yreps, tf.unpack(zs)):
         Tyreps += [T(yrep, z)]
-        if y != None:
+        if y is not None:
             Tys += [T(y, z)]
 
-    if y == None:
-        return sess.run(tf.pack(Tyreps), feed_dict)
+    if y is None:
+        return sess.run(tf.pack(Tyreps))
     else:
-        return sess.run([tf.pack(Tyreps), tf.pack(Tys)], feed_dict)
+        return sess.run([tf.pack(Tyreps), tf.pack(Tys)])
 
 
 # Classification metrics

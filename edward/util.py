@@ -2,8 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 
 def cumprod(xs):
@@ -67,19 +67,25 @@ def get_dims(x):
 
     Parameters
     ----------
-    x: tf.Tensor
-        scalar, vector, matrix, or n-Tensor
+    x : tf.Tensor or np.ndarray
+        scalar, vector, matrix, or n-tensor
 
     Returns
     -------
     list
         Python list containing dimensions of `x`
     """
-    dims = x.get_shape()
-    if len(dims) == 0: # scalar
-        return [1]
-    else: # array
-        return [dim.value for dim in dims]
+    if isinstance(x, tf.Tensor):
+        dims = x.get_shape()
+        if len(dims) == 0: # scalar
+            return []
+        else: # array
+            return [dim.value for dim in dims]
+
+    elif isinstance(x, np.ndarray):
+        return list(x.shape)
+    else:
+        raise NotImplementedError()
 
 
 def get_session():
@@ -180,6 +186,25 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             tf.square(scale_one/scale_two) + \
             tf.square((loc_two - loc_one)/scale_two) - \
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
+
+
+def log_mean_exp(x):
+    """Compute the ``log_mean_exp`` of the elements in x.
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        vector or matrix with second dimension 1
+        shape=TensorShape([Dimension(N)])
+        shape=TensorShape([Dimension(N), Dimension(1)])
+
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, vector if matrix tensor input
+    """
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))
 
 
 def log_sum_exp(x):
