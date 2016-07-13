@@ -321,7 +321,7 @@ class Variational(object):
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.is_multivariate += [layer.is_multivariate]
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         """
         Draws a mix of tensors and placeholders, corresponding to
         TensorFlow-based samplers and SciPy-based samplers depending
@@ -329,17 +329,18 @@ class Variational(object):
 
         Parameters
         ----------
-        size : int, optional
+        n : int, optional
+            Number of samples.
 
         Returns
         -------
         list or tf.Tensor
             If more than one layer, a list of tf.Tensors of dimension
-            (size x shape), one for each layer. If one layer, a
-            tf.Tensor of (size x shape). If a layer requires SciPy to
+            (n x shape), one for each layer. If one layer, a
+            tf.Tensor of (n x shape). If a layer requires SciPy to
             sample, its corresponding tensor is a tf.placeholder.
         """
-        samples = [layer.sample(size) for layer in self.layers]
+        samples = [layer.sample(n) for layer in self.layers]
         if len(samples) == 1:
             samples = samples[0]
 

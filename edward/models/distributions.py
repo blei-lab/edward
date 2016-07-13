@@ -210,7 +210,7 @@ class Bernoulli(Distribution):
         # unavailable in TensorFlow natively.
         def np_sample(p):
             # get `size` from lexical scoping
-            return bernoulli.rvs(p, n=n).astype(np.float32)
+            return bernoulli.rvs(p, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.p], [tf.float32])[0]
         x.set_shape((n, ) + self.shape) # set shape from unknown shape
@@ -258,7 +258,7 @@ class Beta(Distribution):
         # unavailable in TensorFlow natively.
         def np_sample(a, b):
             # get `size` from lexical scoping
-            return beta.rvs(a, b, n=n).astype(np.float32)
+            return beta.rvs(a, b, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
         x.set_shape((n, ) + self.shape) # set shape from unknown shape
@@ -299,7 +299,7 @@ class Dirichlet(Distribution):
         # unavailable in TensorFlow natively.
         def np_sample(alpha):
             # get `size` from lexical scoping
-            return dirichlet.rvs(alpha, n=n).astype(np.float32)
+            return dirichlet.rvs(alpha, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha], [tf.float32])[0]
         x.set_shape((n, ) + self.shape) # set shape from unknown shape
@@ -352,7 +352,7 @@ class InvGamma(Distribution):
         # unavailable in TensorFlow natively.
         def np_sample(a, scale):
             # get `size` from lexical scoping
-            return invgamma.rvs(a, scale=scale, n=n).astype(np.float32)
+            return invgamma.rvs(a, scale=scale, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
         x.set_shape((n, ) + self.shape) # set shape from unknown shape
@@ -409,7 +409,7 @@ class Multinomial(Distribution):
         # unavailable in TensorFlow natively.
         def np_sample(p):
             # get `size` from lexical scoping
-            return multinomial.rvs(np.ones(self.shape[:-1]), p, n=n).astype(np.float32)
+            return multinomial.rvs(np.ones(self.shape[:-1]), p, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.pi], [tf.float32])[0]
         x.set_shape((n, ) + self.shape) # set shape from unknown shape

@@ -13,7 +13,7 @@ sess = tf.Session()
 
 def _test(shape, loc, scale, n):
     x = Normal(shape, loc, scale)
-    val_est = tuple(get_dims(x.sample(n=n)))
+    val_est = tuple(get_dims(x.sample(n)))
     val_true = (n, ) + shape
     assert val_est == val_true
 

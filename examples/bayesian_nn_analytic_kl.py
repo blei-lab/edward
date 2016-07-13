@@ -53,7 +53,7 @@ class BayesianNN:
         self.lik_variance = lik_variance
 
         self.n_layers = len(layer_sizes)
-        self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
+        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):
@@ -97,6 +97,7 @@ class BayesianNN:
         # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik
+
 
 def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)

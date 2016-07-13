@@ -29,9 +29,9 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
         according to the Stan program's data block.
     y_true : np.ndarray or tf.Tensor
         True values to compare to in supervised learning tasks.
-    n_samples : int, optional 
-        Number of posterior samples for making predictions 
-        via the posterior predictive distribution
+    n_samples : int, optional
+        Number of posterior samples for making predictions,
+        using the posterior predictive distribution.
 
     Returns
     -------
@@ -46,7 +46,7 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
     # 1. Sample a batch of latent variables from posterior
-    zs = variational.sample(size=n_samples)
+    zs = variational.sample(n_samples)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred = model.predict(data, zs)
 
