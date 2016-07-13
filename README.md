@@ -4,18 +4,17 @@
 [![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master)](https://coveralls.io/github/blei-lab/edward?branch=master)
 
 __Edward__ is a Python library for probabilistic modeling, inference,
-and criticism. It enables black box inference for models with discrete
-and continuous latent variables, neural network parameterizations, and
-infinite dimensional parameter spaces. Edward serves as a fusion of
-three fields: Bayesian statistics and machine learning, deep learning,
-and probabilistic programming.
+and criticism. It is a testbed for fast experimentation and research
+with probabilistic models. Edward fuses three fields: Bayesian
+statistics and machine learning, deep learning, and probabilistic
+programming.
 
 It supports __modeling languages__ including
 
-+ [TensorFlow](https://www.tensorflow.org) (with neural network compositionality via [Keras](http://keras.io), [Pretty Tensor](https://github.com/google/prettytensor), or [TensorFlow-Slim](https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md))
++ [TensorFlow](https://www.tensorflow.org) (with neural networks via [Keras](http://keras.io), [TensorFlow-Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim), or [Pretty Tensor](https://github.com/google/prettytensor))
 + [Stan](http://mc-stan.org)
 + [PyMC3](http://pymc-devs.github.io/pymc3/)
-+ original Python using [NumPy/SciPy](http://scipy.org/)
++ Python, through [NumPy/SciPy](http://scipy.org/)
 
 It supports __inference__ via
 
@@ -35,7 +34,7 @@ It supports __criticism__ of the model and inference via
 
 It also has __features__ including
 
-+ [TensorFlow](https://www.tensorflow.org) for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard
++ [TensorFlow](https://www.tensorflow.org) for backend computation, which includes computational graphs, distributed training, CPU/GPU integration, automatic differentiation, and TensorBoard
 + A library for probability distributions in TensorFlow
 + Documentation and tutorials
 + Examples demonstrating state-of-the-art generative models and inference
