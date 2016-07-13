@@ -34,8 +34,6 @@ std = tf.constant(1.0)
 model = NormalPosterior(mu, std)
 
 qz = Normal()
-variational = Model()
-variational.add(qz)
 
-inference = ed.MFVI(model, variational, mapping={'z': qz})
+inference = ed.MFVI({'z': qz}, model=model)
 inference.run(n_iter=10000)

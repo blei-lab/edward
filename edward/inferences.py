@@ -35,15 +35,13 @@ class Inference(object):
         `data_gen` is empty: the user will have to manually feed the
         placeholders at runtime.
     """
-    def __init__(self, model, data=None):
+    def __init__(self, data=None, model=None):
         """Initialization.
 
         Calls ``util.get_session()``
 
         Parameters
         ----------
-        model : ed.Model
-            probability model
         data : dict, optional
             Data dictionary. For TensorFlow, Python, and Stan models,
             the key type is a string; for PyMC3, the key type is a
@@ -51,9 +49,18 @@ class Inference(object):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
+        model : ed.Model, optional
+            probability model. can be obtained from the data
+            dictionary except for certain model wrappers
         """
         get_session()
-        self.model = model
+        if model is None:
+            self.model = Model()
+            for rv in six.iterkeys(mapping):
+                self.model.add(rv)
+        else:
+            self.model = model
+
         if data is None:
             data = {}
 
@@ -93,8 +100,6 @@ class MonteCarlo(Inference):
 
         Parameters
         ----------
-        model : ed.Model
-            probability model
         data : dict, optional
             Data dictionary. For TensorFlow, Python, and Stan models,
             the key type is a string; for PyMC3, the key type is a
@@ -102,6 +107,9 @@ class MonteCarlo(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
+        model : ed.Model, optional
+            probability model. can be obtained from the data
+            dictionary except for certain model wrappers
         """
         super(MonteCarlo, self).__init__(*args, **kwargs)
 
@@ -109,15 +117,14 @@ class MonteCarlo(Inference):
 class VariationalInference(Inference):
     """Base class for variational inference methods.
     """
-    def __init__(self, model, variational, data=None, mapping=None):
+    def __init__(self, mapping=None, data=None, model=None, variational=None):
         """Initialization.
 
         Parameters
         ----------
-        model : ed.Model
-            probability model
-        variational : ed.Variational
-            variational model or distribution
+        mapping : dict
+            Dictionary binding random variables in `model` (or
+            strings) to random variables in `variational`.
         data : dict, optional
             Data dictionary. For TensorFlow, Python, and Stan models,
             the key type is a string; for PyMC3, the key type is a
@@ -125,13 +132,20 @@ class VariationalInference(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
-        mapping : dict
-            Dictionary binding random variables in `model` (or
-            strings) to random variables in `variational`.
+        model : ed.Model, optional
+            probability model
+        variational : ed.Variational, optional
+            variational model or distribution
         """
         super(VariationalInference, self).__init__(model, data)
-        self.variational = variational
         self.mapping = mapping
+        if variational is None:
+            self.variational = Model()
+            for rv in six.itervalues(self.mapping):
+                self.variational.add(rv)
+
+        else:
+            self.variational = variational
 
     def run(self, *args, **kwargs):
         """A simple wrapper to run variational inference.
