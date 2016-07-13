@@ -118,7 +118,7 @@ $q(z\;;\;\lambda)$ iteratively gets closer to the posterior $p(z \mid x)$.
 
 We implement
 We implement $\text{KL}(p\|q)$ and its importance sampling gradient
-estimator in a single method \texttt{build_loss} of the \texttt{KLqp}class.
+estimator in a single method \texttt{build_loss} of the \texttt{KLpq} class.
 \begin{lstlisting}[language=Python]
 class KLpq(VariationalInference):
     ...
