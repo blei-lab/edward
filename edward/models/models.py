@@ -338,11 +338,7 @@ class Model(object):
             Dictionary of distribution objects in the container assigned
             to a tf.Tensor. Each tf.Tensor is of size size x shape.
         """
-        samples = [layer.sample(size) for layer in self.layers]
-        if len(samples) == 1:
-            samples = samples[0]
-
-        return samples
+        return {layer: layer.sample(size) for layer in self.layers}
 
     def log_prob(self, data_dict):
         """
@@ -375,17 +371,17 @@ class Model(object):
         each item corresponds to a layer in self.layers.
         """
         # Get batch size from the first item in the dictionary. For now we
-        # assume the outer dimension always has the batch size.
-        if isinstance(data_dict.values()[0], tf.Tensor):
-            shape = get_dims(data_dict.values()[0])
+        # assume the outer dimension always has the same batch size.
+        if isinstance(list(six.itervalues(data_dict))[0], tf.Tensor):
+            shape = get_dims(list(six.itervalues(data_dict))[0])
         else: # NumPy array
-            shape = data_dict.values()[0].shape
+            shape = list(six.itervalues(data_dict))[0].shape
 
         # Sum over the log-density of each distribution in container.
         n_minibatch = shape[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
-        for layer in self.layers:
-            log_prob += layer.log_prob(data_dict[layer])
+        for layer, data in list(six.iteritems(data_dict)):
+            log_prob += layer.log_prob(data)
 
         return log_prob
 

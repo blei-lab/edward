@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 
@@ -348,7 +349,8 @@ def stop_gradient(x):
     elif isinstance(x, list):
         return [tf.stop_gradient(i) for i in x]
     elif isinstance(x, dict):
-        return {key: tf.stop_gradient(value) for key, value in x.items()}
+        return {key: tf.stop_gradient(value)
+                for key, value in six.iteritems(x)}
     else:
         raise NotImplementedError()
 
