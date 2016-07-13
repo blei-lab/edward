@@ -104,6 +104,8 @@ Maximizing the ELBO encourages $q$ to place its mass to explain the data through
 the likelihood $p(x \mid z)$. But the KL term penalizes $q$ as it drifts away
 from the prior $p(z)$. 
 
-There are various strategies of maximizing the ELBO.
-We describe them in sub-tutorials that are acessible from the
-\href{tutorials.html}{tutorials} page.
+Edward implements two strategies of maximizing the ELBO.
+\begin{itemize}
+    \item \href{tut_KLqp_score.html}{Score function method}
+    \item \href{tut_KLqp_reparam.html}{Reparameterization method}
+  \end{itemize}

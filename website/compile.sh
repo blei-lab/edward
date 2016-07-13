@@ -4,11 +4,13 @@ rm -f *.html
 cd tex
 for filename in *.tex; do
   pandoc ${filename%.*}.tex \
+         --from=latex+link_attributes \
+         --to=html \
          --mathjax \
          --no-highlight \
          --title-prefix=Edward \
          --template=edward_template.pandoc \
-         -o ../${filename%.*}.html
+         --output=../${filename%.*}.html
 done
 
 cd ..

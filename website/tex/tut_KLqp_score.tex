@@ -94,8 +94,66 @@ A Monte Carlo estimate of the gradient is then
 \end{align*}
 This is an unbiased estimate of the actual gradient of the ELBO. 
 
+\subsubsection{Implementation}
+
+We implement the ELBO and its score function gradient estimator in a single
+method \texttt{build_score_loss} of the \texttt{MFVI} (mean-field variational
+inference) class.
+\begin{lstlisting}[language=Python]
+class MFVI(VariationalInference):
+    ...
+    def build_score_loss(self):
+        x = self.data
+        z = self.variational.sample(self.n_minibatch)
+
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
+        losses = self.model.log_prob(x, z) - q_log_prob
+        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
+\end{lstlisting}
+
+This method draws $S$ (\texttt{self.n_minibatch}) samples from the variational
+distribution; the TensorFlow method \texttt{reduce_mean} computes the Monte
+Carlo summation. 
+
+The TensorFlow method \texttt{stop_gradient} implicitly specifies the gradient
+of the ELBO; it tells TensorFlow where to stop automatic differentiation. In
+this case, it will only compute $\nabla_\lambda \log q(z_s\;;\;\lambda)$ because
+it is not wrapped in a \texttt{stop_gradient}.
+
+There is a nuance here. This method actually returns the \textbf{negative} ELBO
+because TensorFlow's stochastic optimization routines are all configured to
+\emph {minimize} an objective function.
+
 \subsubsection{Stochastic gradient optimization}
 
 Stochastic gradient ascent is an extension of gradient ascent that permits
 following noisy estimates of the gradient. Under mild conditions, stochastic
 gradient ascent finds a (local) optimum of the original (noiseless) function.
+
+Edward uses TensorFlow's built-in stochastic gradient minimization routines.
+This is specified in the \texttt{initialize} method of the 
+\texttt{VariationalInference} base class.
+
+\begin{lstlisting}[language=Python]
+class VariationalInference(Inference):
+    ...
+    def initialize(self, ...):
+        ...
+        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                     scope=scope)
+
+        # Use Adam with a decaying scale factor
+        global_step = tf.Variable(0, trainable=False)
+        starter_learning_rate = 0.1
+        learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                            global_step,
+                                            100, 0.9, staircase=True)
+        optimizer = tf.train.AdamOptimizer(learning_rate)
+        self.train = optimizer.minimize(loss, global_step=global_step,
+                                        var_list=var_list)
+\end{lstlisting}
+
+This sets up TensorFlow to minimize the ELBO using the Adam adaptive step-size
+schedule with an exponentially decaying scaling factor.
+
+See the \href{api/index.html}{API} for further implementation details.

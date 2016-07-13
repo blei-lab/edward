@@ -133,7 +133,11 @@
   &amp;=\;
   \mathbb{E}_{q(z \;;\; \lambda)}[\log p(x \mid z)]  
   - \text{KL}(q(z \;;\; \lambda) \;\|\; p(z)).\end{aligned}\]</span> Maximizing the ELBO encourages <span class="math inline">\(q\)</span> to place its mass to explain the data through the likelihood <span class="math inline">\(p(x \mid z)\)</span>. But the KL term penalizes <span class="math inline">\(q\)</span> as it drifts away from the prior <span class="math inline">\(p(z)\)</span>.</p>
-<p>There are various strategies of maximizing the ELBO. We describe them in sub-tutorials that are acessible from the <a href="tutorials.html">tutorials</a> page.</p>
+<p>Edward implements two strategies of maximizing the ELBO.</p>
+<ul>
+<li><a href="tut_KLqp_score.html">Score function method</a></li>
+<li><a href="tut_KLqp_reparam.html">Reparameterization method</a></li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
