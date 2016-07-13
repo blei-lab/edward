@@ -54,13 +54,6 @@ class Inference(object):
             dictionary except for certain model wrappers
         """
         get_session()
-        if model is None:
-            self.model = Model()
-            for rv in six.iterkeys(mapping):
-                self.model.add(rv)
-        else:
-            self.model = model
-
         if data is None:
             data = {}
 
@@ -137,7 +130,15 @@ class VariationalInference(Inference):
         variational : ed.Variational, optional
             variational model or distribution
         """
-        super(VariationalInference, self).__init__(model, data)
+        # TODO for now this is here due to current need in mapping
+        if model is None:
+            self.model = Model()
+            for rv in six.iterkeys(mapping):
+                self.model.add(rv)
+        else:
+            self.model = model
+
+        super(VariationalInference, self).__init__(data, model)
         self.mapping = mapping
         if variational is None:
             self.variational = Model()
@@ -625,6 +626,7 @@ class MAP(VariationalInference):
 
         \min_{z} - \log p(x,z)
     """
+    # TODO
     def __init__(self, model, data=None, params=None):
         with tf.variable_scope("variational"):
             if hasattr(model, 'num_vars'):
@@ -665,6 +667,7 @@ class Laplace(MAP):
     the Hessian at the mode of the posterior. This forms the
     covariance of the normal approximation.
     """
+    # TODO
     def __init__(self, model, data=None, params=None):
         super(Laplace, self).__init__(model, data, params)
 

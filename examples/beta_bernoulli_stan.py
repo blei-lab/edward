@@ -17,7 +17,6 @@ import edward as ed
 
 from edward.models import Model, Beta
 
-
 model_code = """
     data {
       int<lower=0> N;
