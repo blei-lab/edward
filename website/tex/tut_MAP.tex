@@ -1,0 +1,92 @@
+% Define the subtitle of the page
+\title{Maximum a posteriori estimation}
+
+% Begin the content of the page
+\subsection{Maximum a posteriori estimation}
+
+(We recommend reading the 
+\href{tut_inference_probability_models.html}{inference of probability models}
+tutorial first.)
+
+Maximum a posteriori (MAP) estimation seeks the mode of the posterior
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  p(z \mid x)\\
+  &=
+  \arg \max_z
+  \log p(z \mid x).
+\end{align*}
+We prefer working with logarithms of densities to avoid numerical underflow
+issues.
+
+The MAP estimate is the most likely configuration of the hidden patterns $z$
+under the model. However, we cannot directly solve this optimization problem,
+because the posterior is unknown. To circumvent this, we use Bayes' rule to
+optimize over the joint density,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  \log p(z \mid x)\\
+  &=
+  \arg \max_z
+  \log p(x, z).  
+\end{align*}
+This is valid because
+\begin{align*}
+  \log p(z \mid x)
+  &=
+  \log p(x, z) - \log p(x)\\
+  &=
+  \log p(x, z) - \text{constant in terms of} z.
+\end{align*}
+
+\subsubsection{Gradient ascent}
+
+To find the MAP estimate of the latent variables $z$, we simply compute the
+gradient of the log joint density
+\begin{align*}
+  \nabla_z
+  \log p(x, z)
+\end{align*}
+and follow it to a local maximum. Automatic differentiation makes it easy to
+compute this gradient without any additional mathematical derivation.
+
+\subsubsection{Implementation}
+
+In Edward, we view MAP estimation as a special case of 
+\href{tut_KLqp.html}{$KL(q\|p)$ minimization} where the approximating variational
+distribution is a point mass (delta function) distribution.
+
+\begin{lstlisting}[language=Python]
+class MAP(VariationalInference):
+    def __init__(self, model, data=None, params=None):
+        with tf.variable_scope("variational"):
+            if hasattr(model, 'num_vars'):
+                variational = Variational()
+                variational.add(PointMass(model.num_vars, params))
+            else:
+                variational = Variational()
+                variational.add(PointMass(0))
+
+        super(MAP, self).__init__(model, variational, data)
+
+    def build_loss(self):
+        x = self.data
+        z = self.variational.sample()
+        self.loss = tf.squeeze(self.model.log_prob(x, z))
+        return -self.loss  
+\end{lstlisting}
+
+The \texttt{MAP} class automatically initializes a variational point mass
+distribution. The \texttt{build_loss} method implicitly specifies the gradient
+of the log joint. TensorFlow's automatic differentiation will apply to \texttt
+{z}, thus applying the chain rule of differentiation to compute the gradient of
+the ELBO.
+
+There is a nuance here. This method actually returns the \textbf{negative} log
+joint density because TensorFlow's stochastic optimization routines are all
+configured to \emph {minimize} an objective function.
+
