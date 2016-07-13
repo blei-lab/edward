@@ -109,7 +109,7 @@ class MonteCarlo(Inference):
 class VariationalInference(Inference):
     """Base class for variational inference methods.
     """
-    def __init__(self, model, variational, mapping=None, data=None):
+    def __init__(self, model, variational, data=None, mapping=None):
         """Initialization.
 
         Parameters
@@ -125,6 +125,9 @@ class VariationalInference(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
+        mapping : dict
+            Dictionary binding random variables in `model` (or
+            strings) to random variables in `variational`.
         """
         super(VariationalInference, self).__init__(model, data)
         self.variational = variational
@@ -369,8 +372,8 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         p_log_prob = self.model.log_prob(xz)
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -395,8 +398,8 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         p_log_prob = self.model.log_prob(xz)
         q_log_prob = self.variational.log_prob(z)
@@ -425,8 +428,8 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         p_log_lik = self.model.log_lik(xz)
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -456,8 +459,8 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         p_log_prob = self.model.log_prob(xz)
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -488,8 +491,8 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -517,8 +520,8 @@ class MFVI(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         self.loss = tf.reduce_mean(self.model.log_prob(xz)) + \
                     self.variational.entropy()
@@ -585,8 +588,8 @@ class KLpq(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         # normalized importance weights
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -630,8 +633,8 @@ class MAP(VariationalInference):
         # Collect dictionary binding each random variable in the
         # probability model to its realization.
         xz = self.data
-        for key, value in six.iteritems(z):
-            xz[self.mapping[key]] = value
+        for key, value in six.iteritems(self.mapping):
+            xz[key] = z[value]
 
         self.loss = tf.squeeze(self.model.log_prob(xz))
         return -self.loss

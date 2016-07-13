@@ -340,11 +340,11 @@ class Model(object):
         """
         return {layer: layer.sample(size) for layer in self.layers}
 
-    def log_prob(self, data_dict):
+    def log_prob(self, var_dict):
         """
         Parameters
         ----------
-        data_dict : dict
+        var_dict : dict
             Dictionary which binds all random variables (distribution
             objects) in the model (container object) to realizations
             (tf.Tensor or np.ndarray's). For each random variable of
@@ -367,21 +367,21 @@ class Model(object):
         This method may be removed in the future in favor of indexable
         log_prob methods, e.g., for automatic Rao-Blackwellization.
 
-        This method assumes length of data_dict == length of self.layers and
+        This method assumes length of var_dict == length of self.layers and
         each item corresponds to a layer in self.layers.
         """
         # Get batch size from the first item in the dictionary. For now we
         # assume the outer dimension always has the same batch size.
-        if isinstance(list(six.itervalues(data_dict))[0], tf.Tensor):
-            shape = get_dims(list(six.itervalues(data_dict))[0])
+        if isinstance(list(six.itervalues(var_dict))[0], tf.Tensor):
+            shape = get_dims(list(six.itervalues(var_dict))[0])
         else: # NumPy array
-            shape = list(six.itervalues(data_dict))[0].shape
+            shape = list(six.itervalues(var_dict))[0].shape
 
         # Sum over the log-density of each distribution in container.
         n_minibatch = shape[0]
         log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
-        for layer, data in list(six.iteritems(data_dict)):
-            log_prob += layer.log_prob(data)
+        for rv, obs in six.iteritems(var_dict):
+            log_prob += rv.log_prob(obs)
 
         return log_prob
 

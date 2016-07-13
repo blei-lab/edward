@@ -24,5 +24,5 @@ qz = Normal()
 variational = Model()
 variational.add(qz)
 
-inference = ed.MFVI(model, variational, {qz: z})
+inference = ed.MFVI(model, variational, mapping={z: qz})
 inference.run(n_iter=10000)
