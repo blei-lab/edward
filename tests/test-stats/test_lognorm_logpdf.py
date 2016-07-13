@@ -24,7 +24,7 @@ def _test(x, s):
     _assert_eq(lognorm.logpdf(xtf, tf.constant([s])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(2.0, s=1)
     _test(0.623, s=1)
 

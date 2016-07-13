@@ -11,13 +11,13 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(df, n):
-    val_est = chi2.rvs(df, n=n).shape
-    val_true = (n, ) + np.asarray(df).shape
+def _test(df, size):
+    val_est = chi2.rvs(df, size=size).shape
+    val_true = (size, ) + np.asarray(df).shape
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     _test(3, 1)
     _test(np.array(3), 1)
 

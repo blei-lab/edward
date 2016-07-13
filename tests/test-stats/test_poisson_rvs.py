@@ -11,13 +11,13 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(mu, n):
-    val_est = poisson.rvs(mu, n=n).shape
-    val_true = (n, ) + np.asarray(mu).shape
+def _test(mu, size):
+    val_est = poisson.rvs(mu, size=size).shape
+    val_true = (size, ) + np.asarray(mu).shape
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     _test(0.5, 1)
     _test(np.array(0.5), 1)
 

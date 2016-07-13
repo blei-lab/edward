@@ -25,7 +25,7 @@ def _test(x, a, scale=1):
     _assert_eq(gamma.logpdf(xtf, tf.constant([a]), tf.constant([scale])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.3, a=0.5)
     _test(0.7, a=0.5)
 

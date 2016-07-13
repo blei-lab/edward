@@ -23,7 +23,7 @@ def _test(p):
     _assert_eq(bernoulli.entropy(tf.constant([p])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(0.5)
     _test(0.75)
 

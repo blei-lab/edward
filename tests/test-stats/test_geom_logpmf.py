@@ -24,12 +24,12 @@ def _test(x, p):
     _assert_eq(geom.logpmf(xtf, tf.constant([p])), val_true)
 
 
-def test_int_scalar():
+def test_int_0d():
     _test(1, 0.5)
     _test(2, 0.75)
 
 
-def test_float_scalar():
+def test_float_0d():
     _test(1.0, 0.5)
     _test(2.0, 0.75)
 

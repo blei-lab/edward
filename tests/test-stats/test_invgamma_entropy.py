@@ -25,7 +25,7 @@ def _test(a, scale=1):
     _assert_eq(invgamma.entropy(tf.constant([a]), tf.constant([scale])), val_true)
 
 
-def test_scalar():
+def test_0d():
     _test(a=1.0, scale=1.0)
     _test(a=0.5, scale=5.0)
     _test(a=5.0, scale=0.5)

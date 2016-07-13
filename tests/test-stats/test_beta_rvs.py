@@ -11,13 +11,13 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(a, b, n):
-    val_est = beta.rvs(a, b, n=n).shape
-    val_true = (n, ) + np.asarray(a).shape
+def _test(a, b, size):
+    val_est = beta.rvs(a, b, size=size).shape
+    val_true = (size, ) + np.asarray(a).shape
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     _test(0.5, 0.5, 1)
     _test(np.array(0.5), np.array(0.5), 1)
 

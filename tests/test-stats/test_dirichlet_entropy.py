@@ -16,9 +16,9 @@ def dirichlet_entropy_vec(alpha):
     if len(alpha.shape) == 1:
         return stats.dirichlet.entropy(alpha)
     else:
-        n = alpha.shape[0]
+        n_minibatch = alpha.shape[0]
         return np.array([stats.dirichlet.entropy(alpha[i, :])
-                         for i in range(n)])
+                         for i in range(n_minibatch)])
 
 
 def _assert_eq(val_ed, val_true):

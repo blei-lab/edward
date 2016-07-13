@@ -11,13 +11,13 @@ from scipy import stats
 sess = tf.Session()
 
 
-def _test(p, n):
-    val_est = bernoulli.rvs(p, n=n).shape
-    val_true = (n, ) + np.asarray(p).shape
+def _test(p, size):
+    val_est = bernoulli.rvs(p, size=size).shape
+    val_true = (size, ) + np.asarray(p).shape
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     _test(0.5, 1)
     _test(np.array(0.5), 1)
 

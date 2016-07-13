@@ -35,9 +35,9 @@ def multinomial_logpmf_vec(x, n, p):
     if len(x.shape) == 1:
         return multinomial_logpmf(x, n, p)
     else:
-        n = x.shape[0]
+        size = x.shape[0]
         return np.array([multinomial_logpmf(x[i, :], n, p)
-                         for i in range(n)])
+                         for i in range(size)])
 
 
 def _assert_eq(val_ed, val_true):

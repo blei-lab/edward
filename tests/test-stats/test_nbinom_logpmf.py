@@ -26,12 +26,12 @@ def _test(x, n, p):
     _assert_eq(nbinom.logpmf(xtf, tf.constant([n]), tf.constant([p])), val_true)
 
 
-def test_int_scalar():
+def test_int_0d():
     _test(1, 5, 0.5)
     _test(2, 5, 0.75)
 
 
-def test_float_scalar():
+def test_float_0d():
     _test(1.0, 5, 0.5)
     _test(2.0, 5, 0.75)
 
