@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 from edward.data import DataGenerator
@@ -57,16 +58,18 @@ class Inference(object):
             data = {}
 
         if isinstance(model, StanModel):
-            # Stan models do not support data subsampling. Therefore
-            # fix the data dictionary `self.data` at compile time to
-            # `data`. No placeholders need to be fed so
-            # `self.data_gen` is empty.
+            # Stan models do no support data subsampling because they
+            # take arbitrary data structure types in the data block
+            # and not just NumPy arrays (this makes it unamenable to
+            # TensorFlow placeholders). Therefore fix the data
+            # dictionary `self.data` at compile time to `data`. No
+            # placeholders need to be fed so `self.data_gen` is empty.
             self.data = data
             self.data_gen = {}
         else:
             self.data = {}
             self.data_gen = {}
-            for key, value in data.items():
+            for key, value in six.iteritems(data):
                 if isinstance(value, tf.Tensor):
                     if value.name.startswith('Placeholder'):
                         # If `data` already has TensorFlow
@@ -129,17 +132,17 @@ class VariationalInference(Inference):
     def run(self, *args, **kwargs):
         """A simple wrapper to run variational inference.
 
-        1. Initialize via ``initialize``
-        2. Run ``update`` for ``self.n_iter`` iterations
-        3. While running, ``print_progress``
-        4. Finalize via ``finalize``
+        1. Initialize via ``initialize``.
+        2. Run ``update`` for ``self.n_iter`` iterations.
+        3. While running, ``print_progress``.
+        4. Finalize via ``finalize``.
 
         Parameters
         ----------
-        *args :
-            passed into ``initialize``
-        **kwargs :
-            passed into ``initialize``
+        *args
+            Passed into ``initialize``.
+        **kwargs
+            Passed into ``initialize``.
         """
         self.initialize(*args, **kwargs)
         for t in range(self.n_iter+1):
@@ -179,7 +182,7 @@ class VariationalInference(Inference):
 
         # Set shape of data placeholders according to batch size.
         if not isinstance(self.model, StanModel):
-            for value in self.data.values():
+            for value in six.itervalues(self.data):
                 value.set_shape([self.n_minibatch] + get_dims(value)[1:])
 
         loss = self.build_loss()
@@ -214,7 +217,8 @@ class VariationalInference(Inference):
             Loss function values after one iteration
         """
         sess = get_session()
-        feed_dict = {key: value.next(self.n_minibatch) for key, value in self.data_gen.items()}
+        feed_dict = {key: value.next(self.n_minibatch)
+                     for key, value in six.iteritems(self.data_gen)}
         _, loss = sess.run([self.train, self.loss], feed_dict)
         return loss
 
@@ -296,7 +300,7 @@ class MFVI(VariationalInference):
             self.score = True
 
         self.n_samples = n_samples
-        return VariationalInference.initialize(self, *args, **kwargs)
+        return super(MFVI, self).initialize(*args, **kwargs)
 
     def build_loss(self):
         """Wrapper for the MFVI loss function.
@@ -348,8 +352,8 @@ class MFVI(VariationalInference):
                 return self.build_reparam_loss()
 
     def build_score_loss(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -366,11 +370,11 @@ class MFVI(VariationalInference):
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
+        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
 
     def build_reparam_loss(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -389,8 +393,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_score_loss_kl(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -415,11 +419,11 @@ class MFVI(VariationalInference):
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
-        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
+        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -440,12 +444,12 @@ class MFVI(VariationalInference):
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
-        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
+        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_prob)) +
                  q_entropy)
 
     def build_reparam_loss_kl(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -471,8 +475,8 @@ class MFVI(VariationalInference):
         return -self.loss
 
     def build_reparam_loss_entropy(self):
-        """Defines a loss function whose automatic differentiation
-        is the stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
 
@@ -514,12 +518,11 @@ class KLpq(VariationalInference):
             stochastic gradients.
         """
         self.n_samples = n_samples
-        return VariationalInference.initialize(self, *args, **kwargs)
+        return super(KLpq, self).initialize(*args, **kwargs)
 
     def build_loss(self):
-        """Loss function to minimize.
-
-        Defines a stochastic gradient of
+        """Build loss function. Its automatic differentiation
+        is a stochastic gradient of
 
         .. math::
             KL( p(z |x) || q(z) )
@@ -560,7 +563,7 @@ class KLpq(VariationalInference):
         w_norm = tf.exp(log_w_norm)
 
         self.loss = tf.reduce_mean(w_norm * log_w)
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
+        return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
 
 
 class MAP(VariationalInference):
@@ -585,9 +588,8 @@ class MAP(VariationalInference):
         super(MAP, self).__init__(model, variational, data)
 
     def build_loss(self):
-        """Loss function to minimize.
-
-        Defines the gradient of
+        """Build loss function. Its automatic differentiation
+        is the gradient of
 
         .. math::
             - \log p(x,z)
@@ -624,6 +626,7 @@ class Laplace(MAP):
         inv_cov = hessian(self.model.log_prob(x, z), var_list)
         sess = get_session()
         # use only a batch of data to estimate hessian
-        feed_dict = {key: value.next(self.n_minibatch) for key, value in self.data_gen.items()}
+        feed_dict = {key: value.next(self.n_minibatch)
+                     for key, value in six.iteritems(self.data_gen)}
         print("Precision matrix:")
         print(sess.run(inv_cov, feed_dict))

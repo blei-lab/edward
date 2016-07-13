@@ -9,6 +9,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +20,7 @@ import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import bernoulli, norm
+
 
 class HierarchicalLogistic:
     """
@@ -38,7 +43,7 @@ class HierarchicalLogistic:
         Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
-    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=0.01):
+    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=10):
         self.weight_dim = weight_dim
         self.inv_link = inv_link
         self.prior_variance = prior_variance
@@ -66,8 +71,9 @@ class HierarchicalLogistic:
             log_lik += [bernoulli.logpmf(y, p)]
 
         log_lik = tf.pack(log_lik)
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         return log_lik + log_prior
+
 
 def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
@@ -79,6 +85,7 @@ def build_toy_dataset(N=40, noise_std=0.1):
     x = (x - 4.0) / 4.0
     x = x.reshape((N, D))
     return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = HierarchicalLogistic(weight_dim=[1,1])

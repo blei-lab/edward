@@ -11,6 +11,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,6 +23,7 @@ import tensorflow as tf
 from edward.models import Variational, Normal
 from edward.stats import norm
 from edward.util import rbf
+
 
 class BayesianNN:
     """
@@ -92,21 +97,22 @@ class BayesianNN:
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
         # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
 
-def build_toy_dataset(n_minibatch=40, noise_std=0.1):
+def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_minibatch/2),
-                         np.linspace(6, 8, num=n_minibatch/2)])
+    x  = np.concatenate([np.linspace(0, 2, num=N/2),
+                         np.linspace(6, 8, num=N/2)])
     y = np.cos(x) + norm.rvs(0, noise_std, size=n_minibatch)
     x = (x - 4.0) / 4.0
     x = x.reshape((n_minibatch, D))
     return {'x': x, 'y': y}
+
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)

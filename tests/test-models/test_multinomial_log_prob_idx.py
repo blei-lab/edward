@@ -3,8 +3,8 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from edward.models import Multinomial
 from scipy.special import gammaln
@@ -31,42 +31,40 @@ def multinomial_logpmf(x, n, p):
 
 
 def multinomial_logpmf_vec(x, n, p):
-    n = x.shape[0]
+    size = x.shape[0]
     return np.array([multinomial_logpmf(x[i, :], n, p)
-                     for i in range(n)])
+                     for i in range(size)])
 
 
 def _test(shape, n):
     K = shape[-1]
-    multinomial = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
+    rv = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
+    rv_sample = rv.sample(n)
     with sess.as_default():
-        pi = multinomial.pi.eval()
-        z = np.zeros((n, ) + tuple(shape))
-        for i in range(shape[0]):
-            z[:, i, :] = np.random.multinomial(1, pi[i, :], n=n)
-
-        z_tf = tf.constant(z, dtype=tf.float32)
-        for i in range(shape[0]):
+        x = rv_sample.eval()
+        x_tf = tf.constant(x, dtype=tf.float32)
+        pi = rv.pi.eval()
+        if len(shape) == 1:
             assert np.allclose(
-                multinomial.log_prob_idx((i, ), z_tf).eval(),
-                multinomial_logpmf_vec(z[:, i, :], 1, pi[i, :]))
+                rv.log_prob_idx((), x_tf).eval(),
+                multinomial_logpmf_vec(x[:, :], 1, pi[:]))
+        elif len(shape) == 2:
+            for i in range(shape[0]):
+                assert np.allclose(
+                    rv.log_prob_idx((i, ), x_tf).eval(),
+                    multinomial_logpmf_vec(x[:, i, :], 1, pi[i, :]))
+        else:
+            assert False
 
 
-def test_1_2v_1d():
-    _test([1, 2], 1)
+def test_1d():
+    _test((2, ), 1)
+    _test((2, ), 2)
 
 
-def test_1_3v_1d():
-    _test([1, 3], 1)
-
-
-def test_1_2v_2d():
-    _test([1, 2], 2)
-
-
-def test_2_2v_1d():
-    _test([2, 2], 1)
-
-
-def test_2_2v_2d():
-    _test([2, 2], 2)
+def test_2d():
+    _test((1, 2), 1)
+    _test((1, 3), 1)
+    _test((1, 2), 2)
+    _test((2, 2), 1)
+    _test((2, 2), 2)

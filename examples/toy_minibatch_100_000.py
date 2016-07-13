@@ -3,11 +3,16 @@
 This is just to show how fast we can do a minibatch gradient descent
 of 100,000 samples (!).
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import tensorflow as tf
 
 from edward.models import Variational, Bernoulli
 from edward.stats import bernoulli
+
 
 class BernoulliModel:
     """
@@ -18,6 +23,7 @@ class BernoulliModel:
 
     def log_prob(self, xs, zs):
         return bernoulli.logpmf(zs, p)
+
 
 ed.set_seed(42)
 p = tf.constant(0.6)

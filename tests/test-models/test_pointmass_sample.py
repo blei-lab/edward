@@ -18,7 +18,7 @@ def _test(shape, params, n):
     assert val_est == val_true
 
 
-def test_scalar():
+def test_0d():
     _test((), 0.5, 1)
     _test((), np.array(0.5), 1)
     _test((), tf.constant(0.5), 1)

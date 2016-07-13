@@ -15,12 +15,17 @@ Inference: Maximum a posteriori
 
 Data: x = {x_1, ..., x_N}, where each x_i is in R^2
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
 
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims
+
 
 class MixtureGaussian:
     """
@@ -82,6 +87,7 @@ class MixtureGaussian:
             log_lik += [log_lik_z]
 
         return log_prior + tf.pack(log_lik)
+
 
 ed.set_seed(42)
 x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')

@@ -9,6 +9,10 @@ Probability model:
 Variational model
     Likelihood: Mean-field Normal
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +20,7 @@ import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
+
 
 class LinearModel:
     """
@@ -44,7 +49,7 @@ class LinearModel:
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
         W = tf.expand_dims(zs[:, 0], 0)
         b = zs[:, 1]
@@ -53,6 +58,7 @@ class LinearModel:
         y = tf.expand_dims(y, 1)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
         return log_lik + log_prior
+
 
 def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)

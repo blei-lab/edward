@@ -188,6 +188,25 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
 
+def log_mean_exp(x):
+    """Compute the ``log_mean_exp`` of the elements in x.
+
+    Parameters
+    ----------
+    x : tf.Tensor
+        vector or matrix with second dimension 1
+        shape=TensorShape([Dimension(N)])
+        shape=TensorShape([Dimension(N), Dimension(1)])
+
+    Returns
+    -------
+    tf.Tensor
+        scalar if vector input, vector if matrix tensor input
+    """
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))
+
+
 def log_sum_exp(x):
     """Compute the ``log_sum_exp`` of the elements in x.
 

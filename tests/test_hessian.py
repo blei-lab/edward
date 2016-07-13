@@ -18,7 +18,7 @@ def _test(y, xs, val_true):
         assert np.all(val_est == val_true)
 
 
-def test_scalar():
+def test_0d():
     x1 = tf.Variable(tf.random_normal([1], dtype=tf.float32))
     x2 = tf.Variable(tf.random_normal([1], dtype=tf.float32))
     y = tf.pow(x1, tf.constant(2.0)) + tf.constant(2.0) * x1 * x2 + \
