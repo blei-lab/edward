@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import multiprocessing
 import numpy as np
 import six
 import tensorflow as tf
@@ -190,7 +191,9 @@ class VariationalInference(Inference):
             # Re-assign data to batch tensors, with size given by `n_data`.
             values = list(six.itervalues(self.data))
             slices = tf.train.slice_input_producer(values)
-            batches = tf.train.batch(slices, self.n_data)
+            # By default use as many threads as CPUs.
+            batches = tf.train.batch(slices, self.n_data,
+                                     num_threads=multiprocessing.cpu_count())
             if not isinstance(batches, list):
                 # `tf.train.batch` returns tf.Tensor if `slices` is a
                 # list of size 1.
