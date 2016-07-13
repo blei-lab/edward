@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Reparameterization method</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="reparameterization-method">Reparameterization method</h2>
+<p>(This tutorial follows the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a> tutorial.)</p>
+<p>We seek to maximize the ELBO, <span class="math display">\[\begin{aligned}
+  \lambda^*
+  &amp;=
+  \arg \max_\lambda \text{ELBO}(\lambda)\\
+  &amp;=\;
+  \arg \max_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],\end{aligned}\]</span> using a “black box” algorithm. This means avoiding additional mathematical derivations, such as calculating integrals (expectations) or gradients (for maximization) by hand.</p>
+<h3 id="the-reparameterization-gradient-estimator">The reparameterization gradient estimator</h3>
+<p>Gradient ascent is one way to maximize complicated functions like the ELBO. The idea is to compute the function’s gradient <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;=
+  \nabla_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],\end{aligned}\]</span> and to follow it to a (local) optimum.</p>
+<p>Some variational distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize the normal distribution <span class="math inline">\(z \sim \mathcal{N}(\mu, \Sigma)\)</span> as <span class="math inline">\(z \sim \mu + L \mathcal{N}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
+  \epsilon &amp;\sim q(\epsilon)\\
+  z &amp;= g(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(g\)</span> encapsulates the variational parameters instead.</p>
+<p>The reparameterization gradient estimator leverages this property of the variational approximation to write the gradient as <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;=\; 
+  \mathbb{E}_{q(\epsilon)}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(x, g(\epsilon \;;\; \lambda))
+  -
+  \log q(g(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].\end{aligned}\]</span> This construes the gradient of the ELBO as an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>. This allows the gradient to move inside the expectati on; however, now the gradient applies to both the model and the variational approximation. We need to run automatic differentation on both.</p>
+<h3 id="noisy-estimates-using-monte-carlo-integration">Noisy estimates using Monte Carlo integration</h3>
+<p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
+<ol>
+<li>draw <span class="math inline">\(S\)</span> samples <span class="math inline">\(\{\epsilon_s\}_1^S \sim q(\epsilon)\)</span>,</li>
+<li>evaluate the argument of the expectation using <span class="math inline">\(\{\epsilon_s\}_1^S\)</span>, and</li>
+<li>compute the empirical mean of the evaluated quantities.</li>
+</ol>
+<p>A Monte Carlo estimate of the gradient is then <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;\approx\; 
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(x, g(\epsilon \;;\; \lambda))
+  -
+  \log q(g(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="tut_KLqp_score.html">score function method</a>.</p>
+<h3 id="implementation">Implementation</h3>
+<p>We implement the ELBO and its reparameterization gradient estimator in a single method <code>build_reparam_loss</code> of the <code>MFVI</code> (mean-field variational inference) class.</p>
+<pre class="python" language="Python"><code>class MFVI(VariationalInference):
+    ...
+    def build_reparam_loss(self):
+        x = self.data
+        z = self.variational.sample(self.n_minibatch)
+
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
+                                   self.variational.log_prob(z))
+        return -self.loss</code></pre>
+<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_minibatch</code>) samples from the variational distribution. The <code>sample</code> function implements the reparameterization <span class="math inline">\(g(\epsilon\;;\;\lambda)\)</span>. The TensorFlow method <code>reduce_mean</code> then computes the Monte Carlo summation.</p>
+<p>This method implicitly specifies the gradient of the ELBO as well. TensorFlow’s automatic differentation will apply to <code>z</code>, thus applying the chain rule of differentation to compute the gradient of the ELBO. Unlike the <a href="tut_KLqp_score.html">score function method</a>, we do not have to use TensorFlow’s <code>stop_gradient</code> method.</p>
+<p>There is a nuance here. This method actually returns the <strong>negative</strong> ELBO because TensorFlow’s stochastic optimization routines are all configured to <em>minimize</em> an objective function.</p>
+<h3 id="stochastic-gradient-optimization">Stochastic gradient optimization</h3>
+<p>Stochastic gradient ascent is an extension of gradient ascent that permits following noisy estimates of the gradient. Under mild conditions, stochastic gradient ascent finds a (local) optimum of the original (noiseless) function.</p>
+<p>Edward uses TensorFlow’s built-in stochastic gradient minimization routines. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
+<pre class="python" language="Python"><code>class VariationalInference(Inference):
+    ...
+    def initialize(self, ...):
+        ...
+        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                     scope=scope)
+
+        # Use Adam with a decaying scale factor
+        global_step = tf.Variable(0, trainable=False)
+        starter_learning_rate = 0.1
+        learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                            global_step,
+                                            100, 0.9, staircase=True)
+        optimizer = tf.train.AdamOptimizer(learning_rate)
+        self.train = optimizer.minimize(loss, global_step=global_step,
+                                        var_list=var_list)</code></pre>
+<p>This sets up TensorFlow to minimize the ELBO using the Adam adaptive step-size schedule with an exponentially decaying scaling factor.</p>
+<p>See the <a href="api/index.html">API</a> for further implementation details.</p>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
