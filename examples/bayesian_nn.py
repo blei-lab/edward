@@ -67,38 +67,29 @@ class BayesianNN:
                   tf.reshape(z[m*n:(m*n+n)], [1, n])
             z = z[(m+1)*n:]
 
-    def mapping(self, x, z):
+    def neural_network(self, x, zs):
         """
-        mu = NN(x; z)
-
-        Note this is one sample of z at a time.
-
-        Parameters
-        -------
-        x : tf.tensor
-            n_data x D
-
-        z : tf.tensor
-            num_vars
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_data
+        Return a `n_minibatch` x `n_data` matrix. Each row is
+        the output of a neural network on the input data `x` and
+        given a set of weights `z` in `zs`.
         """
-        h = x
-        for W, b in self.unpack_weights(z):
-            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
-            h = self.nonlinearity(tf.matmul(h, W) + b)
+        matrix = []
+        for z in tf.unpack(zs):
+            # Calculate neural network with weights given by `z`.
+            h = x
+            for W, b in self.unpack_weights(z):
+                # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
+                h = self.nonlinearity(tf.matmul(h, W) + b)
 
-        h = tf.squeeze(h) # n_data x 1 to n_data
-        return h
+            matrix += [tf.squeeze(h)] # n_data x 1 to n_data
+
+        return tf.pack(matrix)
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
         log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
-        mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
+        mus = self.neural_network(x, zs)
         # broadcasting to do mus - y (n_minibatch x n_data - n_data)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
@@ -129,7 +120,7 @@ plt.show(block=False)
 
 sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
-inference.initialize(n_print=10)
+inference.initialize(n_print=100)
 for t in range(1000):
     loss = inference.update()
     if t % inference.n_print == 0:
@@ -143,7 +134,7 @@ for t in range(1000):
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
-        mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
+        mus = model.neural_network(x, zs)
         outputs = mus.eval()
 
         # Get data
