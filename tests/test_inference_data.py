@@ -38,14 +38,14 @@ def read_and_decode_single_example(filename):
     return features['outcome']
 
 
-def _test(data, n_data, x=None, is_file=False):
+def _test(data, n_minibatch, x=None, is_file=False):
     sess = ed.get_session()
     model = NormalModel()
     variational = Variational()
     variational.add(Normal())
 
     inference = ed.MFVI(model, variational, data)
-    inference.initialize(n_data=n_data)
+    inference.initialize(n_minibatch=n_minibatch)
 
     if x is not None:
         # Placeholder setting.
@@ -62,7 +62,7 @@ def _test(data, n_data, x=None, is_file=False):
         val = sess.run(inference.data)
         val_1 = sess.run(inference.data)
         assert not np.all(val['x'] == val_1['x'])
-    elif n_data is None:
+    elif n_minibatch is None:
         # Preloaded full setting.
         # Check data is full data.
         val = sess.run(inference.data)
@@ -71,7 +71,7 @@ def _test(data, n_data, x=None, is_file=False):
         # Preloaded batch setting.
         # Check data is randomly shuffled.
         val = sess.run(inference.data)
-        assert not np.all(val['x'] == data['x'][:n_data])
+        assert not np.all(val['x'] == data['x'][:n_minibatch])
         # Check data varies by session run.
         val_1 = sess.run(inference.data)
         assert not np.all(val['x'] == val_1['x'])

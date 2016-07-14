@@ -36,10 +36,10 @@ def multinomial_logpmf_vec(x, n, p):
                      for i in range(size)])
 
 
-def _test(shape, size):
+def _test(shape, n):
     K = shape[-1]
     rv = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
-    rv_sample = rv.sample(size=size)
+    rv_sample = rv.sample(n)
     with sess.as_default():
         x = rv_sample.eval()
         x_tf = tf.constant(x, dtype=tf.float32)
