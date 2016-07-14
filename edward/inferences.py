@@ -370,7 +370,7 @@ class MFVI(VariationalInference):
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
+        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
 
     def build_reparam_loss(self):
         """Build loss function. Its automatic differentiation
@@ -419,7 +419,7 @@ class MFVI(VariationalInference):
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
-        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
+        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
         """Build loss function. Its automatic differentiation
@@ -444,7 +444,7 @@ class MFVI(VariationalInference):
         p_log_prob = self.model.log_prob(x, z)
         q_entropy = self.variational.entropy()
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
-        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
+        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_prob)) +
                  q_entropy)
 
     def build_reparam_loss_kl(self):
@@ -563,7 +563,7 @@ class KLpq(VariationalInference):
         w_norm = tf.exp(log_w_norm)
 
         self.loss = tf.reduce_mean(w_norm * log_w)
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
+        return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
 
 
 class MAP(VariationalInference):

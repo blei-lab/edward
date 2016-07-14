@@ -237,15 +237,17 @@ class StanModel(object):
         """
         Notes
         -----
-        The log_prob() method in Stan requires the input to be a
-        dictionary data type, with each parameter named
-        correspondingly; this is because zs lives on the original
-        (constrained) latent variable space.
+        The log_prob() method in Stan requires the input to be on
+        the unconstrained space. But the zs live on the original
+        (constrained) latent variable space. Therefore we must pass zs
+        into unconstrain_pars(), which requires the constrained latent
+        variables to be of a particular dictionary type.
 
-        Ideally, in Stan it would have log_prob() for both this
-        input and a flattened vector. Internally, Stan always assumes
-        unconstrained parameters are flattened vectors, and
-        constrained parameters are named data structures.
+        Ideally, in Stan it would have log_prob() for direct
+        calculation on the constrained latent variables. Internally,
+        Stan always assumes unconstrained parameters are flattened
+        vectors, and constrained parameters are named data structures.
+        This data conversion can be expensive.
         """
         lp = np.zeros((zs.shape[0]), dtype=np.float32)
         for b, z in enumerate(zs):

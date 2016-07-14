@@ -43,7 +43,7 @@ class HierarchicalLogistic:
         Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
-    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=0.01):
+    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=10):
         self.weight_dim = weight_dim
         self.inv_link = inv_link
         self.prior_variance = prior_variance
@@ -71,7 +71,7 @@ class HierarchicalLogistic:
             log_lik += [bernoulli.logpmf(y, p)]
 
         log_lik = tf.pack(log_lik)
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         return log_lik + log_prior
 
 

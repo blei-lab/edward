@@ -97,7 +97,7 @@ class BayesianNN:
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
         # broadcasting to do mus - y (n_minibatch x n_data - n_data)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance

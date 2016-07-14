@@ -105,7 +105,7 @@ class IWVI(MFVI):
         for s in range(self.n_minibatch):
             z = self.variational.sample(self.K)
             p_log_prob = self.model.log_prob(x, z)
-            q_log_prob = self.variational.log_prob(stop_gradient(z))
+            q_log_prob = self.variational.log_prob(z)
             log_w = p_log_prob - q_log_prob
             losses += [log_mean_exp(log_w)]
 

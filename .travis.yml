@@ -18,12 +18,13 @@ before_install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
-    - deps='pip numpy scipy nose pep8 progressbar'
+    - deps='pip numpy scipy nose pep8 progressbar pystan'
     - conda create -q -n test-environment "python=$TRAVIS_PYTHON_VERSION" $deps
     - source activate test-environment
     - pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp27-none-linux_x86_64.whl
     - pip install python-coveralls
     - pip install numpydoc
+    - pip install git+https://github.com/pymc-devs/pymc3
 
 install:
     - pip install -e .
