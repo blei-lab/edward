@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Home</title>
+<title>Edward – Tutorials</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,54 +69,38 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="a-library-for-probabilistic-modeling-inference-and-criticism.">A library for probabilistic modeling, inference, and criticism.</h2>
-<p>Edward is a Python library for probabilistic modeling, inference, and criticism. It is a testbed for fast experimentation and research with probabilistic models, ranging from classical hierarchical models on small data sets to complex deep probabilistic models on large data sets. Edward fuses three fields: Bayesian statistics and machine learning, deep learning, and probabilistic programming.</p>
-<p>It supports <strong>modeling languages</strong> including</p>
+<h2 id="tutorials">Tutorials</h2>
+<p>Edward supports a variety of probability models, inference algorithms, and criticism procedures. Here we show a few key examples from each category. We recommend <a href="getting-started.html">Getting Started</a> and <a href="delving-in.html">Delving In</a> before continuing to the tutorials.</p>
+<h3 id="models">Models</h3>
 <ul>
-<li><a href="https://www.tensorflow.org">TensorFlow</a> (with neural networks via <a href="http://keras.io">Keras</a>, <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a>, or <a href="https://github.com/google/prettytensor">Pretty Tensor</a>)</li>
-<li><a href="http://mc-stan.org">Stan</a></li>
-<li><a href="http://pymc-devs.github.io/pymc3/">PyMC3</a></li>
-<li>Python, through <a href="http://scipy.org/">NumPy/SciPy</a></li>
+<li><a href="tut_bayesian_linear_regression.html">Bayesian linear regression</a></li>
+<li><a href="tut_mixture_gaussian.html">Mixture of Gaussians</a></li>
+<li><a href="tut_gp_classification.html">Gaussian process classification</a></li>
+<li><a href="tut_bayesian_nn.html">Bayesian neural network</a></li>
+<li>Maja’s log bilinear network model (the simple one)</li>
 </ul>
-<p>It supports <strong>inference</strong> via</p>
+<h3 id="inference">Inference</h3>
 <ul>
-<li>Variational inference
+<li><a href="tut_inference_probability_models.html">Inference of probability models</a></li>
+<li><a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization (variational inference)</a>
 <ul>
-<li>Black box variational inference</li>
-<li>Stochastic variational inference</li>
-<li>Variational auto-encoders</li>
-<li>Inclusive KL divergence: <span class="math inline">\(\text{KL}(p\|q)\)</span></li>
-<li>Laplace approximation</li>
+<li><a href="tut_KLqp_score.html">Score function method</a></li>
+<li><a href="tut_KLqp_reparam.html">Reparameterization method</a></li>
 </ul></li>
-<li>Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)</li>
-<li>Maximum a posteriori estimation (penalized maximum likelihood, maximum likelihood)</li>
-</ul>
-<p>It supports <strong>criticism</strong> of the model and inference via</p>
+<li><a href="tut_KLpq.html"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization (variational inference)</a>
 <ul>
-<li>Evaluations on both supervised and unsupervised tasks</li>
-<li>Posterior predictive checks</li>
-</ul>
-<h3 id="authors">Authors</h3>
-<p>Edward is led by <a href="http://dustintran.com">Dustin Tran</a> with guidance by <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>. The other developers are</p>
+<li><a href="tut_KLpq_ais.html">Adaptive importance sampling</a></li>
+</ul></li>
+<li><a href="tut_MAP.html">Maximum a posteriori estimation</a>
 <ul>
-<li><a href="http://stat.columbia.edu/~diengadji/">Adji Dieng</a></li>
-<li><a href="http://www.proditus.com/">Alp Kucukelbir</a></li>
-<li><a href="http://www.ee.columbia.edu/~dliang/">Dawen Liang</a></li>
-<li><a href="http://maja-rita-rudolph.com/">Maja Rudolph</a></li>
+<li><a href="tut_MAP_Laplace.html">Laplace approximation</a></li>
+</ul></li>
 </ul>
-<p>We welcome contributions by submitting issues, feature requests, or by solving any current issues!</p>
-<p>We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of the Blei Lab for their helpful feedback and advice.</p>
-<h3 id="citation">Citation</h3>
-<p>We appreciate citations for Edward because it lets us find out how people have been using the library and it motivates further work.</p>
-<blockquote>
-<p>Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M. Blei. 2016. <em>Edward: A library for probabilistic modeling, inference, and criticism.</em> http://edwardlib.org</p>
-</blockquote>
-<pre class="JSON"><code>@misc{tran2016edward,
-    author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
-    title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
-    year = {2016},
-    url = {http://edwardlib.org}
-}</code></pre>
+<h3 id="criticism">Criticism</h3>
+<ul>
+<li><a href="tut_PPC.html">Posterior predictive checks</a></li>
+<li><a href="tut_metric_eval.html">Metric-based evaluations</a></li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

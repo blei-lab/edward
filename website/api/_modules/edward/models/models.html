@@ -367,15 +367,17 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        The log_prob() method in Stan requires the input to be a</span>
-<span class="sd">        dictionary data type, with each parameter named</span>
-<span class="sd">        correspondingly; this is because zs lives on the original</span>
-<span class="sd">        (constrained) latent variable space.</span>
+<span class="sd">        The log_prob() method in Stan requires the input to be on</span>
+<span class="sd">        the unconstrained space. But the zs live on the original</span>
+<span class="sd">        (constrained) latent variable space. Therefore we must pass zs</span>
+<span class="sd">        into unconstrain_pars(), which requires the constrained latent</span>
+<span class="sd">        variables to be of a particular dictionary type.</span>
 
-<span class="sd">        Ideally, in Stan it would have log_prob() for both this</span>
-<span class="sd">        input and a flattened vector. Internally, Stan always assumes</span>
-<span class="sd">        unconstrained parameters are flattened vectors, and</span>
-<span class="sd">        constrained parameters are named data structures.</span>
+<span class="sd">        Ideally, in Stan it would have log_prob() for direct</span>
+<span class="sd">        calculation on the constrained latent variables. Internally,</span>
+<span class="sd">        Stan always assumes unconstrained parameters are flattened</span>
+<span class="sd">        vectors, and constrained parameters are named data structures.</span>
+<span class="sd">        This data conversion can be expensive.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zs</span><span class="p">):</span>
