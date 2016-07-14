@@ -83,68 +83,41 @@
 <pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
 <p>See the <a href="troubleshooting.html">troubleshooting page</a> for detailed installation instructions.</p>
 <h3 id="your-first-edward-program">Your first Edward program</h3>
-<p>Let’s use Edward to fit a simple Bayesian neural network regression model.</p>
-<p>First, import Edward, TensorFlow, and Numpy.</p>
-<pre class="python" language="Python"><code>import edward as ed
-import tensorflow as tf
-import numpy as np  </code></pre>
-<p>Now, consider the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> <span class="math display">\[\begin{aligned}
-  p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
-  &amp;=
-  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\mu\)</span> is a neural network with weights (latent) variables <span class="math inline">\(\mathbf{z}\)</span>. Here <span class="math inline">\(x_n\)</span> is the (known) covariate and <span class="math inline">\(\sigma^2\)</span> is the (known) variance of the observation.</p>
-<p>A Bayesian neural network further posits a prior on the weights. Assuming an independent standard normal prior gives the following joint density <span class="math display">\[\begin{aligned}
-  p(\mathbf{z}, \mathbf{y} \;;\; \mathbf{x}, \sigma^2)
-  &amp;=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I)
-  \times
-  \prod_{n=1}^N
-  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2).\end{aligned}\]</span></p>
-<p>Here is one way to write this model in Edward. (This is abridged; full code <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">HERE</a>.)</p>
-<pre class="python" language="Python"><code>class BayesianNN:
-    &quot;&quot;&quot;A Bayesian neural network regression model (abridged)&quot;&quot;&quot;
+<p>Probabilistic models are built in Edward using one of the available modeling languages. Here we use TensorFlow to define a Bayesian neural network. It is a neural network with prior distributions on its weights. (This is abridged; complete example <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
+<pre class="python" language="Python"><code>import tensorflow as tf
 
+class BayesianNN:
+    &quot;&quot;&quot;Bayesian neural network for regression&quot;&quot;&quot;
     def log_prob(self, xs, zs):
-        # Specify the prior on latent variables zs
+        # Extract inputs/outputs from data `xs`.
+        x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
+        # Specify the prior on neural network weights `zs`.
         log_prior = tf.reduce_sum(norm.logpdf(zs, loc=0, scale=1), 1)
-
-        # Extract (y,x) from data xs
-        y = xs[:, 0]
-        x = xs[:, 1:]
-
-        # Specify mu (neural network)
-        mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
-
-        # Specify the likelihood
-        log_lik = tf.reduce_sum(norm.logpdf(y, loc=mus, scale=self.lik_variance), 1)
-
+        # Specify the likelihood. Its mean is the output of a neural
+        # network taking `x` as input with weights `zs`.
+        mus = self.neural_network(x, zs)
+        log_lik = tf.reduce_sum(norm.logpdf(y, loc=mus, scale=1), 1)
         return log_prior + log_lik</code></pre>
 <p>Instantiating this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>
-<p>defines a two-layer a Bayesian neural network regression model with <span class="math inline">\(\tanh\)</span> activation functions. Specifically <span class="math display">\[\begin{aligned}
-  h_{11} &amp;= \tanh(w_{11} x_n + b_{11})\\
-  h_{12} &amp;= \tanh(w_{12} x_n + b_{12})\\
-  h_{21} &amp;= \tanh(w_{211} h_{11} + w_{212} h_{12} + b_{21})\\
-  h_{22} &amp;= \tanh(w_{221} h_{11} + w_{222} h_{12} + b_{22})\\
-  \mu &amp;= \tanh(w_{31} h_{21} + w_{32} h_{22} + b_3)\end{aligned}\]</span> where <span class="math inline">\(\mathbf{z} = (w_{1:}, w_{2::}, w_{3:}, b_{1:}, b_{2:}, b_3)\)</span>.</p>
-<p>Next, specify a variational approximation to the posterior. A mean-field normal approximation is reasonable.</p>
-<pre class="python" language="Python"><code>variational = Variational()
-variational.add(Normal(model.num_vars))  </code></pre>
-<p>Finally, simulate a toy dataset of 50 observations with a cosine nonlinearity and some measurement noise.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(n_data=50, noise_std=0.1):
-    x = np.linspace(-3, 3, num=n_data)
-    y = np.cos(x) 
-    y = y + ed.stats.norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
-    x = x.reshape((n_data, 1))
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)  </code></pre>
-<p>Plotting the data shows the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<p>defines a two-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
+<p>Let’s use a toy dataset of 50 observations with a cosine relationship.</p>
+<pre class="python" language="Python"><code>import numpy as np
+
+data = {&#39;x&#39;: np.array(...), &#39;y&#39;: np.array(...)}</code></pre>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
-<p>We now have all the ingredients to infer the posterior of this model. Edward <code>Inference</code> classes take three things as input: a probability model, a variational model, and data. Here we run mean-field variational inference for <code>1000</code> iterations, by subsampling <code>5</code> datapoints at each iteration. We also print a status report to the terminal every <code>100</code> iterations</p>
-<pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000, n_minibatch=5, n_print=100)  </code></pre>
-<p>Drawing samples from the posterior shows how the Bayesian neural network has learned the cosine nonlinearity.</p>
+<p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation</p>
+<pre class="python" language="Python"><code>from edward.models import Variational, Normal
+
+variational = Variational()
+variational.add(Normal(model.n_vars))</code></pre>
+<p>with the number of latent variables given by the model.</p>
+<p>Run mean-field variational inference. We use <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
+<pre class="python" language="Python"><code>import edward as ed
+
+inference = ed.MFVI(model, variational, data)
+inference.run(n_iter=1000, n_minibatch=10)</code></pre>
+<p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
 <p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="tutorials.html">tutorials</a>.</p>
