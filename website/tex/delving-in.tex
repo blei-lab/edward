@@ -157,56 +157,8 @@ end, Edward provides a \texttt{criticisms} module that implements:
   \item metric-based evaluations (e.g.~mean squared error, binary accuracy)
 \end{enumerate}
 
-\textbf{Posterior predictive checks (PPC).}
-The simplest PPC works by studying the posterior predictive distribution
-\begin{align*}
-  p(x_\text{new} \mid x)
-  &=
-  \int
-  p(x_\text{new} \mid z)
-  p(z \mid x)
-  \text{d} z
-\end{align*}
-through a discrepancy function, such as $T(x_\text{new}) = \max(x_\text{new})$.
-
-One way to use a PPC is to compare $T(x_\text{new})$ to the observed value
-of the discrepancy on the data $T(x)$. 
-
-\includegraphics{images/ppc.png}
-
-Here $T(x)$ falls in a low probability region of the posterior
-predictive discrepancy distribution. This indicates a direction for potential
-improvement.
-
-Edward implements PPCs through the \texttt{sample_likelihood()}
-function in the probability model. This method samples a dataset from the
-model likelihood
-\begin{align*}
-  x \sim p(x \mid z).
-\end{align*}
-The \texttt{criticisms.ppc()} method then provides a scaffold for studying various
-discrepancy functions by repeatedly simulating datasets from the posterior
-predictive distribution. See the \href{tutorials.html}{tutorial} page for
-examples.
-
-\textbf{Metric-based evaluations.} 
-Edward also supports metric-based evaluations. The simplest example is 
-a classification model. After inferring the posterior, we can predict the
-label for each observation in the data. Edward implements a
-variety of metrics, such as classification error and mean absolute error, based
-on these predictions.
-
-First implement a \texttt{predict()} function in the probability model. This
-predicts the label given samples from the posterior $p(z \mid x)$. Then call
-\begin{lstlisting}[language=Python]
-print(ed.evaluate('categorical_accuracy', my_model, my_variational, my_data))
-print(ed.evaluate('mean_absolute_error', my_model, my_variational, my_data))
-\end{lstlisting}
-to evaluate these metrics. Swapping \texttt{my_data} with held-out data makes it
-easy to implement cross-validation and other model assessment techniques.
-
-Edward offers many evaluation metrics; see the  
-\href{tutorials.html}{tutorials} for more examples.
+See the \href{tutorials.html}{tutorials} for how to introduce criticism into
+your modeling workflow.
 
 \subsubsection{References}\label{references}
 

@@ -1,0 +1,59 @@
+% Define the subtitle of the page
+\title{Posterior predictive checks (PPC)}
+
+% Begin the content of the page
+\subsection{Posterior predictive checks (PPC)}
+
+The simplest PPC works by studying the posterior predictive distribution
+\begin{align*}
+  p(x_\text{new} \mid x)
+  &=
+  \int
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z
+\end{align*}
+through a discrepancy function, such as $T(x_\text{new}) = \max(x_\text{new})$.
+
+One way to use a PPC is to compare $T(x_\text{new})$ to the observed value
+of the discrepancy on the data $T(x)$. 
+
+\includegraphics{images/ppc.png}
+
+Here $T(x)$ falls in a low probability region of the posterior
+predictive discrepancy distribution. This indicates a direction for potential
+improvement.
+
+\subsubsection{Implementation}
+
+Edward implements PPCs through the \texttt{sample_likelihood()}
+function in the probability model. This method samples a dataset from the
+model likelihood
+\begin{lstlisting}[language=Python]
+class BetaBernoulli:
+    def __init__(self):
+        self.num_vars = 1
+
+    def log_prob(self, xs, zs):
+        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
+                           for z in tf.unpack(zs)])
+        return log_lik + log_prior
+
+    def sample_likelihood(self, zs, size):
+    """x | z ~ p(x | z)"""
+        out = []
+        for s in range(zs.shape[0]):
+            out += [{'x': bernoulli.rvs(zs[s, :], size=size).reshape((size,))}]
+        return out
+\end{lstlisting}
+
+The \texttt{ed.ppc()} method then provides a scaffold for studying
+various discrepancy functions by repeatedly simulating datasets from the
+posterior predictive distribution
+\begin{lstlisting}[language=Python]
+T = lambda y, z=None: tf.reduce_mean(y['x'])
+print(ed.ppc(model, variational, data, T))  
+\end{lstlisting}
+
+See the \href{api/index.html}{API} for further implementation details.

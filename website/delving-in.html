@@ -142,24 +142,7 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <li>posterior predictive checks</li>
 <li>metric-based evaluations (e.g. mean squared error, binary accuracy)</li>
 </ol>
-<p><strong>Posterior predictive checks (PPC).</strong> The simplest PPC works by studying the posterior predictive distribution <span class="math display">\[\begin{aligned}
-  p(x_\text{new} \mid x)
-  &amp;=
-  \int
-  p(x_\text{new} \mid z)
-  p(z \mid x)
-  \text{d} z\end{aligned}\]</span> through a discrepancy function, such as <span class="math inline">\(T(x_\text{new}) = \max(x_\text{new})\)</span>.</p>
-<p>One way to use a PPC is to compare <span class="math inline">\(T(x_\text{new})\)</span> to the observed value of the discrepancy on the data <span class="math inline">\(T(x)\)</span>.</p>
-<p><img alt="image" src="images/ppc.png"/></p>
-<p>Here <span class="math inline">\(T(x)\)</span> falls in a low probability region of the posterior predictive discrepancy distribution. This indicates a direction for potential improvement.</p>
-<p>Edward implements PPCs through the <code>sample_likelihood()</code> function in the probability model. This method samples a dataset from the model likelihood <span class="math display">\[\begin{aligned}
-  x \sim p(x \mid z).\end{aligned}\]</span> The <code>criticisms.ppc()</code> method then provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution. See the <a href="tutorials.html">tutorial</a> page for examples.</p>
-<p><strong>Metric-based evaluations.</strong> Edward also supports metric-based evaluations. The simplest example is a classification model. After inferring the posterior, we can predict the label for each observation in the data. Edward implements a variety of metrics, such as classification error and mean absolute error, based on these predictions.</p>
-<p>First implement a <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span>. Then call</p>
-<pre class="python" language="Python"><code>print(ed.evaluate('categorical_accuracy', my_model, my_variational, my_data))
-print(ed.evaluate('mean_absolute_error', my_model, my_variational, my_data))</code></pre>
-<p>to evaluate these metrics. Swapping <code>my_data</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
-<p>Edward offers many evaluation metrics; see the <a href="tutorials.html">tutorials</a> for more examples.</p>
+<p>See the <a href="tutorials.html">tutorials</a> for how to introduce criticism into your modeling workflow.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>
