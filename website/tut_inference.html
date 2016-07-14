@@ -75,17 +75,7 @@
     </div>
     <div class="nine columns">
 <h2 id="inference-of-probability-models">Inference of probability models</h2>
-<p>This tutorial introduces the class of models supported in Edward, namely probability models. It asks the question: what does it mean to do inference in probability models? This sets the stage for understanding how to develop and implement inference procedures in Edward.</p>
-<h3 id="probability-models">Probability models</h3>
-<p>A probability model has two components. The <em>likelihood</em> <span class="math display">\[\begin{aligned}
-  p(x \mid z)\end{aligned}\]</span> is a probability distribution that describes how the data <span class="math inline">\(x\)</span> depend on some latent random variables <span class="math inline">\(z\)</span>. The likelihood models a random data generating process, where the data <span class="math inline">\(x\)</span> are observed random variables conditioned on a particular hidden pattern described by <span class="math inline">\(z\)</span>. For example, consider measuring your weight on a cheap scale; the likelihood model would describe the imprecisions of the scale that reflect into the measurements.</p>
-<p>The <em>prior</em> <span class="math display">\[\begin{aligned}
-  p(z)\end{aligned}\]</span> is another probability distribution that captures our prior beliefs on the latent random variables <span class="math inline">\(z\)</span>. It describes the kind of hidden patterns we expect to have produced the data <span class="math inline">\(x\)</span>. Continuing our example, the prior would capture your prior belief about your (latent) weight. A potential prior might be a normal distribution centered at the average weight of adults on Earth ( which is <span class="math inline">\(\approx62\)</span> kilograms).</p>
-<p>Combining the likelihood and the prior specifies a probability model, <span class="math display">\[\begin{aligned}
-  p(x,z)
-  &amp;=
-  p(x \mid z)
-  p(z)\end{aligned}\]</span> as a joint density over observed and latent random variables.</p>
+<p>This tutorial asks the question: what does it mean to do inference in probability models? This sets the stage for understanding how to develop and implement inference procedures in Edward.</p>
 <h3 id="the-posterior">The posterior</h3>
 <p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden patterns <span class="math inline">\(z\)</span> explain the data? We seek to infer these hidden patterns using the model.</p>
 <p>Inference for probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
