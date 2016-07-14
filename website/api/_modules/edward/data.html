@@ -128,11 +128,11 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.data</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="DataGenerator"><a class="viewcode-back" href="../../edward.data.html#edward.data.DataGenerator">[docs]</a><span class="k">class</span> <span class="nc">DataGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -164,7 +164,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="DataGenerator.next"><a class="viewcode-back" href="../../edward.data.html#edward.data.DataGenerator.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DataGenerator.next"><a class="viewcode-back" href="../../edward.data.html#edward.data.DataGenerator.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Data sampling method.</span>
 
 <span class="sd">        At any given point, the internal counter ``self.counter`` tracks the</span>
@@ -187,7 +187,7 @@
 <span class="sd">        np.ndarray</span>
 <span class="sd">            Array whose values are all subsampled.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">n_data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
         <span class="n">counter_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counter</span>
