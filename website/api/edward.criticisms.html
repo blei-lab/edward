@@ -32,7 +32,7 @@
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
         <link rel="up" title="edward package" href="edward.html"/>
-        <link rel="next" title="edward.data module" href="edward.data.html"/>
+        <link rel="next" title="edward.inferences module" href="edward.inferences.html"/>
         <link rel="prev" title="edward.stats.distributions module" href="edward.stats.distributions.html"/> 
 
   
@@ -88,7 +88,6 @@
 <li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">edward.criticisms module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="edward.data.html">edward.data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edward.inferences.html">edward.inferences module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edward.util.html">edward.util module</a></li>
 </ul>
@@ -241,7 +240,7 @@ that data point per row.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>model</em>, <em>variational</em>, <em>data</em>, <em>y_true=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>model</em>, <em>variational</em>, <em>data</em>, <em>y_true=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -258,6 +257,8 @@ Python, and PyMC3 models, the value type is a NumPy array or
 TensorFlow placeholder; for Stan, the value type is the type
 according to the Stan program&#8217;s data block.</li>
 <li><strong>y_true</strong> (<em>np.ndarray or tf.Tensor</em>) &#8211; True values to compare to in supervised learning tasks.</li>
+<li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of posterior samples for making predictions,
+using the posterior predictive distribution.</li>
 </ul>
 </td>
 </tr>
@@ -512,7 +513,7 @@ that data point.</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="edward.data.html" class="btn btn-neutral float-right" title="edward.data module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="edward.inferences.html" class="btn btn-neutral float-right" title="edward.inferences module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="edward.stats.distributions.html" class="btn btn-neutral" title="edward.stats.distributions module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

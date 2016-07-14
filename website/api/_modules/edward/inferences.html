@@ -132,11 +132,11 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">six</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.data</span> <span class="k">import</span> <span class="n">DataGenerator</span>
 <span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span><span class="p">,</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">PointMass</span>
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">kl_multivariate_normal</span><span class="p">,</span> <span class="n">log_sum_exp</span><span class="p">,</span> <span class="n">stop_gradient</span>
 
@@ -153,17 +153,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : ed.Model</span>
 <span class="sd">        probability model</span>
-<span class="sd">    data : dict</span>
-<span class="sd">        Dictionary of TensorFlow placeholders. The computational graph</span>
-<span class="sd">        uses this dictionary so that the data inputs may vary</span>
-<span class="sd">        when specified at runtime.</span>
-<span class="sd">    data_gen : dict</span>
-<span class="sd">        Dictionary where each placeholder in `data` is binded to a data</span>
-<span class="sd">        generator formed from the original data. The data generators</span>
-<span class="sd">        generate data to feed the placeholders at runtime. If the</span>
-<span class="sd">        original data is already composed of placeholders, then</span>
-<span class="sd">        `data_gen` is empty: the user will have to manually feed the</span>
-<span class="sd">        placeholders at runtime.</span>
+<span class="sd">    data : dict of tf.Tensor</span>
+<span class="sd">        Data dictionary whose values may vary at each session run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
@@ -179,10 +170,22 @@
 <span class="sd">            the key type is a string; for PyMC3, the key type is a</span>
 <span class="sd">            Theano shared variable. For TensorFlow, Python, and PyMC3</span>
 <span class="sd">            models, the value type is a NumPy array or TensorFlow</span>
-<span class="sd">            placeholder; for Stan, the value type is the type</span>
+<span class="sd">            tensor; for Stan, the value type is the type</span>
 <span class="sd">            according to the Stan program&#39;s data block.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If `data` is not passed in, the dictionary is empty.</span>
+
+<span class="sd">        Three options are available for batch training:</span>
+<span class="sd">        1. internally if user passes in data as a dictionary of NumPy</span>
+<span class="sd">           arrays;</span>
+<span class="sd">        2. externally if user passes in data as a dictionary of</span>
+<span class="sd">           TensorFlow placeholders (and manually feeds them);</span>
+<span class="sd">        3. externally if user passes in data as TensorFlow tensors</span>
+<span class="sd">           which are the outputs of data readers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">get_session</span><span class="p">()</span>
+        <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -192,27 +195,28 @@
             <span class="c"># take arbitrary data structure types in the data block</span>
             <span class="c"># and not just NumPy arrays (this makes it unamenable to</span>
             <span class="c"># TensorFlow placeholders). Therefore fix the data</span>
-            <span class="c"># dictionary `self.data` at compile time to `data`. No</span>
-            <span class="c"># placeholders need to be fed so `self.data_gen` is empty.</span>
+            <span class="c"># dictionary `self.data` at compile time to `data`.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_gen</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_gen</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Placeholder&#39;</span><span class="p">):</span>
-                        <span class="c"># If `data` already has TensorFlow</span>
-                        <span class="c"># placeholders, then set `self.data` to them.</span>
-                        <span class="c"># In such a case, there is no data to form</span>
-                        <span class="c"># data generators so `self.data_gen` is empty.</span>
-                        <span class="c"># The user will have to manually feed the</span>
-                        <span class="c"># placeholders at runtime.</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="c"># If `data` has TensorFlow placeholders, the user</span>
+                    <span class="c"># must manually feed them at each step of</span>
+                    <span class="c"># inference.</span>
+                    <span class="c"># If `data` has tensors that are the output of</span>
+                    <span class="c"># data readers, then batch training operates</span>
+                    <span class="c"># according to the reader.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="c"># If `data` has NumPy arrays, store the data</span>
+                    <span class="c"># in the computational graph.</span>
+                    <span class="n">placeholder</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                    <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span>
+                    <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span> <span class="p">{</span><span class="n">placeholder</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">placeholder</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="p">(</span><span class="k">None</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">placeholder</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">data_gen</span><span class="p">[</span><span class="n">placeholder</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataGenerator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MonteCarlo"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MonteCarlo">[docs]</a><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
@@ -281,7 +285,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">optimizer</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize variational inference algorithm.</span>
 
@@ -293,9 +297,12 @@
 <span class="sd">        ----------</span>
 <span class="sd">        n_iter : int, optional</span>
 <span class="sd">            Number of iterations for optimization.</span>
-<span class="sd">        n_data : int, optional</span>
-<span class="sd">            Number of samples for data subsampling. Default is to use all</span>
-<span class="sd">            the data.</span>
+<span class="sd">        n_minibatch : int, optional</span>
+<span class="sd">            Number of samples for data subsampling. Default is to use</span>
+<span class="sd">            all the data. Subsampling is available only if all data</span>
+<span class="sd">            passed in are NumPy arrays and the model is not a Stan</span>
+<span class="sd">            model. For subsampling details, see</span>
+<span class="sd">            `tf.train.slice_input_producer` and `tf.train.batch`.</span>
 <span class="sd">        n_print : int, optional</span>
 <span class="sd">            Number of iterations for each print progress. To suppress print</span>
 <span class="sd">            progress, then specify None.</span>
@@ -306,20 +313,30 @@
 <span class="sd">            Scope of TensorFlow variable objects to optimize over.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span> <span class="o">=</span> <span class="n">n_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">n_minibatch</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">=</span> <span class="n">n_print</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
-        <span class="c"># Set shape of data placeholders according to batch size.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-                <span class="n">value</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">]</span> <span class="o">+</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
+            <span class="c"># Re-assign data to batch tensors, with size given by `n_data`.</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">slices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">slice_input_producer</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="c"># By default use as many threads as CPUs.</span>
+            <span class="n">batches</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">,</span>
+                                     <span class="n">num_threads</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c"># `tf.train.batch` returns tf.Tensor if `slices` is a</span>
+                <span class="c"># list of size 1.</span>
+                <span class="n">batches</span> <span class="o">=</span> <span class="p">[</span><span class="n">batches</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span>
+                         <span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">batches</span><span class="p">)}</span>
 
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
                                          <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">)</span>
-            <span class="c"># Use ADAM with a decaying scale factor</span>
+            <span class="c"># Use ADAM with a decaying scale factor.</span>
             <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
             <span class="n">starter_learning_rate</span> <span class="o">=</span> <span class="mf">0.1</span>
             <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">exponential_decay</span><span class="p">(</span><span class="n">starter_learning_rate</span><span class="p">,</span>
@@ -336,7 +353,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">apply_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">losses</span><span class="o">=</span><span class="p">[</span><span class="n">loss</span><span class="p">])</span>
 
         <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">initialize_all_variables</span><span class="p">()</span>
-        <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+        <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="c"># Start input enqueue threads.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Coordinator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">start_queue_runners</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VariationalInference.update"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Run one iteration of optimizer for variational inference.</span>
@@ -347,9 +368,7 @@
 <span class="sd">            Loss function values after one iteration</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-        <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">)</span>
-                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_gen</span><span class="p">)}</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">],</span> <span class="n">feed_dict</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">loss</span></div>
 
 <div class="viewcode-block" id="VariationalInference.print_progress"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.print_progress">[docs]</a>    <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
@@ -368,14 +387,14 @@
                 <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VariationalInference.finalize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Finalize.</span>
-
-<span class="sd">        Empty method. (Optional.)</span>
+        <span class="sd">&quot;&quot;&quot;Function to call after convergence.</span>
 
 <span class="sd">        Any class based on ``VariationalInference`` **may**</span>
-<span class="sd">        implement this method.</span>
+<span class="sd">        overwrite this method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="c"># Ask threads to stop.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">request_stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VariationalInference.build_loss"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.build_loss">[docs]</a>    <span class="k">def</span> <span class="nf">build_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Build loss function.</span>
@@ -411,12 +430,12 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MFVI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MFVI.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MFVI.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="MFVI.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MFVI.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        n_minibatch : int, optional</span>
+<span class="sd">        n_samples : int, optional</span>
 <span class="sd">            Number of samples from variational model for calculating</span>
 <span class="sd">            stochastic gradients.</span>
 <span class="sd">        score : bool, optional</span>
@@ -429,7 +448,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="k">True</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">n_minibatch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MFVI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MFVI.build_loss"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MFVI.build_loss">[docs]</a>    <span class="k">def</span> <span class="nf">build_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -495,7 +514,7 @@
 <span class="sd">        expectation using Monte Carlo sampling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
         <span class="n">q_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
         <span class="n">losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">q_log_prob</span>
@@ -516,7 +535,7 @@
 <span class="sd">        expectation using Monte Carlo sampling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
@@ -541,7 +560,7 @@
 <span class="sd">        expectation using Monte Carlo sampling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
         <span class="n">q_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
         <span class="n">p_log_lik</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_lik</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
@@ -568,7 +587,7 @@
 <span class="sd">        expectation using Monte Carlo sampling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
         <span class="n">q_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
         <span class="n">p_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
@@ -596,7 +615,7 @@
 <span class="sd">        expectation using Monte Carlo sampling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
         <span class="n">mu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">layer</span><span class="o">.</span><span class="n">loc</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">layer</span><span class="o">.</span><span class="n">scale</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">layers</span><span class="p">])</span>
@@ -621,7 +640,7 @@
 <span class="sd">        expectation using Monte Carlo sampling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span> <span class="o">+</span> \
                     <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span></div></div>
@@ -638,16 +657,16 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">KLpq</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="KLpq.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.KLpq.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="KLpq.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.KLpq.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        n_minibatch : int, optional</span>
+<span class="sd">        n_samples : int, optional</span>
 <span class="sd">            Number of samples from variational model for calculating</span>
 <span class="sd">            stochastic gradients.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">n_minibatch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">KLpq</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="KLpq.build_loss"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.KLpq.build_loss">[docs]</a>    <span class="k">def</span> <span class="nf">build_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -684,7 +703,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
         <span class="c"># normalized importance weights</span>
         <span class="n">q_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
@@ -708,9 +727,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s">&quot;variational&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;num_vars&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;n_vars&#39;</span><span class="p">):</span>
                 <span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
-                <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">PointMass</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">num_vars</span><span class="p">,</span> <span class="n">params</span><span class="p">))</span>
+                <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">PointMass</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">n_vars</span><span class="p">,</span> <span class="n">params</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
                 <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">PointMass</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
@@ -749,17 +768,15 @@
 
 <span class="sd">        Computes the Hessian at the mode.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># use only a batch of data to estimate hessian</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
         <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
                                      <span class="n">scope</span><span class="o">=</span><span class="s">&#39;variational&#39;</span><span class="p">)</span>
         <span class="n">inv_cov</span> <span class="o">=</span> <span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">var_list</span><span class="p">)</span>
-        <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-        <span class="c"># use only a batch of data to estimate hessian</span>
-        <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">)</span>
-                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_gen</span><span class="p">)}</span>
         <span class="nb">print</span><span class="p">(</span><span class="s">&quot;Precision matrix:&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inv_cov</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">))</span></div></div>
+        <span class="nb">print</span><span class="p">(</span><span class="n">inv_cov</span><span class="o">.</span><span class="n">eval</span><span class="p">())</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Laplace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

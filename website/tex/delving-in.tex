@@ -34,20 +34,21 @@ whether the model captures the real-world process of coin flips. If it
 doesn't, then revise the model and repeat.
 
 This process defines the design of Edward. Four primary objects enable the
-above analysis. 
+above analysis.
 
 \subsubsection{Data}
 
-\texttt{Data} objects contain measurements. The structure of these objects must
-match the inputs of the probabilistic model. For example, 
+A data object contains measurements. It is a Python dictionary,
+typically comprised of strings naming a data object and NumPy arrays
+representing their values. For example,
 
 \begin{lstlisting}[language=Python]
-data_np = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-my_data = ed.Data(tf.constant(data_np, dtype=tf.float32))
+my_data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 \end{lstlisting}
 
-\texttt{Data} objects define a \texttt{sample} method that specifies how to
-sample minibatches of observations from the dataset.
+Data objects can also have their values be TensorFlow tensors in order
+to deal with settings such as when the data does not fit in memory.
+For more details see the \href{#}{data API}.
 
 \subsubsection{Models}\label{models}
 
@@ -58,7 +59,7 @@ There are two types of model objects in Edward:
 \end{enumerate}
 
 \textbf{Probability Models.}
-Edward supports probability models specified in TensorFlow, NumPy/SciPy, PyMC3,
+Edward supports probability models specified in TensorFlow, Python, PyMC3,
 or Stan. A probability model has the following structure.
 \begin{lstlisting}[language=Python]
 import edward as ed
@@ -67,8 +68,8 @@ import tensorflow as tf
 class probability_model():
     def __init__(...):
         ...
-        self.num_vars = ...
- 
+        self.n_vars = ...
+
     def log_prob(self, xs, zs):
         log_prior = ...
         log_likelihood = ...
@@ -76,62 +77,66 @@ class probability_model():
 
 my_model = probability_model(...)
 \end{lstlisting}
-The field \texttt{self.num\_vars} holds the number of latent variables in the
+The field \texttt{n\_vars} denotes the number of latent variables in the
 probability model. For example, a model with a Gaussian likelihood with latent
-mean and variance would have \texttt{self.num\_vars=2*N} latent variables for 
+mean and variance would have \texttt{n\_vars=2*N} latent variables for
 \texttt{N} observations.
 
-The method \texttt{self.log_prob(xs, zs)} calculates the log probability of the
-joint density $\log p(x,z)$. Here \texttt{xs} contains the data and \texttt{zs}
-are the latent variables.
+The method \texttt{log_prob(xs, zs)} calculates the log probability of
+the joint density $\log p(x,z)$. Here \texttt{xs} contains the data
+and \texttt{zs} are the latent variables. \texttt{xs} can be a single
+data point or a batch, and analogously, \texttt{zs} can be a single set or
+multiple sets of latent variables.
 
-This describes the probability model, which is a joint distribution of data $x$
-and latent variables $z$. Given a model, we aim to reason about $z$ given some
-data: the latent patterns conditioned on some data. The posterior distribution
-$p(z \mid x)$ captures our reasoning: its mean describes our best guess of the
-latent patterns, and its variance describes the uncertainty around our best
-guess. 
+This describes the probability model, which is a joint distribution of
+data $x$ and latent variables $z$. Given a model and data, we aim to
+reason about $z$: the model's hidden patterns conditioned on the data. The
+posterior distribution $p(z \mid x)$ captures our reasoning: its mean
+describes our best guess of the hidden patterns, and its variance
+describes the uncertainty around our best guess.
 
 \textbf{Variational Models.}
-Edward uses variational inference to approximate the posterior. To this end,
-Edward implements a foundational \texttt{Variational()} class and a library of
-\texttt{Distribution()} objects. Variational models combine these using
-the \texttt{add()} syntax.
+Edward uses variational inference to approximate the posterior. To
+this end, Edward has a \texttt{Variational} class and a library of
+\texttt{Distribution} objects. Variational models combine these
+using the \texttt{add()} syntax.
 
 For example, to specify this variational model (e.g.~for a Gaussian mixture)
 \begin{align*}
-  q(z \;;\; \lambda) 
+  q(z \;;\; \lambda)
   &=
   \text{Dirichlet}(z_\pi)
   \times
   \mathcal{N}(z_\mu)
   \times
-  \text{LogNorm}(z_\sigma)
+  \text{InvGamma}(z_\sigma)
 \end{align*}
 we would write
 \begin{lstlisting}[language=Python]
-from edward.models import Variational, Dirichlet, Normal, LogNorm
+from edward.models import Variational, Dirichlet, Normal, InvGamma
 
 my_variational = Variational()
 my_variational.add(Dirichlet(K))
 my_variational.add(Normal(K*D))
-my_variational.add(LogNorm(K*D))
+my_variational.add(InvGamma(K*D))
 \end{lstlisting}
-Ordering matters; variational models must match the same ordering as latent
-variable declarations in \texttt{probability_model.log_prob(xs, zs)}.
+Ordering matters: variational models must match the same ordering as latent
+variables accessed in \texttt{probability_model.log_prob(xs, zs)}.
 
 \subsubsection{Inference}\label{inference}
 
-Edward implements a variety of inference procedures. Current techniques
+Edward implements a variety of inference methods. Current techniques
 leverage variational inference, which seeks to match the variational model
-$q(z \;;\; \lambda)$ to the posterior of the probability model 
+$q(z \;;\; \lambda)$ to the posterior of the probability model
 $p(z \mid x)$.
 
 \includegraphics{images/inference_structure.png}
+[in caption-style.] Dependency graph of inference methods. Each
+node is a class in Edward and arrows represent class inheritance.
 
-Each algorithm minimizes a different loss metric between the variational model
-and the posterior. Algorithms that derive from \texttt{VariationalInference()}
-take as input a probability model, a variational model, and data. 
+Each algorithm minimizes a different loss function between the variational model
+and the posterior. Algorithms derived from \texttt{VariationalInference}
+take as input a probability model, a variational model, and data.
 
 For example, to minimize the Kullback-Leibler divergence
 \begin{align*}
@@ -142,16 +147,23 @@ we would write
 inference = ed.KLpq(my_model, my_variational, my_data)
 inference.run(n_iter=500, n_minibatch=5)
 \end{lstlisting}
-which runs the \texttt{KLpq} minimization algorithm for \texttt{500} iterations,
-drawing minibatches of \texttt{5} samples from the data at every iteration.
+This runs the \texttt{KLpq} minimization algorithm for \texttt{500} iterations,
+using a batch of \texttt{5} data points per iteration.
 
-Edward offers many inference procedures; they are best explored through 
+Edward offers many inference methods; they are best explored through
 \href{tutorials.html}{tutorials}.
 
 \subsubsection{Criticism}\label{criticism}
 
-Edward actively encourages criticizing models and inference procedures. To that
-end, Edward provides a \texttt{criticisms} module that implements:
+Criticizing models and their inference is a crucial step in analysis.
+Following
+falsificationists such as Popper and Box, we can never validate
+whether a model is true---no model will be true in practice---but we
+can seek to uncover where the model goes wrong. Criticism can
+help justify the model fit as an approximation or point to good directions
+for looping back and revising the model.
+
+To this end, Edward provides a \texttt{criticisms} module that implements:
 \begin{enumerate}
   \item posterior predictive checks
   \item metric-based evaluations (e.g.~mean squared error, binary accuracy)
@@ -163,13 +175,13 @@ your modeling workflow.
 \subsubsection{References}\label{references}
 
 \begin{itemize}
-\item 
+\item
   Box, G.E.P. (1976). Science and Statistics. Journal of the American
   Statistical Association, 71(356), 791–799
 \item
   Box, G.E.P. (1980). Sampling and Bayes' inference in scientific modelling and
   robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.
-\item 
+\item
   Gelman, A., Meng, X.-L., \& Stern, H. (1996). Posterior predictive assessment
   of model fitness via realized discrepancies. Statistica Sinica.
 \item

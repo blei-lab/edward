@@ -83,8 +83,9 @@
 <pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
 <p>See the <a href="troubleshooting.html">troubleshooting page</a> for detailed installation instructions.</p>
 <h3 id="your-first-edward-program">Your first Edward program</h3>
-<p>Probabilistic models are built in Edward using one of the available modeling languages. Here we use TensorFlow to define a Bayesian neural network. It is a neural network with prior distributions on its weights. (This is abridged; complete example <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
+<p>Probabilistic models are built in Edward using one of the available modeling languages. Here we use TensorFlow to define a Bayesian neural network. It is a neural network with a prior distribution on its weights. (This example is abridged; full source <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
 <pre class="python" language="Python"><code>import tensorflow as tf
+from edward.stats import norm
 
 class BayesianNN:
     &quot;&quot;&quot;Bayesian neural network for regression&quot;&quot;&quot;
@@ -111,7 +112,7 @@ data = {&#39;x&#39;: np.array(...), &#39;y&#39;: np.array(...)}</code></pre>
 
 variational = Variational()
 variational.add(Normal(model.n_vars))</code></pre>
-<p>with the number of latent variables given by the model.</p>
+<p>The number of latent variables <code>model.n_vars</code> is the number of weights and biases in the neural network.</p>
 <p>Run mean-field variational inference. We use <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
 <pre class="python" language="Python"><code>import edward as ed
 
@@ -119,6 +120,7 @@ inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=10)</code></pre>
 <p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
 <p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
+<p>The model has learned the cosine relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="tutorials.html">tutorials</a>.</p>
     </div>

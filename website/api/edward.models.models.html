@@ -333,7 +333,7 @@ shape.</p>
 
 <dl class="method">
 <dt id="edward.models.models.Variational.sample">
-<code class="descname">sample</code><span class="sig-paren">(</span><em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational.sample" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sample</code><span class="sig-paren">(</span><em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draws a mix of tensors and placeholders, corresponding to
 TensorFlow-based samplers and SciPy-based samplers depending
 on the layer.</p>
@@ -341,11 +341,11 @@ on the layer.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int, optional</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int, optional</em>) &#8211; Number of samples.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If more than one layer, a list of tf.Tensors of dimension
-(size x shape), one for each layer. If one layer, a
-tf.Tensor of (size x shape). If a layer requires SciPy to
+(n x shape), one for each layer. If one layer, a
+tf.Tensor of (n x shape). If a layer requires SciPy to
 sample, its corresponding tensor is a tf.placeholder.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list or tf.Tensor</td>
