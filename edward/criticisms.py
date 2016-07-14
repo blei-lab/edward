@@ -9,7 +9,7 @@ import tensorflow as tf
 from edward.util import logit, get_dims, get_session
 
 
-def evaluate(metrics, model, variational, data, y_true=None):
+def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
     """Evaluate fitted model using a set of metrics.
 
     Parameters
@@ -29,6 +29,9 @@ def evaluate(metrics, model, variational, data, y_true=None):
         according to the Stan program's data block.
     y_true : np.ndarray or tf.Tensor
         True values to compare to in supervised learning tasks.
+    n_samples : int, optional
+        Number of posterior samples for making predictions,
+        using the posterior predictive distribution.
 
     Returns
     -------
@@ -43,8 +46,7 @@ def evaluate(metrics, model, variational, data, y_true=None):
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
     # 1. Sample a batch of latent variables from posterior
-    n_minibatch = 100
-    zs = variational.sample(size=n_minibatch)
+    zs = variational.sample(n_samples)
     # 2. Make predictions, averaging over each sample of latent variables
     y_pred = model.predict(data, zs)
 

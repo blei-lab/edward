@@ -11,10 +11,10 @@ from edward.util import get_dims
 sess = tf.Session()
 
 
-def _test(shape, a, b, size):
+def _test(shape, a, b, n):
     x = Beta(shape, a, b)
-    val_est = tuple(get_dims(x.sample(size=size)))
-    val_true = (size, ) + shape
+    val_est = tuple(get_dims(x.sample(n)))
+    val_true = (n, ) + shape
     assert val_est == val_true
 
 

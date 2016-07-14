@@ -47,7 +47,7 @@ class MixtureGaussian:
     def __init__(self, K, D):
         self.K = K
         self.D = D
-        self.num_vars = (2*D + 1) * K
+        self.n_vars = (2*D + 1) * K
 
         self.a = 1
         self.b = 1
@@ -74,10 +74,10 @@ class MixtureGaussian:
         log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
         log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
 
-        # Loop over each mini-batch zs[b,:]
+        # Loop over each sample zs[b,:]
         log_lik = []
-        n_minibatch = get_dims(zs)[0]
-        for s in range(n_minibatch):
+        n_samples = get_dims(zs)[0]
+        for s in range(n_samples):
             log_lik_z = N*tf.reduce_sum(tf.log(pi))
             for k in range(self.K):
                 log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs['x'],
@@ -95,4 +95,4 @@ data = {'x': x}
 
 model = MixtureGaussian(K=2, D=2)
 inference = ed.MAP(model, data)
-inference.run(n_iter=250, n_data=5, n_print=50)
+inference.run(n_iter=250, n_minibatch=5, n_print=50)

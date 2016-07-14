@@ -56,9 +56,9 @@ class BayesianNN:
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
 
-        self.num_layers = len(layer_sizes)
+        self.n_layers = len(layer_sizes)
         self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
-        self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
+        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):
         """Unpack weight matrices and biases from a flattened vector."""
@@ -67,58 +67,49 @@ class BayesianNN:
                   tf.reshape(z[m*n:(m*n+n)], [1, n])
             z = z[(m+1)*n:]
 
-    def mapping(self, x, z):
+    def neural_network(self, x, zs):
         """
-        mu = NN(x; z)
-
-        Note this is one sample of z at a time.
-
-        Parameters
-        -------
-        x : tf.tensor
-            n_data x D
-
-        z : tf.tensor
-            num_vars
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_data
+        Return a `n_samples` x `n_minibatch` matrix. Each row is
+        the output of a neural network on the input data `x` and
+        given a set of weights `z` in `zs`.
         """
-        h = x
-        for W, b in self.unpack_weights(z):
-            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
-            h = self.nonlinearity(tf.matmul(h, W) + b)
+        matrix = []
+        for z in tf.unpack(zs):
+            # Calculate neural network with weights given by `z`.
+            h = x
+            for W, b in self.unpack_weights(z):
+                # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
+                h = self.nonlinearity(tf.matmul(h, W) + b)
 
-        h = tf.squeeze(h) # n_data x 1 to n_data
-        return h
+            matrix += [tf.squeeze(h)] # n_minibatch x 1 to n_minibatch
+
+        return tf.pack(matrix)
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
         log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
-        mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
-        # broadcasting to do mus - y (n_minibatch x n_data - n_data)
+        mus = self.neural_network(x, zs)
+        # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
 
 
-def build_toy_dataset(n_data=40, noise_std=0.1):
+def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
-                         np.linspace(6, 8, num=n_data/2)])
-    y = np.cos(x) + norm.rvs(0, noise_std, size=n_data)
+    x  = np.concatenate([np.linspace(0, 2, num=N/2),
+                         np.linspace(6, 8, num=N/2)])
+    y = np.cos(x) + norm.rvs(0, noise_std, size=n_minibatch)
     x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, D))
+    x = x.reshape((n_minibatch, D))
     return {'x': x, 'y': y}
 
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 data = build_toy_dataset()
 
 # Set up figure
@@ -129,7 +120,7 @@ plt.show(block=False)
 
 sess = ed.get_session()
 inference = ed.MFVI(model, variational, data)
-inference.initialize(n_print=10)
+inference.initialize(n_print=100)
 for t in range(1000):
     loss = inference.update()
     if t % inference.n_print == 0:
@@ -139,11 +130,11 @@ for t in range(1000):
         mean, std = sess.run([variational.layers[0].loc,
                               variational.layers[0].scale])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, variational.num_vars) * std + mean
+        zs = rs.randn(10, variational.n_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
-        mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
+        mus = model.neural_network(x, zs)
         outputs = mus.eval()
 
         # Get data

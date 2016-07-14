@@ -2,11 +2,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import multiprocessing
 import numpy as np
 import six
 import tensorflow as tf
 
-from edward.data import DataGenerator
 from edward.models import StanModel, Variational, PointMass
 from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
@@ -23,17 +23,8 @@ class Inference(object):
     ----------
     model : ed.Model
         probability model
-    data : dict
-        Dictionary of TensorFlow placeholders. The computational graph
-        uses this dictionary so that the data inputs may vary
-        when specified at runtime.
-    data_gen : dict
-        Dictionary where each placeholder in `data` is binded to a data
-        generator formed from the original data. The data generators
-        generate data to feed the placeholders at runtime. If the
-        original data is already composed of placeholders, then
-        `data_gen` is empty: the user will have to manually feed the
-        placeholders at runtime.
+    data : dict of tf.Tensor
+        Data dictionary whose values may vary at each session run.
     """
     def __init__(self, model, data=None):
         """Initialization.
@@ -49,10 +40,22 @@ class Inference(object):
             the key type is a string; for PyMC3, the key type is a
             Theano shared variable. For TensorFlow, Python, and PyMC3
             models, the value type is a NumPy array or TensorFlow
-            placeholder; for Stan, the value type is the type
+            tensor; for Stan, the value type is the type
             according to the Stan program's data block.
+
+        Notes
+        -----
+        If `data` is not passed in, the dictionary is empty.
+
+        Three options are available for batch training:
+        1. internally if user passes in data as a dictionary of NumPy
+           arrays;
+        2. externally if user passes in data as a dictionary of
+           TensorFlow placeholders (and manually feeds them);
+        3. externally if user passes in data as TensorFlow tensors
+           which are the outputs of data readers.
         """
-        get_session()
+        sess = get_session()
         self.model = model
         if data is None:
             data = {}
@@ -62,27 +65,28 @@ class Inference(object):
             # take arbitrary data structure types in the data block
             # and not just NumPy arrays (this makes it unamenable to
             # TensorFlow placeholders). Therefore fix the data
-            # dictionary `self.data` at compile time to `data`. No
-            # placeholders need to be fed so `self.data_gen` is empty.
+            # dictionary `self.data` at compile time to `data`.
             self.data = data
-            self.data_gen = {}
         else:
             self.data = {}
-            self.data_gen = {}
             for key, value in six.iteritems(data):
                 if isinstance(value, tf.Tensor):
-                    if value.name.startswith('Placeholder'):
-                        # If `data` already has TensorFlow
-                        # placeholders, then set `self.data` to them.
-                        # In such a case, there is no data to form
-                        # data generators so `self.data_gen` is empty.
-                        # The user will have to manually feed the
-                        # placeholders at runtime.
-                        self.data[key] = value
+                    # If `data` has TensorFlow placeholders, the user
+                    # must manually feed them at each step of
+                    # inference.
+                    # If `data` has tensors that are the output of
+                    # data readers, then batch training operates
+                    # according to the reader.
+                    self.data[key] = value
+                elif isinstance(value, np.ndarray):
+                    # If `data` has NumPy arrays, store the data
+                    # in the computational graph.
+                    placeholder = tf.placeholder(tf.float32, value.shape)
+                    var = tf.Variable(placeholder, trainable=False, collections=[])
+                    self.data[key] = var
+                    sess.run(var.initializer, {placeholder: value})
                 else:
-                    placeholder = tf.placeholder(tf.float32, (None, ) + value.shape[1:])
-                    self.data[key] = placeholder
-                    self.data_gen[placeholder] = DataGenerator(value)
+                    raise NotImplementedError()
 
 
 class MonteCarlo(Inference):
@@ -151,7 +155,7 @@ class VariationalInference(Inference):
 
         self.finalize()
 
-    def initialize(self, n_iter=1000, n_data=None, n_print=100,
+    def initialize(self, n_iter=1000, n_minibatch=None, n_print=100,
         optimizer=None, scope=None):
         """Initialize variational inference algorithm.
 
@@ -163,9 +167,12 @@ class VariationalInference(Inference):
         ----------
         n_iter : int, optional
             Number of iterations for optimization.
-        n_data : int, optional
-            Number of samples for data subsampling. Default is to use all
-            the data.
+        n_minibatch : int, optional
+            Number of samples for data subsampling. Default is to use
+            all the data. Subsampling is available only if all data
+            passed in are NumPy arrays and the model is not a Stan
+            model. For subsampling details, see
+            `tf.train.slice_input_producer` and `tf.train.batch`.
         n_print : int, optional
             Number of iterations for each print progress. To suppress print
             progress, then specify None.
@@ -176,20 +183,30 @@ class VariationalInference(Inference):
             Scope of TensorFlow variable objects to optimize over.
         """
         self.n_iter = n_iter
-        self.n_data = n_data
+        self.n_minibatch = n_minibatch
         self.n_print = n_print
         self.loss = tf.constant(0.0)
 
-        # Set shape of data placeholders according to batch size.
-        if not isinstance(self.model, StanModel):
-            for value in six.itervalues(self.data):
-                value.set_shape([self.n_data] + get_dims(value)[1:])
+        if n_minibatch is not None and not isinstance(self.model, StanModel):
+            # Re-assign data to batch tensors, with size given by `n_data`.
+            values = list(six.itervalues(self.data))
+            slices = tf.train.slice_input_producer(values)
+            # By default use as many threads as CPUs.
+            batches = tf.train.batch(slices, self.n_minibatch,
+                                     num_threads=multiprocessing.cpu_count())
+            if not isinstance(batches, list):
+                # `tf.train.batch` returns tf.Tensor if `slices` is a
+                # list of size 1.
+                batches = [batches]
+
+            self.data = {key: value for key, value in
+                         zip(six.iterkeys(self.data), batches)}
 
         loss = self.build_loss()
         if optimizer is None:
             var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                          scope=scope)
-            # Use ADAM with a decaying scale factor
+            # Use ADAM with a decaying scale factor.
             global_step = tf.Variable(0, trainable=False)
             starter_learning_rate = 0.1
             learning_rate = tf.train.exponential_decay(starter_learning_rate,
@@ -208,6 +225,10 @@ class VariationalInference(Inference):
         init = tf.initialize_all_variables()
         init.run()
 
+        # Start input enqueue threads.
+        self.coord = tf.train.Coordinator()
+        self.threads = tf.train.start_queue_runners(coord=self.coord)
+
     def update(self):
         """Run one iteration of optimizer for variational inference.
 
@@ -217,9 +238,7 @@ class VariationalInference(Inference):
             Loss function values after one iteration
         """
         sess = get_session()
-        feed_dict = {key: value.next(self.n_data)
-                     for key, value in six.iteritems(self.data_gen)}
-        _, loss = sess.run([self.train, self.loss], feed_dict)
+        _, loss = sess.run([self.train, self.loss])
         return loss
 
     def print_progress(self, t, loss):
@@ -238,14 +257,14 @@ class VariationalInference(Inference):
                 print(self.variational)
 
     def finalize(self):
-        """Finalize.
-
-        Empty method. (Optional.)
+        """Function to call after convergence.
 
         Any class based on ``VariationalInference`` **may**
-        implement this method.
+        overwrite this method.
         """
-        pass
+        # Ask threads to stop.
+        self.coord.request_stop()
+        self.coord.join(self.threads)
 
     def build_loss(self):
         """Build loss function.
@@ -281,12 +300,12 @@ class MFVI(VariationalInference):
     def __init__(self, *args, **kwargs):
         super(MFVI, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_minibatch=1, score=None, *args, **kwargs):
+    def initialize(self, n_samples=1, score=None, *args, **kwargs):
         """Initialization.
 
         Parameters
         ----------
-        n_minibatch : int, optional
+        n_samples : int, optional
             Number of samples from variational model for calculating
             stochastic gradients.
         score : bool, optional
@@ -299,7 +318,7 @@ class MFVI(VariationalInference):
         else:
             self.score = True
 
-        self.n_minibatch = n_minibatch
+        self.n_samples = n_samples
         return super(MFVI, self).initialize(*args, **kwargs)
 
     def build_loss(self):
@@ -365,7 +384,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
@@ -386,7 +405,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
                                    self.variational.log_prob(z))
@@ -411,7 +430,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_lik = self.model.log_lik(x, z)
@@ -438,7 +457,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         p_log_prob = self.model.log_prob(x, z)
@@ -466,7 +485,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         mu = tf.pack([layer.loc for layer in self.variational.layers])
         sigma = tf.pack([layer.scale for layer in self.variational.layers])
@@ -491,7 +510,7 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
         self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
                     self.variational.entropy()
         return -self.loss
@@ -508,16 +527,16 @@ class KLpq(VariationalInference):
     def __init__(self, *args, **kwargs):
         super(KLpq, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_minibatch=1, *args, **kwargs):
+    def initialize(self, n_samples=1, *args, **kwargs):
         """Initialization.
 
         Parameters
         ----------
-        n_minibatch : int, optional
+        n_samples : int, optional
             Number of samples from variational model for calculating
             stochastic gradients.
         """
-        self.n_minibatch = n_minibatch
+        self.n_samples = n_samples
         return super(KLpq, self).initialize(*args, **kwargs)
 
     def build_loss(self):
@@ -554,7 +573,7 @@ class KLpq(VariationalInference):
 
         """
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         # normalized importance weights
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -578,9 +597,9 @@ class MAP(VariationalInference):
     """
     def __init__(self, model, data=None, params=None):
         with tf.variable_scope("variational"):
-            if hasattr(model, 'num_vars'):
+            if hasattr(model, 'n_vars'):
                 variational = Variational()
-                variational.add(PointMass(model.num_vars, params))
+                variational.add(PointMass(model.n_vars, params))
             else:
                 variational = Variational()
                 variational.add(PointMass(0))
@@ -619,14 +638,12 @@ class Laplace(MAP):
 
         Computes the Hessian at the mode.
         """
+        # use only a batch of data to estimate hessian
         x = self.data
         z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
         inv_cov = hessian(self.model.log_prob(x, z), var_list)
-        sess = get_session()
-        # use only a batch of data to estimate hessian
-        feed_dict = {key: value.next(self.n_data)
-                     for key, value in six.iteritems(self.data_gen)}
         print("Precision matrix:")
-        print(sess.run(inv_cov, feed_dict))
+        print(inv_cov.eval())
+        super(Laplace, self).finalize()

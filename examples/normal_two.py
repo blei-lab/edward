@@ -24,7 +24,7 @@ class NormalPosterior:
     def __init__(self, mu, Sigma):
         self.mu = mu
         self.Sigma = Sigma
-        self.num_vars = get_dims(mu)[0]
+        self.n_vars = get_dims(mu)[0]
 
     def log_prob(self, xs, zs):
         return multivariate_normal.logpdf(zs, self.mu, self.Sigma)
@@ -37,7 +37,7 @@ Sigma = tf.constant(
  [0.1, 1.0]])
 model = NormalPosterior(mu, Sigma)
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 
 inference = ed.MFVI(model, variational)
 inference.run(n_iter=10000)

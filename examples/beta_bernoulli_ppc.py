@@ -26,7 +26,7 @@ class BetaBernoulli:
     p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
     """
     def __init__(self):
-        self.num_vars = 1
+        self.n_vars = 1
 
     def log_prob(self, xs, zs):
         log_prior = beta.logpdf(zs, a=1.0, b=1.0)
@@ -46,7 +46,7 @@ class BetaBernoulli:
 ed.set_seed(42)
 model = BetaBernoulli()
 variational = Variational()
-variational.add(Beta(model.num_vars))
+variational.add(Beta(model.n_vars))
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 inference = ed.MFVI(model, variational, data)
