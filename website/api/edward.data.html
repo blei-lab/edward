@@ -30,10 +30,7 @@
   
 
   
-    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
-        <link rel="up" title="edward package" href="edward.html"/>
-        <link rel="next" title="edward.inferences module" href="edward.inferences.html"/>
-        <link rel="prev" title="edward.criticisms module" href="edward.criticisms.html"/> 
+    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,19 +79,9 @@
           
             
             
-                <ul class="current">
+                <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="edward.criticisms.html">edward.criticisms module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">edward.data module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="edward.inferences.html">edward.inferences module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="edward.util.html">edward.util module</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
 </ul>
 
             
@@ -125,8 +112,6 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-          <li><a href="edward.html">edward package</a> &raquo;</li>
-      
     <li>edward.data module</li>
       <li class="wy-breadcrumbs-aside">
         
@@ -145,7 +130,7 @@
 <span id="edward-data-module"></span><h1>edward.data module<a class="headerlink" href="#module-edward.data" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="edward.data.DataGenerator">
-<em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">DataGenerator</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/data.html#DataGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.data.DataGenerator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.data.</code><code class="descname">DataGenerator</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.DataGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base class for Edward data generators.</p>
 <p>Its only method is next(), which returns a batch of data. By
@@ -168,7 +153,7 @@ It is used to obtain the next batch of data starting from
 </table>
 <dl class="method">
 <dt id="edward.data.DataGenerator.next">
-<code class="descname">next</code><span class="sig-paren">(</span><em>n_data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/data.html#DataGenerator.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.data.DataGenerator.next" title="Permalink to this definition">¶</a></dt>
+<code class="descname">next</code><span class="sig-paren">(</span><em>n_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.data.DataGenerator.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sampling method.</p>
 <p>At any given point, the internal counter <code class="docutils literal"><span class="pre">self.counter</span></code> tracks the
 last datapoint returned by <code class="docutils literal"><span class="pre">next</span></code>.</p>
@@ -200,15 +185,6 @@ beginning of the dataset.</p>
            </div>
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="edward.inferences.html" class="btn btn-neutral float-right" title="edward.inferences module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="edward.criticisms.html" class="btn btn-neutral" title="edward.criticisms module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

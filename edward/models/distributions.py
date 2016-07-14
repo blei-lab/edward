@@ -7,6 +7,7 @@ import tensorflow as tf
 
 from edward.stats import bernoulli, beta, norm, dirichlet, invgamma, multinomial
 from edward.util import cumprod, get_dims, get_session, to_simplex
+from itertools import product
 
 
 class Distribution(object):
@@ -21,9 +22,9 @@ class Distribution(object):
     ----------
     shape : tuple
         shape of random variable(s); see below
-    num_vars : int
+    n_vars : int
         the number of variables; equals the product of ``shape``
-    num_params : int
+    n_params : int
         the number of parameters
     is_multivariate : bool
         ``True`` if ``Distribution`` is multivariate
@@ -49,12 +50,12 @@ class Distribution(object):
             shape = tuple(shape)
 
         self.shape = shape
-        self.num_vars = np.prod(self.shape)
-        self.num_params = None
+        self.n_vars = np.prod(self.shape)
+        self.n_params = None
         self.is_multivariate = False
         self.is_reparameterized = False
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         """Sample from ``Distribution``.
 
         .. math::
@@ -62,13 +63,13 @@ class Distribution(object):
 
         Parameters
         ----------
-        size : int, optional
+        n : int, optional
             Number of samples to return.
 
         Returns
         -------
         tf.Tensor
-            A (size x shape) array of type tf.float32, where each
+            A (n x shape) array of type tf.float32, where each
             slice along the first dimension is a sample from p.
         """
         raise NotImplementedError()
@@ -81,7 +82,7 @@ class Distribution(object):
         Parameters
         ----------
         xs : tf.Tensor or np.ndarray
-            n_minibatch x self.shape
+            n x self.shape
 
         Returns
         -------
@@ -92,51 +93,42 @@ class Distribution(object):
 
                 [ sum_{idx in shape} log p(xs[1, idx] | params[idx]),
                 ...,
-                sum_{idx in shape} log p(xs[n_minibatch, idx] | params[idx]) ]
+                sum_{idx in shape} log p(xs[n, idx] | params[idx]) ]
         """
         # Loop over each random variable.
         # If univariate distribution, this is over all indices; if
         # multivariate distribution, this is over all but the last
         # index.
-        n_minibatch = get_dims(xs)[0]
-        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        n = get_dims(xs)[0]
+        log_prob = tf.zeros([n], dtype=tf.float32)
         if len(self.shape) == 1:
             if self.is_multivariate:
                 idx = ()
                 log_prob += self.log_prob_idx(idx, xs)
             else:
-                for i in range(self.shape[0]):
-                    idx = (i, )
+                for idx in product(range(self.shape[0])):
                     log_prob += self.log_prob_idx(idx, xs)
 
         elif len(self.shape) == 2:
             if self.is_multivariate:
-                for i in range(self.shape[0]):
-                    idx = (i, )
+                for idx in product(range(self.shape[0])):
                     log_prob += self.log_prob_idx(idx, xs)
 
             else:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[1]):
-                        idx = (i, j, )
-                        log_prob += self.log_prob_idx(idx, xs)
+                for idx in product(range(self.shape[0]), range(self.shape[1])):
+                    log_prob += self.log_prob_idx(idx, xs)
 
         elif len(self.shape) == 3:
             if self.is_multivariate:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[1]):
-                        idx = (i, j, )
-                        log_prob += self.log_prob_idx(idx, xs)
+                for idx in product(range(self.shape[0]), range(self.shape[1])):
+                    log_prob += self.log_prob_idx(idx, xs)
 
             else:
-                for i in range(self.shape[0]):
-                    for j in range(self.shape[1]):
-                        for k in range(self.shape[2]):
-                            idx = (i, j, k, )
-                            log_prob += self.log_prob_idx(idx, xs)
+                for idx in product(range(self.shape[0]), range(self.shape[1]), range(self.shape[2])):
+                    log_prob += self.log_prob_idx(idx, xs)
 
         else: # len(self.shape) >= 4
-            # There should be a generic recursive solution.
+            # There should be a generic solution.
             raise NotImplementedError()
 
         return log_prob
@@ -155,7 +147,7 @@ class Distribution(object):
             length len(self.shape[:-1]); note if len(self.shape) is 1
             for multivariate, then idx must be an empty tuple.
         xs : tf.Tensor or np.ndarray
-            of size ``[n_minibatch x self.shape]``
+            of size ``[n x self.shape]``
 
         Returns
         -------
@@ -198,7 +190,7 @@ class Bernoulli(Distribution):
     """
     def __init__(self, shape=1, p=None):
         super(Bernoulli, self).__init__(shape)
-        self.num_params = self.num_vars
+        self.n_params = self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -212,20 +204,20 @@ class Bernoulli(Distribution):
         p = self.p.eval()
         return "probability: \n" + p.__str__()
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         # Define Python function which returns samples as a Numpy
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(p):
             # get `size` from lexical scoping
-            return bernoulli.rvs(p, size=size).astype(np.float32)
+            return bernoulli.rvs(p, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.p], [tf.float32])[0]
-        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        x.set_shape((n, ) + self.shape) # set shape from unknown shape
         return x
 
     def log_prob_idx(self, idx, xs):
-        full_idx = (slice(0, None), ) + idx # slice over batch size
+        full_idx = (slice(0, None), ) + idx # slice over sample size
         return bernoulli.logpmf(xs[full_idx], self.p[idx])
 
     def entropy(self):
@@ -239,7 +231,7 @@ class Beta(Distribution):
     """
     def __init__(self, shape=1, alpha=None, beta=None):
         super(Beta, self).__init__(shape)
-        self.num_params = 2*self.num_vars
+        self.n_params = 2*self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -260,20 +252,20 @@ class Beta(Distribution):
         return "shape: \n" + a.__str__() + "\n" + \
                "scale: \n" + b.__str__()
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         # Define Python function which returns samples as a Numpy
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(a, b):
             # get `size` from lexical scoping
-            return beta.rvs(a, b, size=size).astype(np.float32)
+            return beta.rvs(a, b, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
-        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        x.set_shape((n, ) + self.shape) # set shape from unknown shape
         return x
 
     def log_prob_idx(self, idx, xs):
-        full_idx = (slice(0, None), ) + idx # slice over batch size
+        full_idx = (slice(0, None), ) + idx # slice over sample size
         return beta.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
     def entropy(self):
@@ -287,7 +279,7 @@ class Dirichlet(Distribution):
     """
     def __init__(self, shape, alpha=None):
         super(Dirichlet, self).__init__(shape)
-        self.num_params = self.num_vars
+        self.n_params = self.n_vars
         self.is_multivariate = True
         self.is_reparameterized = False
 
@@ -301,16 +293,16 @@ class Dirichlet(Distribution):
         alpha = self.alpha.eval()
         return "concentration: \n" + alpha.__str__()
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         # Define Python function which returns samples as a Numpy
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(alpha):
             # get `size` from lexical scoping
-            return dirichlet.rvs(alpha, size=size).astype(np.float32)
+            return dirichlet.rvs(alpha, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha], [tf.float32])[0]
-        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        x.set_shape((n, ) + self.shape) # set shape from unknown shape
         return x
 
     def log_prob_idx(self, idx, xs):
@@ -319,7 +311,7 @@ class Dirichlet(Distribution):
         where ``idx`` is of dimension ``shape[:-1]``
         """
         idx = idx + (slice(0, None), ) # slice over multivariate dimension
-        full_idx = (slice(0, None), ) + idx # slice over batch size
+        full_idx = (slice(0, None), ) + idx # slice over sample size
         return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
 
     def entropy(self):
@@ -333,7 +325,7 @@ class InvGamma(Distribution):
     """
     def __init__(self, shape=1, alpha=None, beta=None):
         super(InvGamma, self).__init__(shape)
-        self.num_params = 2*self.num_vars
+        self.n_params = 2*self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -354,20 +346,20 @@ class InvGamma(Distribution):
         return "shape: \n" + a.__str__() + "\n" + \
                "scale: \n" + b.__str__()
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         # Define Python function which returns samples as a Numpy
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(a, scale):
             # get `size` from lexical scoping
-            return invgamma.rvs(a, scale=scale, size=size).astype(np.float32)
+            return invgamma.rvs(a, scale=scale, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
-        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        x.set_shape((n, ) + self.shape) # set shape from unknown shape
         return x
 
     def log_prob_idx(self, idx, xs):
-        full_idx = (slice(0, None), ) + idx # slice over batch size
+        full_idx = (slice(0, None), ) + idx # slice over sample size
         return invgamma.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
     def entropy(self):
@@ -395,7 +387,7 @@ class Multinomial(Distribution):
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
         super(Multinomial, self).__init__(shape)
-        self.num_params = np.prod(shape[:-1]) * (shape[-1] -1)
+        self.n_params = np.prod(shape[:-1]) * (shape[-1] -1)
         self.is_multivariate = True
         self.is_reparameterized = False
 
@@ -411,16 +403,16 @@ class Multinomial(Distribution):
         pi = self.pi.eval()
         return "probability: \n" + pi.__str__()
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         # Define Python function which returns samples as a Numpy
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(p):
             # get `size` from lexical scoping
-            return multinomial.rvs(np.ones(self.shape[:-1]), p, size=size).astype(np.float32)
+            return multinomial.rvs(np.ones(self.shape[:-1]), p, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.pi], [tf.float32])[0]
-        x.set_shape((size, ) + self.shape) # set shape from unknown shape
+        x.set_shape((n, ) + self.shape) # set shape from unknown shape
         return x
 
     def log_prob_idx(self, idx, xs):
@@ -429,7 +421,7 @@ class Multinomial(Distribution):
         where ``idx`` is of dimension ``shape[:-1]``
         """
         idx_K = idx + (slice(0, None), ) # slice over multivariate dimension
-        full_idx = (slice(0, None), ) + idx_K # slice over batch size
+        full_idx = (slice(0, None), ) + idx_K # slice over sample size
         return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx_K])
 
     def entropy(self):
@@ -443,7 +435,7 @@ class Normal(Distribution):
     """
     def __init__(self, shape=1, loc=None, scale=None):
         super(Normal, self).__init__(shape)
-        self.num_params = 2*self.num_vars
+        self.n_params = 2*self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = True
 
@@ -463,11 +455,11 @@ class Normal(Distribution):
         return "mean: \n" + m.__str__() + "\n" + \
                "std dev: \n" + s.__str__()
 
-    def sample(self, size=1):
-        return self.loc + tf.random_normal((size, ) + self.shape) * self.scale
+    def sample(self, n=1):
+        return self.loc + tf.random_normal((n, ) + self.shape) * self.scale
 
     def log_prob_idx(self, idx, xs):
-        full_idx = (slice(0, None), ) + idx # slice over batch size
+        full_idx = (slice(0, None), ) + idx # slice over sample size
         return norm.logpdf(xs[full_idx], self.loc[idx], self.scale[idx])
 
     def entropy(self):
@@ -489,7 +481,7 @@ class PointMass(Distribution):
     """
     def __init__(self, shape=1, params=None):
         super(PointMass, self).__init__(shape)
-        self.num_params = self.num_vars
+        self.n_params = self.n_vars
         self.is_multivariate = False
         self.is_reparameterized = True
 
@@ -505,7 +497,7 @@ class PointMass(Distribution):
         params = self.params.eval()
         return "parameter values: \n" + params.__str__()
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         """Sample from a point mass distribution.
 
         Each sample is simply the set of point masses, as all
@@ -513,10 +505,10 @@ class PointMass(Distribution):
 
         Parameters
         ----------
-        size: int
+        n: int
             number of samples
         """
-        return tf.pack([self.params]*size)
+        return tf.pack([self.params]*n)
 
     def log_prob_idx(self, idx, xs):
         """Log probability at an index of a point mass distribution.
@@ -527,5 +519,5 @@ class PointMass(Distribution):
             A vector where the jth element is 1 if xs[j, idx] is equal
             to params[idx], 0 otherwise.
         """
-        full_idx = (slice(0, None), ) + idx # slice over batch size
+        full_idx = (slice(0, None), ) + idx # slice over sample size
         return tf.cast(tf.equal(xs[full_idx], self.params[idx]), dtype=tf.float32)

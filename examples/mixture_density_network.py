@@ -56,9 +56,9 @@ class MixtureDensityNetwork:
         return tf.reduce_sum(result)
 
 
-def build_toy_dataset(nsample=6000):
-    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, nsample))).T
-    r_data = np.float32(np.random.normal(size=(nsample,1))) # random noise
+def build_toy_dataset(N=6000):
+    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
+    r_data = np.float32(np.random.normal(size=(N, 1))) # random noise
     x_data = np.float32(np.sin(0.75*y_data)*7.0+y_data*0.5+r_data*1.0)
     return train_test_split(x_data, y_data, random_state=42)
 

@@ -27,9 +27,9 @@ class BetaBernoulli(PythonModel):
     def _py_log_prob(self, xs, zs):
         # This example is written for pedagogy. We recommend
         # vectorizing operations in practice.
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for b in range(n_minibatch):
+        n_samples = zs.shape[0]
+        lp = np.zeros(n_samples, dtype=np.float32)
+        for b in range(n_samples):
             lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
             for n in range(xs['x'].shape[0]):
                 lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])

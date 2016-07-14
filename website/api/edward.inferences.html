@@ -33,7 +33,7 @@
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
         <link rel="up" title="edward package" href="edward.html"/>
         <link rel="next" title="edward.util module" href="edward.util.html"/>
-        <link rel="prev" title="edward.data module" href="edward.data.html"/> 
+        <link rel="prev" title="edward.criticisms module" href="edward.criticisms.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -88,7 +88,6 @@
 <li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="edward.criticisms.html">edward.criticisms module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="edward.data.html">edward.data module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">edward.inferences module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edward.util.html">edward.util module</a></li>
 </ul>
@@ -157,20 +156,7 @@
 <dl class="attribute">
 <dt id="edward.inferences.Inference.data">
 <code class="descname">data</code><a class="headerlink" href="#edward.inferences.Inference.data" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> &#8211; Dictionary of TensorFlow placeholders. The computational graph
-uses this dictionary so that the data inputs may vary
-when specified at runtime.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="edward.inferences.Inference.data_gen">
-<code class="descname">data_gen</code><a class="headerlink" href="#edward.inferences.Inference.data_gen" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> &#8211; Dictionary where each placeholder in <cite>data</cite> is binded to a data
-generator formed from the original data. The data generators
-generate data to feed the placeholders at runtime. If the
-original data is already composed of placeholders, then
-<cite>data_gen</cite> is empty: the user will have to manually feed the
-placeholders at runtime.</p>
+<dd><p><em>dict of tf.Tensor</em> &#8211; Data dictionary whose values may vary at each session run.</p>
 </dd></dl>
 
 <p>Initialization.</p>
@@ -185,13 +171,25 @@ placeholders at runtime.</p>
 the key type is a string; for PyMC3, the key type is a
 Theano shared variable. For TensorFlow, Python, and PyMC3
 models, the value type is a NumPy array or TensorFlow
-placeholder; for Stan, the value type is the type
+tensor; for Stan, the value type is the type
 according to the Stan program&#8217;s data block.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>If <cite>data</cite> is not passed in, the dictionary is empty.</p>
+<p>Three options are available for batch training:
+1. internally if user passes in data as a dictionary of NumPy</p>
+<blockquote>
+<div>arrays;</div></blockquote>
+<ol class="arabic simple" start="2">
+<li>externally if user passes in data as a dictionary of
+TensorFlow placeholders (and manually feeds them);</li>
+<li>externally if user passes in data as TensorFlow tensors
+which are the outputs of data readers.</li>
+</ol>
 </dd></dl>
 
 <dl class="class">
@@ -227,13 +225,13 @@ w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)\]</div>
 
 <dl class="method">
 <dt id="edward.inferences.KLpq.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#KLpq.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.KLpq.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#KLpq.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.KLpq.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_minibatch</strong> (<em>int, optional</em>) &#8211; Number of samples from variational model for calculating
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of samples from variational model for calculating
 stochastic gradients.</td>
 </tr>
 </tbody>
@@ -410,14 +408,14 @@ expectation using Monte Carlo sampling.</p>
 
 <dl class="method">
 <dt id="edward.inferences.MFVI.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=1</em>, <em>score=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#MFVI.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.MFVI.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>score=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#MFVI.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.MFVI.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>n_minibatch</strong> (<em>int, optional</em>) &#8211; Number of samples from variational model for calculating
+<li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of samples from variational model for calculating
 stochastic gradients.</li>
 <li><strong>score</strong> (<em>bool, optional</em>) &#8211; Whether to force inference to use the score function
 gradient estimator. Otherwise default is to use the
@@ -500,15 +498,14 @@ implement this method.</p>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.finalize">
 <code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#VariationalInference.finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.VariationalInference.finalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finalize.</p>
-<p>Empty method. (Optional.)</p>
+<dd><p>Function to call after convergence.</p>
 <p>Any class based on <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>may</strong>
-implement this method.</p>
+overwrite this method.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_data=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_minibatch=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize variational inference algorithm.</p>
 <p>Set up <code class="docutils literal"><span class="pre">tf.train.AdamOptimizer</span></code> with a decaying scale factor.</p>
 <p>Initialize all variables</p>
@@ -518,8 +515,11 @@ implement this method.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>n_iter</strong> (<em>int, optional</em>) &#8211; Number of iterations for optimization.</li>
-<li><strong>n_data</strong> (<em>int, optional</em>) &#8211; Number of samples for data subsampling. Default is to use all
-the data.</li>
+<li><strong>n_minibatch</strong> (<em>int, optional</em>) &#8211; Number of samples for data subsampling. Default is to use
+all the data. Subsampling is available only if all data
+passed in are NumPy arrays and the model is not a Stan
+model. For subsampling details, see
+<cite>tf.train.slice_input_producer</cite> and <cite>tf.train.batch</cite>.</li>
 <li><strong>n_print</strong> (<em>int, optional</em>) &#8211; Number of iterations for each print progress. To suppress print
 progress, then specify None.</li>
 <li><strong>optimizer</strong> (<em>str, optional</em>) &#8211; Whether to use TensorFlow optimizer or PrettyTensor
@@ -604,7 +604,7 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
         <a href="edward.util.html" class="btn btn-neutral float-right" title="edward.util module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="edward.data.html" class="btn btn-neutral" title="edward.data module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="edward.criticisms.html" class="btn btn-neutral" title="edward.criticisms module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

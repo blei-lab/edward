@@ -43,11 +43,11 @@ class HierarchicalLogistic:
         Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
     """
-    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=0.01):
+    def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=10):
         self.weight_dim = weight_dim
         self.inv_link = inv_link
         self.prior_variance = prior_variance
-        self.num_vars = (self.weight_dim[0]+1)*self.weight_dim[1]
+        self.n_vars = (self.weight_dim[0]+1)*self.weight_dim[1]
 
     def mapping(self, x, z):
         """
@@ -59,7 +59,7 @@ class HierarchicalLogistic:
         b = tf.reshape(z[m*n:], [1, n])
         # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
         h = self.inv_link(tf.matmul(x, W) + b)
-        h = tf.squeeze(h) # n_data x 1 to n_data
+        h = tf.squeeze(h) # n_minibatch x 1 to n_minibatch
         return h
 
     def log_prob(self, xs, zs):
@@ -71,26 +71,26 @@ class HierarchicalLogistic:
             log_lik += [bernoulli.logpmf(y, p)]
 
         log_lik = tf.pack(log_lik)
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         return log_lik + log_prior
 
 
-def build_toy_dataset(n_data=40, noise_std=0.1):
+def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
     D = 1
-    x  = np.linspace(-3, 3, num=n_data)
-    y = np.tanh(x) + norm.rvs(0, noise_std, size=n_data)
+    x  = np.linspace(-3, 3, num=N)
+    y = np.tanh(x) + norm.rvs(0, noise_std, size=N)
     y[y < 0.5] = 0
     y[y >= 0.5] = 1
     x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, D))
+    x = x.reshape((N, D))
     return {'x': x, 'y': y}
 
 
 ed.set_seed(42)
 model = HierarchicalLogistic(weight_dim=[1,1])
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 data = build_toy_dataset()
 
 # Set up figure
@@ -112,7 +112,7 @@ for t in range(600):
         mean, std = sess.run([variational.layers[0].loc,
                               variational.layers[0].scale])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, variational.num_vars) * std + mean
+        zs = rs.randn(10, variational.n_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)

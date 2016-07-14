@@ -1,0 +1,40 @@
+% Define the subtitle of the page
+\title{Probability models}
+
+% Begin the content of the page
+\subsection{Probability models}
+
+This tutorial introduces the class of models supported in Edward.
+
+%\subsubsection{Probability models}
+
+A probability model has two components. The \emph{likelihood}
+\begin{align*}
+  p(x \mid z)
+\end{align*}
+is a probability distribution that describes how the data $x$ depend on some
+latent random variables $z$. The likelihood models a random data generating
+process, where the data $x$ are observed random variables conditioned on a
+particular hidden pattern described by $z$. For example, consider measuring your
+weight on a cheap scale; the likelihood model would describe the imprecisions
+of the scale that reflect into the measurements.
+
+The \emph{prior}
+\begin{align*}
+  p(z)
+\end{align*}
+is another probability distribution that captures our prior beliefs on
+the latent random variables $z$. It describes the kind of hidden patterns we
+expect to have produced the data $x$. Continuing our example, the prior would
+capture your prior belief about your (latent) weight. A potential prior might be
+a normal distribution centered at the average weight of adults on Earth (
+which is $\approx62$ kilograms).
+
+Combining the likelihood and the prior specifies a probability model,
+\begin{align*}
+  p(x,z)
+  &=
+  p(x \mid z)
+  p(z)
+\end{align*}
+as a joint density over observed and latent random variables.

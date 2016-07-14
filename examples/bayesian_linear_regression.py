@@ -43,37 +43,37 @@ class LinearModel:
     def __init__(self, lik_variance=0.01, prior_variance=0.01):
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
-        self.num_vars = 2
+        self.n_vars = 2
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
-        # broadcasting to do (x*W) + b (n_data x n_minibatch - n_minibatch)
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+        # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
         W = tf.expand_dims(zs[:, 0], 0)
         b = zs[:, 1]
         mus = tf.matmul(x, W) + b
-        # broadcasting to do mus - y (n_data x n_minibatch - n_data x 1)
+        # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
         y = tf.expand_dims(y, 1)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
         return log_lik + log_prior
 
 
-def build_toy_dataset(n_data=40, noise_std=0.1):
+def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
-    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
-                         np.linspace(6, 8, num=n_data/2)])
-    y = 0.075*x + norm.rvs(0, noise_std, size=n_data)
+    x  = np.concatenate([np.linspace(0, 2, num=N/2),
+                         np.linspace(6, 8, num=N/2)])
+    y = 0.075*x + norm.rvs(0, noise_std, size=N)
     x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, 1))
+    x = x.reshape((N, 1))
     return {'x': x, 'y': y}
 
 
 ed.set_seed(42)
 model = LinearModel()
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 data = build_toy_dataset()
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=250, n_minibatch=5, n_print=10)
+inference.run(n_iter=250, n_samples=5, n_print=10)

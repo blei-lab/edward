@@ -1,0 +1,47 @@
+% Define the subtitle of the page
+\title{Inference of probability models}
+
+% Begin the content of the page
+\subsection{Inference of probability models}
+
+This tutorial asks the question: what does it mean to do inference in
+probability models? This sets the stage for understanding how to
+develop and implement inference procedures in Edward.
+
+\subsubsection{The posterior}
+
+How can we use a model $p(x,z)$ to analyze some data $x$? In other words,
+what hidden patterns $z$ explain the data? We seek to infer these
+hidden patterns using the model.
+
+Inference for probability models leverages Bayes' rule to define the
+\emph{posterior}
+\begin{align*}
+  p(z \mid x)
+  &=
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.
+\end{align*}
+The posterior is the distribution of the latent variables $z$, conditioned on
+some (observed) data $x$. It provides a probabilistic description of the hidden
+patterns that explain the data. Wrapping up our example, say you measured your
+weight $7$ times and the posterior of your weight turns out to be
+\begin{align*}
+  p(z \mid x) &= \mathcal{N}(z\;;\; 68.21, 2.19).
+\end{align*}
+This is a complete description of the model's estimate of your weight and its
+uncertainty around it.
+
+
+\subsubsection{Computing the posterior}
+
+Now we know what the posterior represents. How do we compute it? This is the
+central computational challenge in inference.
+
+The posterior difficult to compute because of the integral in the denominator.
+This is often a high-dimensional integral that lacks an analytic (closed-form)
+solution. Thus, computing the posterior means \emph{approximating} the
+posterior.
+
+There are many methods to approximate the posterior. Edward provides a scaffold
+for these methods. We describe them in detail in the other inference
+\href{tutorials.html}{tutorials}.

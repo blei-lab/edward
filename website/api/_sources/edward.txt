@@ -20,7 +20,6 @@ Submodules
 .. toctree::
 
    edward.criticisms
-   edward.data
    edward.inferences
    edward.util
 

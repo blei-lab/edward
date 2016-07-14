@@ -13,9 +13,9 @@ sess = tf.Session()
 ed.set_seed(98765)
 
 
-def _test(shape, size):
+def _test(shape, n):
     rv = Normal(shape, loc=tf.zeros(shape), scale=tf.ones(shape))
-    rv_sample = rv.sample(size=size)
+    rv_sample = rv.sample(n)
     with sess.as_default():
         x = rv_sample.eval()
         x_tf = tf.constant(x, dtype=tf.float32)
