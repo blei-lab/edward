@@ -10,7 +10,6 @@ import tensorflow as tf
 from edward.models import Variational, Normal
 from edward.stats import norm
 
-
 ed.set_seed(1512351)
 
 
@@ -25,7 +24,21 @@ class NormalModel:
         return log_lik + log_prior
 
 
-def _test(data, n_data, x=None):
+def read_and_decode_single_example(filename):
+    # Construct a queue containing a list of filenames.
+    filename_queue = tf.train.string_input_producer([filename])
+    # Read a single serialized example from a filename.
+    # `serialized_example` is a Tensor of type str.
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(filename_queue)
+    # Convert serialized example back to actual values,
+    # describing format of the objects to be returned.
+    features = tf.parse_single_example(serialized_example,
+        features={'outcome': tf.FixedLenFeature([], tf.int64)})
+    return features['outcome']
+
+
+def _test(data, n_data, x=None, is_file=False):
     sess = ed.get_session()
     model = NormalModel()
     variational = Variational()
@@ -43,8 +56,14 @@ def _test(data, n_data, x=None):
                    six.iteritems(inference.data)}
         val = sess.run(data_id, feed_dict)
         assert np.all(val['x'] == x)
+    elif is_file:
+        # File reader setting.
+        # Check data varies by session run.
+        val = sess.run(inference.data)
+        val_1 = sess.run(inference.data)
+        assert not np.all(val['x'] == val_1['x'])
     elif n_data is None:
-        # Preloaded full setting or file reader setting.
+        # Preloaded full setting.
         # Check data is full data.
         val = sess.run(inference.data)
         assert np.all(val['x'] == data['x'])
@@ -80,7 +99,7 @@ def test_feeding():
     _test(data, None, x)
 
 
-#def test_read_file():
-#    x = tf.constant() # TODO from data file reader
-#    data = {'x': x}
-#    _test(data, None)
+def test_read_file():
+    x = read_and_decode_single_example("data/toy_data.tfrecords")
+    data = {'x': x}
+    _test(data, None, is_file=True)
