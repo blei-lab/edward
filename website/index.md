@@ -1,9 +1,7 @@
-![edward](http://proditus.com/images/edward_200.png)
+A library for probabilistic modeling, inference, and criticism.
+---------------------------------------------------------------
 
-[![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
-[![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master)](https://coveralls.io/github/blei-lab/edward?branch=master)
-
-**Edward** is a Python library for probabilistic modeling, inference, and
+Edward is a Python library for probabilistic modeling, inference, and
 criticism. It is a testbed for fast experimentation and research with
 probabilistic models, ranging from classical hierarchical models on
 small data sets to complex deep probabilistic models on large data sets.
