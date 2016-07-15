@@ -70,9 +70,9 @@ We welcome contributions by submitting issues, feature requests, or by
 solving any current issues!
 
 Edward has benefited enormously from the helpful feedback and advice of
-many people: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt Hoffman,
-Kevin Murphy, Rajesh Ranganath, Rif Saurous, and additional members of
-the Blei Lab, Google Brain, and Google Research.
+many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt
+Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and additional
+members of the Blei Lab, Google Brain, and Google Research.
 
 ### Citation
 

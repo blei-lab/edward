@@ -48,7 +48,6 @@ class Inference(object):
         If `data` is not passed in, the dictionary is empty.
 
         Three options are available for batch training:
-
         1. internally if user passes in data as a dictionary of NumPy
            arrays;
         2. externally if user passes in data as a dictionary of
