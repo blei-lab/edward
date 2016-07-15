@@ -46,7 +46,7 @@ class LinearModel:
         self.n_vars = 11
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
         log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
@@ -59,7 +59,7 @@ class LinearModel:
         return log_lik + log_prior
 
     def predict(self, xs, zs):
-        """Returns a prediction for each data point, averaging over
+        """Return a prediction for each data point, averaging over
         each set of latent variables z in zs; and also return the true
         value."""
         x_test = xs['x']

@@ -1,84 +1,80 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="text/css" http-equiv="Content-Style-Type"/>
-<meta content="pandoc" name="generator"/>
-<title>Edward – Bayesian neural network</title>
-<!-- Mobile Specific Metas -->
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<!-- FONT -->
-<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-<!-- CSS -->
-<link href="css/normalize.css" rel="stylesheet">
-<link href="css/skeleton.css" rel="stylesheet">
-<!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-<!-- highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
-<!-- Favicon -->
-<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
-<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-<link href="icons/manifest.json" rel="manifest">
-<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
-<link href="icons/favicon.ico" rel="shortcut icon">
-<meta content="#da532c" name="msapplication-TileColor">
-<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
-<meta content="icons/browserconfig.xml" name="msapplication-config">
-<meta content="#ffffff" name="theme-color">
-</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Bayesian neural network</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+    
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="icons/manifest.json">
+  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
 <body>
 <div class="container">
-<div class="row" style="margin-top: 5%">
-<div class="three columns">
-<h1><a href="index.html">Edward</a></h1>
-<a href="index.html">
-<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
-</a>
-<a class="button u-full-width" href="index.html">Home</a>
-<a class="button u-full-width" href="getting-started.html">Getting Started</a>
-<a class="button u-full-width" href="delving-in.html">Delving In</a>
-<a class="button u-full-width" href="tutorials.html">Tutorials</a>
-<a class="button u-full-width" href="api/index.html">API</a>
-<a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
-<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
-<a class="button2 u-full-width" href="license.html">License</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-<a href="https://github.com/blei-lab/edward">
-<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
-<!-- </object> -->
-</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-</div>
-<div class="nine columns">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="index.html">Edward</a></h1> 
+    <a href="index.html">
+    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
+    </a>
+    <a class="button u-full-width" href="index.html">Home</a>
+    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
+    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
+    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
+    <a class="button u-full-width" href="api/index.html">API</a> 
+    <a class="button u-full-width" href="#">Advanced</a> 
+    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
+    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
+    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
+    <a class="button2 u-full-width" href="license.html">License</a> 
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a href="https://github.com/blei-lab/edward">
+    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
+    alt="Edward on Github" />
+    <!-- </object> -->
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
 <h2 id="bayesian-neural-network">Bayesian neural network</h2>
-<ul>
-<li><strong>Probability Model:</strong> Bayesian neural network regression</li>
-<li><strong>Variational Model:</strong> Fully factorized normal</li>
-<li><strong>Data:</strong> Simulated data</li>
-<li><strong>Inference:</strong> Mean-field variational inference</li>
-<li><strong>Criticism:</strong> None</li>
-</ul>
-<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">bayesian_nn.py</a></p>
-<h3 id="probability-model">Probability Model</h3>
 <p>Define the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> <span class="math display">\[\begin{aligned}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &amp;=
@@ -87,9 +83,9 @@
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I)\end{aligned}\]</span></p>
-<p>The model in Edward is</p>
+<p>Let’s define the model in Edward using TensorFlow.</p>
 <pre class="python" language="Python"><code>class BayesianNN:
-    """
+    &quot;&quot;&quot;
     Bayesian neural network for regressing outputs y on inputs x.
 
     p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
@@ -111,7 +107,7 @@
     prior_variance : float, optional
         Variance of the normal prior on weights; aka L2
         regularization parameter, ridge penalty, scale parameter.
-    """
+    &quot;&quot;&quot;
     def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
         lik_variance=0.01, prior_variance=1):
         self.layer_sizes = layer_sizes
@@ -124,14 +120,14 @@
         self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):
-        """Unpack weight matrices and biases from a flattened vector."""
+        &quot;&quot;&quot;Unpack weight matrices and biases from a flattened vector.&quot;&quot;&quot;
         for m, n in self.weight_dims:
             yield tf.reshape(z[:m*n],        [m, n]), \
                   tf.reshape(z[m*n:(m*n+n)], [1, n])
             z = z[(m+1)*n:]
 
     def mapping(self, x, z):
-        """
+        &quot;&quot;&quot;
         mu = NN(x; z)
 
         Note this is one sample of z at a time.
@@ -148,7 +144,7 @@
         -------
         tf.tensor
             vector of length n_data
-        """
+        &quot;&quot;&quot;
         h = x
         for W, b in self.unpack_weights(z):
             # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
@@ -158,7 +154,7 @@
         return h
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        &quot;&quot;&quot;Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
         # Data must have labels in the first column and features in
         # subsequent columns.
         y = xs[:, 0]
@@ -170,41 +166,14 @@
         return log_lik + log_prior
 
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)</code></pre>
-<h3 id="variational-model">Variational Model</h3>
-<p>Define the variational model to be a fully factorized normal <span class="math display">\[\begin{aligned}
-  q(\mathbf{z} \;;\; \lambda)
-  &amp;=
-  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2} I).\end{aligned}\]</span></p>
-<p>The model in Edward is</p>
-<pre class="python" language="Python"><code>variational = Variational()
-variational.add(Normal(model.num_vars))</code></pre>
-<h3 id="data">Data</h3>
-<p>Consider a simulated dataset</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(n_data=40, noise_std=0.1):
-    ed.set_seed(0)
-    D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
-                         np.linspace(6, 8, num=n_data/2)])
-    y = np.cos(x) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
-    x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, D))
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)
-
-data = build_toy_dataset()</code></pre>
-<h3 id="inference">Inference</h3>
-<p>Inference is mean-field variational inference</p>
-<pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000, n_print=10)</code></pre>
-</div>
-</div>
-<div class="row" style="padding-bottom: 25%"> </div>
+<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">bayesian_nn.py</a> <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn_analytic_kl.py">bayesian_nn.py</a></p>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();
   renderMathInElement(document.body);
-</script>
+</script> 
 </body>
 </html>

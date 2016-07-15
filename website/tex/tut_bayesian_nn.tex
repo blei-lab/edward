@@ -4,27 +4,13 @@
 % Begin the content of the page
 \subsection{Bayesian neural network}
 
-\begin{itemize}
-  \item \textbf{Probability Model:} Bayesian neural network regression
-  \item \textbf{Variational Model:} Fully factorized normal 
-  \item \textbf{Data:} Simulated data
-  \item \textbf{Inference:} Mean-field variational inference
-  \item \textbf{Criticism:} None
-\end{itemize}
-
-Full Python code in: 
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
-{bayesian_nn.py}
-
-
-\subsubsection{Probability Model}
 Define the likelihood of an observation $(y_n, x_n)$
 \begin{align*}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &=
   \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)
-\end{align*} 
-where $\mu$ is a neural network with weights (latent) variables 
+\end{align*}
+where $\mu$ is a neural network with weights (latent) variables
 $\mathbf{z}$. Here $x_n$ is the (known) covariate and $\sigma^2$ is the
 (known) variance of the observation.
 
@@ -33,9 +19,9 @@ Define the prior on $\mathbf{z}$ to be a factorized normal
   p(\mathbf{z})
   &=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I)
-\end{align*} 
+\end{align*}
 
-The model in Edward is 
+Let's define the model in Edward using TensorFlow.
 \begin{lstlisting}[language=Python]
 class BayesianNN:
     """
@@ -121,46 +107,8 @@ class BayesianNN:
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 \end{lstlisting}
 
-\subsubsection{Variational Model}
-Define the variational model to be a fully factorized normal
-\begin{align*}
-  q(\mathbf{z} \;;\; \lambda)
-  &=
-  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2} I).
-\end{align*}
-
-The model in Edward is
-\begin{lstlisting}[language=Python]
-variational = Variational()
-variational.add(Normal(model.num_vars))
-\end{lstlisting}
-
-
-\subsubsection{Data}
-
-Consider a simulated dataset
-\begin{lstlisting}[language=Python]
-def build_toy_dataset(n_data=40, noise_std=0.1):
-    ed.set_seed(0)
-    D = 1
-    x  = np.concatenate([np.linspace(0, 2, num=n_data/2),
-                         np.linspace(6, 8, num=n_data/2)])
-    y = np.cos(x) + norm.rvs(0, noise_std, size=n_data).reshape((n_data,))
-    x = (x - 4.0) / 4.0
-    x = x.reshape((n_data, D))
-    y = y.reshape((n_data, 1))
-    data = np.concatenate((y, x), axis=1) # n_data x (D+1)
-    data = tf.constant(data, dtype=tf.float32)
-    return ed.Data(data)
-
-data = build_toy_dataset()
-\end{lstlisting}
-
-
-\subsubsection{Inference}
-
-Inference is mean-field variational inference
-\begin{lstlisting}[language=Python]
-inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=1000, n_print=10)
-\end{lstlisting}
+Full Python code in:
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
+{bayesian_nn.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn_analytic_kl.py}
+{bayesian_nn.py}
