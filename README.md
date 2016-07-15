@@ -3,12 +3,12 @@
 [![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
 [![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master)](https://coveralls.io/github/blei-lab/edward?branch=master)
 
-**Edward** is a Python library for probabilistic modeling, inference, and
-criticism. It is a testbed for fast experimentation and research with
-probabilistic models, ranging from classical hierarchical models on
-small data sets to complex deep probabilistic models on large data sets.
-Edward fuses three fields: Bayesian statistics and machine learning,
-deep learning, and probabilistic programming.
+[Edward](http://edwardlib.org) is a Python library for probabilistic modeling,
+inference, and criticism. It is a testbed for fast experimentation and research
+with probabilistic models, ranging from classical hierarchical models on small
+data sets to complex deep probabilistic models on large data sets. Edward fuses
+three fields: Bayesian statistics and machine learning, deep learning, and
+probabilistic programming.
 
 It supports **modeling languages** including
 
@@ -16,37 +16,26 @@ It supports **modeling languages** including
     [Keras](http://keras.io), [TensorFlow
     Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim),
     or [Pretty Tensor](https://github.com/google/prettytensor))
-
 -   [Stan](http://mc-stan.org)
-
 -   [PyMC3](http://pymc-devs.github.io/pymc3/)
-
 -   Python, through [NumPy/SciPy](http://scipy.org/)
 
 It supports **inference** via
 
 -   Variational inference
-
     -   Black box variational inference
-
     -   Stochastic variational inference
-
     -   Variational auto-encoders
-
     -   Inclusive KL divergence: $\text{KL}(p\|q)$
-
     -   Laplace approximation
-
 -   Marginal posterior optimization (empirical Bayes, marginal
     maximum likelihood)
-
 -   Maximum a posteriori estimation (penalized maximum likelihood,
     maximum likelihood)
 
 It supports **criticism** of the model and inference via
 
 -   Point-based evaluations
-
 -   Posterior predictive checks
 
 ### Authors
@@ -56,11 +45,8 @@ Edward is led by [Dustin Tran](http://dustintran.com) with guidance by
 are
 
 -   [Adji Dieng](http://stat.columbia.edu/~diengadji/)
-
 -   [Alp Kucukelbir](http://www.proditus.com/)
-
 -   [Dawen Liang](http://www.ee.columbia.edu/~dliang/)
-
 -   [Maja Rudolph](http://maja-rita-rudolph.com/)
 
 We welcome contributions by submitting issues, feature requests, or by
