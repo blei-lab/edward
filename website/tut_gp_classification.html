@@ -88,7 +88,7 @@
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, \mathbf{K})\end{aligned}\]</span> with covariance matrix given by evaluating <span class="math inline">\(k(x, x^\prime)\)</span> for each pair of inputs <span class="math inline">\((x, x^\prime)\)</span>.</p>
-<p>Let’s define the model in Edward using TensorFlow, fixing the kernel to be the RBF kernel, also as the squared exponential or exponentiated quadratic.</p>
+<p>Let’s build the model in Edward using TensorFlow, fixing the kernel to be the RBF kernel, also as the squared exponential or exponentiated quadratic.</p>
 <pre class="python" language="Python"><code>class GaussianProcess:
     """
     Gaussian process classification

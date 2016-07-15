@@ -23,25 +23,31 @@ Inference for probability models leverages Bayes' rule to define the
 \end{align*}
 The posterior is the distribution of the latent variables $z$, conditioned on
 some (observed) data $x$. It provides a probabilistic description of the hidden
-patterns that explain the data. Wrapping up our example, say you measured your
-weight $7$ times and the posterior of your weight turns out to be
-\begin{align*}
-  p(z \mid x) &= \mathcal{N}(z\;;\; 68.21, 2.19).
-\end{align*}
-This is a complete description of the model's estimate of your weight and its
-uncertainty around it.
+patterns that explain the data.
+%Wrapping up our example, say you measured your
+%weight $7$ times and the posterior of your weight turns out to be
+%\begin{align*}
+%  p(z \mid x) &= \mathcal{N}(z\;;\; 68.21, 2.19).
+%\end{align*}
+%This is a complete description of the model's estimate of your weight and its
+%uncertainty around it.
 
 
-\subsubsection{Computing the posterior}
+\subsubsection{Inferring the posterior}
 
-Now we know what the posterior represents. How do we compute it? This is the
+We know what the posterior represents. How do we calculate it? This is the
 central computational challenge in inference.
 
-The posterior difficult to compute because of the integral in the denominator.
+The posterior is difficult to compute because of its normalizing
+constant, which is the integral in the denominator.
 This is often a high-dimensional integral that lacks an analytic (closed-form)
-solution. Thus, computing the posterior means \emph{approximating} the
+solution. Thus, calculating the posterior means \emph{approximating} the
 posterior.
 
-There are many methods to approximate the posterior. Edward provides a scaffold
-for these methods. We describe them in detail in the other inference
-\href{tutorials.html}{tutorials}.
+There are many approaches to posterior inference, which can be
+unwieldy to manage or even conceptualize. Edward uses abstract base
+classes and class inheritance to provide a hierarchy of inference
+methods, enabling fast experimentation on top of existing
+methods.  For details on the inference hierarchy in Edward, see the
+\href{#}{inference API}.  We describe several examples in detail in
+the other inference \href{tutorials.html}{tutorials}.

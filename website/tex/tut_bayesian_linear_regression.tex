@@ -31,7 +31,7 @@ known likelihood variance. The mean of the likelihood is given by a
 linear transformation of the inputs $\mathbf{x}_n$ and shared weights
 $\mathbf{w}$, along with the intercept $b$.
 
-Let's define the model in Edward using TensorFlow, fixing $D=10$.
+Let's build the model in Edward using TensorFlow, fixing $D=10$.
 \begin{lstlisting}[language=Python]
 class BayesianLinearRegression:
     """

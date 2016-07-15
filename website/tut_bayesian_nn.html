@@ -78,7 +78,7 @@
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
-<p>Let’s define the model in Edward using TensorFlow, where we instantiate a 2-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
+<p>Let’s build the model in Edward using TensorFlow, where we instantiate a 2-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
 <pre class="python" language="Python"><code>class BayesianNN:
     """
     Bayesian neural network for regressing outputs y on inputs x.

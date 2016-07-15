@@ -87,7 +87,7 @@
   p(\mathbf{\sigma}_k)
   &amp;=
   \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).\end{aligned}\]</span></p>
-<p>The model in Edward is</p>
+<p>Let’s build the model in Edward using TensorFlow.</p>
 <pre class="python" language="Python"><code>class MixtureGaussian:
     """
     Mixture of Gaussians

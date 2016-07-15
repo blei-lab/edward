@@ -40,7 +40,7 @@ Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
   \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).
 \end{align*}
 
-The model in Edward is
+Let's build the model in Edward using TensorFlow.
 \begin{lstlisting}[language=Python]
 class MixtureGaussian:
     """

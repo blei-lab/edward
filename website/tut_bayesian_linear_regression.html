@@ -80,7 +80,7 @@
   &amp;=
   \prod_{n=1}^N
   \mathcal{N}(y_n \;;\; \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span> The latent variables <span class="math inline">\(\mathbf{z}=[\mathbf{w},b]\)</span> form the weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_z^2\)</span> is a known prior variance and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span> and shared weights <span class="math inline">\(\mathbf{w}\)</span>, along with the intercept <span class="math inline">\(b\)</span>.</p>
-<p>Let’s define the model in Edward using TensorFlow, fixing <span class="math inline">\(D=10\)</span>.</p>
+<p>Let’s build the model in Edward using TensorFlow, fixing <span class="math inline">\(D=10\)</span>.</p>
 <pre class="python" language="Python"><code>class BayesianLinearRegression:
     """
     Bayesian linear regression for outputs y on inputs x.
