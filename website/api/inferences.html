@@ -237,9 +237,9 @@ computational graph, forming the objective value given the current
 state of the graph. This field must also be implemented in a derived
 class.</p>
 <p>Nothing in <code class="docutils literal"><span class="pre">Inference</span></code> says anything about the class of models that
-an inference algorithm must work with. This one can build inference
+an inference algorithm must work with. Thus one can build inference
 algorithms which are tailored to a smaller class of models than the
-general class available here, or even tailor it to a single model.</p>
+general class available in Edward, or even tailor it to a single model.</p>
 <p>Hybrid methods and novel paradigms outside of <code class="docutils literal"><span class="pre">VariationalInference</span></code>
 and <code class="docutils literal"><span class="pre">MonteCarlo</span></code> are also possible in Edward. For example, one can
 write a class derived from <code class="docutils literal"><span class="pre">Inference</span></code> directly, or inherited to

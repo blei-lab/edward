@@ -73,13 +73,13 @@
 <h3 id="basic-installation">Basic Installation</h3>
 <p>Edward depends on</p>
 <ul>
-<li>Numpy (&gt;=1.7)</li>
-<li>Scipy (&gt;=0.16)</li>
-<li>Progressbar (&gt;=2.0)</li>
-<li>TensorFlow (&gt;=0.7)</li>
+<li>NumPy (&gt;=1.7)</li>
+<li>SciPy (&gt;=0.16)</li>
+<li>Six (&gt;=1.1.0)</li>
+<li>TensorFlow (&gt;=0.9.0)</li>
 </ul>
-<p>We recommend using <code>pip</code> to install <code>numpy</code>, <code>scipy</code>, and <code>progressbar</code> as</p>
-<pre language="JSON"><code>pip install numpy scipy progressbar</code></pre>
+<p>We recommend using <code>pip</code> to install <code>numpy</code>, <code>scipy</code>, and <code>six</code> as</p>
+<pre language="JSON"><code>pip install numpy scipy six</code></pre>
 <p><a href="https://www.tensorflow.org/">TensorFlow</a> is not on PyPI yet. We recommend using <code>pip</code> to install the latest TensorFlow binaries. Please follow the <a href="https://www.tensorflow.org/versions/r0.9/get_started/os_setup.html#pip-installation">instructions</a> from Google.</p>
 <h3 id="full-installation">Full Installation</h3>
 <p>Edward has optional features that depend on external packages.</p>
@@ -87,11 +87,11 @@
 <li>The <a href="http://mc-stan.org">Stan</a> modeling language is supported through PyStan (&gt;=2.0.1.3)
 <pre language="JSON"><code>pip install pystan</code></pre></li>
 <li>The <a href="http://pymc-devs.github.io/pymc3/">PyMC3</a> modeling language is supported through PyMC3 (&gt;=3.0). Please see their installation <a href="http://pymc-devs.github.io/pymc3/notebooks/getting_started.html">instructions</a>.</li>
-<li>Neural network modeling is supported through Keras (&gt;=1.0)
+<li>Neural networks are supported through <a href="http://keras.io">Keras</a> (&gt;=1.0)
 <pre language="JSON"><code>pip install keras</code></pre>
-<p>and PrettyTensor (&gt;=0.5.3)</p>
-<pre language="JSON"><code>pip install prettytensor</code></pre>
 <p>You have to manually <a href="http://keras.io/#switching-from-theano-to-tensorflow">configure Keras</a> to work with TensorFlow.</p></li>
+<li>Neural networks are also supported through <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> (native in TensorFlow) and <a href="https://github.com/google/prettytensor">PrettyTensor</a> (&gt;=0.5.3)
+<pre language="JSON"><code>pip install prettytensor</code></pre></li>
 </ul>
 </div>
 </div>

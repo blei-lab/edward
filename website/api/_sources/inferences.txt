@@ -118,9 +118,9 @@ state of the graph. This field must also be implemented in a derived
 class.
 
 Nothing in ``Inference`` says anything about the class of models that
-an inference algorithm must work with. This one can build inference
+an inference algorithm must work with. Thus one can build inference
 algorithms which are tailored to a smaller class of models than the
-general class available here, or even tailor it to a single model.
+general class available in Edward, or even tailor it to a single model.
 
 Hybrid methods and novel paradigms outside of ``VariationalInference``
 and ``MonteCarlo`` are also possible in Edward. For example, one can

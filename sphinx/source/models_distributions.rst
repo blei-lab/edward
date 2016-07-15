@@ -47,7 +47,7 @@ outer dimension (right-most dimension) of their shape.
 
     from edward.models import Dirichlet
 
-    # 1 K-dimensional Dirichlet's
+    # 1 K-dimensional Dirichlet
     Dirichlet(alpha=np.array([0.1]*K)
     # vector of 5 K-dimensional Dirichlet's
     Dirichlet(alpha=tf.ones([5, K]))
