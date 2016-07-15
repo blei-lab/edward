@@ -32,8 +32,7 @@ class BayesianNN:
     p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
                   Normal(z | 0, 1),
 
-    where z are neural network weights, and with known lik_variance
-    and prior_variance.
+    where z are neural network weights, and with known lik_variance.
 
     Parameters
     ----------
