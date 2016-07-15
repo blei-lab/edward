@@ -135,15 +135,14 @@
             
   <div class="section" id="building-probabilistic-models">
 <h1>Building Probabilistic Models<a class="headerlink" href="#building-probabilistic-models" title="Permalink to this headline">¶</a></h1>
-<p>A probabilistic model is specified by a joint distribution <code class="docutils literal"><span class="pre">p(x,z)</span></code> of
-data <code class="docutils literal"><span class="pre">x</span></code> and latent variables <code class="docutils literal"><span class="pre">z</span></code>. All models in Edward are written
-as a class; to implement a new model, it can be written in any of the
-currently supported modeling languages: TensorFlow, Python, Stan, and
-PyMC3.</p>
+<p>A probabilistic model is specified by a joint distribution <code class="docutils literal"><span class="pre">p(x,</span> <span class="pre">z)</span></code>
+of data <code class="docutils literal"><span class="pre">x</span></code> and latent variables <code class="docutils literal"><span class="pre">z</span></code>. All models in Edward are
+written as a class; to implement a new model, it can be written in any
+of the currently supported modeling languages: TensorFlow, Python, Stan,
+and PyMC3.</p>
 <p>To use TensorFlow or Python, write a class with the method
 <code class="docutils literal"><span class="pre">log_prob(xs,</span> <span class="pre">zs)</span></code>. The method defines the logarithm of a joint
-probabilistic density function over data <code class="docutils literal"><span class="pre">xs</span></code> and latent variables
-<code class="docutils literal"><span class="pre">zs</span></code>. <code class="docutils literal"><span class="pre">xs</span></code> can be a single data point or a batch, and analogously,
+density. <code class="docutils literal"><span class="pre">xs</span></code> can be a single data point or a batch, and analogously,
 <code class="docutils literal"><span class="pre">zs</span></code> can be a single set or multiple sets of latent variables. The
 method outputs a vector of the joint density evaluations
 <code class="docutils literal"><span class="pre">[log</span> <span class="pre">p(xs,</span> <span class="pre">zs[0,:]),</span> <span class="pre">log</span> <span class="pre">p(xs,</span> <span class="pre">zs[1,:]),</span> <span class="pre">...]</span></code>, with an evaluation
@@ -168,20 +167,9 @@ that uses this model which is written in TensorFlow. Here is another
 script</a>
 that uses the same model written in Python using only NumPy/SciPy. The
 model class can be more complicated, containing fields or other methods
-required for certain functions in Edward. A full spec of the model is
+required for certain functions in Edward, and which can provide more
+information about the model&#8217;s structure. A full spec of the model is
 available below. [Include the full model spec somewhere below.]</p>
-<p>To use PyMC3, write a PyMC3 model whose observed values are Theano
-shared variables. The values in the Theano shared variables can be
-plugged at a later time. Here is an example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
-    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py">toy
-script</a>
-that uses this model.</p>
 <p>To use Stan, write a Stan program in the form of a file or string. Then
 call it with <code class="docutils literal"><span class="pre">StanModel(file)</span></code> or <code class="docutils literal"><span class="pre">StanModel(model_code)</span></code>. Here is
 an example:</p>
@@ -207,16 +195,32 @@ script</a>
 that uses this model. Stan programs are convenient as <a class="reference external" href="https://github.com/stan-dev/example-models/wiki">there are many
 online examples</a>,
 although they are limited to probability models with differentiable
-latent variables and they can be quite slow to call in practice over
-TensorFlow.</p>
-<p>For efficiency during future inferences or criticisms, we recommend
-using the modeling language which contains the most structure about the
-model; this enables the inference algorithms to automatically take
-advantage of any available structure if they are implemented to do so.
-TensorFlow will be most efficient as Edward uses it as the backend for
-computation. Internally, we wrap the other languages in TensorFlow so
-their computation represents a single node in the graph (making it more
-difficult to tease apart and thus distribute).</p>
+latent variables. <code class="docutils literal"><span class="pre">StanModel</span></code> objects also contain no structure about
+the model besides how to calculate its joint density.</p>
+<p>To use PyMC3, write a PyMC3 model whose observed values are Theano
+shared variables. The values in the Theano shared variables can be
+plugged at a later time. Here is an example:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">PyMC3Model</span><span class="p">(</span><span class="n">pm_model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py">toy
+script</a>
+that uses this model. PyMC3 can be used to define models with both
+differentiable latent variables and non-differentiable (e.g., discrete)
+latent variables. <code class="docutils literal"><span class="pre">PyMC3Model</span></code> objects contain no structure about the
+model besides how to calculate its joint density.</p>
+<p>For modeling convenience, we recommend using the modeling language that
+you are most familiar with. For efficiency, we recommend using
+TensorFlow, as Edward uses TensorFlow as the computational backend.
+Internally, other languages are wrapped in TensorFlow so their
+computation represents a single node in the graph (making it difficult
+to tease apart and thus distribute their computation).</p>
+<p>[api for <code class="docutils literal"><span class="pre">edward.models.models</span></code> goes here]</p>
 </div>
 
 
