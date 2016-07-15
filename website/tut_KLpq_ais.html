@@ -70,8 +70,8 @@
 </div>
 <div class="nine columns">
 <h2 id="adaptive-importance-sampling">Adaptive importance sampling</h2>
-<p>(This tutorial follows the <a href="tut_KLpq.html"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization</a> tutorial.)</p>
-<p>We seek to minimize <span class="math inline">\(\text{KL}(p\|q)\)</span> by following its gradient <span class="math display">\[\begin{aligned}
+<p>(This tutorial follows the <a href="tut_KLpq.html"><span class="math">\(\text{KL}(p\|q)\)</span> minimization</a> tutorial.)</p>
+<p>We seek to minimize <span class="math">\(\text{KL}(p\|q)\)</span> by following its gradient <span class="math">\[\begin{aligned}
   \nabla_\lambda\;
   \text{KL}(
   p(z \mid x)
@@ -87,7 +87,7 @@
   \big].\end{aligned}\]</span> using a “black box” algorithm. This means generically inferring the posterior while making few assumptions about the model.</p>
 <h3 id="importance-sampling">Importance sampling</h3>
 <p>The gradient is an expectation with respect to the unknown posterior. Combining Bayes’ rule with importance sampling can circumvent this obstacle.</p>
-<p>First rewrite the expectation to be with respect to the variational distribution, <span class="math display">\[\begin{aligned}
+<p>First rewrite the expectation to be with respect to the variational distribution, <span class="math">\[\begin{aligned}
   -
   \mathbb{E}_{p(z \mid x)}
   \big[
@@ -104,9 +104,9 @@
   \Bigg].\end{aligned}\]</span></p>
 <p>We then use importance sampling to obtain a noisy estimate of this gradient. The basic procedure follows these steps:</p>
 <ol>
-<li>draw <span class="math inline">\(S\)</span> samples <span class="math inline">\(\{z_s\}_1^S \sim q(z\;;\;\lambda)\)</span>,</li>
-<li>evaluate <span class="math inline">\(\nabla_\lambda\; \log q(z_s\;;\;\lambda)\)</span>,</li>
-<li>compute the normalized importance weights <span class="math display">\[\begin{aligned}
+<li>draw <span class="math">\(S\)</span> samples <span class="math">\(\{z_s\}_1^S \sim q(z\;;\;\lambda)\)</span>,</li>
+<li>evaluate <span class="math">\(\nabla_\lambda\; \log q(z_s\;;\;\lambda)\)</span>,</li>
+<li>compute the normalized importance weights <span class="math">\[\begin{aligned}
     w_s
     &amp;=
     \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
@@ -116,7 +116,7 @@
   \end{aligned}\]</span></li>
 <li>compute the weighted mean.</li>
 </ol>
-<p>The key insight is that we can use the joint <span class="math inline">\(p(x,z)\)</span> instead of the posterior when estimating the normalized importance weights <span class="math display">\[\begin{aligned}
+<p>The key insight is that we can use the joint <span class="math">\(p(x,z)\)</span> instead of the posterior when estimating the normalized importance weights <span class="math">\[\begin{aligned}
   w_s
   &amp;=
   \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
@@ -127,13 +127,13 @@
   \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}
   \Bigg/
   \sum_{s=1}^{S}
-  \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}.\end{aligned}\]</span> This follows from Bayes’ rule <span class="math display">\[\begin{aligned}
+  \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}.\end{aligned}\]</span> This follows from Bayes’ rule <span class="math">\[\begin{aligned}
   p(z \mid x)
   &amp;=
   p(x, z) / p(x)\\
   &amp;=
   p(x, z) / \text{a constant function of }z.\end{aligned}\]</span></p>
-<p>Importance sampling thus gives the following noisy yet unbiased gradient estimate <span class="math display">\[\begin{aligned}
+<p>Importance sampling thus gives the following noisy yet unbiased gradient estimate <span class="math">\[\begin{aligned}
 \nabla_\lambda\;
   \text{KL}(
   p(z \mid x)
@@ -145,10 +145,10 @@
   \frac{1}{S}
   \sum_{s=1}^S
   w_s
-  \nabla_\lambda\; \log q(z_s\;;\;\lambda).\end{aligned}\]</span> The objective <span class="math inline">\(\text{KL}(p\|q)\)</span> can be calculated in a similar fashion. The only new ingredient for its gradient is the score function <span class="math inline">\(\nabla_\lambda \log q(z\;;\;\lambda)\)</span>. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
-<p>Adaptive importance sampling follows this gradient to a local optimum using stochastic optimization. It is adaptive because the variational distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> iteratively gets closer to the posterior <span class="math inline">\(p(z \mid x)\)</span>.</p>
+  \nabla_\lambda\; \log q(z_s\;;\;\lambda).\end{aligned}\]</span> The objective <span class="math">\(\text{KL}(p\|q)\)</span> can be calculated in a similar fashion. The only new ingredient for its gradient is the score function <span class="math">\(\nabla_\lambda \log q(z\;;\;\lambda)\)</span>. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
+<p>Adaptive importance sampling follows this gradient to a local optimum using stochastic optimization. It is adaptive because the variational distribution <span class="math">\(q(z\;;\;\lambda)\)</span> iteratively gets closer to the posterior <span class="math">\(p(z \mid x)\)</span>.</p>
 <h3 id="implementation">Implementation</h3>
-<p>We implement <span class="math inline">\(\text{KL}(p\|q)\)</span> with its importance sampling gradient in the method <code>build_loss</code> of the <code>KLpq</code> class.</p>
+<p>We implement <span class="math">\(\text{KL}(p\|q)\)</span> with its importance sampling gradient in the method <code>buildloss</code> of the <code>KLpq</code> class.</p>
 <pre class="python" language="Python"><code>class KLpq(VariationalInference):
     ...
     def build_loss(self):
@@ -163,9 +163,9 @@
 
         self.loss = tf.reduce_mean(w_norm * log_w)
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))</code></pre>
-<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_samples</code>) samples from the variational model. The TensorFlow function <code>reduce_mean</code> takes the mean over the samples.</p>
-<p>The method stores computation of <span class="math inline">\(\text{KL}(p\|q)\)</span> in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is a stochastic gradient of <span class="math inline">\(\text{KL}(p\|q)\)</span>. The TensorFlow function <code>stop_gradient</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, because it is not wrapped in a <code>stop_gradient</code>.</p>
-<p>Computing the normalized importance weights is a numerically challenging task. Underflow is a common issue. Here we use the <code>log_sum_exp</code> trick to compute weights in the log space. However, the normalized weights are still exponentiated to compute the gradient. As with importance sampling in general, this inference method does not scale to high dimensions.</p>
+<p>This method draws <span class="math">\(S\)</span> (<code>self.nsamples</code>) samples from the variational model. The TensorFlow function <code>reducemean</code> takes the mean over the samples.</p>
+<p>The method stores computation of <span class="math">\(\text{KL}(p\|q)\)</span> in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is a stochastic gradient of <span class="math">\(\text{KL}(p\|q)\)</span>. The TensorFlow function <code>stopgradient</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, because it is not wrapped in a <code>stopgradient</code>.</p>
+<p>Computing the normalized importance weights is a numerically challenging task. Underflow is a common issue. Here we use the <code>logsumexp</code> trick to compute weights in the log space. However, the normalized weights are still exponentiated to compute the gradient. As with importance sampling in general, this inference method does not scale to high dimensions.</p>
 <h3 id="stochastic-gradient-optimization">Stochastic gradient optimization</h3>
 <p>Stochastic gradient descent is an extension of gradient descent using noisy estimates of the gradient. Under mild conditions, stochastic gradient descent finds a (local) optimum of the original (noiseless) function.</p>
 <p>Edward uses TensorFlow’s optimizers. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
@@ -185,7 +185,7 @@
         optimizer = tf.train.AdamOptimizer(learning_rate)
         self.train = optimizer.minimize(loss, global_step=global_step,
                                         var_list=var_list)</code></pre>
-<p>This sets up TensorFlow to optimize <span class="math inline">\(\text{KL}(p\|q)\)</span> using ADAM’s learning rate combined with an exponentially decaying scale factor.</p>
+<p>This sets up TensorFlow to optimize <span class="math">\(\text{KL}(p\|q)\)</span> using ADAM’s learning rate combined with an exponentially decaying scale factor.</p>
 <p>See the <a href="api/index.html">API</a> for more details.</p>
 </div>
 </div>

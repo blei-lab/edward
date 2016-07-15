@@ -75,7 +75,7 @@
     </div>
     <div class="nine columns">
 <h2 id="supervised-learning-classification">Supervised learning (Classification)</h2>
-<p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math inline">\(y\)</span> takes discrete values.</p>
+<p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math">\(y\)</span> takes discrete values.</p>
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>Use 25 data points from the UCI crabs data set.</p>
@@ -145,7 +145,7 @@ variational.add(Normal(model.n_vars))</code></pre>
 <p>Run mean-field variational inference for 500 iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=500)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

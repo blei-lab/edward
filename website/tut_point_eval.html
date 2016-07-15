@@ -72,7 +72,7 @@
 <h2 id="point-based-evaluations">Point-based evaluations</h2>
 <p>Edward supports point-based evaluations. The simplest example is evaluating a model for classification. After inferring the posterior, we can predict the label for each observation in the data and compare it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error, based on these predictions.</p>
 <h3 id="implementation">Implementation</h3>
-<p>Edward implements point-based evaluations through the <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span></p>
+<p>Edward implements point-based evaluations through the <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math">\(p(z \mid x)\)</span></p>
 <pre class="python" language="Python"><code>class BayesianLinearRegression:
     def __init__(self, lik_variance=0.01, prior_variance=0.01):
         self.lik_variance = lik_variance
@@ -101,7 +101,7 @@
 <p>The <code>ed.evaluate()</code> method then evaluates a model as</p>
 <pre class="python" language="Python"><code>ed.evaluate('categorical_accuracy', my_model, my_variational, my_data)
 ed.evaluate('mean_absolute_error', my_model, my_variational, my_data)</code></pre>
-<p>Swapping <code>my_data</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
+<p>Swapping <code>mydata</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
 <p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
 <pre class="python" language="Python"><code>ed.evaluate('log_likelihood', my_model, my_variational, my_data)</code></pre>
 <p>Point-based evaluations are formally known as scoring rules (Gneiting and Raftery, 2007) in decision theory. Scoring rules are commonly used for model comparison, model selection, and model averaging.</p>

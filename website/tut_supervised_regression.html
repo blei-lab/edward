@@ -75,10 +75,10 @@
     </div>
     <div class="nine columns">
 <h2 id="supervised-learning-regression">Supervised learning (Regression)</h2>
-<p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Regression (typically) means the output <span class="math inline">\(y\)</span> takes continuous values.</p>
+<p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math">\(\{(x_n, y_n)\}\)</span>. Regression (typically) means the output <span class="math">\(y\)</span> takes continuous values.</p>
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_test.py">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>Simulate a data set of <span class="math inline">\(40\)</span> data points, which comprises of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
+<p>Simulate a data set of <span class="math">\(40\)</span> data points, which comprises of pairs of inputs <span class="math">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
     n_dim = len(coeff)
     x = np.random.randn(N, n_dim).astype(np.float32)
@@ -145,7 +145,7 @@ variational.add(Normal(model.n_vars))</code></pre>
 <p>Run mean-field variational inference for 250 iterations and print every 10 iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_print=10)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>Use point-based evaluation, and calculate the mean squared error for predictions on test data. Here the test data is simulated from the same process.</p>
 <pre class="python" language="Python"><code>data_test = build_toy_dataset(coeff=coeff)
@@ -153,7 +153,7 @@ x_test, y_test = data_test[&#39;x&#39;], data_test[&#39;y&#39;]
 print(ed.evaluate(&#39;mse&#39;, model, variational, {&#39;x&#39;: x_test}, y_test))
 ## 0.0262413</code></pre>
 <p>The mean squared error is quite low given the magnitude of the output.</p>
-<p>In addition to the model’s <code>log_prob()</code> method typically required for inference, we have a <code>predict()</code> method which makes predictions. This method is required for point-based evaluation. For more details on criticism, see the <a href="tut_point_eval.html">point-based evaluation tutorial</a>.</p>
+<p>In addition to the model’s <code>logprob()</code> method typically required for inference, we have a <code>predict()</code> method which makes predictions. This method is required for point-based evaluation. For more details on criticism, see the <a href="tut_point_eval.html">point-based evaluation tutorial</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
