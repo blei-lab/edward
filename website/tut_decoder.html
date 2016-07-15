@@ -70,7 +70,7 @@
 </div>
 <div class="nine columns">
 <h2 id="probabilistic-decoder">Probabilistic decoder</h2>
-<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory, where <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> defines a distribution over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its decoding for any given code is random.</p>
+<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory. It is a distribution <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables <span class="math inline">\(\mathbf{z}_n\)</span> are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its generated values (decoding) for any given code is random.</p>
 <p>For real-valued data, the randomness in the decoder is given by a multivariate Gaussian <span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n\mid\mathbf{z}_n)
   &amp;=
@@ -81,7 +81,7 @@
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
-<p>Let’s define the model in Edward using TensorFlow, and with PrettyTensor as an easy way to build neural networks. Here we use a probabilistic decoder to model 28 x 28 pixels in a binarized MNIST data set.</p>
+<p>Let’s define the model in Edward using TensorFlow, and with PrettyTensor as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
 <pre class="python" language="Python"><code>class NormalBernoulli:
     """
     Each binarized pixel in an image is modeled by a Bernoulli
@@ -120,7 +120,7 @@
         return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
 
 model = NormalBernoulli(n_vars=10)</code></pre>
-<p>We experiment with this model in the <a href="variational_autoencoder.html">variational auto-encoder</a> tutorial.</p>
+<p>An example script using this model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">here</a>.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Dayan, P., Hinton, G. E., Neal, R. M., &amp; Zemel, R. S. (1995). The Helmholtz Machine. Neural Computation, 7(5), 889–904.</li>

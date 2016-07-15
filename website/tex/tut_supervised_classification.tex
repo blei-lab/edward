@@ -1,48 +1,36 @@
 % Define the subtitle of the page
-\title{Supervised learning (classification)}
+\title{Supervised learning (Classification)}
 
 % Begin the content of the page
-\subsection{Supervised learning (classification)}
+\subsection{Supervised learning (Classification)}
 
-We explain how to perform supervised learning in Edward using
-Gaussian process classification as an example.
+In supervised learning, the task is to infer hidden structure from
+labeled data, comprised of training examples $\{(x_n, y_n)\}$.
+Classification means the output $y$ takes discrete values.
 
-The task is ...
-
-\begin{itemize}
-  \item \textbf{Probability Model:} Gaussian process classification
-  \item \textbf{Variational Model:} Fully factorized normal
-  \item \textbf{Data:} Crabs dataset (\href
-  {https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html}{link})
-  \item \textbf{Inference:} Mean-field variational inference
-  \item \textbf{Criticism:} None
-\end{itemize}
-
-Full Python code in:
+We demonstrate how to do this in Edward with an example.
+The script is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py}
-{gp_classification.py}
+{here}.
 
 
-\subsubsection{Probability Model}
-Define the likelihood of an observation $(y_n, x_n)$ as
-\begin{align*}
-  p(y_n \mid \mathbf{z} \;;\; x_n)
-  &=
-  \text{Bernoulli}(y_n \mid \text{logit}^{-1}(x_n * \mathbf{z})).
-\end{align*}
+\subsubsection{Data}
 
-Define the prior to be a multivariate normal
-\begin{align*}
-  p(\mathbf{z})
-  &=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, K)
-\end{align*}
- where $\mathbf{z}$ are weights drawn from a Gaussian process with covariance
- matrix
- given by $k(x, x^\prime)$ for each pair of inputs $(x, x^\prime)$, and with a
- squared-exponential kernel and known kernel hyperparameters.
+Use 25 data points from the UCI crabs data set.
+\begin{lstlisting}[language=Python]
+df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
+data = {'x': df[:, 1:], 'y': df[:, 0]}
+\end{lstlisting}
 
-The model in Edward is
+
+\subsubsection{Model}
+
+Posit the model as Gaussian process classification. For more details on the
+model, see the
+\href{tut_gp_classification.html}
+{Gaussian process classification tutorial}.
+
+Here we build the model in Edward using TensorFlow.
 \begin{lstlisting}[language=Python]
 class GaussianProcess:
     """
@@ -69,7 +57,7 @@ class GaussianProcess:
         self.sigma = sigma
         self.l = l
 
-        self.num_vars = N
+        self.n_vars = N
         self.inverse_link = tf.sigmoid
 
     def kernel(self, x):
@@ -89,49 +77,39 @@ class GaussianProcess:
         return tf.pack(mat)
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
         log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(
             bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
             ) for z in tf.unpack(zs)])
         return log_prior + log_lik
 
-model = GaussianProcess(N=number_of_datapoints)
-\end{lstlisting}
-
-
-\subsubsection{Variational Model}
-Define the variational model to be a fully factorized normal
-\begin{align*}
-  q(\mathbf{z} \;;\; \lambda)
-  &=
-  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2} I).
-\end{align*}
-
-The model in Edward is
-\begin{lstlisting}[language=Python]
-variational = Variational()
-variational.add(Normal(model.num_vars))
-\end{lstlisting}
-
-
-\subsubsection{Data}
-
-The \texttt{crabs} dataset is
-\begin{lstlisting}[language=Python]
-df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
-data = ed.Data(tf.constant(df, dtype=tf.float32))
+model = GaussianProcess(N=len(df))
 \end{lstlisting}
 
 
 \subsubsection{Inference}
 
-Inference is mean-field variational inference
+Perform variational inference.
+Define the variational model to be a fully factorized normal
+\begin{lstlisting}[language=Python]
+variational = Variational()
+variational.add(Normal(model.n_vars))
+\end{lstlisting}
+
+Run mean-field variational inference for 500 iterations.
 \begin{lstlisting}[language=Python]
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=500)
 \end{lstlisting}
+In this case
+\texttt{MFVI} defaults to minimizing the
+$\text{KL}(q\|p)$ divergence measure using the reparameterization
+gradient.
+For more details on inference, see the \href{tut_KLqp.html}{$\text{KL}(q\|p)$ tutorial}.
+(This example happens to be slow because evaluating and inverting full
+covariances in Gaussian processes happens to be slow.)
+
+
+%\subsubsection{Criticism}

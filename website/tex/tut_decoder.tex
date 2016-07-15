@@ -5,12 +5,11 @@
 \subsection{Probabilistic decoder}
 
 A probabilistic decoder is a reinterpretation of model likelihoods
-based on coding theory, where $p(\mathbf{x}_n\mid \mathbf{z}_n)$ defines
-a distribution over each value
+based on coding theory. It is a distribution $p(\mathbf{x}_n\mid \mathbf{z}_n)$  over each value
 $\mathbf{x}_n\in\mathbb{R}^D$ given a code $\mathbf{z}_n$. The latent
-variables are interpreted as the hidden representation, or code, of the value
-$\mathbf{x}_n$. The decoder is probabilistic because its decoding for
-any given code is random.
+variables $\mathbf{z}_n$ are interpreted as the hidden representation, or code, of the value
+$\mathbf{x}_n$. The decoder is probabilistic because its generated
+values (decoding) for any given code is random.
 
 For real-valued data,
 the randomness in the decoder is given by a multivariate Gaussian
@@ -37,8 +36,8 @@ prior over the code
 
 Let's define the model in Edward using TensorFlow, and with
 PrettyTensor as an easy way to build neural networks. Here we use a
-probabilistic decoder to model 28 x 28
-pixels in a binarized MNIST data set.
+probabilistic decoder to model binarized 28 x 28
+pixel images from MNIST.
 \begin{lstlisting}[language=Python]
 class NormalBernoulli:
     """
@@ -80,8 +79,11 @@ class NormalBernoulli:
 model = NormalBernoulli(n_vars=10)
 \end{lstlisting}
 
-We experiment with this model in the
-\href{variational_autoencoder.html}{variational auto-encoder} tutorial.
+An example script using this model can found
+\href{https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py}
+{here}.
+%We experiment with this model in the
+%\href{variational_autoencoder.html}{variational auto-encoder} tutorial.
 
 \subsubsection{References}\label{references}
 
