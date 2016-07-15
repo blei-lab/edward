@@ -70,20 +70,20 @@
 </div>
 <div class="nine columns">
 <h2 id="mixture-of-gaussians">Mixture of Gaussians</h2>
-<p>A mixture of Gaussians, also known as a Gaussian mixture model, clusters data points <span class="math">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> using <span class="math">\(K\)</span> individual Gaussian distributions.</p>
-<p>For a set of <span class="math">\(N\)</span> data points, the likelihood of each observation <span class="math">\(\mathbf{x}_n\)</span> is <span class="math">\[\begin{aligned}
+<p>A mixture of Gaussians, also known as a Gaussian mixture model, clusters data points <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> using <span class="math inline">\(K\)</span> individual Gaussian distributions.</p>
+<p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is <span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &amp;=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math">\(\pi\)</span> is a <span class="math">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by mean <span class="math">\(\mu_k\)</span> and variance <span class="math">\(\sigma_k\)</span>.</p>
-<p>Define the prior on <span class="math">\(\pi\in[0,1]\)</span> such that <span class="math">\(\sum_{k=1}^K\pi_k=1\)</span> to be <span class="math">\[\begin{aligned}
+  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by mean <span class="math inline">\(\mu_k\)</span> and variance <span class="math inline">\(\sigma_k\)</span>.</p>
+<p>Define the prior on <span class="math inline">\(\pi\in[0,1]\)</span> such that <span class="math inline">\(\sum_{k=1}^K\pi_k=1\)</span> to be <span class="math display">\[\begin{aligned}
   p(\pi)
   &amp;=
   \text{Dirichlet}(\pi \;;\; \alpha \mathbf{1}_{K}).\end{aligned}\]</span></p>
-<p>Define the prior on each component <span class="math">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be <span class="math">\[\begin{aligned}
+<p>Define the prior on each component <span class="math inline">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
   p(\mathbf{\mu}_k)
   &amp;=
   \mathcal{N}(\mathbf{\mu}_k \;;\; 0, \sigma^2\mathbf{I}).\end{aligned}\]</span></p>
-<p>Define the prior on each component <span class="math">\(\mathbf{\sigma}_k\in\mathbb{R}^D\)</span> to be <span class="math">\[\begin{aligned}
+<p>Define the prior on each component <span class="math inline">\(\mathbf{\sigma}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
   p(\mathbf{\sigma}_k)
   &amp;=
   \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).\end{aligned}\]</span></p>

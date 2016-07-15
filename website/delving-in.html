@@ -88,8 +88,8 @@
 <h3 id="models">Models</h3>
 <p>There are two types of model objects in Edward:</p>
 <ol>
-<li>Probability models of data, <span class="math">\(p(x,z)\)</span></li>
-<li>Variational models of latent variables <span class="math">\(q(z\;;\;\lambda)\)</span></li>
+<li>Probability models of data, <span class="math inline">\(p(x,z)\)</span></li>
+<li>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></li>
 </ol>
 <p><strong>Probability Models.</strong> Edward supports probability models specified in TensorFlow, Python, PyMC3, or Stan. A probability model has the following structure.</p>
 <pre class="python" language="Python"><code>import edward as ed
@@ -107,10 +107,10 @@ class probability_model():
 
 my_model = probability_model(...)</code></pre>
 <p>The field <code>n_vars</code> denotes the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>n_vars=2*N</code> latent variables for <code>N</code> observations.</p>
-<p>The method <code>logprob(xs, zs)</code> calculates the log probability of the joint density <span class="math">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables. <code>xs</code> can be a single data point or a batch, and analogously, <code>zs</code> can be a single set or multiple sets of latent variables.</p>
-<p>This describes the probability model, which is a joint distribution of data <span class="math">\(x\)</span> and latent variables <span class="math">\(z\)</span>. Given a model and data, we aim to reason about <span class="math">\(z\)</span>: the model’s hidden patterns conditioned on the data. The posterior distribution <span class="math">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden patterns, and its variance describes the uncertainty around our best guess.</p>
+<p>The method <code>log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables. <code>xs</code> can be a single data point or a batch, and analogously, <code>zs</code> can be a single set or multiple sets of latent variables.</p>
+<p>This describes the probability model, which is a joint distribution of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Given a model and data, we aim to reason about <span class="math inline">\(z\)</span>: the model’s hidden patterns conditioned on the data. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden patterns, and its variance describes the uncertainty around our best guess.</p>
 <p><strong>Variational Models.</strong> Edward uses variational inference to approximate the posterior. To this end, Edward has a <code>Variational</code> class and a library of <code>Distribution</code> objects. Variational models combine these using the <code>add()</code> syntax.</p>
-<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math">\[\begin{aligned}
+<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math display">\[\begin{aligned}
   q(z \;;\; \lambda)
   &amp;=
   \text{Dirichlet}(z_\pi)
@@ -124,12 +124,12 @@ my_variational = Variational()
 my_variational.add(Dirichlet(K))
 my_variational.add(Normal(K*D))
 my_variational.add(InvGamma(K*D))</code></pre>
-<p>Ordering matters: variational models must match the same ordering as latent variables accessed in <code>probabilitymodel.logprob(xs, zs)</code>.</p>
+<p>Ordering matters: variational models must match the same ordering as latent variables accessed in <code>probability_model.log_prob(xs, zs)</code>.</p>
 <h3 id="inference">Inference</h3>
-<p>Edward implements a variety of inference methods. Current techniques leverage variational inference, which seeks to match the variational model <span class="math">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math">\(p(z \mid x)\)</span>.</p>
+<p>Edward implements a variety of inference methods. Current techniques leverage variational inference, which seeks to match the variational model <span class="math inline">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math inline">\(p(z \mid x)\)</span>.</p>
 <p><img alt="image" src="images/inference_structure.png"/> [in caption-style.] Dependency graph of inference methods. Each node is a class in Edward and arrows represent class inheritance.</p>
 <p>Each algorithm minimizes a different loss function between the variational model and the posterior. Algorithms derived from <code>VariationalInference</code> take as input a probability model, a variational model, and data.</p>
-<p>For example, to minimize the Kullback-Leibler divergence <span class="math">\[\begin{aligned}
+<p>For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
   \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we would write</p>
 <pre class="python" language="Python"><code>inference = ed.KLpq(my_model, my_variational, my_data)
 inference.run(n_iter=500, n_minibatch=5)</code></pre>

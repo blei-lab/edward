@@ -76,16 +76,16 @@
     <div class="nine columns">
 <h2 id="laplace-approximation">Laplace approximation</h2>
 <p>(This tutorial follows the <a href="tut_MAP.html">Maximum a posteriori estimation</a> tutorial.)</p>
-<p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math">\(p(z \mid x)\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
-<p>The Laplace approximation is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math">\[\begin{aligned}
+<p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math inline">\(p(z \mid x)\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
+<p>The Laplace approximation is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}
   p(z \mid x)
   &amp;\approx
-  \mathcal{N}(z\;;\; \mu = z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math">\[\begin{aligned}
+  \mathcal{N}(z\;;\; \mu = z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
   \Lambda_{ij}
   &amp;=
   \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> This is also easy (yet computationally expensive) to compute using automatic differentiation.</p>
 <h3 id="implementation">Implementation</h3>
-<p>The Laplace approximation derives from <a href="tut_MAP.html">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math">\(z_\text{MAP}\)</span>.</p>
+<p>The Laplace approximation derives from <a href="tut_MAP.html">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
 <pre class="python" language="Python"><code>class Laplace(MAP):
     def __init__(self, model, data=None, params=None):
         super(Laplace, self).__init__(model, data, params)

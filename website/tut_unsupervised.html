@@ -75,10 +75,10 @@
     </div>
     <div class="nine columns">
 <h2 id="unsupervised-learning">Unsupervised learning</h2>
-<p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math">\(\{x_n\}\)</span>.</p>
+<p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math inline">\(\{x_n\}\)</span>.</p>
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>Use a simulated (pre-generated) dataset of datapoints <span class="math">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
+<p>Use a simulated (pre-generated) dataset of datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
 <pre class="python" language="Python"><code>x = np.loadtxt(&#39;data/mixture_data.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)
 data = {&#39;x&#39;: x}</code></pre>
 <h3 id="model">Model</h3>
@@ -135,7 +135,7 @@ data = {&#39;x&#39;: x}</code></pre>
 
 model = MixtureGaussian(K=2, D=2)</code></pre>
 <h3 id="inference">Inference</h3>
-<p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be a Dirichlet <span class="math">\(\times\)</span> fully factorized normal <span class="math">\(\times\)</span> fully factorized inverse Gamma.</p>
+<p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be a Dirichlet <span class="math inline">\(\times\)</span> fully factorized normal <span class="math inline">\(\times\)</span> fully factorized inverse Gamma.</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Dirichlet(model.K))
 variational.add(Normal(model.K*model.D))
@@ -143,7 +143,7 @@ variational.add(InvGamma(model.K*model.D))</code></pre>
 <p>Run mean-field variational inference for 500 iterations, using a batch of 5 datapoints and 5 latent variable samples per iteration.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=500, n_samples=5, n_minibatch=5)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
