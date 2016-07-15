@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Mixture of Gaussians</title>
+<title>Edward – Probabilistic decoder</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,79 +69,62 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="mixture-of-gaussians">Mixture of Gaussians</h2>
-<p>A mixture of Gaussians, also known as a Gaussian mixture model, clusters data points <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> using <span class="math inline">\(K\)</span> individual Gaussian distributions.</p>
-<p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is <span class="math display">\[\begin{aligned}
-  p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+<h2 id="probabilistic-decoder">Probabilistic decoder</h2>
+<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory, where <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> defines a distribution over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its decoding for any given code is random.</p>
+<p>For real-valued data, the randomness in the decoder is given by a multivariate Gaussian <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n\mid\mathbf{z}_n)
   &amp;=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by mean <span class="math inline">\(\mu_k\)</span> and variance <span class="math inline">\(\sigma_k\)</span>.</p>
-<p>Define the prior on <span class="math inline">\(\pi\in[0,1]\)</span> such that <span class="math inline">\(\sum_{k=1}^K\pi_k=1\)</span> to be <span class="math display">\[\begin{aligned}
-  p(\pi)
+  \mathcal{N}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the probabilistic decoder is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> taking the code <span class="math inline">\(\mathbf{z}_n\)</span> as input. For binary data, it is given by a Bernoulli <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n\mid\mathbf{z}_n)
   &amp;=
-  \text{Dirichlet}(\pi \;;\; \alpha \mathbf{1}_{K}).\end{aligned}\]</span></p>
-<p>Define the prior on each component <span class="math inline">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
-  p(\mathbf{\mu}_k)
+  \text{Bernoulli}(\mathbf{x}_n\mid p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).\end{aligned}\]</span> Probabilistic decoders are typically used alongside a standard normal prior over the code <span class="math display">\[\begin{aligned}
+  p(\mathbf{z})
   &amp;=
-  \mathcal{N}(\mathbf{\mu}_k \;;\; 0, \sigma^2\mathbf{I}).\end{aligned}\]</span></p>
-<p>Define the prior on each component <span class="math inline">\(\mathbf{\sigma}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
-  p(\mathbf{\sigma}_k)
-  &amp;=
-  \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).\end{aligned}\]</span></p>
-<p>The model in Edward is</p>
-<pre class="python" language="Python"><code>class MixtureGaussian:
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
+<p>Let’s define the model in Edward using TensorFlow, and with PrettyTensor as an easy way to build neural networks. Here we use a probabilistic decoder to model 28 x 28 pixels in a binarized MNIST data set.</p>
+<pre class="python" language="Python"><code>class NormalBernoulli:
     """
-    Mixture of Gaussians
+    Each binarized pixel in an image is modeled by a Bernoulli
+    likelihood. The success probability for each pixel is the output
+    of a neural network that takes samples from a normal prior as
+    input.
 
-    p(x, z) = [ prod_{n=1}^N N(x_n; mu_{c_n}, sigma_{c_n}) Multinomial(c_n; pi) ]
-              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-              Dirichlet(pi; alpha)
-
-    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
-
-    Parameters
-    ----------
-    K : int
-        Number of mixture components.
-    D : float, optional
-        Dimension of the Gaussians.
+    p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
     """
-    def __init__(self, K, D):
-        self.K = K
-        self.D = D
-        self.n_vars = (2*D + 1) * K
+    def __init__(self, n_vars):
+        self.n_vars = n_vars # number of local latent variables
 
-        self.a = 1
-        self.b = 1
-        self.c = 10
-        self.alpha = tf.ones([K])
+    def neural_network(self, z):
+        """p = neural_network(z)"""
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                               batch_normalize=True,
+                               learned_moments_update_rate=0.0003,
+                               variance_epsilon=0.001,
+                               scale_after_normalization=True):
+            return (pt.wrap(z).
+                    reshape([N_MINIBATCH, 1, 1, self.n_vars]).
+                    deconv2d(3, 128, edges='VALID').
+                    deconv2d(5, 64, edges='VALID').
+                    deconv2d(5, 32, stride=2).
+                    deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+                    flatten()).tensor
 
-    def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        N = get_dims(xs['x'])[0]
-        pi, mus, sigmas = zs
-        log_prior = dirichlet.logpdf(pi, self.alpha)
-        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
-        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+    def log_lik(self, xs, z):
+        """
+        Bernoulli log-likelihood, summing over every image n and pixel i
+        in image n.
 
-        # Loop over each sample zs[b,:]
-        log_lik = []
-        n_samples = get_dims(zs[0])[0]
-        for s in range(n_samples):
-            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
-            for k in range(self.K):
-                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs['x'],
-                    mus[s, (k*self.D):((k+1)*self.D)],
-                    sigmas[s, (k*self.D):((k+1)*self.D)]))
+        log p(x | z) = log Bernoulli(x | p = neural_network(z))
+         = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
+        """
+        return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
 
-            log_lik += [log_lik_z]
-
-        return log_prior + tf.pack(log_lik)
-
-model = MixtureGaussian(K=2, D=2)</code></pre>
-<p>We experiment with this model in the <a href="tut_unsupervised.html">unsupervised learning</a> tutorial.</p>
+model = NormalBernoulli(n_vars=10)</code></pre>
+<p>We experiment with this model in the <a href="variational_autoencoder.html">variational auto-encoder</a> tutorial.</p>
 <h3 id="references">References</h3>
 <ul>
-<li>Bishop, C. (2007). Pattern Recognition and Machine Learning. Springer.</li>
+<li>Dayan, P., Hinton, G. E., Neal, R. M., &amp; Zemel, R. S. (1995). The Helmholtz Machine. Neural Computation, 7(5), 889–904.</li>
+<li>Kingma, D. P., &amp; Welling, M. (2014). Auto-Encoding Variational Bayes. In International Conference on Learning Representations.</li>
 </ul>
 </div>
 </div>

@@ -4,24 +4,28 @@
 % Begin the content of the page
 \subsection{Bayesian neural network}
 
-Define the likelihood of an observation $(y_n, x_n)$
+A Bayesian neural network is a neural network with a prior
+distribution on its weights.
+Define the likelihood of an observation $(\mathbf{x}_n, y_n)$
 \begin{align*}
-  p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
+  p(y_n \mid \mathbf{z} \;;\; \mathbf{x}_n, \sigma^2)
   &=
-  \mathcal{N}(y_n \;;\; \mu(x_n\;;\;\mathbf{z}), \sigma^2)
+  \mathcal{N}(y_n \;;\; \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),
 \end{align*}
-where $\mu$ is a neural network with weights (latent) variables
-$\mathbf{z}$. Here $x_n$ is the (known) covariate and $\sigma^2$ is the
-(known) variance of the observation.
+where $\mathrm{NN}$ is a neural network whose weights and biases form
+the latent variables $\mathbf{z}$. Assume $\sigma^2$ is a
+known variance.
 
-Define the prior on $\mathbf{z}$ to be a factorized normal
+Define the prior on the weights and biases $\mathbf{z}$ to be the standard normal
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I)
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).
 \end{align*}
 
-Let's define the model in Edward using TensorFlow.
+Let's define the model in Edward using TensorFlow, where we
+instantiate a 2-layer Bayesian neural network with $\tanh$
+nonlinearities.
 \begin{lstlisting}[language=Python]
 class BayesianNN:
     """
@@ -54,9 +58,9 @@ class BayesianNN:
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
 
-        self.num_layers = len(layer_sizes)
-        self.weight_dims = zip(layer_sizes[:-1], layer_sizes[1:])
-        self.num_vars = sum((m+1)*n for m, n in self.weight_dims)
+        self.n_layers = len(layer_sizes)
+        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
+        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def unpack_weights(self, z):
         """Unpack weight matrices and biases from a flattened vector."""
@@ -65,50 +69,49 @@ class BayesianNN:
                   tf.reshape(z[m*n:(m*n+n)], [1, n])
             z = z[(m+1)*n:]
 
-    def mapping(self, x, z):
+    def neural_network(self, x, zs):
         """
-        mu = NN(x; z)
-
-        Note this is one sample of z at a time.
-
-        Parameters
-        -------
-        x : tf.tensor
-            n_data x D
-
-        z : tf.tensor
-            num_vars
-
-        Returns
-        -------
-        tf.tensor
-            vector of length n_data
+        Return a `n_samples` x `n_minibatch` matrix. Each row is
+        the output of a neural network on the input data `x` and
+        given a set of weights `z` in `zs`.
         """
-        h = x
-        for W, b in self.unpack_weights(z):
-            # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
-            h = self.nonlinearity(tf.matmul(h, W) + b)
+        matrix = []
+        for z in tf.unpack(zs):
+            # Calculate neural network with weights given by `z`.
+            h = x
+            for W, b in self.unpack_weights(z):
+                # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
+                h = self.nonlinearity(tf.matmul(h, W) + b)
 
-        h = tf.squeeze(h) # n_data x 1 to n_data
-        return h
+            matrix += [tf.squeeze(h)] # n_minibatch x 1 to n_minibatch
+
+        return tf.pack(matrix)
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
-        mus = tf.pack([self.mapping(x, z) for z in tf.unpack(zs)])
-        # broadcasting to do mus - y (n_minibatch x n_data - n_data)
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+        mus = self.neural_network(x, zs)
+        # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
 
-model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
+model = BayesianNN(layer_sizes=[1, 10, 10, 1])
 \end{lstlisting}
 
-Full Python code in:
+A toy demonstration is available in the \href{getting-started}{Getting Started} section.
+Source code including a visualization is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
-{bayesian_nn.py}
+{here}, as well as an example
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn_analytic_kl.py}
-{bayesian_nn.py}
+{here}
+leveraging additional structure in the
+Bayesian neural network for faster inference.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Neal, R. M. (1994) Bayesian Learning for Neural Networks, Ph.D.
+  Thesis, Dept. of Computer Science, University of Toronto.
+\end{itemize}

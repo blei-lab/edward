@@ -106,11 +106,8 @@ class GaussianProcess:
         return tf.pack(mat)
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        # Data must have labels in the first column and features in
-        # subsequent columns.
-        y = xs[:, 0]
-        x = xs[:, 1:]
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
         log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(
             bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
@@ -122,3 +119,11 @@ model = GaussianProcess(N=number_of_datapoints)
 
 We experiment with this model in the
 \href{tut_supervised_classification.html}{supervised learning (classification)} tutorial.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Rasmussen, C. E., \& Williams, C. K. I. (2006). Gaussian processes
+  for machine learning. MIT Press, Cambridge, MA.
+\end{itemize}
