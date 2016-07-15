@@ -26,7 +26,7 @@ It supports **inference** via
     -   Black box variational inference
     -   Stochastic variational inference
     -   Variational auto-encoders
-    -   Inclusive KL divergence: $\text{KL}(p\|q)$
+    -   Inclusive KL divergence: KL(p||q)
     -   Laplace approximation
 -   Marginal posterior optimization (empirical Bayes, marginal
     maximum likelihood)
