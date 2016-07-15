@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Latent Space Models</title>
+  <title>Edward – Latent space models for neurological data</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -74,7 +74,7 @@
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
-<h2 id="latent-space-models">Latent Space Models</h2>
+<h2 id="latent-space-models-for-neurological-data">Latent space models for neurological data</h2>
 <p>Many interesting data sets are networks. For example, social networks or biological neural networks.</p>
 <p>Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model [1]. Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.</p>
 <p>We demonstrate how to do this in Edward with an example from neuroscience. The script can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py">here</a>.</p>
@@ -124,7 +124,7 @@ inference = ed.MFVI(model, variational,data)</code></pre>
 <p>See this extended tutorial about <a href="tut_KLqp.html">variational inference in Edward</a>.</p>
 <h3 id="references">References</h3>
 <p>[1] Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
-<p>[2] Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. , 393(6684):440–442.</p>
+<p>[2] Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘</p>
 <p>[3] White, J. G., Southgate, E., Thomson, J. N., and Brenner, S. (1986). The structure of the nervous system of the nematode caenorhabditis elegans. , 314(1165):1–340.</p>
     </div>
   </div>

@@ -1,6 +1,6 @@
-\title{Latent Space Models}
+\title{Latent space models for neurological data}
 
-\subsection{Latent Space Models}
+\subsection{Latent space models for neurological data}
 
 Many interesting data sets are networks. For example, social networks or biological neural networks.
 
@@ -12,7 +12,7 @@ We demonstrate how to do this in Edward with an example from neuroscience. The s
 \subsubsection{Data}
 
 The data comes from \href{http://www-personal.umich.edu/~mejn/netdata/}{here}.
-It is a weighted, directed network representing the neural network of the nematode \href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C. Elegans} compiled by Duncan Watts and Steven Strogatz [2] from original experimental data by White et al. [3]. 
+It is a weighted, directed network representing the neural network of the nematode \href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C. Elegans} compiled by Duncan Watts and Steven Strogatz [2] from original experimental data by White et al. [3].
 
 The neural network consists of around $300$ neurons. Each connection is associated with a weight (positive integer) capturing the strength of the connection.
 
@@ -71,7 +71,7 @@ inference = ed.MAP(model, data)
 var = inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
 
-See this extended tutorial about 
+See this extended tutorial about
 \href{tut_MAP.html}{MAP estimation in Edward}.
 
 One could instead run variational inference. This requires specifying a variational model and instantiating MFVI.
@@ -84,7 +84,7 @@ Finally, the following line runs the inference procedure:
 \begin{lstlisting}[language=Python]
 var = inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
-See this extended tutorial about 
+See this extended tutorial about
 \href{tut_KLqp.html}{variational inference in Edward}.
 
 \subsubsection{References}

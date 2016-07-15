@@ -4,64 +4,76 @@
 % Begin the content of the page
 \subsection{Point-based evaluations}
 
-Edward supports point-based evaluations. The simplest example is
-evaluating a model for classification. After inferring the posterior,
-we can predict the label for each observation in the data and compare
-it to their true labels. Edward implements a variety of metrics, such
-as classification error and mean absolute error, based on these
-predictions.
+Edward supports point-based evaluations. For example, given a trained
+model for classification, we can predict the label for each
+observation in the data and compare it to their true labels. Edward
+implements a variety of metrics, such as classification error and mean
+absolute error.
+
+Formally, point prediction in probabilistic models is given by
+taking the mean of the posterior predictive distribution,
+\begin{align*}
+  p(x_\text{new} \mid x)
+  &=
+  \int
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z.
+\end{align*}
+The model's posterior predictive can be used to generate new data
+given past observations and can also make predictions on new data
+given past observations.
+It is formed by calculating the likelihood of the new data, averaged
+over every set of latent variables according to the posterior
+distribution.
 
 \subsubsection{Implementation}
 
 Edward implements point-based evaluations through the
-\texttt{predict()} function in the probability model. This
-predicts the label given samples from the posterior $p(z \mid x)$
+\texttt{predict()} method in the probability model. It predicts the
+label given samples from the posterior $p(z \mid x)$, i.e., it is the
+mean of $p(x_\text{new} \mid z)$ averaged over posterior samples.
 \begin{lstlisting}[language=Python]
 class BayesianLinearRegression:
-    def __init__(self, lik_variance=0.01, prior_variance=0.01):
-        self.lik_variance = lik_variance
-        self.prior_variance = prior_variance
-        self.num_vars = 11
-
-    def log_prob(self, xs, zs):
-        x, y = xs['x'], xs['y']
-        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
-        b = zs[:, 0]
-        W = tf.transpose(zs[:, 1:])
-        mus = tf.matmul(x, W) + b
-        y = tf.expand_dims(y, 1)
-        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
-        return log_lik + log_prior
-
+    ...
     def predict(self, xs, zs):
-        """Returns a prediction for each data point, averaging over
-        each set of latent variables z in zs; and also return the true
-        value."""
+        """Return a prediction for each data point, averaging over
+        each set of latent variables z in zs."""
         x_test = xs['x']
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])
         y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
         return y_pred
-\end{lstlisting}
 
-The \texttt{ed.evaluate()} method then evaluates a model as
-\begin{lstlisting}[language=Python]
-ed.evaluate('categorical_accuracy', my_model, my_variational, my_data)
-ed.evaluate('mean_absolute_error', my_model, my_variational, my_data)
+model = BayesianLinearRegression()
 \end{lstlisting}
-Swapping \texttt{my_data} with held-out data makes it easy to implement
-cross-validation and other model assessment techniques.
+Similar to variational inference methods, the
+\texttt{ed.evaluate()} method takes as input the probability model,
+variational model, and a data set. It evaluates the trained model (the
+posterior via the variational model; everything else via the
+probability model) according to a chosen metric.
+\begin{lstlisting}[language=Python]
+ed.evaluate('categorical_accuracy', model, variational, data)
+ed.evaluate('mean_absolute_error', model, variational, data)
+\end{lstlisting}
+Swapping \texttt{data} with data held-out from training time makes it
+easy to implement cross-validation and other model assessment
+techniques.
 
 Point-based evaluation applies generally to any setting, including
 unsupervised tasks. For example, we can evaluate the likelihood of
 observing the data.
 \begin{lstlisting}[language=Python]
-ed.evaluate('log_likelihood', my_model, my_variational, my_data)
+ed.evaluate('log_likelihood', model, variational, data)
 \end{lstlisting}
 
 Point-based evaluations are formally known as scoring rules (Gneiting
-and Raftery, 2007) in decision theory. Scoring rules are commonly
-used for model comparison, model selection, and model averaging.
+and Raftery, 2007) in decision theory. Scoring rules are
+useful for model comparison, model selection, and model averaging.
+
+We use point-based evaluation in the
+\href{tut_supervised_regression.html}{supervised learning
+(regression)} tutorial.
 
 \subsubsection{References}\label{references}
 

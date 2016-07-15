@@ -70,20 +70,20 @@
 </div>
 <div class="nine columns">
 <h2 id="posterior-predictive-checks">Posterior predictive checks</h2>
-<p>Posterior predictive checks (PPCs; Rubin, 1984; Gelman et al., 1996) analyze the degree to which data generated from the model deviate from data generated from the true distribution. They can be used either numerically to quantify this degree, or graphically to analyze this degree qualitatively. PPCs can be thought of as a probabilistic version of point-based evaluations.</p>
+<p>Posterior predictive checks (PPCs; Rubin, 1984; Gelman et al., 1996) analyze the degree to which data generated from the model deviate from data generated from the true distribution. They can be used either numerically to quantify this degree, or graphically to visualize this degree. PPCs can be thought of as a probabilistic generalization of point-based evaluations.</p>
 <p>PPCs focus on the posterior predictive distribution <span class="math display">\[\begin{aligned}
   p(x_\text{new} \mid x)
   &amp;=
   \int
   p(x_\text{new} \mid z)
   p(z \mid x)
-  \text{d} z.\end{aligned}\]</span> The model’s posterior predictive can be used to generate new data given past observations and can also make predictions on new data given past observations. It is formed by calculating the likelihood of the new data, averaged over every possible set of latent variables according to the posterior distribution.</p>
+  \text{d} z.\end{aligned}\]</span> The model’s posterior predictive can be used to generate new data given past observations and can also make predictions on new data given past observations. It is formed by calculating the likelihood of the new data, averaged over every set of latent variables according to the posterior distribution.</p>
 <p>The simplest PPC works by applying a test statistic on new data generated from the posterior predictive, such as <span class="math inline">\(T(x_\text{new}) = \max(x_\text{new})\)</span>. Applying <span class="math inline">\(T(x_\text{new})\)</span> to new data over many data replications induces a distribution. We compare this distribution to the test statistic on the real data <span class="math inline">\(T(x)\)</span>.</p>
 <p><img alt="image" src="images/ppc.png"/></p>
 <p>In the figure, <span class="math inline">\(T(x)\)</span> falls in a low probability region of this reference distribution. This indicates that the model fits the data poorly according to this check; this suggests an area of improvement for the model.</p>
-<p>More generally, the test statistic can also be a function of the model’s latent variables <span class="math inline">\(T(x, z)\)</span>, known as a discrepancy function.</p>
+<p>More generally, the test statistic can also be a function of the model’s latent variables <span class="math inline">\(T(x, z)\)</span>, known as a discrepancy function. Examples of discrepancy functions are the metrics used for point-based evaluation. We can now interpret the point-based evaluation as a special case of PPCs: it simply calculates <span class="math inline">\(T(x, z)\)</span> over the real data and without a reference distribution in mind.</p>
 <h3 id="implementation">Implementation</h3>
-<p>Edward implements PPCs through the <code>sample_likelihood()</code> function in the probability model. This method samples a dataset from the model likelihood</p>
+<p>Edward implements PPCs through the <code>sample_likelihood()</code> method in the probability model. This method samples a dataset <span class="math inline">\(x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)\)</span> from the model likelihood given a set of latent variables.</p>
 <pre class="python" language="Python"><code>class BetaBernoulli:
     def __init__(self):
         self.num_vars = 1
@@ -100,12 +100,12 @@
         for s in range(zs.shape[0]):
             out += [{'x': bernoulli.rvs(zs[s, :], size=size).reshape((size,))}]
         return out</code></pre>
-<p>The <code>ed.ppc()</code> method then provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution</p>
+<p>The <code>ed.ppc()</code> method provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution</p>
 <pre class="python" language="Python"><code>T = lambda y, z=None: tf.reduce_mean(y['x'])
 print(ed.ppc(model, variational, data, T))</code></pre>
 <p>See the <a href="api/index.html">API</a> for further implementation details.</p>
-<p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by classical hypothesis testing (Meng, 1994), under the philosophy that models should be criticized under the frequentist perspective of large samples.</p>
-<p>PPCs can also be applied for other tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while they can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended, as binary decision making from a single test is not as common a use case as one might believe.</p>
+<p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by classical hypothesis testing (Meng, 1994), under the philosophy that models should be criticized under the frequentist perspective of large sample assessment.</p>
+<p>PPCs can also be applied to tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while they can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended, as binary decision making from a single test is not as common a use case as one might believe. We recommend performing many PPCs to get a better understanding of the model fit.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Box, G.E.P. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.</li>
