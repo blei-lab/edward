@@ -125,7 +125,7 @@ variational.add(Normal(model.n_vars))</code></pre>
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=10)</code></pre>
 <p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
-<p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
+<p><img src="images/getting-started-fig1.png" alt="image" width="700" /></p>
 <p>The model has learned the cosine relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="tutorials.html">tutorials</a>.</p>

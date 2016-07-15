@@ -1,95 +1,100 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="text/css" http-equiv="Content-Style-Type"/>
-<meta content="pandoc" name="generator"/>
-<title>Edward – Delving In</title>
-<!-- Mobile Specific Metas -->
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<!-- FONT -->
-<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-<!-- CSS -->
-<link href="css/normalize.css" rel="stylesheet">
-<link href="css/skeleton.css" rel="stylesheet">
-<!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-<!-- highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
-<!-- Favicon -->
-<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
-<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-<link href="icons/manifest.json" rel="manifest">
-<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
-<link href="icons/favicon.ico" rel="shortcut icon">
-<meta content="#da532c" name="msapplication-TileColor">
-<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
-<meta content="icons/browserconfig.xml" name="msapplication-config">
-<meta content="#ffffff" name="theme-color">
-</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Delving In</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+    
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="icons/manifest.json">
+  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
 <body>
 <div class="container">
-<div class="row" style="margin-top: 5%">
-<div class="three columns">
-<h1><a href="index.html">Edward</a></h1>
-<a href="index.html">
-<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
-</a>
-<a class="button u-full-width" href="index.html">Home</a>
-<a class="button u-full-width" href="getting-started.html">Getting Started</a>
-<a class="button u-full-width" href="delving-in.html">Delving In</a>
-<a class="button u-full-width" href="tutorials.html">Tutorials</a>
-<a class="button u-full-width" href="api/index.html">API</a>
-<a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
-<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
-<a class="button2 u-full-width" href="license.html">License</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-<a href="https://github.com/blei-lab/edward">
-<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
-<!-- </object> -->
-</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-</div>
-<div class="nine columns">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="index.html">Edward</a></h1> 
+    <a href="index.html">
+    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
+    </a>
+    <a class="button u-full-width" href="index.html">Home</a>
+    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
+    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
+    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
+    <a class="button u-full-width" href="api/index.html">API</a> 
+    <a class="button u-full-width" href="#">Advanced</a> 
+    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
+    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
+    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
+    <a class="button2 u-full-width" href="license.html">License</a> 
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a href="https://github.com/blei-lab/edward">
+    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
+    alt="Edward on Github" />
+    <!-- </object> -->
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
 <h2 id="delving-in">Delving In</h2>
 <p>Edward enables black box inference for probability models. Its design reflects the building blocks for inference and model criticism. Here we describe the motivation behind Edward’s design and specify its internal workings.</p>
 <p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
 <p>First gather data from a real-world process. Then cycle through Box’s loop:</p>
 <ol>
-<li>Build a probabilistic model of the process</li>
-<li>Reason about the process given model and data</li>
-<li>Criticize the model, revise and repeat</li>
+<li><p>Build a probabilistic model of the process</p></li>
+<li><p>Reason about the process given model and data</p></li>
+<li><p>Criticize the model, revise and repeat</p></li>
 </ol>
-<p><img alt="image" src="images/model_infer_criticize.png"/></p>
+<p><img src="images/model_infer_criticize.png" alt="image" /></p>
 <p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to reason about the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
 <p>This process defines the design of Edward. Four primary objects enable the above analysis.</p>
 <h3 id="data">Data</h3>
 <p>A data object contains measurements. It is a Python dictionary, typically comprised of strings naming a data object and NumPy arrays representing their values. For example,</p>
-<pre class="python" language="Python"><code>my_data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre>
+<pre class="python" language="Python"><code>my_data = {&#39;x&#39;: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre>
 <p>Data objects can also have their values be TensorFlow tensors in order to deal with settings such as when the data does not fit in memory. For more details see the <a href="api/data.html">data API</a>.</p>
 <h3 id="models">Models</h3>
 <p>There are two types of model objects in Edward:</p>
 <ol>
-<li>Probability models of data, <span class="math inline">\(p(x,z)\)</span></li>
-<li>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></li>
+<li><p>Probability models of data, <span class="math inline">\(p(x,z)\)</span></p></li>
+<li><p>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></p></li>
 </ol>
 <p><strong>Probability Models.</strong> Edward supports probability models specified in TensorFlow, Python, PyMC3, or Stan. A probability model has the following structure.</p>
 <pre class="python" language="Python"><code>import edward as ed
@@ -127,7 +132,7 @@ my_variational.add(InvGamma(K*D))</code></pre>
 <p>Ordering matters: variational models must match the same ordering as latent variables accessed in <code>probability_model.log_prob(xs, zs)</code>.</p>
 <h3 id="inference">Inference</h3>
 <p>Edward implements a variety of inference methods. Current techniques leverage variational inference, which seeks to match the variational model <span class="math inline">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math inline">\(p(z \mid x)\)</span>.</p>
-<p><img alt="image" src="images/inference_structure.png"/> [in caption-style.] Dependency graph of inference methods. Each node is a class in Edward and arrows represent class inheritance.</p>
+<p><img src="images/inference_structure.png" alt="image" /> [in caption-style.] Dependency graph of inference methods. Each node is a class in Edward and arrows represent class inheritance.</p>
 <p>Each algorithm minimizes a different loss function between the variational model and the posterior. Algorithms derived from <code>VariationalInference</code> take as input a probability model, a variational model, and data.</p>
 <p>For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
   \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we would write</p>
@@ -139,22 +144,22 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, we can never validate whether a model is true—no model will be true in practice—but we can seek to uncover where the model goes wrong. Criticism can help justify the model fit as an approximation or point to good directions for looping back and revising the model.</p>
 <p>To this end, Edward provides a <code>criticisms</code> module that implements:</p>
 <ol>
-<li>posterior predictive checks</li>
-<li>metric-based evaluations (e.g. mean squared error, binary accuracy)</li>
+<li><p>posterior predictive checks</p></li>
+<li><p>metric-based evaluations (e.g. mean squared error, binary accuracy)</p></li>
 </ol>
 <p>See the <a href="tutorials.html">tutorials</a> for how to introduce criticism into your modeling workflow.</p>
 <h3 id="references">References</h3>
 <ul>
-<li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>
-<li>David M Blei. (2014). Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics, 1:203-232</li>
+<li><p>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</p></li>
+<li><p>David M Blei. (2014). Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics, 1:203-232</p></li>
 </ul>
-</div>
-</div>
-<div class="row" style="padding-bottom: 25%"> </div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();
   renderMathInElement(document.body);
-</script>
+</script> 
 </body>
 </html>

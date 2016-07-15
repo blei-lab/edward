@@ -43,6 +43,6 @@ a backend, enabling features such as computational graphs, distributed
 training, CPU/GPU integration, automatic differentiation, and
 TensorBoard.
 
-### Resources
+## Resources
 
 + [Edward website](http://edwardlib.org)

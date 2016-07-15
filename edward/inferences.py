@@ -28,7 +28,7 @@ class Inference(object):
     """
     def __init__(self, model, data=None):
         """Initialization.
-        
+
         Calls ``util.get_session()``
 
         Parameters
