@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Posterior predictive checks</title>
+<title>Edward – Point-based evaluations</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,49 +69,45 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="posterior-predictive-checks">Posterior predictive checks</h2>
-<p>Posterior predictive checks (PPCs; Rubin, 1984; Gelman et al., 1996) analyze the degree to which data generated from the model deviate from data generated from the true distribution. They can be used either numerically to quantify this degree, or graphically to analyze this degree qualitatively. PPCs can be thought of as a probabilistic version of point-based evaluations.</p>
-<p>PPCs focus on the posterior predictive distribution <span class="math display">\[\begin{aligned}
-  p(x_\text{new} \mid x)
-  &amp;=
-  \int
-  p(x_\text{new} \mid z)
-  p(z \mid x)
-  \text{d} z.\end{aligned}\]</span> The model’s posterior predictive can be used to generate new data given past observations and can also make predictions on new data given past observations. It is formed by calculating the likelihood of the new data, averaged over every possible set of latent variables according to the posterior distribution.</p>
-<p>The simplest PPC works by applying a test statistic on new data generated from the posterior predictive, such as <span class="math inline">\(T(x_\text{new}) = \max(x_\text{new})\)</span>. Applying <span class="math inline">\(T(x_\text{new})\)</span> to new data over many data replications induces a distribution. We compare this distribution to the test statistic on the real data <span class="math inline">\(T(x)\)</span>.</p>
-<p><img alt="image" src="images/ppc.png"/></p>
-<p>In the figure, <span class="math inline">\(T(x)\)</span> falls in a low probability region of this reference distribution. This indicates that the model fits the data poorly according to this check; this suggests an area of improvement for the model.</p>
-<p>More generally, the test statistic can also be a function of the model’s latent variables <span class="math inline">\(T(x, z)\)</span>, known as a discrepancy function.</p>
+<h2 id="point-based-evaluations">Point-based evaluations</h2>
+<p>Edward supports point-based evaluations. The simplest example is evaluating a model for classification. After inferring the posterior, we can predict the label for each observation in the data and compare it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error, based on these predictions.</p>
 <h3 id="implementation">Implementation</h3>
-<p>Edward implements PPCs through the <code>sample_likelihood()</code> function in the probability model. This method samples a dataset from the model likelihood</p>
-<pre class="python" language="Python"><code>class BetaBernoulli:
-    def __init__(self):
-        self.num_vars = 1
+<p>Edward implements point-based evaluations through the <code>predict()</code> function in the probability model. This predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span></p>
+<pre class="python" language="Python"><code>class BayesianLinearRegression:
+    def __init__(self, lik_variance=0.01, prior_variance=0.01):
+        self.lik_variance = lik_variance
+        self.prior_variance = prior_variance
+        self.num_vars = 11
 
     def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                           for z in tf.unpack(zs)])
+        x, y = xs['x'], xs['y']
+        log_prior = -self.prior_variance * tf.reduce_sum(zs*zs, 1)
+        b = zs[:, 0]
+        W = tf.transpose(zs[:, 1:])
+        mus = tf.matmul(x, W) + b
+        y = tf.expand_dims(y, 1)
+        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
         return log_lik + log_prior
 
-    def sample_likelihood(self, zs, size):
-    """x | z ~ p(x | z)"""
-        out = []
-        for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=size).reshape((size,))}]
-        return out</code></pre>
-<p>The <code>ed.ppc()</code> method then provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution</p>
-<pre class="python" language="Python"><code>T = lambda y, z=None: tf.reduce_mean(y['x'])
-print(ed.ppc(model, variational, data, T))</code></pre>
-<p>See the <a href="api/index.html">API</a> for further implementation details.</p>
-<p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by classical hypothesis testing (Meng, 1994), under the philosophy that models should be criticized under the frequentist perspective of large samples.</p>
-<p>PPCs can also be applied for other tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while they can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended, as binary decision making from a single test is not as common a use case as one might believe.</p>
+    def predict(self, xs, zs):
+        """Returns a prediction for each data point, averaging over
+        each set of latent variables z in zs; and also return the true
+        value."""
+        x_test = xs['x']
+        b = zs[:, 0]
+        W = tf.transpose(zs[:, 1:])
+        y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
+        return y_pred</code></pre>
+<p>The <code>ed.evaluate()</code> method then evaluates a model as</p>
+<pre class="python" language="Python"><code>ed.evaluate('categorical_accuracy', my_model, my_variational, my_data)
+ed.evaluate('mean_absolute_error', my_model, my_variational, my_data)</code></pre>
+<p>Swapping <code>my_data</code> with held-out data makes it easy to implement cross-validation and other model assessment techniques.</p>
+<p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
+<pre class="python" language="Python"><code>ed.evaluate('log_likelihood', my_model, my_variational, my_data)</code></pre>
+<p>Point-based evaluations are formally known as scoring rules (Gneiting and Raftery, 2007) in decision theory. Scoring rules are commonly used for model comparison, model selection, and model averaging.</p>
 <h3 id="references">References</h3>
 <ul>
-<li>Box, G.E.P. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.</li>
-<li>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. Statistica Sinica.</li>
-<li>Meng, X.-L. (1994). Posterior predictive <span class="math inline">\(p\)</span>-values. The Annals of Statistics, 1–19.</li>
-<li>Rubin, D. B. (1984). Bayesianly justifiable and relevant frequency calculations for the applied statistician. The Annals of Statistics, 12(4), 1151–1172.</li>
+<li>Gneiting, T., &amp; Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. Journal of the American Statistical Association, 102(477), 359–378.</li>
 </ul>
 </div>
 </div>
