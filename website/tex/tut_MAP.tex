@@ -4,11 +4,9 @@
 % Begin the content of the page
 \subsection{Maximum a posteriori estimation}
 
-(We recommend reading the 
-\href{tut_inference.html}{inference of probability models}
-tutorial first.)
-
-Maximum a posteriori (MAP) estimation seeks the mode of the posterior
+Maximum a posteriori (MAP) estimation is a form of approximate
+posterior inference. It uses the mode as a point estimate of the
+posterior distribution,
 \begin{align*}
   z_\text{MAP}
   &=
@@ -18,12 +16,12 @@ Maximum a posteriori (MAP) estimation seeks the mode of the posterior
   \arg \max_z
   \log p(z \mid x).
 \end{align*}
-We prefer working with logarithms of densities to avoid numerical underflow
+In practice, we work with logarithms of densities to avoid numerical underflow
 issues.
 
 The MAP estimate is the most likely configuration of the hidden patterns $z$
-under the model. However, we cannot directly solve this optimization problem,
-because the posterior is unknown. To circumvent this, we use Bayes' rule to
+under the model. However, we cannot directly solve this optimization problem
+because the posterior is typically intractable. To circumvent this, we use Bayes' rule to
 optimize over the joint density,
 \begin{align*}
   z_\text{MAP}
@@ -32,7 +30,7 @@ optimize over the joint density,
   \log p(z \mid x)\\
   &=
   \arg \max_z
-  \log p(x, z).  
+  \log p(x, z).
 \end{align*}
 This is valid because
 \begin{align*}
@@ -42,23 +40,66 @@ This is valid because
   &=
   \log p(x, z) - \text{constant in terms of} z.
 \end{align*}
+MAP estimation includes the common scenario of maximum
+likelihood estimation as a special case,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  p(x, z)\\
+  &=
+  \arg \max_z
+  p(x\mid z),
+\end{align*}
+where the prior $p(z)$ is flat, placing uniform probability over all
+values $z$ supports. Placing a nonuniform prior can be thought of as
+regularizing the estimation, penalizing values away from maximizing
+the likelihood, which can lead to overfitting. For example, a normal
+prior or Laplace prior on $z$ corresponds to L2 penalization, also
+known as ridge regression, and L1 penalization respectively, also
+known as the LASSO.
 
-\subsubsection{Gradient ascent}
+Maximum likelihood is also known as minimizing the cross entropy, where
+for a data set $x=\{x_n\}$,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  \log p(x\mid z)
+  \\
+  &=
+  \arg \max_z
+  \sum_{n=1}^N \log p(x_n\mid z)
+  \\
+  &=
+  \arg \min_z
+  -\frac{1}{N}\sum_{n=1}^N \log p(x\mid z).
+\end{align*}
+where the last expression can be thought of as an approximation to the cross
+entropy between the true data distribution and the model $p(x\mid z)$,
+using a set of $N$ data points.
 
-To find the MAP estimate of the latent variables $z$, we simply compute the
-gradient of the log joint density
+\subsubsection{Gradient descent}
+
+To find the MAP estimate of the latent variables $z$, we simply
+calculate the gradient of the log joint density
 \begin{align*}
   \nabla_z
   \log p(x, z)
 \end{align*}
-and follow it to a local maximum. Automatic differentiation makes it easy to
-compute this gradient without any additional mathematical derivation.
+and follow it to a (local) optima.
+Edward uses automatic differentiation, specifically with TensorFlow's
+computational graphs, making this gradient computation both simple and
+efficient to distribute.
 
 \subsubsection{Implementation}
 
-In Edward, we view MAP estimation as a special case of 
-\href{tut_KLqp.html}{$KL(q\|p)$ minimization} where the approximating variational
-distribution is a point mass (delta function) distribution.
+In Edward, we view MAP estimation as a special case of
+\href{tut_KLqp.html}{$KL(q\|p)$ minimization}, where the variational
+distribution is a point mass (delta function) distribution. This makes
+explicit the additional assumptions underlying MAP estimation from the
+viewpoint of variational inference: namely, it approximates the
+posterior using a point to summarize the full distribution.
 
 \begin{lstlisting}[language=Python]
 class MAP(VariationalInference):
@@ -66,7 +107,7 @@ class MAP(VariationalInference):
         with tf.variable_scope("variational"):
             if hasattr(model, 'num_vars'):
                 variational = Variational()
-                variational.add(PointMass(model.num_vars, params))
+                variational.add(PointMass(model.n_vars, params))
             else:
                 variational = Variational()
                 variational.add(PointMass(0))
@@ -77,16 +118,15 @@ class MAP(VariationalInference):
         x = self.data
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
-        return -self.loss  
+        return -self.loss
 \end{lstlisting}
 
-The \texttt{MAP} class automatically initializes a variational point mass
-distribution. The \texttt{build_loss} method implicitly specifies the gradient
+The \texttt{MAP} class automatically initializes a point mass
+variational distribution. The \texttt{build_loss} method implicitly specifies the gradient
 of the log joint. TensorFlow's automatic differentiation will apply to \texttt
-{z}, thus applying the chain rule of differentiation to compute the gradient of
-the ELBO.
+{z}, thus backpropagating (applying the chain rule of differentiation)
+to compute the gradient of the objective.
 
-There is a nuance here. This method actually returns the \textbf{negative} log
-joint density because TensorFlow's stochastic optimization routines are all
-configured to \emph {minimize} an objective function.
-
+There is a nuance here. TensorFlow's optimizers are configured to
+\emph{minimize} an objective function, so the gradient is set to be
+the negative of the log density's gradient.

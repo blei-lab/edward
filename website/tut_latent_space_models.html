@@ -114,14 +114,14 @@ model = Latent_Space_Model(N,K)</code></pre>
 <p>Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are required: Instantiating inference and running it.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP(model, data)
 var = inference.run(n_iter=5000, n_print=500)</code></pre>
-<p>You can learn more about <a href="tut_MAP.html">MAP estimation in Edward</a> in another tutorial.</p>
+<p>See this extended tutorial about <a href="tut_MAP.html">MAP estimation in Edward</a>.</p>
 <p>One could instead run variational inference. This requires specifying a variational model and instantiating MFVI.</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Normal(model.num_vars))
 inference = ed.MFVI(model, variational,data)</code></pre>
 <p>Finally, the following line runs the inference procedure:</p>
 <pre class="python" language="Python"><code>var = inference.run(n_iter=5000, n_print=500)</code></pre>
-<p>You can learn more about <a href="tut_KLqp.html">variational inference in Edward</a> in another tutorial.</p>
+<p>See this extended tutorial about <a href="tut_KLqp.html">variational inference in Edward</a>.</p>
 <h3 id="references">References</h3>
 <p>[1] Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
 <p>[2] Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. , 393(6684):440–442.</p>
