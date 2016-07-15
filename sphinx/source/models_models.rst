@@ -1,26 +1,27 @@
-Building Probabilistic Models
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Probabilistic Models
+^^^^^^^^^^^^^^^^^^^^
 
-A probabilistic model is specified by a joint distribution ``p(x, z)``
-of data ``x`` and latent variables ``z``. All models in Edward are
-written as a class; to implement a new model, it can be written in any
-of the currently supported modeling languages: TensorFlow, Python, Stan,
-and PyMC3.
+A probabilistic model specifies a joint distribution ``p(x, z)``
+of data ``x`` and latent variables ``z``.
+For more details, see the
+`Probability Models tutorial <>`__.
 
-To use TensorFlow or Python, write a class with the method
-``log_prob(xs, zs)``. The method defines the logarithm of a joint
-density. ``xs`` can be a single data point or a batch, and analogously,
-``zs`` can be a single set or multiple sets of latent variables. The
-method outputs a vector of the joint density evaluations
-``[log p(xs, zs[0,:]), log p(xs, zs[1,:]), ...]``, with an evaluation
-for each set of latent variables. Here is an example:
+All models in Edward are written as a class. To write a new model,
+it can be written in any of the currently supported modeling
+languages: TensorFlow, Python, Stan, and PyMC3.
+
+**TensorFlow.**
+Write a class with the method ``log_prob(xs, zs)``. The method defines
+the logarithm of a joint density. ``xs`` can be a single data point or
+a batch, and analogously, ``zs`` can be a single set or multiple sets
+of latent variables. The method outputs a vector of the joint density
+evaluations ``[log p(xs, zs[0,:]), log p(xs, zs[1,:]), ...]``, with an
+evaluation for each set of latent variables. Here is an example:
 
 .. code:: python
 
     class BetaBernoulli:
-        """
-        p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-        """
+        """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
         def log_prob(self, xs, zs):
             log_prior = beta.logpdf(zs, a=1.0, b=1.0)
             log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
@@ -29,22 +30,54 @@ for each set of latent variables. Here is an example:
 
     model = BetaBernoulli()
 
-Here is a `toy
-script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
-that uses this model which is written in TensorFlow. Here is another
-`toy
-script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_np.py>`__
-that uses the same model written in Python using only NumPy/SciPy. The
-model class can be more complicated, containing fields or other methods
-required for certain functions in Edward, and which can provide more
-information about the model's structure. A full spec of the model is
-available below. [Include the full model spec somewhere below.]
+Here is a `toy script
+<https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
+that uses this model. The model class can be more complicated,
+containing fields or other methods required for certain functions in
+Edward, and which can provide more information about the model's
+structure. A full spec of the model is available below. [Include the
+full model spec somewhere below.]
 
-To use Stan, write a Stan program in the form of a file or string. Then
-call it with ``StanModel(file)`` or ``StanModel(model_code)``. Here is
-an example:
+**Python.**
+Write a class that inherits from ``PythonModel`` and with the method
+``_py_log_prob(xs, zs)``. The method defines the logarithm of a joint
+density with the same concept as in a TensorFlow model, but where
+``xs`` and ``zs`` now use NumPy arrays rather than TensorFlow tensors.
+Here is an example:
 
 .. code:: python
+
+  from edward.models import PythonModel
+
+  class BetaBernoulli(PythonModel):
+      """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+      def _py_log_prob(self, xs, zs):
+          # This example is written for pedagogy. We recommend
+          # vectorizing operations in practice.
+          n_samples = zs.shape[0]
+          lp = np.zeros(n_samples, dtype=np.float32)
+          for b in range(n_samples):
+              lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
+              for n in range(xs['x'].shape[0]):
+                  lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+
+          return lp
+              return log_lik + log_prior
+
+    model = BetaBernoulli()
+
+Here is a `toy script
+<https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_np.py>`__
+that uses this model.
+
+**Stan.**
+Write a Stan program in the form of a file or string. Then
+call it with ``StanModel(file=file)`` or
+``StanModel(model_code=model_code)``. Here is an example:
+
+.. code:: python
+
+    from edward.models import StanModel
 
     model_code = """
         data {
@@ -60,7 +93,7 @@ an example:
             y[n] ~ bernoulli(theta);
         }
     """
-    model = ed.StanModel(model_code=model_code)
+    model = StanModel(model_code=model_code)
 
 Here is a `toy
 script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py>`__
@@ -70,17 +103,20 @@ although they are limited to probability models with differentiable
 latent variables. ``StanModel`` objects also contain no structure about
 the model besides how to calculate its joint density.
 
-To use PyMC3, write a PyMC3 model whose observed values are Theano
-shared variables. The values in the Theano shared variables can be
-plugged at a later time. Here is an example:
+**PyMC3.**
+Write a PyMC3 model whose observed values are Theano shared variables.
+The values in the Theano shared variables can be plugged at a later
+time. Here is an example:
 
 .. code:: python
+
+    from edward.models import PyMC3Model
 
     x_obs = theano.shared(np.zeros(1))
     with pm.Model() as pm_model:
         beta = pm.Beta('beta', 1, 1, transform=None)
         x = pm.Bernoulli('x', beta, observed=x_obs)
-        
+
     model = PyMC3Model(pm_model)
 
 Here is a `toy
@@ -97,4 +133,5 @@ Internally, other languages are wrapped in TensorFlow so their
 computation represents a single node in the graph (making it difficult
 to tease apart and thus distribute their computation).
 
-[api for ``edward.models.models`` goes here]
+For examples of models built in Edward, see the model
+`tutorials <>`__.

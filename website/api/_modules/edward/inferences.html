@@ -81,12 +81,11 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../data.html">Data in Edward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models_models.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models_distributions.html">Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats_distributions.html">Statistics Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../inferences.html">Inference Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../criticisms.html">Criticism Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models_models.html">Probabilistic Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models_distributions.html">Variational Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../edward.html">edward package</a></li>
 </ul>
 
@@ -133,20 +132,20 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.inferences</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">six</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.models</span> <span class="kn">import</span> <span class="n">StanModel</span><span class="p">,</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">PointMass</span>
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="kn">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">kl_multivariate_normal</span><span class="p">,</span> <span class="n">log_sum_exp</span><span class="p">,</span> <span class="n">stop_gradient</span>
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span><span class="p">,</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">PointMass</span>
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">kl_multivariate_normal</span><span class="p">,</span> <span class="n">log_sum_exp</span><span class="p">,</span> <span class="n">stop_gradient</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">prettytensor</span> <span class="kn">as</span> <span class="nn">pt</span>
+    <span class="kn">import</span> <span class="nn">prettytensor</span> <span class="k">as</span> <span class="nn">pt</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
@@ -161,7 +160,7 @@
 <span class="sd">    data : dict of tf.Tensor</span>
 <span class="sd">        Data dictionary whose values may vary at each session run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 <span class="sd">        </span>
 <span class="sd">        Calls ``util.get_session()``</span>
@@ -193,32 +192,32 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
-            <span class="c1"># Stan models do no support data subsampling because they</span>
-            <span class="c1"># take arbitrary data structure types in the data block</span>
-            <span class="c1"># and not just NumPy arrays (this makes it unamenable to</span>
-            <span class="c1"># TensorFlow placeholders). Therefore fix the data</span>
-            <span class="c1"># dictionary `self.data` at compile time to `data`.</span>
+            <span class="c"># Stan models do no support data subsampling because they</span>
+            <span class="c"># take arbitrary data structure types in the data block</span>
+            <span class="c"># and not just NumPy arrays (this makes it unamenable to</span>
+            <span class="c"># TensorFlow placeholders). Therefore fix the data</span>
+            <span class="c"># dictionary `self.data` at compile time to `data`.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                    <span class="c1"># If `data` has TensorFlow placeholders, the user</span>
-                    <span class="c1"># must manually feed them at each step of</span>
-                    <span class="c1"># inference.</span>
-                    <span class="c1"># If `data` has tensors that are the output of</span>
-                    <span class="c1"># data readers, then batch training operates</span>
-                    <span class="c1"># according to the reader.</span>
+                    <span class="c"># If `data` has TensorFlow placeholders, the user</span>
+                    <span class="c"># must manually feed them at each step of</span>
+                    <span class="c"># inference.</span>
+                    <span class="c"># If `data` has tensors that are the output of</span>
+                    <span class="c"># data readers, then batch training operates</span>
+                    <span class="c"># according to the reader.</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                    <span class="c1"># If `data` has NumPy arrays, store the data</span>
-                    <span class="c1"># in the computational graph.</span>
+                    <span class="c"># If `data` has NumPy arrays, store the data</span>
+                    <span class="c"># in the computational graph.</span>
                     <span class="n">placeholder</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-                    <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
+                    <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span>
                     <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span> <span class="p">{</span><span class="n">placeholder</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -249,7 +248,7 @@
 <div class="viewcode-block" id="VariationalInference"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference">[docs]</a><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">        Parameters</span>
@@ -291,8 +290,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-        <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize variational inference algorithm.</span>
 
 <span class="sd">        Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.</span>
@@ -323,37 +322,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">=</span> <span class="n">n_print</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
-            <span class="c1"># Re-assign data to batch tensors, with size given by `n_data`.</span>
+        <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
+            <span class="c"># Re-assign data to batch tensors, with size given by `n_data`.</span>
             <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
             <span class="n">slices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">slice_input_producer</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
-            <span class="c1"># By default use as many threads as CPUs.</span>
+            <span class="c"># By default use as many threads as CPUs.</span>
             <span class="n">batches</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">,</span>
                                      <span class="n">num_threads</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="c1"># `tf.train.batch` returns tf.Tensor if `slices` is a</span>
-                <span class="c1"># list of size 1.</span>
+                <span class="c"># `tf.train.batch` returns tf.Tensor if `slices` is a</span>
+                <span class="c"># list of size 1.</span>
                 <span class="n">batches</span> <span class="o">=</span> <span class="p">[</span><span class="n">batches</span><span class="p">]</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span>
                          <span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">batches</span><span class="p">)}</span>
 
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
                                          <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">)</span>
-            <span class="c1"># Use ADAM with a decaying scale factor.</span>
-            <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="c"># Use ADAM with a decaying scale factor.</span>
+            <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
             <span class="n">starter_learning_rate</span> <span class="o">=</span> <span class="mf">0.1</span>
             <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">exponential_decay</span><span class="p">(</span><span class="n">starter_learning_rate</span><span class="p">,</span>
                                                 <span class="n">global_step</span><span class="p">,</span>
-                                                <span class="mi">100</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">staircase</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                                <span class="mi">100</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">staircase</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
             <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">,</span>
                                             <span class="n">var_list</span><span class="o">=</span><span class="n">var_list</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;PrettyTensor optimizer does not accept a variable scope.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;PrettyTensor optimizer does not accept a variable scope.&quot;</span><span class="p">)</span>
 
             <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">apply_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">losses</span><span class="o">=</span><span class="p">[</span><span class="n">loss</span><span class="p">])</span>
@@ -361,7 +360,7 @@
         <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">initialize_all_variables</span><span class="p">()</span>
         <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-        <span class="c1"># Start input enqueue threads.</span>
+        <span class="c"># Start input enqueue threads.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Coordinator</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">start_queue_runners</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">)</span></div>
 
@@ -387,10 +386,10 @@
 <span class="sd">        loss : double</span>
 <span class="sd">            Loss function value at iteration ``t``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">t</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;iter {:d} loss {:.2f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
-                <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="p">)</span></div>
+                <span class="nb">print</span><span class="p">(</span><span class="s">&quot;iter {:d} loss {:.2f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VariationalInference.finalize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to call after convergence.</span>
@@ -398,7 +397,7 @@
 <span class="sd">        Any class based on ``VariationalInference`` **may**</span>
 <span class="sd">        overwrite this method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Ask threads to stop.</span>
+        <span class="c"># Ask threads to stop.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">request_stop</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span></div>
 
@@ -436,7 +435,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MFVI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MFVI.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MFVI.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="MFVI.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MFVI.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">        Parameters</span>
@@ -449,10 +448,10 @@
 <span class="sd">            gradient estimator. Otherwise default is to use the</span>
 <span class="sd">            reparameterization gradient if available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">score</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_reparameterized</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">score</span> <span class="ow">is</span> <span class="k">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_reparameterized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="k">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="k">True</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MFVI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -490,19 +489,19 @@
 <span class="sd">            an appropriately selected loss function form</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_normal</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;log_lik&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_normal</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;log_lik&#39;</span><span class="p">):</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_score_loss_kl</span><span class="p">()</span>
-            <span class="c1"># Analytic entropies may lead to problems around</span>
-            <span class="c1"># convergence; for now it is deactivated.</span>
-            <span class="c1">#elif self.variational.is_entropy:</span>
-            <span class="c1">#    return self.build_score_loss_entropy()</span>
+            <span class="c"># Analytic entropies may lead to problems around</span>
+            <span class="c"># convergence; for now it is deactivated.</span>
+            <span class="c">#elif self.variational.is_entropy:</span>
+            <span class="c">#    return self.build_score_loss_entropy()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_score_loss</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_normal</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;log_lik&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_normal</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;log_lik&#39;</span><span class="p">):</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_reparam_loss_kl</span><span class="p">()</span>
-            <span class="c1">#elif self.variational.is_entropy:</span>
-            <span class="c1">#    return self.build_reparam_loss_entropy()</span>
+            <span class="c">#elif self.variational.is_entropy:</span>
+            <span class="c">#    return self.build_reparam_loss_entropy()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_reparam_loss</span><span class="p">()</span></div>
 
@@ -711,7 +710,7 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
 
-        <span class="c1"># normalized importance weights</span>
+        <span class="c"># normalized importance weights</span>
         <span class="n">q_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
         <span class="n">log_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">q_log_prob</span>
         <span class="n">log_w_norm</span> <span class="o">=</span> <span class="n">log_w</span> <span class="o">-</span> <span class="n">log_sum_exp</span><span class="p">(</span><span class="n">log_w</span><span class="p">)</span>
@@ -731,9 +730,9 @@
 
 <span class="sd">        \min_{z} - \log p(x,z)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;variational&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;n_vars&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s">&quot;variational&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;n_vars&#39;</span><span class="p">):</span>
                 <span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
                 <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">PointMass</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">n_vars</span><span class="p">,</span> <span class="n">params</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -766,7 +765,7 @@
 <span class="sd">    the Hessian at the mode of the posterior. This forms the</span>
 <span class="sd">    covariance of the normal approximation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Laplace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Laplace.finalize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.Laplace.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -774,14 +773,14 @@
 
 <span class="sd">        Computes the Hessian at the mode.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># use only a batch of data to estimate hessian</span>
+        <span class="c"># use only a batch of data to estimate hessian</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
         <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
-                                     <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;variational&#39;</span><span class="p">)</span>
+                                     <span class="n">scope</span><span class="o">=</span><span class="s">&#39;variational&#39;</span><span class="p">)</span>
         <span class="n">inv_cov</span> <span class="o">=</span> <span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">var_list</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Precision matrix:&quot;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">inv_cov</span><span class="o">.</span><span class="n">eval</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s">&quot;Precision matrix:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">inv_cov</span><span class="o">.</span><span class="n">eval</span><span class="p">())</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Laplace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div></div>
 </pre></div>
 

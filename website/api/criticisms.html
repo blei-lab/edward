@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Criticism Techniques &mdash; Edward 1.0.9 documentation</title>
+  <title>Criticism &mdash; Edward 1.0.9 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
         <link rel="next" title="edward package" href="edward.html"/>
-        <link rel="prev" title="Inference Algorithms" href="inferences.html"/> 
+        <link rel="prev" title="Inference" href="inferences.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,12 +82,11 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data in Edward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_models.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_distributions.html">Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_distributions.html">Statistics Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference Algorithms</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Criticism Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models_models.html">Probabilistic Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models_distributions.html">Variational Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
 </ul>
 
@@ -119,7 +118,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Criticism Techniques</li>
+    <li>Criticism</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,10 +132,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="criticism-techniques">
-<h1>Criticism Techniques<a class="headerlink" href="#criticism-techniques" title="Permalink to this headline">¶</a></h1>
-<p>The <code class="docutils literal"><span class="pre">criticisms</span></code> module provides a collection of functions for criticizing both the model and inference algorithm.</p>
-<p>[api doc for edward.criticisms goes here]</p>
+  <div class="section" id="criticism">
+<h1>Criticism<a class="headerlink" href="#criticism" title="Permalink to this headline">¶</a></h1>
+<p>Criticism is about explicitly understanding and analyzing the
+assumptions made in one&#8217;s analysis. For example, model criticism
+measures the degree to which our model falsely describes the data.
+For more details, see the
+<a href="#id1"><span class="problematic" id="id2">`Point-based evaluations tutorial &lt;&gt;`__</span></a>
+and
+<a href="#id1"><span class="problematic" id="id3">`Posterior predictive checks tutorial &lt;&gt;`__</span></a>.</p>
+<p>Criticism techniques are simply functions which take the probability
+model, variational model, and data as input along with other
+additional arguments. Developing new criticism techniques is easy.
+They can be derived from the current techniques or built as a
+standalone function.</p>
+<p>For examples of criticism techniques built in Edward, see the
+criticism
+<a href="#id1"><span class="problematic" id="id4">`tutorials &lt;&gt;`__</span></a>.</p>
 </div>
 
 
@@ -149,7 +161,7 @@
         <a href="edward.html" class="btn btn-neutral float-right" title="edward package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="inferences.html" class="btn btn-neutral" title="Inference Algorithms" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="inferences.html" class="btn btn-neutral" title="Inference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

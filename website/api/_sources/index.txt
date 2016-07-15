@@ -13,7 +13,6 @@ Click HERE_ to return to the Edward website.
   data
   models_models
   models_distributions
-  stats_distributions
   inferences
   criticisms
   edward

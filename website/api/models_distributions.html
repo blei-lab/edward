@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Distributions &mdash; Edward 1.0.9 documentation</title>
+  <title>Variational Models &mdash; Edward 1.0.9 documentation</title>
   
 
   
@@ -31,8 +31,8 @@
 
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
-        <link rel="next" title="Statistics Distributions" href="stats_distributions.html"/>
-        <link rel="prev" title="Building Probabilistic Models" href="models_models.html"/> 
+        <link rel="next" title="Inference" href="inferences.html"/>
+        <link rel="prev" title="Probabilistic Models" href="models_models.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,12 +82,11 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data in Edward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_models.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_distributions.html">Statistics Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models_models.html">Probabilistic Models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Variational Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
 </ul>
 
@@ -119,7 +118,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Distributions</li>
+    <li>Variational Models</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,62 +132,66 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="distributions">
-<h1>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline">¶</a></h1>
-<p>All distribution objects, i.e., any class inheriting from
-<code class="docutils literal"><span class="pre">Distribution</span></code> in <code class="docutils literal"><span class="pre">edward.models</span></code>, now takes as input a shape and
-optionally, parameter arguments. The shape denotes the shape of its
-random variable. For example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Normal</span>
+  <div class="section" id="variational-models">
+<h1>Variational Models<a class="headerlink" href="#variational-models" title="Permalink to this headline">¶</a></h1>
+<p>A variational model defines a distribution over latent
+variables. It is a model of the posterior distribution, specifying
+another distribution to approximate it. This is analogous to the way
+that probabilistic models specify distributions to approximate the
+true data distribution. After inference, the variational model is used
+as a proxy to the true posterior.</p>
+<p>Edward implements variational models using the <code class="docutils literal"><span class="pre">Variational</span></code> class in
+<code class="docutils literal"><span class="pre">edward.models</span></code>. For example, the following instantiates an empty
+container for the variational distribution.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span>
 
-<span class="c1"># 5 x 2 matrix of random variables</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="n">x</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The output is a set of samples with shape <code class="docutils literal"><span class="pre">(10,</span> <span class="pre">5,</span> <span class="pre">2)</span></code>, where size is
-the outer dimension.</p>
-<p>This generalizes the previously cryptic <code class="docutils literal"><span class="pre">num_factors</span></code> argument and
-enables tensors of random variables. Note also that as a result, all
-sample methods—whether in be in the container object <code class="docutils literal"><span class="pre">Variational()</span></code>,
-distribution objects <code class="docutils literal"><span class="pre">Distribution()</span></code>, or <code class="docutils literal"><span class="pre">edward.stats</span></code> sampling
-<code class="docutils literal"><span class="pre">rvs()</span></code>—will draw samples where the size is the outer dimension. For
+<p>To add distributions to this object, use the <code class="docutils literal"><span class="pre">add()</span></code> method, which
+is used to add Distribution objects.  All distribution objects, i.e.,
+any class inheriting from <code class="docutils literal"><span class="pre">Distribution</span></code> in <code class="docutils literal"><span class="pre">edward.models</span></code>, takes
+as input a shape and optionally, parameter arguments. If left
+unspecified, the parameter arguments are trainable parameters during
+inference.  The shape denotes the shape of its random variable. For
 example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edward.stats</span> <span class="k">import</span> <span class="n">bernoulli</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Beta</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="c1">## (1,)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="c1">## (1, 1)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="c1">## (3, 2)</span>
+<span class="c"># first, add a vector of 10 random variables</span>
+<span class="c"># second, add a 5 x 2 matrix of random variables</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+
+<span class="c"># vector of 3 random variables with fixed alpha param</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
 </pre></div>
 </div>
-<p>This goes against SciPy behavior (which is inconsistent anyways):
-<code class="docutils literal"><span class="pre">size=1</span></code> typically results in the same output dimension as the
-parameter rather than <code class="docutils literal"><span class="pre">size</span> <span class="pre">x</span> <span class="pre">shape(parameter)</span></code>. Our standard adheres
-to the behavior in the <code class="docutils literal"><span class="pre">tf.contrib.distributions</span></code> library.</p>
-<p>The container object <code class="docutils literal"><span class="pre">Variational()</span></code> now works with a list of tensors
-if there is more than one layer, and a single tensor if only one layer.
-This arises in the input for <code class="docutils literal"><span class="pre">variational.log_prob(xs)</span></code> as well as the
-output for <code class="docutils literal"><span class="pre">variational.sample(size)</span></code>. Carrying around a list of
-tensors makes packing and unpacking of latent variables much easier to
-work with; see the mixture of Gaussians example. Carrying around a
-tensor if only one layer is convenient for probability models that deal
-with only one set of latent variables; it&#8217;s easier to work directly with
-<code class="docutils literal"><span class="pre">zs</span></code> rather than do <code class="docutils literal"><span class="pre">zs[0]</span></code>; see the Beta-Bernoulli or hierarchical
-linear model examples.</p>
-<p>There is a nuance worth mentioning why there&#8217;s a difference in the
-<code class="docutils literal"><span class="pre">log_prob(xs,</span> <span class="pre">zs)</span></code> methods of <code class="docutils literal"><span class="pre">mixture_gaussian.py</span></code> compared to
-<code class="docutils literal"><span class="pre">mixture_gaussian_map.py</span></code>. The former uses three sets of variational
-distributions; the latter uses one (a point mass). This means the former
-takes <code class="docutils literal"><span class="pre">zs</span></code> as a list of 3 tensors, and the latter takes <code class="docutils literal"><span class="pre">zs</span></code> as a
-single tensor. While this isn&#8217;t satisfactory (the probability model&#8217;s
-method should not rely on the variational model downstream), this makes
-the difference which already currently exists more transparent.</p>
+<p>Multivariate distributions store their multivariate dimension in the
+outer dimension (right-most dimension) of their shape.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span>
+
+<span class="c"># 1 K-dimensional Dirichlet&#39;s</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
+<span class="c"># vector of 5 K-dimensional Dirichlet&#39;s</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>The main methods in <code class="docutils literal"><span class="pre">Variational</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
+<code class="docutils literal"><span class="pre">sample()</span></code>, which mathematically are <code class="docutils literal"><span class="pre">log</span> <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> and <code class="docutils literal"><span class="pre">z</span> <span class="pre">~</span>
+<span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively.</p>
+<p><code class="docutils literal"><span class="pre">samples(n)</span></code> takes as input the number of samples and returns a list
+of TensorFlow tensors, each of whose shape is <code class="docutils literal"><span class="pre">(n,</span> <span class="pre">)</span> <span class="pre">+</span> <span class="pre">self.shape</span></code> for
+each distribution object within the container. <code class="docutils literal"><span class="pre">log_prob(xs)</span></code> takes
+as input a list of TensorFlow tensors, and returns a vector of density
+evaluations, one for each sample <code class="docutils literal"><span class="pre">x</span></code> in <code class="docutils literal"><span class="pre">xs</span></code>.</p>
+<p>The ordering of the addition to the container matters. This defines
+the ordering of the lists for the output of <code class="docutils literal"><span class="pre">sample()</span></code> and the input
+of <code class="docutils literal"><span class="pre">log_prob()</span></code>.
+(As an example, see the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture of Gaussians</a>.)</p>
+<p>For examples of variational models built in Edward, see the end-to-end
+<a href="#id1"><span class="problematic" id="id2">`tutorials &lt;&gt;`__</span></a> which use variational inference.</p>
 </div>
 
 
@@ -198,10 +201,10 @@ the difference which already currently exists more transparent.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="stats_distributions.html" class="btn btn-neutral float-right" title="Statistics Distributions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="inferences.html" class="btn btn-neutral float-right" title="Inference" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="models_models.html" class="btn btn-neutral" title="Building Probabilistic Models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="models_models.html" class="btn btn-neutral" title="Probabilistic Models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
