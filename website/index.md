@@ -47,6 +47,11 @@ It supports **criticism** of the model and inference via
 
 -   Posterior predictive checks
 
+Edward is built on top of [TensorFlow](https://www.tensorflow.org) as a
+backend, enabling features such as computational graphs, distributed
+training, CPU/GPU integration, automatic differentiation, and
+TensorBoard.
+
 ### Authors
 
 Edward is led by [Dustin Tran](http://dustintran.com) with guidance by
@@ -64,8 +69,10 @@ are
 We welcome contributions by submitting issues, feature requests, or by
 solving any current issues!
 
-We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other
-members of the Blei Lab for their helpful feedback and advice.
+Edward has benefited enormously from the helpful feedback and advice of
+many people: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt Hoffman,
+Kevin Murphy, Rajesh Ranganath, Rif Saurous, and additional members of
+the Blei Lab, Google Brain, and Google Research.
 
 ### Citation
 

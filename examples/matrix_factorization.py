@@ -11,13 +11,13 @@ class Matrix_Factorization():
     """
     p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; \exp(s_iTt_j) ) ]
               [ prod_{i=1}^N N(s_i; 0, var) N(t_i; 0, var) ]
-              
+
     where z = {s,t}.
     """
-    
-    def __init__(self,K,n_rows,n_cols=None,var=0.01, 
-                 like ='Poisson', 
-                 prior='Lognormal', 
+
+    def __init__(self,K,n_rows,n_cols=None,var=0.01,
+                 like ='Poisson',
+                 prior='Lognormal',
                  interaction ='additive'):
         if n_cols == None:
              n_cols = n_rows
@@ -64,7 +64,7 @@ def load_celegans_brain():
 
 ed.set_seed(42)
 data, N = load_celegans_brain()
-K = 3 
+K = 3
 model = Matrix_Factorization(K,N,
                              like='Poisson',
                              prior='Lognormal',
