@@ -1,2 +1,2 @@
 #!/bin/bash
-ghp-import -n .
+ghp-import -n -p .
