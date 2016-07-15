@@ -4,36 +4,34 @@
 % Begin the content of the page
 \subsection{$\text{KL}(p\|q)$ minimization}
 
-(We recommend reading the 
-\href{tut_inference_probability_models.html}{inference of probability models}
-tutorial first.)
-
-Variational inference is a powerful approach to approximating the posterior. The
+Variational inference is a powerful approach for inferring the posterior. The
 core idea involves two steps:
 \begin{enumerate}
-   \item propose a tractable approximation to the posterior $q(z\;;\;\lambda)$,
-   and
-   \item match it to the posterior by tuning the variational
+   \item posit a family of distributions $q(z\;;\;\lambda)$ over the
+   posterior latent variables;
+   \item match $q(z\;;\;\lambda)$ to the posterior by optimizing over its
    parameters $\lambda$.
- \end{enumerate} 
+ \end{enumerate}
 This strategy converts the problem of computing the posterior $p(z \mid x)$ into
-an optimization problem of minimizing some divergence metric
+an optimization problem, which minimizes a divergence measure
 \begin{align*}
-  \lambda^* 
+  \lambda^*
   &=
-  \arg\min_\lambda \text{divergence}( 
+  \arg\min_\lambda \text{divergence}(
   p(z \mid x)
   ,
   q(z\;;\;\lambda)
   ).
 \end{align*}
+The optimized distribution $q(z\;;\;\lambda)$ is then used as a
+proxy to the posterior $p(z\mid x)$.
 
-One form of variational inference minimizes the Kullback-Leibler divergence 
+One form of variational inference minimizes the Kullback-Leibler divergence
 \textbf{from} $p(z \mid x)$ \textbf{to} $q(z\;;\;\lambda)$,
 \begin{align*}
-  \lambda^* 
+  \lambda^*
   &=
-  \arg\min_\lambda \text{KL}( 
+  \arg\min_\lambda \text{KL}(
   p(z \mid x)
   \;\|\;
   q(z\;;\;\lambda)
@@ -47,8 +45,8 @@ One form of variational inference minimizes the Kullback-Leibler divergence
   \log q(z\;;\;\lambda)
   \big].
 \end{align*}
-The KL divergence is a non-symmetric, information theoretic metric of
-similarity between two probability distributions. 
+The KL divergence is a non-symmetric, information theoretic measure of
+similarity between two probability distributions.
 
 \subsubsection{Minimizing an intractable objective function}
 
@@ -57,7 +55,7 @@ involves the posterior $p(z \mid x)$. Ignoring this for the moment, consider its
 gradient
 \begin{align*}
   \nabla_\lambda\;
-  \text{KL}( 
+  \text{KL}(
   p(z \mid x)
   \;\|\;
   q(z\;;\;\lambda)
@@ -70,6 +68,7 @@ gradient
   \log q(z\;;\;\lambda)
   \big].
 \end{align*}
-While this gradient is still intractable, we can follow it to a (local) minimum
-of $\text{KL}(p\|q)$ using
-\href{tut_KLpq_ais.html}{adaptive importance sampling}.
+Both $\text{KL}(p\|q)$ and its gradient are intractable
+because of the posterior expectation.
+We can use \href{tut_KLpq_ais.html}{importance sampling} to both
+estimate the objective and calculate stochastic gradients.

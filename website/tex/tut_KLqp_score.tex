@@ -1,8 +1,8 @@
 % Define the subtitle of the page
-\title{Score function method}
+\title{Score function gradient}
 
 % Begin the content of the page
-\subsection{Score function method}
+\subsection{Score function gradient}
 
 (This tutorial follows the
 \href{tut_KLqp.html}{$\text{KL}(q\|p)$ minimization} tutorial.)
@@ -21,14 +21,13 @@ We seek to maximize the ELBO,
   \log q(z\;;\;\lambda)
   \big],
 \end{align*}
-using a ``black box'' algorithm. This means avoiding additional
-mathematical derivations, such as calculating integrals (expectations) or
-gradients (for maximization) by hand.
+using a ``black box'' algorithm. This means generically inferring the
+posterior while making few assumptions about the model.
 
-\subsubsection{The score function gradient estimator}
+\subsubsection{The score function identity}
 
-Gradient ascent is one way to maximize complicated functions like the ELBO. The
-idea is to compute the function's gradient
+Gradient descent is a standard approach for optimizing complicated
+objectives like the ELBO. The idea is to calculate its gradient
 \begin{align*}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
@@ -41,29 +40,31 @@ idea is to compute the function's gradient
   \log q(z\;;\;\lambda)
   \big],
 \end{align*}
-and to follow it to a (local) optimum.
+and update the current set of parameters proportional to the gradient.
 
-The score function gradient estimator leverages a nice property of logarithm to
-write the gradient as
+The score function gradient estimator leverages a property of
+logarithms to write the gradient as
 \begin{align*}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
-  &=\; 
+  &=\;
   \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
+  \nabla_\lambda \log q(z\;;\;\lambda)
+  \:
   \big(
   \log p(x, z)
   -
   \log q(z\;;\;\lambda)
   \big)
-  \:
-  \nabla_\lambda \log q(z\;;\;\lambda)
   \big].
 \end{align*}
-This construes the gradient of the ELBO as an expectation over the variational
-approximation $q(z\;;\;\lambda)$; the only new ingredient it requires is the 
-\emph{score function} $\nabla_\lambda \log q(z\;;\;\lambda)$, which is easy
-using automatic differentiation.
+The gradient of the ELBO is an expectation over the variational
+model $q(z\;;\;\lambda)$; the only new ingredient it requires is the
+\emph{score function} $\nabla_\lambda \log q(z\;;\;\lambda)$.
+Edward uses automatic differentiation, specifically with TensorFlow's
+computational graphs, making this gradient computation both simple and
+efficient to distribute.
 
 \subsubsection{Noisy estimates using Monte Carlo integration}
 
@@ -79,7 +80,7 @@ A Monte Carlo estimate of the gradient is then
 \begin{align*}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
-  &\approx\; 
+  &\approx\;
   \frac{1}{S}
   \sum_{s=1}^{S}
   \big[
@@ -92,46 +93,52 @@ A Monte Carlo estimate of the gradient is then
   \nabla_\lambda \log q(z_s\;;\;\lambda)
   \big].
 \end{align*}
-This is an unbiased estimate of the actual gradient of the ELBO. 
+This is an unbiased estimate of the actual gradient of the ELBO.
 
 \subsubsection{Implementation}
 
-We implement the ELBO and its score function gradient estimator in a single
-method \texttt{build_score_loss} of the \texttt{MFVI} (mean-field variational
+We implement the ELBO with the score function gradient in the method
+\texttt{build_score_loss} of the \texttt{MFVI} (mean-field variational
 inference) class.
 \begin{lstlisting}[language=Python]
 class MFVI(VariationalInference):
     ...
     def build_score_loss(self):
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         q_log_prob = self.variational.log_prob(stop_gradient(z))
         losses = self.model.log_prob(x, z) - q_log_prob
+        self.loss = tf.reduce_mean(losses)
         return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
 \end{lstlisting}
 
-This method draws $S$ (\texttt{self.n_minibatch}) samples from the variational
-distribution; the TensorFlow method \texttt{reduce_mean} computes the Monte
-Carlo summation. 
+This method draws $S$ (\texttt{self.n_samples}) samples from the variational
+model. The TensorFlow function \texttt{reduce_mean} takes the
+mean over the samples.
 
-The TensorFlow method \texttt{stop_gradient} implicitly specifies the gradient
-of the ELBO; it tells TensorFlow where to stop automatic differentiation. In
-this case, it will only compute $\nabla_\lambda \log q(z_s\;;\;\lambda)$ because
-it is not wrapped in a \texttt{stop_gradient}.
+The method stores computation of the ELBO in \texttt{self.loss}, which
+can be used to track progress of the inference for diagnostics.
+The method returns an object whose automatic differentiation is the
+score function gradient of the ELBO.  The TensorFlow function
+\texttt{stop_gradient} tells the computational graph to stop
+traversing nodes to propagate gradients. In this case,
+the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
+because it is not wrapped in a \texttt{stop_gradient}.
 
-There is a nuance here. This method actually returns the \textbf{negative} ELBO
-because TensorFlow's stochastic optimization routines are all configured to
-\emph {minimize} an objective function.
+There is a nuance here. TensorFlow's optimizers are configured to
+\emph{minimize} an objective function, so the gradient is set to be
+the negative of the ELBO's gradient.
 
-\subsubsection{Stochastic gradient optimization}
+\subsubsection{Stochastic optimization}
 
-Stochastic gradient ascent is an extension of gradient ascent that permits
-following noisy estimates of the gradient. Under mild conditions, stochastic
-gradient ascent finds a (local) optimum of the original (noiseless) function.
+Stochastic gradient descent is an extension of gradient descent using
+noisy estimates of the gradient. Under mild conditions, stochastic
+gradient descent finds a (local) optimum of the original (noiseless)
+function.
 
-Edward uses TensorFlow's built-in stochastic gradient minimization routines.
-This is specified in the \texttt{initialize} method of the 
+Edward uses TensorFlow's optimizers.
+This is specified in the \texttt{initialize} method of the
 \texttt{VariationalInference} base class.
 
 \begin{lstlisting}[language=Python]
@@ -142,7 +149,7 @@ class VariationalInference(Inference):
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope=scope)
 
-        # Use Adam with a decaying scale factor
+        # Use ADAM with a decaying scale factor.
         global_step = tf.Variable(0, trainable=False)
         starter_learning_rate = 0.1
         learning_rate = tf.train.exponential_decay(starter_learning_rate,
@@ -153,7 +160,7 @@ class VariationalInference(Inference):
                                         var_list=var_list)
 \end{lstlisting}
 
-This sets up TensorFlow to minimize the ELBO using the Adam adaptive step-size
-schedule with an exponentially decaying scaling factor.
+This sets up TensorFlow to optimize the ELBO using ADAM's learning
+rate combined with an exponentially decaying scale factor.
 
-See the \href{api/index.html}{API} for further implementation details.
+See the \href{api/index.html}{API} for more details.

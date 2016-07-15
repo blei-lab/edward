@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Tutorials</title>
+<title>Edward – Probabilistic decoder</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,44 +69,62 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="tutorials">Tutorials</h2>
-<p>Edward provides a testbed for fast experimentation and research with probabilistic models. Here we demonstrate examples from each of the three components defining Edward: <strong>Models</strong>, <strong>Inference</strong>, and <strong>Criticism</strong>. In the <strong>End-to-End</strong> section, we demonstrate examples which sweep through the whole process.</p>
-<h3 id="models">Models</h3>
+<h2 id="probabilistic-decoder">Probabilistic decoder</h2>
+<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory. It is a distribution <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables <span class="math inline">\(\mathbf{z}_n\)</span> are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its generated values (decoding) for any given code is random.</p>
+<p>For real-valued data, the randomness in the decoder is given by a multivariate Gaussian <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n\mid\mathbf{z}_n)
+  &amp;=
+  \mathcal{N}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the probabilistic decoder is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> taking the code <span class="math inline">\(\mathbf{z}_n\)</span> as input. For binary data, it is given by a Bernoulli <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n\mid\mathbf{z}_n)
+  &amp;=
+  \text{Bernoulli}(\mathbf{x}_n\mid p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).\end{aligned}\]</span> Probabilistic decoders are typically used alongside a standard normal prior over the code <span class="math display">\[\begin{aligned}
+  p(\mathbf{z})
+  &amp;=
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
+<p>Let’s build the model in Edward using TensorFlow, and with PrettyTensor as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
+<pre class="python" language="Python"><code>class NormalBernoulli:
+    """
+    Each binarized pixel in an image is modeled by a Bernoulli
+    likelihood. The success probability for each pixel is the output
+    of a neural network that takes samples from a normal prior as
+    input.
+
+    p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
+    """
+    def __init__(self, n_vars):
+        self.n_vars = n_vars # number of local latent variables
+
+    def neural_network(self, z):
+        """p = neural_network(z)"""
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                               batch_normalize=True,
+                               learned_moments_update_rate=0.0003,
+                               variance_epsilon=0.001,
+                               scale_after_normalization=True):
+            return (pt.wrap(z).
+                    reshape([N_MINIBATCH, 1, 1, self.n_vars]).
+                    deconv2d(3, 128, edges='VALID').
+                    deconv2d(5, 64, edges='VALID').
+                    deconv2d(5, 32, stride=2).
+                    deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+                    flatten()).tensor
+
+    def log_lik(self, xs, z):
+        """
+        Bernoulli log-likelihood, summing over every image n and pixel i
+        in image n.
+
+        log p(x | z) = log Bernoulli(x | p = neural_network(z))
+         = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
+        """
+        return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
+
+model = NormalBernoulli(n_vars=10)</code></pre>
+<p>An example script using this model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">here</a>.</p>
+<h3 id="references">References</h3>
 <ul>
-<li><a href="tut_model.html">Probability models</a></li>
-<li><a href="tut_bayesian_linear_regression.html">Bayesian linear regression</a></li>
-<li><a href="tut_mixture_gaussian.html">Mixture of Gaussians</a></li>
-<li><a href="tut_gp_classification.html">Gaussian process classification</a></li>
-<li><a href="tut_bayesian_nn.html">Bayesian neural network</a></li>
-<li><a href="tut_decoder.html">Probabilistic decoder</a></li>
-</ul>
-<h3 id="inference">Inference</h3>
-<ul>
-<li><a href="tut_inference.html">Inference of probability models</a></li>
-<li><a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization (variational inference)</a>
-<ul>
-<li><a href="tut_KLqp_score.html">Score function gradient</a></li>
-<li><a href="tut_KLqp_reparam.html">Reparameterization gradient</a></li>
-</ul></li>
-<li><a href="tut_KLpq.html"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization (variational inference)</a>
-<ul>
-<li><a href="tut_KLpq_ais.html">Adaptive importance sampling</a></li>
-</ul></li>
-<li><a href="tut_MAP.html">Maximum a posteriori estimation</a>
-<ul>
-<li><a href="tut_MAP_Laplace.html">Laplace approximation</a></li>
-</ul></li>
-</ul>
-<h3 id="criticism">Criticism</h3>
-<ul>
-<li><a href="tut_point_eval.html">Point-based evaluations</a></li>
-<li><a href="tut_PPC.html">Posterior predictive checks</a></li>
-</ul>
-<h3 id="end-to-end">End-to-end</h3>
-<ul>
-<li><a href="tut_supervised_regression.html">Supervised learning (Regression)</a></li>
-<li><a href="tut_supervised_classification.html">Supervised learning (Classification)</a></li>
-<li><a href="tut_unsupervised.html">Unsupervised learning</a></li>
+<li>Dayan, P., Hinton, G. E., Neal, R. M., &amp; Zemel, R. S. (1995). The Helmholtz Machine. Neural Computation, 7(5), 889–904.</li>
+<li>Kingma, D. P., &amp; Welling, M. (2014). Auto-Encoding Variational Bayes. In International Conference on Learning Representations.</li>
 </ul>
 </div>
 </div>

@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Inference of probability models</title>
+  <title>Edward – Conjugate models</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -74,18 +74,8 @@
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
-<h2 id="inference-of-probability-models">Inference of probability models</h2>
-<p>This tutorial asks the question: what does it mean to do inference in probability models? This sets the stage for understanding how to develop and implement inference procedures in Edward.</p>
-<h3 id="the-posterior">The posterior</h3>
-<p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden patterns <span class="math inline">\(z\)</span> explain the data? We seek to infer these hidden patterns using the model.</p>
-<p>Inference for probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
-  p(z \mid x)
-  &amp;=
-  \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math inline">\(z\)</span>, conditioned on some (observed) data <span class="math inline">\(x\)</span>. It provides a probabilistic description of the hidden patterns that explain the data.</p>
-<h3 id="inferring-the-posterior">Inferring the posterior</h3>
-<p>We know what the posterior represents. How do we calculate it? This is the central computational challenge in inference.</p>
-<p>The posterior is difficult to compute because of its normalizing constant, which is the integral in the denominator. This is often a high-dimensional integral that lacks an analytic (closed-form) solution. Thus, calculating the posterior means <em>approximating</em> the posterior.</p>
-<p>There are many approaches to posterior inference, which can be unwieldy to manage or even conceptualize. Edward uses abstract base classes and class inheritance to provide a hierarchy of inference methods, enabling fast experimentation on top of existing methods. For details on the inference hierarchy in Edward, see the <a href="#">inference API</a>. We describe several examples in detail in the other inference <a href="tutorials.html">tutorials</a>.</p>
+<h2 id="conjugate-models">Conjugate models</h2>
+<p>(explain this is a useful toy model to play around with in a new inference algorithm, focused on beta-bernoulli)</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

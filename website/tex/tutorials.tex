@@ -4,20 +4,30 @@
 % Begin the content of the page
 \subsection{Tutorials}
 
-Edward supports a variety of probability models, inference
-algorithms, and criticism procedures. Here we show a few key examples from each
-category. We recommend \href{getting-started.html}{Getting Started} and
-\href{delving-in.html}{Delving In} before continuing to the tutorials.
+Edward provides a testbed for fast experimentation and research with
+probabilistic models. Here we demonstrate examples from each of the
+three components defining Edward: \textbf{Models}, \textbf{Inference},
+and \textbf{Criticism}.
+In the \textbf{End-to-End} section, we demonstrate examples which
+sweep through the whole process.
+%---whether it be studying the properties of a new research idea;
+%solving a specific machine learning task; or using probabilistic
+%models for a specific domain application.
 
 \subsubsection{Models}
 
 \begin{itemize}
 \item \href{tut_model.html}{Probability models}
+%\item \href{tut_posteriors.html}{Tractable posteriors}
+%\item \href{tut_conjugate.html}{Conjugate models}
 \item \href{tut_bayesian_linear_regression.html}{Bayesian linear regression}
-\item \href{#}{Hierarchical logistic regression}
+%\item \href{tut_hierarchical_logistic.html}{Hierarchical logistic regression}
 \item \href{tut_mixture_gaussian.html}{Mixture of Gaussians}
 \item \href{tut_gp_classification.html}{Gaussian process classification}
 \item \href{tut_bayesian_nn.html}{Bayesian neural network}
+%\item \href{tut_mixture_density.html}{Mixture density network}
+\item \href{tut_decoder.html}{Probabilistic decoder}
+%\item \href{#}{Log-linear network model}
 \end{itemize}
 
 \subsubsection{Inference}
@@ -27,8 +37,8 @@ category. We recommend \href{getting-started.html}{Getting Started} and
   \item \href{tut_KLqp.html}{$\text{KL}(q\|p)$ minimization (variational
   inference)}
   \begin{itemize}
-    \item \href{tut_KLqp_score.html}{Score function method}
-    \item \href{tut_KLqp_reparam.html}{Reparameterization method}
+    \item \href{tut_KLqp_score.html}{Score function gradient}
+    \item \href{tut_KLqp_reparam.html}{Reparameterization gradient}
   \end{itemize}
   \item \href{tut_KLpq.html}{$\text{KL}(p\|q)$ minimization (variational
   inference)}
@@ -39,28 +49,25 @@ category. We recommend \href{getting-started.html}{Getting Started} and
   \begin{itemize}
     \item \href{tut_MAP_Laplace.html}{Laplace approximation}
   \end{itemize}
-  \item \href{#}{Importance-weighted variational inference}
+  %\item \href{tut_inference_networks.html}{Inference networks}
+  %\item \href{tut_iwvi.html}{Importance-weighted variational inference}
+  %\item \href{#}{Variational expectation maximization}
 \end{itemize}
 
 \subsubsection{Criticism}
 
 \begin{itemize}
   \item \href{tut_point_eval.html}{Point-based evaluations}
+  %\item \href{tut_prior_pc.html}{Prior predictive checks}
   \item \href{tut_PPC.html}{Posterior predictive checks}
 \end{itemize}
 
 \subsubsection{End-to-end}
 
 \begin{itemize}
-  \item \href{#}{Tractable posteriors} (explain this is a useful toy model to play
-    around with in a new inference algorithm, focused on normal
-    posterior)
-  \item \href{#}{Conjugate models} (explain this is a useful toy model to play
-    around with in a new inference algorithm, focused on
-    beta-bernoulli)
-  \item \href{#}{Supervised learning (regression)} (use the bayesian linear regression demo)
-  \item \href{#}{Supervised learning (classification)} (use the gp classification demo)
-  \item \href{#}{Unsupervised learning} (use the mixture gaussian's demo)
-  \item \href{#}{Mixture density network}
-  \item \href{#}{Variational auto-encoder}
+  \item \href{tut_supervised_regression.html}{Supervised learning (Regression)}
+  \item \href{tut_supervised_classification.html}{Supervised learning (Classification)}
+  \item \href{tut_unsupervised.html}{Unsupervised learning}
+  %\item \href{tut_mdn.html}{Mixture density network}
+  %\item \href{tut_vae.html}{Variational auto-encoder}
 \end{itemize}

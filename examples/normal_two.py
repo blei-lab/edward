@@ -18,9 +18,7 @@ from edward.util import get_dims
 
 
 class NormalPosterior:
-    """
-    p(x, z) = p(z) = p(z | x) = Normal(z; mu, Sigma)
-    """
+    """p(x, z) = p(z) = p(z | x) = Normal(z; mu, Sigma)"""
     def __init__(self, mu, Sigma):
         self.mu = mu
         self.Sigma = Sigma

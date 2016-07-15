@@ -63,7 +63,7 @@ class MixtureGaussian:
         self.alpha = tf.ones([K])
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         N = get_dims(xs['x'])[0]
         pi, mus, sigmas = zs
         log_prior = dirichlet.logpdf(pi, self.alpha)

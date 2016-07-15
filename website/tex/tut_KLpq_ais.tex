@@ -10,7 +10,7 @@
 We seek to minimize $\text{KL}(p\|q)$ by following its gradient
 \begin{align*}
   \nabla_\lambda\;
-  \text{KL}( 
+  \text{KL}(
   p(z \mid x)
   \;\|\;
   q(z\;;\;\lambda)
@@ -23,17 +23,16 @@ We seek to minimize $\text{KL}(p\|q)$ by following its gradient
   \log q(z\;;\;\lambda)
   \big].
 \end{align*}
-to a local minimum using a ``black box'' algorithm. This means avoiding
-additional mathematical derivations, such as calculating integrals 
-(expectations) or gradients (for maximization) by hand.
+using a ``black box'' algorithm. This means generically inferring the
+posterior while making few assumptions about the model.
 
 \subsubsection{Importance sampling}
 
 The gradient is an expectation with respect to the unknown posterior. Combining
-Bayes rule with importance sampling can circumvent this obstacle. 
+Bayes' rule with importance sampling can circumvent this obstacle.
 
-Begin by construing the expectation with respect to the variational
-approximation,
+First rewrite the expectation to be with respect to the variational
+distribution,
 \begin{align*}
   -
   \mathbb{E}_{p(z \mid x)}
@@ -60,10 +59,10 @@ The basic procedure follows these steps:
   \begin{align*}
     w_s
     &=
-    \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)} 
-    \Bigg/ 
+    \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
+    \Bigg/
     \sum_{s=1}^{S}
-    \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)} 
+    \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
   \end{align*}
   \item compute the weighted mean.
 \end{enumerate}
@@ -72,13 +71,13 @@ when estimating the normalized importance weights
 \begin{align*}
   w_s
   &=
-  \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)} 
-  \Bigg/ 
+  \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
+  \Bigg/
   \sum_{s=1}^{S}
   \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)} \\
   &=
-  \frac{p(x, z_s)}{q(z_s\;;\;\lambda)} 
-  \Bigg/ 
+  \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}
+  \Bigg/
   \sum_{s=1}^{S}
   \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}.
 \end{align*}
@@ -95,7 +94,7 @@ Importance sampling thus gives the following noisy yet unbiased gradient
 estimate
 \begin{align*}
 \nabla_\lambda\;
-  \text{KL}( 
+  \text{KL}(
   p(z \mid x)
   \;\|\;
   q(z\;;\;\lambda)
@@ -107,25 +106,27 @@ estimate
   w_s
   \nabla_\lambda\; \log q(z_s\;;\;\lambda).
 \end{align*}
-The only additional computation here is the gradient, which is easy to automate
-using automatic differentation.
+The objective $\text{KL}(p\|q)$ can be calculated in a similar fashion.
+The only new ingredient for its gradient is the score function
+$\nabla_\lambda \log q(z\;;\;\lambda)$.  Edward uses automatic
+differentiation, specifically with TensorFlow's computational graphs,
+making this gradient computation both simple and efficient to
+distribute.
 
 Adaptive importance sampling follows this gradient to a local optimum using
-stochastic optimization. It is adaptive because the variational approximation
+stochastic optimization. It is adaptive because the variational distribution
 $q(z\;;\;\lambda)$ iteratively gets closer to the posterior $p(z \mid x)$.
 
 \subsubsection{Implementation}
 
-We implement
-We implement $\text{KL}(p\|q)$ and its importance sampling gradient
-estimator in a single method \texttt{build_loss} of the \texttt{KLpq} class.
+We implement $\text{KL}(p\|q)$ with its importance sampling gradient
+in the method \texttt{build_loss} of the \texttt{KLpq} class.
 \begin{lstlisting}[language=Python]
 class KLpq(VariationalInference):
     ...
     def build_loss(self):
-        ...
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         # normalized importance weights
         q_log_prob = self.variational.log_prob(stop_gradient(z))
@@ -137,29 +138,34 @@ class KLpq(VariationalInference):
         return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 \end{lstlisting}
 
-This method draws $S$ (\texttt{self.n_minibatch}) samples from the variational
-distribution; the TensorFlow method \texttt{reduce_mean} computes the Monte
-Carlo summation. 
+This method draws $S$ (\texttt{self.n_samples}) samples from the variational
+model. The TensorFlow function \texttt{reduce_mean} takes the
+mean over the samples.
 
-The TensorFlow method \texttt{stop_gradient} implicitly specifies the gradient; 
-it tells TensorFlow where to stop automatic differentiation. In
-this case, it will only compute $\nabla_\lambda \log q(z_s\;;\;\lambda)$ because
-it is not wrapped in a \texttt{stop_gradient}.
+The method stores computation of $\text{KL}(p\|q)$ in
+\texttt{self.loss}, which can be used to track progress of the
+inference for diagnostics.  The method returns an object whose
+automatic differentiation is a stochastic gradient of $\text{KL}(p\|q)$.
+The TensorFlow function \texttt{stop_gradient} tells the computational
+graph to stop traversing nodes to propagate gradients. In this case,
+the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
+because it is not wrapped in a \texttt{stop_gradient}.
 
 Computing the normalized importance weights is a numerically challenging task.
 Underflow is a common issue. Here we use the \texttt{log_sum_exp} trick to
 compute weights in the log space. However, the normalized weights are still
-exponentiated to compute the gradient. Thus, this method is limited to
-relatively low-dimensional models.
+exponentiated to compute the gradient. As with importance sampling in
+general, this inference method does not scale to high dimensions.
 
 \subsubsection{Stochastic gradient optimization}
 
-Stochastic gradient descent is an extension of gradient descent that permits
-following noisy estimates of the gradient. Under mild conditions, stochastic
-gradient descent finds a (local) optimum of the original (noiseless) function.
+Stochastic gradient descent is an extension of gradient descent using
+noisy estimates of the gradient. Under mild conditions, stochastic
+gradient descent finds a (local) optimum of the original (noiseless)
+function.
 
-Edward uses TensorFlow's built-in stochastic gradient minimization routines.
-This is specified in the \texttt{initialize} method of the 
+Edward uses TensorFlow's optimizers.
+This is specified in the \texttt{initialize} method of the
 \texttt{VariationalInference} base class.
 
 \begin{lstlisting}[language=Python]
@@ -181,7 +187,7 @@ class VariationalInference(Inference):
                                         var_list=var_list)
 \end{lstlisting}
 
-This sets up TensorFlow to minimize $\text{KL}(p\|q)$ using the Adam adaptive
-step-size schedule with an exponentially decaying scaling factor.
+This sets up TensorFlow to optimize $\text{KL}(p\|q)$ using ADAM's
+learning rate combined with an exponentially decaying scale factor.
 
-See the \href{api/index.html}{API} for further implementation details.
+See the \href{api/index.html}{API} for more details.

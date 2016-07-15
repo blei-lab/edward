@@ -82,7 +82,7 @@ class BayesianNN:
         return tf.pack(matrix)
 
     def log_lik(self, xs, zs):
-        """Returns a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
+        """Return a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
         x, y = xs['x'], xs['y']
         mus = self.neural_network(x, zs)
         # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)

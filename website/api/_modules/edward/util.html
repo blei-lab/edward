@@ -81,12 +81,6 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../data.html">Data in Edward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models_models.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models_distributions.html">Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats_distributions.html">Statistics Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../inferences.html">Inference Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../criticisms.html">Criticism Techniques</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../edward.html">edward package</a></li>
 </ul>
 
@@ -133,12 +127,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.util</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
 <div class="viewcode-block" id="cumprod"><a class="viewcode-back" href="../../edward.util.html#edward.util.cumprod">[docs]</a><span class="k">def</span> <span class="nf">cumprod</span><span class="p">(</span><span class="n">xs</span><span class="p">):</span>
@@ -212,9 +206,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># scalar</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># scalar</span>
             <span class="k">return</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># array</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># array</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">dim</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -234,7 +228,7 @@
 <span class="sd">    _ED_SESSION : tf.InteractiveSession</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_ED_SESSION</span>
-    <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
         <span class="n">_ED_SESSION</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">InteractiveSession</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">_ED_SESSION</span></div>
@@ -257,22 +251,22 @@
 <span class="sd">        A matrix where each row is</span>
 <span class="sd">        .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Calculate flattened vector grad_{xs} y.</span>
+    <span class="c"># Calculate flattened vector grad_{xs} y.</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">grad</span> <span class="ow">in</span> <span class="n">grads</span><span class="p">]</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
-    <span class="c1"># Loop over each element in the vector.</span>
+    <span class="c"># Loop over each element in the vector.</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="c1"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
+        <span class="c"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
         <span class="n">gradjgrads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">xs</span><span class="p">)</span>
-        <span class="c1"># Flatten into vector.</span>
+        <span class="c"># Flatten into vector.</span>
         <span class="n">hi</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)):</span>
             <span class="n">hij</span> <span class="o">=</span> <span class="n">gradjgrads</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-            <span class="c1"># return 0 if gradient doesn&#39;t exist; TensorFlow returns None</span>
-            <span class="k">if</span> <span class="n">hij</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># return 0 if gradient doesn&#39;t exist; TensorFlow returns None</span>
+            <span class="k">if</span> <span class="n">hij</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
                 <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
             <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">hij</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -281,7 +275,7 @@
         <span class="n">hi</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
         <span class="n">mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
 
-    <span class="c1"># Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).</span>
+    <span class="c"># Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
 
 
@@ -376,7 +370,7 @@
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        size corresponding to size of input</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">1e-8</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
 
 
@@ -478,7 +472,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span> <span class="c1"># list</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># list</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span></div>
 
 
@@ -523,7 +517,7 @@
         <span class="n">z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">eq</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
         <span class="n">pil</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">n_rows</span><span class="p">,</span> <span class="mi">1</span><span class="p">])])</span>
         <span class="n">piu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">n_rows</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">z</span><span class="p">])</span>
-        <span class="c1"># cumulative product along 1st axis</span>
+        <span class="c"># cumulative product along 1st axis</span>
         <span class="n">S</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">cumprod</span><span class="p">(</span><span class="n">piu_x</span><span class="p">)</span> <span class="k">for</span> <span class="n">piu_x</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">piu</span><span class="p">)])</span>
         <span class="k">return</span> <span class="n">S</span> <span class="o">*</span> <span class="n">pil</span></div>
 </pre></div>

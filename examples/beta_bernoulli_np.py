@@ -21,9 +21,7 @@ from scipy.stats import beta, bernoulli
 
 
 class BetaBernoulli(PythonModel):
-    """
-    p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
     def _py_log_prob(self, xs, zs):
         # This example is written for pedagogy. We recommend
         # vectorizing operations in practice.

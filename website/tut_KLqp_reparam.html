@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Reparameterization method</title>
+<title>Edward – Reparameterization gradient</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,7 +69,7 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="reparameterization-method">Reparameterization method</h2>
+<h2 id="reparameterization-gradient">Reparameterization gradient</h2>
 <p>(This tutorial follows the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a> tutorial.)</p>
 <p>We seek to maximize the ELBO, <span class="math display">\[\begin{aligned}
   \lambda^*
@@ -82,9 +82,10 @@
   \log p(x, z)
   -
   \log q(z\;;\;\lambda)
-  \big],\end{aligned}\]</span> using a “black box” algorithm. This means avoiding additional mathematical derivations, such as calculating integrals (expectations) or gradients (for maximization) by hand.</p>
-<h3 id="the-reparameterization-gradient-estimator">The reparameterization gradient estimator</h3>
-<p>Gradient ascent is one way to maximize complicated functions like the ELBO. The idea is to compute the function’s gradient <span class="math display">\[\begin{aligned}
+  \big],\end{aligned}\]</span> using a “black box” algorithm. This means generically inferring the posterior while making few assumptions about the model.</p>
+<p>If the model has differentiable latent variables, then it is generally advantageous to leverage gradient information from the model in order to better traverse the optimization space. One approach to doing this is the reparameterization gradient.</p>
+<h3 id="the-reparameterization-identity">The reparameterization identity</h3>
+<p>Gradient descent is a standard approach for optimizing complicated objectives like the ELBO. The idea is to calculate its gradient <span class="math display">\[\begin{aligned}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
   &amp;=
@@ -94,23 +95,23 @@
   \log p(x, z)
   -
   \log q(z\;;\;\lambda)
-  \big],\end{aligned}\]</span> and to follow it to a (local) optimum.</p>
-<p>Some variational distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize the normal distribution <span class="math inline">\(z \sim \mathcal{N}(\mu, \Sigma)\)</span> as <span class="math inline">\(z \sim \mu + L \mathcal{N}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
+  \big],\end{aligned}\]</span> and update the current set of parameters proportional to the gradient.</p>
+<p>Some variational distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize a normal distribution <span class="math inline">\(z \sim \mathcal{N}(\mu, \Sigma)\)</span> as <span class="math inline">\(z \sim \mu + L \mathcal{N}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
   \epsilon &amp;\sim q(\epsilon)\\
-  z &amp;= g(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(g\)</span> encapsulates the variational parameters instead.</p>
-<p>The reparameterization gradient estimator leverages this property of the variational approximation to write the gradient as <span class="math display">\[\begin{aligned}
+  z &amp;= z(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(z(\cdot;\lambda)\)</span> encapsulates the variational parameters instead, and following the process is equivalent to directly drawing <span class="math inline">\(z\)</span> from the original distribution.</p>
+<p>The reparameterization gradient estimator leverages this property of the variational distribution to write the gradient as <span class="math display">\[\begin{aligned}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
-  &amp;=\; 
+  &amp;=\;
   \mathbb{E}_{q(\epsilon)}
   \big[
   \nabla_\lambda
   \big(
-  \log p(x, g(\epsilon \;;\; \lambda))
+  \log p(x, z(\epsilon \;;\; \lambda))
   -
-  \log q(g(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
-  \big].\end{aligned}\]</span> This construes the gradient of the ELBO as an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>. This allows the gradient to move inside the expectati on; however, now the gradient applies to both the model and the variational approximation. We need to run automatic differentation on both.</p>
+  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>, and the gradient can be applied directly to the inner expression. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
 <h3 id="noisy-estimates-using-monte-carlo-integration">Noisy estimates using Monte Carlo integration</h3>
 <p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
 <ol>
@@ -121,34 +122,34 @@
 <p>A Monte Carlo estimate of the gradient is then <span class="math display">\[\begin{aligned}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
-  &amp;\approx\; 
+  &amp;\approx\;
   \frac{1}{S}
   \sum_{s=1}^{S}
   \big[
   \nabla_\lambda
   \big(
-  \log p(x, g(\epsilon \;;\; \lambda))
+  \log p(x, z(\epsilon \;;\; \lambda))
   -
-  \log q(g(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
-  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="tut_KLqp_score.html">score function method</a>.</p>
+  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="tut_KLqp_score.html">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
 <h3 id="implementation">Implementation</h3>
-<p>We implement the ELBO and its reparameterization gradient estimator in a single method <code>build_reparam_loss</code> of the <code>MFVI</code> (mean-field variational inference) class.</p>
+<p>We implement the ELBO with the reparameterization gradient in the method <code>build_reparam_loss</code> of the <code>MFVI</code> (mean-field variational inference) class.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
     ...
     def build_reparam_loss(self):
         x = self.data
-        z = self.variational.sample(self.n_minibatch)
+        z = self.variational.sample(self.n_samples)
 
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
                                    self.variational.log_prob(z))
         return -self.loss</code></pre>
-<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_minibatch</code>) samples from the variational distribution. The <code>sample</code> function implements the reparameterization <span class="math inline">\(g(\epsilon\;;\;\lambda)\)</span>. The TensorFlow method <code>reduce_mean</code> then computes the Monte Carlo summation.</p>
-<p>This method implicitly specifies the gradient of the ELBO as well. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus applying the chain rule of differentiation to compute the gradient of the ELBO. Unlike the <a href="tut_KLqp_score.html">score function method</a>, we do not have to use TensorFlow’s <code>stop_gradient</code> method.</p>
-<p>There is a nuance here. This method actually returns the <strong>negative</strong> ELBO because TensorFlow’s stochastic optimization routines are all configured to <em>minimize</em> an objective function.</p>
+<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_samples</code>) samples from the variational distribution. The <code>sample</code> method follows the reparameterization procedure. The TensorFlow function <code>reduce_mean</code> then computes the Monte Carlo summation.</p>
+<p>The method stores computation of the ELBO in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score.html">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>stop_gradient</code> function.</p>
+<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function, so the gradient is set to be the negative of the ELBO’s gradient.</p>
 <h3 id="stochastic-gradient-optimization">Stochastic gradient optimization</h3>
-<p>Stochastic gradient ascent is an extension of gradient ascent that permits following noisy estimates of the gradient. Under mild conditions, stochastic gradient ascent finds a (local) optimum of the original (noiseless) function.</p>
-<p>Edward uses TensorFlow’s built-in stochastic gradient minimization routines. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
+<p>Stochastic gradient descent is an extension of gradient descent using noisy estimates of the gradient. Under mild conditions, stochastic gradient descent finds a (local) optimum of the original (noiseless) function.</p>
+<p>Edward uses TensorFlow’s optimizers. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
 <pre class="python" language="Python"><code>class VariationalInference(Inference):
     ...
     def initialize(self, ...):
@@ -165,8 +166,8 @@
         optimizer = tf.train.AdamOptimizer(learning_rate)
         self.train = optimizer.minimize(loss, global_step=global_step,
                                         var_list=var_list)</code></pre>
-<p>This sets up TensorFlow to minimize the ELBO using the Adam adaptive step-size schedule with an exponentially decaying scaling factor.</p>
-<p>See the <a href="api/index.html">API</a> for further implementation details.</p>
+<p>This sets up TensorFlow to optimize the ELBO using ADAM’s learning rate combined with an exponentially decaying scale factor.</p>
+<p>See the <a href="api/index.html">API</a> for more details.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
