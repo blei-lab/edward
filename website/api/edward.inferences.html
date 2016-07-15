@@ -83,7 +83,6 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Building Probabilistic Models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
@@ -180,11 +179,10 @@ according to the Stan program&#8217;s data block.</li>
 </table>
 <p class="rubric">Notes</p>
 <p>If <cite>data</cite> is not passed in, the dictionary is empty.</p>
-<p>Three options are available for batch training:
-1. internally if user passes in data as a dictionary of NumPy</p>
-<blockquote>
-<div>arrays;</div></blockquote>
-<ol class="arabic simple" start="2">
+<p>Three options are available for batch training:</p>
+<ol class="arabic simple">
+<li>internally if user passes in data as a dictionary of NumPy
+arrays;</li>
 <li>externally if user passes in data as a dictionary of
 TensorFlow placeholders (and manually feeds them);</li>
 <li>externally if user passes in data as TensorFlow tensors
