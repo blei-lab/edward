@@ -111,7 +111,10 @@ class BayesianNN:
 <p>Let’s use a toy dataset of 50 observations with a cosine relationship.</p>
 <pre class="python" language="Python"><code>import numpy as np
 
-data = {&#39;x&#39;: np.array(...), &#39;y&#39;: np.array(...)}</code></pre>
+x = np.linspace(-3, 3, num=50)
+y = np.cos(x) + norm.rvs(0, 0.1, size=50)
+x = x.reshape((N, 1))
+data = {&#39;x&#39;: x, &#39;y&#39;: y}</code></pre>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
 <p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation</p>
 <pre class="python" language="Python"><code>from edward.models import Variational, Normal

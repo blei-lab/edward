@@ -76,12 +76,12 @@
     <div class="nine columns">
 <h2 id="latent-space-models-for-neurological-data">Latent space models for neurological data</h2>
 <p>Many interesting data sets are networks. For example, social networks or biological neural networks.</p>
-<p>Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model [1]. Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.</p>
+<p>Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model (Hoff et al., 2002). Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.</p>
 <p>We demonstrate how to do this in Edward with an example from neuroscience. The script can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">here</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Duncan Watts and Steven Strogatz [2] from original experimental data by White et al. [3].</p>
+<p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">Mark Newman’s repository</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Watts and Strogatz (1998) from original experimental data by White et al. (1986).</p>
 <p>The neural network consists of around <span class="math inline">\(300\)</span> neurons. Each connection is associated with a weight (positive integer) capturing the strength of the connection.</p>
-<p>In the example we load the data with:</p>
+<p>In the example we load the data with</p>
 <pre class="python" language="Python"><code>data, N = load_celegans_brain()</code></pre>
 <h3 id="model">Model</h3>
 <p>Here we will fit a latent space model to the C.Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.</p>
@@ -90,42 +90,42 @@
 <p>For each node <span class="math inline">\(n\)</span>: <span class="math display">\[\begin{aligned}
 z_n \sim N(0,I)\end{aligned}\]</span> For each edge <span class="math inline">\((i,j)\)</span>: <span class="math display">\[\begin{aligned}
 Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg)\end{aligned}\]</span></p>
-<p>Define and instantiate the model in edward as follows:</p>
-<pre class="python" language="Python"><code>class Latent_Space_Model():
-    def __init__(self,N,K):
+<p>Here we build the model in Edward using TensorFlow.</p>
+<pre class="python" language="Python"><code>class LatentSpaceModel:
+    def __init__(self, N, K):
         self.num_vars = N * K
         self.N = N
         self.K = K
 
     def log_prob(self, xs, zs):
-        &quot;&quot;&quot;Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
+        &quot;&quot;&quot;Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
         log_prior = - tf.reduce_sum(zs*zs)
-        z = tf.reshape(zs,[self.N,self.K])
-    # compute reciprocal of euclidean distance
-        xp = tf.matmul(tf.ones([1,self.N]),tf.reduce_sum(z*z,1,keep_dims=True))
-        xp = xp + tf.transpose(xp) - 2*tf.matmul(z,z,transpose_b = True)
+        z = tf.reshape(zs, [self.N,self.K])
+        # compute reciprocal of euclidean distance
+        xp = tf.matmul(tf.ones([1,self.N]), tf.reduce_sum(z*z,1,keep_dims=True))
+        xp = xp + tf.transpose(xp) - 2*tf.matmul(z, z, transpose_b = True)
         xp = 1.0/xp
         log_lik = tf.reduce_sum(poisson.logpmf(xs,xp))
         return log_lik + log_prior
 
 K = 3
-model = Latent_Space_Model(N,K)</code></pre>
+model = LatentSpaceModel(N, K)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are required: Instantiating inference and running it.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP(model, data)
-var = inference.run(n_iter=5000, n_print=500)</code></pre>
+inference.run(n_iter=5000, n_print=500)</code></pre>
 <p>See this extended tutorial about <a href="tut_MAP.html">MAP estimation in Edward</a>.</p>
-<p>One could instead run variational inference. This requires specifying a variational model and instantiating MFVI.</p>
+<p>One could instead run variational inference. This requires specifying a variational model and instantiating <code>MFVI</code>.</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Normal(model.num_vars))
-inference = ed.MFVI(model, variational,data)</code></pre>
+inference = ed.MFVI(model, variational, data)</code></pre>
 <p>Finally, the following line runs the inference procedure:</p>
 <pre class="python" language="Python"><code>var = inference.run(n_iter=5000, n_print=500)</code></pre>
 <p>See this extended tutorial about <a href="tut_KLqp.html">variational inference in Edward</a>.</p>
 <h3 id="references">References</h3>
-<p>[1] Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
-<p>[2] Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘</p>
-<p>[3] White, J. G., Southgate, E., Thomson, J. N., and Brenner, S. (1986). The structure of the nervous system of the nematode caenorhabditis elegans. , 314(1165):1–340.</p>
+<p>Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>
+<p>Watts, D. J. and Strogatz, S. H. (1998). Collective dynamics of ‘</p>
+<p>White, J. G., Southgate, E., Thomson, J. N., and Brenner, S. (1986). The structure of the nervous system of the nematode caenorhabditis elegans. , 314(1165):1–340.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

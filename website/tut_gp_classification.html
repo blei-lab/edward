@@ -1,79 +1,74 @@
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title>Edward – Gaussian process classification</title>
-  <!-- Mobile Specific Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- FONT -->
-  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-    
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/skeleton.css">
-
-  <!-- KaTeX -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-
-  <!-- highlight.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
-
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
-  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
-  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
-  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
-  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
-  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
-  <link rel="icon" type="image/png" href="icons/android-chrome-192x192.png" sizes="192x192">
-  <link rel="icon" type="image/png" href="icons/favicon-96x96.png" sizes="96x96">
-  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
-  <link rel="manifest" href="icons/manifest.json">
-  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
-  <link rel="shortcut icon" href="icons/favicon.ico">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <meta name="msapplication-TileImage" content="icons/mstile-144x144.png">
-  <meta name="msapplication-config" content="icons/browserconfig.xml">
-  <meta name="theme-color" content="#ffffff">
-</head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Gaussian process classification</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
 <body>
 <div class="container">
-  <div class="row" style="margin-top: 5%">
-    <div class="three columns">
-    <h1><a href="index.html">Edward</a></h1> 
-    <a href="index.html">
-    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
-    </a>
-    <a class="button u-full-width" href="index.html">Home</a>
-    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
-    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
-    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
-    <a class="button u-full-width" href="api/index.html">API</a> 
-    <a class="button u-full-width" href="#">Advanced</a> 
-    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
-    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
-    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
-    <a class="button2 u-full-width" href="license.html">License</a> 
-    <div class="row" style="padding-bottom: 5%"> </div>
-    <a href="https://github.com/blei-lab/edward">
-    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-      <img src="images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
-    alt="Edward on Github" />
-    <!-- </object> -->
-    </a>
-    <div class="row" style="padding-bottom: 5%"> </div>
-    </div>
-    <div class="nine columns">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
 <h2 id="gaussian-process-classification">Gaussian process classification</h2>
 <p>A Gaussian process is a powerful object for modeling nonlinear relationships between pairs of random variables. It defines a distribution over (possibly nonlinear) functions, which can be applied for representing our uncertainty around the true functional relationship. Here we define a Gaussian process model for classification.</p>
 <p>Formally, a distribution over functions <span class="math inline">\(f:\mathbb{R}^D\to\mathbb{R}\)</span> can be specified by a Gaussian process <span class="math display">\[\begin{aligned}
@@ -95,14 +90,14 @@
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, \mathbf{K})\end{aligned}\]</span> with covariance matrix given by evaluating <span class="math inline">\(k(x, x^\prime)\)</span> for each pair of inputs <span class="math inline">\((x, x^\prime)\)</span>.</p>
 <p>Let’s build the model in Edward using TensorFlow, fixing the kernel to be the RBF kernel, also as the squared exponential or exponentiated quadratic.</p>
 <pre class="python" language="Python"><code>class GaussianProcess:
-    &quot;&quot;&quot;
+    """
     Gaussian process classification
 
     p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
                   Normal(z | 0, K),
 
     where z are weights drawn from a GP with covariance given by k(x,
-    x&#39;) for each pair of inputs (x, x&#39;), and with squared-exponential
+    x') for each pair of inputs (x, x'), and with squared-exponential
     kernel and known kernel hyperparameters.
 
     Parameters
@@ -113,7 +108,7 @@
         Signal variance parameter.
     l : float, optional
         Length scale parameter.
-    &quot;&quot;&quot;
+    """
     def __init__(self, N, sigma=1.0, l=1.0):
         self.N = N
         self.sigma = sigma
@@ -139,8 +134,8 @@
         return tf.pack(mat)
 
     def log_prob(self, xs, zs):
-        &quot;&quot;&quot;Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
-        x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
         log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(
             bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
@@ -151,15 +146,15 @@ model = GaussianProcess(N=number_of_datapoints)</code></pre>
 <p>We experiment with this model in the <a href="tut_supervised_classification.html">supervised learning (classification)</a> tutorial.</p>
 <h3 id="references">References</h3>
 <ul>
-<li><p>Rasmussen, C. E., &amp; Williams, C. K. I. (2006). Gaussian processes for machine learning. MIT Press, Cambridge, MA.</p></li>
+<li>Rasmussen, C. E., &amp; Williams, C. K. I. (2006). Gaussian processes for machine learning. MIT Press, Cambridge, MA.</li>
 </ul>
-    </div>
-  </div>
-  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();
   renderMathInElement(document.body);
-</script> 
+</script>
 </body>
 </html>
