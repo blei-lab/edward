@@ -17,9 +17,7 @@ from edward.stats import norm
 
 
 class NormalPosterior:
-    """
-    p(x, z) = p(z) = p(z | x) = Normal(z; mu, std)
-    """
+    """p(x, z) = p(z) = p(z | x) = Normal(z; mu, std)"""
     def __init__(self, mu, std):
         self.mu = mu
         self.std = std
