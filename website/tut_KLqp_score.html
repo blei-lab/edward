@@ -145,7 +145,7 @@
         return -tf.reduce_mean(q_log_prob * stop_gradient(losses))</code></pre>
 <p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_samples</code>) samples from the variational model. The TensorFlow function <code>reduce_mean</code> takes the mean over the samples.</p>
 <p>The method stores computation of the ELBO in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is the score function gradient of the ELBO. The TensorFlow function <code>stop_gradient</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, because it is not wrapped in a <code>stop_gradient</code>.</p>
-<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function, so the gradient is set to be the negative of the ELBO’s gradient.</p>
+<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
 <h3 id="stochastic-optimization">Stochastic optimization</h3>
 <p>Stochastic gradient descent is an extension of gradient descent using noisy estimates of the gradient. Under mild conditions, stochastic gradient descent finds a (local) optimum of the original (noiseless) function.</p>
 <p>Edward uses TensorFlow’s optimizers. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
@@ -167,6 +167,11 @@
                                         var_list=var_list)</code></pre>
 <p>This sets up TensorFlow to optimize the ELBO using ADAM’s learning rate combined with an exponentially decaying scale factor.</p>
 <p>See the <a href="api/index.html">API</a> for more details.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Paisley, J., Blei, D. M., &amp; Jordan, M. (2012). Variational Bayesian Inference with Stochastic Search. In International Conference on Machine Learning.</li>
+<li>Ranganath, R., Gerrish, S., &amp; Blei, D. M. (2014). Black Box Variational Inference. In Artificial Intelligence and Statistics.</li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

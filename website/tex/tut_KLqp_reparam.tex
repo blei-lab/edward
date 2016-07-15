@@ -148,7 +148,7 @@ reparameterization gradient does not need TensorFlow's
 \texttt{stop_gradient} function.
 
 There is a nuance here. TensorFlow's optimizers are configured to
-\emph{minimize} an objective function, so the gradient is set to be
+\emph{minimize} an objective function. So the gradient is set to be
 the negative of the ELBO's gradient.
 
 \subsubsection{Stochastic gradient optimization}
@@ -185,3 +185,15 @@ This sets up TensorFlow to optimize the ELBO using ADAM's learning rate
 combined with an exponentially decaying scale factor.
 
 See the \href{api/index.html}{API} for more details.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Rezende, D. J., Mohamed, S., & Wierstra, D. (2014). Stochastic
+  Backpropagation and Approximate Inference in Deep Generative Models.
+  In International Conference on Machine Learning.
+\item
+  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational
+  Bayes. In International Conference on Learning Representations.
+\end{itemize}

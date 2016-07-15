@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Latent space models for neurological data</title>
+  <title>Edward – Latent space models for neural data</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -74,7 +74,7 @@
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
-<h2 id="latent-space-models-for-neurological-data">Latent space models for neurological data</h2>
+<h2 id="latent-space-models-for-neural-data">Latent space models for neural data</h2>
 <p>Many interesting data sets are networks. For example, social networks or biological neural networks.</p>
 <p>Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model (Hoff et al., 2002). Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.</p>
 <p>We demonstrate how to do this in Edward with an example from neuroscience. The script can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py">here</a>.</p>
@@ -86,14 +86,14 @@
 <h3 id="model">Model</h3>
 <p>Here we will fit a latent space model to the C.Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.</p>
 <p>Each neuron <span class="math inline">\(n\)</span> is a node in the network and is associated with a latent <span class="math inline">\(K\)</span>-dimensional vector <span class="math inline">\(z_n\)</span>.</p>
-<p>We place a Gaussian prior on each of the latent vectors. In [1] the log-odds of an edge between node <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is proportional to the euclidean distance between the latent representations of the nodes <span class="math inline">\(|z_i- z_j|\)</span>. Here, we model instead model the weights (<span class="math inline">\(Y_{ij}\)</span>) of the edges with a Poisson likelihood. The rate is the reciprocal of the distance in latent space. This is the generative process:</p>
+<p>We place a Gaussian prior on each of the latent vectors. In Hoff et al. (2002), the log-odds of an edge between node <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is proportional to the Euclidean distance between the latent representations of the nodes <span class="math inline">\(|z_i- z_j|\)</span>. Here, we model the weights (<span class="math inline">\(Y_{ij}\)</span>) of the edges with a Poisson likelihood. The rate is the reciprocal of the distance in latent space. This is the generative process:</p>
 <p>For each node <span class="math inline">\(n\)</span>: <span class="math display">\[\begin{aligned}
-z_n \sim N(0,I)\end{aligned}\]</span> For each edge <span class="math inline">\((i,j)\)</span>: <span class="math display">\[\begin{aligned}
-Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg)\end{aligned}\]</span></p>
+z_n \sim N(0,I).\end{aligned}\]</span> For each edge <span class="math inline">\((i,j)\)</span>: <span class="math display">\[\begin{aligned}
+Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).\end{aligned}\]</span></p>
 <p>Here we build the model in Edward using TensorFlow.</p>
 <pre class="python" language="Python"><code>class LatentSpaceModel:
     def __init__(self, N, K):
-        self.num_vars = N * K
+        self.n_vars = N * K
         self.N = N
         self.K = K
 
@@ -117,10 +117,10 @@ inference.run(n_iter=5000, n_print=500)</code></pre>
 <p>See this extended tutorial about <a href="tut_MAP.html">MAP estimation in Edward</a>.</p>
 <p>One could instead run variational inference. This requires specifying a variational model and instantiating <code>MFVI</code>.</p>
 <pre class="python" language="Python"><code>variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 inference = ed.MFVI(model, variational, data)</code></pre>
 <p>Finally, the following line runs the inference procedure:</p>
-<pre class="python" language="Python"><code>var = inference.run(n_iter=5000, n_print=500)</code></pre>
+<pre class="python" language="Python"><code>inference.run(n_iter=5000, n_print=500)</code></pre>
 <p>See this extended tutorial about <a href="tut_KLqp.html">variational inference in Edward</a>.</p>
 <h3 id="references">References</h3>
 <p>Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social network analysis. , 97(460):1090–1098.</p>

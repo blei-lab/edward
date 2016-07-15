@@ -1,6 +1,6 @@
-\title{Latent space models for neurological data}
+\title{Latent space models for neural data}
 
-\subsection{Latent space models for neurological data}
+\subsection{Latent space models for neural data}
 
 Many interesting data sets are networks. For example, social networks or biological neural networks.
 
@@ -41,22 +41,27 @@ Here we will fit a latent space model to the C.Elegans neural network. What can 
 Each neuron $n$ is a node in the network and is associated with a latent $K$-dimensional vector $z_n$.
 
 We place a Gaussian prior on each of the latent vectors.
-In [1] the log-odds of an edge between node $i$ and $j$ is proportional to the euclidean distance between the latent representations of the nodes $|z_i- z_j|$. Here, we model instead model the weights ($Y_{ij}$) of the edges with a Poisson likelihood. The rate is the reciprocal of the distance in latent space. This is the generative process:
+In Hoff et al. (2002), the log-odds of an edge between node $i$ and
+$j$ is proportional to the Euclidean distance between the latent
+representations of the nodes $|z_i- z_j|$. Here, we
+model the weights ($Y_{ij}$) of the edges with a Poisson likelihood.
+The rate is the reciprocal of the distance in latent space. This is
+the generative process:
 
 For each node $n$:
 \begin{align}
-z_n \sim N(0,I)
+z_n \sim N(0,I).
 \end{align}
 For each edge $(i,j)$:
 \begin{align}
-Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg)
+Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).
 \end{align}
 
 Here we build the model in Edward using TensorFlow.
 \begin{lstlisting}[language=Python]
 class LatentSpaceModel:
     def __init__(self, N, K):
-        self.num_vars = N * K
+        self.n_vars = N * K
         self.N = N
         self.K = K
 
@@ -91,12 +96,12 @@ One could instead run variational inference. This requires specifying
 a variational model and instantiating \texttt{MFVI}.
 \begin{lstlisting}[language=Python]
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 inference = ed.MFVI(model, variational, data)
 \end{lstlisting}
 Finally, the following line runs the inference procedure:
 \begin{lstlisting}[language=Python]
-var = inference.run(n_iter=5000, n_print=500)
+inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
 See this extended tutorial about
 \href{tut_KLqp.html}{variational inference in Edward}.

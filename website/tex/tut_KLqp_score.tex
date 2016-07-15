@@ -127,7 +127,7 @@ the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
 because it is not wrapped in a \texttt{stop_gradient}.
 
 There is a nuance here. TensorFlow's optimizers are configured to
-\emph{minimize} an objective function, so the gradient is set to be
+\emph{minimize} an objective function. So the gradient is set to be
 the negative of the ELBO's gradient.
 
 \subsubsection{Stochastic optimization}
@@ -164,3 +164,15 @@ This sets up TensorFlow to optimize the ELBO using ADAM's learning
 rate combined with an exponentially decaying scale factor.
 
 See the \href{api/index.html}{API} for more details.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Paisley, J., Blei, D. M., & Jordan, M. (2012). Variational Bayesian
+  Inference with Stochastic Search. In International Conference on
+  Machine Learning.
+\item
+  Ranganath, R., Gerrish, S., & Blei, D. M. (2014). Black Box
+  Variational Inference. In Artificial Intelligence and Statistics.
+\end{itemize}
