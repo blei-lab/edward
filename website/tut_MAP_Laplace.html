@@ -80,12 +80,12 @@
 <p>The Laplace approximation is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}
   p(z \mid x)
   &amp;\approx
-  \mathcal{N}(z\;;\; \mu = z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
+  \mathcal{N}(z\;;\; z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
   \Lambda_{ij}
   &amp;=
-  \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> This is also easy (yet computationally expensive) to compute using automatic differentiation.</p>
+  \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
 <h3 id="implementation">Implementation</h3>
-<p>The Laplace approximation derives from <a href="tut_MAP.html">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
+<p>Edward implements the Laplace approximation by extending the class built for <a href="tut_MAP.html">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
 <pre class="python" language="Python"><code>class Laplace(MAP):
     def __init__(self, model, data=None, params=None):
         super(Laplace, self).__init__(model, data, params)
@@ -95,17 +95,15 @@
 
         Computes the Hessian at the mode.
         &quot;&quot;&quot;
+        # use only a batch of data to estimate hessian
         x = self.data
         z = self.variational.sample()
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope=&#39;variational&#39;)
-        inv_cov = edward.util.hessian(self.model.log_prob(x, z), var_list)
-        sess = get_session()
-        # use only a batch of data to estimate hessian
-        feed_dict = {key: value.next(self.n_data)
-                     for key, value in six.iteritems(self.data_gen)}
+        inv_cov = hessian(self.model.log_prob(x, z), var_list)
         print(&quot;Precision matrix:&quot;)
-        print(sess.run(inv_cov, feed_dict))  </code></pre>
+        print(inv_cov.eval())
+        super(Laplace, self).finalize()</code></pre>
 <p>The <code>Laplace</code> simply defines an additional method <code>finalize</code> to run after <code>MAP</code> has found the posterior mode. The <code>edward.util.hessian</code> method uses TensorFlow’s automatic differentiation to compute the Hessian without any additional mathematical derivations.</p>
     </div>
   </div>

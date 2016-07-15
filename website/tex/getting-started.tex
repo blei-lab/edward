@@ -1,4 +1,8 @@
-% Define the subtitle of the page
+ite
+
+commit 16c7e65d402931e84bce1e8b3c8e3cd71e3c66a4
+Author: Dustin Tran <dustinviettran@gmail.com>
+ Define the subtitle of the page
 \title{Getting Started}
 
 % Begin the content of the page
@@ -37,6 +41,12 @@ from edward.stats import norm
 
 class BayesianNN:
     """Bayesian neural network for regression"""
+    def __init__(self, layer_sizes):
+        self.layer_sizes = layer_sizes
+        self.n_layers = len(layer_sizes)
+        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
+        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
+
     def log_prob(self, xs, zs):
         # Extract inputs/outputs from data `xs`.
         x, y = xs['x'], xs['y']
