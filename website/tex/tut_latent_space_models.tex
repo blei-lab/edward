@@ -36,7 +36,7 @@ z_n \sim N(0,I)
 \end{align}
 For each edge $(i,j)$:
 \begin{align}
-Y_{ij} \sim \text{Poisson}(\frac{1}{|z_i - z_j|})
+Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg)
 \end{align}
 
 Define and instantiate the model in edward as follows:
@@ -64,14 +64,15 @@ model = Latent_Space_Model(N,K)
 
 \subsubsection{Inference}
 
-Maximum a posteriori (MAP) inference is simple in Edward. Two lines are required: Instantiating inference and running it.
+Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are
+required: Instantiating inference and running it.
 \begin{lstlisting}[language=Python]
 inference = ed.MAP(model, data)
 var = inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
 
-\href{tut_MAP.html}{Here}
-is a more extensive tutorial on MAP inference in Edward.
+See this extended tutorial about 
+\href{tut_MAP.html}{MAP estimation in Edward}.
 
 One could instead run variational inference. This requires specifying a variational model and instantiating MFVI.
 \begin{lstlisting}[language=Python]
@@ -83,7 +84,8 @@ Finally, the following line runs the inference procedure:
 \begin{lstlisting}[language=Python]
 var = inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
-For a tutorial on VI in Edward click \href{tut_MAP.html}{here}.
+See this extended tutorial about 
+\href{tut_KLqp.html}{variational inference in Edward}.
 
 \subsubsection{References}
 \begin{thebibliography}{}
