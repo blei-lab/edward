@@ -69,21 +69,21 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="textklpq-minimization"><span class="math">\(\text{KL}(p\|q)\)</span> minimization</h2>
+<h2 id="textklpq-minimization"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization</h2>
 <p>Variational inference is a powerful approach for inferring the posterior. The core idea involves two steps:</p>
 <ol>
-<li>posit a family of distributions <span class="math">\(q(z\;;\;\lambda)\)</span> over the posterior latent variables;</li>
-<li>match <span class="math">\(q(z\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math">\(\lambda\)</span>.</li>
+<li>posit a family of distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> over the posterior latent variables;</li>
+<li>match <span class="math inline">\(q(z\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
 </ol>
-<p>This strategy converts the problem of computing the posterior <span class="math">\(p(z \mid x)\)</span> into an optimization problem, which minimizes a divergence measure <span class="math">\[\begin{aligned}
+<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(z \mid x)\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
   \arg\min_\lambda \text{divergence}(
   p(z \mid x)
   ,
   q(z\;;\;\lambda)
-  ).\end{aligned}\]</span> The optimized distribution <span class="math">\(q(z\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math">\(p(z\mid x)\)</span>.</p>
-<p>One form of variational inference minimizes the Kullback-Leibler divergence <strong>from</strong> <span class="math">\(p(z \mid x)\)</span> <strong>to</strong> <span class="math">\(q(z\;;\;\lambda)\)</span>, <span class="math">\[\begin{aligned}
+  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(z\mid x)\)</span>.</p>
+<p>One form of variational inference minimizes the Kullback-Leibler divergence <strong>from</strong> <span class="math inline">\(p(z \mid x)\)</span> <strong>to</strong> <span class="math inline">\(q(z\;;\;\lambda)\)</span>, <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
   \arg\min_\lambda \text{KL}(
@@ -100,7 +100,7 @@
   \log q(z\;;\;\lambda)
   \big].\end{aligned}\]</span> The KL divergence is a non-symmetric, information theoretic measure of similarity between two probability distributions.</p>
 <h3 id="minimizing-an-intractable-objective-function">Minimizing an intractable objective function</h3>
-<p>The <span class="math">\(\text{KL}(p\|q)\)</span> objective we seek to minimize is intractable; it directly involves the posterior <span class="math">\(p(z \mid x)\)</span>. Ignoring this for the moment, consider its gradient <span class="math">\[\begin{aligned}
+<p>The <span class="math inline">\(\text{KL}(p\|q)\)</span> objective we seek to minimize is intractable; it directly involves the posterior <span class="math inline">\(p(z \mid x)\)</span>. Ignoring this for the moment, consider its gradient <span class="math display">\[\begin{aligned}
   \nabla_\lambda\;
   \text{KL}(
   p(z \mid x)
@@ -113,7 +113,7 @@
   \big[
   \nabla_\lambda\;
   \log q(z\;;\;\lambda)
-  \big].\end{aligned}\]</span> Both <span class="math">\(\text{KL}(p\|q)\)</span> and its gradient are intractable because of the posterior expectation. We can use <a href="tut_KLpq_ais.html">importance sampling</a> to both estimate the objective and calculate stochastic gradients.</p>
+  \big].\end{aligned}\]</span> Both <span class="math inline">\(\text{KL}(p\|q)\)</span> and its gradient are intractable because of the posterior expectation. We can use <a href="tut_KLpq_ais.html">importance sampling</a> to both estimate the objective and calculate stochastic gradients.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

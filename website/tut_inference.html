@@ -77,11 +77,11 @@
 <h2 id="inference-of-probability-models">Inference of probability models</h2>
 <p>This tutorial asks the question: what does it mean to do inference in probability models? This sets the stage for understanding how to develop and implement inference procedures in Edward.</p>
 <h3 id="the-posterior">The posterior</h3>
-<p>How can we use a model <span class="math">\(p(x,z)\)</span> to analyze some data <span class="math">\(x\)</span>? In other words, what hidden patterns <span class="math">\(z\)</span> explain the data? We seek to infer these hidden patterns using the model.</p>
-<p>Inference for probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math">\[\begin{aligned}
+<p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden patterns <span class="math inline">\(z\)</span> explain the data? We seek to infer these hidden patterns using the model.</p>
+<p>Inference for probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
   p(z \mid x)
   &amp;=
-  \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math">\(z\)</span>, conditioned on some (observed) data <span class="math">\(x\)</span>. It provides a probabilistic description of the hidden patterns that explain the data.</p>
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math inline">\(z\)</span>, conditioned on some (observed) data <span class="math inline">\(x\)</span>. It provides a probabilistic description of the hidden patterns that explain the data.</p>
 <h3 id="inferring-the-posterior">Inferring the posterior</h3>
 <p>We know what the posterior represents. How do we calculate it? This is the central computational challenge in inference.</p>
 <p>The posterior is difficult to compute because of its normalizing constant, which is the integral in the denominator. This is often a high-dimensional integral that lacks an analytic (closed-form) solution. Thus, calculating the posterior means <em>approximating</em> the posterior.</p>
