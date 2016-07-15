@@ -35,8 +35,8 @@ It supports **inference** via
 
     -   Laplace approximation
 
--   Marginal posterior optimization (empirical Bayes, marginal
-    maximum likelihood)
+-   Marginal posterior optimization (empirical Bayes, marginal maximum
+    likelihood)
 
 -   Maximum a posteriori estimation (penalized maximum likelihood,
     maximum likelihood)

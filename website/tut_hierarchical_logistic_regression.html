@@ -78,13 +78,13 @@
 <li><strong>Inference:</strong> Mean-field variational inference</li>
 <li><strong>Criticism:</strong> None</li>
 </ul>
-<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">bayesian_linear_regression.py</a></p>
+<p>Full Python code in: <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">bayesian<sub>l</sub>inear<sub>r</sub>egression.py</a></p>
 <h3 id="probability-model">Probability Model</h3>
-<p>Define the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> as <span class="math display">\[\begin{aligned}
+<p>Define the likelihood of an observation <span class="math">\((y_n, x_n)\)</span> as <span class="math">\[\begin{aligned}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &amp;=
-  \mathcal{N}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
-<p>Define the prior to be a fully factorized normal <span class="math display">\[\begin{aligned}
+  \mathcal{N}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)\end{aligned}\]</span> where <span class="math">\(\sigma^2\)</span> is a known variance.</p>
+<p>Define the prior to be a fully factorized normal <span class="math">\[\begin{aligned}
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
@@ -131,7 +131,7 @@
 
 model = BayesianLinearRegressionModel()</code></pre>
 <h3 id="variational-model">Variational Model</h3>
-<p>Define the variational model to be a fully factorized normal <span class="math display">\[\begin{aligned}
+<p>Define the variational model to be a fully factorized normal <span class="math">\[\begin{aligned}
   q(\mathbf{z} \;;\; \lambda)
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).\end{aligned}\]</span></p>

@@ -101,26 +101,26 @@ class BayesianNN:
         return log_prior + log_lik</code></pre>
 <p>Instantiating this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>
-<p>defines a two-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
+<p>defines a two-layer Bayesian neural network with <span class="math">\(\tanh\)</span> nonlinearities.</p>
 <p>Let’s use a toy dataset of 50 observations with a cosine relationship.</p>
 <pre class="python" language="Python"><code>import numpy as np
 
 data = {&#39;x&#39;: np.array(...), &#39;y&#39;: np.array(...)}</code></pre>
-<p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
+<p><img src="images/getting-started-fig0.png" alt="image" /></p>
 <p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation</p>
 <pre class="python" language="Python"><code>from edward.models import Variational, Normal
 
 variational = Variational()
 variational.add(Normal(model.n_vars))</code></pre>
-<p>The number of latent variables <code>model.n_vars</code> is the number of weights and biases in the neural network.</p>
+<p>The number of latent variables <code>model.nvars</code> is the number of weights and biases in the neural network.</p>
 <p>Run mean-field variational inference. We use <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
 <pre class="python" language="Python"><code>import edward as ed
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=10)</code></pre>
 <p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
-<p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
-<p>The model has learned the cosine relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<p><img src="images/getting-started-fig2.png" alt="image" /></p>
+<p>The model has learned the cosine relationship between <span class="math">\(x\)</span> and <span class="math">\(y\)</span>.</p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="tutorials.html">tutorials</a>.</p>
     </div>

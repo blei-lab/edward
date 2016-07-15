@@ -1,17 +1,15 @@
-\title{Tutorial: Latent Space Models}
+\title{Latent Space Models}
 
-\subsection{Tutorial: Latent Space Models}
+\subsection{Latent Space Models}
 
-This tutorial correponds to code found \href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}{here}.
+Many interesting data sets are networks. For example, social networks or biological neural networks.
 
-The purpose of this tutorial is to show how one can use Edward to fit a latent space model to network data from a neuroscience application.
+Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model [1].
+Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.
 
-It is structured as follows.
-We first describe the neuroscience data we use in this tutorial and introduce the idea behind latent space models for networks.
-Next, we define the model and specify implementation details. 
-Finally we fit the model with MAP estimation and mention how one would go about using variational inference.
+We demonstrate how to do this in Edward with an example from neuroscience. The script can be found \href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}{here}.
 
-\subsubsection{Data: C.Elegans Connectome}
+\subsubsection{Data}
 
 The data comes from \href{http://www-personal.umich.edu/~mejn/netdata/}{here}.
 It is a weighted, directed network representing the neural network of the nematode \href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C. Elegans} compiled by Duncan Watts and Steven Strogatz [2] from original experimental data by White et al. [3]. 
@@ -23,13 +21,9 @@ In the example we load the data with:
 data, N = load_celegans_brain()
 \end{lstlisting}
 
-\subsubsection{Latent Space Models}
-Many interesting data sets are networks. For example, social networks or biological neural networks like the one we study here.
+\subsubsection{Model}
 
-Often the question arises what we can learn about the nodes of the network from the connectivity patterns. This question can be addressed by fitting a latent space model [1].
-Latent space models are latent variable models which embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.
-
-Here we will fit such a model to the C.Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.
+Here we will fit a latent space model to the C.Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.
 
 Each neuron $n$ is a node in the network and is associated with a latent $K$-dimensional vector $z_n$.
 
@@ -45,7 +39,7 @@ For each edge $(i,j)$:
 Y_{ij} \sim \text{Poisson}(\frac{1}{|z_i - z_j|})
 \end{align}
 
-In Edward the model can be defined and instantiated as follows:
+Define and instantiate the model in edward as follows:
 \begin{lstlisting}[language=Python]
 class Latent_Space_Model():
     def __init__(self,N,K):
@@ -76,6 +70,9 @@ inference = ed.MAP(model, data)
 var = inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
 
+\href{tut_MAP.html}{Here}
+is a more extensive tutorial on MAP inference in Edward.
+
 One could instead run variational inference. This requires specifying a variational model and instantiating MFVI.
 \begin{lstlisting}[language=Python]
 variational = Variational()
@@ -86,6 +83,7 @@ Finally, the following line runs the inference procedure:
 \begin{lstlisting}[language=Python]
 var = inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
+For a tutorial on VI in Edward click \href{tut_MAP.html}{here}.
 
 \subsubsection{References}
 \begin{thebibliography}{}

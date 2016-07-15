@@ -71,19 +71,19 @@
 <div class="nine columns">
 <h2 id="posterior-predictive-checks">Posterior predictive checks</h2>
 <p>Posterior predictive checks (PPCs; Rubin, 1984; Gelman et al., 1996) analyze the degree to which data generated from the model deviate from data generated from the true distribution. They can be used either numerically to quantify this degree, or graphically to analyze this degree qualitatively. PPCs can be thought of as a probabilistic version of point-based evaluations.</p>
-<p>PPCs focus on the posterior predictive distribution <span class="math display">\[\begin{aligned}
+<p>PPCs focus on the posterior predictive distribution <span class="math">\[\begin{aligned}
   p(x_\text{new} \mid x)
   &amp;=
   \int
   p(x_\text{new} \mid z)
   p(z \mid x)
   \text{d} z.\end{aligned}\]</span> The model’s posterior predictive can be used to generate new data given past observations and can also make predictions on new data given past observations. It is formed by calculating the likelihood of the new data, averaged over every possible set of latent variables according to the posterior distribution.</p>
-<p>The simplest PPC works by applying a test statistic on new data generated from the posterior predictive, such as <span class="math inline">\(T(x_\text{new}) = \max(x_\text{new})\)</span>. Applying <span class="math inline">\(T(x_\text{new})\)</span> to new data over many data replications induces a distribution. We compare this distribution to the test statistic on the real data <span class="math inline">\(T(x)\)</span>.</p>
+<p>The simplest PPC works by applying a test statistic on new data generated from the posterior predictive, such as <span class="math">\(T(x_\text{new}) = \max(x_\text{new})\)</span>. Applying <span class="math">\(T(x_\text{new})\)</span> to new data over many data replications induces a distribution. We compare this distribution to the test statistic on the real data <span class="math">\(T(x)\)</span>.</p>
 <p><img alt="image" src="images/ppc.png"/></p>
-<p>In the figure, <span class="math inline">\(T(x)\)</span> falls in a low probability region of this reference distribution. This indicates that the model fits the data poorly according to this check; this suggests an area of improvement for the model.</p>
-<p>More generally, the test statistic can also be a function of the model’s latent variables <span class="math inline">\(T(x, z)\)</span>, known as a discrepancy function.</p>
+<p>In the figure, <span class="math">\(T(x)\)</span> falls in a low probability region of this reference distribution. This indicates that the model fits the data poorly according to this check; this suggests an area of improvement for the model.</p>
+<p>More generally, the test statistic can also be a function of the model’s latent variables <span class="math">\(T(x, z)\)</span>, known as a discrepancy function.</p>
 <h3 id="implementation">Implementation</h3>
-<p>Edward implements PPCs through the <code>sample_likelihood()</code> function in the probability model. This method samples a dataset from the model likelihood</p>
+<p>Edward implements PPCs through the <code>samplelikelihood()</code> function in the probability model. This method samples a dataset from the model likelihood</p>
 <pre class="python" language="Python"><code>class BetaBernoulli:
     def __init__(self):
         self.num_vars = 1
@@ -110,7 +110,7 @@ print(ed.ppc(model, variational, data, T))</code></pre>
 <ul>
 <li>Box, G.E.P. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.</li>
 <li>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. Statistica Sinica.</li>
-<li>Meng, X.-L. (1994). Posterior predictive <span class="math inline">\(p\)</span>-values. The Annals of Statistics, 1–19.</li>
+<li>Meng, X.-L. (1994). Posterior predictive <span class="math">\(p\)</span>-values. The Annals of Statistics, 1–19.</li>
 <li>Rubin, D. B. (1984). Bayesianly justifiable and relevant frequency calculations for the applied statistician. The Annals of Statistics, 12(4), 1151–1172.</li>
 </ul>
 </div>
