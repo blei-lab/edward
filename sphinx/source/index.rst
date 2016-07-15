@@ -10,7 +10,12 @@ Click HERE_ to return to the Edward website.
 .. toctree::
   :maxdepth: 2
 
-  intro
+  data
+  models_models
+  models_distributions
+  stats_distributions
+  inferences
+  criticisms
   edward
 
 * :ref:`genindex`
