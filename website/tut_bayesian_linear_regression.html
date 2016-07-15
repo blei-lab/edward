@@ -70,8 +70,8 @@
 </div>
 <div class="nine columns">
 <h2 id="bayesian-linear-regression">Bayesian Linear Regression</h2>
-<p>Bayesian linear regression is a model <span class="math">\(p(\mathbf{y}\mid \mathbf{X})\)</span> of outputs <span class="math">\(y\in\mathbb{R}\)</span>, also known as the response, given a vector of inputs <span class="math">\(\mathbf{x}\in\mathbb{R}^D\)</span>, also known as the features or covariates. The model assumes a linear relationship between these two random variables.</p>
-<p>For a set of <span class="math">\(N\)</span> data points <span class="math">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model is <span class="math">\[\begin{aligned}
+<p>Bayesian linear regression is a model <span class="math inline">\(p(\mathbf{y}\mid \mathbf{X})\)</span> of outputs <span class="math inline">\(y\in\mathbb{R}\)</span>, also known as the response, given a vector of inputs <span class="math inline">\(\mathbf{x}\in\mathbb{R}^D\)</span>, also known as the features or covariates. The model assumes a linear relationship between these two random variables.</p>
+<p>For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model is <span class="math display">\[\begin{aligned}
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, \sigma_z^2\mathbf{I}),
@@ -79,8 +79,8 @@
   p(\mathbf{y} \mid \mathbf{z}, \mathbf{X})
   &amp;=
   \prod_{n=1}^N
-  \mathcal{N}(y_n \;;\; \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span> The latent variables <span class="math">\(\mathbf{z}=[\mathbf{w},b]\)</span> form the weights <span class="math">\(\mathbf{w}\)</span> and intercept <span class="math">\(b\)</span>, also known as the bias. Assume <span class="math">\(\sigma_z^2\)</span> is a known prior variance and <span class="math">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math">\(\mathbf{x}_n\)</span> and shared weights <span class="math">\(\mathbf{w}\)</span>, along with the intercept <span class="math">\(b\)</span>.</p>
-<p>Let’s build the model in Edward using TensorFlow, fixing <span class="math">\(D=10\)</span>.</p>
+  \mathcal{N}(y_n \;;\; \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span> The latent variables <span class="math inline">\(\mathbf{z}=[\mathbf{w},b]\)</span> form the weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_z^2\)</span> is a known prior variance and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span> and shared weights <span class="math inline">\(\mathbf{w}\)</span>, along with the intercept <span class="math inline">\(b\)</span>.</p>
+<p>Let’s build the model in Edward using TensorFlow, fixing <span class="math inline">\(D=10\)</span>.</p>
 <pre class="python" language="Python"><code>class BayesianLinearRegression:
     """
     Bayesian linear regression for outputs y on inputs x.
