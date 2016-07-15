@@ -12,7 +12,7 @@ All stand-alone pages are in `website/tex`. These compile to root level HTML pag
 
 + Install the dependencies
 ```{bash}
-pip install pandoc beautifulsoup4 sphinx sphinx-autobuild sphinx_rtd_theme
+pip install pandoc beautifulsoup4 sphinx sphinx-autobuild sphinx_rtd_theme ghp-import
 ```
 + You can build the website locally. Go to this `website/` directory and run
 ```{bash}
@@ -27,4 +27,7 @@ This will
 
 ## Deploying the website
 
-tbd
++ You can deploy the website to the `gh-pages` branch. Just run
+```{bash}
+./deploy.sh
+```
