@@ -52,6 +52,7 @@ which can be found in [`examples/`](examples/):
 + [Bayesian linear regression](examples/bayesian_linear_regression.py)
 + [Hierarchical logistic regression](examples/hierarchical_logistic_regression.py)
 + [Mixture model of Gaussians](examples/mixture_gaussian.py)
++ [Latent space model](examples/latent_space_model.py)
 + [Gaussian process classification](examples/gp_classification.py)
 + [Bayesian neural network](examples/bayesian_nn.py)
 + [Mixture density network](examples/mixture_density_network.py)
