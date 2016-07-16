@@ -129,7 +129,7 @@ def hessian(y, xs):
     # Loop over each element in the vector.
     mat = []
     d = grads.get_shape()[0]
-    if type(d) != int:
+    if not isinstance(d, int):
         d = grads.eval().shape[0]
     for j in range(d):
         # Calculate grad_{xs} ( [ grad_{xs} y ]_j ).
