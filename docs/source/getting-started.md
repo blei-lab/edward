@@ -16,31 +16,35 @@ This process defines the design of **Edward**. Here are the four primary objects
 
 ### Data
 
-`Data` objects are containers that contain measurements. The structure of these objects must match the inputs of the probabilistic model.
+A data object contains measurements. It is a Python dictionary, typically comprised of strings naming a data object and NumPy arrays representing their values. For example,
 
-```{Python}
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+```python
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 ```
+
+Data objects can also have their values be TensorFlow tensors in order to deal with settings such as when the data does not fit in memory.
 
 ### Models
 
 There are two types of model objects in Edward:
 
-1. Probability models of data
-2. Variational models of latent variables
+1. Probability models of data, `p(x, z)`
+2. Variational models of latent variables, `q(z; lambda)`
 
-We can specify probability models of data using NumPy/SciPy, TensorFlow, PyMC3, or Stan. Here is a model of coin flips using a [Beta-Bernoulli distribution](https://en.wikipedia.org/wiki/Beta-binomial_distribution) in NumPy/Scipy.
+We can specify probability models of data using TensorFlow, Python, PyMC3, or Stan. Here is a model of coin flips using a [Beta-Bernoulli distribution](https://en.wikipedia.org/wiki/Beta-binomial_distribution) in NumPy/Scipy.
 ```{Python}
 class BetaBernoulli(PythonModel):
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
     def _py_log_prob(self, xs, zs):
+        # This example is written for pedagogy. We recommend
+        # vectorizing operations in practice.
         n_samples = zs.shape[0]
         lp = np.zeros(n_samples, dtype=np.float32)
-        for s in range(n_samples):
-            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
-            for n in range(len(xs)):
-                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
+        for b in range(n_samples):
+            lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
+            for n in range(xs['x'].shape[0]):
+                lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+
         return lp
 ```
 This describes a Bayesian model, which is a joint distribution of data and latent variables `z`. With this model and data of coin flips, we aim to reason about `z`, the probability that the coin lands heads. The posterior distribution of `z` captures our reasoning: its mean describes our best guess of the probability, and its variance describes our uncertainty around our best guess. In this toy model, we know that the posterior is a Beta distribution. Let us assume we do not know its parameters in closed form.
@@ -87,26 +91,29 @@ import numpy as np
 from edward.models import PythonModel, Variational, Beta
 from scipy.stats import beta, bernoulli
 
+
 class BetaBernoulli(PythonModel):
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
     def _py_log_prob(self, xs, zs):
-        # This example is pedagogical.
-        # We recommend vectorizing operations in practice.
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for s in range(n_minibatch):
-            lp[s] = beta.logpdf(zs[s, :], a=1.0, b=1.0)
-            for n in range(len(xs)):
-                lp[s] += bernoulli.logpmf(xs[n], p=zs[s, :])
+        # This example is written for pedagogy. We recommend
+        # vectorizing operations in practice.
+        n_samples = zs.shape[0]
+        lp = np.zeros(n_samples, dtype=np.float32)
+        for b in range(n_samples):
+            lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
+            for n in range(xs['x'].shape[0]):
+                lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+
         return lp
 
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
+
+ed.set_seed(42)
 model = BetaBernoulli()
 variational = Variational()
 variational.add(Beta())
-inference = ed.MFVI(model, variational, data)
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)
 ```
 
