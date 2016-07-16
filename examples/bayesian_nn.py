@@ -100,7 +100,7 @@ ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 variational = Variational()
 variational.add(Normal(model.n_vars))
-data = simulate_regression_data(N=40)
+data = simulate_regression_data(transform='cosine')
 
 # Set up figure
 fig = plt.figure(figsize=(8,8), facecolor='white')
