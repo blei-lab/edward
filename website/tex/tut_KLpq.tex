@@ -157,7 +157,7 @@ class KLpq(VariationalInference):
         w_norm = tf.exp(log_w_norm)
 
         self.loss = tf.reduce_mean(w_norm * log_w)
-        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
+        return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
 \end{lstlisting}
 
 This method draws $S$ (\texttt{self.n_samples}) samples from the variational

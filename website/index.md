@@ -47,9 +47,9 @@ It supports **criticism** of the model and inference via
 
 -   Posterior predictive checks
 
-Edward is built on top of [TensorFlow](https://www.tensorflow.org) as a
-backend, enabling features such as computational graphs, distributed
-training, CPU/GPU integration, automatic differentiation, and
+Edward is built on top of [TensorFlow](https://www.tensorflow.org),
+enabling features such as computational graphs, distributed training,
+CPU/GPU integration, automatic differentiation, and visualization with
 TensorBoard.
 
 ### Authors

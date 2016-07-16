@@ -99,7 +99,7 @@
         print("Precision matrix:")
         print(inv_cov.eval())
         super(Laplace, self).finalize()</code></pre>
-<p>The <code>Laplace</code> simply defines an additional method <code>finalize()</code> to run after <code>MAP</code> has found the posterior mode. The <code>edward.util.hessian</code> method uses TensorFlow’s automatic differentiation to compute the Hessian without any additional mathematical derivations.</p>
+<p>The <code>Laplace</code> simply defines an additional method <code>finalize()</code> to run after <code>MAP</code> has found the posterior mode. The <code>hessian</code> function in <code>edward.util</code> uses TensorFlow’s automatic differentiation to compute the Hessian without any additional mathematical derivations.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Laplace, P. S. (1774). Memoir on the probability of causes of events. Mémoires de Mathématique et de Physique, Tome Sixième.</li>

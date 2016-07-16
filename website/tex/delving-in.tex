@@ -85,13 +85,13 @@ of log density evaluations, one for each set of latent variables.
 \subsubsection{Inference}\label{inference}
 
 Given a model and data, we aim to
-reason about $z$: the model's hidden structure conditioned on the data. The
+reason about $z$: the model's hidden structure. The
 posterior distribution $p(z \mid x)$ captures our reasoning: its mean
 describes our best guess of the hidden structure, and its variance
 describes the uncertainty around our best guess.
 
 %The posterior distribution is typically intractable.
-Edward has a variety of built-in inference methods and makes it easy
+Edward implements a variety of inference methods and makes it easy
 to develop new ones.
 
 \includegraphics{images/inference_structure.png}
