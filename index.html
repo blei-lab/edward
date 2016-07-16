@@ -33,44 +33,44 @@
         <div class="body" role="main">
           
             <h1 id="welcome-to-edward">Welcome to Edward</h1>
-<p><strong>Edward</strong> is a Python library for probabilistic modeling, inference,
-and criticism. It enables black box inference for models with discrete
-and continuous latent variables, neural network parameterizations, and
-infinite dimensional parameter spaces. Edward serves as a fusion of
-three fields: Bayesian statistics and machine learning, deep learning,
-and probabilistic programming.</p>
+<p><strong>Edward</strong> is a Python library for probabilistic modeling,
+inference, and criticism. It is a testbed for fast experimentation and research
+with probabilistic models, ranging from classical hierarchical models on small
+data sets to complex deep probabilistic models on large data sets. Edward fuses
+three fields: Bayesian statistics and machine learning, deep learning, and
+probabilistic programming.</p>
 <p>It supports <strong>modeling languages</strong> including</p>
 <ul>
-<li><a href="https://www.tensorflow.org">TensorFlow</a> (with neural network compositionality via <a href="http://keras.io">Keras</a>, <a href="https://github.com/google/prettytensor">Pretty Tensor</a>, or <a href="https://github.com/tensorflow/models/blob/master/inception/inception/slim/README.md">TensorFlow-Slim</a>)</li>
+<li><a href="https://www.tensorflow.org">TensorFlow</a> (with neural networks via
+    <a href="http://keras.io">Keras</a>, <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow
+    Slim</a>,
+    or <a href="https://github.com/google/prettytensor">Pretty Tensor</a>)</li>
 <li><a href="http://mc-stan.org">Stan</a></li>
 <li><a href="http://pymc-devs.github.io/pymc3/">PyMC3</a></li>
-<li>original Python using <a href="http://scipy.org/">NumPy/SciPy</a></li>
+<li>Python, through <a href="http://scipy.org/">NumPy/SciPy</a></li>
 </ul>
 <p>It supports <strong>inference</strong> via</p>
 <ul>
-<li>Variational inference<ul>
+<li>Variational inference</li>
 <li>Black box variational inference</li>
 <li>Stochastic variational inference</li>
 <li>Variational auto-encoders</li>
-<li>Inclusive KL divergence (KL(p || q))</li>
+<li>Inclusive KL divergence: KL(p||q)</li>
 <li>Laplace approximation</li>
-</ul>
-</li>
-<li>Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)</li>
-<li>Maximum a posteriori (penalized maximum likelihood, maximum likelihood)</li>
+<li>Marginal posterior optimization (empirical Bayes, marginal
+    maximum likelihood)</li>
+<li>Maximum a posteriori estimation (penalized maximum likelihood,
+    maximum likelihood)</li>
 </ul>
 <p>It supports <strong>criticism</strong> of the model and inference via</p>
 <ul>
-<li>Evaluations on both supervised and unsupervised tasks</li>
+<li>Point-based evaluations</li>
 <li>Posterior predictive checks</li>
 </ul>
-<p>It also has <strong>features</strong> including</p>
-<ul>
-<li><a href="https://www.tensorflow.org">TensorFlow</a> for backend computation, which includes automatic differentiation, GPU support, computational graphs, optimization, and TensorBoard</li>
-<li>A library for probability distributions in TensorFlow</li>
-<li>Documentation and tutorials</li>
-<li>Examples demonstrating state-of-the-art generative models and inference</li>
-</ul>
+<p>Edward is built on top of <a href="https://www.tensorflow.org">TensorFlow</a> as
+a backend, enabling features such as computational graphs, distributed
+training, CPU/GPU integration, automatic differentiation, and
+TensorBoard.</p>
 <h2 id="getting-started">Getting Started</h2>
 <p><a href="getting-started/">You can find a tutorial here</a>
 for getting started with Edward. We highlight a few examples, more of
@@ -79,10 +79,12 @@ which can be found in <a href="https://github.com/blei-lab/edward/tree/master/ex
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a></li>
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py">Hierarchical logistic regression</a></li>
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">Mixture model of Gaussians</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py">Latent space model</a></li>
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">Gaussian process classification</a></li>
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">Bayesian neural network</a></li>
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py">Mixture density network</a></li>
 <li><a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">Variational auto-encoder</a></li>
+<li><a href="https://github.com/blei-lab/edward/blob/master/examples/iwvi.py">Importance-weighted variational inference</a></li>
 </ul>
 <h2 id="installation">Installation</h2>
 <p>To install the latest stable version, run</p>
@@ -94,14 +96,31 @@ which can be found in <a href="https://github.com/blei-lab/edward/tree/master/ex
 </code></pre>
 
 <h2 id="authors">Authors</h2>
-<p>Edward is led by <a href="http://dustintran.com">Dustin Tran</a> with guidance by <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>. It is under active development (by order of joining) by <a href="http://dustintran.com">Dustin Tran</a>, <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>, <a href="http://www.proditus.com/">Alp Kucukelbir</a>, <a href="http://stat.columbia.edu/~diengadji/">Adji Dieng</a>, <a href="http://maja-rita-rudolph.com/">Maja Rudolph</a>, and <a href="http://www.ee.columbia.edu/~dliang/">Dawen Liang</a>. We welcome contributions by submitting issues, feature requests, or by solving any current issues!</p>
-<p>We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other members of the Blei Lab for their helpful feedback and advice.</p>
+<p>Edward is led by <a href="http://dustintran.com">Dustin Tran</a> with guidance by
+<a href="http://www.cs.columbia.edu/~blei/">David Blei</a>. The other developers
+are</p>
+<ul>
+<li><a href="http://stat.columbia.edu/~diengadji/">Adji Dieng</a></li>
+<li><a href="http://www.proditus.com/">Alp Kucukelbir</a></li>
+<li><a href="http://www.ee.columbia.edu/~dliang/">Dawen Liang</a></li>
+<li><a href="http://maja-rita-rudolph.com/">Maja Rudolph</a></li>
+</ul>
+<p>We welcome contributions by submitting issues, feature requests, or by
+solving any current issues!</p>
+<p>Edward has benefited enormously from the helpful feedback and advice
+of many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney,
+Matt Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and
+additional members of the Blei Lab, Google Brain, and Google Research.</p>
 <h2 id="citation">Citation</h2>
 <p>We appreciate citations for Edward because it lets us find out how
 people have been using the library and it motivates further work.</p>
-<p>Dustin Tran, David M. Blei, Alp Kucukelbir, Adji Dieng, Maja Rudolph, and Dawen Liang. 2016. Edward: A library for probabilistic modeling, inference, and criticism. http://edwardlib.org</p>
+<blockquote>
+<p>Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M.  Blei. 2016.
+<em>Edward: A library for probabilistic modeling, inference, and criticism.</em>
+http://edwardlib.org</p>
+</blockquote>
 <pre><code>@misc{tran2016edward,
-  author = {Dustin Tran and David M. Blei and Alp Kucukelbir and Adji Dieng and Maja Rudolph and Dawen Liang},
+  author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
   title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
   year = {2016},
   url = {http://edwardlib.org}
@@ -216,7 +235,7 @@ people have been using the library and it motivates further work.</p>
 
   <!--
   MkDocs version      : 0.15.3
-  Docs Build Date UTC : 2016-07-16 01:12:26.408507
+  Docs Build Date UTC : 2016-07-16 01:15:15.460713
   -->
 </body>
 </html>
