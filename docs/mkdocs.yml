@@ -8,7 +8,7 @@ pages:
 - Home: index.md
 - Getting Started: getting-started.md
 - Guide for Research: guide-research.md
-- Design and Philosophy: design.md
+- Design Philosophy: design.md
 - Developer Process: developer.md
 - TensorFlow: tensorflow.md
 - Feature Wishlist: wishlist.md

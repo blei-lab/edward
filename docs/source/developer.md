@@ -1,29 +1,29 @@
 # Developer Process
 ## Standards
 
-+ __Pull request and branches.__ We follow standards used in Stan. Namely, contribute by developing on a clone of the repo and writing the code in a branch. Submit a pull request when ready. See Stan's process for [how to describe the pull request](https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request). For developers with push permission to the repo, see Stan's process for [how to name branches](https://github.com/stan-dev/stan/wiki/Developer-Process#4--how-to-contribute-with-a-clone-of-the-repository).
++ __Pull request and branches.__ Contribute by developing on a clone of the repo and writing the code in a branch. Submit a pull request when ready.
+
+    For developers with push permission to the repo, see [Stan's process](https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request) for how to name branches.  Do not merge your own pull requests or ever push to master. Someone should always review your code.  After merging (or deciding to close the request without merging), always delete the branch from the repo.
+
 + __Unit testing.__ Unit testing is awesome. It's useful not only for checking code after having written it, but also in checking code as you are developing it. If you're informally writing short scripts that output various things anyways, I suggest saving the file in the `tests/` directory. This gets the momentum going as the test becomes formalized. For testing, simply run [`nose2`](http://nose2.readthedocs.io/en/latest/getting_started.html) in the repo; it will automatically find and run all tests in `tests/`. Most if not all pull requests should have unit tests.
 + __Issue labeling system.__ We use [Stan's labeling system](https://github.com/stan-dev/stan/pulls). While several labels obviously don't apply to us, it's better than the default labels and it's not worth the effort to reinvent the wheel and maintain a custom system.
 
 Coding
 
-+ Use [PEP 8](https://www.python.org/dev/peps/pep-0008/).
-+ Be compatible with Python 3. See for example [here](http://sebastianraschka.com/Articles/2014_python_2_3_key_diff.html) to be cognizant of the main differences between 2.7.x and 3.x.
++ __Style guidelines.__ Follow [TensorFlow](https://www.tensorflow.org/versions/r0.9/how_tos/style_guide.html), including its [documentation guidelines](https://www.tensorflow.org/versions/r0.9/how_tos/documentation/index.html).  The only exceptions are detailed below. Some below are not necessarily exceptions but simply emphasize style guidelines you should be following from TensorFlow or PEP 8 anyways.
++ Use four-space indents rather than two-space.
++ To organize imports in a script, use three blocks: 1. any `from __future__ import [...]` lines; 2. any `import [...]` lines; and 3. any `from [...] import [...]` lines. Each block is separated by a blank line, and within each block the lines are sorted alphabetically.
++ `edward.stats` uses SciPy standards. This includes, for example, the argument specification and the choice of how a distribution is parameterized. `edward.models` uses `tf.contrib.distributions` standards.
++ For arguments that are positive integers, use `n_`, e.g., `n_minibatch`, `n_print`, to represent "number of [...]".  For class attributes that are booleans, use `is_`, e.g., `is_reparameterized`, `is_multivariate`.
 + Aim for 70 characters per line, with some exceptions.
-+ __docstrings.__ We follow [Numpy/SciPy standards]
-(https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt).
-+ __Naming variables.__ For arguments that are positive integers, use `n_`, e.g., `n_minibatch`, `n_print`, to represent "number of [...]".
-+ __"Private methods".__ Python of course doesn't really enforce private methods but as convention prefix all methods with `_` that are used internally and are not aimed to be exposed to the user.
-+ [Package names are almost always plural, with the exception of `util.py`.](http://programmers.stackexchange.com/questions/75919/should-package-names-be-singular-or-plural)
-+ Use [PEP 8's blank line standards](https://www.python.org/dev/peps/pep-0008/#blank-lines) with the caveat to not use more than one empty line to separate code. Also use a blank line to separate the end of an indented procedure:
-```{Python}
++ [Package names are almost always plural, with the exception of](http://programmers.stackexchange.com/questions/75919/should-package-names-be-singular-or-plural) `util.py`.
++ Use a blank line to separate the end of an indented procedure:
+```python
 for i in range(5):
     do_stuff()
 
 more_code()
 ```
-+ In general, any remaining tasks to be done are raised as Github issues. In other cases, write a TODO comment for things that need to be done but are so minor you'd rather not raise a Github issue; this can be helpful as you are writing code in a branch, and none of the intermediate commits which have a TODO comment will still have that TODO comment when submitting the pull request.
-+ Everything in `edward.stats` uses SciPy standards. This includes, for example, the argument specification and the choice of how a distribution is parameterized.
 
 ## Suggested workflow
 
@@ -53,12 +53,12 @@ To develop work on a branch privately, we suggest using a private repo that main
 
 Clone the private repo so you can work on it (create a repo if it does not exist).
 ```{bash}
-git clone https://github.com/yourname/private-repo.git
+git clone https://github.com/blei-lab/edward-private.git
 ```
 Pull changes from the public repo. This will let the private repo have the latest code from the public repo on its master branch.
 ```{bash}
-cd private-repo
-git remote add public https://github.com/exampleuser/public-repo.git
+cd edward-private
+git remote add public https://github.com/blei-lab/edward.git
 git pull public master # Creates a merge commit
 git push origin master
 ```
@@ -66,11 +66,11 @@ Now create your branch on the private repo, develop stuff, and pull any latest c
 
 Finally, to create a pull request from a private repo's branch to the public repo, push the private branch to the public repo.
 ```{bash}
-git clone https://github.com/exampleuser/public-repo.git
-cd public-repo
-git remote add private_repo_yourname https://github.com/yourname/private-repo.git
+git clone https://github.com/blei-lab/edward.git
+cd edward
+git remote add private https://github.com/blei-lab/edward-private.git
 git checkout -b pull_request_yourname
-git pull private_repo_yourname master
+git pull private master
 git push origin pull_request_yourname
 ```
 Now simply create a pull request via the Github UI on the public repo. Once project owners review the pull request, they can merge it. [Source](http://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private/30352360#30352360)
