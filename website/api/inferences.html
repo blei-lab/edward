@@ -32,7 +32,7 @@
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
         <link rel="next" title="Criticism" href="criticisms.html"/>
-        <link rel="prev" title="Variational Models" href="models_distributions.html"/> 
+        <link rel="prev" title="Models" href="models.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -83,9 +83,11 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_models.html">Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_distributions.html">Variational Models</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#variational-models">Variational Models</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
 </ul>
@@ -161,7 +163,7 @@ methods are derived from.</p>
 <p>It takes as input a probabilistic model <code class="docutils literal"><span class="pre">model</span></code> and dataset
 <code class="docutils literal"><span class="pre">data</span></code>.
 For more details, see the
-<a class="reference external" href="models_models.html">Probabilistic Models API</a>
+<a class="reference external" href="models.html">Probabilistic Models API</a>
 and
 <a class="reference external" href="data.html">Data API</a>.</p>
 <p>We categorize inference under two paradigms:
@@ -197,8 +199,7 @@ contributors to make significant advances here!</p>
 <p>Let&#8217;s focus on <code class="docutils literal"><span class="pre">VariationalInference</span></code>. In addition to a model and
 data as input, <code class="docutils literal"><span class="pre">VariationalInference</span></code> also takes in a variational
 model <code class="docutils literal"><span class="pre">variational</span></code>, which serves as a model of the posterior
-distribution. For more details, see the
-<a class="reference external" href="models_distributions.html">Variational Models API</a>.</p>
+distribution. For more details, see the Variational Models API below.</p>
 <p>The main method in <code class="docutils literal"><span class="pre">VariationalInference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
@@ -248,6 +249,65 @@ write a class derived from <code class="docutils literal"><span class="pre">Infe
 carry both <code class="docutils literal"><span class="pre">VariationalInference</span></code> and <code class="docutils literal"><span class="pre">MonteCarlo</span></code> methods.</p>
 <p>For examples of inference algorithms built in Edward, see the inference
 <a class="reference external" href="../tutorials.html">tutorials</a>.</p>
+<div class="section" id="variational-models">
+<h2>Variational Models<a class="headerlink" href="#variational-models" title="Permalink to this headline">¶</a></h2>
+<p>A variational model defines a distribution over latent
+variables. It is a model of the posterior distribution, specifying
+another distribution to approximate it. This is analogous to the way
+that probabilistic models specify distributions to approximate the
+true data distribution. After inference, the variational model is used
+as a proxy to the true posterior.</p>
+<p>Edward implements variational models using the <code class="docutils literal"><span class="pre">Variational</span></code> class in
+<code class="docutils literal"><span class="pre">edward.models</span></code>. For example, the following instantiates an empty
+container for the variational distribution.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span>
+
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To add distributions to this object, use the <code class="docutils literal"><span class="pre">add()</span></code> method, which
+is used to add Distribution objects.  All distribution objects, i.e.,
+any class inheriting from <code class="docutils literal"><span class="pre">Distribution</span></code> in <code class="docutils literal"><span class="pre">edward.models</span></code>, takes
+as input a shape and optionally, parameter arguments. If left
+unspecified, the parameter arguments are trainable parameters during
+inference.  The shape denotes the shape of its random variable. For
+example:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Beta</span>
+
+<span class="c"># first, add a vector of 10 random variables</span>
+<span class="c"># second, add a 5 x 2 matrix of random variables</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+
+<span class="c"># vector of 3 random variables with fixed alpha param</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Multivariate distributions store their multivariate dimension in the
+outer dimension (right-most dimension) of their shape.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span>
+
+<span class="c"># 1 K-dimensional Dirichlet</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
+<span class="c"># vector of 5 K-dimensional Dirichlet&#39;s</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>The main methods in <code class="docutils literal"><span class="pre">Variational</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
+<code class="docutils literal"><span class="pre">sample()</span></code>, which mathematically are <code class="docutils literal"><span class="pre">log</span> <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> and <code class="docutils literal"><span class="pre">z</span> <span class="pre">~</span>
+<span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively.</p>
+<p><code class="docutils literal"><span class="pre">samples(n)</span></code> takes as input the number of samples and returns a list
+of TensorFlow tensors, each of whose shape is <code class="docutils literal"><span class="pre">(n,</span> <span class="pre">)</span> <span class="pre">+</span> <span class="pre">self.shape</span></code> for
+each distribution object within the container. <code class="docutils literal"><span class="pre">log_prob(xs)</span></code> takes
+as input a list of TensorFlow tensors, and returns a vector of density
+evaluations, one for each sample <code class="docutils literal"><span class="pre">x</span></code> in <code class="docutils literal"><span class="pre">xs</span></code>.</p>
+<p>The ordering of the addition to the container matters. This defines
+the ordering of the lists for the output of <code class="docutils literal"><span class="pre">sample()</span></code> and the input
+of <code class="docutils literal"><span class="pre">log_prob()</span></code>.
+(As an example, see the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture of Gaussians</a>.)</p>
+</div>
 </div>
 
 
@@ -260,7 +320,7 @@ carry both <code class="docutils literal"><span class="pre">VariationalInference
         <a href="criticisms.html" class="btn btn-neutral float-right" title="Criticism" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="models_distributions.html" class="btn btn-neutral" title="Variational Models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="models.html" class="btn btn-neutral" title="Models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

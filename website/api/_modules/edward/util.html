@@ -82,8 +82,7 @@
             
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models_models.html">Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models_distributions.html">Variational Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../inferences.html">Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../edward.html">edward package</a></li>
@@ -262,7 +261,9 @@
     <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
     <span class="c"># Loop over each element in the vector.</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
         <span class="c"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
         <span class="n">gradjgrads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">xs</span><span class="p">)</span>

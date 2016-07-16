@@ -11,8 +11,7 @@ Click HERE_ to return to the Edward website.
   :maxdepth: 2
 
   data
-  models_models
-  models_distributions
+  models
   inferences
   criticisms
   edward

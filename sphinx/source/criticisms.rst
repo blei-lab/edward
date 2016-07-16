@@ -1,5 +1,5 @@
 Criticism
-^^^^^^^^^
+---------
 
 Criticism is about explicitly understanding and analyzing the
 assumptions made in one's analysis. For example, model criticism

@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
-        <link rel="next" title="Variational Models" href="models_distributions.html"/>
+        <link rel="next" title="&lt;no title&gt;" href="models_distributions.html"/>
         <link rel="prev" title="Data" href="data.html"/> 
 
   
@@ -83,8 +83,10 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_distributions.html">Variational Models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Probabilistic Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-api">Model API</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
@@ -148,7 +150,10 @@ a batch, and analogously, <code class="docutils literal"><span class="pre">zs</s
 of latent variables. The method outputs a vector of the joint density
 evaluations <code class="docutils literal"><span class="pre">[log</span> <span class="pre">p(xs,</span> <span class="pre">zs[0,:]),</span> <span class="pre">log</span> <span class="pre">p(xs,</span> <span class="pre">zs[1,:]),</span> <span class="pre">...]</span></code>, with an
 evaluation for each set of latent variables. Here is an example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">edward.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
+
+<span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
         <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
@@ -163,15 +168,16 @@ evaluation for each set of latent variables. Here is an example:</p>
 that uses this model. The model class can be more complicated,
 containing fields or other methods required for certain functions in
 Edward, and which can provide more information about the model&#8217;s
-structure. A full spec of the model is available below. [Include the
-full model spec somewhere below.]</p>
+structure. See the section below for more details.</p>
 <p><strong>Python.</strong>
 Write a class that inherits from <code class="docutils literal"><span class="pre">PythonModel</span></code> and with the method
 <code class="docutils literal"><span class="pre">_py_log_prob(xs,</span> <span class="pre">zs)</span></code>. The method defines the logarithm of a joint
 density with the same concept as in a TensorFlow model, but where
 <code class="docutils literal"><span class="pre">xs</span></code> and <code class="docutils literal"><span class="pre">zs</span></code> now use NumPy arrays rather than TensorFlow tensors.
 Here is an example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">PythonModel</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">PythonModel</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
 
 <span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">(</span><span class="n">PythonModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
@@ -227,7 +233,10 @@ the model besides how to calculate its joint density.</p>
 Write a PyMC3 model whose observed values are Theano shared variables.
 The values in the Theano shared variables can be plugged at a later
 time. Here is an example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">PyMC3Model</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">theano</span>
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">PyMC3Model</span>
 
 <span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
@@ -251,6 +260,132 @@ computation represents a single node in the graph (making it difficult
 to tease apart and thus distribute their computation).</p>
 <p>For examples of models built in Edward, see the model
 <a class="reference external" href="../tutorials.html">tutorials</a>.</p>
+<div class="section" id="model-api">
+<h2>Model API<a class="headerlink" href="#model-api" title="Permalink to this headline">¶</a></h2>
+<p>This outlines the current spec for all methods in the model object.
+It includes all modeling languages, where certain methods are
+implemented by wrapping around other methods. For example, by a Python
+model builds a <code class="docutils literal"><span class="pre">_py_log_prob()</span></code> method and inherits from
+<code class="docutils literal"><span class="pre">PythonModel</span></code>; <code class="docutils literal"><span class="pre">PythonModel</span></code> implements <code class="docutils literal"><span class="pre">log_prob()</span></code> by wrapping
+around <code class="docutils literal"><span class="pre">_py_log_prob()</span></code> as a TensorFlow operation.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used in: (most) inference.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : dict</span>
+<span class="sd">            Data dictionary. Each key names a data structure used in</span>
+<span class="sd">            the model (str), and its value is the corresponding</span>
+<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">log_lik</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used in: inference with analytic KL.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : dict</span>
+<span class="sd">            Data dictionary. Each key names a data structure used in</span>
+<span class="sd">            the model (str), and its value is the corresponding</span>
+<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used in: ed.evaluate().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xs : dict</span>
+<span class="sd">            Data dictionary. Each key names a data structure used in</span>
+<span class="sd">            the model (str), and its value is the corresponding</span>
+<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            Vector of predictions, one for each data point.</span>
+
+<span class="sd">            For supervised tasks, the predicted value is the mean of the</span>
+<span class="sd">            output&#39;s likelihood given features from the ith data point and</span>
+<span class="sd">            averaged over the latent variable samples:</span>
+<span class="sd">                + Binary classification. The probability of the success</span>
+<span class="sd">                label.</span>
+<span class="sd">                + Multi-class classification. The probability of each</span>
+<span class="sd">                label, with the entire output of shape N x K.</span>
+<span class="sd">                + Regression. The mean response.</span>
+<span class="sd">            For unsupervised, the predicted value is the log-marginal</span>
+<span class="sd">            likelihood evaluated at the ith data point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">sample_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used in: ed.ppc().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int, optional</span>
+<span class="sd">            Number of latent variable samples.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tf.Tensor</span>
+<span class="sd">            size x d matrix, where each row is a set of latent variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">sample_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used in: ed.ppc().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        zs : list or tf.Tensor</span>
+<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">        size : int, optional</span>
+<span class="sd">            Number of data points to generate per set of latent variables.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of dict&#39;s of tf.Tensor&#39;s</span>
+<span class="sd">            List of replicated data sets from the likelihood,</span>
+<span class="sd">            [x^{rep, 1}, ..., x^{rep, S}],</span>
+<span class="sd">            where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has</span>
+<span class="sd">            size-many data points. Type-wise, each x^{rep, s} is a</span>
+<span class="sd">            dictionary with the same items and shape of values as the</span>
+<span class="sd">            test data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -260,7 +395,7 @@ to tease apart and thus distribute their computation).</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="models_distributions.html" class="btn btn-neutral float-right" title="Variational Models" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="models_distributions.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="data.html" class="btn btn-neutral" title="Data" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

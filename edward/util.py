@@ -128,7 +128,9 @@ def hessian(y, xs):
     grads = tf.concat(0, grads)
     # Loop over each element in the vector.
     mat = []
+    print(grads)
     d = grads.get_shape()[0]
+    print(d)
     for j in range(d):
         # Calculate grad_{xs} ( [ grad_{xs} y ]_j ).
         gradjgrads = tf.gradients(grads[j], xs)
