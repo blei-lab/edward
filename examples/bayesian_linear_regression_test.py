@@ -19,6 +19,7 @@ import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
+from edward.datasets import simulate_regression_data
 
 
 class LinearModel:
@@ -68,12 +69,6 @@ class LinearModel:
         return y_pred
 
 
-def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
-    n_dim = len(coeff)
-    x = np.random.randn(N, n_dim).astype(np.float32)
-    y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
-    return {'x': x, 'y': y}
-
 
 ed.set_seed(42)
 model = LinearModel()
@@ -81,11 +76,11 @@ variational = Variational()
 variational.add(Normal(model.n_vars))
 
 coeff = np.random.randn(10)
-data = build_toy_dataset(coeff=coeff)
+data = simulate_regression_data(coeff=coeff)
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_samples=5, n_print=10)
 
-data_test = build_toy_dataset(coeff=coeff)
+data_test = simulate_regression_data(coeff=coeff)
 x_test, y_test = data_test['x'], data_test['y']
 print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))
