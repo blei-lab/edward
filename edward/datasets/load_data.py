@@ -21,4 +21,3 @@ def load_celegans_brain():
     x = np.load(join(module_path, 'data', 'celegans_brain.npy'))
     return {'x': x}
 
-
