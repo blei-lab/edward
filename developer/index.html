@@ -37,9 +37,11 @@
 <ul>
 <li><strong>Pull request and branches.</strong> Contribute by developing on a clone of the repo and writing the code in a branch. Submit a pull request when ready.</li>
 </ul>
-<p>For developers with push permission to the repo, see <a href="https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request">Stan's process</a> for how to name branches.  Do not merge your own pull requests or ever push to master. Someone should always review your code.  After merging (or deciding to close the request without merging), always delete the branch from the repo.
-+ <strong>Unit testing.</strong> Unit testing is awesome. It's useful not only for checking code after having written it, but also in checking code as you are developing it. If you're informally writing short scripts that output various things anyways, I suggest saving the file in the <code>tests/</code> directory. This gets the momentum going as the test becomes formalized. For testing, simply run <a href="http://nose2.readthedocs.io/en/latest/getting_started.html"><code>nose2</code></a> in the repo; it will automatically find and run all tests in <code>tests/</code>. Most if not all pull requests should have unit tests.
-+ <strong>Issue labeling system.</strong> We use <a href="https://github.com/stan-dev/stan/pulls">Stan's labeling system</a>. While several labels obviously don't apply to us, it's better than the default labels and it's not worth the effort to reinvent the wheel and maintain a custom system.</p>
+<p>For developers with push permission to the repo, see <a href="https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request">Stan's process</a> for how to name branches.  Do not merge your own pull requests or ever push to master. Someone should always review your code.  After merging (or deciding to close the request without merging), always delete the branch from the repo.</p>
+<ul>
+<li><strong>Unit testing.</strong> Unit testing is awesome. It's useful not only for checking code after having written it, but also in checking code as you are developing it. If you're informally writing short scripts that output various things anyways, I suggest saving the file in the <code>tests/</code> directory. This gets the momentum going as the test becomes formalized. For testing, simply run <a href="http://nose2.readthedocs.io/en/latest/getting_started.html"><code>nose2</code></a> in the repo; it will automatically find and run all tests in <code>tests/</code>. Most if not all pull requests should have unit tests.</li>
+<li><strong>Issue labeling system.</strong> We use <a href="https://github.com/stan-dev/stan/pulls">Stan's labeling system</a>. While several labels obviously don't apply to us, it's better than the default labels and it's not worth the effort to reinvent the wheel and maintain a custom system.</li>
+</ul>
 <p>Coding</p>
 <ul>
 <li><strong>Style guidelines.</strong> Follow <a href="https://www.tensorflow.org/versions/r0.9/how_tos/style_guide.html">TensorFlow</a>, including its <a href="https://www.tensorflow.org/versions/r0.9/how_tos/documentation/index.html">documentation guidelines</a>.  The only exceptions are detailed below. Some below are not necessarily exceptions but simply emphasize style guidelines you should be following from TensorFlow or PEP 8 anyways.</li>
@@ -214,7 +216,7 @@ git push origin pull_request_yourname
 
   <!--
   MkDocs version      : 0.15.3
-  Docs Build Date UTC : 2016-07-16 01:11:07.889566
+  Docs Build Date UTC : 2016-07-16 01:11:35.154358
   -->
 </body>
 </html>
