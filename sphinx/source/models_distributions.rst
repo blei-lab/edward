@@ -86,4 +86,4 @@ of ``log_prob()``.
 .. 4distributions.
 
 For examples of variational models built in Edward, see the end-to-end
-`tutorials <>`__ which use variational inference.
+`tutorials <../tutorials.html>`__ which use variational inference.

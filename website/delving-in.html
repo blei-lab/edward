@@ -125,7 +125,7 @@ variational.add(InvGamma(K*D))</code></pre>
 inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <p>This runs the <code>KLpq</code> minimization algorithm for <code>500</code> iterations, using a batch of <code>5</code> data points per iteration.</p>
 <h3 id="criticism">Criticism</h3>
-<p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, we can never validate whether a model is true—no model will be true in practice—but we can seek to uncover where the model goes wrong.</p>
+<p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, no model will be true in practice; in other words, “all models are wrong”. Thus we must seek to uncover where the model goes wrong.</p>
 <p>Edward provides a <code>criticisms</code> module, which supports</p>
 <ul>
 <li>point-based evaluations such as mean squared error or classification accuracy</li>

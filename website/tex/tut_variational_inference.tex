@@ -8,7 +8,7 @@ Variational inference is an umbrella term for algorithms which cast
 posterior inference as optimization. The core idea involves two steps:
 \begin{enumerate}
    \item posit a family of distributions $q(z\;;\;\lambda)$ over the
-   posterior latent variables;
+   latent variables;
    \item match $q(z\;;\;\lambda)$ to the posterior by optimizing over its
    parameters $\lambda$.
  \end{enumerate}
@@ -34,7 +34,10 @@ that the true data generating process is unknown, and thus we build
 models of data to best approximate the true process.
 
 For details on the design of variational models in Edward, see the
-\href{api/edward.models.html}{variational model API}.
+\href{api/models_distributions.html}{variational model API}.
+For details on the variational inference base class defined in Edward,
+see the
+\href{api/inferences.html}{inference API}.
 For examples of specific variational inference algorithms in
 Edward, see the other inference \href{tutorials.html}{tutorials}.
 

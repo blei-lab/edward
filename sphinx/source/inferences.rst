@@ -4,7 +4,7 @@ Inference
 An inference algorithm infers the posterior for a particular model
 ``p(x, z)`` and data set ``x``. It is the distribution of the latent
 variables given data, ``p(z | x)``. For more details, see the
-`Inference of Probability Models tutorial <>`__.
+`Inference of Probability Models tutorial <../tut_inference.html>`__.
 
 Edward uses abstract base classes and class inheritance to provide a
 hierarchy of inference methods, all of which are easily extensible.
@@ -14,9 +14,10 @@ algorithms or developing new model-specific inference algorithms which
 are tailored to a particular model or restricted class of models.
 We detail this below.
 
-\includegraphics{images/inference_structure.png}
-{\small\textit{Dependency graph of inference methods.
-Nodes are classes in Edward and arrows represent class inheritance.}}
+.. image:: ../images/inference_structure.png
+
+*Dependency graph of inference methods. Nodes are classes in Edward
+and arrows represent class inheritance.*
 
 There is a abstract base class ``Inference``, from which all inference
 methods are derived from.
@@ -33,9 +34,9 @@ methods are derived from.
 It takes as input a probabilistic model ``model`` and dataset
 ``data``.
 For more details, see the
-`Probabilistic Models API <>`__
+`Probabilistic Models API <models_models.html>`__
 and
-`Data API <>`__.
+`Data API <data.html>`__.
 
 We categorize inference under two paradigms:
 ``VariationalInference`` and ``MonteCarlo`` (or more plainly,
@@ -74,7 +75,7 @@ Let's focus on ``VariationalInference``. In addition to a model and
 data as input, ``VariationalInference`` also takes in a variational
 model ``variational``, which serves as a model of the posterior
 distribution. For more details, see the
-`Variational Models API <>`__.
+`Variational Models API <models_distributions.html>`__.
 
 The main method in ``VariationalInference`` is ``run()``.
 
@@ -130,4 +131,4 @@ write a class derived from ``Inference`` directly, or inherited to
 carry both ``VariationalInference`` and ``MonteCarlo`` methods.
 
 For examples of inference algorithms built in Edward, see the inference
-`tutorials <>`__.
+`tutorials <../tutorials.html>`__.

@@ -136,19 +136,19 @@
 <h1>Criticism<a class="headerlink" href="#criticism" title="Permalink to this headline">¶</a></h1>
 <p>Criticism is about explicitly understanding and analyzing the
 assumptions made in one&#8217;s analysis. For example, model criticism
-measures the degree to which our model falsely describes the data.
-For more details, see the
-<a href="#id1"><span class="problematic" id="id2">`Point-based evaluations tutorial &lt;&gt;`__</span></a>
-and
-<a href="#id1"><span class="problematic" id="id3">`Posterior predictive checks tutorial &lt;&gt;`__</span></a>.</p>
+measures the degree to which our model falsely describes the data.</p>
 <p>Criticism techniques are simply functions which take the probability
 model, variational model, and data as input along with other
-additional arguments. Developing new criticism techniques is easy.
-They can be derived from the current techniques or built as a
-standalone function.</p>
+additional arguments.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">criticize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Developing new criticism techniques is easy.  They can be derived from
+the current techniques or built as a standalone function.</p>
 <p>For examples of criticism techniques built in Edward, see the
 criticism
-<a href="#id1"><span class="problematic" id="id4">`tutorials &lt;&gt;`__</span></a>.</p>
+<a class="reference external" href="../tutorials.html">tutorials</a>.</p>
 </div>
 
 
