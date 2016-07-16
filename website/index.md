@@ -33,13 +33,15 @@ It supports **inference** via
 
     -   Inclusive KL divergence: $\text{KL}(p\|q)$
 
-    -   Laplace approximation
-
 -   Marginal posterior optimization (empirical Bayes, marginal
     maximum likelihood)
 
+    -   Variational EM
+
 -   Maximum a posteriori estimation (penalized maximum likelihood,
     maximum likelihood)
+
+    -   Laplace approximation
 
 It supports **criticism** of the model and inference via
 
@@ -66,8 +68,10 @@ are
 
 -   [Maja Rudolph](http://maja-rita-rudolph.com/)
 
-We welcome contributions by submitting issues, feature requests, or by
-solving any current issues!
+We are very open to research collaboration, and welcome other
+researchers and developers to contribute. Check out the [Github
+issues](https://github.com/blei-lab/edward/issues) for unsolved software
+problems. For broader research problems, shoot one of us an e-mail.
 
 Edward has benefited enormously from the helpful feedback and advice of
 many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt

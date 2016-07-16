@@ -141,11 +141,20 @@ $q(z\;;\;\lambda)$ iteratively gets closer to the posterior $p(z \mid x)$.
 
 \subsubsection{Implementation}
 
-We implement $\text{KL}(p\|q)$ with its importance sampling gradient
-in the method \texttt{build_loss()} of the \texttt{KLpq} class.
+We implement $\text{KL}(q\|p)$ minimization with the importance
+sampling gradient in the class \texttt{KLpq}. It inherits from
+\texttt{VariationalInference}, which provides a collection of default
+methods such as an optimizer.
+
 \begin{lstlisting}[language=Python]
 class KLpq(VariationalInference):
-    ...
+    def __init__(self, *args, **kwargs):
+        super(KLpq, self).__init__(*args, **kwargs)
+
+    def initialize(self, n_samples=1, *args, **kwargs):
+        self.n_samples = n_samples
+        return super(KLpq, self).initialize(*args, **kwargs)
+
     def build_loss(self):
         x = self.data
         z = self.variational.sample(self.n_samples)
@@ -160,57 +169,33 @@ class KLpq(VariationalInference):
         return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
 \end{lstlisting}
 
-This method draws $S$ (\texttt{self.n_samples}) samples from the variational
-model. The TensorFlow function \texttt{reduce_mean()} takes the
-mean over the samples.
+Two methods are added: \texttt{initialize()} and
+\texttt{build_loss()}. The method \texttt{initialize()}
+follows the same initialization as \texttt{VariationalInference}, and
+adds an argument: \texttt{n_samples} for the number of samples from
+the variational model.
 
-The method stores computation of $\text{KL}(p\|q)$ in
-\texttt{self.loss}, which can be used to track progress of the
-inference for diagnostics.  The method returns an object whose
+The method \texttt{build_loss()} implements the $\text{KL}(q\|p)$
+objective and its gradient. It draws \texttt{self.n_samples} samples from the
+variational model. It registers the Monte Carlo
+estimate of $\text{KL}(q\|p)$ in TensorFlow's computational graph, and stores it
+in \texttt{self.loss}, to track progress of the inference for diagnostics.
+
+The method returns an object whose
 automatic differentiation is a stochastic gradient of $\text{KL}(p\|q)$.
 The TensorFlow function \texttt{stop_gradient()} tells the computational
 graph to stop traversing nodes to propagate gradients. In this case,
 the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
-because it is not wrapped in a \texttt{stop_gradient()}.
+one for each sample $z_s$. We multiply it by \texttt{w_norm}
+element-wise and return the mean.
 
-Computing the normalized importance weights is a numerically challenging task.
-Underflow is a common issue. Here we use the \texttt{log_sum_exp} trick to
-compute weights in the log space. However, the normalized weights are still
-exponentiated to compute the gradient. As with importance sampling in
-general, this inference method does not scale to high dimensions.
-
-\subsubsection{Stochastic optimization}
-
-Stochastic gradient descent is an extension of gradient descent using
-noisy estimates of the gradient. Under mild conditions, stochastic
-gradient descent finds a (local) optimum of the original (noiseless)
-function.
-
-Edward uses TensorFlow's optimizers.
-This is specified in the \texttt{initialize()} method of the
-\texttt{VariationalInference} base class.
-
-\begin{lstlisting}[language=Python]
-class VariationalInference(Inference):
-    ...
-    def initialize(self, ...):
-        ...
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                     scope=scope)
-
-        # Use Adam with a decaying scale factor
-        global_step = tf.Variable(0, trainable=False)
-        starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                            global_step,
-                                            100, 0.9, staircase=True)
-        optimizer = tf.train.AdamOptimizer(learning_rate)
-        self.train = optimizer.minimize(loss, global_step=global_step,
-                                        var_list=var_list)
-\end{lstlisting}
-
-This sets up TensorFlow to optimize $\text{KL}(p\|q)$ using ADAM's
-learning rate combined with an exponentially decaying scale factor.
+Computing the normalized importance weights is a numerically
+challenging task.  Underflow is a common issue. Here we use the
+\texttt{log_sum_exp} trick to compute weights in the log space,
+available in \texttt{edward.util}. However, the normalized weights are
+still exponentiated to compute the gradient. As with importance
+sampling in general, this inference method does not scale to high
+dimensions.
 
 See the \href{api/index.html}{API} for more details.
 

@@ -105,7 +105,7 @@ posterior using a point to summarize the full distribution.
 class MAP(VariationalInference):
     def __init__(self, model, data=None, params=None):
         with tf.variable_scope("variational"):
-            if hasattr(model, 'num_vars'):
+            if hasattr(model, 'n_vars'):
                 variational = Variational()
                 variational.add(PointMass(model.n_vars, params))
             else:
@@ -122,8 +122,9 @@ class MAP(VariationalInference):
 \end{lstlisting}
 
 The \texttt{MAP} class inherits from \texttt{VariationalInference} and
-initializes a point mass as the variational distribution. The
-\texttt{build_loss()} method implicitly specifies the gradient of the
+initializes a point mass as the variational distribution. It requires
+defining only one method:
+\texttt{build_loss()}, which implicitly specifies the gradient of the
 log joint. TensorFlow's automatic differentiation will apply to
 \texttt {z}, thus backpropagating (applying the chain rule of
 differentiation) to compute the gradient of the objective.

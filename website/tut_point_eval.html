@@ -70,7 +70,7 @@
 </div>
 <div class="nine columns">
 <h2 id="point-based-evaluations">Point-based evaluations</h2>
-<p>Edward supports point-based evaluations. For example, given a trained model for classification, we can predict the label for each observation in the data and compare it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
+<p>A point-based evaluation is a scalar-valued metric for assessing trained models. For example, we can assess models for classification by predicting the label for each observation in the data and comparing it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
 <p>Formally, point prediction in probabilistic models is given by taking the mean of the posterior predictive distribution, <span class="math display">\[\begin{aligned}
   p(x_\text{new} \mid x)
   &amp;=
@@ -95,7 +95,7 @@ model = BayesianLinearRegression()</code></pre>
 <p>Similar to variational inference methods, the <code>ed.evaluate()</code> method takes as input the probability model, variational model, and a data set. It evaluates the trained model (the posterior via the variational model; everything else via the probability model) according to a chosen metric.</p>
 <pre class="python" language="Python"><code>ed.evaluate('categorical_accuracy', model, variational, data)
 ed.evaluate('mean_absolute_error', model, variational, data)</code></pre>
-<p>Swapping <code>data</code> with data held-out from training time makes it easy to implement cross-validation and other model assessment techniques.</p>
+<p>The <code>data</code> can be data held-out from training time, making it easy to implement cross-validated techniques.</p>
 <p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
 <pre class="python" language="Python"><code>ed.evaluate('log_likelihood', model, variational, data)</code></pre>
 <p>Point-based evaluations are formally known as scoring rules (Gneiting and Raftery, 2007) in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>

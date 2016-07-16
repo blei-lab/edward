@@ -120,7 +120,7 @@
 <pre class="python" language="Python"><code>class MAP(VariationalInference):
     def __init__(self, model, data=None, params=None):
         with tf.variable_scope("variational"):
-            if hasattr(model, 'num_vars'):
+            if hasattr(model, 'n_vars'):
                 variational = Variational()
                 variational.add(PointMass(model.n_vars, params))
             else:
@@ -134,7 +134,7 @@
         z = self.variational.sample()
         self.loss = tf.squeeze(self.model.log_prob(x, z))
         return -self.loss</code></pre>
-<p>The <code>MAP</code> class inherits from <code>VariationalInference</code> and initializes a point mass as the variational distribution. The <code>build_loss()</code> method implicitly specifies the gradient of the log joint. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus backpropagating (applying the chain rule of differentiation) to compute the gradient of the objective.</p>
+<p>The <code>MAP</code> class inherits from <code>VariationalInference</code> and initializes a point mass as the variational distribution. It requires defining only one method: <code>build_loss()</code>, which implicitly specifies the gradient of the log joint. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus backpropagating (applying the chain rule of differentiation) to compute the gradient of the objective.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the log density’s gradient.</p>
 <h3 id="references">References</h3>
 <ul>

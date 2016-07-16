@@ -27,11 +27,12 @@ It supports __inference__ via
   + Stochastic variational inference
   + Variational auto-encoders
   + Inclusive KL divergence: KL(p||q)
-  + Laplace approximation
 + Marginal posterior optimization (empirical Bayes, marginal
     maximum likelihood)
+  + Variational EM
 + Maximum a posteriori estimation (penalized maximum likelihood,
     maximum likelihood)
+  + Laplace approximation
 
 It supports __criticism__ of the model and inference via
 

@@ -145,9 +145,10 @@ it can be written in any of the currently supported modeling
 languages: TensorFlow, Python, Stan, and PyMC3.</p>
 <p><strong>TensorFlow.</strong>
 Write a class with the method <code class="docutils literal"><span class="pre">log_prob(xs,</span> <span class="pre">zs)</span></code>. The method defines
-the logarithm of a joint density. <code class="docutils literal"><span class="pre">xs</span></code> can be a single data point or
-a batch, and analogously, <code class="docutils literal"><span class="pre">zs</span></code> can be a single set or multiple sets
-of latent variables. The method outputs a vector of the joint density
+the logarithm of a joint density.  Here <code class="docutils literal"><span class="pre">xs</span></code> can be a single data
+point or a batch of data points, and analogously, <code class="docutils literal"><span class="pre">zs</span></code> can be a
+single set or multiple sets of latent variables.  <code class="docutils literal"><span class="pre">xs</span></code> can be a
+single data point or The method outputs a vector of the joint density
 evaluations <code class="docutils literal"><span class="pre">[log</span> <span class="pre">p(xs,</span> <span class="pre">zs[0,:]),</span> <span class="pre">log</span> <span class="pre">p(xs,</span> <span class="pre">zs[1,:]),</span> <span class="pre">...]</span></code>, with an
 evaluation for each set of latent variables. Here is an example:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>

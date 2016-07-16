@@ -91,7 +91,6 @@ class BayesianNN:
     &quot;&quot;&quot;Bayesian neural network for regression&quot;&quot;&quot;
     def __init__(self, layer_sizes):
         self.layer_sizes = layer_sizes
-        self.n_layers = len(layer_sizes)
         self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 

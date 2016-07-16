@@ -4,11 +4,11 @@
 % Begin the content of the page
 \subsection{Point-based evaluations}
 
-Edward supports point-based evaluations. For example, given a trained
-model for classification, we can predict the label for each
-observation in the data and compare it to their true labels. Edward
-implements a variety of metrics, such as classification error and mean
-absolute error.
+A point-based evaluation is a scalar-valued metric for assessing
+trained models. For example, we can assess models for classification
+by predicting the label for each observation in the data and comparing
+it to their true labels. Edward implements a variety of metrics, such
+as classification error and mean absolute error.
 
 Formally, point prediction in probabilistic models is given by
 taking the mean of the posterior predictive distribution,
@@ -56,9 +56,8 @@ probability model) according to a chosen metric.
 ed.evaluate('categorical_accuracy', model, variational, data)
 ed.evaluate('mean_absolute_error', model, variational, data)
 \end{lstlisting}
-Swapping \texttt{data} with data held-out from training time makes it
-easy to implement cross-validation and other model assessment
-techniques.
+The \texttt{data} can be data held-out from training time, making it
+easy to implement cross-validated techniques.
 
 Point-based evaluation applies generally to any setting, including
 unsupervised tasks. For example, we can evaluate the likelihood of

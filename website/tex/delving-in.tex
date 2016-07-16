@@ -6,8 +6,8 @@
 
 Edward's design reflects the building blocks for probabilistic
 modeling. It defines interchangeable components, enabling fast
-experimentation and research with probabilistic models.  Here we
-describe the design and provide an overview of its internal workings.
+experimentation and research with probabilistic models. Here we
+provide an overview of the design.
 
 Edward is named after the innovative statistician
 \href{https://en.wikipedia.org/wiki/George_E._P._Box}{George Edward
@@ -27,8 +27,8 @@ loop:
 
 Here's a toy example. A child flips a coin ten times, with the set of
 outcomes being \texttt{{[}0,\ 1,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 1{]}},
-where \texttt{0} denotes tails and \texttt{1} denotes heads. We
-are interested in the probability that the coin lands heads. First,
+where \texttt{0} denotes tails and \texttt{1} denotes heads. She
+is interested in the probability that the coin lands heads. First,
 build a model: assume the coin flips are independent and land heads with
 the same probability. Second, reason about the phenomena: use an algorithm
 to infer the model given data. Third, criticize the model: analyze
@@ -36,7 +36,7 @@ whether the model captures the real-world phenomena of coin flips. If it
 doesn't, then revise the model and repeat.
 
 This process defines the design of Edward. Four objects organize the
-above analysis.
+analysis.
 
 \subsubsection{Data}
 
@@ -56,10 +56,10 @@ to deal with settings such as when the data does not fit in memory.
 A probabilistic model is a joint distribution $p(x, z)$ of data $x$ and latent
 variables $z$.
 Edward supports several languages for specifying probability models:
-TensorFlow, Python, PyMC3, and Stan. In general, a probability model
-has the following structure.
+TensorFlow, Python, PyMC3, and Stan. In general, a probability
+model is a class with the structure
 \begin{lstlisting}[language=Python]
-class ProbabilityModel:
+class Model:
     def __init__(...):
         ...
         self.n_vars = ...
@@ -69,7 +69,7 @@ class ProbabilityModel:
         log_likelihood = ...
         return log_prior + log_likelihood
 
-model = ProbabilityModel(...)
+model = Model(...)
 \end{lstlisting}
 The field \texttt{n\_vars} denotes the number of latent variables in the
 probability model. For example, a model with a Gaussian likelihood with latent
@@ -91,7 +91,7 @@ describes our best guess of the hidden structure, and its variance
 describes the uncertainty around our best guess.
 
 %The posterior distribution is typically intractable.
-Edward implements a variety of inference methods and makes it easy
+Edward has many inference algorithms and makes it easy
 to develop new ones.
 
 \includegraphics{images/inference_structure.png}
@@ -128,7 +128,7 @@ variational.add(Normal(K*D))
 variational.add(InvGamma(K*D))
 \end{lstlisting}
 %Ordering matters: variational models must match the same ordering as latent
-%variables accessed in \texttt{ProbabilityModel.log_prob(xs, zs)}.
+%variables accessed in \texttt{Model.log_prob(xs, zs)}.
 
 Each algorithm derived from \texttt{VariationalInference} minimizes a
 different loss function between the variational model and the
@@ -154,16 +154,16 @@ Following falsificationists such as Popper and Box, no model will be
 true in practice; in other words, "all models are wrong". Thus we must seek to
 uncover where the model goes wrong.
 
-Edward provides a \texttt{criticisms} module, which supports
+Edward provides criticism using
 \begin{itemize}
-  \item point-based evaluations such as mean squared error or
+  \item point-based evaluations, such as mean squared error or
   classification accuracy
 \end{itemize}
 \begin{lstlisting}[language=Python]
 ed.evaluate('mean_squared_error', model, variational, data)
 \end{lstlisting}
 \begin{itemize}
-  \item posterior predictive checks for making probabilistic
+  \item posterior predictive checks, for making probabilistic
   assessments of the model fit using discrepancy functions
 \end{itemize}
 \begin{lstlisting}[language=Python]

@@ -6,7 +6,7 @@ An inference algorithm infers the posterior for a particular model
 variables given data, ``p(z | x)``. For more details, see the
 `Inference of Probability Models tutorial <../tut_inference.html>`__.
 
-Edward uses abstract base classes and class inheritance to provide a
+Edward uses classes and class inheritance to provide a
 hierarchy of inference methods, all of which are easily extensible.
 This enables fast experimentation and research on top of existing
 inference methods, whether it be developing new black box inference
@@ -19,7 +19,7 @@ We detail this below.
 *Dependency graph of inference methods. Nodes are classes in Edward
 and arrows represent class inheritance.*
 
-There is a abstract base class ``Inference``, from which all inference
+There is a base class ``Inference``, from which all inference
 methods are derived from.
 
 .. code:: python
@@ -34,11 +34,17 @@ methods are derived from.
 It takes as input a probabilistic model ``model`` and dataset
 ``data``.
 For more details, see the
-`Probabilistic Models API <models.html>`__
+`Model API <models.html>`__
 and
 `Data API <data.html>`__.
 
-We categorize inference under two paradigms:
+Note that ``Inference`` says nothing about the class of models that an
+algorithm must work with. One can build inference algorithms which are
+tailored to a restricted class of models available in Edward (such as
+differentiable models), or even tailor it to a single model. The
+algorithm can raise an error if the model is outside this class.
+
+We organize inference under two paradigms:
 ``VariationalInference`` and ``MonteCarlo`` (or more plainly,
 optimization and sampling). These inherit from ``Inference`` and each
 have their own default methods.
@@ -66,15 +72,21 @@ have their own default methods.
 
       ...
 
+Hybrid methods and novel paradigms outside of ``VariationalInference``
+and ``MonteCarlo`` are also possible in Edward. For example, one can
+write a class derived from ``Inference`` directly, or inherit to
+carry both ``VariationalInference`` and ``MonteCarlo`` methods.
+
 Currently, Edward has most of its inference infrastructure within the
 ``VariationalInference`` class.
 The ``MonteCarlo`` class is still under development. We welcome
-contributors to make significant advances here!
+researchers to make significant advances here!
 
 Let's focus on ``VariationalInference``. In addition to a model and
-data as input, ``VariationalInference`` also takes in a variational
+data as input, ``VariationalInference`` takes in a variational
 model ``variational``, which serves as a model of the posterior
-distribution. For more details, see the Variational Models API below.
+distribution. For more details, see the Variational Models section
+below.
 
 The main method in ``VariationalInference`` is ``run()``.
 
@@ -86,7 +98,6 @@ The main method in ``VariationalInference`` is ``run()``.
       ...
       def run(self, *args, **kwargs):
           """A simple wrapper to run variational inference.
-          ...
           """
           self.initialize(*args, **kwargs)
           for t in range(self.n_iter+1):
@@ -100,34 +111,39 @@ The main method in ``VariationalInference`` is ``run()``.
 First, it calls ``initialize()`` to initialize the algorithm, such as
 setting the number of iterations. Then, within a loop it calls
 ``update()`` which runs one step of inference, as well as
-``print_progress()`` for possibly displaying diagnostics; finally, it
-calls ``finalize()`` which runs the final steps as the inference
+``print_progress()`` for displaying progress; finally, it
+calls ``finalize()`` which runs the last steps as the inference
 algorithm terminates.
 
 Developing a new variational inference algorithm is as simple as
 inheriting from ``VariationalInference`` or one of its derived
 classes. ``VariationalInference`` implements many default methods such
-as ``run()`` above. For example, ``initialize()`` creates a TensorFlow
-optimizer and builds the computational graph for running the
-algorithm. It calls the method ``build_loss()``, which returns a node
-to differentiate for gradient-based optimization.  ``build_loss()`` is
-not implemented in ``VariationalInference`` and must be defined in a
-derived class defining a variational inference algorithm. As another
-example, ``update()`` runs a TensorFlow session to run one step of the
-optimizer. It also fetches ``self.loss`` which is a node in the
-computational graph, forming the objective value given the current
-state of the graph. This field must also be implemented in a derived
-class.
+as ``run()`` above. Let's go through ``initialize()`` as an example.
 
-Nothing in ``Inference`` says anything about the class of models that
-an inference algorithm must work with. Thus one can build inference
-algorithms which are tailored to a smaller class of models than the
-general class available in Edward, or even tailor it to a single model.
+.. code:: python
 
-Hybrid methods and novel paradigms outside of ``VariationalInference``
-and ``MonteCarlo`` are also possible in Edward. For example, one can
-write a class derived from ``Inference`` directly, or inherited to
-carry both ``VariationalInference`` and ``MonteCarlo`` methods.
+  class VariationalInference(Inference):
+      ...
+      def initialize(self, ...):
+          ...
+          if n_minibatch is not None ...
+              ...
+              slices = tf.train.slice_input_producer(values)
+              batches = tf.train.batch(slices, self.n_minibatch,
+                                       num_threads=multiprocessing.cpu_count())
+              ...
+              self.data = {key: value for key, value in
+                           zip(six.iterkeys(self.data), batches)}
+          ...
+          loss = self.build_loss()
+          ...
+          optimizer = tf.train.AdamOptimizer(learning_rate)
+          self.train = optimizer.minimize(loss, ...)
+
+Three code snippets are highlighted in ``initialize()``: the first
+enables batch training with an argument ``n_minibatch`` for the batch size;
+the second builds TensorFlow's computational graph defined
+by a loss; the third sets up an optimizer to minimize the loss.
 
 For examples of inference algorithms built in Edward, see the inference
 `tutorials <../tutorials.html>`__.
@@ -153,7 +169,7 @@ container for the variational distribution.
     variational = Variational()
 
 To add distributions to this object, use the ``add()`` method, which
-is used to add Distribution objects.  All distribution objects, i.e.,
+is used to add ``Distribution`` objects.  All distribution objects, i.e.,
 any class inheriting from ``Distribution`` in ``edward.models``, takes
 as input a shape and optionally, parameter arguments. If left
 unspecified, the parameter arguments are trainable parameters during
