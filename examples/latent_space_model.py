@@ -13,6 +13,7 @@ import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm, poisson
+from edward.datasets import load_celegans_brain
 
 
 class LatentSpaceModel:
@@ -63,14 +64,9 @@ class LatentSpaceModel:
         return log_lik + log_prior
 
 
-def load_celegans_brain():
-    x = np.load('data/celegans_brain.npy')
-    N = x.shape[0]
-    return {'x': x}, N
-
-
 ed.set_seed(42)
-data, N = load_celegans_brain()
+data = load_celegans_brain()
+N = data['x'].shape[0]
 model = LatentSpaceModel(N, K=3, like='Poisson', prior='Gaussian')
 
 inference = ed.MAP(model, data)
