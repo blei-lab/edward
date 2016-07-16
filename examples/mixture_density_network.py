@@ -18,7 +18,7 @@ import tensorflow as tf
 from edward.stats import norm
 from keras import backend as K
 from keras.layers import Dense
-from sklearn.cross_validation import train_test_split
+from edward.datasets import simulate_mdn_data
 
 
 class MixtureDensityNetwork:
@@ -56,26 +56,15 @@ class MixtureDensityNetwork:
         return tf.reduce_sum(result)
 
 
-def build_toy_dataset(N=6000):
-    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-    r_data = np.float32(np.random.normal(size=(N, 1))) # random noise
-    x_data = np.float32(np.sin(0.75*y_data)*7.0+y_data*0.5+r_data*1.0)
-    return train_test_split(x_data, y_data, random_state=42)
-
-
 ed.set_seed(42)
 model = MixtureDensityNetwork(10)
-
-X_train, X_test, y_train, y_test = build_toy_dataset()
+    
+data, X_train, X_test, y_train, y_test = simulate_mdn_data()
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
 print("Size of output in test data: {:s}".format(y_test.shape))
-
-X = tf.placeholder(tf.float32, shape=(None, 1))
-y = tf.placeholder(tf.float32, shape=(None, 1))
-data = {'X': X, 'y': y}
-
+    
 inference = ed.MAP(model, data)
 sess = ed.get_session()
 K.set_session(sess)
@@ -86,9 +75,9 @@ train_loss = np.zeros(NEPOCH)
 test_loss = np.zeros(NEPOCH)
 for i in range(NEPOCH):
     _, train_loss[i] = sess.run([inference.train, inference.loss],
-                                feed_dict={X: X_train, y: y_train})
-    test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
+                                feed_dict={data['X']: X_train, data['y']: y_train})
+    test_loss[i] = sess.run(inference.loss, feed_dict={data['X']: X_test, data['y']: y_test})
     print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i], test_loss[i]))
 
 pred_weights, pred_means, pred_std = sess.run(
-        [model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
+        [model.pi, model.mus, model.sigmas], feed_dict={data['X']: X_test})
