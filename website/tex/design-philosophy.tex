@@ -86,14 +86,15 @@ of choice for machine learning research and as an investment in Google's
 massive engineering.
 
 \textbf{High-level deep learning libraries.}
-Neural network libraries
-such as \href{https://github.com/fchollet/keras}{Keras} and
+Neural network libraries such as
+\href{https://github.com/fchollet/keras}{Keras} and
 \href{https://github.com/Lasagne/Lasagne}{Lasagne} are at a similar
-abstraction level as us, but they are interested in parameterizing
-complicated likelihood functions in order to minimize a loss. We are
-more interested in inferring probabilistic models, which can
-have both complicated likelihood and complicated priors (neural networks
-are an option but not a necessity). Therefore our goals are orthogonal,
-and in fact mutually benefit each other: for example, we use Keras'
+abstraction level as us, but they are primarily interested in
+parameterizing complicated functions for supervised learning on large
+datasets. We are more interested in probabilistic models which apply
+to a wide amount of learning tasks, and which can have both
+complicated likelihood and complicated priors (neural networks are an
+option but not a necessity). Therefore our goals are orthogonal and in
+fact mutually benefit each other. For example, we use Keras'
 abstraction as a way to easily specify models parameterized by deep
 neural networks.
