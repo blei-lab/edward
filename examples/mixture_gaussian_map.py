@@ -25,6 +25,7 @@ import tensorflow as tf
 
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims
+from edward.datasets import load_mixture_data
 
 
 class MixtureGaussian:
@@ -90,8 +91,7 @@ class MixtureGaussian:
 
 
 ed.set_seed(42)
-x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
-data = {'x': x}
+data = load_mixture_data()
 
 model = MixtureGaussian(K=2, D=2)
 inference = ed.MAP(model, data)
