@@ -11,85 +11,89 @@
 \item
   to serve as a foundation for research;
 \item
-  to provide an open-source, unified library for inference and
-  criticism, with modeling tools at our disposal.
+  to provide a unified library for inference and criticism, with
+  modeling tools at our disposal.
 \end{enumerate}
 
-As a research tool, the code base is easily interchangeable so that we
-can play with extensions for further avenues of investigation, without
-having to re-implement everything from scratch. For example, for testing
-new inference algorithms, the model experiments only need to be written
-once, and we can simply swap the inference object with the newly
-proposed algorithm. For certain inference algorithms, this corresponds
-to inheriting from a current inference class and writing a new function
-for computing stochastic gradients. The same idea applies at a lower
-level: we can leverage the optimizers and visualization tools already
-available.
+As a research tool, the code base serves as a testbed for fast
+experimentation, so that we can easily play with extensions of current
+paradigms. For example, to evaluate new inference algorithms, the
+experiments only need to be written once and we can simply swap the
+inference with the newly proposed algorithm. For certain inference
+algorithms, this corresponds to inheriting from a current inference
+class and simply writing one function. This idea applies to all
+components of probabilistic modeling: we can leverage the built-in
+inference algorithms to develop new complex models, or use the
+built-in models and inference to develop new criticism techniques.
 
-As a practical tool, Edward has many desirable features such as
-computational graphs for automatic differentiation, GPU support and
-distributed implementations, support for a variety of modeling
-languages. It also has the fundamentals: linear model examples, data
-subsampling for scaling to massive data sets, mean-field variational
-inference, and so on.
+As an applied tool, Edward supports a wide variety of settings,
+ranging from classical hierarchical models on small data sets to
+complex deep probabilistic models on large data sets. With
+\href{https://www.tensorflow.org}{TensorFlow} as a backend, Edward can
+leverage features such as computational graphs, distributed training,
+and CPU/GPU integration to deploy probabilistic modeling at scale. It
+also has the fundamentals: for example, linear model examples, mixture
+model examples, probabilistic neural networks, and stochastic and
+black box variational inference.
 
 \subsection{Related Software}\label{related-software}
 
 There are several notable themes in Edward.
 
-\textbf{Probabilistic programming.} There has been incredible progress
-recently on developing generic languages for specifying probability
-models, or probabilistic programs. Among these include
+\textbf{Probabilistic programming.}
+There has been incredible progress recently on developing generic
+languages for specifying probabilistic models, or probabilistic
+programs. Among these include
 \href{http://probcomp.csail.mit.edu/venture/}{Venture},
 \href{http://www.robots.ox.ac.uk/~fwood/anglican/literature/index.html}{Anglican},
 \href{https://www.cra.com/work/case-studies/figaro}{Figaro},
 \href{http://mc-stan.org}{Stan}, and
-\href{http://dippl.org/chapters/02-webppl.html}{WebPPL}. We do not work
-on modeling languages; we work on general-purpose algorithms, which can
-be applied to any of these languages. For example, we use Stan's
-modeling language as an easy way to specify probability models, and our
-library performs inference on them.
+\href{http://dippl.org/chapters/02-webppl.html}{WebPPL}.
+Edward focuses less on the language and more on easily enabling
+probabilistic modeling across all components of data analysis. For example,
+we use Stan's modeling language as an easy way to specify models in
+Edward, and our library enables fast experimentation on their
+inference and criticism.
 
-\textbf{Computational frameworks.} There are many computational
-frameworks, primarily built for deep learning: as of this date, this
-includes \href{http://deeplearning.net/software/theano/}{Theano},
+\textbf{Black box inference.}
+Implementations of inference algorithms are usually tied to a specific
+probabilistic programming language, and the majority of these are
+black box algorithms, using sequential Monte Carlo and making very few
+assumptions about the model. There are three important distinctions.
+First, we focus primarily on variational inference. Second, we are
+agnostic to the modeling language. Third, we believe inference
+algorithms should take advantage of as much structure as possible from
+the model. Thus Edward supports all types of inference algorithms,
+whether they be black box or model-specific, being tailored to a
+single model or restricted class of models.  This makes Edward's
+probabilistic modeling a rich and practical tool for real-world
+applications. It also makes Edward suitable for experimenting with
+all types of inference.
+
+\textbf{Computational frameworks.}
+There are many computational frameworks, primarily built for deep
+learning: as of this date, this includes
 \href{https://www.tensorflow.org}{TensorFlow},
+\href{http://deeplearning.net/software/theano/}{Theano},
 \href{http://torch.ch}{Torch},
 \href{http://rll.berkeley.edu/cgt/}{Computational Graph Toolkit},
 \href{https://github.com/NervanaSystems/neon}{neon}, and
 \href{https://github.com/stan-dev/math}{Stan Math Library}. These are
-incredible back end tools, which we use rather than compete with. In
-terms of abstraction, our library sits at one level higher. For example,
+incredible tools which Edward employs as a backend. In
+terms of abstraction, Edward sits at one level higher. For example,
 we chose to use TensorFlow among the bunch due to Python as our language
 of choice for machine learning research and as an investment in Google's
-prodigious engineering.
+massive engineering.
 
-\textbf{High-level deep learning libraries.} Neural network libraries
+\textbf{High-level deep learning libraries.}
+Neural network libraries
 such as \href{https://github.com/fchollet/keras}{Keras} and
 \href{https://github.com/Lasagne/Lasagne}{Lasagne} are at a similar
 abstraction level as us, but they are interested in parameterizing
 complicated likelihood functions in order to minimize a loss. We are
-more interested in inferring Bayesian hierarchical models, which can
+more interested in inferring probabilistic models, which can
 have both complicated likelihood and complicated priors (neural networks
 are an option but not a necessity). Therefore our goals are orthogonal,
 and in fact mutually benefit each other: for example, we use Keras'
 abstraction as a way to easily specify models parameterized by deep
 neural networks.
-
-\textbf{Scalable inference.} Implementations of black box inference
-algorithms are usually tied to a specific probabilistic programming
-language, and the majority of these algorithms focus on non-gradient
-based approaches using sequential Monte Carlo. We are agnostic to the
-modeling language. Further, we are interested in scalable approaches
-using gradient information from the model and optimization of an
-objective function. The most related in this line is
-\href{http://mc-stan.org}{Stan}'s algorithms such as
-\href{http://arxiv.org/abs/1506.03431}{ADVI}. However, we don't aim to
-be as user-friendly by automating as many internals as possible. This is
-because this library is first and foremost a research tool, where we are
-interested in not abstracting away the specific mathematics but
-understanding the mechanics behind them. Further, our developed
-algorithms will eventually make its way into more mature,
-enterprise-level software (such as Stan). As several of us are also core
-developers in Stan, we do prototyping of new algorithms here, and deploy
-them in Stan when they're ready to be applied industry-wide.
