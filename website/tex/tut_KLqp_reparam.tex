@@ -119,7 +119,7 @@ faster convergence in a large set of problems.
 \subsubsection{Implementation}
 
 We implement the ELBO with the reparameterization gradient in the method
-\texttt{build_reparam_loss} of the \texttt{MFVI} (mean-field variational
+\texttt{build_reparam_loss()} of the \texttt{MFVI} (mean-field variational
 inference) class.
 \begin{lstlisting}[language=Python]
 class MFVI(VariationalInference):
@@ -134,8 +134,8 @@ class MFVI(VariationalInference):
 \end{lstlisting}
 
 This method draws $S$ (\texttt{self.n_samples}) samples from the variational
-distribution. The \texttt{sample} method follows the reparameterization
-procedure. The TensorFlow function \texttt{reduce_mean} then
+distribution. The \texttt{sample()} method follows the reparameterization
+procedure. The TensorFlow function \texttt{reduce_mean()} then
 computes the Monte Carlo summation.
 
 The method stores computation of the ELBO in \texttt{self.loss}, which
@@ -145,13 +145,13 @@ reparameterization gradient of the ELBO. The computational graph will
 simply traverse the nodes during backpropagation; unlike the
 \href{tut_KLqp_score.html}{score function gradient}, the
 reparameterization gradient does not need TensorFlow's
-\texttt{stop_gradient} function.
+\texttt{stop_gradient()} function.
 
 There is a nuance here. TensorFlow's optimizers are configured to
 \emph{minimize} an objective function. So the gradient is set to be
 the negative of the ELBO's gradient.
 
-\subsubsection{Stochastic gradient optimization}
+\subsubsection{Stochastic optimization}
 
 Stochastic gradient descent is an extension of gradient descent using
 noisy estimates of the gradient. Under mild conditions, stochastic
@@ -159,7 +159,7 @@ gradient descent finds a (local) optimum of the original (noiseless)
 function.
 
 Edward uses TensorFlow's optimizers.
-This is specified in the \texttt{initialize} method of the
+This is specified in the \texttt{initialize()} method of the
 \texttt{VariationalInference} base class.
 
 \begin{lstlisting}[language=Python]

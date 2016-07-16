@@ -134,7 +134,7 @@
   \big)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="tut_KLqp_score.html">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
 <h3 id="implementation">Implementation</h3>
-<p>We implement the ELBO with the reparameterization gradient in the method <code>build_reparam_loss</code> of the <code>MFVI</code> (mean-field variational inference) class.</p>
+<p>We implement the ELBO with the reparameterization gradient in the method <code>build_reparam_loss()</code> of the <code>MFVI</code> (mean-field variational inference) class.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
     ...
     def build_reparam_loss(self):
@@ -144,12 +144,12 @@
         self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
                                    self.variational.log_prob(z))
         return -self.loss</code></pre>
-<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_samples</code>) samples from the variational distribution. The <code>sample</code> method follows the reparameterization procedure. The TensorFlow function <code>reduce_mean</code> then computes the Monte Carlo summation.</p>
-<p>The method stores computation of the ELBO in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score.html">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>stop_gradient</code> function.</p>
+<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_samples</code>) samples from the variational distribution. The <code>sample()</code> method follows the reparameterization procedure. The TensorFlow function <code>reduce_mean()</code> then computes the Monte Carlo summation.</p>
+<p>The method stores computation of the ELBO in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score.html">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>stop_gradient()</code> function.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
-<h3 id="stochastic-gradient-optimization">Stochastic gradient optimization</h3>
+<h3 id="stochastic-optimization">Stochastic optimization</h3>
 <p>Stochastic gradient descent is an extension of gradient descent using noisy estimates of the gradient. Under mild conditions, stochastic gradient descent finds a (local) optimum of the original (noiseless) function.</p>
-<p>Edward uses TensorFlow’s optimizers. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
+<p>Edward uses TensorFlow’s optimizers. This is specified in the <code>initialize()</code> method of the <code>VariationalInference</code> base class.</p>
 <pre class="python" language="Python"><code>class VariationalInference(Inference):
     ...
     def initialize(self, ...):

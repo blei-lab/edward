@@ -123,7 +123,7 @@ class MAP(VariationalInference):
 
 The \texttt{MAP} class inherits from \texttt{VariationalInference} and
 initializes a point mass as the variational distribution. The
-\texttt{build_loss} method implicitly specifies the gradient of the
+\texttt{build_loss()} method implicitly specifies the gradient of the
 log joint. TensorFlow's automatic differentiation will apply to
 \texttt {z}, thus backpropagating (applying the chain rule of
 differentiation) to compute the gradient of the objective.

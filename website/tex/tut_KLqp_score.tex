@@ -98,7 +98,7 @@ This is an unbiased estimate of the actual gradient of the ELBO.
 \subsubsection{Implementation}
 
 We implement the ELBO with the score function gradient in the method
-\texttt{build_score_loss} of the \texttt{MFVI} (mean-field variational
+\texttt{build_score_loss()} of the \texttt{MFVI} (mean-field variational
 inference) class.
 \begin{lstlisting}[language=Python]
 class MFVI(VariationalInference):
@@ -114,17 +114,17 @@ class MFVI(VariationalInference):
 \end{lstlisting}
 
 This method draws $S$ (\texttt{self.n_samples}) samples from the variational
-model. The TensorFlow function \texttt{reduce_mean} takes the
+model. The TensorFlow function \texttt{reduce_mean()} takes the
 mean over the samples.
 
 The method stores computation of the ELBO in \texttt{self.loss}, which
 can be used to track progress of the inference for diagnostics.
 The method returns an object whose automatic differentiation is the
 score function gradient of the ELBO.  The TensorFlow function
-\texttt{stop_gradient} tells the computational graph to stop
+\texttt{stop_gradient()} tells the computational graph to stop
 traversing nodes to propagate gradients. In this case,
 the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
-because it is not wrapped in a \texttt{stop_gradient}.
+because it is not wrapped in a \texttt{stop_gradient()}.
 
 There is a nuance here. TensorFlow's optimizers are configured to
 \emph{minimize} an objective function. So the gradient is set to be
@@ -138,7 +138,7 @@ gradient descent finds a (local) optimum of the original (noiseless)
 function.
 
 Edward uses TensorFlow's optimizers.
-This is specified in the \texttt{initialize} method of the
+This is specified in the \texttt{initialize()} method of the
 \texttt{VariationalInference} base class.
 
 \begin{lstlisting}[language=Python]

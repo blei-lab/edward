@@ -145,7 +145,9 @@ inference methods, whether it be developing new black box inference
 algorithms or developing new model-specific inference algorithms which
 are tailored to a particular model or restricted class of models.
 We detail this below.</p>
-<p>[display dependency figure]</p>
+<p>includegraphics{images/inference_structure.png}
+{smalltextit{Dependency graph of inference methods.
+Nodes are classes in Edward and arrows represent class inheritance.}}</p>
 <p>There is a abstract base class <code class="docutils literal"><span class="pre">Inference</span></code>, from which all inference
 methods are derived from.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

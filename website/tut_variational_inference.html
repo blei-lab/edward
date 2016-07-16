@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Tutorials</title>
+<title>Edward – Variational inference</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,43 +69,27 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="tutorials">Tutorials</h2>
-<p>Edward provides a testbed for fast experimentation and research with probabilistic models. Here we demonstrate examples from each of the three components defining Edward: <strong>Models</strong>, <strong>Inference</strong>, and <strong>Criticism</strong>. In the <strong>End-to-End</strong> section, we demonstrate examples which sweep through the whole process.</p>
-<h3 id="models">Models</h3>
+<h2 id="variational-inference">Variational inference</h2>
+<p>Variational inference is an umbrella term for algorithms which cast posterior inference as optimization. The core idea involves two steps:</p>
+<ol>
+<li>posit a family of distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> over the posterior latent variables;</li>
+<li>match <span class="math inline">\(q(z\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
+</ol>
+<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(z \mid x)\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
+  \lambda^*
+  &amp;=
+  \arg\min_\lambda \text{divergence}(
+  p(z \mid x)
+  ,
+  q(z\;;\;\lambda)
+  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(z\mid x)\)</span>.</p>
+<p>Edward takes the perspective that the posterior is (typically) intractable, and thus we must build a model of latent variables that best approximates the posterior. It is analogous to the perspective that the true data generating process is unknown, and thus we build models of data to best approximate the true process.</p>
+<p>For details on the design of variational models in Edward, see the <a href="api/edward.models.html">variational model API</a>. For examples of specific variational inference algorithms in Edward, see the other inference <a href="tutorials.html">tutorials</a>.</p>
+<h3 id="references">References</h3>
 <ul>
-<li><a href="tut_model.html">Probability models</a></li>
-<li><a href="tut_bayesian_linear_regression.html">Bayesian linear regression</a></li>
-<li><a href="tut_mixture_gaussian.html">Mixture of Gaussians</a></li>
-<li><a href="tut_gp_classification.html">Gaussian process classification</a></li>
-<li><a href="tut_bayesian_nn.html">Bayesian neural network</a></li>
-<li><a href="tut_decoder.html">Probabilistic decoder</a></li>
-</ul>
-<h3 id="inference">Inference</h3>
-<ul>
-<li><a href="tut_inference.html">Inference of probability models</a></li>
-<li><a href="tut_variational_inference.html">Variational inference</a></li>
-<li><a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a>
-<ul>
-<li><a href="tut_KLqp_score.html">Score function gradient</a></li>
-<li><a href="tut_KLqp_reparam.html">Reparameterization gradient</a></li>
-</ul></li>
-<li><a href="tut_KLpq.html"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization</a></li>
-<li><a href="tut_MAP.html">Maximum a posteriori estimation</a>
-<ul>
-<li><a href="tut_MAP_Laplace.html">Laplace approximation</a></li>
-</ul></li>
-</ul>
-<h3 id="criticism">Criticism</h3>
-<ul>
-<li><a href="tut_point_eval.html">Point-based evaluations</a></li>
-<li><a href="tut_PPC.html">Posterior predictive checks</a></li>
-</ul>
-<h3 id="end-to-end">End-to-end</h3>
-<ul>
-<li><a href="tut_supervised_regression.html">Supervised learning (Regression)</a></li>
-<li><a href="tut_supervised_classification.html">Supervised learning (Classification)</a></li>
-<li><a href="tut_unsupervised.html">Unsupervised learning</a></li>
-<li><a href="tut_latent_space_models.html">Latent space models for neural data</a></li>
+<li>Hinton, G. and Van Camp, D (1993). Keeping the neural networks simple by minimizing the description length of the weights. In Computational Learning Theory, pp. 5–13. ACM.</li>
+<li>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. Machine Learning, 37(2), 183-233.</li>
+<li>Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods for mixtures of experts. In Neural Information Processing Systems.</li>
 </ul>
 </div>
 </div>

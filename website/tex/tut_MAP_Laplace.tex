@@ -60,7 +60,8 @@ class Laplace(MAP):
         super(Laplace, self).finalize()
 \end{lstlisting}
 
-The \texttt{Laplace} simply defines an additional method \texttt{finalize} to
+The \texttt{Laplace} simply defines an additional method
+\texttt{finalize()} to
 run after \texttt{MAP} has found the posterior mode. The
 \texttt{edward.util.hessian} method uses TensorFlow's automatic differentiation
 to compute the Hessian without any additional mathematical derivations.

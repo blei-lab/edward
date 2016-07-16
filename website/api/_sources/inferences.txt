@@ -14,7 +14,9 @@ algorithms or developing new model-specific inference algorithms which
 are tailored to a particular model or restricted class of models.
 We detail this below.
 
-[display dependency figure]
+\includegraphics{images/inference_structure.png}
+{\small\textit{Dependency graph of inference methods.
+Nodes are classes in Edward and arrows represent class inheritance.}}
 
 There is a abstract base class ``Inference``, from which all inference
 methods are derived from.
