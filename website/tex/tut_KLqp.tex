@@ -4,28 +4,6 @@
 % Begin the content of the page
 \subsection{$\text{KL}(q\|p)$ minimization}
 
-Variational inference is a powerful approach for inferring the posterior. The
-core idea involves two steps:
-\begin{enumerate}
-   \item posit a family of distributions $q(z\;;\;\lambda)$ over the
-   posterior latent variables;
-   \item match $q(z\;;\;\lambda)$ to the posterior by optimizing over its
-   parameters $\lambda$.
- \end{enumerate}
-This strategy converts the problem of computing the posterior $p(z \mid x)$ into
-an optimization problem, which minimizes a divergence measure
-\begin{align*}
-  \lambda^*
-  &=
-  \arg\min_\lambda \text{divergence}(
-  p(z \mid x)
-  ,
-  q(z\;;\;\lambda)
-  ).
-\end{align*}
-The optimized distribution $q(z\;;\;\lambda)$ is then used as a
-proxy to the posterior $p(z\mid x)$.
-
 One form of variational inference minimizes the Kullback-Leibler divergence
 \textbf{from} $q(z\;;\;\lambda)$ \textbf{to} $p(z \mid x)$,
 \begin{align*}
@@ -92,8 +70,9 @@ tractable. The optimization problem we seek to solve becomes
   &=
   \arg \max_\lambda \text{ELBO}(\lambda).
 \end{align*}
-
-What does maximizing the ELBO do? Expanding the ELBO reveals a trade-off
+As per its name, the ELBO is a lower bound on the evidence, and
+optimizing it tries to maximize the probability of observing the data.
+What does maximizing the ELBO do? Splitting the ELBO reveals a trade-off
 \begin{align*}
   \text{ELBO}(\lambda)
   &=\;
@@ -113,3 +92,19 @@ optimization.
     \item \href{tut_KLqp_score.html}{Score function gradient}
     \item \href{tut_KLqp_reparam.html}{Reparameterization gradient}
   \end{itemize}
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Hinton, G. and Van Camp, D (1993). Keeping the neural networks
+  simple by minimizing the description length of the weights. In
+  Computational Learning Theory, pp. 5–13. ACM.
+\item
+  Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., & Saul, L. K.
+  (1999). An introduction to variational methods for graphical models.
+  Machine Learning, 37(2), 183-233.
+\item
+  Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods
+  for mixtures of experts. In Neural Information Processing Systems.
+\end{itemize}

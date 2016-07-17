@@ -81,12 +81,10 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data in Edward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../models_models.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../models_distributions.html">Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../stats_distributions.html">Statistics Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../inferences.html">Inference Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../criticisms.html">Criticism Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../edward.html">edward package</a></li>
 </ul>
 
@@ -133,16 +131,16 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.models.distributions</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.stats</span> <span class="kn">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">dirichlet</span><span class="p">,</span> <span class="n">invgamma</span><span class="p">,</span> <span class="n">multinomial</span>
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="kn">import</span> <span class="n">cumprod</span><span class="p">,</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">to_simplex</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">edward.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">dirichlet</span><span class="p">,</span> <span class="n">invgamma</span><span class="p">,</span> <span class="n">multinomial</span>
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">cumprod</span><span class="p">,</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">to_simplex</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
 
 
 <div class="viewcode-block" id="Distribution"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution">[docs]</a><span class="k">class</span> <span class="nc">Distribution</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -186,9 +184,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="k">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
 <div class="viewcode-block" id="Distribution.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sample from ``Distribution``.</span>
@@ -230,10 +228,10 @@
 <span class="sd">                ...,</span>
 <span class="sd">                sum_{idx in shape} log p(xs[n, idx] | params[idx]) ]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over each random variable.</span>
-        <span class="c1"># If univariate distribution, this is over all indices; if</span>
-        <span class="c1"># multivariate distribution, this is over all but the last</span>
-        <span class="c1"># index.</span>
+        <span class="c"># Loop over each random variable.</span>
+        <span class="c"># If univariate distribution, this is over all indices; if</span>
+        <span class="c"># multivariate distribution, this is over all but the last</span>
+        <span class="c"># index.</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">xs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -262,8 +260,8 @@
                 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])):</span>
                     <span class="n">log_prob</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_prob_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># len(self.shape) &gt;= 4</span>
-            <span class="c1"># There should be a generic solution.</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># len(self.shape) &gt;= 4</span>
+            <span class="c"># There should be a generic solution.</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">log_prob</span></div>
@@ -323,13 +321,13 @@
 
 <span class="sd">    See :class:`edward.stats.distributions.Bernoulli`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Bernoulli</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
-        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">p_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">p_unconst</span><span class="p">)</span>
 
@@ -337,22 +335,22 @@
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s2">&quot;probability: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;probability: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Bernoulli.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Define Python function which returns samples as a Numpy</span>
-        <span class="c1"># array. This is necessary for sampling from distributions</span>
-        <span class="c1"># unavailable in TensorFlow natively.</span>
+        <span class="c"># Define Python function which returns samples as a Numpy</span>
+        <span class="c"># array. This is necessary for sampling from distributions</span>
+        <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-            <span class="c1"># get `size` from lexical scoping</span>
+            <span class="c"># get `size` from lexical scoping</span>
             <span class="k">return</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># set shape from unknown shape</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
 <div class="viewcode-block" id="Bernoulli.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c1"># slice over sample size</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Bernoulli.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -364,17 +362,17 @@
 
 <span class="sd">    See :class:`edward.stats.distributions.Beta`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Beta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
-        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">alpha_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">alpha_unconst</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">beta_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
             <span class="n">beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">beta_unconst</span><span class="p">)</span>
 
@@ -384,23 +382,23 @@
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
         <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
-        <span class="k">return</span> <span class="s2">&quot;shape: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-               <span class="s2">&quot;scale: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;shape: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
+               <span class="s">&quot;scale: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Beta.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Define Python function which returns samples as a Numpy</span>
-        <span class="c1"># array. This is necessary for sampling from distributions</span>
-        <span class="c1"># unavailable in TensorFlow natively.</span>
+        <span class="c"># Define Python function which returns samples as a Numpy</span>
+        <span class="c"># array. This is necessary for sampling from distributions</span>
+        <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-            <span class="c1"># get `size` from lexical scoping</span>
+            <span class="c"># get `size` from lexical scoping</span>
             <span class="k">return</span> <span class="n">beta</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># set shape from unknown shape</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
 <div class="viewcode-block" id="Beta.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c1"># slice over sample size</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Beta.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -412,13 +410,13 @@
 
 <span class="sd">    See :class:`edward.stats.distributions.Dirichlet`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Dirichlet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
-        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">alpha_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">alpha_unconst</span><span class="p">)</span>
 
@@ -426,18 +424,18 @@
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s2">&quot;concentration: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;concentration: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Dirichlet.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Define Python function which returns samples as a Numpy</span>
-        <span class="c1"># array. This is necessary for sampling from distributions</span>
-        <span class="c1"># unavailable in TensorFlow natively.</span>
+        <span class="c"># Define Python function which returns samples as a Numpy</span>
+        <span class="c"># array. This is necessary for sampling from distributions</span>
+        <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
-            <span class="c1"># get `size` from lexical scoping</span>
+            <span class="c"># get `size` from lexical scoping</span>
             <span class="k">return</span> <span class="n">dirichlet</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># set shape from unknown shape</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
 <div class="viewcode-block" id="Dirichlet.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
@@ -445,8 +443,8 @@
 <span class="sd">        ``log p(xs[:, idx, :] | params[idx, :])``</span>
 <span class="sd">        where ``idx`` is of dimension ``shape[:-1]``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="c1"># slice over multivariate dimension</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c1"># slice over sample size</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="c"># slice over multivariate dimension</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">dirichlet</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Dirichlet.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -458,19 +456,19 @@
 
 <span class="sd">    See :class:`edward.stats.distributions.InvGamma`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">InvGamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
-        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">alpha_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
-            <span class="n">alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">alpha_unconst</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-2</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">alpha_unconst</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">2</span>
 
-        <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">beta_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
-            <span class="n">beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">beta_unconst</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-2</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">beta_unconst</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">2</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
@@ -478,23 +476,23 @@
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
         <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
-        <span class="k">return</span> <span class="s2">&quot;shape: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-               <span class="s2">&quot;scale: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;shape: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
+               <span class="s">&quot;scale: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="InvGamma.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Define Python function which returns samples as a Numpy</span>
-        <span class="c1"># array. This is necessary for sampling from distributions</span>
-        <span class="c1"># unavailable in TensorFlow natively.</span>
+        <span class="c"># Define Python function which returns samples as a Numpy</span>
+        <span class="c"># array. This is necessary for sampling from distributions</span>
+        <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
-            <span class="c1"># get `size` from lexical scoping</span>
+            <span class="c"># get `size` from lexical scoping</span>
             <span class="k">return</span> <span class="n">invgamma</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># set shape from unknown shape</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
 <div class="viewcode-block" id="InvGamma.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c1"># slice over sample size</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">invgamma</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="InvGamma.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -517,16 +515,16 @@
 <span class="sd">    distribution), it assumes a single trial (n=1) when sampling and</span>
 <span class="sd">    calculating the density.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multinomial is not supported for K=1. Use Bernoulli.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Multinomial is not supported for K=1. Use Bernoulli.&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">Multinomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
-        <span class="k">if</span> <span class="n">pi</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pi</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">real_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">K_minus_one</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="n">pi_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">real_shape</span> <span class="o">+</span> <span class="p">(</span><span class="n">K_minus_one</span><span class="p">,</span> <span class="p">)]))</span>
@@ -536,18 +534,18 @@
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s2">&quot;probability: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">pi</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;probability: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">pi</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Multinomial.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Define Python function which returns samples as a Numpy</span>
-        <span class="c1"># array. This is necessary for sampling from distributions</span>
-        <span class="c1"># unavailable in TensorFlow natively.</span>
+        <span class="c"># Define Python function which returns samples as a Numpy</span>
+        <span class="c"># array. This is necessary for sampling from distributions</span>
+        <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-            <span class="c1"># get `size` from lexical scoping</span>
+            <span class="c"># get `size` from lexical scoping</span>
             <span class="k">return</span> <span class="n">multinomial</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">p</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># set shape from unknown shape</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
 <div class="viewcode-block" id="Multinomial.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
@@ -555,8 +553,8 @@
 <span class="sd">        ``log p(xs[:, idx, :] | params[idx, :])``</span>
 <span class="sd">        where ``idx`` is of dimension ``shape[:-1]``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">idx_K</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="c1"># slice over multivariate dimension</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx_K</span> <span class="c1"># slice over sample size</span>
+        <span class="n">idx_K</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="c"># slice over multivariate dimension</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx_K</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">multinomial</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">[</span><span class="n">idx_K</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Multinomial.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -568,16 +566,16 @@
 
 <span class="sd">    See :class:`edward.stats.distributions.Norm`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">True</span>
 
-        <span class="k">if</span> <span class="n">loc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">loc</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">scale_unconst</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
             <span class="n">scale</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">scale_unconst</span><span class="p">)</span>
 
@@ -587,14 +585,14 @@
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
         <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">])</span>
-        <span class="k">return</span> <span class="s2">&quot;mean: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-               <span class="s2">&quot;std dev: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;mean: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
+               <span class="s">&quot;std dev: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Normal.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span></div>
 
 <div class="viewcode-block" id="Normal.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c1"># slice over sample size</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Normal.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -614,23 +612,23 @@
 <span class="sd">    params : np.ndarray or tf.Tensor, optional</span>
 <span class="sd">             If not specified, everything initialized to :math:`\mathcal{N}(0,1)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PointMass</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">True</span>
 
-        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;parameter values: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;None&quot;</span>
+            <span class="k">return</span> <span class="s">&quot;parameter values: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="s">&quot;None&quot;</span>
 
         <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s2">&quot;parameter values: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;parameter values: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PointMass.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.PointMass.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sample from a point mass distribution.</span>
@@ -654,7 +652,7 @@
 <span class="sd">            A vector where the jth element is 1 if xs[j, idx] is equal</span>
 <span class="sd">            to params[idx], 0 otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c1"># slice over sample size</span>
+        <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div></div>
 </pre></div>
 

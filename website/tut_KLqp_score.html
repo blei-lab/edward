@@ -132,9 +132,16 @@
   \nabla_\lambda \log q(z_s\;;\;\lambda)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO.</p>
 <h3 id="implementation">Implementation</h3>
-<p>We implement the ELBO with the score function gradient in the method <code>build_score_loss</code> of the <code>MFVI</code> (mean-field variational inference) class.</p>
+<p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the score function gradient in the class <code>MFVI</code> (mean-field variational inference). It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
-    ...
+    def __init__(self, *args, **kwargs):
+        super(MFVI, self).__init__(*args, **kwargs)
+
+    def initialize(self, n_samples=1, ...):
+        ...
+        self.n_samples = n_samples
+        return super(MFVI, self).initialize(*args, **kwargs)
+
     def build_score_loss(self):
         x = self.data
         z = self.variational.sample(self.n_samples)
@@ -143,30 +150,16 @@
         losses = self.model.log_prob(x, z) - q_log_prob
         self.loss = tf.reduce_mean(losses)
         return -tf.reduce_mean(q_log_prob * stop_gradient(losses))</code></pre>
-<p>This method draws <span class="math inline">\(S\)</span> (<code>self.n_samples</code>) samples from the variational model. The TensorFlow function <code>reduce_mean</code> takes the mean over the samples.</p>
-<p>The method stores computation of the ELBO in <code>self.loss</code>, which can be used to track progress of the inference for diagnostics. The method returns an object whose automatic differentiation is the score function gradient of the ELBO. The TensorFlow function <code>stop_gradient</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, because it is not wrapped in a <code>stop_gradient</code>.</p>
-<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function, so the gradient is set to be the negative of the ELBO’s gradient.</p>
-<h3 id="stochastic-optimization">Stochastic optimization</h3>
-<p>Stochastic gradient descent is an extension of gradient descent using noisy estimates of the gradient. Under mild conditions, stochastic gradient descent finds a (local) optimum of the original (noiseless) function.</p>
-<p>Edward uses TensorFlow’s optimizers. This is specified in the <code>initialize</code> method of the <code>VariationalInference</code> base class.</p>
-<pre class="python" language="Python"><code>class VariationalInference(Inference):
-    ...
-    def initialize(self, ...):
-        ...
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                     scope=scope)
-
-        # Use ADAM with a decaying scale factor.
-        global_step = tf.Variable(0, trainable=False)
-        starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                            global_step,
-                                            100, 0.9, staircase=True)
-        optimizer = tf.train.AdamOptimizer(learning_rate)
-        self.train = optimizer.minimize(loss, global_step=global_step,
-                                        var_list=var_list)</code></pre>
-<p>This sets up TensorFlow to optimize the ELBO using ADAM’s learning rate combined with an exponentially decaying scale factor.</p>
+<p>Two methods are added: <code>initialize()</code> and <code>build_score_loss()</code>. The method <code>initialize()</code> follows the same initialization as <code>VariationalInference</code>, and adds an argument: <code>n_samples</code> for the number of samples from the variational model.</p>
+<p>The method <code>build_score_loss()</code> implements the ELBO and its gradient. It draws <code>self.n_samples</code> samples from the variational model. It registers the Monte Carlo estimate of the ELBO in TensorFlow’s computational graph, and stores it in <code>self.loss</code>, to track progress of the inference for diagnostics.</p>
+<p>The method returns an object whose automatic differentiation is the score function gradient of the ELBO. The TensorFlow function <code>stop_gradient()</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, one for each sample <span class="math inline">\(z_s\)</span>. We multiply it by <code>losses</code> element-wise and return the mean.</p>
+<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
 <p>See the <a href="api/index.html">API</a> for more details.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Paisley, J., Blei, D. M., &amp; Jordan, M. (2012). Variational Bayesian Inference with Stochastic Search. In International Conference on Machine Learning.</li>
+<li>Ranganath, R., Gerrish, S., &amp; Blei, D. M. (2014). Black Box Variational Inference. In Artificial Intelligence and Statistics.</li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

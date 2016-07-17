@@ -70,32 +70,24 @@
 </div>
 <div class="nine columns">
 <h2 id="delving-in">Delving In</h2>
-<p>Edward enables black box inference for probability models. Its design reflects the building blocks for inference and model criticism. Here we describe the motivation behind Edward’s design and specify its internal workings.</p>
+<p>Edward’s design reflects the building blocks for probabilistic modeling. It defines interchangeable components, enabling fast experimentation and research with probabilistic models. Here we provide an overview of the design.</p>
 <p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
-<p>First gather data from a real-world process. Then cycle through Box’s loop:</p>
+<p>First gather data from a real-world phenomena. Then cycle through Box’s loop:</p>
 <ol>
-<li>Build a probabilistic model of the process</li>
-<li>Reason about the process given model and data</li>
-<li>Criticize the model, revise and repeat</li>
+<li>Build a probabilistic model of the phenomena.</li>
+<li>Reason about the phenomena given model and data.</li>
+<li>Criticize the model, revise and repeat.</li>
 </ol>
 <p><img alt="image" src="images/model_infer_criticize.png"/></p>
-<p>Here’s a toy example. A child flips a coin ten times, with the data of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>. We are interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the process: use an algorithm to reason about the model given data. Third, criticize the model: analyze whether the model captures the real-world process of coin flips. If it doesn’t, then revise the model and repeat.</p>
-<p>This process defines the design of Edward. Four primary objects enable the above analysis.</p>
+<p>Here’s a toy example. A child flips a coin ten times, with the set of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>, where <code>0</code> denotes tails and <code>1</code> denotes heads. She is interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the phenomena: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world phenomena of coin flips. If it doesn’t, then revise the model and repeat.</p>
+<p>This process defines the design of Edward. Four objects organize the analysis.</p>
 <h3 id="data">Data</h3>
-<p>A data object contains measurements. It is a Python dictionary, typically comprised of strings naming a data object and NumPy arrays representing their values. For example,</p>
-<pre class="python" language="Python"><code>my_data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre>
-<p>Data objects can also have their values be TensorFlow tensors in order to deal with settings such as when the data does not fit in memory. For more details see the <a href="api/data.html">data API</a>.</p>
+<p>Data defines a set of observations. Edward represents data as a Python dictionary, typically comprised of strings naming a data object and NumPy arrays representing its values. For example,</p>
+<pre class="python" language="Python"><code>data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre>
+<p>Data can also have its values be TensorFlow tensors in order to deal with settings such as when the data does not fit in memory.</p>
 <h3 id="models">Models</h3>
-<p>There are two types of model objects in Edward:</p>
-<ol>
-<li>Probability models of data, <span class="math inline">\(p(x,z)\)</span></li>
-<li>Variational models of latent variables <span class="math inline">\(q(z\;;\;\lambda)\)</span></li>
-</ol>
-<p><strong>Probability Models.</strong> Edward supports probability models specified in TensorFlow, Python, PyMC3, or Stan. A probability model has the following structure.</p>
-<pre class="python" language="Python"><code>import edward as ed
-import tensorflow as tf
-
-class probability_model():
+<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Edward supports several languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan. In general, a probability model is a class with the structure</p>
+<pre class="python" language="Python"><code>class Model:
     def __init__(...):
         ...
         self.n_vars = ...
@@ -105,12 +97,15 @@ class probability_model():
         log_likelihood = ...
         return log_prior + log_likelihood
 
-my_model = probability_model(...)</code></pre>
+model = Model(...)</code></pre>
 <p>The field <code>n_vars</code> denotes the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>n_vars=2*N</code> latent variables for <code>N</code> observations.</p>
-<p>The method <code>log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> contains the data and <code>zs</code> are the latent variables. <code>xs</code> can be a single data point or a batch, and analogously, <code>zs</code> can be a single set or multiple sets of latent variables.</p>
-<p>This describes the probability model, which is a joint distribution of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Given a model and data, we aim to reason about <span class="math inline">\(z\)</span>: the model’s hidden patterns conditioned on the data. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden patterns, and its variance describes the uncertainty around our best guess.</p>
-<p><strong>Variational Models.</strong> Edward uses variational inference to approximate the posterior. To this end, Edward has a <code>Variational</code> class and a library of <code>Distribution</code> objects. Variational models combine these using the <code>add()</code> syntax.</p>
-<p>For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math display">\[\begin{aligned}
+<p>The method <code>log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> can be a single data point or a batch of data points, and analogously, <code>zs</code> can be a single set or multiple sets of latent variables. The method returns a vector of log density evaluations, one for each set of latent variables.</p>
+<h3 id="inference">Inference</h3>
+<p>Given a model and data, we aim to reason about <span class="math inline">\(z\)</span>: the model’s hidden structure. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden structure, and its variance describes the uncertainty around our best guess.</p>
+<p>Edward has many inference algorithms and makes it easy to develop new ones.</p>
+<p><img alt="image" src="images/inference_structure.png"/> <span><em>Dependency graph of inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
+<p>Edward focuses on variational inference. It views posterior inference as positing a model of the latent variables <span class="math inline">\(q(z \;;\; \lambda)\)</span> and optimizing it to approximate the posterior <span class="math inline">\(p(z \mid x)\)</span>.</p>
+<p>Edward provides a <code>Variational</code> class and a library of <code>Distribution</code> objects. Variational models combine these using the <code>add()</code> syntax. For example, to specify this variational model (e.g. for a Gaussian mixture) <span class="math display">\[\begin{aligned}
   q(z \;;\; \lambda)
   &amp;=
   \text{Dirichlet}(z_\pi)
@@ -120,29 +115,29 @@ my_model = probability_model(...)</code></pre>
   \text{InvGamma}(z_\sigma)\end{aligned}\]</span> we would write</p>
 <pre class="python" language="Python"><code>from edward.models import Variational, Dirichlet, Normal, InvGamma
 
-my_variational = Variational()
-my_variational.add(Dirichlet(K))
-my_variational.add(Normal(K*D))
-my_variational.add(InvGamma(K*D))</code></pre>
-<p>Ordering matters: variational models must match the same ordering as latent variables accessed in <code>probability_model.log_prob(xs, zs)</code>.</p>
-<h3 id="inference">Inference</h3>
-<p>Edward implements a variety of inference methods. Current techniques leverage variational inference, which seeks to match the variational model <span class="math inline">\(q(z \;;\; \lambda)\)</span> to the posterior of the probability model <span class="math inline">\(p(z \mid x)\)</span>.</p>
-<p><img alt="image" src="images/inference_structure.png"/> [in caption-style.] Dependency graph of inference methods. Each node is a class in Edward and arrows represent class inheritance.</p>
-<p>Each algorithm minimizes a different loss function between the variational model and the posterior. Algorithms derived from <code>VariationalInference</code> take as input a probability model, a variational model, and data.</p>
-<p>For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
-  \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we would write</p>
-<pre class="python" language="Python"><code>inference = ed.KLpq(my_model, my_variational, my_data)
+variational = Variational()
+variational.add(Dirichlet(K))
+variational.add(Normal(K*D))
+variational.add(InvGamma(K*D))</code></pre>
+<p>Each algorithm derived from <code>VariationalInference</code> minimizes a different loss function between the variational model and the posterior. For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
+  \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we first instantiate the inference class and then run it.</p>
+<pre class="python" language="Python"><code>inference = ed.KLpq(model, variational, data)
 inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <p>This runs the <code>KLpq</code> minimization algorithm for <code>500</code> iterations, using a batch of <code>5</code> data points per iteration.</p>
-<p>Edward offers many inference methods; they are best explored through <a href="tutorials.html">tutorials</a>.</p>
 <h3 id="criticism">Criticism</h3>
-<p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, we can never validate whether a model is true—no model will be true in practice—but we can seek to uncover where the model goes wrong. Criticism can help justify the model fit as an approximation or point to good directions for looping back and revising the model.</p>
-<p>To this end, Edward provides a <code>criticisms</code> module that implements:</p>
-<ol>
-<li>posterior predictive checks</li>
-<li>metric-based evaluations (e.g. mean squared error, binary accuracy)</li>
-</ol>
-<p>See the <a href="tutorials.html">tutorials</a> for how to introduce criticism into your modeling workflow.</p>
+<p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, no model will be true in practice; in other words, “all models are wrong”. Thus we must seek to uncover where the model goes wrong.</p>
+<p>Edward provides criticism using</p>
+<ul>
+<li>point-based evaluations, such as mean squared error or classification accuracy</li>
+</ul>
+<pre class="python" language="Python"><code>ed.evaluate('mean_squared_error', model, variational, data)</code></pre>
+<ul>
+<li>posterior predictive checks, for making probabilistic assessments of the model fit using discrepancy functions</li>
+</ul>
+<pre class="python" language="Python"><code>T = lambda data, z=None: tf.reduce_mean(data['x'])
+print(ed.ppc(model, variational, data, T))</code></pre>
+<p>See the <a href="tutorials.html">tutorials</a> for examples of models, inference, and criticism in Edward.</p>
+<p>See the <a href="api/index.html">API</a> for details of how Edward designs these objects.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>

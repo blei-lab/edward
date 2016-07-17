@@ -91,7 +91,6 @@ class BayesianNN:
     &quot;&quot;&quot;Bayesian neural network for regression&quot;&quot;&quot;
     def __init__(self, layer_sizes):
         self.layer_sizes = layer_sizes
-        self.n_layers = len(layer_sizes)
         self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
@@ -111,7 +110,10 @@ class BayesianNN:
 <p>Let’s use a toy dataset of 50 observations with a cosine relationship.</p>
 <pre class="python" language="Python"><code>import numpy as np
 
-data = {&#39;x&#39;: np.array(...), &#39;y&#39;: np.array(...)}</code></pre>
+x = np.linspace(-3, 3, num=50)
+y = np.cos(x) + norm.rvs(0, 0.1, size=50)
+x = x.reshape((N, 1))
+data = {&#39;x&#39;: x, &#39;y&#39;: y}</code></pre>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
 <p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation</p>
 <pre class="python" language="Python"><code>from edward.models import Variational, Normal
@@ -125,7 +127,7 @@ variational.add(Normal(model.n_vars))</code></pre>
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=1000, n_minibatch=10)</code></pre>
 <p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
-<p><img src="images/getting-started-fig2.png" alt="image" width="700" /></p>
+<p><img src="images/getting-started-fig1.png" alt="image" width="700" /></p>
 <p>The model has learned the cosine relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
 <p>To learn more about Edward, <a href="delving-in.html">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="tutorials.html">tutorials</a>.</p>

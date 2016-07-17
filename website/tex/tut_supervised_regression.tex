@@ -125,10 +125,11 @@ print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))
 ## 0.0262413
 \end{lstlisting}
 
-The mean squared error is quite low given the magnitude of the output.
+The trained model makes predictions with low mean squared error
+(relative to the magnitude of the output).
 
 In addition to the model's \texttt{log_prob()} method typically required for
-inference, we have a \texttt{predict()} method which makes
+inference, it has a \texttt{predict()} method which makes
 predictions. This method is required for point-based evaluation. For
 more details on criticism, see the \href{tut_point_eval.html}{point-based
 evaluation tutorial}.

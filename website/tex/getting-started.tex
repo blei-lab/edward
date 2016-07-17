@@ -38,7 +38,6 @@ class BayesianNN:
     """Bayesian neural network for regression"""
     def __init__(self, layer_sizes):
         self.layer_sizes = layer_sizes
-        self.n_layers = len(layer_sizes)
         self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
@@ -65,7 +64,10 @@ Let's use a toy dataset of 50 observations with a cosine relationship.
 \begin{lstlisting}[language=Python]
 import numpy as np
 
-data = {'x': np.array(...), 'y': np.array(...)}
+x = np.linspace(-3, 3, num=50)
+y = np.cos(x) + norm.rvs(0, 0.1, size=50)
+x = x.reshape((N, 1))
+data = {'x': x, 'y': y}
 \end{lstlisting}
 \includegraphics[width=700px]{images/getting-started-fig0.png}
 
@@ -95,7 +97,7 @@ distribution over neural networks, so let's do a graphical check. Draw
 neural networks from the inferred model and visualize how well it
 fits the data.
 
-\includegraphics[width=700px]{images/getting-started-fig2.png}
+\includegraphics[width=700px]{images/getting-started-fig1.png}
 
 The model has learned the cosine relationship between $x$ and $y$.
 

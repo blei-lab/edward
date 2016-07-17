@@ -7,10 +7,9 @@
 Posterior predictive checks (PPCs; Rubin, 1984; Gelman et al., 1996)
 analyze the degree to which data generated from the model deviate from
 data generated from the true distribution. They can be used either
-numerically to quantify this degree, or graphically to analyze this
-degree qualitatively.
-PPCs can be thought of as a probabilistic version of point-based
-evaluations.
+numerically to quantify this degree, or graphically to visualize this
+degree. PPCs can be thought of as a probabilistic generalization of
+point-based evaluations.
 
 PPCs focus on the posterior predictive distribution
 \begin{align*}
@@ -25,14 +24,14 @@ The model's posterior predictive can be used to generate new data
 given past observations and can also make predictions on new data
 given past observations.
 It is formed by calculating the likelihood of the new data, averaged
-over every possible set of latent variables according to the posterior
+over every set of latent variables according to the posterior
 distribution.
 
 The simplest PPC works by applying a test statistic on new data
 generated from the posterior predictive, such as
 $T(x_\text{new}) = \max(x_\text{new})$.  Applying $T(x_\text{new})$ to
 new data over many data replications induces a distribution. We compare
-this distribution to the test statistic on the real data $T(x)$.
+this distribution to the test statistic applied to the real data $T(x)$.
 
 \includegraphics{images/ppc.png}
 
@@ -43,12 +42,19 @@ for the model.
 
 More generally, the test statistic can also be a function of the
 model's latent variables $T(x, z)$, known as a discrepancy function.
+Examples of discrepancy functions are the metrics used for point-based
+evaluation. We can now interpret the point-based evaluation as a
+special case of PPCs: it simply calculates $T(x, z)$ over the real
+data and without a reference distribution in mind. A reference
+distribution allows us to make probabilistic statements about the
+point, in reference to an overall distribution.
 
 \subsubsection{Implementation}
 
 Edward implements PPCs through the \texttt{sample_likelihood()}
-function in the probability model. This method samples a dataset from the
-model likelihood
+method in the probability model. This method samples a dataset
+$x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)$ from the
+model likelihood given a set of latent variables.
 \begin{lstlisting}[language=Python]
 class BetaBernoulli:
     def __init__(self):
@@ -61,14 +67,14 @@ class BetaBernoulli:
         return log_lik + log_prior
 
     def sample_likelihood(self, zs, size):
-    """x | z ~ p(x | z)"""
+        """x | z ~ p(x | z)"""
         out = []
         for s in range(zs.shape[0]):
             out += [{'x': bernoulli.rvs(zs[s, :], size=size).reshape((size,))}]
         return out
 \end{lstlisting}
 
-The \texttt{ed.ppc()} method then provides a scaffold for studying
+The \texttt{ed.ppc()} method provides a scaffold for studying
 various discrepancy functions by repeatedly simulating datasets from the
 posterior predictive distribution
 \begin{lstlisting}[language=Python]
@@ -76,20 +82,22 @@ T = lambda y, z=None: tf.reduce_mean(y['x'])
 print(ed.ppc(model, variational, data, T))
 \end{lstlisting}
 
-See the \href{api/index.html}{API} for further implementation details.
+See the \href{api/criticisms.html}{criticism API} for further details.
 
 PPCs are an excellent tool for revising models, simplifying or
 expanding the current model as one examines how well it fits the data.
-They are inspired by classical hypothesis testing (Meng, 1994),
-under the philosophy that models should be criticized under the
-frequentist perspective of large samples.
+They are inspired by prior checks (Box, 1980) and classical hypothesis
+testing (Meng, 1994), under the philosophy that models should be
+criticized under the frequentist perspective of large sample
+assessment.
 
-PPCs can also be applied for other tasks such as hypothesis testing,
-model comparison, model selection, and model averaging.  It's
-important to note that while they can be applied as a form of Bayesian
-hypothesis testing, hypothesis testing is generally not recommended,
-as binary decision making from a single test is not as common a use
-case as one might believe.
+PPCs can also be applied to tasks such as hypothesis testing, model
+comparison, model selection, and model averaging.  It's important to
+note that while they can be applied as a form of Bayesian hypothesis
+testing, hypothesis testing is generally not recommended: binary
+decision making from a single test is not as common a use case as one
+might believe. We recommend performing many PPCs to get a holistic
+understanding of the model fit.
 
 \subsubsection{References}\label{references}
 

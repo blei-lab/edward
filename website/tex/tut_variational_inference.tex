@@ -1,0 +1,56 @@
+% Define the subtitle of the page
+\title{Variational inference}
+
+% Begin the content of the page
+\subsection{Variational inference}
+
+Variational inference is an umbrella term for algorithms which cast
+posterior inference as optimization. The core idea involves two steps:
+\begin{enumerate}
+   \item posit a family of distributions $q(z\;;\;\lambda)$ over the
+   latent variables;
+   \item match $q(z\;;\;\lambda)$ to the posterior by optimizing over its
+   parameters $\lambda$.
+ \end{enumerate}
+This strategy converts the problem of computing the posterior $p(z \mid x)$ into
+an optimization problem, which minimizes a divergence measure
+\begin{align*}
+  \lambda^*
+  &=
+  \arg\min_\lambda \text{divergence}(
+  p(z \mid x)
+  ,
+  q(z\;;\;\lambda)
+  ).
+\end{align*}
+The optimized distribution $q(z\;;\;\lambda)$ is then used as a
+proxy to the posterior $p(z\mid x)$.
+
+Edward takes the perspective that the posterior is (typically)
+intractable, and thus we must build a model of latent variables that
+best approximates the posterior.
+It is analogous to the perspective
+that the true data generating process is unknown, and thus we build
+models of data to best approximate the true process.
+
+For details on the variational inference base class defined in Edward,
+or the design of variational models, see the
+\href{api/inferences.html}{inference API}.
+For examples of specific variational inference algorithms in
+Edward, see the other inference \href{tutorials.html}{tutorials}.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Hinton, G. and Van Camp, D (1993). Keeping the neural networks
+  simple by minimizing the description length of the weights. In
+  Computational Learning Theory, pp. 5–13. ACM.
+\item
+  Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., & Saul, L. K.
+  (1999). An introduction to variational methods for graphical models.
+  Machine Learning, 37(2), 183-233.
+\item
+  Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods
+  for mixtures of experts. In Neural Information Processing Systems.
+\end{itemize}

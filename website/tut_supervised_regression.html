@@ -152,8 +152,8 @@ inference.run(n_iter=250, n_print=10)</code></pre>
 x_test, y_test = data_test[&#39;x&#39;], data_test[&#39;y&#39;]
 print(ed.evaluate(&#39;mse&#39;, model, variational, {&#39;x&#39;: x_test}, y_test))
 ## 0.0262413</code></pre>
-<p>The mean squared error is quite low given the magnitude of the output.</p>
-<p>In addition to the model’s <code>log_prob()</code> method typically required for inference, we have a <code>predict()</code> method which makes predictions. This method is required for point-based evaluation. For more details on criticism, see the <a href="tut_point_eval.html">point-based evaluation tutorial</a>.</p>
+<p>The trained model makes predictions with low mean squared error (relative to the magnitude of the output).</p>
+<p>In addition to the model’s <code>log_prob()</code> method typically required for inference, it has a <code>predict()</code> method which makes predictions. This method is required for point-based evaluation. For more details on criticism, see the <a href="tut_point_eval.html">point-based evaluation tutorial</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

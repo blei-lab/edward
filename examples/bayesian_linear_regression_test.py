@@ -60,8 +60,7 @@ class LinearModel:
 
     def predict(self, xs, zs):
         """Return a prediction for each data point, averaging over
-        each set of latent variables z in zs; and also return the true
-        value."""
+        each set of latent variables z in zs."""
         x_test = xs['x']
         b = zs[:, 0]
         W = tf.transpose(zs[:, 1:])

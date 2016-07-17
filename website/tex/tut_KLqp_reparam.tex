@@ -62,7 +62,7 @@ $z(\cdot;\lambda)$ encapsulates the variational parameters instead,
 and following the process is equivalent to directly drawing $z$ from
 the original distribution.
 
-The reparameterization gradient estimator leverages this property of the
+The reparameterization gradient leverages this property of the
 variational distribution to write the gradient as
 \begin{align*}
   \nabla_\lambda\;
@@ -118,12 +118,23 @@ faster convergence in a large set of problems.
 
 \subsubsection{Implementation}
 
-We implement the ELBO with the reparameterization gradient in the method
-\texttt{build_reparam_loss} of the \texttt{MFVI} (mean-field variational
-inference) class.
+We implement $\text{KL}(q\|p)$ minimization with the
+reparameterization gradient in the class \texttt{MFVI} (mean-field
+variational inference). It inherits from
+\texttt{VariationalInference}, which
+provides a collection of default methods
+such as an optimizer.
+
 \begin{lstlisting}[language=Python]
 class MFVI(VariationalInference):
-    ...
+    def __init__(self, *args, **kwargs):
+        super(MFVI, self).__init__(*args, **kwargs)
+
+    def initialize(self, n_samples=1, ...):
+        ...
+        self.n_samples = n_samples
+        return super(MFVI, self).initialize(*args, **kwargs)
+
     def build_reparam_loss(self):
         x = self.data
         z = self.variational.sample(self.n_samples)
@@ -133,55 +144,39 @@ class MFVI(VariationalInference):
         return -self.loss
 \end{lstlisting}
 
-This method draws $S$ (\texttt{self.n_samples}) samples from the variational
-distribution. The \texttt{sample} method follows the reparameterization
-procedure. The TensorFlow function \texttt{reduce_mean} then
-computes the Monte Carlo summation.
+Two methods are added: \texttt{initialize()} and
+\texttt{build_reparam_loss()}. The method \texttt{initialize()}
+follows the same initialization as \texttt{VariationalInference}, and
+adds an argument: \texttt{n_samples} for the number of samples from
+the variational model.
 
-The method stores computation of the ELBO in \texttt{self.loss}, which
-can be used to track progress of the inference for diagnostics.  The
-method returns an object whose automatic differentiation is the
+The method \texttt{build_reparam_loss()} implements the ELBO and its
+gradient. It draws \texttt{self.n_samples} samples from the
+variational model. It registers the Monte Carlo
+estimate of the ELBO in TensorFlow's computational graph, and stores it
+in \texttt{self.loss}, to track progress of the inference for diagnostics.
+
+The method returns an object whose automatic differentiation is the
 reparameterization gradient of the ELBO. The computational graph will
 simply traverse the nodes during backpropagation; unlike the
 \href{tut_KLqp_score.html}{score function gradient}, the
 reparameterization gradient does not need TensorFlow's
-\texttt{stop_gradient} function.
+\texttt{stop_gradient()} function.
 
 There is a nuance here. TensorFlow's optimizers are configured to
-\emph{minimize} an objective function, so the gradient is set to be
+\emph{minimize} an objective function. So the gradient is set to be
 the negative of the ELBO's gradient.
 
-\subsubsection{Stochastic gradient optimization}
-
-Stochastic gradient descent is an extension of gradient descent using
-noisy estimates of the gradient. Under mild conditions, stochastic
-gradient descent finds a (local) optimum of the original (noiseless)
-function.
-
-Edward uses TensorFlow's optimizers.
-This is specified in the \texttt{initialize} method of the
-\texttt{VariationalInference} base class.
-
-\begin{lstlisting}[language=Python]
-class VariationalInference(Inference):
-    ...
-    def initialize(self, ...):
-        ...
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                     scope=scope)
-
-        # Use Adam with a decaying scale factor
-        global_step = tf.Variable(0, trainable=False)
-        starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                            global_step,
-                                            100, 0.9, staircase=True)
-        optimizer = tf.train.AdamOptimizer(learning_rate)
-        self.train = optimizer.minimize(loss, global_step=global_step,
-                                        var_list=var_list)
-\end{lstlisting}
-
-This sets up TensorFlow to optimize the ELBO using ADAM's learning rate
-combined with an exponentially decaying scale factor.
-
 See the \href{api/index.html}{API} for more details.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Rezende, D. J., Mohamed, S., & Wierstra, D. (2014). Stochastic
+  Backpropagation and Approximate Inference in Deep Generative Models.
+  In International Conference on Machine Learning.
+\item
+  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational
+  Bayes. In International Conference on Learning Representations.
+\end{itemize}

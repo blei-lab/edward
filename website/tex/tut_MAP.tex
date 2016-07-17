@@ -75,8 +75,8 @@ for a data set $x=\{x_n\}$,
   \arg \min_z
   -\frac{1}{N}\sum_{n=1}^N \log p(x\mid z).
 \end{align*}
-where the last expression can be thought of as an approximation to the cross
-entropy between the true data distribution and the model $p(x\mid z)$,
+The last expression can be thought of as an approximation to the cross
+entropy between the true data distribution and $p(x\mid z)$,
 using a set of $N$ data points.
 
 \subsubsection{Gradient descent}
@@ -105,7 +105,7 @@ posterior using a point to summarize the full distribution.
 class MAP(VariationalInference):
     def __init__(self, model, data=None, params=None):
         with tf.variable_scope("variational"):
-            if hasattr(model, 'num_vars'):
+            if hasattr(model, 'n_vars'):
                 variational = Variational()
                 variational.add(PointMass(model.n_vars, params))
             else:
@@ -121,12 +121,21 @@ class MAP(VariationalInference):
         return -self.loss
 \end{lstlisting}
 
-The \texttt{MAP} class automatically initializes a point mass
-variational distribution. The \texttt{build_loss} method implicitly specifies the gradient
-of the log joint. TensorFlow's automatic differentiation will apply to \texttt
-{z}, thus backpropagating (applying the chain rule of differentiation)
-to compute the gradient of the objective.
+The \texttt{MAP} class inherits from \texttt{VariationalInference} and
+initializes a point mass as the variational distribution. It requires
+defining only one method:
+\texttt{build_loss()}, which implicitly specifies the gradient of the
+log joint. TensorFlow's automatic differentiation will apply to
+\texttt {z}, thus backpropagating (applying the chain rule of
+differentiation) to compute the gradient of the objective.
 
 There is a nuance here. TensorFlow's optimizers are configured to
-\emph{minimize} an objective function, so the gradient is set to be
+\emph{minimize} an objective function. So the gradient is set to be
 the negative of the log density's gradient.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Murphy, K. (2012). Machine Learning: A Probabilistic Perspective. MIT Press.
+\end{itemize}

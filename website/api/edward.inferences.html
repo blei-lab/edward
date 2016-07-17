@@ -83,12 +83,10 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data in Edward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_models.html">Building Probabilistic Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models_distributions.html">Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_distributions.html">Statistics Distributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
@@ -185,10 +183,11 @@ according to the Stan program&#8217;s data block.</li>
 </table>
 <p class="rubric">Notes</p>
 <p>If <cite>data</cite> is not passed in, the dictionary is empty.</p>
-<p>Three options are available for batch training:</p>
-<ol class="arabic simple">
-<li>internally if user passes in data as a dictionary of NumPy
-arrays;</li>
+<p>Three options are available for batch training:
+1. internally if user passes in data as a dictionary of NumPy</p>
+<blockquote>
+<div>arrays;</div></blockquote>
+<ol class="arabic simple" start="2">
 <li>externally if user passes in data as a dictionary of
 TensorFlow placeholders (and manually feeds them);</li>
 <li>externally if user passes in data as TensorFlow tensors

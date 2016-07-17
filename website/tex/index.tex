@@ -26,17 +26,22 @@ It supports \textbf{modeling languages} including
 It supports \textbf{inference} via
 \begin{itemize}
 \item Variational inference
-\begin{itemize}
+  \begin{itemize}
     \item Black box variational inference
     \item Stochastic variational inference
     \item Variational auto-encoders
     \item Inclusive KL divergence: $\text{KL}(p\|q)$
-    \item Laplace approximation
   \end{itemize}
 \item Marginal posterior optimization (empirical Bayes, marginal maximum
 likelihood)
+  \begin{itemize}
+    \item Variational EM
+  \end{itemize}
 \item Maximum a posteriori estimation (penalized maximum likelihood, maximum
   likelihood)
+  \begin{itemize}
+  \item Laplace approximation
+  \end{itemize}
 \end{itemize}
 
 It supports \textbf{criticism} of the model and inference via
@@ -44,6 +49,11 @@ It supports \textbf{criticism} of the model and inference via
 \item Point-based evaluations
 \item Posterior predictive checks
 \end{itemize}
+
+Edward is built on top of
+\href{https://www.tensorflow.org}{TensorFlow}, enabling features such
+as computational graphs, distributed training, CPU/GPU integration,
+automatic differentiation, and visualization with TensorBoard.
 
 \subsubsection{Authors}
 
@@ -56,11 +66,16 @@ are
   \item \href{http://www.ee.columbia.edu/~dliang/}{Dawen Liang}
   \item \href{http://maja-rita-rudolph.com/}{Maja Rudolph}
 \end{itemize}
-We welcome contributions by submitting issues, feature requests, or by solving
-any current issues!
+We are very open to research collaboration, and welcome other
+researchers and developers to contribute. Check out the
+\href{https://github.com/blei-lab/edward/issues}{Github issues} for
+unsolved software problems. For broader research problems, shoot
+one of us an e-mail.
 
-We thank Rajesh Ranganath, Allison Chaney, Jaan Altosaar, and other
-members of the Blei Lab for their helpful feedback and advice.
+Edward has benefited enormously from the helpful feedback and advice
+of many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt
+Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and additional
+members of the Blei Lab, Google Brain, and Google Research.
 
 \subsubsection{Citation}
 
