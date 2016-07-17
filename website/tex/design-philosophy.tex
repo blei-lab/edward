@@ -11,18 +11,14 @@
 \item
   to serve as a foundation for research;
 \item
-  to provide a unified library for inference and criticism, with
-  modeling tools at our disposal.
+  to serve as a unified library for modeling, inference, and criticism.
 \end{enumerate}
 
-As a research tool, the code base serves as a testbed for fast
-experimentation, so that we can easily play with extensions of current
-paradigms. For example, to evaluate new inference algorithms, the
-experiments only need to be written once and we can simply swap the
-inference with the newly proposed algorithm. For certain inference
-algorithms, this corresponds to inheriting from a current inference
-class and simply writing one function. This idea applies to all
-components of probabilistic modeling: we can leverage the built-in
+As a research tool, the code base provides a testbed for fast
+experimentation. For example, to evaluate new inference algorithms,
+the experiments only need to be written once and we can simply swap
+the inference with the newly proposed algorithm. This idea applies to
+all components of probabilistic modeling: we can leverage the built-in
 inference algorithms to develop new complex models, or use the
 built-in models and inference to develop new criticism techniques.
 
@@ -31,47 +27,47 @@ ranging from classical hierarchical models on small data sets to
 complex deep probabilistic models on large data sets. With
 \href{https://www.tensorflow.org}{TensorFlow} as a backend, Edward can
 leverage features such as computational graphs, distributed training,
-and CPU/GPU integration to deploy probabilistic modeling at scale. It
-also has the fundamentals: for example, linear model examples, mixture
-model examples, probabilistic neural networks, and stochastic and
-black box variational inference.
+and CPU/GPU integration to deploy probabilistic modeling at scale.
 
 \subsection{Related Software}\label{related-software}
 
 There are several notable themes in Edward.
 
 \textbf{Probabilistic programming.}
-There has been outstanding work on generic
-languages for specifying probabilistic models, or probabilistic
+There has been outstanding work on programming languages which specify
+broad classes of probabilistic models, or probabilistic
 programs. Among these include
 \href{http://probcomp.csail.mit.edu/venture/}{Venture},
 \href{http://www.robots.ox.ac.uk/~fwood/anglican/literature/index.html}{Anglican},
-\href{https://www.cra.com/work/case-studies/figaro}{Figaro},
+\href{http://webppl.org}{WebPPL},
 \href{http://mc-stan.org}{Stan}, and
-\href{http://dippl.org/chapters/02-webppl.html}{WebPPL}.
-Edward focuses not only on easily building models and
-automated inference engines, but on
-all aspects of data analysis.
-We are agnostic to the modeling language.
-For example,
-we use Stan's modeling language as an easy way to specify models in
-Edward, and our library enables fast experimentation on their
-inference and criticism.
-
-\textbf{Black box inference.}
-Black box algorithms are typically Monte Carlo methods, and
-by design make very few assumptions about the model.
+\href{https://www.cra.com/work/case-studies/figaro}{Figaro}.
 The most important distinction in Edward comes from our motivation.
 We are interested in deploying probabilistic models to a myriad of
 real world applications, ranging from the size of data and
 data structure, such as large text corpora or many brief audio signals,
 to the size of model and class of models, such as small nonparametric
-models or deep generative models. This presents a new set of
-challenges in both research design and software implementation.
+models or deep generative models.
+%As one consequence,
+%Edward focuses not only on the abstraction of model and inference, but
+%across what we view encapsulates all data analysis: modeling, inference,
+%and criticism.
+As one consequence, Edward is built for efficient (and possibly
+distributed) training. As another, we do not prioritize development of
+modeling languages. For example, we instead leverage Stan's
+language as an easy way to specify models in Edward.
+
+\textbf{Black box inference.}
+Black box algorithms are typically Monte Carlo methods, and
+by design make very few assumptions about the model.
+Our motivation as outlined above presents a new set of
+challenges in both inference research and their software design.
 As one consequence, we focus on variational inference.
-As another consequence, our inference
+As a second consequence, we encourage active development
+of inference by providing a class hierarchy of inference algorithms.
+As a third consequence, our inference
 algorithms aim to take advantage of as much structure as possible from
-the model. Thus Edward supports all types of inference, whether they
+the model. Edward supports all types of inference, whether they
 be black box or model-specific.
 
 \textbf{Computational frameworks.}
@@ -80,8 +76,8 @@ learning: as of this date, this includes
 \href{https://www.tensorflow.org}{TensorFlow},
 \href{http://deeplearning.net/software/theano/}{Theano},
 \href{http://torch.ch}{Torch},
-\href{http://rll.berkeley.edu/cgt/}{Computational Graph Toolkit},
-\href{https://github.com/NervanaSystems/neon}{neon}, and
+\href{https://github.com/NervanaSystems/neon}{neon},
+\href{http://rll.berkeley.edu/cgt/}{Computational Graph Toolkit}, and
 \href{https://github.com/stan-dev/math}{Stan Math Library}. These are
 incredible tools which Edward employs as a backend. In
 terms of abstraction, Edward sits at one level higher. For example,

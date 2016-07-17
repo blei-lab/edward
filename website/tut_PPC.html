@@ -85,15 +85,7 @@
 <h3 id="implementation">Implementation</h3>
 <p>Edward implements PPCs through the <code>sample_likelihood()</code> method in the probability model. This method samples a dataset <span class="math inline">\(x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)\)</span> from the model likelihood given a set of latent variables.</p>
 <pre class="python" language="Python"><code>class BetaBernoulli:
-    def __init__(self):
-        self.num_vars = 1
-
-    def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                           for z in tf.unpack(zs)])
-        return log_lik + log_prior
-
+    ...
     def sample_likelihood(self, zs, size):
         """x | z ~ p(x | z)"""
         out = []
