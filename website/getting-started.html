@@ -83,7 +83,7 @@
 <pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
 <p>See the <a href="troubleshooting.html">troubleshooting page</a> for detailed installation instructions.</p>
 <h3 id="your-first-edward-program">Your first Edward program</h3>
-<p>Probabilistic models are built in Edward using one of the available modeling languages. Here we use TensorFlow to define a Bayesian neural network. It is a neural network with a prior distribution on its weights. (This example is abridged; full source <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
+<p>Probabilistic models are built in Edward using one of the available modeling languages. Here we use TensorFlow to define a Bayesian neural network: a neural network with a prior distribution on its weights. (This example is abridged; full source <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
 <pre class="python" language="Python"><code>import tensorflow as tf
 from edward.stats import norm
 
@@ -107,7 +107,7 @@ class BayesianNN:
 <p>Instantiating this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>
 <p>defines a two-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
-<p>Let’s use a toy dataset of 50 observations with a cosine relationship.</p>
+<p>First, simulate a toy dataset of 50 observations with a cosine relationship.</p>
 <pre class="python" language="Python"><code>import numpy as np
 
 x = np.linspace(-3, 3, num=50)
@@ -115,13 +115,13 @@ y = np.cos(x) + norm.rvs(0, 0.1, size=50)
 x = x.reshape((N, 1))
 data = {&#39;x&#39;: x, &#39;y&#39;: y}</code></pre>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
-<p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation</p>
+<p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation as</p>
 <pre class="python" language="Python"><code>from edward.models import Variational, Normal
 
 variational = Variational()
 variational.add(Normal(model.n_vars))</code></pre>
 <p>The number of latent variables <code>model.n_vars</code> is the number of weights and biases in the neural network.</p>
-<p>Run mean-field variational inference. We use <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
+<p>Now, run mean-field variational inference. We specify <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
 <pre class="python" language="Python"><code>import edward as ed
 
 inference = ed.MFVI(model, variational, data)

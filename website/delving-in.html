@@ -70,23 +70,23 @@
 </div>
 <div class="nine columns">
 <h2 id="delving-in">Delving In</h2>
-<p>Edward’s design reflects the building blocks for probabilistic modeling. It defines interchangeable components, enabling fast experimentation and research with probabilistic models. Here we provide an overview of the design.</p>
+<p>Edward’s design reflects the building blocks for probabilistic modeling. It defines interchangeable components, enabling rapid experimentation and research with probabilistic models. Here we provide an overview of the design.</p>
 <p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
-<p>First gather data from a real-world phenomena. Then cycle through Box’s loop:</p>
+<p>First gather data from some real-world phenomena. Then cycle through Box’s loop:</p>
 <ol>
 <li>Build a probabilistic model of the phenomena.</li>
 <li>Reason about the phenomena given model and data.</li>
 <li>Criticize the model, revise and repeat.</li>
 </ol>
 <p><img alt="image" src="images/model_infer_criticize.png"/></p>
-<p>Here’s a toy example. A child flips a coin ten times, with the set of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>, where <code>0</code> denotes tails and <code>1</code> denotes heads. She is interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the phenomena: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world phenomena of coin flips. If it doesn’t, then revise the model and repeat.</p>
-<p>This process defines the design of Edward. Four objects organize the analysis.</p>
+<p>Here’s a toy example. A child flips a coin ten times, with the set of outcomes being <code>[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]</code>, where <code>0</code> denotes tails and <code>1</code> denotes heads. She is interested in the probability that the coin lands heads. First, build a model: assume the coin flips are independent and land heads with the same probability. Second, reason about the phenomenon: use an algorithm to infer the model given data. Third, criticize the model: analyze whether the model captures the real-world phenomenon of coin flips. If it doesn’t, then revise the model and repeat.</p>
+<p>This process defines the design of Edward. Four objects enable this analysis.</p>
 <h3 id="data">Data</h3>
 <p>Data defines a set of observations. Edward represents data as a Python dictionary, typically comprised of strings naming a data object and NumPy arrays representing its values. For example,</p>
 <pre class="python" language="Python"><code>data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre>
-<p>Data can also have its values be TensorFlow tensors in order to deal with settings such as when the data does not fit in memory.</p>
+<p>Data can also store TensorFlow tensors to contend with situations where the observations do not fit in memory.</p>
 <h3 id="models">Models</h3>
-<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Edward supports several languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan. In general, a probability model is a class with the structure</p>
+<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. Edward supports several languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan. In general, a probability model is a class with structure</p>
 <pre class="python" language="Python"><code>class Model:
     def __init__(...):
         ...
@@ -99,7 +99,7 @@
 
 model = Model(...)</code></pre>
 <p>The field <code>n_vars</code> denotes the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>n_vars=2*N</code> latent variables for <code>N</code> observations.</p>
-<p>The method <code>log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> can be a single data point or a batch of data points, and analogously, <code>zs</code> can be a single set or multiple sets of latent variables. The method returns a vector of log density evaluations, one for each set of latent variables.</p>
+<p>The method <code>log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> can be a single data point or a batch of data points. Analogously, <code>zs</code> can be a single set of latent variables, or a batch thereof. The method returns a vector of log density evaluations, one for each set of latent variables.</p>
 <h3 id="inference">Inference</h3>
 <p>Given a model and data, we aim to reason about <span class="math inline">\(z\)</span>: the model’s hidden structure. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden structure, and its variance describes the uncertainty around our best guess.</p>
 <p>Edward has many inference algorithms and makes it easy to develop new ones.</p>
@@ -125,8 +125,8 @@ variational.add(InvGamma(K*D))</code></pre>
 inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <p>This runs the <code>KLpq</code> minimization algorithm for <code>500</code> iterations, using a batch of <code>5</code> data points per iteration.</p>
 <h3 id="criticism">Criticism</h3>
-<p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, no model will be true in practice; in other words, “all models are wrong”. Thus we must seek to uncover where the model goes wrong.</p>
-<p>Edward provides criticism using</p>
+<p>Criticizing models and their inference is a crucial step in analysis. Following falsificationists such as Popper and Box, no model will exactly describe the natural phenomena we seek to analyze; in other words, “all models are wrong”. Thus we would like to uncover where and how the model goes wrong.</p>
+<p>Edward explores model and inference criticism using</p>
 <ul>
 <li>point-based evaluations, such as mean squared error or classification accuracy</li>
 </ul>
@@ -137,7 +137,7 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <pre class="python" language="Python"><code>T = lambda data, z=None: tf.reduce_mean(data['x'])
 print(ed.ppc(model, variational, data, T))</code></pre>
 <p>See the <a href="tutorials.html">tutorials</a> for examples of models, inference, and criticism in Edward.</p>
-<p>See the <a href="api/index.html">API</a> for details of how Edward designs these objects.</p>
+<p>See the <a href="api/index.html">API</a> for details of how Edward implements these objects.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>

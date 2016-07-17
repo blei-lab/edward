@@ -4,15 +4,14 @@
 % Begin the content of the page
 \subsection{Probability models}
 
-A probabilistic model makes an assertion of how data is generated.
-It forms a distribution over observed and unobserved random variables.
-This is written as a joint distribution
+A probabilistic model asserts how observations from a natural phenomenon arise.
+The model is a \emph{joint distribution}
 \begin{align*}
   p(x, z)
 \end{align*}
-of observed variables $x$ corresponding to the data, and latent
+of observed variables $x$ corresponding to data, and latent
 variables $z$ that provide the hidden structure to generate from $x$.
-The joint has a convenient factorization into two components.
+The joint distribution factorizes into two components.
 
 The \emph{likelihood}
 \begin{align*}
@@ -28,8 +27,7 @@ The \emph{prior}
   p(z)
 \end{align*}
 is a probability distribution that describes the latent variables
-present in the data. It posits a generating process of the
-data's hidden structure.
+present in the data. It posits a generating process of the hidden structure.
 
 For details on how to specify a model in Edward, see the
 \href{api/models.html}{model API}. We describe several examples in detail

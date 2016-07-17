@@ -70,7 +70,7 @@
 </div>
 <div class="nine columns">
 <h2 id="posterior-predictive-checks">Posterior predictive checks</h2>
-<p>Posterior predictive checks (PPCs; Rubin, 1984; Gelman et al., 1996) analyze the degree to which data generated from the model deviate from data generated from the true distribution. They can be used either numerically to quantify this degree, or graphically to visualize this degree. PPCs can be thought of as a probabilistic generalization of point-based evaluations.</p>
+<p>Posterior predictive checks (PPCs) analyze the degree to which data generated from the model deviate from data generated from the true distribution. They can be used either numerically to quantify this degree, or graphically to visualize this degree. PPCs can be thought of as a probabilistic generalization of point-based evaluations.</p>
 <p>PPCs focus on the posterior predictive distribution <span class="math display">\[\begin{aligned}
   p(x_\text{new} \mid x)
   &amp;=
@@ -104,14 +104,14 @@
 <pre class="python" language="Python"><code>T = lambda y, z=None: tf.reduce_mean(y['x'])
 print(ed.ppc(model, variational, data, T))</code></pre>
 <p>See the <a href="api/criticisms.html">criticism API</a> for further details.</p>
-<p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by prior checks (Box, 1980) and classical hypothesis testing (Meng, 1994), under the philosophy that models should be criticized under the frequentist perspective of large sample assessment.</p>
+<p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by prior checks and classical hypothesis testing, under the philosophy that models should be criticized under the frequentist perspective of large sample assessment.</p>
 <p>PPCs can also be applied to tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while they can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended: binary decision making from a single test is not as common a use case as one might believe. We recommend performing many PPCs to get a holistic understanding of the model fit.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Box, G.E.P. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.</li>
-<li>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. Statistica Sinica.</li>
-<li>Meng, X.-L. (1994). Posterior predictive <span class="math inline">\(p\)</span>-values. The Annals of Statistics, 1–19.</li>
 <li>Rubin, D. B. (1984). Bayesianly justifiable and relevant frequency calculations for the applied statistician. The Annals of Statistics, 12(4), 1151–1172.</li>
+<li>Meng, X.-L. (1994). Posterior predictive <span class="math inline">\(p\)</span>-values. The Annals of Statistics, 1–19.</li>
+<li>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. Statistica Sinica.</li>
 </ul>
 </div>
 </div>

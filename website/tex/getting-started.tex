@@ -25,8 +25,7 @@ installation instructions.
 
 Probabilistic models are built in Edward using one of the available
 modeling languages. Here we use TensorFlow to define a Bayesian neural
-network. It is a neural network with a prior distribution on its
-weights.
+network: a neural network with a prior distribution on its weights.
 (This example is abridged; full source
 \href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
 {here}.)
@@ -60,7 +59,7 @@ model = BayesianNN(layer_sizes=[1, 2, 2, 1])
 defines a two-layer Bayesian neural network with $\tanh$
 nonlinearities.
 
-Let's use a toy dataset of 50 observations with a cosine relationship.
+First, simulate a toy dataset of 50 observations with a cosine relationship.
 \begin{lstlisting}[language=Python]
 import numpy as np
 
@@ -73,7 +72,7 @@ data = {'x': x, 'y': y}
 
 Next, make inferences about the model from data.
 Edward focuses on variational inference. Specify a mean-field normal
-approximation
+approximation as
 \begin{lstlisting}[language=Python]
 from edward.models import Variational, Normal
 
@@ -83,7 +82,7 @@ variational.add(Normal(model.n_vars))
 The number of latent variables \texttt{model.n_vars} is the number
 of weights and biases in the neural network.
 
-Run mean-field variational inference. We use \texttt{1000} iterations
+Now, run mean-field variational inference. We specify \texttt{1000} iterations
 with a batch of \texttt{10} datapoints per iteration.
 \begin{lstlisting}[language=Python]
 import edward as ed

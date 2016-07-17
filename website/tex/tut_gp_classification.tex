@@ -36,7 +36,7 @@ set.
 The above applies directly for regression where $\mathbb{y}$ is a
 real-valued response, but not for (binary) classification, where $\mathbb{y}$
 is a label in $\{0,1\}$. To deal with classification, we interpret the
-response as latent variables which is squashed in $[0,1]$. We then
+response as latent variables which is squashed into $[0,1]$. We then
 draw from a Bernoulli to determine the label, with probability given
 by the squashed value.
 
@@ -57,9 +57,8 @@ with
 covariance matrix given by evaluating $k(x, x^\prime)$ for each pair of inputs
 $(x, x^\prime)$.
 
-Let's build the model in Edward using TensorFlow, fixing the kernel
-to be the RBF kernel, also as the squared exponential or exponentiated
-quadratic.
+Let's build the model in Edward using TensorFlow, using a radial basis function 
+(RBF) kernel, also known as the squared exponential or exponentiated quadratic.
 \begin{lstlisting}[language=Python]
 class GaussianProcess:
     """

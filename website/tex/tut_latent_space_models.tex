@@ -2,17 +2,16 @@
 
 \subsection{Latent space models for neural data}
 
-Many interesting data sets are networks. For example, social networks or biological neural networks.
+Many interesting data sets exhibit a network structure. For example, social
+networks or biological neural networks.
 
-Often the question arises what we can learn about the nodes of the
-network from the connectivity patterns. This question can be addressed
-by fitting a latent space model (Hoff et al., 2002).
-Latent space models are latent variable models which embed the nodes
-of the network in a latent space which captures attributes of the
-nodes. The likelihood to form an edge between two nodes depends on
-their distance in the latent space.
+What we can learn about the nodes of the network from its connectivity patterns?
+We can begin to study this using a latent space model.
+Latent space models embed the nodes of the network in a latent space which
+captures attributes of the nodes. The likelihood to form an edge between two
+nodes depends on their distance in the latent space.
 
-We demonstrate how to do this in Edward with an example from neuroscience.
+Let us study an dataset from from neuroscience.
 The script can be found
 \href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}{here}.
 
@@ -21,9 +20,9 @@ The script can be found
 The data comes from \href{http://www-personal.umich.edu/~mejn/netdata/}{Mark Newman's repository}.
 It is a weighted, directed network representing the neural network of
 the nematode
-\href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C.  Elegans}
-compiled by Watts and Strogatz (1998) from original experimental data
-by White et al. (1986).
+\href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C.~Elegans}
+compiled by Watts and Strogatz from original experimental data
+by White and co-authors.
 
 The neural network consists of around $300$ neurons. Each connection
 is associated with a weight (positive integer) capturing the strength
@@ -36,12 +35,15 @@ data, N = load_celegans_brain()
 
 \subsubsection{Model}
 
-Here we will fit a latent space model to the C.Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.
+Here we will fit a latent space model to the C.~Elegans neural network. What can
+we learn about the neurons from how they are connected? We will learn a latent
+embedding for each neuron to capture the similarities between them.
 
-Each neuron $n$ is a node in the network and is associated with a latent $K$-dimensional vector $z_n$.
+Each neuron $n$ is a node in the network and is associated with a latent
+$K$-dimensional vector $z_n$.
 
 We place a Gaussian prior on each of the latent vectors.
-In Hoff et al. (2002), the log-odds of an edge between node $i$ and
+The log-odds of an edge between node $i$ and
 $j$ is proportional to the Euclidean distance between the latent
 representations of the nodes $|z_i- z_j|$. Here, we
 model the weights ($Y_{ij}$) of the edges with a Poisson likelihood.
@@ -108,21 +110,19 @@ See this extended tutorial about
 
 \subsubsection{References}
 
-\begin{thebibliography}{}
-\bibitem[\protect\astroncite{Hoff et~al.}{2002}]{hoff2002latent}
-Hoff, P.~D., Raftery, A.~E., and Handcock, M.~S. (2002).
-\newblock Latent space approaches to social network analysis.
-\newblock {\em Journal of the american Statistical association},
-  97(460):1090--1098.
-
-\bibitem[\protect\astroncite{Watts and Strogatz}{1998}]{watts1998collective}
-Watts, D.~J. and Strogatz, S.~H. (1998).
-\newblock Collective dynamics of ‘small-world’networks.
-\newblock {\em nature}, 393(6684):440--442.
-
-\bibitem[\protect\astroncite{White et~al.}{1986}]{white1986structure}
+\begin{itemize}
+\item
 White, J.~G., Southgate, E., Thomson, J.~N., and Brenner, S. (1986).
 \newblock The structure of the nervous system of the nematode caenorhabditis
   elegans.
-\newblock {\em Philos Trans R Soc Lond B Biol Sci}, 314(1165):1--340.
-\end{thebibliography}
+\newblock \emph{Philos Trans R Soc Lond B Biol Sci}, 314(1165):1--340.
+\item
+Watts, D.~J. and Strogatz, S.~H. (1998).
+\newblock Collective dynamics of ‘small-world’ networks.
+\newblock \emph{Nature}, 393(6684):440--442.
+\item
+Hoff, P.~D., Raftery, A.~E., and Handcock, M.~S. (2002).
+\newblock Latent space approaches to social network analysis.
+\newblock \emph{Journal of the american Statistical association},
+  97(460):1090--1098.
+\end{itemize}

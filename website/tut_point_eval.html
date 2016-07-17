@@ -98,7 +98,7 @@ ed.evaluate('mean_absolute_error', model, variational, data)</code></pre>
 <p>The <code>data</code> can be data held-out from training time, making it easy to implement cross-validated techniques.</p>
 <p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
 <pre class="python" language="Python"><code>ed.evaluate('log_likelihood', model, variational, data)</code></pre>
-<p>Point-based evaluations are formally known as scoring rules (Gneiting and Raftery, 2007) in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>
+<p>Point-based evaluations are formally known as scoring rules in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>
 <p>See the <a href="api/criticisms.html">criticism API</a> for further details. An example of point-based evaluation is in the <a href="tut_supervised_regression.html">supervised learning (regression)</a> tutorial.</p>
 <h3 id="references">References</h3>
 <ul>

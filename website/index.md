@@ -38,8 +38,7 @@ It supports **inference** via
 
     -   Variational EM
 
--   Maximum a posteriori estimation (penalized maximum likelihood,
-    maximum likelihood)
+-   Maximum a posteriori estimation (penalized maximum likelihood)
 
     -   Laplace approximation
 
@@ -68,15 +67,16 @@ are
 
 -   [Maja Rudolph](http://maja-rita-rudolph.com/)
 
-We are very open to research collaboration, and welcome other
-researchers and developers to contribute. Check out the [Github
-issues](https://github.com/blei-lab/edward/issues) for unsolved software
-problems. For broader research problems, shoot one of us an e-mail.
+We are open to collaboration, and welcome researchers and developers to
+contribute. Check out the [Github
+issues](https://github.com/blei-lab/edward/issues) for feature requests
+and other software problems. For broader research challenges, shoot one
+of us an e-mail.
 
 Edward has benefited enormously from the helpful feedback and advice of
 many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt
-Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and additional
-members of the Blei Lab, Google Brain, and Google Research.
+Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and other members
+of the Blei Lab, Google Brain, and Google Research.
 
 ### Citation
 

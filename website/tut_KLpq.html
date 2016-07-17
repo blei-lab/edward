@@ -100,8 +100,8 @@
   \big[
   \nabla_\lambda\;
   \log q(z\;;\;\lambda)
-  \big].\end{aligned}\]</span> Both <span class="math inline">\(\text{KL}(p\|q)\)</span> and its gradient are intractable because of the posterior expectation. We can use <a href="tut_KLpq_ais.html">importance sampling</a> to both estimate the objective and calculate stochastic gradients.</p>
-<h3 id="importance-sampling">Importance sampling</h3>
+  \big].\end{aligned}\]</span> Both <span class="math inline">\(\text{KL}(p\|q)\)</span> and its gradient are intractable because of the posterior expectation. We can use importance sampling to both estimate the objective and calculate stochastic gradients.</p>
+<h3 id="adaptive-importance-sampling">Adaptive Importance sampling</h3>
 <p>First rewrite the expectation to be with respect to the variational distribution, <span class="math display">\[\begin{aligned}
   -
   \mathbb{E}_{p(z \mid x)}

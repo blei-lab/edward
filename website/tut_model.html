@@ -75,12 +75,12 @@
     </div>
     <div class="nine columns">
 <h2 id="probability-models">Probability models</h2>
-<p>A probabilistic model makes an assertion of how data is generated. It forms a distribution over observed and unobserved random variables. This is written as a joint distribution <span class="math display">\[\begin{aligned}
-  p(x, z)\end{aligned}\]</span> of observed variables <span class="math inline">\(x\)</span> corresponding to the data, and latent variables <span class="math inline">\(z\)</span> that provide the hidden structure to generate from <span class="math inline">\(x\)</span>. The joint has a convenient factorization into two components.</p>
+<p>A probabilistic model asserts how observations from a natural phenomenon arise. The model is a <em>joint distribution</em> <span class="math display">\[\begin{aligned}
+  p(x, z)\end{aligned}\]</span> of observed variables <span class="math inline">\(x\)</span> corresponding to data, and latent variables <span class="math inline">\(z\)</span> that provide the hidden structure to generate from <span class="math inline">\(x\)</span>. The joint distribution factorizes into two components.</p>
 <p>The <em>likelihood</em> <span class="math display">\[\begin{aligned}
   p(x \mid z)\end{aligned}\]</span> is a probability distribution that describes how any data <span class="math inline">\(x\)</span> depend on the latent variables <span class="math inline">\(z\)</span>. The likelihood posits a data generating process, where the data <span class="math inline">\(x\)</span> are assumed drawn from the likelihood conditioned on a particular hidden pattern described by <span class="math inline">\(z\)</span>.</p>
 <p>The <em>prior</em> <span class="math display">\[\begin{aligned}
-  p(z)\end{aligned}\]</span> is a probability distribution that describes the latent variables present in the data. It posits a generating process of the data’s hidden structure.</p>
+  p(z)\end{aligned}\]</span> is a probability distribution that describes the latent variables present in the data. It posits a generating process of the hidden structure.</p>
 <p>For details on how to specify a model in Edward, see the <a href="api/models.html">model API</a>. We describe several examples in detail in the other model <a href="tutorials.html">tutorials</a>.</p>
     </div>
   </div>

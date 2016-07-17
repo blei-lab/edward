@@ -48,7 +48,7 @@ posterior $p(z \mid x)$. To tackle this, consider the property
 \end{align*}
 where the left hand side is the logarithm of the marginal likelihood
 $p(x) = \int p(x,z) \text{d}z$, also known as the model evidence. (Try
-deriving this using Bayes rule!)
+deriving this using Bayes' rule!)
 
 The evidence is a constant with respect to the variational parameters $\lambda$,
 so we can minimize $\text{KL}(q\|p)$ by instead maximizing
@@ -101,10 +101,10 @@ optimization.
   simple by minimizing the description length of the weights. In
   Computational Learning Theory, pp. 5–13. ACM.
 \item
+  Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods
+  for mixtures of experts. In Neural Information Processing Systems.
+\item
   Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., & Saul, L. K.
   (1999). An introduction to variational methods for graphical models.
   Machine Learning, 37(2), 183-233.
-\item
-  Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods
-  for mixtures of experts. In Neural Information Processing Systems.
 \end{itemize}

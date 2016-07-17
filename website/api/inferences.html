@@ -152,11 +152,11 @@ We detail this below.</p>
 and arrows represent class inheritance.</em></p>
 <p>There is a base class <code class="docutils literal"><span class="pre">Inference</span></code>, from which all inference
 methods are derived from.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for Edward inference methods.</span>
 <span class="sd">    ...</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="o">...</span>
 </pre></div>
 </div>
@@ -175,7 +175,7 @@ algorithm can raise an error if the model is outside this class.</p>
 <code class="docutils literal"><span class="pre">VariationalInference</span></code> and <code class="docutils literal"><span class="pre">MonteCarlo</span></code> (or more plainly,
 optimization and sampling). These inherit from <code class="docutils literal"><span class="pre">Inference</span></code> and each
 have their own default methods.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for Monte Carlo inference methods.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -187,7 +187,7 @@ have their own default methods.</p>
 <span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 <span class="sd">        ...</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -211,7 +211,7 @@ model <code class="docutils literal"><span class="pre">variational</span></code>
 distribution. For more details, see the Variational Models section
 below.</p>
 <p>The main method in <code class="docutils literal"><span class="pre">VariationalInference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
@@ -238,11 +238,11 @@ algorithm terminates.</p>
 inheriting from <code class="docutils literal"><span class="pre">VariationalInference</span></code> or one of its derived
 classes. <code class="docutils literal"><span class="pre">VariationalInference</span></code> implements many default methods such
 as <code class="docutils literal"><span class="pre">run()</span></code> above. Let&#8217;s go through <code class="docutils literal"><span class="pre">initialize()</span></code> as an example.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
     <span class="o">...</span>
     <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
         <span class="o">...</span>
-        <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="o">...</span>
+        <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="o">...</span>
             <span class="o">...</span>
             <span class="n">slices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">slice_input_producer</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
             <span class="n">batches</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span><span class="p">,</span>
@@ -274,7 +274,7 @@ as a proxy to the true posterior.</p>
 <p>Edward implements variational models using the <code class="docutils literal"><span class="pre">Variational</span></code> class in
 <code class="docutils literal"><span class="pre">edward.models</span></code>. For example, the following instantiates an empty
 container for the variational distribution.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span>
 
 <span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
 </pre></div>
@@ -286,26 +286,26 @@ as input a shape and optionally, parameter arguments. If left
 unspecified, the parameter arguments are trainable parameters during
 inference.  The shape denotes the shape of its random variable. For
 example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Beta</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Beta</span>
 
-<span class="c"># first, add a vector of 10 random variables</span>
-<span class="c"># second, add a 5 x 2 matrix of random variables</span>
+<span class="c1"># first, add a vector of 10 random variables</span>
+<span class="c1"># second, add a 5 x 2 matrix of random variables</span>
 <span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
 <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
 
-<span class="c"># vector of 3 random variables with fixed alpha param</span>
+<span class="c1"># vector of 3 random variables with fixed alpha param</span>
 <span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
 <span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
 </pre></div>
 </div>
 <p>Multivariate distributions store their multivariate dimension in the
 outer dimension (right-most dimension) of their shape.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span>
 
-<span class="c"># 1 K-dimensional Dirichlet</span>
+<span class="c1"># 1 K-dimensional Dirichlet</span>
 <span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
-<span class="c"># vector of 5 K-dimensional Dirichlet&#39;s</span>
+<span class="c1"># vector of 5 K-dimensional Dirichlet&#39;s</span>
 <span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
 </pre></div>
 </div>

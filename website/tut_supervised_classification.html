@@ -78,7 +78,7 @@
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math inline">\(y\)</span> takes discrete values.</p>
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>Use 25 data points from the UCI crabs data set.</p>
+<p>Use 25 data points from the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>.</p>
 <pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)[:25, :]
 data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
 <h3 id="model">Model</h3>

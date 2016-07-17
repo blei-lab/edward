@@ -16,7 +16,9 @@ The script is available
 
 \subsubsection{Data}
 
-Use 25 data points from the UCI crabs data set.
+Use 25 data points from the \href
+{https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html}
+{crabs data set}.
 \begin{lstlisting}[language=Python]
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
 data = {'x': df[:, 1:], 'y': df[:, 0]}

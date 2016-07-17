@@ -101,7 +101,7 @@
   \log p(x, z)
   -
   \log q(z\;;\;\lambda)
-  \big]\end{aligned}\]</span> where the left hand side is the logarithm of the marginal likelihood <span class="math inline">\(p(x) = \int p(x,z) \text{d}z\)</span>, also known as the model evidence. (Try deriving this using Bayes rule!)</p>
+  \big]\end{aligned}\]</span> where the left hand side is the logarithm of the marginal likelihood <span class="math inline">\(p(x) = \int p(x,z) \text{d}z\)</span>, also known as the model evidence. (Try deriving this using Bayes’ rule!)</p>
 <p>The evidence is a constant with respect to the variational parameters <span class="math inline">\(\lambda\)</span>, so we can minimize <span class="math inline">\(\text{KL}(q\|p)\)</span> by instead maximizing the Evidence Lower BOund, <span class="math display">\[\begin{aligned}
   \text{ELBO}(\lambda)
   &amp;=\;
@@ -126,8 +126,8 @@
 <h3 id="references">References</h3>
 <ul>
 <li>Hinton, G. and Van Camp, D (1993). Keeping the neural networks simple by minimizing the description length of the weights. In Computational Learning Theory, pp. 5–13. ACM.</li>
-<li>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. Machine Learning, 37(2), 183-233.</li>
 <li>Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods for mixtures of experts. In Neural Information Processing Systems.</li>
+<li>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. Machine Learning, 37(2), 183-233.</li>
 </ul>
 </div>
 </div>
