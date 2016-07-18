@@ -10,8 +10,8 @@ from edward.util import cumprod, get_dims, get_session, to_simplex
 from itertools import product
 
 
-class Distribution(object):
-    """Base class for Edward distributions.
+class RandomVariable(object):
+    """Base class for Edward random variables.
 
     ``p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])``
 
@@ -21,16 +21,16 @@ class Distribution(object):
     Attributes
     ----------
     shape : tuple
-        shape of random variable(s); see below
+        Shape of random variable(s); see below.
     n_vars : int
-        the number of variables; equals the product of ``shape``
+        The number of variables; equals the product of ``shape``.
     n_params : int
-        the number of parameters
+        The number of parameters.
     is_multivariate : bool
-        ``True`` if ``Distribution`` is multivariate
+        ``True`` if its distribution is multivariate.
     is_reparameterized : bool
-        ``True`` if sampling from ``Distribution`` is done by
-        reparameterizing random noise drawn from another distribution
+        ``True`` if sampling from ``RandomVariable`` is done by
+        reparameterizing random noise drawn from another distribution.
     """
     def __init__(self, shape=1):
         """Initialize.
@@ -38,10 +38,10 @@ class Distribution(object):
         Parameters
         ----------
         shape : int, list, or tuple, optional
-            Shape of random variable(s). If ``is_multivariate=True``, then the
-            inner-most (right-most) dimension indicates the dimension of
-            the multivariate random variable. Otherwise, all dimensions
-            are conceptually the same.
+            Shape of random variable(s). If ``is_multivariate=True``,
+            then the inner-most (right-most) dimension indicates the
+            multivariate dimension. Otherwise, all dimensions are
+            conceptually the same.
         """
         get_session()
         if isinstance(shape, int):
@@ -56,7 +56,7 @@ class Distribution(object):
         self.is_reparameterized = False
 
     def sample(self, n=1):
-        """Sample from ``Distribution``.
+        """Sample from ``RandomVariable``.
 
         .. math::
             x \sim p(x | \\text{params})
@@ -96,8 +96,8 @@ class Distribution(object):
                 sum_{idx in shape} log p(xs[n, idx] | params[idx]) ]
         """
         # Loop over each random variable.
-        # If univariate distribution, this is over all indices; if
-        # multivariate distribution, this is over all but the last
+        # If distribution is univariate, this is over all indices; if
+        # distribution is multivariate, this is over all but the last
         # index.
         n = get_dims(xs)[0]
         log_prob = tf.zeros([n], dtype=tf.float32)
@@ -142,8 +142,8 @@ class Distribution(object):
         ----------
         idx : tuple
             Index of the random variable to take the log density of.
-            If univariate distribution, idx is of length
-            len(self.shape). If multivariate distribution, idx is of
+            If univariate random variable, idx is of length
+            len(self.shape). If multivariate random variable, idx is of
             length len(self.shape[:-1]); note if len(self.shape) is 1
             for multivariate, then idx must be an empty tuple.
         xs : tf.Tensor or np.ndarray
@@ -183,7 +183,7 @@ class Distribution(object):
         raise NotImplementedError()
 
 
-class Bernoulli(Distribution):
+class Bernoulli(RandomVariable):
     """Bernoulli
 
     See :class:`edward.stats.distributions.Bernoulli`
@@ -224,7 +224,7 @@ class Bernoulli(Distribution):
         return tf.reduce_sum(bernoulli.entropy(self.p))
 
 
-class Beta(Distribution):
+class Beta(RandomVariable):
     """Beta
 
     See :class:`edward.stats.distributions.Beta`
@@ -272,7 +272,7 @@ class Beta(Distribution):
         return tf.reduce_sum(beta.entropy(self.alpha, self.beta))
 
 
-class Dirichlet(Distribution):
+class Dirichlet(RandomVariable):
     """Dirichlet
 
     See :class:`edward.stats.distributions.Dirichlet`
@@ -318,7 +318,7 @@ class Dirichlet(Distribution):
         return tf.reduce_sum(dirichlet.entropy(self.alpha))
 
 
-class InvGamma(Distribution):
+class InvGamma(RandomVariable):
     """Inverse Gamma
 
     See :class:`edward.stats.distributions.InvGamma`
@@ -366,7 +366,7 @@ class InvGamma(Distribution):
         return tf.reduce_sum(invgamma.entropy(self.alpha, self.beta))
 
 
-class Multinomial(Distribution):
+class Multinomial(RandomVariable):
     """Multinomial
 
     See :class:`edward.stats.distributions.Multinomial`
@@ -428,7 +428,7 @@ class Multinomial(Distribution):
         return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
 
 
-class Normal(Distribution):
+class Normal(RandomVariable):
     """Normal
 
     See :class:`edward.stats.distributions.Norm`
@@ -466,7 +466,7 @@ class Normal(Distribution):
         return tf.reduce_sum(norm.entropy(scale=self.scale))
 
 
-class PointMass(Distribution):
+class PointMass(RandomVariable):
     """Point mass distribution
 
     ``p(x | params ) = prod_{idx in shape} Dirac(x[idx] | params[idx])``
