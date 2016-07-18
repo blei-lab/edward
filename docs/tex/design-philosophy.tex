@@ -52,10 +52,13 @@ models or deep generative models.
 %Edward focuses not only on the abstraction of model and inference, but
 %across what we view encapsulates all data analysis: modeling, inference,
 %and criticism.
-As one consequence, Edward is built for efficient (and possibly
-distributed) training. As another, we do not prioritize development of
-modeling languages. For example, we instead leverage Stan's
-language as an easy way to specify models in Edward.
+Thus Edward is built with efficient (and possibly distributed)
+training in mind, beyond the setting where all computing is on CPUs
+or where data must fit in memory.
+%As another, we do not prioritize development of
+%modeling languages. For example, we instead leverage Stan's
+%language as an easy way to specify models in Edward.
+
 
 \textbf{Black box inference.}
 Black box algorithms are typically Monte Carlo methods, and
@@ -63,8 +66,8 @@ by design make very few assumptions about the model.
 Our motivation as outlined above presents a new set of
 challenges in both inference research and their software design.
 As one consequence, we focus on variational inference.
-As a second consequence, we encourage active development
-of inference by providing a class hierarchy of inference algorithms.
+As a second consequence, we encourage active research
+on inference by providing a class hierarchy of inference algorithms.
 As a third consequence, our inference
 algorithms aim to take advantage of as much structure as possible from
 the model. Edward supports all types of inference, whether they
