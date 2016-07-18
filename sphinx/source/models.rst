@@ -232,23 +232,23 @@ around ``_py_log_prob()`` as a TensorFlow operation.
           """
           pass
 
-      def sample_prior(self, size=1):
+      def sample_prior(self, n=1):
           """
           Used in: ed.ppc().
 
           Parameters
           ----------
-          size : int, optional
+          n : int, optional
               Number of latent variable samples.
 
           Returns
           -------
           tf.Tensor
-              size x d matrix, where each row is a set of latent variables.
+              n x d matrix, where each row is a set of latent variables.
           """
           pass
 
-      def sample_likelihood(self, zs, size=1):
+      def sample_likelihood(self, zs, n=1):
           """
           Used in: ed.ppc().
 
@@ -257,7 +257,7 @@ around ``_py_log_prob()`` as a TensorFlow operation.
           zs : list or tf.Tensor
               A list of tf.Tensor's if multiple varational families,
               otherwise a tf.Tensor if single variational family.
-          size : int, optional
+          n : int, optional
               Number of data points to generate per set of latent variables.
 
           Returns
@@ -266,7 +266,7 @@ around ``_py_log_prob()`` as a TensorFlow operation.
               List of replicated data sets from the likelihood,
               [x^{rep, 1}, ..., x^{rep, S}],
               where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
-              size-many data points. Type-wise, each x^{rep, s} is a
+              n data points. Type-wise, each x^{rep, s} is a
               dictionary with the same items and shape of values as the
               test data.
           """

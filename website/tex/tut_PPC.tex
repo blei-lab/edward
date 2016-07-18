@@ -58,11 +58,11 @@ model likelihood given a set of latent variables.
 \begin{lstlisting}[language=Python]
 class BetaBernoulli:
     ...
-    def sample_likelihood(self, zs, size):
+    def sample_likelihood(self, zs, n):
         """x | z ~ p(x | z)"""
         out = []
         for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=size).reshape((size,))}]
+            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
         return out
 \end{lstlisting}
 

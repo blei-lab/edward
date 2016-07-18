@@ -26,7 +26,6 @@ methods are derived from.
 
   class Inference(object):
       """Base class for Edward inference methods.
-      ...
       """
       def __init__(self, model, data=None):
           ...
@@ -54,8 +53,8 @@ have their own default methods.
   class MonteCarlo(Inference):
       """Base class for Monte Carlo inference methods.
       """
-      def __init__(self, *args, **kwargs):
-          super(MonteCarlo, self).__init__(*args, **kwargs)
+      def __init__(self, model, data=None):
+          super(MonteCarlo, self).__init__(model, data)
 
       ...
 
@@ -129,7 +128,7 @@ as ``run()`` above. Let's go through ``initialize()`` as an example.
           if n_minibatch is not None ...
               ...
               slices = tf.train.slice_input_producer(values)
-              batches = tf.train.batch(slices, self.n_minibatch,
+              batches = tf.train.batch(slices, n_minibatch,
                                        num_threads=multiprocessing.cpu_count())
               ...
               self.data = {key: value for key, value in
@@ -141,9 +140,10 @@ as ``run()`` above. Let's go through ``initialize()`` as an example.
           self.train = optimizer.minimize(loss, ...)
 
 Three code snippets are highlighted in ``initialize()``: the first
-enables batch training with an argument ``n_minibatch`` for the batch size;
-the second builds TensorFlow's computational graph defined
-by a loss; the third sets up an optimizer to minimize the loss.
+enables batch training with an argument ``n_minibatch`` for the batch
+size; the second defines the loss function, building TensorFlow's
+computational graph; the third sets up an optimizer to minimize the
+loss.
 
 For examples of inference algorithms built in Edward, see the inference
 `tutorials <../tutorials.html>`__.
@@ -169,8 +169,8 @@ container for the variational distribution.
     variational = Variational()
 
 To add distributions to this object, use the ``add()`` method, which
-is used to add ``Distribution`` objects.  All distribution objects, i.e.,
-any class inheriting from ``Distribution`` in ``edward.models``, takes
+is used to add ``RandomVariable`` objects.  All random variable objects, i.e.,
+any class inheriting from ``RandomVariable`` in ``edward.models``, takes
 as input a shape and optionally, parameter arguments. If left
 unspecified, the parameter arguments are trainable parameters during
 inference.  The shape denotes the shape of its random variable. For
@@ -208,7 +208,7 @@ q(z; \lambda)`` respectively.
 
 ``samples(n)`` takes as input the number of samples and returns a list
 of TensorFlow tensors, each of whose shape is ``(n, ) + self.shape`` for
-each distribution object within the container. ``log_prob(xs)`` takes
+each random variable object within the container. ``log_prob(xs)`` takes
 as input a list of TensorFlow tensors, and returns a vector of density
 evaluations, one for each sample ``x`` in ``xs``.
 

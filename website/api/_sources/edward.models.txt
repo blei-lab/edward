@@ -11,6 +11,6 @@ Submodules
 
 .. toctree::
 
-   edward.models.distributions
    edward.models.models
+   edward.models.random_variables
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>edward.models.distributions &mdash; Edward 1.0.9 documentation</title>
+  <title>edward.models.random_variables &mdash; Edward 1.0.9 documentation</title>
   
 
   
@@ -118,7 +118,7 @@
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
-    <li>edward.models.distributions</li>
+    <li>edward.models.random_variables</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -130,7 +130,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for edward.models.distributions</h1><div class="highlight"><pre>
+  <h1>Source code for edward.models.random_variables</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
@@ -143,8 +143,8 @@
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
 
 
-<div class="viewcode-block" id="Distribution"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution">[docs]</a><span class="k">class</span> <span class="nc">Distribution</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base class for Edward distributions.</span>
+<div class="viewcode-block" id="RandomVariable"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.RandomVariable">[docs]</a><span class="k">class</span> <span class="nc">RandomVariable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for Edward random variables.</span>
 
 <span class="sd">    ``p(x | params) = prod_{idx in shape} p(x[idx] | params[idx])``</span>
 
@@ -154,16 +154,16 @@
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    shape : tuple</span>
-<span class="sd">        shape of random variable(s); see below</span>
+<span class="sd">        Shape of random variable(s); see below.</span>
 <span class="sd">    n_vars : int</span>
-<span class="sd">        the number of variables; equals the product of ``shape``</span>
+<span class="sd">        The number of variables; equals the product of ``shape``.</span>
 <span class="sd">    n_params : int</span>
-<span class="sd">        the number of parameters</span>
+<span class="sd">        The number of parameters.</span>
 <span class="sd">    is_multivariate : bool</span>
-<span class="sd">        ``True`` if ``Distribution`` is multivariate</span>
+<span class="sd">        ``True`` if its distribution is multivariate.</span>
 <span class="sd">    is_reparameterized : bool</span>
-<span class="sd">        ``True`` if sampling from ``Distribution`` is done by</span>
-<span class="sd">        reparameterizing random noise drawn from another distribution</span>
+<span class="sd">        ``True`` if sampling from ``RandomVariable`` is done by</span>
+<span class="sd">        reparameterizing random noise drawn from another distribution.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize.</span>
@@ -171,10 +171,10 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        shape : int, list, or tuple, optional</span>
-<span class="sd">            Shape of random variable(s). If ``is_multivariate=True``, then the</span>
-<span class="sd">            inner-most (right-most) dimension indicates the dimension of</span>
-<span class="sd">            the multivariate random variable. Otherwise, all dimensions</span>
-<span class="sd">            are conceptually the same.</span>
+<span class="sd">            Shape of random variable(s). If ``is_multivariate=True``,</span>
+<span class="sd">            then the inner-most (right-most) dimension indicates the</span>
+<span class="sd">            multivariate dimension. Otherwise, all dimensions are</span>
+<span class="sd">            conceptually the same.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">get_session</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -188,8 +188,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_multivariate</span> <span class="o">=</span> <span class="k">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="o">=</span> <span class="k">False</span>
 
-<div class="viewcode-block" id="Distribution.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sample from ``Distribution``.</span>
+<div class="viewcode-block" id="RandomVariable.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.RandomVariable.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sample from ``RandomVariable``.</span>
 
 <span class="sd">        .. math::</span>
 <span class="sd">            x \sim p(x | \\text{params})</span>
@@ -207,7 +207,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Distribution.log_prob"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution.log_prob">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomVariable.log_prob"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.RandomVariable.log_prob">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Evaluate log probability.</span>
 
 <span class="sd">            ``log p(xs | params)``</span>
@@ -229,8 +229,8 @@
 <span class="sd">                sum_{idx in shape} log p(xs[n, idx] | params[idx]) ]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># Loop over each random variable.</span>
-        <span class="c"># If univariate distribution, this is over all indices; if</span>
-        <span class="c"># multivariate distribution, this is over all but the last</span>
+        <span class="c"># If distribution is univariate, this is over all indices; if</span>
+        <span class="c"># distribution is multivariate, this is over all but the last</span>
         <span class="c"># index.</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">xs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -266,7 +266,7 @@
 
         <span class="k">return</span> <span class="n">log_prob</span></div>
 
-<div class="viewcode-block" id="Distribution.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomVariable.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.RandomVariable.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Log probability (single index)</span>
 
 <span class="sd">            ``log p(xs[:, idx] | params[idx])``</span>
@@ -275,8 +275,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        idx : tuple</span>
 <span class="sd">            Index of the random variable to take the log density of.</span>
-<span class="sd">            If univariate distribution, idx is of length</span>
-<span class="sd">            len(self.shape). If multivariate distribution, idx is of</span>
+<span class="sd">            If univariate random variable, idx is of length</span>
+<span class="sd">            len(self.shape). If multivariate random variable, idx is of</span>
 <span class="sd">            length len(self.shape[:-1]); note if len(self.shape) is 1</span>
 <span class="sd">            for multivariate, then idx must be an empty tuple.</span>
 <span class="sd">        xs : tf.Tensor or np.ndarray</span>
@@ -299,7 +299,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Distribution.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Distribution.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomVariable.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.RandomVariable.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Entropy.</span>
 
 <span class="sd">        .. code-block:: none</span>
@@ -316,7 +316,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
 
 
-<div class="viewcode-block" id="Bernoulli"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli">[docs]</a><span class="k">class</span> <span class="nc">Bernoulli</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="Bernoulli"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Bernoulli">[docs]</a><span class="k">class</span> <span class="nc">Bernoulli</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Bernoulli</span>
 
 <span class="sd">    See :class:`edward.stats.distributions.Bernoulli`</span>
@@ -337,7 +337,7 @@
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">return</span> <span class="s">&quot;probability: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Bernoulli.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Bernoulli.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Bernoulli.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="c"># Define Python function which returns samples as a Numpy</span>
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
@@ -349,15 +349,15 @@
         <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="Bernoulli.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="Bernoulli.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Bernoulli.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Bernoulli.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Bernoulli.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Bernoulli.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Bernoulli.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="Beta"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta">[docs]</a><span class="k">class</span> <span class="nc">Beta</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="Beta"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Beta">[docs]</a><span class="k">class</span> <span class="nc">Beta</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Beta</span>
 
 <span class="sd">    See :class:`edward.stats.distributions.Beta`</span>
@@ -385,7 +385,7 @@
         <span class="k">return</span> <span class="s">&quot;shape: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
                <span class="s">&quot;scale: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Beta.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Beta.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Beta.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="c"># Define Python function which returns samples as a Numpy</span>
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
@@ -397,15 +397,15 @@
         <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="Beta.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="Beta.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Beta.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Beta.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Beta.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Beta.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Beta.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">beta</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="Dirichlet"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet">[docs]</a><span class="k">class</span> <span class="nc">Dirichlet</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="Dirichlet"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Dirichlet">[docs]</a><span class="k">class</span> <span class="nc">Dirichlet</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Dirichlet</span>
 
 <span class="sd">    See :class:`edward.stats.distributions.Dirichlet`</span>
@@ -426,7 +426,7 @@
         <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">return</span> <span class="s">&quot;concentration: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Dirichlet.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Dirichlet.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Dirichlet.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="c"># Define Python function which returns samples as a Numpy</span>
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
@@ -438,7 +438,7 @@
         <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="Dirichlet.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="Dirichlet.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Dirichlet.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        ``log p(xs[:, idx, :] | params[idx, :])``</span>
 <span class="sd">        where ``idx`` is of dimension ``shape[:-1]``</span>
@@ -447,11 +447,11 @@
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">dirichlet</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Dirichlet.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Dirichlet.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Dirichlet.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Dirichlet.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">dirichlet</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="InvGamma"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma">[docs]</a><span class="k">class</span> <span class="nc">InvGamma</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="InvGamma"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.InvGamma">[docs]</a><span class="k">class</span> <span class="nc">InvGamma</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Inverse Gamma</span>
 
 <span class="sd">    See :class:`edward.stats.distributions.InvGamma`</span>
@@ -479,7 +479,7 @@
         <span class="k">return</span> <span class="s">&quot;shape: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
                <span class="s">&quot;scale: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="InvGamma.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="InvGamma.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.InvGamma.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="c"># Define Python function which returns samples as a Numpy</span>
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
@@ -491,15 +491,15 @@
         <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="InvGamma.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="InvGamma.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.InvGamma.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">invgamma</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="InvGamma.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.InvGamma.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="InvGamma.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.InvGamma.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">invgamma</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="Multinomial"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial">[docs]</a><span class="k">class</span> <span class="nc">Multinomial</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="Multinomial"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Multinomial">[docs]</a><span class="k">class</span> <span class="nc">Multinomial</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Multinomial</span>
 
 <span class="sd">    See :class:`edward.stats.distributions.Multinomial`</span>
@@ -536,7 +536,7 @@
         <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">return</span> <span class="s">&quot;probability: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">pi</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Multinomial.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Multinomial.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Multinomial.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="c"># Define Python function which returns samples as a Numpy</span>
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
@@ -548,7 +548,7 @@
         <span class="n">x</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># set shape from unknown shape</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="Multinomial.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="Multinomial.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Multinomial.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        ``log p(xs[:, idx, :] | params[idx, :])``</span>
 <span class="sd">        where ``idx`` is of dimension ``shape[:-1]``</span>
@@ -557,11 +557,11 @@
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx_K</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">multinomial</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">[</span><span class="n">idx_K</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Multinomial.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Multinomial.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Multinomial.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Multinomial.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">multinomial</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="Normal"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal">[docs]</a><span class="k">class</span> <span class="nc">Normal</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="Normal"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Normal">[docs]</a><span class="k">class</span> <span class="nc">Normal</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Normal</span>
 
 <span class="sd">    See :class:`edward.stats.distributions.Norm`</span>
@@ -588,18 +588,18 @@
         <span class="k">return</span> <span class="s">&quot;mean: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
                <span class="s">&quot;std dev: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Normal.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Normal.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Normal.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span></div>
 
-<div class="viewcode-block" id="Normal.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="Normal.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Normal.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>
         <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Normal.entropy"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.Normal.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Normal.entropy"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Normal.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="PointMass"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.PointMass">[docs]</a><span class="k">class</span> <span class="nc">PointMass</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.PointMass">[docs]</a><span class="k">class</span> <span class="nc">PointMass</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Point mass distribution</span>
 
 <span class="sd">    ``p(x | params ) = prod_{idx in shape} Dirac(x[idx] | params[idx])``</span>
@@ -630,7 +630,7 @@
         <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">return</span> <span class="s">&quot;parameter values: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PointMass.sample"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.PointMass.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.sample"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.PointMass.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sample from a point mass distribution.</span>
 
 <span class="sd">        Each sample is simply the set of point masses, as all</span>
@@ -643,7 +643,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">]</span><span class="o">*</span><span class="n">n</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PointMass.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.distributions.html#edward.models.distributions.PointMass.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.log_prob_idx"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.PointMass.log_prob_idx">[docs]</a>    <span class="k">def</span> <span class="nf">log_prob_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Log probability at an index of a point mass distribution.</span>
 
 <span class="sd">        Returns</span>

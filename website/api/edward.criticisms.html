@@ -389,24 +389,24 @@ using the posterior predictive distribution.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=None</em>, <em>T=None</em>, <em>size=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#ppc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>model</em>, <em>variational=None</em>, <em>data=None</em>, <em>T=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#ppc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Posterior predictive check.
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
 If no posterior approximation is provided through <code class="docutils literal"><span class="pre">variational</span></code>,
 then we default to a prior predictive check (Box, 1980).</p>
 <p>PPC&#8217;s form an empirical distribution for the predictive discrepancy,</p>
 <div class="math">
-\[p(T) = \int p(T(yrep) | z) p(z | y) dz\]</div>
-<p>by drawing replicated data sets yrep and calculating
-<span class="math">\(T(yrep)\)</span> for each data set. Then it compares it to
-<span class="math">\(T(y)\)</span>.</p>
+\[p(T) = \int p(T(xrep) | z) p(z | x) dz\]</div>
+<p>by drawing replicated data sets xrep and calculating
+<span class="math">\(T(xrep)\)</span> for each data set. Then it compares it to
+<span class="math">\(T(x)\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>model</strong> (<em>ed.Model</em>) &#8211; class object that implements the <code class="docutils literal"><span class="pre">sample_likelihood</span></code> method</li>
-<li><strong>variational</strong> (<em>ed.Variational, optional</em>) &#8211; latent variable distribution q(z) to sample from. It is an
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; Class object that implements the <code class="docutils literal"><span class="pre">sample_likelihood</span></code> method</li>
+<li><strong>variational</strong> (<em>ed.Variational, optional</em>) &#8211; Latent variable distribution q(z) to sample from. It is an
 approximation to the posterior, e.g., a variational
 approximation or an empirical distribution from MCMC samples.
 If not specified, samples will be obtained from the model
@@ -422,18 +422,18 @@ program&#8217;s data block.</li>
 <li><strong>T</strong> (<em>function, optional</em>) &#8211; Discrepancy function, which takes a data dictionary and list
 of latent variables as input and outputs a tf.Tensor. Default
 is the identity function.</li>
-<li><strong>size</strong> (<em>int, optional</em>) &#8211; number of replicated data sets</li>
+<li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of replicated data sets.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>List containing the reference distribution, which is a Numpy
 vector of size elements,</p>
 <div class="math">
-\[(T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}))\]</div>
+\[(T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))\]</div>
 <p>and the realized discrepancy, which is a NumPy vector of size
 elements,</p>
 <div class="math">
-\[(T(y, z^{1}), ..., T(y, z^{size})).\]</div>
+\[(T(x, z^{1}), ..., T(x, z^{size})).\]</div>
 <p>If the discrepancy function is not specified, then the list
 contains the full data distribution where each element is a
 data set (dictionary).</p>
