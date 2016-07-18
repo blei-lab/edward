@@ -1,0 +1,110 @@
+% Define the subtitle of the page
+\title{KL(q||p) minimization}
+
+% Begin the content of the page
+\subsection{$\text{KL}(q\|p)$ minimization}
+
+One form of variational inference minimizes the Kullback-Leibler divergence
+\textbf{from} $q(z\;;\;\lambda)$ \textbf{to} $p(z \mid x)$,
+\begin{align*}
+  \lambda^*
+  &=
+  \arg\min_\lambda \text{KL}(
+  q(z\;;\;\lambda)
+  \;\|\;
+  p(z \mid x)
+  )\\
+  &=
+  \arg\min_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log q(z\;;\;\lambda)
+  -
+  \log p(z \mid x)
+  \big].
+\end{align*}
+The KL divergence is a non-symmetric, information theoretic measure of
+similarity between two probability distributions.
+
+\subsubsection{The Evidence Lower Bound}
+
+The above optimization problem is intractable because it directly depends on the
+posterior $p(z \mid x)$. To tackle this, consider the property
+\begin{align*}
+  \log p(x)
+  &=
+  \text{KL}(
+  q(z\;;\;\lambda)
+  \;\|\;
+  p(z \mid x)
+  )\\
+  &\quad+\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big]
+\end{align*}
+where the left hand side is the logarithm of the marginal likelihood
+$p(x) = \int p(x,z) \text{d}z$, also known as the model evidence. (Try
+deriving this using Bayes' rule!)
+
+The evidence is a constant with respect to the variational parameters $\lambda$,
+so we can minimize $\text{KL}(q\|p)$ by instead maximizing
+the Evidence Lower BOund,
+\begin{align*}
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big].
+\end{align*}
+In the ELBO, both $p(x,z)$ and $q(z\;;\;\lambda)$ are
+tractable. The optimization problem we seek to solve becomes
+\begin{align*}
+  \lambda^*
+  &=
+  \arg \max_\lambda \text{ELBO}(\lambda).
+\end{align*}
+As per its name, the ELBO is a lower bound on the evidence, and
+optimizing it tries to maximize the probability of observing the data.
+What does maximizing the ELBO do? Splitting the ELBO reveals a trade-off
+\begin{align*}
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(z \;;\; \lambda)}[\log p(x, z)]
+  - \mathbb{E}_{q(z \;;\; \lambda)}[\log q(z\;;\;\lambda)],
+\end{align*}
+where the first term represents an energy and the second term
+(including the minus sign) represents the entropy of $q$.
+The energy encourages $q$ to focus probability mass where the
+model puts high probability, $p(x, z)$.
+The entropy encourages $q$ to spread probability mass to avoid
+concentrating to one location.
+
+Edward uses two generic strategies to obtain gradients for
+optimization.
+\begin{itemize}
+    \item \href{tut_KLqp_score.html}{Score function gradient}
+    \item \href{tut_KLqp_reparam.html}{Reparameterization gradient}
+  \end{itemize}
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Hinton, G. and Van Camp, D (1993). Keeping the neural networks
+  simple by minimizing the description length of the weights. In
+  Computational Learning Theory, pp. 5–13. ACM.
+\item
+  Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods
+  for mixtures of experts. In Neural Information Processing Systems.
+\item
+  Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., & Saul, L. K.
+  (1999). An introduction to variational methods for graphical models.
+  Machine Learning, 37(2), 183-233.
+\end{itemize}

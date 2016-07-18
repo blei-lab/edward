@@ -1,0 +1,128 @@
+% Define the subtitle of the page
+\title{Unsupervised learning}
+
+% Begin the content of the page
+\subsection{Unsupervised learning}
+
+In unsupervised learning, the task is to infer hidden structure from
+unlabeled data, comprised of training examples $\{x_n\}$.
+
+We demonstrate how to do this in Edward with an example.
+The script is available
+\href{https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py}
+{here}.
+
+
+\subsubsection{Data}
+
+Use a simulated (pre-generated) dataset of datapoints
+$\mathbf{x}_n\in\mathbb{R}^2$.
+\begin{lstlisting}[language=Python]
+x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
+data = {'x': x}
+\end{lstlisting}
+
+
+\subsubsection{Model}
+
+Posit the model as a mixture of Gaussians. For more details on the
+model, see the
+\href{tut_mixture_gaussian.html}
+{Mixture of Gaussians tutorial}.
+
+Here we build the model in Edward using TensorFlow, and set the number
+of mixture components to be 2.
+\begin{lstlisting}[language=Python]
+class MixtureGaussian:
+    """
+    Mixture of Gaussians
+
+    p(x, z) = [ prod_{n=1}^N N(x_n; mu_{c_n}, sigma_{c_n}) Multinomial(c_n; pi) ]
+              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
+              Dirichlet(pi; alpha)
+
+    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
+
+    Parameters
+    ----------
+    K : int
+        Number of mixture components.
+    D : float, optional
+        Dimension of the Gaussians.
+    """
+    def __init__(self, K, D):
+        self.K = K
+        self.D = D
+        self.n_vars = (2*D + 1) * K
+
+        self.a = 1
+        self.b = 1
+        self.c = 10
+        self.alpha = tf.ones([K])
+
+    def log_prob(self, xs, zs):
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        N = get_dims(xs['x'])[0]
+        pi, mus, sigmas = zs
+        log_prior = dirichlet.logpdf(pi, self.alpha)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+
+        # Loop over each sample zs[b,:]
+        log_lik = []
+        n_samples = get_dims(zs[0])[0]
+        for s in range(n_samples):
+            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
+            for k in range(self.K):
+                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs['x'],
+                    mus[s, (k*self.D):((k+1)*self.D)],
+                    sigmas[s, (k*self.D):((k+1)*self.D)]))
+
+            log_lik += [log_lik_z]
+
+        return log_prior + tf.pack(log_lik)
+
+model = MixtureGaussian(K=2, D=2)
+\end{lstlisting}
+
+
+\subsubsection{Inference}
+Perform variational inference.
+%
+The latent variables are the mixture probabilities,
+component means, and component variances.
+Define the variational model to be a Dirichlet $\times$ fully factorized normal
+$\times$ fully factorized inverse Gamma.
+%The latent variables are $\mathbf{z} = (\pi, \mu, \sigma)$.
+%\begin{align*}
+%  q(\mathbf{z} \;;\; \lambda)
+%  &=
+%  \text{Dirichlet}(\mathbf{z}_\pi)
+%  \times
+%  \mathcal{N}(\mathbf{z}_\mu)
+%  \times
+%  \text{InvGamma}(\mathbf{z}_\sigma)
+%\end{align*}
+%
+%The model in Edward is
+\begin{lstlisting}[language=Python]
+variational = Variational()
+variational.add(Dirichlet(model.K))
+variational.add(Normal(model.K*model.D))
+variational.add(InvGamma(model.K*model.D))
+\end{lstlisting}
+
+Run mean-field variational inference for 500 iterations, using a batch
+of 5 datapoints and 5 latent variable samples per iteration.
+\begin{lstlisting}[language=Python]
+inference = ed.MFVI(model, variational, data)
+inference.run(n_iter=500, n_samples=5, n_minibatch=5)
+\end{lstlisting}
+In this case
+\texttt{MFVI} defaults to minimizing the
+$\text{KL}(q\|p)$ divergence measure using the score function
+gradient.
+For more details on inference, see the \href{tut_KLqp.html}{$\text{KL}(q\|p)$ tutorial}.
+
+
+%\subsubsection{Criticism}

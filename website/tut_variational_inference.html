@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Variational inference</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="variational-inference">Variational inference</h2>
+<p>Variational inference is an umbrella term for algorithms which cast posterior inference as optimization. The core idea involves two steps:</p>
+<ol>
+<li>posit a family of distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> over the latent variables;</li>
+<li>match <span class="math inline">\(q(z\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
+</ol>
+<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(z \mid x)\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
+  \lambda^*
+  &amp;=
+  \arg\min_\lambda \text{divergence}(
+  p(z \mid x)
+  ,
+  q(z\;;\;\lambda)
+  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(z\mid x)\)</span>.</p>
+<p>Edward takes the perspective that the posterior is (typically) intractable, and thus we must build a model of latent variables that best approximates the posterior. It is analogous to the perspective that the true data generating process is unknown, and thus we build models of data to best approximate the true process.</p>
+<p>For details on the variational inference base class defined in Edward, or the design of variational models, see the <a href="api/inferences.html">inference API</a>. For examples of specific variational inference algorithms in Edward, see the other inference <a href="tutorials.html">tutorials</a>.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Hinton, G. and Van Camp, D (1993). Keeping the neural networks simple by minimizing the description length of the weights. In Computational Learning Theory, pp. 5–13. ACM.</li>
+<li>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. Machine Learning, 37(2), 183-233.</li>
+<li>Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods for mixtures of experts. In Neural Information Processing Systems.</li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+% Define the subtitle of the page
+\title{Point-based evaluations}
+
+% Begin the content of the page
+\subsection{Point-based evaluations}
+
+A point-based evaluation is a scalar-valued metric for assessing
+trained models. For example, we can assess models for classification
+by predicting the label for each observation in the data and comparing
+it to their true labels. Edward implements a variety of metrics, such
+as classification error and mean absolute error.
+
+Formally, point prediction in probabilistic models is given by
+taking the mean of the posterior predictive distribution,
+\begin{align*}
+  p(x_\text{new} \mid x)
+  &=
+  \int
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z.
+\end{align*}
+The model's posterior predictive can be used to generate new data
+given past observations and can also make predictions on new data
+given past observations.
+It is formed by calculating the likelihood of the new data, averaged
+over every set of latent variables according to the posterior
+distribution.
+
+\subsubsection{Implementation}
+
+Edward implements point-based evaluations through the
+\texttt{predict()} method in the probability model. It predicts the
+label given samples from the posterior $p(z \mid x)$, i.e., it is the
+mean of $p(x_\text{new} \mid z)$ averaged over posterior samples.
+\begin{lstlisting}[language=Python]
+class BayesianLinearRegression:
+    ...
+    def predict(self, xs, zs):
+        """Return a prediction for each data point, averaging over
+        each set of latent variables z in zs."""
+        x_test = xs['x']
+        b = zs[:, 0]
+        W = tf.transpose(zs[:, 1:])
+        y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
+        return y_pred
+
+model = BayesianLinearRegression()
+\end{lstlisting}
+Similar to variational inference methods, the
+\texttt{ed.evaluate()} method takes as input the probability model,
+variational model, and a data set. It evaluates the trained model (the
+posterior via the variational model; everything else via the
+probability model) according to a chosen metric.
+\begin{lstlisting}[language=Python]
+ed.evaluate('categorical_accuracy', model, variational, data)
+ed.evaluate('mean_absolute_error', model, variational, data)
+\end{lstlisting}
+The \texttt{data} can be data held-out from training time, making it
+easy to implement cross-validated techniques.
+
+Point-based evaluation applies generally to any setting, including
+unsupervised tasks. For example, we can evaluate the likelihood of
+observing the data.
+\begin{lstlisting}[language=Python]
+ed.evaluate('log_likelihood', model, variational, data)
+\end{lstlisting}
+
+Point-based evaluations are formally known as scoring rules
+in decision theory. Scoring rules are useful for model comparison, model
+selection, and model averaging.
+
+See the \href{api/criticisms.html}{criticism API} for further details.
+An example of point-based evaluation is in the
+\href{tut_supervised_regression.html}{supervised learning
+(regression)} tutorial.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Gneiting, T., & Raftery, A. E. (2007). Strictly Proper Scoring
+  Rules, Prediction, and Estimation. Journal of the American
+  Statistical Association, 102(477), 359–378.
+\end{itemize}

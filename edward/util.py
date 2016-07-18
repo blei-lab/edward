@@ -131,6 +131,7 @@ def hessian(y, xs):
     d = grads.get_shape()[0]
     if not isinstance(d, int):
         d = grads.eval().shape[0]
+
     for j in range(d):
         # Calculate grad_{xs} ( [ grad_{xs} y ]_j ).
         gradjgrads = tf.gradients(grads[j], xs)

@@ -1,0 +1,141 @@
+% Define the subtitle of the page
+\title{Maximum a posteriori estimation}
+
+% Begin the content of the page
+\subsection{Maximum a posteriori estimation}
+
+Maximum a posteriori (MAP) estimation is a form of approximate
+posterior inference. It uses the mode as a point estimate of the
+posterior distribution,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  p(z \mid x)\\
+  &=
+  \arg \max_z
+  \log p(z \mid x).
+\end{align*}
+In practice, we work with logarithms of densities to avoid numerical underflow
+issues.
+
+The MAP estimate is the most likely configuration of the hidden patterns $z$
+under the model. However, we cannot directly solve this optimization problem
+because the posterior is typically intractable. To circumvent this, we use Bayes' rule to
+optimize over the joint density,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  \log p(z \mid x)\\
+  &=
+  \arg \max_z
+  \log p(x, z).
+\end{align*}
+This is valid because
+\begin{align*}
+  \log p(z \mid x)
+  &=
+  \log p(x, z) - \log p(x)\\
+  &=
+  \log p(x, z) - \text{constant in terms of} z.
+\end{align*}
+MAP estimation includes the common scenario of maximum
+likelihood estimation as a special case,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  p(x, z)\\
+  &=
+  \arg \max_z
+  p(x\mid z),
+\end{align*}
+where the prior $p(z)$ is flat, placing uniform probability over all
+values $z$ supports. Placing a nonuniform prior can be thought of as
+regularizing the estimation, penalizing values away from maximizing
+the likelihood, which can lead to overfitting. For example, a normal
+prior or Laplace prior on $z$ corresponds to $\ell_2$ penalization, also
+known as ridge regression, and $\ell_1$ penalization, also
+known as the LASSO.
+
+Maximum likelihood is also known as minimizing the cross entropy, where
+for a data set $x=\{x_n\}$,
+\begin{align*}
+  z_\text{MAP}
+  &=
+  \arg \max_z
+  \log p(x\mid z)
+  \\
+  &=
+  \arg \max_z
+  \sum_{n=1}^N \log p(x_n\mid z)
+  \\
+  &=
+  \arg \min_z
+  -\frac{1}{N}\sum_{n=1}^N \log p(x_n\mid z).
+\end{align*}
+The last expression can be thought of as an approximation to the cross
+entropy between the true data distribution and $p(x\mid z)$,
+using a set of $N$ data points.
+
+\subsubsection{Gradient descent}
+
+To find the MAP estimate of the latent variables $z$, we simply
+calculate the gradient of the log joint density
+\begin{align*}
+  \nabla_z
+  \log p(x, z)
+\end{align*}
+and follow it to a (local) optima.
+Edward uses automatic differentiation, specifically with TensorFlow's
+computational graphs, making this gradient computation both simple and
+efficient to distribute.
+
+\subsubsection{Implementation}
+
+In Edward, we view MAP estimation as a special case of
+\href{tut_KLqp.html}{$KL(q\|p)$ minimization}, where the variational
+distribution is a point mass (delta function) distribution. This makes
+explicit the additional assumptions underlying MAP estimation from the
+viewpoint of variational inference: namely, it approximates the
+posterior using a point to summarize the full distribution.
+
+\begin{lstlisting}[language=Python]
+class MAP(VariationalInference):
+    def __init__(self, model, data=None, params=None):
+        with tf.variable_scope("variational"):
+            if hasattr(model, 'n_vars'):
+                variational = Variational()
+                variational.add(PointMass(model.n_vars, params))
+            else:
+                variational = Variational()
+                variational.add(PointMass(0))
+
+        super(MAP, self).__init__(model, variational, data)
+
+    def build_loss(self):
+        x = self.data
+        z = self.variational.sample()
+        self.loss = tf.squeeze(self.model.log_prob(x, z))
+        return -self.loss
+\end{lstlisting}
+
+The \texttt{MAP} class inherits from \texttt{VariationalInference} and
+initializes a point mass as the variational distribution. It requires
+defining only one method:
+\texttt{build_loss()}, which implicitly specifies the gradient of the
+log joint. TensorFlow's automatic differentiation will apply to
+\texttt {z}, thus backpropagating (applying the chain rule of
+differentiation) to compute the gradient of the objective.
+
+There is a nuance here. TensorFlow's optimizers are configured to
+\emph{minimize} an objective function. So the gradient is set to be
+the negative of the log density's gradient.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Murphy, K. (2012). Machine Learning: A Probabilistic Perspective. MIT Press.
+\end{itemize}

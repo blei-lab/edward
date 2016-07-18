@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Probabilistic decoder</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="probabilistic-decoder">Probabilistic decoder</h2>
+<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory. It is a distribution <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables <span class="math inline">\(\mathbf{z}_n\)</span> are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its generated values (decoding) for any given code is random.</p>
+<p>For real-valued data, the randomness in the decoder is given by a multivariate Gaussian <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n\mid\mathbf{z}_n)
+  &amp;=
+  \mathcal{N}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the probabilistic decoder is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> taking the code <span class="math inline">\(\mathbf{z}_n\)</span> as input. For binary data, it is given by a Bernoulli <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n\mid\mathbf{z}_n)
+  &amp;=
+  \text{Bernoulli}(\mathbf{x}_n\mid p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).\end{aligned}\]</span> Probabilistic decoders are typically used alongside a standard normal prior over the code <span class="math display">\[\begin{aligned}
+  p(\mathbf{z})
+  &amp;=
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
+<p>Let’s build the model in Edward using TensorFlow, and with PrettyTensor as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
+<pre class="python" language="Python"><code>class NormalBernoulli:
+    """
+    Each binarized pixel in an image is modeled by a Bernoulli
+    likelihood. The success probability for each pixel is the output
+    of a neural network that takes samples from a normal prior as
+    input.
+
+    p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
+    """
+    def __init__(self, n_vars):
+        self.n_vars = n_vars # number of local latent variables
+
+    def neural_network(self, z):
+        """p = neural_network(z)"""
+        with pt.defaults_scope(activation_fn=tf.nn.elu,
+                               batch_normalize=True,
+                               learned_moments_update_rate=0.0003,
+                               variance_epsilon=0.001,
+                               scale_after_normalization=True):
+            return (pt.wrap(z).
+                    reshape([N_MINIBATCH, 1, 1, self.n_vars]).
+                    deconv2d(3, 128, edges='VALID').
+                    deconv2d(5, 64, edges='VALID').
+                    deconv2d(5, 32, stride=2).
+                    deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+                    flatten()).tensor
+
+    def log_lik(self, xs, z):
+        """
+        Bernoulli log-likelihood, summing over every image n and pixel i
+        in image n.
+
+        log p(x | z) = log Bernoulli(x | p = neural_network(z))
+         = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
+        """
+        return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
+
+model = NormalBernoulli(n_vars=10)</code></pre>
+<p>An example script using this model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">here</a>.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Dayan, P., Hinton, G. E., Neal, R. M., &amp; Zemel, R. S. (1995). The Helmholtz Machine. Neural Computation, 7(5), 889–904.</li>
+<li>Kingma, D. P., &amp; Welling, M. (2014). Auto-Encoding Variational Bayes. In International Conference on Learning Representations.</li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

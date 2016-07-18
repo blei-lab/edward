@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Inference of probability models</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="inference-of-probability-models">Inference of probability models</h2>
+<p>This tutorial asks the question: what does it mean to do inference of probability models? This sets the stage for understanding how to design inference algorithms in Edward.</p>
+<h3 id="the-posterior">The posterior</h3>
+<p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden structure <span class="math inline">\(z\)</span> explains the data? We seek to infer this hidden structure using the model.</p>
+<p>Inference of probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
+  p(z \mid x)
+  &amp;=
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math inline">\(z\)</span>, conditioned on some (observed) data <span class="math inline">\(x\)</span>. Drawing analogy to representation learning, it is a probabilistic description of the data’s hidden representation.</p>
+<p>From the perspective of inductivism, as practiced by classical Bayesians (and implicitly by frequentists), the posterior is our updated hypothesis about the latent variables. From the perspective of hypothetico-deductivism, as practiced by statisticians such as Box, Rubin, and Gelman, the posterior is simply a fitted model to data, to be criticized and thus revised (Box, 1983; Gelman and Shalizi, 2012).</p>
+<h3 id="inferring-the-posterior">Inferring the posterior</h3>
+<p>Now we know what the posterior represents. How do we calculate it? This is the central computational challenge in inference.</p>
+<p>The posterior is difficult to compute because of its normalizing constant, which is the integral in the denominator. This is often a high-dimensional integral that lacks an analytic (closed-form) solution. Thus, calculating the posterior means <em>approximating</em> the posterior.</p>
+<p>There are many approaches to posterior inference, which can be unwieldy to manage or even conceptualize. Edward uses classes and class inheritance to provide a hierarchy of inference methods, enabling fast experimentation on top of existing methods. For details on the inference hierarchy in Edward, see the <a href="api/inferences.html">inference API</a>. We describe several examples in detail in the other inference <a href="tutorials.html">tutorials</a>.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Box, G. E. (1982). An Apology for Ecumenism in Statistics (No. MRC-TSR-2408). Wisconsin Univ-Madison Mathematics Research Center.</li>
+<li>Gelman, A., &amp; Shalizi, C. R. (2012). Philosophy and the practice of Bayesian statistics. British Journal of Mathematical and Statistical Psychology, 66(1), 8–38.</li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
