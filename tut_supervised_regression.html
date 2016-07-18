@@ -66,22 +66,22 @@
 <div class="container">
   <div class="row" style="margin-top: 5%">
     <div class="three columns">
-    <h1><a href="index.html">Edward</a></h1>
-    <a href="index.html">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
     <center>
       <img src="images/edward.png" class="logo-width" alt="Edward" />
     </center>
     </a>
-    <a class="button u-full-width" href="index.html">Home</a>
-    <a class="button u-full-width" href="getting-started.html">Getting Started</a>
-    <a class="button u-full-width" href="delving-in.html">Delving In</a>
-    <a class="button u-full-width" href="tutorials.html">Tutorials</a>
-    <a class="button u-full-width" href="api/index.html">API</a>
+    <a class="button u-full-width" href="/">Home</a>
+    <a class="button u-full-width" href="getting-started">Getting Started</a>
+    <a class="button u-full-width" href="delving-in">Delving In</a>
+    <a class="button u-full-width" href="tutorials">Tutorials</a>
+    <a class="button u-full-width" href="api/">API</a>
     <a class="button u-full-width" href="#">Advanced</a>
-    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
-    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
-    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
-    <a class="button2 u-full-width" href="license.html">License</a>
+    <a class="button2 u-full-width" href="design-philosophy">Design Philosophy</a>
+    <a class="button2 u-full-width" href="developer-process">Developer Process</a>
+    <a class="button2 u-full-width" href="troubleshooting">Troubleshooting</a>
+    <a class="button2 u-full-width" href="license">License</a>
     <div class="row" style="padding-bottom: 5%"> </div>
     <a href="https://github.com/blei-lab/edward">
     <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
@@ -106,7 +106,7 @@
 coeff = np.random.randn(10)
 data = build_toy_dataset(coeff=coeff)</code></pre>
 <h3 id="model">Model</h3>
-<p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="tut_bayesian_linear_regression.html">Bayesian linear regression tutorial</a>.</p>
+<p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="tut_bayesian_linear_regression">Bayesian linear regression tutorial</a>.</p>
 <p>Here we build the model in Edward using TensorFlow.</p>
 <pre class="python" language="Python"><code>class LinearModel:
     &quot;&quot;&quot;
@@ -163,7 +163,7 @@ variational.add(Normal(model.n_vars))</code></pre>
 <p>Run mean-field variational inference for 250 iterations and print every 10 iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=250, n_print=10)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>Use point-based evaluation, and calculate the mean squared error for predictions on test data. Here the test data is simulated from the same process.</p>
 <pre class="python" language="Python"><code>data_test = build_toy_dataset(coeff=coeff)
@@ -171,7 +171,7 @@ x_test, y_test = data_test[&#39;x&#39;], data_test[&#39;y&#39;]
 print(ed.evaluate(&#39;mse&#39;, model, variational, {&#39;x&#39;: x_test}, y_test))
 ## 0.0262413</code></pre>
 <p>The trained model makes predictions with low mean squared error (relative to the magnitude of the output).</p>
-<p>In addition to the model’s <code>log_prob()</code> method typically required for inference, it has a <code>predict()</code> method which makes predictions. This method is required for point-based evaluation. For more details on criticism, see the <a href="tut_point_eval.html">point-based evaluation tutorial</a>.</p>
+<p>In addition to the model’s <code>log_prob()</code> method typically required for inference, it has a <code>predict()</code> method which makes predictions. This method is required for point-based evaluation. For more details on criticism, see the <a href="tut_point_eval">point-based evaluation tutorial</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

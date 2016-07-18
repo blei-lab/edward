@@ -62,22 +62,22 @@
 <div class="container">
 <div class="row" style="margin-top: 5%">
 <div class="three columns">
-<h1><a href="index.html">Edward</a></h1>
-<a href="index.html">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
 <center>
 <img alt="Edward" class="logo-width" src="images/edward.png"/>
 </center>
 </a>
-<a class="button u-full-width" href="index.html">Home</a>
-<a class="button u-full-width" href="getting-started.html">Getting Started</a>
-<a class="button u-full-width" href="delving-in.html">Delving In</a>
-<a class="button u-full-width" href="tutorials.html">Tutorials</a>
-<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="getting-started">Getting Started</a>
+<a class="button u-full-width" href="delving-in">Delving In</a>
+<a class="button u-full-width" href="tutorials">Tutorials</a>
+<a class="button u-full-width" href="api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
-<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
-<a class="button2 u-full-width" href="license.html">License</a>
+<a class="button2 u-full-width" href="design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="license">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a href="https://github.com/blei-lab/edward">
 <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
@@ -88,7 +88,7 @@
 </div>
 <div class="nine columns">
 <h2 id="laplace-approximation">Laplace approximation</h2>
-<p>(This tutorial follows the <a href="tut_MAP.html">Maximum a posteriori estimation</a> tutorial.)</p>
+<p>(This tutorial follows the <a href="tut_MAP">Maximum a posteriori estimation</a> tutorial.)</p>
 <p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math inline">\(p(z \mid x)\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
 <p>The Laplace approximation is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}
   p(z \mid x)
@@ -98,7 +98,7 @@
   &amp;=
   \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
 <h3 id="implementation">Implementation</h3>
-<p>Edward implements the Laplace approximation by extending the class built for <a href="tut_MAP.html">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
+<p>Edward implements the Laplace approximation by extending the class built for <a href="tut_MAP">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
 <pre class="python" language="Python"><code>class Laplace(MAP):
     def __init__(self, model, data=None, params=None):
         super(Laplace, self).__init__(model, data, params)
