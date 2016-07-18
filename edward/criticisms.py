@@ -107,7 +107,7 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
         return evaluations
 
 
-def ppc(model, variational=None, data=None, T=None, size=100):
+def ppc(model, variational=None, data=None, T=None, n_samples=100):
     """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
     If no posterior approximation is provided through ``variational``,
@@ -116,18 +116,18 @@ def ppc(model, variational=None, data=None, T=None, size=100):
     PPC's form an empirical distribution for the predictive discrepancy,
 
     .. math::
-        p(T) = \int p(T(yrep) | z) p(z | y) dz
+        p(T) = \int p(T(xrep) | z) p(z | x) dz
 
-    by drawing replicated data sets yrep and calculating
-    :math:`T(yrep)` for each data set. Then it compares it to
-    :math:`T(y)`.
+    by drawing replicated data sets xrep and calculating
+    :math:`T(xrep)` for each data set. Then it compares it to
+    :math:`T(x)`.
 
     Parameters
     ----------
     model : ed.Model
-        class object that implements the ``sample_likelihood`` method
+        Class object that implements the ``sample_likelihood`` method
     variational : ed.Variational, optional
-        latent variable distribution q(z) to sample from. It is an
+        Latent variable distribution q(z) to sample from. It is an
         approximation to the posterior, e.g., a variational
         approximation or an empirical distribution from MCMC samples.
         If not specified, samples will be obtained from the model
@@ -145,8 +145,8 @@ def ppc(model, variational=None, data=None, T=None, size=100):
         Discrepancy function, which takes a data dictionary and list
         of latent variables as input and outputs a tf.Tensor. Default
         is the identity function.
-    size : int, optional
-        number of replicated data sets
+    n_samples : int, optional
+        Number of replicated data sets.
 
     Returns
     -------
@@ -155,13 +155,13 @@ def ppc(model, variational=None, data=None, T=None, size=100):
         vector of size elements,
 
         .. math::
-            (T(yrep^{1}, z^{1}), ..., T(yrep^{size}, z^{size}))
+            (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))
 
         and the realized discrepancy, which is a NumPy vector of size
         elements,
 
         .. math::
-            (T(y, z^{1}), ..., T(y, z^{size})).
+            (T(x, z^{1}), ..., T(x, z^{size})).
 
         If the discrepancy function is not specified, then the list
         contains the full data distribution where each element is a
@@ -170,17 +170,17 @@ def ppc(model, variational=None, data=None, T=None, size=100):
     sess = get_session()
     if data is None:
         N = 1
-        y = {}
+        x = {}
     else:
         # Assume all values have the same data set size.
         N = get_dims(list(six.itervalues(data))[0])[0]
-        y = data
+        x = data
 
     # 1. Sample from posterior (or prior).
     # We must fetch zs out of the session because sample_likelihood()
     # may require a SciPy-based sampler.
     if variational is not None:
-        zs = variational.sample(size=size)
+        zs = variational.sample(n_samples)
         # This is to avoid fetching, e.g., a placeholder x with the
         # dictionary {x: np.array()}. TensorFlow will raise an error.
         if isinstance(zs, list):
@@ -190,30 +190,30 @@ def ppc(model, variational=None, data=None, T=None, size=100):
 
         zs = sess.run(zs)
     else:
-        zs = model.sample_prior(size=size)
+        zs = model.sample_prior(n_samples)
         zs = zs.eval()
 
     # 2. Sample from likelihood.
-    yreps = model.sample_likelihood(zs, size=N)
+    xreps = model.sample_likelihood(zs, N)
 
     # 3. Calculate discrepancy.
     if T is None:
-        if y is None:
-            return yreps
+        if x is None:
+            return xreps
         else:
-            return [yreps, y]
+            return [xreps, y]
 
-    Tyreps = []
-    Tys = []
-    for yrep, z in zip(yreps, tf.unpack(zs)):
-        Tyreps += [T(yrep, z)]
+    Txreps = []
+    Txs = []
+    for xrep, z in zip(yreps, tf.unpack(zs)):
+        Txreps += [T(xrep, z)]
         if y is not None:
-            Tys += [T(y, z)]
+            Txs += [T(x, z)]
 
-    if y is None:
-        return sess.run(tf.pack(Tyreps))
+    if x is None:
+        return sess.run(tf.pack(Txreps))
     else:
-        return sess.run([tf.pack(Tyreps), tf.pack(Tys)])
+        return sess.run([tf.pack(Txreps), tf.pack(Txs)])
 
 
 # Classification metrics

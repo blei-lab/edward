@@ -192,7 +192,7 @@ class VariationalInference(Inference):
             values = list(six.itervalues(self.data))
             slices = tf.train.slice_input_producer(values)
             # By default use as many threads as CPUs.
-            batches = tf.train.batch(slices, self.n_minibatch,
+            batches = tf.train.batch(slices, n_minibatch,
                                      num_threads=multiprocessing.cpu_count())
             if not isinstance(batches, list):
                 # `tf.train.batch` returns tf.Tensor if `slices` is a
