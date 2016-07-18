@@ -143,7 +143,8 @@ Three code snippets are highlighted in ``initialize()``: the first
 enables batch training with an argument ``n_minibatch`` for the batch
 size; the second defines the loss function, building TensorFlow's
 computational graph; the third sets up an optimizer to minimize the
-loss.
+loss. These three snippets are applicable to all of variational
+inference, and are thus useful defaults for any derived class.
 
 For examples of inference algorithms built in Edward, see the inference
 `tutorials <../tutorials.html>`__.

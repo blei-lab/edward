@@ -52,11 +52,11 @@ class BayesianNN:
         return log_prior + log_lik
 \end{lstlisting}
 
-Instantiating this model as
+Instantiate this model as
 \begin{lstlisting}[language=Python]
 model = BayesianNN(layer_sizes=[1, 2, 2, 1])
 \end{lstlisting}
-defines a two-layer Bayesian neural network with $\tanh$
+This defines a two-layer Bayesian neural network with $\tanh$
 nonlinearities.
 
 First, simulate a toy dataset of 50 observations with a cosine relationship.
@@ -65,7 +65,6 @@ import numpy as np
 
 x = np.linspace(-3, 3, num=50)
 y = np.cos(x) + norm.rvs(0, 0.1, size=50)
-x = x.reshape((N, 1))
 data = {'x': x, 'y': y}
 \end{lstlisting}
 \includegraphics[width=700px]{images/getting-started-fig0.png}
