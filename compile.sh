@@ -14,18 +14,15 @@ for filename in *.tex; do
          --output=../${filename%.*}.html
 done
 
-# Compile index.tex into markdown, to make it easier to copy 
-# to the base level README.md
-pandoc index.tex --output=../index.md
-
 # Strip paragraphs in lists in pandoc's html output
 cd ..
-python strip_p_in_li.py 
+python strip_p_in_li.py
 
 # Run sphinx to generate the API
-cd ../sphinx
+cd ../docs
 sphinx-apidoc -f -e -M -T -o source/ ../edward
 make html
+mkdir -p ../website/api
 cp -r build/html/* ../website/api
 
 cd ../website
