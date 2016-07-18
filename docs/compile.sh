@@ -1,5 +1,6 @@
 #!/bin/bash
 rm -f *.html
+rm -f api
 
 # Compile all the tex files into html
 cd tex
@@ -19,10 +20,7 @@ cd ..
 python strip_p_in_li.py
 
 # Run sphinx to generate the API
-cd ../docs
 sphinx-apidoc -f -e -M -T -o source/ ../edward
 make html
-mkdir -p ../website/api
-cp -r build/html/* ../website/api
-
-cd ../website
+mkdir -p api
+cp -r build/html/* api

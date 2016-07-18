@@ -92,5 +92,5 @@ img/
 *.ipynb_checkpoints/
 
 # Web development
-website/api/*
-website/*.html
+docs/api/
+docs/*.html
