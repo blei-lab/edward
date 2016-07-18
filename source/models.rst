@@ -4,7 +4,7 @@ Models
 A probabilistic model specifies a joint distribution ``p(x, z)``
 of data ``x`` and latent variables ``z``.
 For more details, see the
-`Probability Models tutorial <../tut_model>`__.
+`Probability Models tutorial <../tut_model.html>`__.
 
 All models in Edward are written as a class. To write a new model,
 it can be written in any of the currently supported modeling
@@ -142,7 +142,7 @@ computation represents a single node in the graph (making it difficult
 to tease apart and thus distribute their computation).
 
 For examples of models built in Edward, see the model
-`tutorials <../tutorials>`__.
+`tutorials <../tutorials.html>`__.
 
 Model API
 ^^^^^^^^^

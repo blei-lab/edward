@@ -1,6 +1,6 @@
 #!/bin/bash
 rm -f *.html
-rm -f api
+rm -rf api
 
 # Compile all the tex files into html
 cd tex

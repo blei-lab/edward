@@ -62,22 +62,22 @@
 <div class="container">
 <div class="row" style="margin-top: 5%">
 <div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
 <center>
 <img alt="Edward" class="logo-width" src="images/edward.png"/>
 </center>
 </a>
-<a class="button u-full-width" href="/">Home</a>
-<a class="button u-full-width" href="getting-started">Getting Started</a>
-<a class="button u-full-width" href="delving-in">Delving In</a>
-<a class="button u-full-width" href="tutorials">Tutorials</a>
-<a class="button u-full-width" href="api/">API</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="design-philosophy">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process">Developer Process</a>
-<a class="button2 u-full-width" href="troubleshooting">Troubleshooting</a>
-<a class="button2 u-full-width" href="license">License</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a href="https://github.com/blei-lab/edward">
 <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
@@ -88,7 +88,7 @@
 </div>
 <div class="nine columns">
 <h2 id="reparameterization-gradient">Reparameterization gradient</h2>
-<p>(This tutorial follows the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a> tutorial.)</p>
+<p>(This tutorial follows the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a> tutorial.)</p>
 <p>We seek to maximize the ELBO, <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
@@ -150,7 +150,7 @@
   -
   \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
-  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="tut_KLqp_score">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
+  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="tut_KLqp_score.html">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
 <h3 id="implementation">Implementation</h3>
 <p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the reparameterization gradient in the class <code>MFVI</code> (mean-field variational inference). It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
@@ -171,9 +171,9 @@
         return -self.loss</code></pre>
 <p>Two methods are added: <code>initialize()</code> and <code>build_reparam_loss()</code>. The method <code>initialize()</code> follows the same initialization as <code>VariationalInference</code>, and adds an argument: <code>n_samples</code> for the number of samples from the variational model.</p>
 <p>The method <code>build_reparam_loss()</code> implements the ELBO and its gradient. It draws <code>self.n_samples</code> samples from the variational model. It registers the Monte Carlo estimate of the ELBO in TensorFlow’s computational graph, and stores it in <code>self.loss</code>, to track progress of the inference for diagnostics.</p>
-<p>The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>stop_gradient()</code> function.</p>
+<p>The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score.html">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>stop_gradient()</code> function.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
-<p>See the <a href="api/">API</a> for more details.</p>
+<p>See the <a href="api/index.html">API</a> for more details.</p>
 <h3 id="references">References</h3>
 <ul>
 <li>Rezende, D. J., Mohamed, S., &amp; Wierstra, D. (2014). Stochastic Backpropagation and Approximate Inference in Deep Generative Models. In International Conference on Machine Learning.</li>

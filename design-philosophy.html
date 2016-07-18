@@ -62,22 +62,22 @@
 <div class="container">
 <div class="row" style="margin-top: 5%">
 <div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
 <center>
 <img alt="Edward" class="logo-width" src="images/edward.png"/>
 </center>
 </a>
-<a class="button u-full-width" href="/">Home</a>
-<a class="button u-full-width" href="getting-started">Getting Started</a>
-<a class="button u-full-width" href="delving-in">Delving In</a>
-<a class="button u-full-width" href="tutorials">Tutorials</a>
-<a class="button u-full-width" href="api/">API</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="design-philosophy">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process">Developer Process</a>
-<a class="button2 u-full-width" href="troubleshooting">Troubleshooting</a>
-<a class="button2 u-full-width" href="license">License</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a href="https://github.com/blei-lab/edward">
 <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
@@ -97,8 +97,8 @@
 <p>As an applied tool, Edward supports a wide variety of settings, ranging from classical hierarchical models on small data sets to complex deep probabilistic models on large data sets. With <a href="https://www.tensorflow.org">TensorFlow</a> as a backend, Edward can leverage features such as computational graphs, distributed training, and CPU/GPU integration to deploy probabilistic modeling at scale.</p>
 <h2 id="related-software">Related Software</h2>
 <p>There are several notable themes in Edward.</p>
-<p><strong>Probabilistic programming.</strong> There has been outstanding work on programming languages which specify broad classes of probabilistic models, or probabilistic programs. Among these include <a href="http://probcomp.csail.mit.edu/venture/">Venture</a>, <a href="http://www.robots.ox.ac.uk/~fwood/anglican/literature/index.html">Anglican</a>, <a href="http://webppl.org">WebPPL</a>, <a href="http://mc-stan.org">Stan</a>, and <a href="https://www.cra.com/work/case-studies/figaro">Figaro</a>. The most important distinction in Edward comes from our motivation. We are interested in deploying probabilistic models to a myriad of real world applications, ranging from the size of data and data structure, such as large text corpora or many brief audio signals, to the size of model and class of models, such as small nonparametric models or deep generative models. As one consequence, Edward is built for efficient (and possibly distributed) training. As another, we do not prioritize development of modeling languages. For example, we instead leverage Stan’s language as an easy way to specify models in Edward.</p>
-<p><strong>Black box inference.</strong> Black box algorithms are typically Monte Carlo methods, and by design make very few assumptions about the model. Our motivation as outlined above presents a new set of challenges in both inference research and their software design. As one consequence, we focus on variational inference. As a second consequence, we encourage active development of inference by providing a class hierarchy of inference algorithms. As a third consequence, our inference algorithms aim to take advantage of as much structure as possible from the model. Edward supports all types of inference, whether they be black box or model-specific.</p>
+<p><strong>Probabilistic programming.</strong> There has been outstanding work on programming languages which specify broad classes of probabilistic models, or probabilistic programs. Among these include <a href="http://probcomp.csail.mit.edu/venture/">Venture</a>, <a href="http://www.robots.ox.ac.uk/~fwood/anglican/literature/index.html">Anglican</a>, <a href="http://webppl.org">WebPPL</a>, <a href="http://mc-stan.org">Stan</a>, and <a href="https://www.cra.com/work/case-studies/figaro">Figaro</a>. The most important distinction in Edward comes from our motivation. We are interested in deploying probabilistic models to a myriad of real world applications, ranging from the size of data and data structure, such as large text corpora or many brief audio signals, to the size of model and class of models, such as small nonparametric models or deep generative models. Thus Edward is built with efficient (and possibly distributed) training in mind, beyond the setting where all computing is on CPUs or where data must fit in memory.</p>
+<p><strong>Black box inference.</strong> Black box algorithms are typically Monte Carlo methods, and by design make very few assumptions about the model. Our motivation as outlined above presents a new set of challenges in both inference research and their software design. As one consequence, we focus on variational inference. As a second consequence, we encourage active research on inference by providing a class hierarchy of inference algorithms. As a third consequence, our inference algorithms aim to take advantage of as much structure as possible from the model. Edward supports all types of inference, whether they be black box or model-specific.</p>
 <p><strong>Computational frameworks.</strong> There are many computational frameworks, primarily built for deep learning: as of this date, this includes <a href="https://www.tensorflow.org">TensorFlow</a>, <a href="http://deeplearning.net/software/theano/">Theano</a>, <a href="http://torch.ch">Torch</a>, <a href="https://github.com/NervanaSystems/neon">neon</a>, <a href="http://rll.berkeley.edu/cgt/">Computational Graph Toolkit</a>, and <a href="https://github.com/stan-dev/math">Stan Math Library</a>. These are incredible tools which Edward employs as a backend. In terms of abstraction, Edward sits at one level higher. For example, we chose to use TensorFlow among the bunch due to Python as our language of choice for machine learning research and as an investment in Google’s massive engineering.</p>
 <p><strong>High-level deep learning libraries.</strong> Neural network libraries such as <a href="https://github.com/fchollet/keras">Keras</a> and <a href="https://github.com/Lasagne/Lasagne">Lasagne</a> are at a similar abstraction level as us, but they are primarily interested in parameterizing complicated functions for supervised learning on large datasets. We are interested in probabilistic models which apply to a wide array of learning tasks, and which can have both complicated likelihood and complicated priors (neural networks are an option but not a necessity). Therefore our goals are orthogonal and in fact mutually benefit each other. For example, we use Keras’ abstraction as a way to easily specify models parameterized by deep neural networks.</p>
 </div>
