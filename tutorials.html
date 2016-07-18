@@ -13,6 +13,22 @@
 <!-- CSS -->
 <link href="css/normalize.css" rel="stylesheet">
 <link href="css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
 <!-- KaTeX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
@@ -42,13 +58,15 @@
 <meta content="icons/browserconfig.xml" name="msapplication-config">
 <meta content="#ffffff" name="theme-color">
 </meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
-<body>
+<body width="device-width">
 <div class="container">
 <div class="row" style="margin-top: 5%">
 <div class="three columns">
 <h1><a href="index.html">Edward</a></h1>
 <a href="index.html">
-<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+<center>
+<img alt="Edward" class="logo-width" src="images/edward.png"/>
+</center>
 </a>
 <a class="button u-full-width" href="index.html">Home</a>
 <a class="button u-full-width" href="getting-started.html">Getting Started</a>

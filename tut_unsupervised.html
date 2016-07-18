@@ -10,10 +10,26 @@
 
   <!-- FONT -->
   <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-    
+
   <!-- CSS -->
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
 
   <!-- KaTeX -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
@@ -46,24 +62,26 @@
   <meta name="msapplication-config" content="icons/browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
 </head>
-<body>
+<body width="device-width">
 <div class="container">
   <div class="row" style="margin-top: 5%">
     <div class="three columns">
-    <h1><a href="index.html">Edward</a></h1> 
+    <h1><a href="index.html">Edward</a></h1>
     <a href="index.html">
-    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
+    <center>
+      <img src="images/edward.png" class="logo-width" alt="Edward" />
+    </center>
     </a>
     <a class="button u-full-width" href="index.html">Home</a>
-    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
-    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
-    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
-    <a class="button u-full-width" href="api/index.html">API</a> 
-    <a class="button u-full-width" href="#">Advanced</a> 
-    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
-    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
-    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
-    <a class="button2 u-full-width" href="license.html">License</a> 
+    <a class="button u-full-width" href="getting-started.html">Getting Started</a>
+    <a class="button u-full-width" href="delving-in.html">Delving In</a>
+    <a class="button u-full-width" href="tutorials.html">Tutorials</a>
+    <a class="button u-full-width" href="api/index.html">API</a>
+    <a class="button u-full-width" href="#">Advanced</a>
+    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+    <a class="button2 u-full-width" href="license.html">License</a>
     <div class="row" style="padding-bottom: 5%"> </div>
     <a href="https://github.com/blei-lab/edward">
     <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
@@ -151,6 +169,6 @@ inference.run(n_iter=500, n_samples=5, n_minibatch=5)</code></pre>
 <script>
   hljs.initHighlightingOnLoad();
   renderMathInElement(document.body);
-</script> 
+</script>
 </body>
 </html>
