@@ -19,7 +19,7 @@ pip install pandoc beautifulsoup4 sphinx sphinx-autobuild sphinx_rtd_theme ghp-i
 ./compile.sh
 ```
 
-This will 
+This will
   1. run pandoc on all LaTeX files in `website/tex`
   2. run beautifulsoup4 on all output html files to clean up artifacts
   3. run sphinx's autobuild on `../sphinx` to auto-generate the API
@@ -27,7 +27,15 @@ This will
 
 ## Deploying the website
 
-+ You can deploy the website to the `gh-pages` branch. Just run
++ We deploy the documentation so that it is available on this repo's
+  Github pages (the `gh-pages` branch). To do this (and assuming you
+  have push permission), go to this directory. Then run
 ```{bash}
 ./deploy.sh
 ```
+  We forward the main domain url to the Github pages url,
+  [blei-lab.github.io/edward](http://blei-lab.github.io/edward).
+  Following
+  [Github's guide](https://help.github.com/articles/setting-up-a-custom-domain-with-github-pages),
+  namely, we make a `CNAME` file; then we update the DNS record on
+  the DNS provider.
