@@ -5,7 +5,7 @@
 \subsection{Laplace approximation}
 
 (This tutorial follows the
-\href{tut_MAP}{Maximum a posteriori estimation} tutorial.)
+\href{tut_MAP.html}{Maximum a posteriori estimation} tutorial.)
 
 Maximum a posteriori (MAP) estimation approximates the posterior $p(z \mid x)$
 with a point mass (delta function) by simply capturing its mode. MAP is
@@ -36,7 +36,7 @@ gradient).
 \subsubsection{Implementation}
 
 Edward implements the Laplace approximation by extending the class built for
-\href{tut_MAP}{MAP estimation}, as it requires an estimate of the
+\href{tut_MAP.html}{MAP estimation}, as it requires an estimate of the
 posterior mode, $z_\text{MAP}$.
 
 \begin{lstlisting}[language=Python]
