@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Home</title>
+<title>Edward – Inference of probability models</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,60 +69,24 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="a-library-for-probabilistic-modeling-inference-and-criticism.">A library for probabilistic modeling, inference, and criticism.</h2>
-<p>Edward is a Python library for probabilistic modeling, inference, and criticism. It is a testbed for fast experimentation and research with probabilistic models, ranging from classical hierarchical models on small data sets to complex deep probabilistic models on large data sets. Edward fuses three fields: Bayesian statistics and machine learning, deep learning, and probabilistic programming.</p>
-<p>It supports <strong>modeling languages</strong> including</p>
+<h2 id="inference-of-probability-models">Inference of probability models</h2>
+<p>This tutorial asks the question: what does it mean to do inference of probability models? This sets the stage for understanding how to design inference algorithms in Edward.</p>
+<h3 id="the-posterior">The posterior</h3>
+<p>How can we use a model <span class="math inline">\(p(x,z)\)</span> to analyze some data <span class="math inline">\(x\)</span>? In other words, what hidden structure <span class="math inline">\(z\)</span> explains the data? We seek to infer this hidden structure using the model.</p>
+<p>Inference of probability models leverages Bayes’ rule to define the <em>posterior</em> <span class="math display">\[\begin{aligned}
+  p(z \mid x)
+  &amp;=
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.\end{aligned}\]</span> The posterior is the distribution of the latent variables <span class="math inline">\(z\)</span>, conditioned on some (observed) data <span class="math inline">\(x\)</span>. Drawing analogy to representation learning, it is a probabilistic description of the data’s hidden representation.</p>
+<p>From the perspective of inductivism, as practiced by classical Bayesians (and implicitly by frequentists), the posterior is our updated hypothesis about the latent variables. From the perspective of hypothetico-deductivism, as practiced by statisticians such as Box, Rubin, and Gelman, the posterior is simply a fitted model to data, to be criticized and thus revised (Box, 1983; Gelman and Shalizi, 2012).</p>
+<h3 id="inferring-the-posterior">Inferring the posterior</h3>
+<p>Now we know what the posterior represents. How do we calculate it? This is the central computational challenge in inference.</p>
+<p>The posterior is difficult to compute because of its normalizing constant, which is the integral in the denominator. This is often a high-dimensional integral that lacks an analytic (closed-form) solution. Thus, calculating the posterior means <em>approximating</em> the posterior.</p>
+<p>There are many approaches to posterior inference, which can be unwieldy to manage or even conceptualize. Edward uses classes and class inheritance to provide a hierarchy of inference methods, enabling fast experimentation on top of existing methods. For details on the inference hierarchy in Edward, see the <a href="api/inferences.html">inference API</a>. We describe several examples in detail in the other inference <a href="tutorials.html">tutorials</a>.</p>
+<h3 id="references">References</h3>
 <ul>
-<li><a href="https://www.tensorflow.org">TensorFlow</a> (with neural networks via <a href="http://keras.io">Keras</a>, <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a>, or <a href="https://github.com/google/prettytensor">Pretty Tensor</a>)</li>
-<li><a href="http://mc-stan.org">Stan</a></li>
-<li><a href="http://pymc-devs.github.io/pymc3/">PyMC3</a></li>
-<li>Python, through <a href="http://scipy.org/">NumPy/SciPy</a></li>
+<li>Box, G. E. (1982). An Apology for Ecumenism in Statistics (No. MRC-TSR-2408). Wisconsin Univ-Madison Mathematics Research Center.</li>
+<li>Gelman, A., &amp; Shalizi, C. R. (2012). Philosophy and the practice of Bayesian statistics. British Journal of Mathematical and Statistical Psychology, 66(1), 8–38.</li>
 </ul>
-<p>It supports <strong>inference</strong> via</p>
-<ul>
-<li>Variational inference
-<ul>
-<li>Black box variational inference</li>
-<li>Stochastic variational inference</li>
-<li>Variational auto-encoders</li>
-<li>Inclusive KL divergence: <span class="math inline">\(\text{KL}(p\|q)\)</span></li>
-</ul></li>
-<li>Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
-<ul>
-<li>Variational EM</li>
-</ul></li>
-<li>Maximum a posteriori estimation (penalized maximum likelihood)
-<ul>
-<li>Laplace approximation</li>
-</ul></li>
-</ul>
-<p>It supports <strong>criticism</strong> of the model and inference via</p>
-<ul>
-<li>Point-based evaluations</li>
-<li>Posterior predictive checks</li>
-</ul>
-<p>Edward is built on top of <a href="https://www.tensorflow.org">TensorFlow</a>, enabling features such as computational graphs, distributed training, CPU/GPU integration, automatic differentiation, and visualization with TensorBoard.</p>
-<h3 id="authors">Authors</h3>
-<p>Edward is led by <a href="http://dustintran.com">Dustin Tran</a> with guidance by <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>. The other developers are</p>
-<ul>
-<li><a href="http://stat.columbia.edu/~diengadji/">Adji Dieng</a></li>
-<li><a href="http://www.proditus.com/">Alp Kucukelbir</a></li>
-<li><a href="http://www.ee.columbia.edu/~dliang/">Dawen Liang</a></li>
-<li><a href="http://maja-rita-rudolph.com/">Maja Rudolph</a></li>
-</ul>
-<p>We are open to collaboration, and welcome researchers and developers to contribute. Check out the <a href="https://github.com/blei-lab/edward/issues">Github issues</a> for feature requests and other software problems. For broader research challenges, shoot one of us an e-mail.</p>
-<p>Edward has benefited enormously from the helpful feedback and advice of many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and other members of the Blei Lab, Google Brain, and Google Research.</p>
-<h3 id="citation">Citation</h3>
-<p>We appreciate citations for Edward because it lets us find out how people have been using the library and it motivates further work.</p>
-<blockquote>
-<p>Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M. Blei. 2016. <em>Edward: A library for probabilistic modeling, inference, and criticism.</em> http://edwardlib.org</p>
-</blockquote>
-<pre class="JSON"><code>@misc{tran2016edward,
-    author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
-    title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
-    year = {2016},
-    url = {http://edwardlib.org}
-}</code></pre>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

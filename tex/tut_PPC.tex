@@ -1,0 +1,110 @@
+% Define the subtitle of the page
+\title{Posterior predictive checks}
+
+% Begin the content of the page
+\subsection{Posterior predictive checks}
+
+Posterior predictive checks (PPCs)
+analyze the degree to which data generated from the model deviate from
+data generated from the true distribution. They can be used either
+numerically to quantify this degree, or graphically to visualize this
+degree. PPCs can be thought of as a probabilistic generalization of
+point-based evaluations.
+
+PPCs focus on the posterior predictive distribution
+\begin{align*}
+  p(x_\text{new} \mid x)
+  &=
+  \int
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z.
+\end{align*}
+The model's posterior predictive can be used to generate new data
+given past observations and can also make predictions on new data
+given past observations.
+It is formed by calculating the likelihood of the new data, averaged
+over every set of latent variables according to the posterior
+distribution.
+
+The simplest PPC works by applying a test statistic on new data
+generated from the posterior predictive, such as
+$T(x_\text{new}) = \max(x_\text{new})$.  Applying $T(x_\text{new})$ to
+new data over many data replications induces a distribution. We compare
+this distribution to the test statistic applied to the real data $T(x)$.
+
+\includegraphics{images/ppc.png}
+
+In the figure, $T(x)$ falls in a low probability region of this
+reference distribution. This indicates that the model fits the data
+poorly according to this check; this suggests an area of improvement
+for the model.
+
+More generally, the test statistic can also be a function of the
+model's latent variables $T(x, z)$, known as a discrepancy function.
+Examples of discrepancy functions are the metrics used for point-based
+evaluation. We can now interpret the point-based evaluation as a
+special case of PPCs: it simply calculates $T(x, z)$ over the real
+data and without a reference distribution in mind. A reference
+distribution allows us to make probabilistic statements about the
+point, in reference to an overall distribution.
+
+\subsubsection{Implementation}
+
+Edward implements PPCs through the \texttt{sample_likelihood()}
+method in the probability model. This method samples a dataset
+$x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)$ from the
+model likelihood given a set of latent variables.
+\begin{lstlisting}[language=Python]
+class BetaBernoulli:
+    ...
+    def sample_likelihood(self, zs, n):
+        """x | z ~ p(x | z)"""
+        out = []
+        for s in range(zs.shape[0]):
+            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
+        return out
+\end{lstlisting}
+
+The \texttt{ed.ppc()} method provides a scaffold for studying
+various discrepancy functions by repeatedly simulating datasets from the
+posterior predictive distribution
+\begin{lstlisting}[language=Python]
+T = lambda y, z=None: tf.reduce_mean(y['x'])
+print(ed.ppc(model, variational, data, T))
+\end{lstlisting}
+
+See the \href{api/criticisms.html}{criticism API} for further details.
+
+PPCs are an excellent tool for revising models, simplifying or
+expanding the current model as one examines how well it fits the data.
+They are inspired by prior checks and classical hypothesis
+testing, under the philosophy that models should be
+criticized under the frequentist perspective of large sample
+assessment.
+
+PPCs can also be applied to tasks such as hypothesis testing, model
+comparison, model selection, and model averaging.  It's important to
+note that while they can be applied as a form of Bayesian hypothesis
+testing, hypothesis testing is generally not recommended: binary
+decision making from a single test is not as common a use case as one
+might believe. We recommend performing many PPCs to get a holistic
+understanding of the model fit.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Box, G.E.P. (1980). Sampling and Bayes' inference in scientific modelling and
+  robustness. Journal of the Royal Statistical Society. Series A. 143(4), 383–430.
+\item
+  Rubin, D. B. (1984). Bayesianly justifiable and relevant frequency
+  calculations for the applied statistician. The Annals of Statistics,
+  12(4), 1151–1172.
+\item
+  Meng, X.-L. (1994). Posterior predictive $p$-values. The Annals of
+  Statistics, 1–19.
+\item
+  Gelman, A., Meng, X.-L., \& Stern, H. (1996). Posterior predictive assessment
+  of model fitness via realized discrepancies. Statistica Sinica.
+\end{itemize}

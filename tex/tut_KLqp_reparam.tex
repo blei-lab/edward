@@ -1,0 +1,182 @@
+% Define the subtitle of the page
+\title{Reparameterization gradient}
+
+% Begin the content of the page
+\subsection{Reparameterization gradient}
+
+(This tutorial follows the
+\href{tut_KLqp.html}{$\text{KL}(q\|p)$ minimization} tutorial.)
+
+We seek to maximize the ELBO,
+\begin{align*}
+  \lambda^*
+  &=
+  \arg \max_\lambda \text{ELBO}(\lambda)\\
+  &=\;
+  \arg \max_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],
+\end{align*}
+using a ``black box'' algorithm. This means generically inferring the
+posterior while making few assumptions about the model.
+
+If the model has differentiable latent variables, then it is generally
+advantageous to leverage gradient information from the model in order to
+better traverse the optimization space. One approach to doing this is
+the reparameterization gradient.
+
+\subsubsection{The reparameterization identity}
+
+Gradient descent is a standard approach for optimizing complicated
+objectives like the ELBO. The idea is to calculate its gradient
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=
+  \nabla_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],
+\end{align*}
+and update the current set of parameters proportional to the gradient.
+
+Some variational distributions $q(z\;;\;\lambda)$ admit useful
+reparameterizations. For example, we can reparameterize a normal distribution
+$z \sim \mathcal{N}(\mu, \Sigma)$ as
+$z \sim \mu + L \mathcal{N}(0, I)$ where $\Sigma = LL^\top$. In general, write
+this as
+\begin{align*}
+  \epsilon &\sim q(\epsilon)\\
+  z &= z(\epsilon \;;\; \lambda),
+\end{align*}
+where $\epsilon$ is a random variable that does \textbf{not} depend on the
+variational parameters $\lambda$. The deterministic function
+$z(\cdot;\lambda)$ encapsulates the variational parameters instead,
+and following the process is equivalent to directly drawing $z$ from
+the original distribution.
+
+The reparameterization gradient leverages this property of the
+variational distribution to write the gradient as
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(\epsilon)}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(x, z(\epsilon \;;\; \lambda))
+  -
+  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].
+\end{align*}
+The gradient of the ELBO is an expectation over the base
+distribution $q(\epsilon)$, and the gradient can be applied directly
+to the inner expression.
+Edward uses automatic differentiation, specifically with TensorFlow's
+computational graphs, making this gradient computation both simple and
+efficient to distribute.
+
+\subsubsection{Noisy estimates using Monte Carlo integration}
+
+We can use Monte Carlo integration to obtain noisy estimates of both the ELBO
+and its gradient. The basic procedure follows these steps:
+\begin{enumerate}
+  \item draw $S$ samples $\{\epsilon_s\}_1^S \sim q(\epsilon)$,
+  \item evaluate the argument of the expectation using $\{\epsilon_s\}_1^S$, and
+  \item compute the empirical mean of the evaluated quantities.
+\end{enumerate}
+
+A Monte Carlo estimate of the gradient is then
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &\approx\;
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(x, z(\epsilon \;;\; \lambda))
+  -
+  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].
+\end{align*}
+This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it
+exhibits lower variance than the
+\href{tut_KLqp_score.html}{score function gradient}, leading to
+faster convergence in a large set of problems.
+
+\subsubsection{Implementation}
+
+We implement $\text{KL}(q\|p)$ minimization with the
+reparameterization gradient in the class \texttt{MFVI} (mean-field
+variational inference). It inherits from
+\texttt{VariationalInference}, which
+provides a collection of default methods
+such as an optimizer.
+
+\begin{lstlisting}[language=Python]
+class MFVI(VariationalInference):
+    def __init__(self, *args, **kwargs):
+        super(MFVI, self).__init__(*args, **kwargs)
+
+    def initialize(self, n_samples=1, ...):
+        ...
+        self.n_samples = n_samples
+        return super(MFVI, self).initialize(*args, **kwargs)
+
+    def build_reparam_loss(self):
+        x = self.data
+        z = self.variational.sample(self.n_samples)
+
+        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
+                                   self.variational.log_prob(z))
+        return -self.loss
+\end{lstlisting}
+
+Two methods are added: \texttt{initialize()} and
+\texttt{build_reparam_loss()}. The method \texttt{initialize()}
+follows the same initialization as \texttt{VariationalInference}, and
+adds an argument: \texttt{n_samples} for the number of samples from
+the variational model.
+
+The method \texttt{build_reparam_loss()} implements the ELBO and its
+gradient. It draws \texttt{self.n_samples} samples from the
+variational model. It registers the Monte Carlo
+estimate of the ELBO in TensorFlow's computational graph, and stores it
+in \texttt{self.loss}, to track progress of the inference for diagnostics.
+
+The method returns an object whose automatic differentiation is the
+reparameterization gradient of the ELBO. The computational graph will
+simply traverse the nodes during backpropagation; unlike the
+\href{tut_KLqp_score.html}{score function gradient}, the
+reparameterization gradient does not need TensorFlow's
+\texttt{stop_gradient()} function.
+
+There is a nuance here. TensorFlow's optimizers are configured to
+\emph{minimize} an objective function. So the gradient is set to be
+the negative of the ELBO's gradient.
+
+See the \href{api/index.html}{API} for more details.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Rezende, D. J., Mohamed, S., & Wierstra, D. (2014). Stochastic
+  Backpropagation and Approximate Inference in Deep Generative Models.
+  In International Conference on Machine Learning.
+\item
+  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational
+  Bayes. In International Conference on Learning Representations.
+\end{itemize}

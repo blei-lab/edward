@@ -1,0 +1,546 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>edward.util module &mdash; Edward 1.0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
+        <link rel="up" title="edward package" href="edward.html"/>
+        <link rel="prev" title="edward.inferences module" href="edward.inferences.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="edward.criticisms.html">edward.criticisms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="edward.inferences.html">edward.inferences module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">edward.util module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="edward.html">edward package</a> &raquo;</li>
+      
+    <li>edward.util module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/edward.util.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-edward.util">
+<span id="edward-util-module"></span><h1>edward.util module<a class="headerlink" href="#module-edward.util" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="edward.util.cumprod">
+<code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#cumprod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cumulative product of a tensor along first dimension.</p>
+<p><a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/813">https://github.com/tensorflow/tensorflow/issues/813</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector, matrix, or n-Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Tensor with <cite>cumprod</cite> applied along its first dimension.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.dot">
+<code class="descclassname">edward.util.</code><code class="descname">dot</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute dot product between a Tensor matrix and a Tensor vector.</p>
+<p>If x is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix, then y is a <code class="docutils literal"><span class="pre">M</span></code>-vector.</p>
+<p>If x is a <code class="docutils literal"><span class="pre">M</span></code>-vector, then y is a <code class="docutils literal"><span class="pre">[M</span> <span class="pre">x</span> <span class="pre">N]</span></code> matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; <code class="docutils literal"><span class="pre">M</span> <span class="pre">x</span> <span class="pre">N</span></code> matrix or <code class="docutils literal"><span class="pre">M</span></code> vector (see above)</li>
+<li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; <code class="docutils literal"><span class="pre">M</span></code> vector or <code class="docutils literal"><span class="pre">M</span> <span class="pre">x</span> <span class="pre">N</span></code> matrix (see above)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">N</span></code>-vector</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.get_dims">
+<code class="descclassname">edward.util.</code><code class="descname">get_dims</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#get_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.get_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get values of each dimension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor or np.ndarray</em>) &#8211; scalar, vector, matrix, or n-tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Python list containing dimensions of <cite>x</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.get_session">
+<code class="descclassname">edward.util.</code><code class="descname">get_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#get_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.get_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the globally defined TensorFlow session.</p>
+<p>If the session is not already defined, then the function will create
+a global session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>_ED_SESSION</strong></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tf.InteractiveSession</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.hessian">
+<code class="descclassname">edward.util.</code><code class="descname">hessian</code><span class="sig-paren">(</span><em>y</em>, <em>xs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#hessian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.hessian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Hessian of y with respect to each x in xs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>y</strong> (<em>tf.Tensor</em>) &#8211; Tensor to calculate Hessian of.</li>
+<li><strong>xs</strong> (<em>list</em>) &#8211; List of TensorFlow variables to calculate with respect to.
+The variables can have different shapes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A matrix where each row is
+.. math:: partial_{xs} ( [ partial_{xs} y ]_j ).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.kl_multivariate_normal">
+<code class="descclassname">edward.util.</code><code class="descname">kl_multivariate_normal</code><span class="sig-paren">(</span><em>loc_one</em>, <em>scale_one</em>, <em>loc_two=0</em>, <em>scale_two=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#kl_multivariate_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.kl_multivariate_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the KL of multivariate normal distributions with
+diagonal covariances.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loc_one</strong> (<em>tf.Tensor</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the mean of a n-dimensional Gaussian</li>
+<li><strong>scale_one</strong> (<em>tf.Tensor</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the standard deviation of a n-dimensional Gaussian</li>
+<li><strong>loc_two</strong> (<em>tf.Tensor, optional</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the mean of a n-dimensional Gaussian</li>
+<li><strong>scale_two</strong> (<em>tf.Tensor, optional</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+row represents the standard deviation of a n-dimensional Gaussian</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">for scalar or vector inputs, outputs the scalar
+<code class="docutils literal"><span class="pre">KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one,</span> <span class="pre">scale_one)</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two,</span> <span class="pre">scale_two)</span> <span class="pre">)</span></code>
+for matrix inputs, outputs the vector
+<code class="docutils literal"><span class="pre">[KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one[m,:],</span> <span class="pre">scale_one[m,:])</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two[m,:],</span> <span class="pre">scale_two[m,:])</span> <span class="pre">)]_{m=1}^M</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.log_mean_exp">
+<code class="descclassname">edward.util.</code><code class="descname">log_mean_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#log_mean_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.log_mean_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <code class="docutils literal"><span class="pre">log_mean_exp</span></code> of the elements in x.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector or matrix with second dimension 1
+shape=TensorShape([Dimension(N)])
+shape=TensorShape([Dimension(N), Dimension(1)])</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, vector if matrix tensor input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.log_sum_exp">
+<code class="descclassname">edward.util.</code><code class="descname">log_sum_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#log_sum_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.log_sum_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <code class="docutils literal"><span class="pre">log_sum_exp</span></code> of the elements in x.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector or matrix with second dimension 1
+shape=TensorShape([Dimension(N)])
+shape=TensorShape([Dimension(N), Dimension(1)])</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, vector if matrix tensor input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.logit">
+<code class="descclassname">edward.util.</code><code class="descname">logit</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#logit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.logit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate <span class="math">\(\log(x / (1 - x))\)</span> elementwise.</p>
+<p>Clips all elements to be between <span class="math">\((0,1)\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.multivariate_rbf">
+<code class="descclassname">edward.util.</code><code class="descname">multivariate_rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#multivariate_rbf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.multivariate_rbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squared-exponential kernel</p>
+<div class="math">
+\[k(x, y) = \sigma^2 \exp{ -1/(2l^2) \sum_i (x_i - y_i)^2 }\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>y</strong> (<em>Optional[tf.Tensor], default 0.0</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>sigma</strong> (<em>Optional[double], default 1.0</em>) &#8211; standard deviation of radial basis function</li>
+<li><strong>l</strong> (<em>Optional[double], default 1.0</em>) &#8211; lengthscale of radial basis function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">scalar if vector input, rank-(n-1) if n-Tensor input</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.rbf">
+<code class="descclassname">edward.util.</code><code class="descname">rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#rbf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.rbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squared-exponential kernel element-wise</p>
+<div class="math">
+\[k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>y</strong> (<em>Optional[tf.Tensor], default 0.0</em>) &#8211; scalar, vector, matrix, or n-Tensor</li>
+<li><strong>sigma</strong> (<em>Optional[double], default 1.0</em>) &#8211; standard deviation of radial basis function</li>
+<li><strong>l</strong> (<em>Optional[double], default 1.0</em>) &#8211; lengthscale of radial basis function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">size corresponding to size of input</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.set_seed">
+<code class="descclassname">edward.util.</code><code class="descname">set_seed</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#set_seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.set_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set seed for both NumPy and TensorFlow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>int, float</em>) &#8211; seed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.softplus">
+<code class="descclassname">edward.util.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#softplus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.softplus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Elementwise Softplus function</p>
+<div class="math">
+\[\log(1 + \exp(x))\]</div>
+<p>TensorFlow can&#8217;t currently autodiff through <code class="docutils literal"><span class="pre">tf.nn.softplus()</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; scalar, vector, matrix, or n-Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.stop_gradient">
+<code class="descclassname">edward.util.</code><code class="descname">stop_gradient</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#stop_gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.stop_gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply <code class="docutils literal"><span class="pre">tf.stop_gradient()</span></code> element-wise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor or list</em>) &#8211; scalar, vector, matrix, or n-Tensor or list thereof</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor or list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.to_simplex">
+<code class="descclassname">edward.util.</code><code class="descname">to_simplex</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#to_simplex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.to_simplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform real vector of length <code class="docutils literal"><span class="pre">(K-1)</span></code> to a simplex of dimension <code class="docutils literal"><span class="pre">K</span></code>
+using a backward stick breaking construction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.tensor or np.array</em>) &#8211; scalar, vector, or matrix</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Same shape as input but with last dimension of size <code class="docutils literal"><span class="pre">K</span></code>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>x as a 3d or higher tensor is not guaranteed to be supported.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="edward.inferences.html" class="btn btn-neutral" title="edward.inferences module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

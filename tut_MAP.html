@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Maximum a posteriori estimation</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="css/normalize.css" rel="stylesheet">
+<link href="css/skeleton.css" rel="stylesheet">
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
+<img alt="Edward" class="u-full-width" src="images/edward.png" style="margin-bottom:15%"/>
+</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="maximum-a-posteriori-estimation">Maximum a posteriori estimation</h2>
+<p>Maximum a posteriori (MAP) estimation is a form of approximate posterior inference. It uses the mode as a point estimate of the posterior distribution, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
+  &amp;=
+  \arg \max_z
+  p(z \mid x)\\
+  &amp;=
+  \arg \max_z
+  \log p(z \mid x).\end{aligned}\]</span> In practice, we work with logarithms of densities to avoid numerical underflow issues.</p>
+<p>The MAP estimate is the most likely configuration of the hidden patterns <span class="math inline">\(z\)</span> under the model. However, we cannot directly solve this optimization problem because the posterior is typically intractable. To circumvent this, we use Bayes’ rule to optimize over the joint density, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
+  &amp;=
+  \arg \max_z
+  \log p(z \mid x)\\
+  &amp;=
+  \arg \max_z
+  \log p(x, z).\end{aligned}\]</span> This is valid because <span class="math display">\[\begin{aligned}
+  \log p(z \mid x)
+  &amp;=
+  \log p(x, z) - \log p(x)\\
+  &amp;=
+  \log p(x, z) - \text{constant in terms of} z.\end{aligned}\]</span> MAP estimation includes the common scenario of maximum likelihood estimation as a special case, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
+  &amp;=
+  \arg \max_z
+  p(x, z)\\
+  &amp;=
+  \arg \max_z
+  p(x\mid z),\end{aligned}\]</span> where the prior <span class="math inline">\(p(z)\)</span> is flat, placing uniform probability over all values <span class="math inline">\(z\)</span> supports. Placing a nonuniform prior can be thought of as regularizing the estimation, penalizing values away from maximizing the likelihood, which can lead to overfitting. For example, a normal prior or Laplace prior on <span class="math inline">\(z\)</span> corresponds to <span class="math inline">\(\ell_2\)</span> penalization, also known as ridge regression, and <span class="math inline">\(\ell_1\)</span> penalization, also known as the LASSO.</p>
+<p>Maximum likelihood is also known as minimizing the cross entropy, where for a data set <span class="math inline">\(x=\{x_n\}\)</span>, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
+  &amp;=
+  \arg \max_z
+  \log p(x\mid z)
+  \\
+  &amp;=
+  \arg \max_z
+  \sum_{n=1}^N \log p(x_n\mid z)
+  \\
+  &amp;=
+  \arg \min_z
+  -\frac{1}{N}\sum_{n=1}^N \log p(x_n\mid z).\end{aligned}\]</span> The last expression can be thought of as an approximation to the cross entropy between the true data distribution and <span class="math inline">\(p(x\mid z)\)</span>, using a set of <span class="math inline">\(N\)</span> data points.</p>
+<h3 id="gradient-descent">Gradient descent</h3>
+<p>To find the MAP estimate of the latent variables <span class="math inline">\(z\)</span>, we simply calculate the gradient of the log joint density <span class="math display">\[\begin{aligned}
+  \nabla_z
+  \log p(x, z)\end{aligned}\]</span> and follow it to a (local) optima. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
+<h3 id="implementation">Implementation</h3>
+<p>In Edward, we view MAP estimation as a special case of <a href="tut_KLqp.html"><span class="math inline">\(KL(q\|p)\)</span> minimization</a>, where the variational distribution is a point mass (delta function) distribution. This makes explicit the additional assumptions underlying MAP estimation from the viewpoint of variational inference: namely, it approximates the posterior using a point to summarize the full distribution.</p>
+<pre class="python" language="Python"><code>class MAP(VariationalInference):
+    def __init__(self, model, data=None, params=None):
+        with tf.variable_scope("variational"):
+            if hasattr(model, 'n_vars'):
+                variational = Variational()
+                variational.add(PointMass(model.n_vars, params))
+            else:
+                variational = Variational()
+                variational.add(PointMass(0))
+
+        super(MAP, self).__init__(model, variational, data)
+
+    def build_loss(self):
+        x = self.data
+        z = self.variational.sample()
+        self.loss = tf.squeeze(self.model.log_prob(x, z))
+        return -self.loss</code></pre>
+<p>The <code>MAP</code> class inherits from <code>VariationalInference</code> and initializes a point mass as the variational distribution. It requires defining only one method: <code>build_loss()</code>, which implicitly specifies the gradient of the log joint. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus backpropagating (applying the chain rule of differentiation) to compute the gradient of the objective.</p>
+<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the log density’s gradient.</p>
+<h3 id="references">References</h3>
+<ul>
+<li>Murphy, K. (2012). Machine Learning: A Probabilistic Perspective. MIT Press.</li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

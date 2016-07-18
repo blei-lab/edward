@@ -1,0 +1,69 @@
+% Define the subtitle of the page
+\title{Inference of probability models}
+
+% Begin the content of the page
+\subsection{Inference of probability models}
+
+This tutorial asks the question: what does it mean to do inference of
+probability models? This sets the stage for understanding how to
+design inference algorithms in Edward.
+
+\subsubsection{The posterior}
+
+How can we use a model $p(x,z)$ to analyze some data $x$? In other words,
+what hidden structure $z$ explains the data? We seek to infer this
+hidden structure using the model.
+
+Inference of probability models leverages Bayes' rule to define the
+\emph{posterior}
+\begin{align*}
+  p(z \mid x)
+  &=
+  \frac{p(x,z)}{\int p(x,z) \text{d}z}.
+\end{align*}
+The posterior is the distribution of the latent variables $z$, conditioned on
+some (observed) data $x$.
+Drawing analogy to representation learning, it is a probabilistic
+description of the data's hidden representation.
+
+From the perspective of inductivism, as practiced by classical
+Bayesians (and implicitly by frequentists),
+the posterior is our updated hypothesis about the latent variables.
+From the perspective of hypothetico-deductivism, as practiced by
+statisticians such as Box, Rubin, and Gelman, the posterior is simply
+a fitted model to data, to be criticized and thus revised (Box, 1983;
+Gelman and Shalizi, 2012).
+
+
+
+\subsubsection{Inferring the posterior}
+
+Now we know what the posterior represents. How do we calculate it? This is the
+central computational challenge in inference.
+
+The posterior is difficult to compute because of its normalizing
+constant, which is the integral in the denominator.
+This is often a high-dimensional integral that lacks an analytic (closed-form)
+solution. Thus, calculating the posterior means \emph{approximating} the
+posterior.
+
+There are many approaches to posterior inference, which can be unwieldy to
+manage or even conceptualize. Edward uses classes and class
+inheritance to provide a hierarchy of inference methods, enabling fast
+experimentation on top of existing methods. For details on the inference
+hierarchy in Edward, see the
+\href{api/inferences.html}{inference API}. We describe several examples in
+detail in the other inference \href{tutorials.html}{tutorials}.
+
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Box, G. E. (1982). An Apology for Ecumenism in Statistics (No.
+  MRC-TSR-2408). Wisconsin Univ-Madison Mathematics Research Center.
+\item
+  Gelman, A., & Shalizi, C. R. (2012). Philosophy and the practice of
+  Bayesian statistics. British Journal of Mathematical and Statistical
+  Psychology, 66(1), 8–38.
+\end{itemize}

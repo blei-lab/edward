@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Unsupervised learning</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+    
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="icons/manifest.json">
+  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="index.html">Edward</a></h1> 
+    <a href="index.html">
+    <img src="images/edward.png" class="u-full-width" style="margin-bottom:15%" alt="Edward" />
+    </a>
+    <a class="button u-full-width" href="index.html">Home</a>
+    <a class="button u-full-width" href="getting-started.html">Getting Started</a> 
+    <a class="button u-full-width" href="delving-in.html">Delving In</a> 
+    <a class="button u-full-width" href="tutorials.html">Tutorials</a> 
+    <a class="button u-full-width" href="api/index.html">API</a> 
+    <a class="button u-full-width" href="#">Advanced</a> 
+    <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a> 
+    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a> 
+    <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a> 
+    <a class="button2 u-full-width" href="license.html">License</a> 
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a href="https://github.com/blei-lab/edward">
+    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
+    alt="Edward on Github" />
+    <!-- </object> -->
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+<h2 id="unsupervised-learning">Unsupervised learning</h2>
+<p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math inline">\(\{x_n\}\)</span>.</p>
+<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">here</a>.</p>
+<h3 id="data">Data</h3>
+<p>Use a simulated (pre-generated) dataset of datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
+<pre class="python" language="Python"><code>x = np.loadtxt(&#39;data/mixture_data.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)
+data = {&#39;x&#39;: x}</code></pre>
+<h3 id="model">Model</h3>
+<p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="tut_mixture_gaussian.html">Mixture of Gaussians tutorial</a>.</p>
+<p>Here we build the model in Edward using TensorFlow, and set the number of mixture components to be 2.</p>
+<pre class="python" language="Python"><code>class MixtureGaussian:
+    &quot;&quot;&quot;
+    Mixture of Gaussians
+
+    p(x, z) = [ prod_{n=1}^N N(x_n; mu_{c_n}, sigma_{c_n}) Multinomial(c_n; pi) ]
+              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
+              Dirichlet(pi; alpha)
+
+    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
+
+    Parameters
+    ----------
+    K : int
+        Number of mixture components.
+    D : float, optional
+        Dimension of the Gaussians.
+    &quot;&quot;&quot;
+    def __init__(self, K, D):
+        self.K = K
+        self.D = D
+        self.n_vars = (2*D + 1) * K
+
+        self.a = 1
+        self.b = 1
+        self.c = 10
+        self.alpha = tf.ones([K])
+
+    def log_prob(self, xs, zs):
+        &quot;&quot;&quot;Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
+        N = get_dims(xs[&#39;x&#39;])[0]
+        pi, mus, sigmas = zs
+        log_prior = dirichlet.logpdf(pi, self.alpha)
+        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
+        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+
+        # Loop over each sample zs[b,:]
+        log_lik = []
+        n_samples = get_dims(zs[0])[0]
+        for s in range(n_samples):
+            log_lik_z = N*tf.reduce_sum(tf.log(pi), 1)
+            for k in range(self.K):
+                log_lik_z += tf.reduce_sum(multivariate_normal.logpdf(xs[&#39;x&#39;],
+                    mus[s, (k*self.D):((k+1)*self.D)],
+                    sigmas[s, (k*self.D):((k+1)*self.D)]))
+
+            log_lik += [log_lik_z]
+
+        return log_prior + tf.pack(log_lik)
+
+model = MixtureGaussian(K=2, D=2)</code></pre>
+<h3 id="inference">Inference</h3>
+<p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be a Dirichlet <span class="math inline">\(\times\)</span> fully factorized normal <span class="math inline">\(\times\)</span> fully factorized inverse Gamma.</p>
+<pre class="python" language="Python"><code>variational = Variational()
+variational.add(Dirichlet(model.K))
+variational.add(Normal(model.K*model.D))
+variational.add(InvGamma(model.K*model.D))</code></pre>
+<p>Run mean-field variational inference for 500 iterations, using a batch of 5 datapoints and 5 latent variable samples per iteration.</p>
+<pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
+inference.run(n_iter=500, n_samples=5, n_minibatch=5)</code></pre>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="tut_KLqp.html"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script> 
+</body>
+</html>

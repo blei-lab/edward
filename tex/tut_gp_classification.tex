@@ -1,0 +1,128 @@
+% Define the subtitle of the page
+\title{Gaussian process classification}
+
+% Begin the content of the page
+\subsection{Gaussian process classification}
+
+A Gaussian process is a powerful object for modeling nonlinear
+relationships between pairs of random variables. It defines a distribution over
+(possibly nonlinear) functions, which can be applied for representing
+our uncertainty around the true functional relationship.
+Here we define a Gaussian process model for classification.
+
+Formally, a distribution over functions $f:\mathbb{R}^D\to\mathbb{R}$ can be specified
+by a Gaussian process
+\begin{align*}
+  p(f)
+  &=
+  \mathcal{GP}(f; \mathbf{0}, k(\mathbf{x}, \mathbf{x}^\prime)),
+\end{align*}
+whose mean function is the zero function, and whose covariance
+function is some kernel which describes dependence between
+any set of inputs to the function.
+
+Given a set of input-output pairs
+$\{(\mathbf{x}_n\in\mathbb{R}^D,y_n\in\mathbb{R})\}$,
+the likelihood can be written as a multivariate normal
+\begin{align*}
+  p(\mathbf{y})
+  &=
+  \mathcal{N}(\mathbf{y} \;;\; \mathbf{0}, \mathbf{K})
+\end{align*}
+where $\mathbf{K}$ is a covariance matrix given by evaluating
+$k(\mathbf{x}, \mathbf{x}^\prime)$ for each pair of inputs in the data
+set.
+
+The above applies directly for regression where $\mathbb{y}$ is a
+real-valued response, but not for (binary) classification, where $\mathbb{y}$
+is a label in $\{0,1\}$. To deal with classification, we interpret the
+response as latent variables which is squashed into $[0,1]$. We then
+draw from a Bernoulli to determine the label, with probability given
+by the squashed value.
+
+Define the likelihood of an observation $(\mathbf{x}_n, y_n)$ as
+\begin{align*}
+  p(y_n \mid \mathbf{z} \;;\; x_n)
+  &=
+  \text{Bernoulli}(y_n \mid \text{logit}^{-1}(\mathbf{x}_n^\top \mathbf{z})).
+\end{align*}
+
+Define the prior to be a multivariate normal
+\begin{align*}
+  p(\mathbf{z})
+  &=
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, \mathbf{K})
+\end{align*}
+with
+covariance matrix given by evaluating $k(x, x^\prime)$ for each pair of inputs
+$(x, x^\prime)$.
+
+Let's build the model in Edward using TensorFlow, using a radial basis function 
+(RBF) kernel, also known as the squared exponential or exponentiated quadratic.
+\begin{lstlisting}[language=Python]
+class GaussianProcess:
+    """
+    Gaussian process classification
+
+    p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
+                  Normal(z | 0, K),
+
+    where z are weights drawn from a GP with covariance given by k(x,
+    x') for each pair of inputs (x, x'), and with squared-exponential
+    kernel and known kernel hyperparameters.
+
+    Parameters
+    ----------
+    N : int
+        Number of data points.
+    sigma : float, optional
+        Signal variance parameter.
+    l : float, optional
+        Length scale parameter.
+    """
+    def __init__(self, N, sigma=1.0, l=1.0):
+        self.N = N
+        self.sigma = sigma
+        self.l = l
+
+        self.num_vars = N
+        self.inverse_link = tf.sigmoid
+
+    def kernel(self, x):
+        mat = []
+        for i in range(self.N):
+            mat += [[]]
+            xi = x[i, :]
+            for j in range(self.N):
+                if j == i:
+                    mat[i] += [multivariate_rbf(xi, xi, self.sigma, self.l)]
+                else:
+                    xj = x[j, :]
+                    mat[i] += [multivariate_rbf(xi, xj, self.sigma, self.l)]
+
+            mat[i] = tf.pack(mat[i])
+
+        return tf.pack(mat)
+
+    def log_prob(self, xs, zs):
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
+        log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
+        log_lik = tf.pack([tf.reduce_sum(
+            bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
+            ) for z in tf.unpack(zs)])
+        return log_prior + log_lik
+
+model = GaussianProcess(N=number_of_datapoints)
+\end{lstlisting}
+
+We experiment with this model in the
+\href{tut_supervised_classification.html}{supervised learning (classification)} tutorial.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Rasmussen, C. E., \& Williams, C. K. I. (2006). Gaussian processes
+  for machine learning. MIT Press, Cambridge, MA.
+\end{itemize}

@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Home</title>
+<title>Edward – Variational inference</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -69,60 +69,28 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="a-library-for-probabilistic-modeling-inference-and-criticism.">A library for probabilistic modeling, inference, and criticism.</h2>
-<p>Edward is a Python library for probabilistic modeling, inference, and criticism. It is a testbed for fast experimentation and research with probabilistic models, ranging from classical hierarchical models on small data sets to complex deep probabilistic models on large data sets. Edward fuses three fields: Bayesian statistics and machine learning, deep learning, and probabilistic programming.</p>
-<p>It supports <strong>modeling languages</strong> including</p>
+<h2 id="variational-inference">Variational inference</h2>
+<p>Variational inference is an umbrella term for algorithms which cast posterior inference as optimization. The core idea involves two steps:</p>
+<ol>
+<li>posit a family of distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> over the latent variables;</li>
+<li>match <span class="math inline">\(q(z\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
+</ol>
+<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(z \mid x)\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
+  \lambda^*
+  &amp;=
+  \arg\min_\lambda \text{divergence}(
+  p(z \mid x)
+  ,
+  q(z\;;\;\lambda)
+  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(z\mid x)\)</span>.</p>
+<p>Edward takes the perspective that the posterior is (typically) intractable, and thus we must build a model of latent variables that best approximates the posterior. It is analogous to the perspective that the true data generating process is unknown, and thus we build models of data to best approximate the true process.</p>
+<p>For details on the variational inference base class defined in Edward, or the design of variational models, see the <a href="api/inferences.html">inference API</a>. For examples of specific variational inference algorithms in Edward, see the other inference <a href="tutorials.html">tutorials</a>.</p>
+<h3 id="references">References</h3>
 <ul>
-<li><a href="https://www.tensorflow.org">TensorFlow</a> (with neural networks via <a href="http://keras.io">Keras</a>, <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a>, or <a href="https://github.com/google/prettytensor">Pretty Tensor</a>)</li>
-<li><a href="http://mc-stan.org">Stan</a></li>
-<li><a href="http://pymc-devs.github.io/pymc3/">PyMC3</a></li>
-<li>Python, through <a href="http://scipy.org/">NumPy/SciPy</a></li>
+<li>Hinton, G. and Van Camp, D (1993). Keeping the neural networks simple by minimizing the description length of the weights. In Computational Learning Theory, pp. 5–13. ACM.</li>
+<li>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. Machine Learning, 37(2), 183-233.</li>
+<li>Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods for mixtures of experts. In Neural Information Processing Systems.</li>
 </ul>
-<p>It supports <strong>inference</strong> via</p>
-<ul>
-<li>Variational inference
-<ul>
-<li>Black box variational inference</li>
-<li>Stochastic variational inference</li>
-<li>Variational auto-encoders</li>
-<li>Inclusive KL divergence: <span class="math inline">\(\text{KL}(p\|q)\)</span></li>
-</ul></li>
-<li>Marginal posterior optimization (empirical Bayes, marginal maximum likelihood)
-<ul>
-<li>Variational EM</li>
-</ul></li>
-<li>Maximum a posteriori estimation (penalized maximum likelihood)
-<ul>
-<li>Laplace approximation</li>
-</ul></li>
-</ul>
-<p>It supports <strong>criticism</strong> of the model and inference via</p>
-<ul>
-<li>Point-based evaluations</li>
-<li>Posterior predictive checks</li>
-</ul>
-<p>Edward is built on top of <a href="https://www.tensorflow.org">TensorFlow</a>, enabling features such as computational graphs, distributed training, CPU/GPU integration, automatic differentiation, and visualization with TensorBoard.</p>
-<h3 id="authors">Authors</h3>
-<p>Edward is led by <a href="http://dustintran.com">Dustin Tran</a> with guidance by <a href="http://www.cs.columbia.edu/~blei/">David Blei</a>. The other developers are</p>
-<ul>
-<li><a href="http://stat.columbia.edu/~diengadji/">Adji Dieng</a></li>
-<li><a href="http://www.proditus.com/">Alp Kucukelbir</a></li>
-<li><a href="http://www.ee.columbia.edu/~dliang/">Dawen Liang</a></li>
-<li><a href="http://maja-rita-rudolph.com/">Maja Rudolph</a></li>
-</ul>
-<p>We are open to collaboration, and welcome researchers and developers to contribute. Check out the <a href="https://github.com/blei-lab/edward/issues">Github issues</a> for feature requests and other software problems. For broader research challenges, shoot one of us an e-mail.</p>
-<p>Edward has benefited enormously from the helpful feedback and advice of many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and other members of the Blei Lab, Google Brain, and Google Research.</p>
-<h3 id="citation">Citation</h3>
-<p>We appreciate citations for Edward because it lets us find out how people have been using the library and it motivates further work.</p>
-<blockquote>
-<p>Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M. Blei. 2016. <em>Edward: A library for probabilistic modeling, inference, and criticism.</em> http://edwardlib.org</p>
-</blockquote>
-<pre class="JSON"><code>@misc{tran2016edward,
-    author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
-    title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
-    year = {2016},
-    url = {http://edwardlib.org}
-}</code></pre>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

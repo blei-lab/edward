@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Inference &mdash; Edward 1.0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
+        <link rel="next" title="Criticism" href="criticisms.html"/>
+        <link rel="prev" title="Models" href="models.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#variational-models">Variational Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Inference</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/inferences.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="inference">
+<h1>Inference<a class="headerlink" href="#inference" title="Permalink to this headline">¶</a></h1>
+<p>An inference algorithm infers the posterior for a particular model
+<code class="docutils literal"><span class="pre">p(x,</span> <span class="pre">z)</span></code> and data set <code class="docutils literal"><span class="pre">x</span></code>. It is the distribution of the latent
+variables given data, <code class="docutils literal"><span class="pre">p(z</span> <span class="pre">|</span> <span class="pre">x)</span></code>. For more details, see the
+<a class="reference external" href="../tut_inference.html">Inference of Probability Models tutorial</a>.</p>
+<p>Edward uses classes and class inheritance to provide a
+hierarchy of inference methods, all of which are easily extensible.
+This enables fast experimentation and research on top of existing
+inference methods, whether it be developing new black box inference
+algorithms or developing new model-specific inference algorithms which
+are tailored to a particular model or restricted class of models.
+We detail this below.</p>
+<img alt="../images/inference_structure.png" src="../images/inference_structure.png" />
+<p><em>Dependency graph of inference methods. Nodes are classes in Edward
+and arrows represent class inheritance.</em></p>
+<p>There is a base class <code class="docutils literal"><span class="pre">Inference</span></code>, from which all inference
+methods are derived from.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for Edward inference methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>It takes as input a probabilistic model <code class="docutils literal"><span class="pre">model</span></code> and dataset
+<code class="docutils literal"><span class="pre">data</span></code>.
+For more details, see the
+<a class="reference external" href="models.html">Model API</a>
+and
+<a class="reference external" href="data.html">Data API</a>.</p>
+<p>Note that <code class="docutils literal"><span class="pre">Inference</span></code> says nothing about the class of models that an
+algorithm must work with. One can build inference algorithms which are
+tailored to a restricted class of models available in Edward (such as
+differentiable models), or even tailor it to a single model. The
+algorithm can raise an error if the model is outside this class.</p>
+<p>We organize inference under two paradigms:
+<code class="docutils literal"><span class="pre">VariationalInference</span></code> and <code class="docutils literal"><span class="pre">MonteCarlo</span></code> (or more plainly,
+optimization and sampling). These inherit from <code class="docutils literal"><span class="pre">Inference</span></code> and each
+have their own default methods.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for Monte Carlo inference methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="o">...</span>
+
+
+<span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization.</span>
+<span class="sd">        ...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variational</span> <span class="o">=</span> <span class="n">variational</span>
+
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Hybrid methods and novel paradigms outside of <code class="docutils literal"><span class="pre">VariationalInference</span></code>
+and <code class="docutils literal"><span class="pre">MonteCarlo</span></code> are also possible in Edward. For example, one can
+write a class derived from <code class="docutils literal"><span class="pre">Inference</span></code> directly, or inherit to
+carry both <code class="docutils literal"><span class="pre">VariationalInference</span></code> and <code class="docutils literal"><span class="pre">MonteCarlo</span></code> methods.</p>
+<p>Currently, Edward has most of its inference infrastructure within the
+<code class="docutils literal"><span class="pre">VariationalInference</span></code> class.
+The <code class="docutils literal"><span class="pre">MonteCarlo</span></code> class is still under development. We welcome
+researchers to make significant advances here!</p>
+<p>Let&#8217;s focus on <code class="docutils literal"><span class="pre">VariationalInference</span></code>. In addition to a model and
+data as input, <code class="docutils literal"><span class="pre">VariationalInference</span></code> takes in a variational
+model <code class="docutils literal"><span class="pre">variational</span></code>, which serves as a model of the posterior
+distribution. For more details, see the Variational Models section
+below.</p>
+<p>The main method in <code class="docutils literal"><span class="pre">VariationalInference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A simple wrapper to run variational inference.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>First, it calls <code class="docutils literal"><span class="pre">initialize()</span></code> to initialize the algorithm, such as
+setting the number of iterations. Then, within a loop it calls
+<code class="docutils literal"><span class="pre">update()</span></code> which runs one step of inference, as well as
+<code class="docutils literal"><span class="pre">print_progress()</span></code> for displaying progress; finally, it
+calls <code class="docutils literal"><span class="pre">finalize()</span></code> which runs the last steps as the inference
+algorithm terminates.</p>
+<p>Developing a new variational inference algorithm is as simple as
+inheriting from <code class="docutils literal"><span class="pre">VariationalInference</span></code> or one of its derived
+classes. <code class="docutils literal"><span class="pre">VariationalInference</span></code> implements many default methods such
+as <code class="docutils literal"><span class="pre">run()</span></code> above. Let&#8217;s go through <code class="docutils literal"><span class="pre">initialize()</span></code> as an example.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="o">...</span>
+            <span class="o">...</span>
+            <span class="n">slices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">slice_input_producer</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">batches</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="p">,</span>
+                                     <span class="n">num_threads</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
+            <span class="o">...</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span>
+                         <span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">batches</span><span class="p">)}</span>
+        <span class="o">...</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">()</span>
+        <span class="o">...</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Three code snippets are highlighted in <code class="docutils literal"><span class="pre">initialize()</span></code>: the first
+enables batch training with an argument <code class="docutils literal"><span class="pre">n_minibatch</span></code> for the batch
+size; the second defines the loss function, building TensorFlow&#8217;s
+computational graph; the third sets up an optimizer to minimize the
+loss.</p>
+<p>For examples of inference algorithms built in Edward, see the inference
+<a class="reference external" href="../tutorials.html">tutorials</a>.</p>
+<div class="section" id="variational-models">
+<h2>Variational Models<a class="headerlink" href="#variational-models" title="Permalink to this headline">¶</a></h2>
+<p>A variational model defines a distribution over latent
+variables. It is a model of the posterior distribution, specifying
+another distribution to approximate it. This is analogous to the way
+that probabilistic models specify distributions to approximate the
+true data distribution. After inference, the variational model is used
+as a proxy to the true posterior.</p>
+<p>Edward implements variational models using the <code class="docutils literal"><span class="pre">Variational</span></code> class in
+<code class="docutils literal"><span class="pre">edward.models</span></code>. For example, the following instantiates an empty
+container for the variational distribution.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span>
+
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To add distributions to this object, use the <code class="docutils literal"><span class="pre">add()</span></code> method, which
+is used to add <code class="docutils literal"><span class="pre">RandomVariable</span></code> objects.  All random variable objects, i.e.,
+any class inheriting from <code class="docutils literal"><span class="pre">RandomVariable</span></code> in <code class="docutils literal"><span class="pre">edward.models</span></code>, takes
+as input a shape and optionally, parameter arguments. If left
+unspecified, the parameter arguments are trainable parameters during
+inference.  The shape denotes the shape of its random variable. For
+example:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Beta</span>
+
+<span class="c"># first, add a vector of 10 random variables</span>
+<span class="c"># second, add a 5 x 2 matrix of random variables</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+
+<span class="c"># vector of 3 random variables with fixed alpha param</span>
+<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
+<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Multivariate distributions store their multivariate dimension in the
+outer dimension (right-most dimension) of their shape.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span>
+
+<span class="c"># 1 K-dimensional Dirichlet</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
+<span class="c"># vector of 5 K-dimensional Dirichlet&#39;s</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>The main methods in <code class="docutils literal"><span class="pre">Variational</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
+<code class="docutils literal"><span class="pre">sample()</span></code>, which mathematically are <code class="docutils literal"><span class="pre">log</span> <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> and <code class="docutils literal"><span class="pre">z</span> <span class="pre">~</span>
+<span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively.</p>
+<p><code class="docutils literal"><span class="pre">samples(n)</span></code> takes as input the number of samples and returns a list
+of TensorFlow tensors, each of whose shape is <code class="docutils literal"><span class="pre">(n,</span> <span class="pre">)</span> <span class="pre">+</span> <span class="pre">self.shape</span></code> for
+each random variable object within the container. <code class="docutils literal"><span class="pre">log_prob(xs)</span></code> takes
+as input a list of TensorFlow tensors, and returns a vector of density
+evaluations, one for each sample <code class="docutils literal"><span class="pre">x</span></code> in <code class="docutils literal"><span class="pre">xs</span></code>.</p>
+<p>The ordering of the addition to the container matters. This defines
+the ordering of the lists for the output of <code class="docutils literal"><span class="pre">sample()</span></code> and the input
+of <code class="docutils literal"><span class="pre">log_prob()</span></code>.
+(As an example, see the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture of Gaussians</a>.)</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="criticisms.html" class="btn btn-neutral float-right" title="Criticism" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="models.html" class="btn btn-neutral" title="Models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

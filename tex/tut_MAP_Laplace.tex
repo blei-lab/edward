@@ -1,0 +1,76 @@
+% Define the subtitle of the page
+\title{Laplace approximation}
+
+% Begin the content of the page
+\subsection{Laplace approximation}
+
+(This tutorial follows the
+\href{tut_MAP.html}{Maximum a posteriori estimation} tutorial.)
+
+Maximum a posteriori (MAP) estimation approximates the posterior $p(z \mid x)$
+with a point mass (delta function) by simply capturing its mode. MAP is
+attractive because it is fast and efficient. How can we use MAP to construct a
+better approximation to the posterior?
+
+The Laplace approximation is one way of improving on an MAP estimate. The idea
+is to approximate the posterior with a normal distribution centered at the MAP
+estimate
+\begin{align*}
+  p(z \mid x)
+  &\approx
+  \mathcal{N}(z\;;\; z_\text{MAP}, \Lambda^{-1}).
+\end{align*}
+This requires computing a precision matrix $\Lambda$. The Laplace approximation
+uses the Hessian of the log joint density at the MAP estimate,
+defined component-wise as
+\begin{align*}
+  \Lambda_{ij}
+  &=
+  \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.
+\end{align*}
+Edward uses automatic differentiation, specifically with TensorFlow's
+computational graphs, making this gradient computation both simple and
+efficient to distribute (although more expensive than a first-order
+gradient).
+
+\subsubsection{Implementation}
+
+Edward implements the Laplace approximation by extending the class built for
+\href{tut_MAP.html}{MAP estimation}, as it requires an estimate of the
+posterior mode, $z_\text{MAP}$.
+
+\begin{lstlisting}[language=Python]
+class Laplace(MAP):
+    def __init__(self, model, data=None, params=None):
+        super(Laplace, self).__init__(model, data, params)
+
+    def finalize(self):
+        """Function to call after convergence.
+
+        Computes the Hessian at the mode.
+        """
+        # use only a batch of data to estimate hessian
+        x = self.data
+        z = self.variational.sample()
+        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                     scope='variational')
+        inv_cov = hessian(self.model.log_prob(x, z), var_list)
+        print("Precision matrix:")
+        print(inv_cov.eval())
+        super(Laplace, self).finalize()
+\end{lstlisting}
+
+The \texttt{Laplace} class simply defines an additional method
+\texttt{finalize()} to
+run after \texttt{MAP} has found the posterior mode. The
+\texttt{hessian} function in \texttt{edward.util} uses TensorFlow's
+automatic differentiation to compute the Hessian without any
+additional mathematical derivations.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Laplace, P. S. (1774). Memoir on the probability of causes of
+  events. Mémoires de Mathématique et de Physique, Tome Sixième.
+\end{itemize}

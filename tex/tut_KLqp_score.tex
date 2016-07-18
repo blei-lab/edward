@@ -1,0 +1,162 @@
+% Define the subtitle of the page
+\title{Score function gradient}
+
+% Begin the content of the page
+\subsection{Score function gradient}
+
+(This tutorial follows the
+\href{tut_KLqp.html}{$\text{KL}(q\|p)$ minimization} tutorial.)
+
+We seek to maximize the ELBO,
+\begin{align*}
+  \lambda^*
+  &=
+  \arg \max_\lambda \text{ELBO}(\lambda)\\
+  &=\;
+  \arg \max_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],
+\end{align*}
+using a ``black box'' algorithm. This means generically inferring the
+posterior while making few assumptions about the model.
+
+\subsubsection{The score function identity}
+
+Gradient descent is a standard approach for optimizing complicated
+objectives like the ELBO. The idea is to calculate its gradient
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=
+  \nabla_\lambda\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big],
+\end{align*}
+and update the current set of parameters proportional to the gradient.
+
+The score function gradient estimator leverages a property of
+logarithms to write the gradient as
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(z\;;\;\lambda)}
+  \big[
+  \nabla_\lambda \log q(z\;;\;\lambda)
+  \:
+  \big(
+  \log p(x, z)
+  -
+  \log q(z\;;\;\lambda)
+  \big)
+  \big].
+\end{align*}
+The gradient of the ELBO is an expectation over the variational
+model $q(z\;;\;\lambda)$; the only new ingredient it requires is the
+\emph{score function} $\nabla_\lambda \log q(z\;;\;\lambda)$.
+Edward uses automatic differentiation, specifically with TensorFlow's
+computational graphs, making this gradient computation both simple and
+efficient to distribute.
+
+\subsubsection{Noisy estimates using Monte Carlo integration}
+
+We can use Monte Carlo integration to obtain noisy estimates of both the ELBO
+and its gradient. The basic procedure follows these steps:
+\begin{enumerate}
+  \item draw $S$ samples $\{z_s\}_1^S \sim q(z\;;\;\lambda)$,
+  \item evaluate the argument of the expectation using $\{z_s\}_1^S$, and
+  \item compute the empirical mean of the evaluated quantities.
+\end{enumerate}
+
+A Monte Carlo estimate of the gradient is then
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &\approx\;
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \big(
+  \log p(x, z_s)
+  -
+  \log q(z_s\;;\;\lambda)
+  \big)
+  \:
+  \nabla_\lambda \log q(z_s\;;\;\lambda)
+  \big].
+\end{align*}
+This is an unbiased estimate of the actual gradient of the ELBO.
+
+\subsubsection{Implementation}
+
+We implement $\text{KL}(q\|p)$ minimization with the score function
+gradient in the class \texttt{MFVI} (mean-field variational
+inference). It inherits from \texttt{VariationalInference}, which
+provides a collection of default
+methods such as an optimizer.
+
+\begin{lstlisting}[language=Python]
+class MFVI(VariationalInference):
+    def __init__(self, *args, **kwargs):
+        super(MFVI, self).__init__(*args, **kwargs)
+
+    def initialize(self, n_samples=1, ...):
+        ...
+        self.n_samples = n_samples
+        return super(MFVI, self).initialize(*args, **kwargs)
+
+    def build_score_loss(self):
+        x = self.data
+        z = self.variational.sample(self.n_samples)
+
+        q_log_prob = self.variational.log_prob(stop_gradient(z))
+        losses = self.model.log_prob(x, z) - q_log_prob
+        self.loss = tf.reduce_mean(losses)
+        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
+\end{lstlisting}
+
+Two methods are added: \texttt{initialize()} and
+\texttt{build_score_loss()}.  The method \texttt{initialize()} follows
+the same initialization as \texttt{VariationalInference}, and adds an
+argument: \texttt{n_samples} for the number of samples from the
+variational model.
+
+The method \texttt{build_score_loss()} implements the ELBO and its
+gradient. It draws \texttt{self.n_samples} samples from the
+variational model. It registers the Monte Carlo
+estimate of the ELBO in TensorFlow's computational graph, and stores it
+in \texttt{self.loss}, to track progress of the inference for diagnostics.
+
+The method returns an object whose automatic differentiation is the
+score function gradient of the ELBO. The TensorFlow function
+\texttt{stop_gradient()} tells the computational graph to stop
+traversing nodes to propagate gradients. In this case,
+the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
+one for each sample $z_s$. We multiply it by \texttt{losses}
+element-wise and return the mean.
+
+There is a nuance here. TensorFlow's optimizers are configured to
+\emph{minimize} an objective function. So the gradient is set to be
+the negative of the ELBO's gradient.
+
+See the \href{api/index.html}{API} for more details.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Paisley, J., Blei, D. M., & Jordan, M. (2012). Variational Bayesian
+  Inference with Stochastic Search. In International Conference on
+  Machine Learning.
+\item
+  Ranganath, R., Gerrish, S., & Blei, D. M. (2014). Black Box
+  Variational Inference. In Artificial Intelligence and Statistics.
+\end{itemize}
