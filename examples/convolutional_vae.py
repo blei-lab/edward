@@ -68,12 +68,12 @@ class NormalBernoulli:
         """
         return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
 
-    def sample_prior(self, size):
+    def sample_prior(self, n):
         """
         p ~ some complex distribution induced by
         z ~ N(0, 1), p = neural_network(z)
         """
-        z = tf.random_normal([size, self.n_vars])
+        z = tf.random_normal([n, self.n_vars])
         # Note the output of this is not prior samples, but just the
         # success probability, i.e., the hidden representation learned
         # by the neural network.

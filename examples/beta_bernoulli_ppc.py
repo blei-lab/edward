@@ -32,11 +32,11 @@ class BetaBernoulli:
                            for z in tf.unpack(zs)])
         return log_lik + log_prior
 
-    def sample_likelihood(self, zs, size):
+    def sample_likelihood(self, zs, n):
         """x | z ~ p(x | z)"""
         out = []
         for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=size).reshape((size,))}]
+            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
 
         return out
 
@@ -50,5 +50,5 @@ data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=200)
 
-T = lambda y, z=None: tf.reduce_mean(y['x'])
+T = lambda x, z=None: tf.reduce_mean(x['x'])
 print(ed.ppc(model, variational, data, T))
