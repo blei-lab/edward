@@ -47,7 +47,7 @@ sns.regplot(X_train, y_train, fit_reg=False)
 \end{lstlisting}
 \includegraphics[width=700px]{images/mdn-fig0.png}
 
-We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data.html}{one of many ways} to train models with data in Edward.
+We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
 
 \begin{lstlisting}[language=Python]
 X = ed.placeholder(tf.float32, shape=(None, 1))
@@ -110,7 +110,7 @@ model = MixtureDensityNetwork(10)
 We use MAP estimation, passing
 in the model and data set.
 See this extended tutorial about
-\href{tut_MAP.html}{MAP estimation in Edward}.
+\href{tut_MAP}{MAP estimation in Edward}.
 
 \begin{lstlisting}[language=Python]
 inference = ed.MAP([], data, model)

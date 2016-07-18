@@ -41,7 +41,7 @@ X_test, y_test = build_toy_dataset(N, coeff)
 
 Posit the model as Bayesian linear regression. For more details on the
 model, see the
-\href{tut_bayesian_linear_regression.html}
+\href{tut_bayesian_linear_regression}
 {Bayesian linear regression tutorial}.
 
 Here we build the model in Edward's native language.
@@ -81,7 +81,7 @@ for t in range(1001):
 In this case \texttt{MFVI} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the reparameterization
 gradient.
-For more details on inference, see the \href{tut_KLqp.html}{$\text{KL}(q\|p)$ tutorial}.
+For more details on inference, see the \href{tut_KLqp}{$\text{KL}(q\|p)$ tutorial}.
 
 
 \subsubsection{Criticism}
@@ -103,5 +103,5 @@ print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
 The trained model makes predictions with low mean squared error
 (relative to the magnitude of the output).
 
-For more details on criticism, see the \href{tut_point_eval.html}{point-based
+For more details on criticism, see the \href{tut_point_eval}{point-based
 evaluation tutorial}.
