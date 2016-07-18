@@ -9,25 +9,27 @@ Probability model
 Variational model
     Likelihood: Mean-field Beta
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
-import pymc3 as pm
 import numpy as np
+import pymc3 as pm
 import theano
 
 from edward.models import PyMC3Model, Variational, Beta
 
-data_shared = theano.shared(np.zeros(1))
-
-with pm.Model() as model:
+x_obs = theano.shared(np.zeros(1))
+with pm.Model() as pm_model:
     beta = pm.Beta('beta', 1, 1, transform=None)
-    out = pm.Bernoulli('data',
-                       beta,
-                       observed=data_shared)
+    x = pm.Bernoulli('x', beta, observed=x_obs)
 
-data = ed.Data(np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1]))
-m = PyMC3Model(model, data_shared)
+ed.set_seed(42)
+model = PyMC3Model(pm_model)
 variational = Variational()
 variational.add(Beta())
+data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = ed.MFVI(m, variational, data)
+inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=10000)

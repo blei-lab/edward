@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
@@ -8,6 +11,7 @@ sess = tf.Session()
 
 a = tf.ones([5]) * np.arange(5)
 b = tf.diag(tf.ones([5]))
+
 
 def test_dot():
     with sess.as_default():

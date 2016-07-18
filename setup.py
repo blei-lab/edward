@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name='edward',
-    version='1.0.8',
+    version='1.1.0',
     description='A library for probabilistic modeling, inference, and criticism',
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
     packages=['edward', 'edward.stats', 'edward.models'],
-    install_requires=['tensorflow>=0.9.0', 'numpy>=1.7', 'scipy>=0.16'],
+    install_requires=['tensorflow>=0.9.0', 'numpy>=1.7', 'scipy>=0.16', 'six>=1.10.0'],
     extras_require = {'stan': ['pystan>=2.0.1.3'],
                       'pymc3': ['pymc3>=3.0'],
                       'neural networks': ['keras>=1.0.0', 'prettytensor>=0.5.3'],
@@ -15,5 +15,6 @@ setup(
     url='https://github.com/blei-lab/edward',
     license='Apache License 2.0',
     classifiers=['License :: OSI Approved :: Apache Software License',
-                 'Programming Language :: Python :: 2.7'],
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3.4'],
 )

@@ -7,6 +7,10 @@ Probability model:
     Likelihood: Mixture sum of normals parameterized by a NN
 Inference: Maximum a posteriori
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
 import numpy as np
 import tensorflow as tf
@@ -15,6 +19,7 @@ from edward.stats import norm
 from keras import backend as K
 from keras.layers import Dense
 from sklearn.cross_validation import train_test_split
+
 
 class MixtureDensityNetwork:
     """
@@ -42,7 +47,7 @@ class MixtureDensityNetwork:
         """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
         # Note there are no parameters we're being Bayesian about. The
         # parameters are baked into how we specify the neural networks.
-        X, y = xs
+        X, y = xs['X'], xs['y']
         self.mapping(X)
         result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
         result = tf.mul(result, self.pi)
@@ -50,11 +55,13 @@ class MixtureDensityNetwork:
         result = tf.log(result)
         return tf.reduce_sum(result)
 
-def build_toy_dataset(nsample=6000):
-    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, nsample))).T
-    r_data = np.float32(np.random.normal(size=(nsample,1))) # random noise
+
+def build_toy_dataset(N=6000):
+    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
+    r_data = np.float32(np.random.normal(size=(N, 1))) # random noise
     x_data = np.float32(np.sin(0.75*y_data)*7.0+y_data*0.5+r_data*1.0)
     return train_test_split(x_data, y_data, random_state=42)
+
 
 ed.set_seed(42)
 model = MixtureDensityNetwork(10)
@@ -67,7 +74,7 @@ print("Size of output in test data: {:s}".format(y_test.shape))
 
 X = tf.placeholder(tf.float32, shape=(None, 1))
 y = tf.placeholder(tf.float32, shape=(None, 1))
-data = ed.Data([X, y])
+data = {'X': X, 'y': y}
 
 inference = ed.MAP(model, data)
 sess = ed.get_session()

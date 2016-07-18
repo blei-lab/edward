@@ -90,3 +90,7 @@ target/
 examples/data/mnist
 img/
 *.ipynb_checkpoints/
+
+# Web development
+docs/api/
+docs/*.html

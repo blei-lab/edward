@@ -1,0 +1,117 @@
+% Define the subtitle of the page
+\title{Bayesian neural network}
+
+% Begin the content of the page
+\subsection{Bayesian neural network}
+
+A Bayesian neural network is a neural network with a prior
+distribution on its weights.
+Define the likelihood of an observation $(\mathbf{x}_n, y_n)$
+\begin{align*}
+  p(y_n \mid \mathbf{z} \;;\; \mathbf{x}_n, \sigma^2)
+  &=
+  \mathcal{N}(y_n \;;\; \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),
+\end{align*}
+where $\mathrm{NN}$ is a neural network whose weights and biases form
+the latent variables $\mathbf{z}$. Assume $\sigma^2$ is a
+known variance.
+
+Define the prior on the weights and biases $\mathbf{z}$ to be the standard normal
+\begin{align*}
+  p(\mathbf{z})
+  &=
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).
+\end{align*}
+
+Let's build the model in Edward using TensorFlow, where we
+instantiate a 2-layer Bayesian neural network with $\tanh$
+nonlinearities.
+\begin{lstlisting}[language=Python]
+class BayesianNN:
+    """
+    Bayesian neural network for regressing outputs y on inputs x.
+
+    p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
+                  Normal(z | 0, prior_variance),
+
+    where z are neural network weights, and with known lik_variance
+    and prior_variance.
+
+    Parameters
+    ----------
+    layer_sizes : list
+        The size of each layer, ordered from input to output.
+    nonlinearity : function, optional
+        Non-linearity after each linear transformation in the neural
+        network; aka activation function.
+    lik_variance : float, optional
+        Variance of the normal likelihood; aka noise parameter,
+        homoscedastic variance, scale parameter.
+    prior_variance : float, optional
+        Variance of the normal prior on weights; aka L2
+        regularization parameter, ridge penalty, scale parameter.
+    """
+    def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
+        lik_variance=0.01, prior_variance=1):
+        self.layer_sizes = layer_sizes
+        self.nonlinearity = nonlinearity
+        self.lik_variance = lik_variance
+        self.prior_variance = prior_variance
+
+        self.n_layers = len(layer_sizes)
+        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
+        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
+
+    def unpack_weights(self, z):
+        """Unpack weight matrices and biases from a flattened vector."""
+        for m, n in self.weight_dims:
+            yield tf.reshape(z[:m*n],        [m, n]), \
+                  tf.reshape(z[m*n:(m*n+n)], [1, n])
+            z = z[(m+1)*n:]
+
+    def neural_network(self, x, zs):
+        """
+        Return a `n_samples` x `n_minibatch` matrix. Each row is
+        the output of a neural network on the input data `x` and
+        given a set of weights `z` in `zs`.
+        """
+        matrix = []
+        for z in tf.unpack(zs):
+            # Calculate neural network with weights given by `z`.
+            h = x
+            for W, b in self.unpack_weights(z):
+                # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
+                h = self.nonlinearity(tf.matmul(h, W) + b)
+
+            matrix += [tf.squeeze(h)] # n_minibatch x 1 to n_minibatch
+
+        return tf.pack(matrix)
+
+    def log_prob(self, xs, zs):
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+        mus = self.neural_network(x, zs)
+        # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
+        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
+        return log_lik + log_prior
+
+model = BayesianNN(layer_sizes=[1, 10, 10, 1])
+\end{lstlisting}
+
+A toy demonstration is available in the \href{getting-started.html}{Getting Started} section.
+Source code including a visualization is available
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
+{here}, as well as an example
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn_analytic_kl.py}
+{here}
+leveraging additional structure in the
+Bayesian neural network for faster inference.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Neal, R. M. (1994) Bayesian Learning for Neural Networks, Ph.D.
+  Thesis, Dept. of Computer Science, University of Toronto.
+\end{itemize}
