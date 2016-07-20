@@ -26,7 +26,7 @@ class Inference(object):
     data : dict of tf.Tensor
         Data dictionary whose values may vary at each session run.
     """
-    def __init__(self, data=None, model=None):
+    def __init__(self, mapping, data=None, model_wrapper=None):
         """Initialization.
 
         Calls ``util.get_session()``
@@ -40,7 +40,7 @@ class Inference(object):
             models, the value type is a NumPy array or TensorFlow
             tensor; for Stan, the value type is the type
             according to the Stan program's data block.
-        model : ed.Model, optional
+        model_wrapper : ed.Model, optional
             probability model. can be obtained from the data
             dictionary except for certain model wrappers
 
@@ -57,11 +57,18 @@ class Inference(object):
            which are the outputs of data readers.
         """
         sess = get_session()
-        self.model = model
+        self.mapping = mapping
+        if model_wrapper is None:
+            self.model = Model()
+            for rv in six.iterkeys(self.mapping):
+                self.model.add(rv)
+        else:
+            self.model = model
+
         if data is None:
             data = {}
 
-        if isinstance(model, StanModel):
+        if isinstance(model_wrapper, StanModel):
             # Stan models do no support data subsampling because they
             # take arbitrary data structure types in the data block
             # and not just NumPy arrays (this makes it unamenable to
@@ -105,7 +112,7 @@ class MonteCarlo(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
-        model : ed.Model, optional
+        model_wrapper : ed.Model, optional
             probability model. can be obtained from the data
             dictionary except for certain model wrappers
         """
@@ -115,7 +122,7 @@ class MonteCarlo(Inference):
 class VariationalInference(Inference):
     """Base class for variational inference methods.
     """
-    def __init__(self, mapping=None, data=None, model=None, variational=None):
+    def __init__(self, mapping, data=None, model_wrapper=None):
         """Initialization.
 
         Parameters
@@ -130,28 +137,14 @@ class VariationalInference(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
-        model : ed.Model, optional
-            probability model
-        variational : ed.Variational, optional
-            variational model or distribution
+        model_wrapper : ed.Model, optional
+            probability model. can be obtained from the data
+            dictionary except for certain model wrappers
         """
-        # TODO for now this is here due to current need in mapping
-        if model is None:
-            self.model = Model()
-            for rv in six.iterkeys(mapping):
-                self.model.add(rv)
-        else:
-            self.model = model
-
-        super(VariationalInference, self).__init__(data, model)
-        self.mapping = mapping
-        if variational is None:
-            self.variational = Model()
-            for rv in six.itervalues(self.mapping):
-                self.variational.add(rv)
-
-        else:
-            self.variational = variational
+        super(VariationalInference, self).__init__(mapping, data, model_wrapper)
+        self.variational = Model()
+        for rv in six.itervalues(self.mapping):
+            self.variational.add(rv)
 
     def run(self, *args, **kwargs):
         """A simple wrapper to run variational inference.
