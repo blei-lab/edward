@@ -26,6 +26,9 @@ class RandomVariable(object):
         The number of variables; equals the product of ``shape``.
     n_params : int
         The number of parameters.
+    is_differentiable : bool
+        ``True`` if its density is differentiable with respect to its
+        input
     is_multivariate : bool
         ``True`` if its distribution is multivariate.
     is_reparameterized : bool
@@ -52,6 +55,7 @@ class RandomVariable(object):
         self.shape = shape
         self.n_vars = np.prod(self.shape)
         self.n_params = None
+        self.is_differentiable = False
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -191,8 +195,9 @@ class Bernoulli(RandomVariable):
     def __init__(self, shape=1, p=None):
         super(Bernoulli, self).__init__(shape)
         self.n_params = self.n_vars
+        self.is_differentiable = False
         self.is_multivariate = False
-        self.is_reparameterized = False
+        self.is_reparameterized = True
 
         if p is None:
             p_unconst = tf.Variable(tf.random_normal(self.shape))
@@ -205,16 +210,11 @@ class Bernoulli(RandomVariable):
         return "probability: \n" + p.__str__()
 
     def sample(self, n=1):
-        # Define Python function which returns samples as a Numpy
-        # array. This is necessary for sampling from distributions
-        # unavailable in TensorFlow natively.
-        def np_sample(p):
-            # get `size` from lexical scoping
-            return bernoulli.rvs(p, size=n).astype(np.float32)
-
-        x = tf.py_func(np_sample, [self.p], [tf.float32])[0]
-        x.set_shape((n, ) + self.shape) # set shape from unknown shape
-        return x
+        # Reparameterization trick to sample from Bernoulli. This is
+        # necessary as sampling from Bernoulli is unavailable in
+        # TensorFlow natively.
+        eps = tf.random_uniform((n, ) + self.shape)
+        return tf.cast(tf.less(eps, self.p), tf.float32)
 
     def log_prob_idx(self, idx, xs):
         full_idx = (slice(0, None), ) + idx # slice over sample size
@@ -232,6 +232,7 @@ class Beta(RandomVariable):
     def __init__(self, shape=1, alpha=None, beta=None):
         super(Beta, self).__init__(shape)
         self.n_params = 2*self.n_vars
+        self.is_differentiable = True
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -257,7 +258,7 @@ class Beta(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(a, b):
-            # get `size` from lexical scoping
+            # get `n` from lexical scoping
             return beta.rvs(a, b, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
@@ -280,6 +281,7 @@ class Dirichlet(RandomVariable):
     def __init__(self, shape, alpha=None):
         super(Dirichlet, self).__init__(shape)
         self.n_params = self.n_vars
+        self.is_differentiable = True
         self.is_multivariate = True
         self.is_reparameterized = False
 
@@ -298,7 +300,7 @@ class Dirichlet(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(alpha):
-            # get `size` from lexical scoping
+            # get `n` from lexical scoping
             return dirichlet.rvs(alpha, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha], [tf.float32])[0]
@@ -326,6 +328,7 @@ class InvGamma(RandomVariable):
     def __init__(self, shape=1, alpha=None, beta=None):
         super(InvGamma, self).__init__(shape)
         self.n_params = 2*self.n_vars
+        self.is_differentiable = True
         self.is_multivariate = False
         self.is_reparameterized = False
 
@@ -351,7 +354,7 @@ class InvGamma(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(a, scale):
-            # get `size` from lexical scoping
+            # get `n` from lexical scoping
             return invgamma.rvs(a, scale=scale, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
@@ -383,11 +386,12 @@ class Multinomial(RandomVariable):
     calculating the density.
     """
     def __init__(self, shape, pi=None):
-        if shape[-1] == 1:
+        super(Multinomial, self).__init__(shape)
+        if self.shape[-1] == 1:
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
-        super(Multinomial, self).__init__(shape)
-        self.n_params = np.prod(shape[:-1]) * (shape[-1] -1)
+        self.n_params = np.prod(self.shape[:-1]) * (self.shape[-1] -1)
+        self.is_differentiable = False
         self.is_multivariate = True
         self.is_reparameterized = False
 
@@ -408,7 +412,7 @@ class Multinomial(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(p):
-            # get `size` from lexical scoping
+            # get `n` from lexical scoping
             return multinomial.rvs(np.ones(self.shape[:-1]), p, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.pi], [tf.float32])[0]
@@ -436,6 +440,7 @@ class Normal(RandomVariable):
     def __init__(self, shape=1, loc=None, scale=None):
         super(Normal, self).__init__(shape)
         self.n_params = 2*self.n_vars
+        self.is_differentiable = True
         self.is_multivariate = False
         self.is_reparameterized = True
 
@@ -482,6 +487,7 @@ class PointMass(RandomVariable):
     def __init__(self, shape=1, params=None):
         super(PointMass, self).__init__(shape)
         self.n_params = self.n_vars
+        self.is_differentiable = False
         self.is_multivariate = False
         self.is_reparameterized = True
 

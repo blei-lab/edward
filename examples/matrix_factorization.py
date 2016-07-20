@@ -28,7 +28,7 @@ class MatrixFactorization:
         if n_cols == None:
              n_cols = n_rows
 
-        self.num_vars = (n_rows+n_cols)* K
+        self.n_vars = (n_rows+n_cols)* K
         self.n_rows = n_rows
         self.n_cols = n_cols
         self.K = K
@@ -86,7 +86,7 @@ model = MatrixFactorization(K, N,
 inference = ed.MAP(model, data)
 
 #variational = Variational()
-#variational.add(Normal(model.num_vars))
+#variational.add(Normal(model.n_vars))
 #inference = ed.MFVI(model, variational,data)
 
 inference.run(n_iter=5000, n_print=500)

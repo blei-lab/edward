@@ -333,7 +333,8 @@ class MFVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and self.variational.is_reparameterized:
+        if score is None and self.variational.is_reparameterized and \
+                             self.variational.is_differentiable:
             self.score = False
         else:
             self.score = True

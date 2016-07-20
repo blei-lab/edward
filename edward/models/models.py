@@ -277,22 +277,25 @@ class Model(object):
             self.shape = []
             self.n_vars = 0
             self.n_params = 0
+            self.is_differentiable = True
+            self.is_multivariate = []
             self.is_reparameterized = True
             self.is_normal = True
             self.is_entropy = True
-            self.is_multivariate = []
         else:
             self.layers = layers
             self.shape = [layer.shape for layer in self.layers]
             self.n_vars = sum([layer.n_vars for layer in self.layers])
             self.n_params = sum([layer.n_params for layer in self.layers])
+            self.is_differentiable = all([layer.is_differentiable
+                                          for layer in self.layers])
+            self.is_multivariate = [layer.is_multivariate for layer in self.layers]
             self.is_reparameterized = all([layer.is_reparameterized
                                            for layer in self.layers])
             self.is_normal = all([isinstance(layer, Normal)
                                   for layer in self.layers])
             self.is_entropy = all(['entropy' in layer.__class__.__dict__
                                    for layer in self.layers])
-            self.is_multivariate = [layer.is_multivariate for layer in self.layers]
 
     def __str__(self):
         string = ""
@@ -316,10 +319,11 @@ class Model(object):
         self.shape += [layer.shape]
         self.n_vars += layer.n_vars
         self.n_params += layer.n_params
+        self.is_differentiable = self.is_differentiable and layer.is_differentiable
+        self.is_multivariate += [layer.is_multivariate]
         self.is_reparameterized = self.is_reparameterized and layer.is_reparameterized
         self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)
-        self.is_multivariate += [layer.is_multivariate]
 
     def sample(self, n=1):
         """
