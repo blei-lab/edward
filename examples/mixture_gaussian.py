@@ -30,7 +30,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Model, Dirichlet, Normal, InvGamma
+from edward.models import Variational, Dirichlet, Normal, InvGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims
 
@@ -90,7 +90,7 @@ x = np.loadtxt('data/mixture_data.txt', dtype='float32', delimiter=',')
 data = {'x': x}
 
 model = MixtureGaussian(K=2, D=2)
-variational = Model()
+variational = Variational()
 variational.add(Dirichlet(model.K))
 variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))

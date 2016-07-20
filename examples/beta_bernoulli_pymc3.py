@@ -18,7 +18,7 @@ import numpy as np
 import pymc3 as pm
 import theano
 
-from edward.models import PyMC3Model, Model, Beta
+from edward.models import PyMC3Model, Variational, Beta
 
 x_obs = theano.shared(np.zeros(1))
 with pm.Model() as pm_model:
@@ -27,7 +27,7 @@ with pm.Model() as pm_model:
 
 ed.set_seed(42)
 model = PyMC3Model(pm_model)
-variational = Model()
+variational = Variational()
 variational.add(Beta())
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 

@@ -19,7 +19,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward.models import Model, Normal
+from edward.models import Variational, Normal
 from edward.stats import bernoulli
 from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
@@ -122,7 +122,7 @@ model = NormalBernoulli(n_vars=10)
 # q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = neural_network(x_m))
 x_ph = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
 loc, scale = neural_network(x_ph)
-variational = Model()
+variational = Variational()
 variational.add(Normal(model.n_vars * N_MINIBATCH, loc=loc, scale=scale))
 
 # MNIST batches are fed at training time.

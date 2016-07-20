@@ -12,7 +12,7 @@ from __future__ import print_function
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Model, Bernoulli
+from edward.models import Variational, Bernoulli
 from edward.stats import bernoulli
 
 
@@ -28,7 +28,7 @@ class BernoulliPosterior:
 ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliPosterior(p)
-variational = Model()
+variational = Variational()
 variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)

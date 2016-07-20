@@ -17,7 +17,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Model, Beta
+from edward.models import Variational, Beta
 from edward.stats import bernoulli, beta
 
 
@@ -43,7 +43,7 @@ class BetaBernoulli:
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Model()
+variational = Variational()
 variational.add(Beta(model.n_vars))
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 

@@ -16,7 +16,7 @@ from __future__ import print_function
 import edward as ed
 import numpy as np
 
-from edward.models import PythonModel, Model, Beta
+from edward.models import PythonModel, Variational, Beta
 from scipy.stats import beta, bernoulli
 
 
@@ -37,7 +37,7 @@ class BetaBernoulli(PythonModel):
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Model()
+variational = Variational()
 variational.add(Beta())
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
