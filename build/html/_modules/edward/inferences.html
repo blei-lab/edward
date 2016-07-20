@@ -446,7 +446,8 @@
 <span class="sd">            gradient estimator. Otherwise default is to use the</span>
 <span class="sd">            reparameterization gradient if available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">score</span> <span class="ow">is</span> <span class="k">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_reparameterized</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">score</span> <span class="ow">is</span> <span class="k">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_reparameterized</span> <span class="ow">and</span> \
+                             <span class="bp">self</span><span class="o">.</span><span class="n">variational</span><span class="o">.</span><span class="n">is_differentiable</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="k">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="k">True</span>

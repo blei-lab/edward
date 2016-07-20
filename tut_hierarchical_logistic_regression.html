@@ -129,7 +129,7 @@
     def __init__(self, lik_variance=0.01, prior_variance=0.01):
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
-        self.num_vars = 2
+        self.n_vars = 2
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
@@ -155,7 +155,7 @@ model = BayesianLinearRegressionModel()</code></pre>
   \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).\end{aligned}\]</span></p>
 <p>The model in Edward is</p>
 <pre class="python" language="Python"><code>variational = Variational()
-variational.add(Normal(model.num_vars))</code></pre>
+variational.add(Normal(model.n_vars))</code></pre>
 <h3 id="data">Data</h3>
 <p>Consider a simulated dataset</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(n_data=40, noise_std=0.1):
