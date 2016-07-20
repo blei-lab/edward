@@ -14,7 +14,7 @@
   \item \textbf{Criticism:} None
 \end{itemize}
 
-Full Python code in: 
+Full Python code in:
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
 {bayesian_linear_regression.py}
 
@@ -33,9 +33,9 @@ Define the prior to be a fully factorized normal
   p(\mathbf{z})
   &=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).
-\end{align*} 
+\end{align*}
 
-The model in Edward is 
+The model in Edward is
 \begin{lstlisting}[language=Python]
 class BayesianLinearRegressionModel:
     """
@@ -59,7 +59,7 @@ class BayesianLinearRegressionModel:
     def __init__(self, lik_variance=0.01, prior_variance=0.01):
         self.lik_variance = lik_variance
         self.prior_variance = prior_variance
-        self.num_vars = 2
+        self.n_vars = 2
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
@@ -87,12 +87,12 @@ Define the variational model to be a fully factorized normal
   q(\mathbf{z} \;;\; \lambda)
   &=
   \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).
-\end{align*} 
+\end{align*}
 
 The model in Edward is
 \begin{lstlisting}[language=Python]
 variational = Variational()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 \end{lstlisting}
 
 

@@ -57,7 +57,7 @@ with
 covariance matrix given by evaluating $k(x, x^\prime)$ for each pair of inputs
 $(x, x^\prime)$.
 
-Let's build the model in Edward using TensorFlow, using a radial basis function 
+Let's build the model in Edward using TensorFlow, using a radial basis function
 (RBF) kernel, also known as the squared exponential or exponentiated quadratic.
 \begin{lstlisting}[language=Python]
 class GaussianProcess:
@@ -85,7 +85,7 @@ class GaussianProcess:
         self.sigma = sigma
         self.l = l
 
-        self.num_vars = N
+        self.n_vars = N
         self.inverse_link = tf.sigmoid
 
     def kernel(self, x):

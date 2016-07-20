@@ -386,11 +386,11 @@ class Multinomial(RandomVariable):
     calculating the density.
     """
     def __init__(self, shape, pi=None):
-        if shape[-1] == 1:
+        super(Multinomial, self).__init__(shape)
+        if self.shape[-1] == 1:
             raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
-        super(Multinomial, self).__init__(shape)
-        self.n_params = np.prod(shape[:-1]) * (shape[-1] -1)
+        self.n_params = np.prod(self.shape[:-1]) * (self.shape[-1] -1)
         self.is_differentiable = False
         self.is_multivariate = True
         self.is_reparameterized = False
