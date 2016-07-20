@@ -1,0 +1,35 @@
+% Define the subtitle of the page
+\title{Probability models}
+
+% Begin the content of the page
+\subsection{Probability models}
+
+A probabilistic model asserts how observations from a natural phenomenon arise.
+The model is a \emph{joint distribution}
+\begin{align*}
+  p(x, z)
+\end{align*}
+of observed variables $x$ corresponding to data, and latent
+variables $z$ that provide the hidden structure to generate from $x$.
+The joint distribution factorizes into two components.
+
+The \emph{likelihood}
+\begin{align*}
+  p(x \mid z)
+\end{align*}
+is a probability distribution that describes how any data $x$ depend
+on the latent variables $z$. The likelihood posits a data generating
+process, where the data $x$ are assumed drawn from the likelihood
+conditioned on a particular hidden pattern described by $z$.
+
+The \emph{prior}
+\begin{align*}
+  p(z)
+\end{align*}
+is a probability distribution that describes the latent variables
+present in the data. It posits a generating process of the hidden structure.
+
+For details on how to specify a model in Edward, see the
+\href{api/models.html}{model API}. We describe several examples in detail
+in the
+other model \href{tutorials.html}{tutorials}.

@@ -20,11 +20,9 @@ from edward.stats import bernoulli, beta
 
 
 class BetaBernoulli:
-    """
-    p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
     def __init__(self):
-        self.num_vars = 1
+        self.n_vars = 1
 
     def log_prob(self, xs, zs):
         log_prior = beta.logpdf(zs, a=1.0, b=1.0)

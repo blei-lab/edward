@@ -17,9 +17,7 @@ from edward.stats import bernoulli
 
 
 class BernoulliPosterior:
-    """
-    p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)
-    """
+    """p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)"""
     def __init__(self, p):
         self.p = p
 

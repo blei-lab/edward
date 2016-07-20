@@ -1,0 +1,58 @@
+% Define the subtitle of the page
+\title{Troubleshooting}
+
+% Begin the content of the page
+\subsection{Troubleshooting}
+
+\subsubsection{Basic Installation}
+
+Edward depends on
+\begin{itemize}
+  \item NumPy (>=1.7)
+  \item SciPy (>=0.16)
+  \item Six (>=1.1.0)
+  \item TensorFlow (>=0.9.0)
+\end{itemize}
+
+We recommend using \texttt{pip} to install \texttt{numpy}, \texttt{scipy}, and
+\texttt{six} as
+\begin{lstlisting}[language=JSON]
+pip install numpy scipy six
+\end{lstlisting}
+
+\href{https://www.tensorflow.org/}{TensorFlow} is not on PyPI yet. We recommend
+using \texttt{pip} to install the latest TensorFlow binaries. Please
+follow the
+\href
+{https://www.tensorflow.org/versions/r0.9/get_started/os_setup.html#pip-installation}
+{instructions} from Google.
+
+\subsubsection{Full Installation}
+
+Edward has optional features that depend on external packages.
+
+\begin{itemize}
+  \item The \href{http://mc-stan.org}{Stan} modeling language is supported
+  through PyStan (>=2.0.1.3)
+\begin{lstlisting}[language=JSON]
+pip install pystan
+\end{lstlisting}
+  \item Neural networks are supported through
+  \href{http://keras.io}{Keras} (>=1.0)
+\begin{lstlisting}[language=JSON]
+pip install keras
+\end{lstlisting}
+You have to manually \href{http://keras.io/#switching-from-theano-to-tensorflow}
+{configure Keras} to work with TensorFlow.
+\item Neural networks are also supported through
+\href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
+Slim} (native in TensorFlow) and
+\href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.5.3)
+\begin{lstlisting}[language=JSON]
+pip install prettytensor
+\end{lstlisting}
+  \item The \href{http://pymc-devs.github.io/pymc3/}{PyMC3} modeling language is supported
+  through PyMC3 (>=3.0). Please see their installation
+  \href{http://pymc-devs.github.io/pymc3/notebooks/getting_started.html}
+  {instructions}.
+\end{itemize}

@@ -1,0 +1,87 @@
+% Define the subtitle of the page
+\title{Bayesian Linear Regression}
+
+% Begin the content of the page
+\subsection{Bayesian Linear Regression}
+
+
+Bayesian linear regression is a model $p(\mathbf{y}\mid \mathbf{X})$ of
+outputs $y\in\mathbb{R}$, also known as the response, given
+a vector of inputs
+$\mathbf{x}\in\mathbb{R}^D$, also known as the features or covariates.
+The model assumes a
+linear relationship between these two random variables.
+
+For a set of $N$ data points $(\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}$,
+the model is
+\begin{align*}
+  p(\mathbf{z})
+  &=
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, \sigma_z^2\mathbf{I}),
+  \\
+  p(\mathbf{y} \mid \mathbf{z}, \mathbf{X})
+  &=
+  \prod_{n=1}^N
+  \mathcal{N}(y_n \;;\; \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
+\end{align*}
+The latent variables $\mathbf{z}=[\mathbf{w},b]$ form the weights $\mathbf{w}$
+and intercept $b$, also known as the bias.
+Assume $\sigma_z^2$ is a known prior variance and $\sigma_y^2$ is a
+known likelihood variance. The mean of the likelihood is given by a
+linear transformation of the inputs $\mathbf{x}_n$ and shared weights
+$\mathbf{w}$, along with the intercept $b$.
+
+Let's build the model in Edward using TensorFlow, fixing $D=10$.
+\begin{lstlisting}[language=Python]
+class BayesianLinearRegression:
+    """
+    Bayesian linear regression for outputs y on inputs x.
+
+    p((x,y), z) = Normal(y | x*z, lik_variance) *
+                  Normal(z | 0, prior_variance),
+
+    where z are weights, and with known lik_variance and
+    prior_variance.
+
+    Parameters
+    ----------
+    lik_variance : float, optional
+        Variance of the normal likelihood; aka noise parameter,
+        homoscedastic variance, scale parameter.
+    prior_variance : float, optional
+        Variance of the normal prior on weights; aka L2
+        regularization parameter, ridge penalty, scale parameter.
+    """
+    def __init__(self, lik_variance=0.01, prior_variance=0.01):
+        self.lik_variance = lik_variance
+        self.prior_variance = prior_variance
+        self.n_vars = 11
+
+    def log_prob(self, xs, zs):
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        x, y = xs['x'], xs['y']
+        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+        # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
+        b = zs[:, 0]
+        W = tf.transpose(zs[:, 1:])
+        mus = tf.matmul(x, W) + b
+        # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
+        y = tf.expand_dims(y, 1)
+        log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
+        return log_lik + log_prior
+
+model = BayesianLinearRegression()
+\end{lstlisting}
+
+We experiment with this model in the \href{tut_supervised_regression.html}{supervised
+learning (regression)} tutorial.
+An example script with visualization is available
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_plot.py}
+{here}.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Murphy, K. (2012). Machine Learning: A Probabilistic Perspective. MIT Press.
+\end{itemize}

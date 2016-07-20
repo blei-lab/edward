@@ -7,7 +7,7 @@ import six
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
-from edward.models.distributions import Normal
+from edward.models.random_variables import Normal
 
 try:
     import pystan
@@ -36,7 +36,7 @@ class PyMC3Model(object):
         self.model = model
 
         vars = pm.inputvars(model.cont_vars)
-        self.num_vars = len(vars)
+        self.n_vars = len(vars)
 
         bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
         self.logp = bij.mapf(model.fastlogp)
@@ -98,9 +98,9 @@ class PyMC3Model(object):
         for key, value in zip(self.keys, values):
             key.set_value(value)
 
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for s in range(n_minibatch):
+        n_samples = zs.shape[0]
+        lp = np.zeros(n_samples, dtype=np.float32)
+        for s in range(n_samples):
             lp[s] = self.logp(zs[s, :])
 
         return lp
@@ -110,7 +110,7 @@ class PythonModel(object):
     """Model wrapper for models written in NumPy/SciPy.
     """
     def __init__(self):
-        self.num_vars = None
+        self.n_vars = None
 
     def log_prob(self, xs, zs):
         """
@@ -196,7 +196,7 @@ class StanModel(object):
 
         self.modelfit = None
         self.is_initialized = False
-        self.num_vars = None
+        self.n_vars = None
 
     def log_prob(self, xs, zs):
         """
@@ -230,8 +230,8 @@ class StanModel(object):
 
     def _initialize(self):
         self.is_initialized = True
-        self.num_vars = sum([sum(dim) if sum(dim) != 0 else 1
-                             for dim in self.modelfit.par_dims])
+        self.n_vars = sum([sum(dim) if sum(dim) != 0 else 1
+                           for dim in self.modelfit.par_dims])
 
     def _py_log_prob(self, zs):
         """
@@ -275,8 +275,8 @@ class Model(object):
         if layers is None:
             self.layers = []
             self.shape = []
-            self.num_vars = 0
-            self.num_params = 0
+            self.n_vars = 0
+            self.n_params = 0
             self.is_reparameterized = True
             self.is_normal = True
             self.is_entropy = True
@@ -284,8 +284,8 @@ class Model(object):
         else:
             self.layers = layers
             self.shape = [layer.shape for layer in self.layers]
-            self.num_vars = sum([layer.num_vars for layer in self.layers])
-            self.num_params = sum([layer.num_params for layer in self.layers])
+            self.n_vars = sum([layer.n_vars for layer in self.layers])
+            self.n_params = sum([layer.n_params for layer in self.layers])
             self.is_reparameterized = all([layer.is_reparameterized
                                            for layer in self.layers])
             self.is_normal = all([isinstance(layer, Normal)
@@ -314,14 +314,14 @@ class Model(object):
         """
         self.layers += [layer]
         self.shape += [layer.shape]
-        self.num_vars += layer.num_vars
-        self.num_params += layer.num_params
+        self.n_vars += layer.n_vars
+        self.n_params += layer.n_params
         self.is_reparameterized = self.is_reparameterized and layer.is_reparameterized
         self.is_entropy = self.is_entropy and 'entropy' in layer.__class__.__dict__
         self.is_normal = self.is_normal and isinstance(layer, Normal)
         self.is_multivariate += [layer.is_multivariate]
 
-    def sample(self, size=1):
+    def sample(self, n=1):
         """
         Draws a mix of tensors and placeholders, corresponding to
         TensorFlow-based samplers and SciPy-based samplers depending
@@ -329,8 +329,8 @@ class Model(object):
 
         Parameters
         ----------
-        size : int, optional
-            Number of samples to draw.
+        n : int, optional
+            Number of samples.
 
         Returns
         -------
@@ -338,7 +338,7 @@ class Model(object):
             Dictionary of distribution objects in the container assigned
             to a tf.Tensor. Each tf.Tensor is of size size x shape.
         """
-        return {layer: layer.sample(size) for layer in self.layers}
+        return {layer: layer.sample(n) for layer in self.layers}
 
     def log_prob(self, var_dict):
         """
@@ -378,8 +378,8 @@ class Model(object):
             shape = list(six.itervalues(var_dict))[0].shape
 
         # Sum over the log-density of each distribution in container.
-        n_minibatch = shape[0]
-        log_prob = tf.zeros([n_minibatch], dtype=tf.float32)
+        n_samples = shape[0]
+        log_prob = tf.zeros([n_samples], dtype=tf.float32)
         for rv, obs in six.iteritems(var_dict):
             log_prob += rv.log_prob(obs)
 

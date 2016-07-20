@@ -1,0 +1,128 @@
+\title{Latent space models for neural data}
+
+\subsection{Latent space models for neural data}
+
+Many interesting data sets exhibit a network structure. For example, social
+networks or biological neural networks.
+
+What we can learn about the nodes of the network from its connectivity patterns?
+We can begin to study this using a latent space model.
+Latent space models embed the nodes of the network in a latent space which
+captures attributes of the nodes. The likelihood to form an edge between two
+nodes depends on their distance in the latent space.
+
+Let us study an dataset from from neuroscience.
+The script can be found
+\href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}{here}.
+
+\subsubsection{Data}
+
+The data comes from \href{http://www-personal.umich.edu/~mejn/netdata/}{Mark Newman's repository}.
+It is a weighted, directed network representing the neural network of
+the nematode
+\href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C.~Elegans}
+compiled by Watts and Strogatz from original experimental data
+by White and co-authors.
+
+The neural network consists of around $300$ neurons. Each connection
+is associated with a weight (positive integer) capturing the strength
+of the connection.
+
+In the example we load the data with
+\begin{lstlisting}[language=Python]
+data, N = load_celegans_brain()
+\end{lstlisting}
+
+\subsubsection{Model}
+
+Here we will fit a latent space model to the C.~Elegans neural network. What can
+we learn about the neurons from how they are connected? We will learn a latent
+embedding for each neuron to capture the similarities between them.
+
+Each neuron $n$ is a node in the network and is associated with a latent
+$K$-dimensional vector $z_n$.
+
+We place a Gaussian prior on each of the latent vectors.
+The log-odds of an edge between node $i$ and
+$j$ is proportional to the Euclidean distance between the latent
+representations of the nodes $|z_i- z_j|$. Here, we
+model the weights ($Y_{ij}$) of the edges with a Poisson likelihood.
+The rate is the reciprocal of the distance in latent space. This is
+the generative process:
+
+For each node $n$:
+\begin{align}
+z_n \sim N(0,I).
+\end{align}
+For each edge $(i,j)$:
+\begin{align}
+Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).
+\end{align}
+
+Here we build the model in Edward using TensorFlow.
+\begin{lstlisting}[language=Python]
+class LatentSpaceModel:
+    def __init__(self, N, K):
+        self.n_vars = N * K
+        self.N = N
+        self.K = K
+
+    def log_prob(self, xs, zs):
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        log_prior = - tf.reduce_sum(zs*zs)
+        z = tf.reshape(zs, [self.N,self.K])
+        # compute reciprocal of euclidean distance
+        xp = tf.matmul(tf.ones([1,self.N]), tf.reduce_sum(z*z,1,keep_dims=True))
+        xp = xp + tf.transpose(xp) - 2*tf.matmul(z, z, transpose_b = True)
+        xp = 1.0/xp
+        log_lik = tf.reduce_sum(poisson.logpmf(xs,xp))
+        return log_lik + log_prior
+
+K = 3
+model = LatentSpaceModel(N, K)
+\end{lstlisting}
+
+\subsubsection{Inference}
+
+Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are
+required: Instantiating inference and running it.
+\begin{lstlisting}[language=Python]
+inference = ed.MAP(model, data)
+inference.run(n_iter=5000, n_print=500)
+\end{lstlisting}
+
+See this extended tutorial about
+\href{tut_MAP.html}{MAP estimation in Edward}.
+
+One could instead run variational inference. This requires specifying
+a variational model and instantiating \texttt{MFVI}.
+\begin{lstlisting}[language=Python]
+variational = Variational()
+variational.add(Normal(model.n_vars))
+inference = ed.MFVI(model, variational, data)
+\end{lstlisting}
+Finally, the following line runs the inference procedure:
+\begin{lstlisting}[language=Python]
+inference.run(n_iter=5000, n_print=500)
+\end{lstlisting}
+See this extended tutorial about
+\href{tut_variational_inference.html}{variational inference in Edward}.
+
+\subsubsection{References}
+
+\begin{itemize}
+\item
+White, J.~G., Southgate, E., Thomson, J.~N., and Brenner, S. (1986).
+\newblock The structure of the nervous system of the nematode caenorhabditis
+  elegans.
+\newblock \emph{Philos Trans R Soc Lond B Biol Sci}, 314(1165):1--340.
+\item
+Watts, D.~J. and Strogatz, S.~H. (1998).
+\newblock Collective dynamics of ‘small-world’ networks.
+\newblock \emph{Nature}, 393(6684):440--442.
+\item
+Hoff, P.~D., Raftery, A.~E., and Handcock, M.~S. (2002).
+\newblock Latent space approaches to social network analysis.
+\newblock \emph{Journal of the american Statistical association},
+  97(460):1090--1098.
+\end{itemize}

@@ -15,9 +15,7 @@ from edward.stats import bernoulli
 
 
 class BernoulliModel:
-    """
-    p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)
-    """
+    """p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)"""
     def __init__(self, p):
         self.p = p
 
@@ -32,4 +30,4 @@ variational = Model()
 variational.add(Bernoulli())
 
 inference = ed.MFVI(model, variational)
-inference.run(n_minibatch=int(1e5))
+inference.run(n_samples=int(1e5))

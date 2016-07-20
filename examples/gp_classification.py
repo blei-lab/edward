@@ -47,7 +47,7 @@ class GaussianProcess:
         self.sigma = sigma
         self.l = l
 
-        self.num_vars = N
+        self.n_vars = N
         self.inverse_link = tf.sigmoid
 
     def kernel(self, x):
@@ -67,7 +67,7 @@ class GaussianProcess:
         return tf.pack(mat)
 
     def log_prob(self, xs, zs):
-        """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
         log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(
@@ -82,7 +82,7 @@ data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 model = GaussianProcess(N=len(df))
 variational = Model()
-variational.add(Normal(model.num_vars))
+variational.add(Normal(model.n_vars))
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=500)

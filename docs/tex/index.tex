@@ -1,0 +1,97 @@
+% Define the subtitle of the page
+\title{Home}
+
+% Begin the content of the page
+\subsection{A library for probabilistic modeling, inference, and criticism.}
+Edward is a Python library for probabilistic modeling, inference, and
+criticism. It is a testbed for fast experimentation and research with
+probabilistic models, ranging from classical hierarchical models on
+small data sets to complex deep probabilistic models on large data
+sets. Edward fuses three fields: Bayesian statistics and machine
+learning, deep learning, and probabilistic programming.
+
+
+It supports \textbf{modeling languages} including
+\begin{itemize}
+\item \href{https://www.tensorflow.org}{TensorFlow} (with neural
+  networks via \href{http://keras.io}{Keras},
+  \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
+  Slim}, or
+  \href{https://github.com/google/prettytensor}{Pretty Tensor})
+\item \href{http://mc-stan.org}{Stan}
+\item \href{http://pymc-devs.github.io/pymc3/}{PyMC3}
+\item Python, through \href{http://scipy.org/}{NumPy/SciPy}
+\end{itemize}
+
+It supports \textbf{inference} via
+\begin{itemize}
+\item Variational inference
+  \begin{itemize}
+    \item Black box variational inference
+    \item Stochastic variational inference
+    \item Variational auto-encoders
+    \item Inclusive KL divergence: $\text{KL}(p\|q)$
+  \end{itemize}
+\item Marginal posterior optimization (empirical Bayes, marginal maximum
+likelihood)
+  \begin{itemize}
+    \item Variational EM
+  \end{itemize}
+\item Maximum a posteriori estimation (penalized maximum likelihood)
+  \begin{itemize}
+  \item Laplace approximation
+  \end{itemize}
+\end{itemize}
+
+It supports \textbf{criticism} of the model and inference via
+\begin{itemize}
+\item Point-based evaluations
+\item Posterior predictive checks
+\end{itemize}
+
+Edward is built on top of
+\href{https://www.tensorflow.org}{TensorFlow}, enabling features such
+as computational graphs, distributed training, CPU/GPU integration,
+automatic differentiation, and visualization with TensorBoard.
+
+\subsubsection{Authors}
+
+Edward is led by \href{http://dustintran.com}{Dustin Tran} with guidance
+by \href{http://www.cs.columbia.edu/~blei/}{David Blei}. The other developers
+are
+\begin{itemize}
+  \item \href{http://stat.columbia.edu/~diengadji/}{Adji Dieng}
+  \item \href{http://www.proditus.com/}{Alp Kucukelbir}
+  \item \href{http://www.ee.columbia.edu/~dliang/}{Dawen Liang}
+  \item \href{http://maja-rita-rudolph.com/}{Maja Rudolph}
+\end{itemize}
+We are open to collaboration, and welcome 
+researchers and developers to contribute. Check out the
+\href{https://github.com/blei-lab/edward/issues}{Github issues} for
+feature requests and other software problems. 
+For broader research challenges, shoot one of us an e-mail.
+
+Edward has benefited enormously from the helpful feedback and advice
+of many individuals: Jaan Altosaar, Eugene Brevdo, Allison Chaney, Matt
+Hoffman, Kevin Murphy, Rajesh Ranganath, Rif Saurous, and other
+members of the Blei Lab, Google Brain, and Google Research.
+
+\subsubsection{Citation}
+
+We appreciate citations for Edward.
+
+\begin{quote}
+Dustin Tran, Adji Dieng, Alp Kucukelbir, Dawen Liang, Maja Rudolph, and David M.
+Blei. 2016.
+\emph{Edward: A library for probabilistic modeling, inference, and criticism. }
+http://edwardlib.org
+\end{quote}
+
+\begin{lstlisting}[class=JSON]
+@misc{tran2016edward,
+    author = {Dustin Tran and Adji Dieng and Alp Kucukelbir and Dawen Liang and Maja Rudolph and David M. Blei},
+    title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
+    year = {2016},
+    url = {http://edwardlib.org}
+}
+\end{lstlisting}
