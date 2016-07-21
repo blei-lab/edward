@@ -13,7 +13,7 @@ variational auto-encoders (Kingma & Welling, 2014; Rezende et al.,
 
 Recall that probabilistic models often have \emph{local} latent
 variables, that is, latent variables associated with a data point; for
-example, the cluster assignment of a data point or the hidden
+example, the latent cluster assignment of a data point or the hidden
 representation of a text or image.
 Variational
 inference on models with local latent variables
@@ -30,7 +30,7 @@ must be optimized at test time, where there may be a new set of data
 points $\{x_n'\}$.
 
 An inference network replaces local variational parameters with global
-parameters. It specifies a neural network
+parameters. It is a neural network
 which takes $x_n$ as input and which outputs its local variational parameters
 $\lambda_n$,
 \begin{equation*}
@@ -144,9 +144,8 @@ This tutorial is taken from text originating in Tran et al. (2016).
   Backpropagation and Approximate Inference in Deep Generative Models.
   In International Conference on Machine Learning.
 \item
-  Salakhutdinov, Ruslan and Larochelle, Hugo. Efficient learning of
-  deep Boltzmann machines. In Artificial Intelligence and Statistics,
-  2010.
+  Salakhutdinov, R., \& and Larochelle, H. (2010). Efficient learning of
+  deep Boltzmann machines. In Artificial Intelligence and Statistics.
 \item
   Stuhlmüller, A., Taylor, J., & Goodman, N. (2013). Learning
   Stochastic Inverses. In Neural Information Processing Systems.
