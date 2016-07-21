@@ -62,22 +62,22 @@
 <div class="container">
 <div class="row" style="margin-top: 5%">
 <div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
+<h1><a href="index.html">Edward</a></h1>
+<a href="index.html">
 <center>
 <img alt="Edward" class="logo-width" src="images/edward.png"/>
 </center>
 </a>
-<a class="button u-full-width" href="/">Home</a>
-<a class="button u-full-width" href="getting-started">Getting Started</a>
-<a class="button u-full-width" href="delving-in">Delving In</a>
-<a class="button u-full-width" href="tutorials">Tutorials</a>
-<a class="button u-full-width" href="api/">API</a>
+<a class="button u-full-width" href="index.html">Home</a>
+<a class="button u-full-width" href="getting-started.html">Getting Started</a>
+<a class="button u-full-width" href="delving-in.html">Delving In</a>
+<a class="button u-full-width" href="tutorials.html">Tutorials</a>
+<a class="button u-full-width" href="api/index.html">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="design-philosophy">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process">Developer Process</a>
-<a class="button2 u-full-width" href="troubleshooting">Troubleshooting</a>
-<a class="button2 u-full-width" href="license">License</a>
+<a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
+<a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+<a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
+<a class="button2 u-full-width" href="license.html">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a href="https://github.com/blei-lab/edward">
 <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
@@ -113,7 +113,7 @@
 <p>The <code>ed.ppc()</code> method provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution</p>
 <pre class="python" language="Python"><code>T = lambda y, z=None: tf.reduce_mean(y['x'])
 print(ed.ppc(model, variational, data, T))</code></pre>
-<p>See the <a href="api/criticisms">criticism API</a> for further details.</p>
+<p>See the <a href="api/criticisms.html">criticism API</a> for further details.</p>
 <p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by prior checks and classical hypothesis testing, under the philosophy that models should be criticized under the frequentist perspective of large sample assessment.</p>
 <p>PPCs can also be applied to tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while they can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended: binary decision making from a single test is not as common a use case as one might believe. We recommend performing many PPCs to get a holistic understanding of the model fit.</p>
 <h3 id="references">References</h3>

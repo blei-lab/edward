@@ -4,7 +4,7 @@ Inference
 An inference algorithm infers the posterior for a particular model
 ``p(x, z)`` and data set ``x``. It is the distribution of the latent
 variables given data, ``p(z | x)``. For more details, see the
-`Inference of Probability Models tutorial <../tut_inference>`__.
+`Inference of Probability Models tutorial <../tut_inference.html>`__.
 
 Edward uses classes and class inheritance to provide a
 hierarchy of inference methods, all of which are easily extensible.
@@ -33,9 +33,9 @@ methods are derived from.
 It takes as input a probabilistic model ``model`` and dataset
 ``data``.
 For more details, see the
-`Model API <models>`__
+`Model API <models.html>`__
 and
-`Data API <data>`__.
+`Data API <data.html>`__.
 
 Note that ``Inference`` says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
@@ -147,7 +147,7 @@ loss. These three snippets are applicable to all of variational
 inference, and are thus useful defaults for any derived class.
 
 For examples of inference algorithms built in Edward, see the inference
-`tutorials <../tutorials>`__.
+`tutorials <../tutorials.html>`__.
 
 Variational Models
 ^^^^^^^^^^^^^^^^^^
