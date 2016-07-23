@@ -8,7 +8,7 @@ Variational model
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Model, Normal
+from edward.models import Normal
 
 ed.set_seed(42)
 
