@@ -75,7 +75,7 @@ def get_dims(x):
     list
         Python list containing dimensions of `x`
     """
-    if isinstance(x, tf.Tensor):
+    if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
         dims = x.get_shape()
         if len(dims) == 0: # scalar
             return []
@@ -344,7 +344,7 @@ def stop_gradient(x):
     tf.Tensor or list
         size corresponding to size of input
     """
-    if isinstance(x, tf.Tensor):
+    if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
         return tf.stop_gradient(x)
     else: # list
         return [tf.stop_gradient(i) for i in x]
@@ -368,7 +368,7 @@ def to_simplex(x):
     -----
     x as a 3d or higher tensor is not guaranteed to be supported.
     """
-    if isinstance(x, tf.Tensor):
+    if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
         shape = get_dims(x)
     else:
         shape = x.shape

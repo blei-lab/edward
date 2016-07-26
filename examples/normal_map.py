@@ -20,6 +20,7 @@ class NormalModel:
     def __init__(self, mu, std):
         self.mu = mu
         self.std = std
+        self.n_vars = 1
 
     def log_prob(self, xs, zs):
         log_prior = norm.logpdf(zs, self.mu, self.std)
