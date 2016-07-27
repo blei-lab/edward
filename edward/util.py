@@ -97,7 +97,6 @@ def get_dims(x):
             return []
         else: # array
             return [dim.value for dim in dims]
-
     elif isinstance(x, np.ndarray):
         return list(x.shape)
     else:
@@ -399,6 +398,10 @@ def softplus(x):
 
     .. math:: \log(1 + \exp(x))
 
+    If input `x < -30`, returns `0.0` exactly.
+
+    If input `x > 30`, returns `x` exactly.
+
     TensorFlow can't currently autodiff through ``tf.nn.softplus()``.
 
     Parameters
@@ -419,7 +422,15 @@ def softplus(x):
     assert_ops = [tf.verify_tensor_all_finite(x, msg='')]
 
     with tf.control_dependencies(assert_ops):
-        return tf.log(1.0 + tf.exp(x))
+        result = tf.log(1.0 + tf.exp(x))
+
+        less_than_thirty = tf.less(x, -30.0)
+        result = tf.select(less_than_thirty, tf.zeros_like(x), result)
+
+        greater_than_thirty = tf.greater(x, 30.0)
+        result = tf.select(greater_than_thirty, x, result)
+
+        return result
 
 
 def stop_gradient(x):
