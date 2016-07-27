@@ -143,8 +143,8 @@ def hessian(y, xs):
     InvalidArgumentError
         If the inputs have Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(y, msg=''),
-                  tf.verify_tensor_all_finite(xs, msg='')]
+    assert_ops = [tf.verify_tensor_all_finite(y, msg='')]
+    assert_ops.extend([tf.verify_tensor_all_finite(x, msg='') for x in xs])
 
     with tf.control_dependencies(assert_ops):
         # Calculate flattened vector grad_{xs} y.

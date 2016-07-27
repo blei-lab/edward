@@ -2,33 +2,44 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
 import tensorflow as tf
+import numpy as np
 
 from edward.util import get_dims
 
+class test_get_dims(tf.test.TestCase):
 
-def _test(x, val_true):
-    val_est = get_dims(x)
-    assert val_est == val_true
+    def test_get_dims_0d_tf(self):
+        with self.test_session():
+            x = tf.constant(0.0)
+            self.assertEqual(get_dims(x), [])
+
+    def test_get_dims_0d_np(self):
+        with self.test_session():
+            x = np.array(0.0)
+            self.assertEqual(get_dims(x), [])            
+
+    def test_get_dims_1d_tf(self):
+        with self.test_session():
+            x = tf.zeros([2])
+            self.assertEqual(get_dims(x), [2])
+
+    def test_get_dims_1d_np(self):
+        with self.test_session():
+            x = np.zeros([2])
+            self.assertEqual(get_dims(x), [2])     
+
+    def test_get_dims_2d_tf(self):
+        with self.test_session():
+            x = tf.zeros([2,2])
+            self.assertEqual(get_dims(x), [2,2])
+
+    def test_get_dims_2d_np(self):
+        with self.test_session():
+            x = np.zeros([2,2])
+            self.assertEqual(get_dims(x), [2,2])  
+
+if __name__ == '__main__':
+    tf.test.main()
 
 
-def test_0d():
-    x = tf.constant(0.0)
-    _test(x, [])
-    x = np.array(0.0)
-    _test(x, [])
-
-
-def test_1d():
-    x = tf.zeros([2])
-    _test(x, [2])
-    x = np.zeros([2])
-    _test(x, [2])
-
-
-def test_2d():
-    x = tf.zeros([2, 2])
-    _test(x, [2, 2])
-    x = np.zeros([2, 2])
-    _test(x, [2, 2])
