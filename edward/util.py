@@ -177,7 +177,7 @@ def hessian(y, xs):
         return tf.pack(mat)
 
 
-def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
+def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     """Calculate the KL of multivariate normal distributions with
     diagonal covariances.
 
@@ -216,7 +216,7 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
                   tf.assert_positive(scale_two)]
 
     with tf.control_dependencies(assert_ops):
-        if loc_two == 0 and scale_two == 1:
+        if loc_two == 0.0 and scale_two == 1.0:
             return 0.5 * tf.reduce_sum(
                 tf.square(scale_one) + tf.square(loc_one) - \
                 1.0 - 2.0 * tf.log(scale_one))
@@ -224,7 +224,7 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0, scale_two=1):
             return 0.5 * tf.reduce_sum(
                 tf.square(scale_one/scale_two) + \
                 tf.square((loc_two - loc_one)/scale_two) - \
-                1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
+                1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one))
 
 
 def log_mean_exp(x):
