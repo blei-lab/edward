@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import multivariate_rbf
 
-class test_multivariate_rbf(tf.test.TestCase):
+class test_multivariate_rbf_class_class(tf.test.TestCase):
 
     def test_multivariate_rbf_0d(self):
         with self.test_session():

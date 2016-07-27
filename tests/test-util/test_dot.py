@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import dot
 
-class test_dot(tf.test.TestCase):
+class test_dot_class(tf.test.TestCase):
 
     def test_dot(self):
         with self.test_session():

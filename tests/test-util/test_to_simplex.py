@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import to_simplex
 
-class test_to_simplex(tf.test.TestCase):
+class test_to_simplex_class(tf.test.TestCase):
 
     def test_to_simplex_1d(self):
         with self.test_session():

@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import cumprod
 
-class test_cumprod(tf.test.TestCase):
+class test_cumprod_class(tf.test.TestCase):
 
     def test_cumprod_1d(self):
         with self.test_session():

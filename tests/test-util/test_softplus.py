@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import softplus
 
-class test_softplus(tf.test.TestCase):
+class test_softplus_class(tf.test.TestCase):
 
     def test_softplus_0d(self):
         with self.test_session():

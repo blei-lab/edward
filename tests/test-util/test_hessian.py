@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import hessian
 
-class test_hessian(tf.test.TestCase):
+class test_hessian_class(tf.test.TestCase):
 
     def test_hessian_0d(self):
         with self.test_session():
@@ -60,7 +60,7 @@ class test_hessian(tf.test.TestCase):
             tf.initialize_all_variables().run()
             with self.assertRaisesOpError('Inf'):
                 hessian(y, [x1, x2]).eval()
-            with self.assertRaisesOpError('NaN'):
+            with self.assertRaisesOpError('Inf'):
                 hessian(y, [x2]).eval()                
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import rbf
 
-class test_rbf(tf.test.TestCase):
+class test_rbf_class(tf.test.TestCase):
 
     def test_rbf_0d(self):
         with self.test_session():

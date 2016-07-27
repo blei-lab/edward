@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import log_mean_exp
 
-class test_log_mean_exp(tf.test.TestCase):
+class test_log_mean_exp_class(tf.test.TestCase):
 
     def test_log_mean_exp_1d(self):
         with self.test_session():

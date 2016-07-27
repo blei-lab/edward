@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import get_dims
 
-class test_get_dims(tf.test.TestCase):
+class test_get_dims_class(tf.test.TestCase):
 
     def test_get_dims_0d_tf(self):
         with self.test_session():

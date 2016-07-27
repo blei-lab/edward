@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import logit
 
-class test_logit(tf.test.TestCase):
+class test_logit_class_class(tf.test.TestCase):
 
     def test_logit_0d(self):
         with self.test_session():

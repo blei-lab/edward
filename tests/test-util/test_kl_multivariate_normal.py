@@ -7,7 +7,7 @@ import numpy as np
 
 from edward.util import kl_multivariate_normal
 
-class test_kl_multivariate_normal(tf.test.TestCase):
+class test_kl_multivariate_normal_class(tf.test.TestCase):
 
     def test_kl_multivariate_normal_0d(self):
         with self.test_session():
