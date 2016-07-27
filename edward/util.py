@@ -459,7 +459,7 @@ def to_simplex(x):
     Parameters
     ----------
     x : tf.tensor or np.array
-        scalar, vector, or matrix
+        vector, or matrix
 
     Returns
     -------
