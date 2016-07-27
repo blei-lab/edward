@@ -347,7 +347,7 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
     """Squared-exponential kernel element-wise
 
-    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }
+    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x - y)^2 }
 
     Parameters
     ----------
