@@ -133,6 +133,207 @@ class Bernoulli(RandomVariable):
         super(Bernoulli, self).__init__(lambda_fn, cond_set)
 
 
+class Beta(RandomVariable):
+    def __init__(self, cond_set, a_lambda_fn=None, b_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [a, b].
+        if a_lambda_fn is None:
+            a_lambda_fn = lambda cond_set: cond_set[0]
+
+        if b_lambda_fn is None:
+            b_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Beta,
+                                  a_lambda_fn(cond_set), b_lambda_fn(cond_set))
+        super(Beta, self).__init__(lambda_fn, cond_set)
+
+
+class Categorical(RandomVariable):
+    def __init__(self, cond_set, logits_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [logits].
+        if logits_lambda_fn is None:
+            logits_lambda_fn = lambda cond_set: cond_set[0]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Categorical, logits_lambda_fn(cond_set))
+        super(Categorical, self).__init__(lambda_fn, cond_set)
+
+
+class Chi2(RandomVariable):
+    def __init__(self, cond_set, df_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [df].
+        if df_lambda_fn is None:
+            df_lambda_fn = lambda cond_set: cond_set[0]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Chi2, df_lambda_fn(cond_set))
+        super(Chi2, self).__init__(lambda_fn, cond_set)
+
+
+class Dirichlet(RandomVariable):
+    def __init__(self, cond_set, alpha_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [alpha].
+        if alpha_lambda_fn is None:
+            alpha_lambda_fn = lambda cond_set: cond_set[0]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Dirichlet, alpha_lambda_fn(cond_set))
+        super(Dirichlet, self).__init__(lambda_fn, cond_set)
+
+
+class DirichletMultinomial(RandomVariable):
+    def __init__(self, cond_set, n_lambda_fn=None, alpha_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [n, alpha].
+        if n_lambda_fn is None:
+            n_lambda_fn = lambda cond_set: cond_set[0]
+
+        if alpha_lambda_fn is None:
+            alpha_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.DirichletMultinomial,
+                                  n_lambda_fn(cond_set), alpha_lambda_fn(cond_set))
+        super(DirichletMultinomial, self).__init__(lambda_fn, cond_set)
+
+
+class Exponential(RandomVariable):
+    def __init__(self, cond_set, lam_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [lam].
+        if lam_lambda_fn is None:
+            lam_lambda_fn = lambda cond_set: cond_set[0]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Exponential, lam_lambda_fn(cond_set))
+        super(Exponential, self).__init__(lambda_fn, cond_set)
+
+
+class Gamma(RandomVariable):
+    def __init__(self, cond_set, alpha_lambda_fn=None, beta_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [alpha, beta].
+        if alpha_lambda_fn is None:
+            alpha_lambda_fn = lambda cond_set: cond_set[0]
+
+        if beta_lambda_fn is None:
+            beta_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Gamma,
+                                  alpha_lambda_fn(cond_set), beta_lambda_fn(cond_set))
+        super(Gamma, self).__init__(lambda_fn, cond_set)
+
+
+class InverseGamma(RandomVariable):
+    def __init__(self, cond_set, alpha_lambda_fn=None, beta_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [alpha, beta].
+        if alpha_lambda_fn is None:
+            alpha_lambda_fn = lambda cond_set: cond_set[0]
+
+        if beta_lambda_fn is None:
+            beta_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.InverseGamma,
+                                  alpha_lambda_fn(cond_set), beta_lambda_fn(cond_set))
+        super(InverseGamma, self).__init__(lambda_fn, cond_set)
+
+
+class Laplace(RandomVariable):
+    def __init__(self, cond_set, loc_lambda_fn=None, scale_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [loc, scale].
+        if loc_lambda_fn is None:
+            loc_lambda_fn = lambda cond_set: cond_set[0]
+
+        if scale_lambda_fn is None:
+            scale_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Laplace,
+                                  loc_lambda_fn(cond_set), scale_lambda_fn(cond_set))
+        super(Laplace, self).__init__(lambda_fn, cond_set)
+
+
+class MultivariateMultivariateNormalCholeskyCholesky(RandomVariable):
+    def __init__(self, cond_set, mu_lambda_fn=None, chol_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [mu, chol].
+        if mu_lambda_fn is None:
+            mu_lambda_fn = lambda cond_set: cond_set[0]
+
+        if chol_lambda_fn is None:
+            chol_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.MultivariateNormalCholesky,
+                                  mu_lambda_fn(cond_set), chol_lambda_fn(cond_set))
+        super(MultivariateNormalCholesky, self).__init__(lambda_fn, cond_set)
+
+
+class MultivariateNormalDiag(RandomVariable):
+    def __init__(self, cond_set, mu_lambda_fn=None, diag_stdev_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [mu, diag_stdev].
+        if mu_lambda_fn is None:
+            mu_lambda_fn = lambda cond_set: cond_set[0]
+
+        if diag_stdev_lambda_fn is None:
+            diag_stdev_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.MultivariateNormalDiag,
+                                  mu_lambda_fn(cond_set), diag_stdev_lambda_fn(cond_set))
+        super(MultivariateNormalDiag, self).__init__(lambda_fn, cond_set)
+
+
+class MultivariateNormalDiagPlusVDVT(RandomVariable):
+    def __init__(self, cond_set, mu_lambda_fn=None, diag_large_lambda_fn=None, v_lambda_fn=None, diag_small_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [mu, diag_large, v, diag_small].
+        if mu_lambda_fn is None:
+            mu_lambda_fn = lambda cond_set: cond_set[0]
+
+        if diag_large_lambda_fn is None:
+            diag_large_lambda_fn = lambda cond_set: cond_set[1]
+
+        if v_lambda_fn is None:
+            v_lambda_fn = lambda cond_set: cond_set[2]
+
+        if diag_small_lambda_fn is None:
+            diag_small_lambda_fn = lambda cond_set: cond_set[3]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.MultivariateNormalDiagPlutVDVT,
+                                  mu_lambda_fn(cond_set),
+                                  diag_large_lambda_fn(cond_set),
+                                  v_lambda_fn(cond_set),
+                                  diag_small_lambda_fn(cond_set))
+        super(MultivariateNormalDiagPlutVDVT, self).__init__(lambda_fn, cond_set)
+
+
+class MultivariateNormalFull(RandomVariable):
+    def __init__(self, cond_set, mu_lambda_fn=None, sigma_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [mu, sigma].
+        if mu_lambda_fn is None:
+            mu_lambda_fn = lambda cond_set: cond_set[0]
+
+        if sigma_lambda_fn is None:
+            sigma_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.MultivariateNormalFull,
+                                  mu_lambda_fn(cond_set), sigma_lambda_fn(cond_set))
+        super(MultivariateNormalFull, self).__init__(lambda_fn, cond_set)
+
+
 class Normal(RandomVariable):
     """
     Examples
@@ -141,7 +342,6 @@ class Normal(RandomVariable):
     >>> sigma = tf.constant([1.0])
     >>> x = Normal([mu, sigma])
     """
-    # TODO make single lambda fn or both
     def __init__(self, cond_set, mu_lambda_fn=None, sigma_lambda_fn=None):
         # If lambda functions are not passed in, default is to assume
         # `cond_set` is passed in as [mu, sigma].
@@ -155,3 +355,40 @@ class Normal(RandomVariable):
             sg.DistributionTensor(distributions.Normal,
                                   mu_lambda_fn(cond_set), sigma_lambda_fn(cond_set))
         super(Normal, self).__init__(lambda_fn, cond_set)
+
+
+class StudentT(RandomVariable):
+    def __init__(self, cond_set, df_lambda_fn=None, mu_lambda_fn=None, sigma_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [df, mu, sigma].
+        if df_lambda_fn is None:
+            df_lambda_fn = lambda cond_set: cond_set[0]
+
+        if mu_lambda_fn is None:
+            mu_lambda_fn = lambda cond_set: cond_set[1]
+
+        if sigma_lambda_fn is None:
+            sigma_lambda_fn = lambda cond_set: cond_set[2]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.StudentT,
+                                  df_lambda_fn(cond_set),
+                                  mu_lambda_fn(cond_set),
+                                  sigma_lambda_fn(cond_set))
+        super(StudentT, self).__init__(lambda_fn, cond_set)
+
+
+class Uniform(RandomVariable):
+    def __init__(self, cond_set, a_lambda_fn=None, b_lambda_fn=None):
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [a, b].
+        if a_lambda_fn is None:
+            a_lambda_fn = lambda cond_set: cond_set[0]
+
+        if b_lambda_fn is None:
+            b_lambda_fn = lambda cond_set: cond_set[1]
+
+        lambda_fn = lambda cond_set: \
+            sg.DistributionTensor(distributions.Uniform,
+                                  a_lambda_fn(cond_set), b_lambda_fn(cond_set))
+        super(Uniform, self).__init__(lambda_fn, cond_set)
