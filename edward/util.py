@@ -101,6 +101,8 @@ def get_session():
     global _ED_SESSION
     if tf.get_default_session() is None:
         _ED_SESSION = tf.InteractiveSession()
+    else:
+        _ED_SESSION = tf.get_default_session()
 
     return _ED_SESSION
 
