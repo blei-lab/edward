@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from edward import models
 from edward import criticisms
 from edward import inferences
 from edward import util
