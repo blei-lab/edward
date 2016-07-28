@@ -7,7 +7,7 @@ import numpy as np
 import six
 import tensorflow as tf
 
-from edward.models import StanModel, Variational, PointMass
+#from edward.models import StanModel, Variational, PointMass
 from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:
