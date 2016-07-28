@@ -9,13 +9,31 @@ distributions = tf.contrib.distributions
 
 
 class RandomVariable(object):
-    """
+    """Node in a metagraph, which defines a model.
+
+    The metagraph carries instructions about how to build model
+    tensors in the computational graph. Graph construction is delayed
+    until one calls `build()`.
+
     Attributes
     ----------
     lambda_fn : function
         Function of conditioning set, returning a stochastic tensor.
     conditioning_set : list
         Default inputs to stochastic tensor when building.
+
+    Examples
+    --------
+    >>> mu = tf.constant([0.0])
+    >>> sigma = tf.constant([1.0])
+    >>> x = RandomVariable(
+    ...   lambda mu, sigma: sg.DistributionTensor(distributions.Normal, mu=mu, sigma=sigma),
+    ...   [mu, sigma])
+    >>> x_tensor = x.build()
+
+    `x.build()` builds the distribution tensor, defaulting to the
+    initialized conditioning set. `sess.run(x_tensor)` returns samples
+    from the generative process.
     """
     def __init__(self, lambda_fn, conditioning_set):
         self.lambda_fn = lambda_fn
@@ -94,8 +112,19 @@ class RandomVariable(object):
 
 
 class Bernoulli(RandomVariable):
+    """
+    Examples
+    --------
+    >>> p = tf.constant([0.5])
+    >>> x = Bernoulli([p])
+    >>>
+    >>> z1 = tf.constant([2.0, 8.0])
+    >>> z2 = tf.constant([1.0, 2.0])
+    >>> x = Bernoulli([z1, z2], lambda cond_set: tf.matmul(cond_set[0], cond_set[1]))
+    """
     def __init__(self, cond_set, p_lambda_fn=None):
-        # default for cond_set must be passed in as [p]
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [p].
         if p_lambda_fn is None:
             p_lambda_fn = lambda cond_set: cond_set[0]
 
@@ -105,9 +134,17 @@ class Bernoulli(RandomVariable):
 
 
 class Normal(RandomVariable):
+    """
+    Examples
+    --------
+    >>> mu = Normal([tf.constant(0.0), tf.constant(1.0)])
+    >>> sigma = tf.constant([1.0])
+    >>> x = Normal([mu, sigma])
+    """
     # TODO make single lambda fn or both
     def __init__(self, cond_set, mu_lambda_fn=None, sigma_lambda_fn=None):
-        # default for cond_set must be passed in as [mu, sigma]
+        # If lambda functions are not passed in, default is to assume
+        # `cond_set` is passed in as [mu, sigma].
         if mu_lambda_fn is None:
             mu_lambda_fn = lambda cond_set: cond_set[0]
 
