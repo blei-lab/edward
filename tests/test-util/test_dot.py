@@ -24,6 +24,10 @@ class test_dot_class(tf.test.TestCase):
             b = tf.diag(tf.ones([5])) 
             with self.assertRaisesOpError('Inf'):
                 dot(a, b).eval()
+            a = tf.ones([5]) * np.arange(5)
+            b = np.inf * tf.diag(tf.ones([5])) 
+            with self.assertRaisesOpError('Inf'):
+                dot(a, b).eval()
 
 if __name__ == '__main__':
     tf.test.main()

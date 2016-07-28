@@ -5,6 +5,8 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
+from tensorflow.python.ops import control_flow_ops
+
 def cumprod(xs):
     """Cumulative product of a tensor along first dimension.
 
@@ -25,19 +27,19 @@ def cumprod(xs):
     InvalidArgumentError
         If the input has Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(xs, msg='')]
+    dependencies = [tf.verify_tensor_all_finite(xs, msg='')]
+    xs = control_flow_ops.with_dependencies(dependencies, xs)
 
-    with tf.control_dependencies(assert_ops):
-        values = tf.unpack(xs)
-        out = []
-        prev = tf.ones_like(values[0])
-        for val in values:
-            s = prev * val
-            out.append(s)
-            prev = s
+    values = tf.unpack(xs)
+    out = []
+    prev = tf.ones_like(values[0])
+    for val in values:
+        s = prev * val
+        out.append(s)
+        prev = s
 
-        result = tf.pack(out)
-        return result
+    result = tf.pack(out)
+    return result
 
 
 def dot(x, y):
@@ -64,18 +66,19 @@ def dot(x, y):
     InvalidArgumentError
         If the inputs have Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg=''),
-                  tf.verify_tensor_all_finite(y, msg='')]
+    dependencies = [tf.verify_tensor_all_finite(x, msg=''),
+                    tf.verify_tensor_all_finite(y, msg='')]
+    x = control_flow_ops.with_dependencies(dependencies, x)
+    y = control_flow_ops.with_dependencies(dependencies, y)
 
-    with tf.control_dependencies(assert_ops):
-        if len(x.get_shape()) == 1:
-            vec = x
-            mat = y
-            return tf.matmul(tf.expand_dims(vec, 0), mat)
-        else:
-            mat = x
-            vec = y
-            return tf.matmul(mat, tf.expand_dims(vec, 1))
+    if len(x.get_shape()) == 1:
+        vec = x
+        mat = y
+        return tf.matmul(tf.expand_dims(vec, 0), mat)
+    else:
+        mat = x
+        vec = y
+        return tf.matmul(mat, tf.expand_dims(vec, 1))
 
 
 def get_dims(x):
@@ -142,10 +145,10 @@ def hessian(y, xs):
     InvalidArgumentError
         If the inputs have Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(y, msg='')]
-    assert_ops.extend([tf.verify_tensor_all_finite(x, msg='') for x in xs])
+    dependencies = [tf.verify_tensor_all_finite(y, msg='')]
+    dependencies.extend([tf.verify_tensor_all_finite(x, msg='') for x in xs])
 
-    with tf.control_dependencies(assert_ops):
+    with tf.control_dependencies(dependencies):
         # Calculate flattened vector grad_{xs} y.
         grads = tf.gradients(y, xs)
         grads = [tf.reshape(grad, [-1]) for grad in grads]
@@ -210,21 +213,24 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
         If the location variables have Inf or NaN values, or if the scale
         variables are not positive.
     """
-    assert_ops = [tf.verify_tensor_all_finite(loc_one, msg=''),
+    dependencies = [tf.verify_tensor_all_finite(loc_one, msg=''),
                   tf.verify_tensor_all_finite(loc_two, msg=''),
                   tf.assert_positive(scale_one),
                   tf.assert_positive(scale_two)]
+    loc_one = control_flow_ops.with_dependencies(dependencies, loc_one)
+    loc_two = control_flow_ops.with_dependencies(dependencies, loc_two)
+    scale_one = control_flow_ops.with_dependencies(dependencies, scale_one)
+    scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
 
-    with tf.control_dependencies(assert_ops):
-        if loc_two == 0.0 and scale_two == 1.0:
-            return 0.5 * tf.reduce_sum(
-                tf.square(scale_one) + tf.square(loc_one) - \
-                1.0 - 2.0 * tf.log(scale_one))
-        else:
-            return 0.5 * tf.reduce_sum(
-                tf.square(scale_one/scale_two) + \
-                tf.square((loc_two - loc_one)/scale_two) - \
-                1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one))
+    if loc_two == 0.0 and scale_two == 1.0:
+        return 0.5 * tf.reduce_sum(
+            tf.square(scale_one) + tf.square(loc_one) - \
+            1.0 - 2.0 * tf.log(scale_one))
+    else:
+        return 0.5 * tf.reduce_sum(
+            tf.square(scale_one/scale_two) + \
+            tf.square((loc_two - loc_one)/scale_two) - \
+            1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one))
 
 
 def log_mean_exp(x):
@@ -247,11 +253,11 @@ def log_mean_exp(x):
     InvalidArgumentError
         If the input has Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg='')]
+    dependencies = [tf.verify_tensor_all_finite(x, msg='')]
+    x = control_flow_ops.with_dependencies(dependencies, x)
 
-    with tf.control_dependencies(assert_ops):
-        x_max = tf.reduce_max(x)
-        return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))  
 
 
 def log_sum_exp(x):
@@ -274,11 +280,11 @@ def log_sum_exp(x):
     InvalidArgumentError
         If the input has Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg='')]
+    dependencies = [tf.verify_tensor_all_finite(x, msg='')]
+    x = control_flow_ops.with_dependencies(dependencies, x);
 
-    with tf.control_dependencies(assert_ops):
-        x_max = tf.reduce_max(x)
-        return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
+    x_max = tf.reduce_max(x)
+    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
 
 
 def logit(x):
@@ -299,11 +305,11 @@ def logit(x):
     InvalidArgumentError
         If the input is not between :math:`(0,1)` elementwise.
     """
-    assert_ops = [tf.assert_positive(x),
-                  tf.assert_less(x, 1.0)]
+    dependencies = [tf.assert_positive(x),
+                    tf.assert_less(x, 1.0)]
+    x = control_flow_ops.with_dependencies(dependencies, x)
 
-    with tf.control_dependencies(assert_ops):
-        return tf.log(x) - tf.log(1.0 - x)
+    return tf.log(x) - tf.log(1.0 - x)
 
 
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
@@ -333,15 +339,18 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
         If the mean variables have Inf or NaN values, or if the scale
         and length variables are not positive.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg=''),
-                  tf.verify_tensor_all_finite(y, msg=''),
-                  tf.assert_positive(sigma),
-                  tf.assert_positive(l)]
+    dependencies = [tf.verify_tensor_all_finite(x, msg=''),
+                    tf.verify_tensor_all_finite(y, msg=''),
+                    tf.assert_positive(sigma),
+                    tf.assert_positive(l)]
+    x = control_flow_ops.with_dependencies(dependencies, x)
+    y = control_flow_ops.with_dependencies(dependencies, y)
+    sigma = control_flow_ops.with_dependencies(dependencies, sigma)
+    l = control_flow_ops.with_dependencies(dependencies, l)
 
-    with tf.control_dependencies(assert_ops):
-        return tf.pow(sigma, 2.0) * \
-                tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
-                tf.reduce_sum(tf.pow(x - y , 2.0)))
+    return tf.pow(sigma, 2.0) * \
+            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
+            tf.reduce_sum(tf.pow(x - y , 2.0)))
 
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
@@ -371,14 +380,17 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
         If the mean variables have Inf or NaN values, or if the scale
         and length variables are not positive.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg=''),
+    dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg=''),
                   tf.assert_positive(sigma),
                   tf.assert_positive(l)]
+    x = control_flow_ops.with_dependencies(dependencies, x)
+    y = control_flow_ops.with_dependencies(dependencies, y)
+    sigma = control_flow_ops.with_dependencies(dependencies, sigma)
+    l = control_flow_ops.with_dependencies(dependencies, l)
 
-    with tf.control_dependencies(assert_ops):
-        return tf.pow(sigma, 2.0) * \
-                tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
+    return tf.pow(sigma, 2.0) * \
+            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
 
 
 def set_seed(x):
@@ -419,18 +431,18 @@ def softplus(x):
     InvalidArgumentError
         If the input has Inf or NaN values.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg='')]
+    dependencies = [tf.verify_tensor_all_finite(x, msg='')]
+    x = control_flow_ops.with_dependencies(dependencies, x)
 
-    with tf.control_dependencies(assert_ops):
-        result = tf.log(1.0 + tf.exp(x))
+    result = tf.log(1.0 + tf.exp(x))
 
-        less_than_thirty = tf.less(x, -30.0)
-        result = tf.select(less_than_thirty, tf.zeros_like(x), result)
+    less_than_thirty = tf.less(x, -30.0)
+    result = tf.select(less_than_thirty, tf.zeros_like(x), result)
 
-        greater_than_thirty = tf.greater(x, 30.0)
-        result = tf.select(greater_than_thirty, x, result)
+    greater_than_thirty = tf.greater(x, 30.0)
+    result = tf.select(greater_than_thirty, x, result)
 
-        return result
+    return result
 
 
 def stop_gradient(x):
@@ -475,32 +487,32 @@ def to_simplex(x):
     -----
     x as a 3d or higher tensor is not guaranteed to be supported.
     """
-    assert_ops = [tf.verify_tensor_all_finite(x, msg='')]
+    dependencies = [tf.verify_tensor_all_finite(x, msg='')]
+    x = control_flow_ops.with_dependencies(dependencies, x)
 
-    with tf.control_dependencies(assert_ops):
-        if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-            shape = get_dims(x)
-        else:
-            shape = x.shape
+    if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
+        shape = get_dims(x)
+    else:
+        shape = x.shape
 
-        if len(shape) == 1:
-            n_rows = ()
-            K_minus_one = shape[0]
-            eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
-                                 dtype=tf.float32))
-            z = tf.sigmoid(eq + x)
-            pil = tf.concat(0, [z, tf.constant([1.0])])
-            piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
-            S = cumprod(piu)
-            return S * pil
-        else:
-            n_rows = shape[0]
-            K_minus_one = shape[1]
-            eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
-                                 dtype=tf.float32))
-            z = tf.sigmoid(eq + x)
-            pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
-            piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
-            # cumulative product along 1st axis
-            S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
-            return S * pil
+    if len(shape) == 1:
+        n_rows = ()
+        K_minus_one = shape[0]
+        eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
+                             dtype=tf.float32))
+        z = tf.sigmoid(eq + x)
+        pil = tf.concat(0, [z, tf.constant([1.0])])
+        piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
+        S = cumprod(piu)
+        return S * pil
+    else:
+        n_rows = shape[0]
+        K_minus_one = shape[1]
+        eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
+                             dtype=tf.float32))
+        z = tf.sigmoid(eq + x)
+        pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
+        piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
+        # cumulative product along 1st axis
+        S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+        return S * pil
