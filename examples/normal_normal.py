@@ -7,45 +7,22 @@ import six
 import tensorflow as tf
 
 from edward.models import Normal
+from edward.util import get_session
 
 #sg = tf.contrib.bayesflow.stochastic_graph
 import edward as ed
 sg = ed.models.stochastic_graph
 
-# PROBABILITY MODEL
-mu = tf.constant([0.0])
-sigma = tf.constant([1.0])
-pmu = Normal([mu, sigma])
-# normal likelihood for 5 data points, with shared unobserved mean
-x = Normal([pmu, sigma],
-           lambda cond_set: tf.pack([cond_set[0] for n in range(5)]))
 
-# VARIATIONAL MODEL
-mu2 = tf.Variable(tf.random_normal([1]))
-sigma2 = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-qmu = Normal([mu2, sigma2])
-
-data = {x: np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)}
-
-## GENERAL APPROACH
-
-from edward.util import get_session
-
-class Inference(object):
+class VariationalInference(object):
     def __init__(self, latent_vars, data):
-        get_session()
         self.latent_vars = latent_vars
         self.data = data
 
-class VariationalInference(Inference):
-    def __init__(self, latent_vars, data):
-        super(VariationalInference, self).__init__(latent_vars, data)
-
-    def initialize(self):
+    def initialize(self, n_samples=1):
         # Use a dictionary to store bindings of `RandomVariable`s to their built tensors.
         self.built_dict = {}
-        n_samples = 4
-        with sg.value_type(sg.SampleValue(n=n_samples)): # 4 latent variable samples
+        with sg.value_type(sg.SampleValue(n=n_samples)): # latent variable samples
             # Build random variables in q(z).
             for rv in six.itervalues(self.latent_vars):
                 rv.build(built_dict=self.built_dict)
@@ -68,7 +45,7 @@ class VariationalInference(Inference):
     def build_loss(self):
         p_log_prob = 0.0
         q_log_prob = 0.0
-        # Sum over prior.
+        # Take log-densities over latent variables.
         for pz, qz in six.iteritems(self.latent_vars):
             pz_tensor = self.built_dict[pz]
             qz_tensor = self.built_dict[qz]
@@ -79,7 +56,7 @@ class VariationalInference(Inference):
             p_log_prob += tf.reduce_sum(pz_tensor.distribution.log_pdf(z_samples),
                                         range(1, len(pz_tensor.value().get_shape())))
 
-        # Sum over likelihood.
+        # Take log-densities over data.
         for px, obs in six.iteritems(self.data):
             px_tensor = self.built_dict[px]
             # reshape in order to broadcast along outer dimension
@@ -92,15 +69,30 @@ class VariationalInference(Inference):
         # reparameterization trick is a stochastic gradient.
         return -tf.reduce_mean(p_log_prob - q_log_prob)
 
+
+# probability model: Normal-Normal with known variance
+mu = tf.constant([0.0])
+sigma = tf.constant([1.0])
+pmu = Normal([mu, sigma])
+x = Normal([pmu, sigma],
+           lambda cond_set: tf.pack([cond_set[0] for n in range(50)]))
+
+# variational model
+mu2 = tf.Variable(tf.random_normal([1]))
+sigma2 = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qmu = Normal([mu2, sigma2])
+
+# inference
+# analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
+data = {x: np.array([0.0]*50, dtype=np.float32)}
 inference = VariationalInference({pmu: qmu}, data)
 inference.initialize()
 
 sess = tf.Session()
 init = tf.initialize_all_variables()
 sess.run(init)
-# TODO debug; doesn't seem to converge correctly
-for t in range(1000):
+for t in range(10000):
     _, loss = sess.run([inference.train, inference.loss])
     if t % 100 == 0:
-        print("loss: {:0.3f}".format(loss))
+        print("iter: {:d}, loss: {:0.3f}".format(t, loss))
         print(sess.run([mu2, sigma2]))
