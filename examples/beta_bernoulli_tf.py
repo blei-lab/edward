@@ -17,24 +17,26 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Beta
+from edward.models import Beta
 from edward.stats import bernoulli, beta
 
 
 class BetaBernoulli:
     """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
-    def log_prob(self, xs, zs):
+    def log_prob(self, var_dict):
+        xs, zs = var_dict['x'], var_dict['z']
         log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
+        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs, z))
                            for z in tf.unpack(zs)])
         return log_lik + log_prior
 
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Variational()
-variational.add(Beta())
+
+qz = Beta()
+
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=10000)
