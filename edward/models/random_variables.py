@@ -5,7 +5,12 @@ from __future__ import print_function
 import tensorflow as tf
 
 #sg = tf.contrib.bayesflow.stochastic_graph
-import models.stochastic_graph as sg
+from edward.models.stochastic_graph import DistributionTensor
+class SG:
+    def __init__(self):
+        self.DistributionTensor = DistributionTensor
+
+sg = SG()
 distributions = tf.contrib.distributions
 
 
