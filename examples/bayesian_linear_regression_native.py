@@ -1,0 +1,47 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import edward as ed
+import numpy as np
+import tensorflow as tf
+
+from edward.models import Normal
+from scipy.stats import norm
+from vi import VariationalInference
+
+
+def build_toy_dataset(N=40, noise_std=0.1):
+    ed.set_seed(0)
+    X  = np.concatenate([np.linspace(0, 2, num=N/2),
+                         np.linspace(6, 8, num=N/2)])
+    y = 0.075*X + norm.rvs(0, noise_std, size=N)
+    X = (X - 4.0) / 4.0
+    X = X.reshape((N, 1))
+    return X, y.astype(np.float32)
+
+
+N = 40
+p = 1
+
+X = tf.placeholder(tf.float32, [N, p])
+z = Normal([tf.zeros(p), tf.ones(p)])
+y = Normal([z, tf.ones(N)],
+           lambda cond_set: tf.matmul(X, cond_set[0]))
+
+mu = tf.Variable(tf.random_normal([p]))
+sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
+qz = Normal([mu, sigma])
+
+data = {}
+data[X], data[y] = build_toy_dataset(N)
+inference = VariationalInference({z: qz}, data)
+inference.initialize()
+
+sess = tf.Session()
+init = tf.initialize_all_variables()
+sess.run(init)
+for t in range(10000):
+    _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
+    if t % 100 == 0:
+        print("iter: {:d}, loss: {:0.3f}".format(t, loss))
