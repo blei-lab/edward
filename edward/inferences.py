@@ -425,18 +425,13 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        p_log_prob = self.model_wrapper.log_prob(xz)
-
+        p_log_prob = self.model_wrapper.log_prob(x, z)
         q_log_prob = 0.0
-        for rv, obs in six.iteritems(z):
-            q_log_prob += rv.log_prob(stop_gradient(obs))
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(stop_gradient(z[key]))
 
         losses = p_log_prob - q_log_prob
         self.loss = tf.reduce_mean(losses)
@@ -455,18 +450,13 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        p_log_prob = self.model_wrapper.log_prob(xz)
-
+        p_log_prob = self.model_wrapper.log_prob(x, z)
         q_log_prob = 0.0
-        for rv, obs in six.iteritems(z):
-            q_log_prob += rv.log_prob(obs)
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(z[key])
 
         self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
         return -self.loss
@@ -489,18 +479,13 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        p_log_lik = self.model_wrapper.log_lik(xz)
-
+        p_log_lik = self.model_wrapper.log_lik(x, z)
         q_log_prob = 0.0
-        for rv, obs in six.iteritems(z):
-            q_log_prob += rv.log_prob(stop_gradient(obs))
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(stop_gradient(z[key]))
 
         mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
         sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
@@ -524,19 +509,14 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        p_log_prob = self.model_wrapper.log_prob(xz)
-
+        p_log_prob = self.model_wrapper.log_prob(x, z)
         q_log_prob = 0.0
         q_entropy = 0.0
-        for rv, obs in six.iteritems(z):
-            q_log_prob += rv.log_prob(stop_gradient(obs))
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(stop_gradient(z[key]))
             q_entropy += rv.entropy()
 
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
@@ -561,15 +541,10 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        p_log_lik = self.model_wrapper.log_lik(xz)
-
+        p_log_lik = self.model_wrapper.log_lik(x, z)
         mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
         sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
         self.loss = tf.reduce_mean(p_log_lik) - \
@@ -592,15 +567,10 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        self.model_wrapper.log_prob(xz)
-
+        p_log_prob = self.model_wrapper.log_prob(x, z)
         q_entropy = 0.0
         for rv in six.iterkeys(z):
             q_entropy += rv.entropy()
@@ -665,19 +635,15 @@ class KLpq(VariationalInference):
             w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
 
         """
-        z = {rv: rv.sample(self.n_samples) for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
+        x = self.data
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
         # normalized importance weights
         q_log_prob = 0.0
-        for rv, obs in six.iteritems(z):
-            q_log_prob += rv.log_prob(stop_gradient(obs))
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(stop_gradient(z[key]))
 
-        log_w = self.model_wrapper.log_prob(xz) - q_log_prob
+        log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
         log_w_norm = log_w - log_sum_exp(log_w)
         w_norm = tf.exp(log_w_norm)
 
@@ -704,7 +670,7 @@ class MAP(VariationalInference):
                 else:
                     latent_vars = {'z': PointMass(0)}
         elif isinstance(latent_vars, dict):
-
+            pass
         else:
             raise TypeError()
 
@@ -717,14 +683,9 @@ class MAP(VariationalInference):
         .. math::
             - \log p(x,z)
         """
-        z = {rv: rv.sample() for rv in six.itervalues(self.latent_vars)}
-        # Collect dictionary binding each random variable in the
-        # probability model to its realization.
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
-
-        self.loss = tf.squeeze(self.model_wrapper.log_prob(xz))
+        x = self.data
+        z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+        self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
         return -self.loss
 
 
@@ -750,14 +711,10 @@ class Laplace(MAP):
         """
         # use only a batch of data to estimate hessian
         x = self.data
-        z = {rv: rv.sample() for rv in six.itervalues(self.latent_vars)}
-        xz = self.data
-        for key, value in six.iteritems(self.latent_vars):
-            xz[key] = z[value]
-
+        z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
-        inv_cov = hessian(self.model_wrapper.log_prob(xz), var_list)
+        inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
         print("Precision matrix:")
         print(inv_cov.eval())
         super(Laplace, self).finalize()

@@ -45,10 +45,10 @@ class LinearModel:
         self.prior_variance = prior_variance
         self.n_vars = 2
 
-    def log_prob(self, var_dict):
+    def log_prob(self, xs, zs):
         """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        x, y = var_dict['x'], var_dict['y']
-        zs = var_dict['z']
+        x, y = xs['x'], xs['y']
+        zs = zs['z']
         log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
         # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
         W = tf.expand_dims(zs[:, 0], 0)

@@ -23,10 +23,9 @@ from edward.stats import bernoulli, beta
 
 class BetaBernoulli:
     """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
-    def log_prob(self, var_dict):
-        xs, zs = var_dict['x'], var_dict['z']
-        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs, z))
+    def log_prob(self, xs, zs):
+        log_prior = beta.logpdf(zs['z'], a=1.0, b=1.0)
+        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
                            for z in tf.unpack(zs)])
         return log_lik + log_prior
 
