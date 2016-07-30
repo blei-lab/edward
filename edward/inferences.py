@@ -661,16 +661,52 @@ class MAP(VariationalInference):
 
         \min_{z} - \log p(x,z)
     """
-    # TODO
     def __init__(self, latent_vars, data=None, model_wrapper=None):
+        """
+        Parameters
+        ----------
+        latent_vars : list of str or dict of str to tf.Tensor
+            Collection of random variables to perform inference on. If
+            list, each random variable (of type `str`) will be
+            implictly optimized using a ``PointMass` distribution that
+            is defined internally. If dictionary, each random variable
+            (of type `str`) is binded to the set of trainable
+            parameters (of type `tf.Tensor`); the latter will
+            approximate the former using its posterior mode.
+
+        Examples
+        --------
+        >>> MAP(['z'], data, model_wrapper)
+
+        For now, the list can only have one element. For example,
+        the following is not currently supported:
+
+        >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
+
+        This is because internally we have no way of knowing the
+        dimensions in which to optimize each parameter. To pass in
+        more than one parameter, at the moment one must define the
+        trainable parameters outside:
+
+        >>> MAP({'pi': tf.Variable(), 'mu': tf.Variable(), 'sigma': tf.Variable()},
+        ...     data, model_wrapper)
+
+        Defining the parameters outside is also useful when the
+        parameters must be constrained, e.g., 'sigma' must be
+        positive.
+        """
         if isinstance(latent_vars, list):
+            if len(latent_vars) > 1:
+                raise NotImplementedError("A list of more than one element is not currently supported. See documentation.")
+
             with tf.variable_scope("variational"):
                 if hasattr(model_wrapper, 'n_vars'):
-                    latent_vars = {'z': PointMass(model_wrapper.n_vars)}
+                    latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
                 else:
-                    latent_vars = {'z': PointMass(0)}
+                    latent_vars = {latent_vars[0]: PointMass(0)}
         elif isinstance(latent_vars, dict):
-            pass
+            latent_vars = {key: PointMass([int(dim) for dim in params.get_shape()], params)
+                           for key, params in latent_vars}
         else:
             raise TypeError()
 
@@ -700,9 +736,8 @@ class Laplace(MAP):
     the Hessian at the mode of the posterior. This forms the
     covariance of the normal approximation.
     """
-    # TODO
     def __init__(self, latent_vars, data=None, model_wrapper=None):
-        super(Laplace, self).__init__(data, model_wrapper, params)
+        super(Laplace, self).__init__(latent_vars, data, model_wrapper)
 
     def finalize(self):
         """Function to call after convergence.
