@@ -21,7 +21,6 @@ import tensorflow as tf
 from convolutional_vae_util import deconv2d
 from edward.models import Variational, Normal
 from edward.stats import bernoulli
-from edward.util import kl_multivariate_normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
