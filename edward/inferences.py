@@ -69,15 +69,21 @@ class Inference(object):
         3. externally if user passes in data as TensorFlow tensors
            which are the outputs of data readers.
         """
-        sess = get_session()
-        self.latent_vars = latent_vars
-        if model_wrapper is None:
-            raise NotImplementedError()
-
-        self.model_wrapper = model_wrapper
+        if not isinstance(latent_vars, list) and \
+           not isinstance(latent_vars, dict):
+            raise TypeError()
 
         if data is None:
             data = {}
+        elif not isinstance(data, dict):
+            raise TypeError()
+
+        if model_wrapper is None:
+            raise TypeError()
+
+        sess = get_session()
+        self.latent_vars = latent_vars
+        self.model_wrapper = model_wrapper
 
         if isinstance(model_wrapper, StanModel):
             # Stan models do no support data subsampling because they
@@ -130,6 +136,9 @@ class MonteCarlo(Inference):
         model_wrapper : ed.Model
             Probability model.
         """
+        if not isinstance(latent_vars, list):
+            raise TypeError()
+
         super(MonteCarlo, self).__init__(*args, **kwargs)
 
 
@@ -156,6 +165,9 @@ class VariationalInference(Inference):
         model_wrapper : ed.Model
             Probability model.
         """
+        if not isinstance(latent_vars, dict):
+            raise TypeError()
+
         super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
     def run(self, *args, **kwargs):
