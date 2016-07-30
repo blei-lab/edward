@@ -69,6 +69,7 @@ class Inference(object):
         3. externally if user passes in data as TensorFlow tensors
            which are the outputs of data readers.
         """
+        sess = get_session()
         if not isinstance(latent_vars, list) and \
            not isinstance(latent_vars, dict):
             raise TypeError()
@@ -81,7 +82,6 @@ class Inference(object):
         if model_wrapper is None:
             raise TypeError()
 
-        sess = get_session()
         self.latent_vars = latent_vars
         self.model_wrapper = model_wrapper
 
@@ -135,6 +135,12 @@ class MonteCarlo(Inference):
             according to the Stan program's data block.
         model_wrapper : ed.Model
             Probability model.
+
+        Examples
+        --------
+        >>> model = ...
+        >>> data = {'x': np.array()}
+        >>> MonteCarlo(['pi', 'mu', 'sigma'], data, model)
         """
         if not isinstance(latent_vars, list):
             raise TypeError()
@@ -164,6 +170,13 @@ class VariationalInference(Inference):
             according to the Stan program's data block.
         model_wrapper : ed.Model
             Probability model.
+
+        Examples
+        --------
+        >>> model = LinearModel()
+        >>> qz = Normal(model.n_vars)
+        >>> data = {'x': np.array(), 'y': np.array()}
+        >>> VariationalInference({'z': qz}, data, model)
         """
         if not isinstance(latent_vars, dict):
             raise TypeError()
