@@ -17,7 +17,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Beta
+from edward.models import Beta
 from edward.stats import bernoulli, beta
 
 
@@ -27,28 +27,27 @@ class BetaBernoulli:
         self.n_vars = 1
 
     def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+        log_prior = beta.logpdf(zs['z'], a=1.0, b=1.0)
         log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                           for z in tf.unpack(zs)])
+                           for z in tf.unpack(zs['z'])])
         return log_lik + log_prior
 
     def sample_likelihood(self, zs, n):
         """x | z ~ p(x | z)"""
         out = []
-        for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
+        for s in range(zs['z'].shape[0]):
+            out += [{'x': bernoulli.rvs(zs['z'][s, :], size=n).reshape((n,))}]
 
         return out
 
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Variational()
-variational.add(Beta(model.n_vars))
+qz = Beta(model.n_vars)
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=200)
 
-T = lambda x, z=None: tf.reduce_mean(x['x'])
-print(ed.ppc(model, variational, data, T))
+T = lambda x, z: tf.reduce_mean(x['x'])
+print(ed.ppc({'z': qz}, data, T, model))

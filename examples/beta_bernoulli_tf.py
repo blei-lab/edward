@@ -32,9 +32,7 @@ class BetaBernoulli:
 
 ed.set_seed(42)
 model = BetaBernoulli()
-
 qz = Beta()
-
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 inference = ed.MFVI({'z': qz}, data, model)
