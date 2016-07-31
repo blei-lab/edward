@@ -678,35 +678,35 @@ class MAP(VariationalInference):
         """
         Parameters
         ----------
-        latent_vars : list of str or dict of str to tf.Tensor
+        latent_vars : list of str or dict of str to RandomVariable
             Collection of random variables to perform inference on. If
-            list, each random variable (of type `str`) will be
-            implictly optimized using a ``PointMass` distribution that
-            is defined internally. If dictionary, each random variable
-            (of type `str`) is binded to the set of trainable
-            parameters (of type `tf.Tensor`); the latter will
-            approximate the former using its posterior mode.
+            list, each random variable will be implictly optimized
+            using a ``PointMass` distribution that is defined
+            internally (with real-valued support). If dictionary, each
+            random variable is binded to a point mass distribution
+            that will be used to approximate the former using its
+            posterior mode.
 
         Examples
         --------
+        For model wrappers, the list can only have one element:
+
         >>> MAP(['z'], data, model_wrapper)
 
-        For now, the list can only have one element. For example,
-        the following is not currently supported:
+        For example, the following is not currently supported:
 
         >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
 
-        This is because internally we have no way of knowing the
-        dimensions in which to optimize each parameter. To pass in
-        more than one parameter, at the moment one must define the
-        trainable parameters outside:
+        This is because internally with model wrappers, we have no way
+        of knowing the dimensions in which to optimize each
+        distribution; further, we do not know their support. For more
+        than one random variable, or for constrained support, one must
+        manually pass in the point mass distributions.
 
-        >>> MAP({'pi': tf.Variable(), 'mu': tf.Variable(), 'sigma': tf.Variable()},
-        ...     data, model_wrapper)
-
-        Defining the parameters outside is also useful when the
-        parameters must be constrained, e.g., 'sigma' must be
-        positive.
+        >>> qpi = PointMass(K-1, params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+        >>> qmu = PointMass(K*D, params=tf.Variable(tf.zeros(K*D)))
+        >>> qsigma = PointMass(K*D, params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+        >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
         """
         if isinstance(latent_vars, list):
             if len(latent_vars) > 1:
@@ -718,8 +718,7 @@ class MAP(VariationalInference):
                 else:
                     latent_vars = {latent_vars[0]: PointMass(0)}
         elif isinstance(latent_vars, dict):
-            latent_vars = {key: PointMass([int(dim) for dim in params.get_shape()], params)
-                           for key, params in latent_vars}
+            pass
         else:
             raise TypeError()
 
