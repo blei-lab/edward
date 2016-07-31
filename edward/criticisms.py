@@ -108,7 +108,7 @@ def evaluate(metrics, latent_vars, data, y_true=None, model_wrapper=None, n_samp
         return evaluations
 
 
-def ppc(latent_vars=None, data=None, T=None, model_wrapper=None, n_samples=100):
+def ppc(latent_vars, data=None, T=None, model_wrapper=None, n_samples=100):
     """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
     If no posterior approximation is provided through ``variational``,
@@ -125,10 +125,11 @@ def ppc(latent_vars=None, data=None, T=None, model_wrapper=None, n_samples=100):
 
     Parameters
     ----------
-    latent_vars : dict of str to RandomVariable, optional
-        Collection of random variables (of type `str`) binded to their
-        approximate posterior (of type `RandomVariable`). If not
-        specified, samples will be obtained from the model through the
+    latent_vars : list of str or dict of str to RandomVariable
+        Collection of random variables (of type `str`). If dictionary,
+        binded to their approximate posterior (of type
+        `RandomVariable`). If list, not binded to any posterior, and
+        samples are obtained from the model through the
         ``sample_prior`` method.
     data : dict, optional
         Observed data to compare to. If not specified, will return
@@ -180,7 +181,7 @@ def ppc(latent_vars=None, data=None, T=None, model_wrapper=None, n_samples=100):
     # 1. Sample from posterior (or prior).
     # We fetch zs out of the session because sample_likelihood() may
     # require a SciPy-based sampler.
-    if latent_vars is not None:
+    if isinstance(latent_vars, dict):
         # `tf.identity()` is to avoid fetching, e.g., a placeholder x
         # when feeding the dictionary {x: np.array()}. TensorFlow will
         # raise an error.
