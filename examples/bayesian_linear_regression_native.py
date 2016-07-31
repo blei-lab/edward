@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -23,15 +24,18 @@ def build_toy_dataset(N=40, noise_std=0.1):
 N = 40
 p = 1
 
+# probability model
 X = tf.placeholder(tf.float32, [N, p])
 z = Normal([tf.zeros(p), tf.ones(p)])
 y = Normal([z, tf.ones(N)],
            lambda cond_set: tf.matmul(X, cond_set[0]))
 
+# variational model
 mu = tf.Variable(tf.random_normal([p]))
 sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
 qz = Normal([mu, sigma])
 
+# inference
 data = {}
 data[X], data[y] = build_toy_dataset(N)
 inference = ed.MFVI({z: qz}, data)

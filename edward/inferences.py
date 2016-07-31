@@ -33,17 +33,18 @@ class Inference(object):
 
     Attributes
     ----------
-    latent_vars : list of str, or dict of str to RandomVariable
+    latent_vars : list of RandomVariable, or dict of RandomVariable to RandomVariable
         Collection of random variables to perform inference on. If
-        list, each random variable (of type `str`) will be inferred
-        nonparametrically (e.g., MCMC). If dictionary, each random
-        variable (of type `str`) is binded to another random
-        variable (of type `RandomVariable`); the latter will infer the
-        former's posterior (e.g., VI).
+        list, each random variable will be inferred nonparametrically
+        (e.g., MCMC). If dictionary, each random variable is binded to
+        another random variable; the latter will infer the former's
+        posterior (e.g., VI).
     data : dict of tf.Tensor
         Data dictionary whose values may vary at each session run.
     model_wrapper : ed.Model or None
-        Probability model.
+        An optional wrapper for the probability model. If specified,
+        the random variables in `latent_vars`' list or dictionary keys
+        are strings used accordingly by the wrapper.
     """
     def __init__(self, latent_vars, data=None, model_wrapper=None):
         """Initialization.
@@ -54,20 +55,26 @@ class Inference(object):
         ----------
         latent_vars : list of str, or dict of str to RandomVariable
             Collection of random variables to perform inference on. If
-            list, each random variable (of type `str`) will be inferred
+            list, each random variable will be inferred
             nonparametrically (e.g., MCMC). If dictionary, each random
-            variable (of type `str`) is binded to to another random
-            variable (of type `RandomVariable`); the latter will infer the
-            former's posterior (e.g., VI).
+            variable is binded to another random variable; the latter
+            will infer the former's posterior (e.g., VI).
         data : dict, optional
-            Data dictionary. For TensorFlow, Python, and Stan models,
-            the key type is a string; for PyMC3, the key type is a
-            Theano shared variable. For TensorFlow, Python, and PyMC3
-            models, the value type is a NumPy array or TensorFlow
-            tensor; for Stan, the value type is the type
-            according to the Stan program's data block.
+            Data dictionary which binds observed variables (of type
+            `RandomVariable`) to their realizations (of type
+            `tf.Tensor` or `np.ndarray`). It can also bind
+            placeholders (of type `tf.Tensor`) used in the model to
+            their realizations.
         model_wrapper : ed.Model, optional
-            Probability model.
+            A wrapper for the probability model. If specified, the
+            random variables in `latent_vars`' list or dictionary keys
+            are strings used accordingly by the wrapper. `data` is
+            also changed. For TensorFlow, Python, and Stan models, the
+            key type is a string; for PyMC3, the key type is a Theano
+            shared variable. For TensorFlow, Python, and PyMC3 models,
+            the value type is a NumPy array or TensorFlow tensor; for
+            Stan, the value type is the type according to the Stan
+            program's data block.
 
         Notes
         -----
@@ -131,19 +138,24 @@ class MonteCarlo(Inference):
 
         Parameters
         ----------
-        latent_vars : list of str
+        latent_vars : list of RandomVariable
             Collection of random variables to perform inference on.
-            Each random variable (of type `str`) will be inferred
-            nonparametrically (e.g., MCMC).
         data : dict, optional
-            Data dictionary. For TensorFlow, Python, and Stan models,
-            the key type is a string; for PyMC3, the key type is a
-            Theano shared variable. For TensorFlow, Python, and PyMC3
-            models, the value type is a NumPy array or TensorFlow
-            placeholder; for Stan, the value type is the type
-            according to the Stan program's data block.
+            Data dictionary which binds observed variables (of type
+            `RandomVariable`) to their realizations (of type
+            `tf.Tensor` or `np.ndarray`). It can also bind
+            placeholders (of type `tf.Tensor`) used in the model to
+            their realizations.
         model_wrapper : ed.Model, optional
-            Probability model.
+            A wrapper for the probability model. If specified, the
+            random variables in `latent_vars`' list are strings used
+            accordingly by the wrapper. `data` is also changed. For
+            TensorFlow, Python, and Stan models, the key type is a
+            string; for PyMC3, the key type is a Theano shared
+            variable. For TensorFlow, Python, and PyMC3 models, the
+            value type is a NumPy array or TensorFlow tensor; for
+            Stan, the value type is the type according to the Stan
+            program's data block.
 
         Examples
         --------
@@ -165,20 +177,26 @@ class VariationalInference(Inference):
 
         Parameters
         ----------
-        latent_vars : dict of str to RandomVariable
+        latent_vars : dict of RandomVariable to RandomVariable
             Collection of random variables to perform inference on.
-            Each random variable (of type `str`) is binded to to
-            another random variable (of type `RandomVariable`); the
-            latter will infer the former's posterior.
+            Each random variable is binded to to another random
+            variable; the latter will infer the former's posterior.
         data : dict, optional
-            Data dictionary. For TensorFlow, Python, and Stan models,
-            the key type is a string; for PyMC3, the key type is a
-            Theano shared variable. For TensorFlow, Python, and PyMC3
-            models, the value type is a NumPy array or TensorFlow
-            placeholder; for Stan, the value type is the type
-            according to the Stan program's data block.
+            Data dictionary which binds observed variables (of type
+            `RandomVariable`) to their realizations (of type
+            `tf.Tensor` or `np.ndarray`). It can also bind
+            placeholders (of type `tf.Tensor`) used in the model to
+            their realizations.
         model_wrapper : ed.Model, optional
-            Probability model.
+            A wrapper for the probability model. If specified, the
+            random variables in `latent_vars`' dictionary keys are
+            strings used accordingly by the wrapper. `data` is also
+            changed. For TensorFlow, Python, and Stan models, the key
+            type is a string; for PyMC3, the key type is a Theano
+            shared variable. For TensorFlow, Python, and PyMC3 models,
+            the value type is a NumPy array or TensorFlow tensor; for
+            Stan, the value type is the type according to the Stan
+            program's data block.
 
         Examples
         --------
@@ -746,35 +764,38 @@ class MAP(VariationalInference):
         """
         Parameters
         ----------
-        latent_vars : list of str or dict of str to tf.Tensor
+        latent_vars : list of RandomVariable
             Collection of random variables to perform inference on. If
-            list, each random variable (of type `str`) will be
-            implictly optimized using a ``PointMass` distribution that
-            is defined internally. If dictionary, each random variable
-            (of type `str`) is binded to the set of trainable
-            parameters (of type `tf.Tensor`); the latter will
-            approximate the former using its posterior mode.
+            list, each random variable will be implictly optimized
+            using a ``PointMass`` distribution that is defined
+            internally (with support matching each random variable).
 
         Examples
         --------
+        >>> MAP([beta], {X: np.array(), y: np.array()})
+        >>> MAP([pi, mu, sigma], {x: np.array()}
+
+        For model wrappers, the list can only have one element:
+
         >>> MAP(['z'], data, model_wrapper)
 
-        For now, the list can only have one element. For example,
-        the following is not currently supported:
+        For example, the following is not currently supported:
 
         >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
 
-        This is because internally we have no way of knowing the
-        dimensions in which to optimize each parameter. To pass in
-        more than one parameter, at the moment one must define the
-        trainable parameters outside:
+        This is because internally with model wrappers, we have no way
+        of knowing the dimensions in which to optimize each
+        distribution; further, we do not know their support. For more
+        than one random variable, or for constrained support, one must
+        manually pass in the point mass distributions.
 
-        >>> MAP({'pi': tf.Variable(), 'mu': tf.Variable(), 'sigma': tf.Variable()},
-        ...     data, model_wrapper)
-
-        Defining the parameters outside is also useful when the
-        parameters must be constrained, e.g., 'sigma' must be
-        positive.
+        >>> qpi = PointMass([tf.Variable(tf.zeros(K-1)],
+                            lambda cond_set: ed.to_simplex(cond_set[0]))
+        >>> qmu = PointMass([tf.Variable(tf.zeros(K*D))],
+                            lambda cond_set: cond_set[0])
+        >>> qsigma = PointMass([tf.Variable(tf.zeros(K*D))],
+                               lambda cond_set: tf.nn.softplus(cond_set[0]))
+        >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
         """
         if isinstance(latent_vars, list):
             if len(latent_vars) > 1:
