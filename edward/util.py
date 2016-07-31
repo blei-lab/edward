@@ -332,32 +332,6 @@ def softplus(x):
     return tf.log(1.0 + tf.exp(x))
 
 
-def stop_gradient(x):
-    """Apply ``tf.stop_gradient()`` element-wise.
-
-    Parameters
-    ----------
-    x : tf.Tensor or list or dictionary
-        scalar, vector, matrix, or n-Tensor or list or dictionary
-        thereof. In the case of a dictionary, tf.stop_gradient() is
-        applied to its values element-wise.
-
-    Returns
-    -------
-    tf.Tensor or list or dictionary
-        size and type corresponding to size and type of input
-    """
-    if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-        return tf.stop_gradient(x)
-    elif isinstance(x, list):
-        return [tf.stop_gradient(i) for i in x]
-    elif isinstance(x, dict):
-        return {key: tf.stop_gradient(value)
-                for key, value in six.iteritems(x)}
-    else:
-        raise NotImplementedError()
-
-
 def to_simplex(x):
     """Transform real vector of length ``(K-1)`` to a simplex of dimension ``K``
     using a backward stick breaking construction.

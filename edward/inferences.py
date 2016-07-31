@@ -8,7 +8,7 @@ import six
 import tensorflow as tf
 
 from edward.models import StanModel, Normal, PointMass
-from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
+from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
 
 try:
     import prettytensor as pt
@@ -25,7 +25,7 @@ class Inference(object):
         Collection of random variables to perform inference on. If
         list, each random variable (of type `str`) will be inferred
         nonparametrically (e.g., MCMC). If dictionary, each random
-        variable (of type `str`) is binded to to another random
+        variable (of type `str`) is binded to another random
         variable (of type `RandomVariable`); the latter will infer the
         former's posterior (e.g., VI).
     data : dict of tf.Tensor
@@ -444,11 +444,11 @@ class MFVI(VariationalInference):
         p_log_prob = self.model_wrapper.log_prob(x, z)
         q_log_prob = 0.0
         for key, rv in six.iteritems(self.latent_vars):
-            q_log_prob += rv.log_prob(stop_gradient(z[key]))
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
 
         losses = p_log_prob - q_log_prob
         self.loss = tf.reduce_mean(losses)
-        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
     def build_reparam_loss(self):
         """Build loss function. Its automatic differentiation
@@ -498,13 +498,13 @@ class MFVI(VariationalInference):
         p_log_lik = self.model_wrapper.log_lik(x, z)
         q_log_prob = 0.0
         for key, rv in six.iteritems(self.latent_vars):
-            q_log_prob += rv.log_prob(stop_gradient(z[key]))
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
 
         mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
         sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
-        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_lik)) - kl)
+        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
         """Build loss function. Its automatic differentiation
@@ -529,11 +529,11 @@ class MFVI(VariationalInference):
         q_log_prob = 0.0
         q_entropy = 0.0
         for key, rv in six.iteritems(self.latent_vars):
-            q_log_prob += rv.log_prob(stop_gradient(z[key]))
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
             q_entropy += rv.entropy()
 
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
-        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_prob)) +
+        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
                  q_entropy)
 
     def build_reparam_loss_kl(self):
@@ -654,14 +654,14 @@ class KLpq(VariationalInference):
         # normalized importance weights
         q_log_prob = 0.0
         for key, rv in six.iteritems(self.latent_vars):
-            q_log_prob += rv.log_prob(stop_gradient(z[key]))
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
 
         log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
         log_w_norm = log_w - log_sum_exp(log_w)
         w_norm = tf.exp(log_w_norm)
 
         self.loss = tf.reduce_mean(w_norm * log_w)
-        return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 
 
 class MAP(VariationalInference):
