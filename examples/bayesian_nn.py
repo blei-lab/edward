@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 from edward.util import rbf
 
@@ -88,8 +88,8 @@ class BayesianNN:
     def log_prob(self, xs, zs):
         """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
-        mus = self.neural_network(x, zs)
+        log_prior = -tf.reduce_sum(zs['z']*zs['z'], 1) / self.prior_variance
+        mus = self.neural_network(x, zs['z'])
         # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik + log_prior
@@ -108,8 +108,7 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 data = build_toy_dataset()
 
 # Set up figure
@@ -119,7 +118,7 @@ plt.ion()
 plt.show(block=False)
 
 sess = ed.get_session()
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=100)
 for t in range(1000):
     loss = inference.update()
@@ -127,10 +126,9 @@ for t in range(1000):
         print("iter {:d} loss {:.2f}".format(t, loss))
 
         # Sample functions from variational model
-        mean, std = sess.run([variational.layers[0].loc,
-                              variational.layers[0].scale])
+        mean, std = sess.run([qz.loc, qz.scale])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, variational.n_vars) * std + mean
+        zs = rs.randn(10, qz.n_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
         x = tf.expand_dims(tf.constant(inputs), 1)
