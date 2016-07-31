@@ -65,29 +65,29 @@ class PyMC3Model(object):
         It wraps around a Python function. The Python function takes
         inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # Store ``xs.keys()`` so that ``_py_log_prob_args`` knows how each
         # data value corresponds to a key.
         self.keys = list(six.iterkeys(xs))
         if not xs:
-            # If `xs` is an empty dictionary, then store their (empty)
-            # values to pass into `_py_log_prob_args`.
+            # If ``xs`` is an empty dictionary, then store their (empty)
+            # values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         elif isinstance(list(six.itervalues(xs))[0], np.ndarray):
-            # If `xs` is a dictionary of NumPy arrays, then store
-            # their values to pass into `_py_log_prob_args`.
+            # If ``xs`` is a dictionary of NumPy arrays, then store
+            # their values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         else:
-            # If `xs` is a dictionary of TensorFlow tensors, then
+            # If ``xs`` is a dictionary of TensorFlow tensors, then
             # pass the tensors into tf.py_func.
             inp = [zs] + list(six.itervalues(xs))
 
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 
     def _py_log_prob_args(self, zs, *args):
-        # Set `values` to NumPy arrays that were passed in via
-        # `self.values` or via `*args`.
+        # Set ``values`` to NumPy arrays that were passed in via
+        # ``self.values`` or via ``*args``.
         if hasattr(self, 'values'):
             values = self.values
         else:
@@ -135,29 +135,29 @@ class PythonModel(object):
         It wraps around a Python function. The Python function takes
         inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # Store ``xs.keys()`` so that ``_py_log_prob_args`` knows how each
         # data value corresponds to a key.
         self.keys = list(six.iterkeys(xs))
         if not xs:
-            # If `xs` is an empty dictionary, then store their (empty)
-            # values to pass into `_py_log_prob_args`.
+            # If ``xs`` is an empty dictionary, then store their (empty)
+            # values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         elif isinstance(list(six.itervalues(xs))[0], np.ndarray):
-            # If `xs` is a dictionary of NumPy arrays, then store
-            # their values to pass into `_py_log_prob_args`.
+            # If ``xs`` is a dictionary of NumPy arrays, then store
+            # their values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         else:
-            # If `xs` is a dictionary of TensorFlow tensors, then
+            # If ``xs`` is a dictionary of TensorFlow tensors, then
             # pass the tensors into tf.py_func.
             inp = [zs] + list(six.itervalues(xs))
 
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 
     def _py_log_prob_args(self, zs, *args):
-        # Set `values` to NumPy arrays that were passed in via
-        # `self.values` or via `*args`.
+        # Set ``values`` to NumPy arrays that were passed in via
+        # ``self.values`` or via ``*args``.
         if hasattr(self, 'values'):
             values = self.values
         else:
