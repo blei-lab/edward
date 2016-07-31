@@ -28,7 +28,7 @@ def evaluate(metrics, latent_vars, data, y_true=None, model_wrapper=None, n_samp
         according to the Stan program's data block.
     y_true : np.ndarray or tf.Tensor
         True values to compare to in supervised learning tasks.
-    model_wrapper : ed.Model
+    model_wrapper : ed.Model, optional
         Probability model.
     n_samples : int, optional
         Number of posterior samples for making predictions,
@@ -140,7 +140,7 @@ def ppc(latent_vars, data=None, T=None, model_wrapper=None, n_samples=100):
         value type is a NumPy array or TensorFlow placeholder; for
         Stan, the value type is the type according to the Stan
         program's data block.
-    model_wrapper : ed.Model
+    model_wrapper : ed.Model, optional
         Probability model. Class object that implements the
         ``sample_likelihood`` method.
     T : function, optional

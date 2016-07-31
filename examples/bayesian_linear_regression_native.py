@@ -8,7 +8,6 @@ import tensorflow as tf
 
 from edward.models import Normal
 from scipy.stats import norm
-from vi import VariationalInference
 
 
 def build_toy_dataset(N=40, noise_std=0.1):
@@ -35,13 +34,10 @@ qz = Normal([mu, sigma])
 
 data = {}
 data[X], data[y] = build_toy_dataset(N)
-inference = VariationalInference({z: qz}, data)
+inference = ed.MFVI({z: qz}, data)
 inference.initialize()
 
-sess = tf.Session()
-init = tf.initialize_all_variables()
-sess.run(init)
-for t in range(10000):
+sess = ed.get_session()
+for t in range(1000):
     _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
-    if t % 100 == 0:
-        print("iter: {:d}, loss: {:0.3f}".format(t, loss))
+    inference.print_progress(t, loss)

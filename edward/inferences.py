@@ -7,8 +7,20 @@ import numpy as np
 import six
 import tensorflow as tf
 
-from edward.models import StanModel, Normal, PointMass
+# TODO
+#from edward.models import StanModel, Normal, PointMass
+from edward.models import StanModel, Normal
 from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
+
+#sg = tf.contrib.bayesflow.stochastic_graph
+from edward.models.stochastic_graph import value_type, SampleAndReshapeValue, SampleValue
+class SG:
+    def __init__(self):
+        self.value_type = value_type
+        self.SampleAndReshapeValue = SampleAndReshapeValue
+        self.SampleValue = SampleValue
+
+sg = SG()
 
 try:
     import prettytensor as pt
@@ -30,7 +42,7 @@ class Inference(object):
         former's posterior (e.g., VI).
     data : dict of tf.Tensor
         Data dictionary whose values may vary at each session run.
-    model_wrapper : ed.Model
+    model_wrapper : ed.Model or None
         Probability model.
     """
     def __init__(self, latent_vars, data=None, model_wrapper=None):
@@ -54,7 +66,7 @@ class Inference(object):
             models, the value type is a NumPy array or TensorFlow
             tensor; for Stan, the value type is the type
             according to the Stan program's data block.
-        model_wrapper : ed.Model
+        model_wrapper : ed.Model, optional
             Probability model.
 
         Notes
@@ -77,9 +89,6 @@ class Inference(object):
         if data is None:
             data = {}
         elif not isinstance(data, dict):
-            raise TypeError()
-
-        if model_wrapper is None:
             raise TypeError()
 
         self.latent_vars = latent_vars
@@ -133,7 +142,7 @@ class MonteCarlo(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
-        model_wrapper : ed.Model
+        model_wrapper : ed.Model, optional
             Probability model.
 
         Examples
@@ -168,7 +177,7 @@ class VariationalInference(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
-        model_wrapper : ed.Model
+        model_wrapper : ed.Model, optional
             Probability model.
 
         Examples
@@ -252,6 +261,34 @@ class VariationalInference(Inference):
             self.data = {key: value for key, value in
                          zip(six.iterkeys(self.data), batches)}
 
+        # TODO n_samples for VI that isn't stochastic
+        # Use a dictionary to store bindings of `RandomVariable`s to
+        # their built tensors.
+        self.built_dict = {}
+        with sg.value_type(sg.SampleValue(n=self.n_samples)): # latent variable samples
+            # Build random variables in q(z).
+            for rv in six.itervalues(self.latent_vars):
+                rv.build(built_dict=self.built_dict)
+
+        if self.model_wrapper is None:
+            with sg.value_type(sg.SampleValue(n=self.n_samples)): # latent variable samples
+                # Build random variables in p(z). `latent_vars`
+                # replaces conditioning on priors with conditioning on
+                # (variational) posteriors.
+                for rv in six.iterkeys(self.latent_vars):
+                    rv.build(built_dict=self.built_dict, latent_vars=self.latent_vars)
+
+            with sg.value_type(sg.SampleAndReshapeValue(n=1)): # 1 data set
+                # Build random variables in p(x | z). `latent_vars`
+                # replaces conditioning on priors with conditioning on
+                # (variational) posteriors.
+                for rv in six.iterkeys(self.data):
+                    # TODO don't call rv
+                    if not isinstance(rv, tf.Tensor):
+                        # TODO for placeholders as in covariates or pre-built
+                        # model tensors
+                        rv.build(built_dict=self.built_dict, latent_vars=self.latent_vars)
+
         loss = self.build_loss()
         if optimizer is None:
             var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
@@ -305,6 +342,7 @@ class VariationalInference(Inference):
             if t % self.n_print == 0:
                 print("iter {:d} loss {:.2f}".format(t, loss))
                 for rv in six.itervalues(self.latent_vars):
+                    # TODO print parameters
                     print(rv)
 
     def finalize(self):
@@ -364,15 +402,19 @@ class MFVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and \
-           all([rv.is_reparameterized and rv.is_differentiable
-                for rv in six.itervalues(self.latent_vars)]):
-            self.score = False
-        else:
-            self.score = True
+        # TODO
+        #   #all([rv.is_reparameterized and rv.is_differentiable
+        #   #     for rv in six.itervalues(self.latent_vars)]):
+        #if score is None and \
+        #   all([self.built_dict[rv].distribution.is_reparameterized
+        #        for rv in six.itervalues(self.latent_vars)]):
+        #    self.score = False
+        #else:
+        #    self.score = True
+        self.score = False
 
         self.n_samples = n_samples
-        return super(MFVI, self).initialize(*args, **kwargs)
+        super(MFVI, self).initialize(*args, **kwargs)
 
     def build_loss(self):
         """Wrapper for the MFVI loss function.
@@ -463,13 +505,39 @@ class MFVI(VariationalInference):
         Computed by sampling from :math:`q(z;\lambda)` and evaluating the
         expectation using Monte Carlo sampling.
         """
-        x = self.data
-        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
+        if self.model_wrapper is not None:
+            x = self.data
+            z = {key: self.built_dict[rv] for key, rv in six.iteritems(self.latent_vars)}
+            p_log_prob = self.model_wrapper.log_prob(x, z)
 
-        p_log_prob = self.model_wrapper.log_prob(x, z)
+        if self.model_wrapper is None:
+            p_log_prob = 0.0
+
         q_log_prob = 0.0
-        for key, rv in six.iteritems(self.latent_vars):
-            q_log_prob += rv.log_prob(z[key])
+        # Take log-densities over latent variables.
+        for pz, qz in six.iteritems(self.latent_vars):
+            pz_tensor = self.built_dict[pz]
+            qz_tensor = self.built_dict[qz]
+            z_samples = qz_tensor.value() # (n_samples, shape) tensor
+            # Sum over all dimensions except the one corresponding to n_samples.
+            q_log_prob += tf.reduce_sum(qz_tensor.distribution.log_pdf(z_samples),
+                                        range(1, len(qz_tensor.value().get_shape())))
+            if self.model_wrapper is None:
+                p_log_prob += tf.reduce_sum(pz_tensor.distribution.log_pdf(z_samples),
+                                            range(1, len(pz_tensor.value().get_shape())))
+
+        if self.model_wrapper is None:
+            # Take log-densities over data.
+            for px, obs in six.iteritems(self.data):
+                if not isinstance(px, tf.Tensor):
+                    # TODO don't call px
+                    px_tensor = self.built_dict[px]
+                    # reshape in order to broadcast along outer dimension
+                    shape = tuple([int(i) for i in obs.get_shape()])
+                    obs = tf.reshape(obs, shape + (1,)*(len(px_tensor.value().get_shape())-1))
+                    # Sum over all dimensions except the one corresponding to n_samples.
+                    p_log_prob += tf.reduce_sum(px_tensor.distribution.log_pdf(obs),
+                                                [0] + range(2, len(px_tensor.value().get_shape())))
 
         self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
         return -self.loss
