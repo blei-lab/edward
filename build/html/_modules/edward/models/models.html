@@ -198,29 +198,29 @@
 <span class="sd">        It wraps around a Python function. The Python function takes</span>
 <span class="sd">        inputs of type np.ndarray and outputs a np.ndarray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c"># Store `xs.keys()` so that `_py_log_prob_args` knows how each</span>
+        <span class="c"># Store ``xs.keys()`` so that ``_py_log_prob_args`` knows how each</span>
         <span class="c"># data value corresponds to a key.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">xs</span><span class="p">:</span>
-            <span class="c"># If `xs` is an empty dictionary, then store their (empty)</span>
-            <span class="c"># values to pass into `_py_log_prob_args`.</span>
+            <span class="c"># If ``xs`` is an empty dictionary, then store their (empty)</span>
+            <span class="c"># values to pass into ``_py_log_prob_args``.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="c"># If `xs` is a dictionary of NumPy arrays, then store</span>
-            <span class="c"># their values to pass into `_py_log_prob_args`.</span>
+            <span class="c"># If ``xs`` is a dictionary of NumPy arrays, then store</span>
+            <span class="c"># their values to pass into ``_py_log_prob_args``.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c"># If `xs` is a dictionary of TensorFlow tensors, then</span>
+            <span class="c"># If ``xs`` is a dictionary of TensorFlow tensors, then</span>
             <span class="c"># pass the tensors into tf.py_func.</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob_args</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="c"># Set `values` to NumPy arrays that were passed in via</span>
-        <span class="c"># `self.values` or via `*args`.</span>
+        <span class="c"># Set ``values`` to NumPy arrays that were passed in via</span>
+        <span class="c"># ``self.values`` or via ``*args``.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">):</span>
             <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
         <span class="k">else</span><span class="p">:</span>
@@ -268,29 +268,29 @@
 <span class="sd">        It wraps around a Python function. The Python function takes</span>
 <span class="sd">        inputs of type np.ndarray and outputs a np.ndarray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c"># Store `xs.keys()` so that `_py_log_prob_args` knows how each</span>
+        <span class="c"># Store ``xs.keys()`` so that ``_py_log_prob_args`` knows how each</span>
         <span class="c"># data value corresponds to a key.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">xs</span><span class="p">:</span>
-            <span class="c"># If `xs` is an empty dictionary, then store their (empty)</span>
-            <span class="c"># values to pass into `_py_log_prob_args`.</span>
+            <span class="c"># If ``xs`` is an empty dictionary, then store their (empty)</span>
+            <span class="c"># values to pass into ``_py_log_prob_args``.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="c"># If `xs` is a dictionary of NumPy arrays, then store</span>
-            <span class="c"># their values to pass into `_py_log_prob_args`.</span>
+            <span class="c"># If ``xs`` is a dictionary of NumPy arrays, then store</span>
+            <span class="c"># their values to pass into ``_py_log_prob_args``.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c"># If `xs` is a dictionary of TensorFlow tensors, then</span>
+            <span class="c"># If ``xs`` is a dictionary of TensorFlow tensors, then</span>
             <span class="c"># pass the tensors into tf.py_func.</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">zs</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob_args</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="c"># Set `values` to NumPy arrays that were passed in via</span>
-        <span class="c"># `self.values` or via `*args`.</span>
+        <span class="c"># Set ``values`` to NumPy arrays that were passed in via</span>
+        <span class="c"># ``self.values`` or via ``*args``.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">):</span>
             <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
         <span class="k">else</span><span class="p">:</span>

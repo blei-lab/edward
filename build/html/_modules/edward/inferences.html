@@ -162,8 +162,6 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
-<span class="sd">        Calls ``util.get_session()``</span>
-
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        model : ed.Model</span>
@@ -178,7 +176,7 @@
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        If `data` is not passed in, the dictionary is empty.</span>
+<span class="sd">        If ``data`` is not passed in, the dictionary is empty.</span>
 
 <span class="sd">        Three options are available for batch training:</span>
 <span class="sd">        1. internally if user passes in data as a dictionary of NumPy</span>
@@ -198,21 +196,21 @@
             <span class="c"># take arbitrary data structure types in the data block</span>
             <span class="c"># and not just NumPy arrays (this makes it unamenable to</span>
             <span class="c"># TensorFlow placeholders). Therefore fix the data</span>
-            <span class="c"># dictionary `self.data` at compile time to `data`.</span>
+            <span class="c"># dictionary ``self.data`` at compile time to ``data``.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                    <span class="c"># If `data` has TensorFlow placeholders, the user</span>
+                    <span class="c"># If ``data`` has TensorFlow placeholders, the user</span>
                     <span class="c"># must manually feed them at each step of</span>
                     <span class="c"># inference.</span>
-                    <span class="c"># If `data` has tensors that are the output of</span>
+                    <span class="c"># If ``data`` has tensors that are the output of</span>
                     <span class="c"># data readers, then batch training operates</span>
                     <span class="c"># according to the reader.</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                    <span class="c"># If `data` has NumPy arrays, store the data</span>
+                    <span class="c"># If ``data`` has NumPy arrays, store the data</span>
                     <span class="c"># in the computational graph.</span>
                     <span class="n">placeholder</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
                     <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
@@ -294,7 +292,7 @@
 
 <span class="sd">        Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.</span>
 
-<span class="sd">        Initialize all variables</span>
+<span class="sd">        Initialize all variables.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -305,7 +303,7 @@
 <span class="sd">            all the data. Subsampling is available only if all data</span>
 <span class="sd">            passed in are NumPy arrays and the model is not a Stan</span>
 <span class="sd">            model. For subsampling details, see</span>
-<span class="sd">            `tf.train.slice_input_producer` and `tf.train.batch`.</span>
+<span class="sd">            ``tf.train.slice_input_producer`` and ``tf.train.batch``.</span>
 <span class="sd">        n_print : int, optional</span>
 <span class="sd">            Number of iterations for each print progress. To suppress print</span>
 <span class="sd">            progress, then specify None.</span>
@@ -321,14 +319,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
-            <span class="c"># Re-assign data to batch tensors, with size given by `n_data`.</span>
+            <span class="c"># Re-assign data to batch tensors, with size given by</span>
+            <span class="c"># ``n_data``.</span>
             <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
             <span class="n">slices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">slice_input_producer</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
             <span class="c"># By default use as many threads as CPUs.</span>
             <span class="n">batches</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="p">,</span>
                                      <span class="n">num_threads</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="c"># `tf.train.batch` returns tf.Tensor if `slices` is a</span>
+                <span class="c"># ``tf.train.batch`` returns tf.Tensor if ``slices`` is a</span>
                 <span class="c"># list of size 1.</span>
                 <span class="n">batches</span> <span class="o">=</span> <span class="p">[</span><span class="n">batches</span><span class="p">]</span>
 
@@ -368,7 +367,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        loss : double</span>
-<span class="sd">            Loss function values after one iteration</span>
+<span class="sd">            Loss function values after one iteration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">])</span>
@@ -380,9 +379,9 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        t : int</span>
-<span class="sd">            Iteration counter</span>
+<span class="sd">            Iteration counter.</span>
 <span class="sd">        loss : double</span>
-<span class="sd">            Loss function value at iteration ``t``</span>
+<span class="sd">            Loss function value at iteration ``t``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">t</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

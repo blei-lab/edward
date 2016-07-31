@@ -391,7 +391,7 @@
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-            <span class="c"># get `n` from lexical scoping</span>
+            <span class="c"># get ``n`` from lexical scoping</span>
             <span class="k">return</span> <span class="n">beta</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
@@ -433,7 +433,7 @@
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
-            <span class="c"># get `n` from lexical scoping</span>
+            <span class="c"># get ``n`` from lexical scoping</span>
             <span class="k">return</span> <span class="n">dirichlet</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
@@ -487,7 +487,7 @@
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
-            <span class="c"># get `n` from lexical scoping</span>
+            <span class="c"># get ``n`` from lexical scoping</span>
             <span class="k">return</span> <span class="n">invgamma</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
@@ -545,7 +545,7 @@
         <span class="c"># array. This is necessary for sampling from distributions</span>
         <span class="c"># unavailable in TensorFlow natively.</span>
         <span class="k">def</span> <span class="nf">np_sample</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-            <span class="c"># get `n` from lexical scoping</span>
+            <span class="c"># get ``n`` from lexical scoping</span>
             <span class="k">return</span> <span class="n">multinomial</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">p</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">np_sample</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>

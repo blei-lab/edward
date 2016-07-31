@@ -152,7 +152,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        A Tensor with `cumprod` applied along its first dimension.</span>
+<span class="sd">        A Tensor with ``cumprod`` applied along its first dimension.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
@@ -206,7 +206,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    list</span>
-<span class="sd">        Python list containing dimensions of `x`</span>
+<span class="sd">        Python list containing dimensions of ``x``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>

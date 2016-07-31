@@ -163,7 +163,6 @@
 </dd></dl>
 
 <p>Initialization.</p>
-<p>Calls <code class="docutils literal"><span class="pre">util.get_session()</span></code></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -182,7 +181,7 @@ according to the Stan program&#8217;s data block.</li>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>If <cite>data</cite> is not passed in, the dictionary is empty.</p>
+<p>If <code class="docutils literal"><span class="pre">data</span></code> is not passed in, the dictionary is empty.</p>
 <p>Three options are available for batch training:
 1. internally if user passes in data as a dictionary of NumPy</p>
 <blockquote>
@@ -511,7 +510,7 @@ overwrite this method.</p>
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_minibatch=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize variational inference algorithm.</p>
 <p>Set up <code class="docutils literal"><span class="pre">tf.train.AdamOptimizer</span></code> with a decaying scale factor.</p>
-<p>Initialize all variables</p>
+<p>Initialize all variables.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -522,7 +521,7 @@ overwrite this method.</p>
 all the data. Subsampling is available only if all data
 passed in are NumPy arrays and the model is not a Stan
 model. For subsampling details, see
-<cite>tf.train.slice_input_producer</cite> and <cite>tf.train.batch</cite>.</li>
+<code class="docutils literal"><span class="pre">tf.train.slice_input_producer</span></code> and <code class="docutils literal"><span class="pre">tf.train.batch</span></code>.</li>
 <li><strong>n_print</strong> (<em>int, optional</em>) &#8211; Number of iterations for each print progress. To suppress print
 progress, then specify None.</li>
 <li><strong>optimizer</strong> (<em>str, optional</em>) &#8211; Whether to use TensorFlow optimizer or PrettyTensor
@@ -544,8 +543,8 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>t</strong> (<em>int</em>) &#8211; Iteration counter</li>
-<li><strong>loss</strong> (<em>double</em>) &#8211; Loss function value at iteration <code class="docutils literal"><span class="pre">t</span></code></li>
+<li><strong>t</strong> (<em>int</em>) &#8211; Iteration counter.</li>
+<li><strong>loss</strong> (<em>double</em>) &#8211; Loss function value at iteration <code class="docutils literal"><span class="pre">t</span></code>.</li>
 </ul>
 </td>
 </tr>
@@ -585,7 +584,7 @@ optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; Loss function values after one iteration</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; Loss function values after one iteration.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
 </tr>

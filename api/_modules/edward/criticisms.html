@@ -338,9 +338,9 @@
 
     <span class="n">Txreps</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">Txs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">xrep</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">yreps</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">xrep</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xreps</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)):</span>
         <span class="n">Txreps</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">xrep</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
-        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
             <span class="n">Txs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
 
     <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
