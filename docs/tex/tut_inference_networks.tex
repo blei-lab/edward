@@ -1,0 +1,169 @@
+% Define the subtitle of the page
+\title{Inference networks}
+
+% Begin the content of the page
+\subsection{Inference networks}
+
+An inference network is a flexible construction for parameterizing
+approximating distributions during inference.
+They are used in Helmholtz machines (Dayan et al., 1995), deep
+Boltzmann machines (Salakhutdinov and Larochelle, 2010), and
+variational auto-encoders (Kingma & Welling, 2014; Rezende et al.,
+2014).
+
+Recall that probabilistic models often have \emph{local} latent
+variables, that is, latent variables associated with a data point; for
+example, the latent cluster assignment of a data point or the hidden
+representation of a text or image.
+Variational
+inference on models with local latent variables
+requires optimizing over each variational factor,
+\begin{equation*}
+q(\mathbf{z}; \mathbf{\lambda}) = \prod_{n=1}^N q(z_n; \lambda_n),
+\end{equation*}
+where $z_n$ are the latent variables associated to a data point $x_n$.
+The set of parameters $\mathbf{\lambda}=\{\lambda_n\}$ grows with the
+size of data. This makes computation difficult when the data
+does not fit in memory.
+Further, a new set of parameters $\mathbf{\lambda}'=\{\lambda_n'\}$
+must be optimized at test time, where there may be a new set of data
+points $\{x_n'\}$.
+
+An inference network replaces local variational parameters with global
+parameters. It is a neural network
+which takes $x_n$ as input and which outputs its local variational parameters
+$\lambda_n$,
+\begin{equation*}
+q(\mathbf{z}\mid \mathbf{x}; \theta)
+= \prod_{n=1}^N q(z_n \mid x_n; \lambda_n)
+= \prod_{n=1}^N q(z_n; \lambda_n = \mathrm{NN}(x_n; \theta)).
+\end{equation*}
+This amortizes inference by only defining a set of \emph{global} parameters,
+namely, the parameters of the neural network. These parameters have a
+fixed size, making the memory complexity of inference a constant.
+Further, the same set of parameters can be used at test time:
+regardless of seeing new or old data points $x_n'$, we simply pass it
+through the neural network (a forward pass) to obtain its
+corresponding variational factor $q(z_n'; \lambda_n' =
+\mathrm{NN}(x_n'; \theta))$.
+
+Note that the inference network is an approximation: it is a common
+misunderstanding that the inference network produces a more expressive
+variational model. The inference network restricts the size of
+parameters, meaning it can only do as well as an approximation as the
+original variational distribution without the inference network.
+
+There are often good reasons beyond computational reasons
+for wanting to use an inference network, depending on the problem
+setting.
+Originating from
+Helmholtz machines (Dayan et al., 1995), they are motivated by the hypothesis
+that "the human perceptual system is a statistical inference engine
+whose function is to infer the probable causes of sensory input." The
+inference network is this function.
+In cognition, "humans and robots are in the setting of amortized
+inference: they have to solve many similar inference problems, and can
+thus offload part of the computational work to shared precomputation
+and adaptation over time" (Stuhlmuller et al., 2013).
+
+\subsubsection{Implementation}
+
+Inference networks are easy to build in Edward.
+In the example below, a data point \texttt{x} is a 28 by 28 pixel
+image (from MNIST).
+We model each \texttt{x} with 10 normally distributed latent
+variables.
+We build a convolutional neural network using PrettyTensor.
+\begin{lstlisting}[language=Python]
+N_VARS = 10 # number of local latent variables
+
+def neural_network(x):
+    with pt.defaults_scope(activation_fn=tf.nn.elu,
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
+        params = (pt.wrap(x).
+                reshape([28, 28, 1]).
+                conv2d(5, 32, stride=2).
+                conv2d(5, 64, stride=2).
+                conv2d(5, 128, edges='VALID').
+                dropout(0.9).
+                flatten().
+                fully_connected(N_VARS * 2, activation_fn=None)).tensor
+
+    # Return list of vectors where mean[i], stddev[i] are the
+    # parameters of the local variational factor for data point i.
+    loc = tf.reshape(params[:, :N_VARS], [-1])
+    scale = tf.reshape(tf.sqrt(tf.exp(params[:, N_VARS:])), [-1])
+    return [loc, scale]
+\end{lstlisting}
+The neural network
+takes a 28 by 28 pixel image and outputs a $2\cdot 10$-dimensional
+output, one for the mean (\texttt{loc}) and one for the standard
+deviation (\texttt{scale}).
+
+We define a TensorFlow placeholder \texttt{x_ph} for the neural network's input.
+We define a variational model which is parameterized by the neural network's
+output.
+\begin{lstlisting}[language=Python]
+x_ph = tf.placeholder(tf.float32, [28 * 28])
+loc, scale = neural_network(x_ph)
+variational = Variational()
+variational.add(Normal(N_VARS, loc=loc, scale=scale))
+\end{lstlisting}
+During each step of inference, we pass in a data point to feed the
+placeholder. Then we train the variational parameters (inference
+network's parameters) according to
+gradients of the variational objective.
+
+An example script using this variational model can found
+\href{https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py}
+{here}.
+%We experiment with this model in the
+%\href{variational_autoencoder.html}{variational auto-encoder} tutorial.
+
+\subsubsection{Footnotes}
+
+Inference networks are also known as recognition models, recognition
+networks, or inverse mappings.
+
+Variational models parameterized by
+inference networks are also known as probabilistic encoders, in
+analogy from coding theory to
+\href{tut_decoder.html}{probabilistic decoders}.
+We recommend against this terminology,
+in favor of making explicit the separation of model and inference.
+That is,
+variational inference with inference networks is a
+general technique that can be applied to models beyond
+probabilistic decoders.
+
+This tutorial is taken from text originating in Tran et al. (2016).
+We thank Kevin Murphy for motivating the tutorial as it is based
+on our discussions, and also related discussion with Jaan Altosaar.
+
+\subsubsection{References}\label{references}
+
+\begin{itemize}
+\item
+  Dayan, P., Hinton, G. E., Neal, R. M., & Zemel, R. S. (1995). The
+  Helmholtz Machine. Neural Computation, 7(5), 889–904.
+\item
+  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational
+  Bayes. In International Conference on Learning Representations.
+\item
+  Rezende, D. J., Mohamed, S., & Wierstra, D. (2014). Stochastic
+  Backpropagation and Approximate Inference in Deep Generative Models.
+  In International Conference on Machine Learning.
+\item
+  Salakhutdinov, R., \& and Larochelle, H. (2010). Efficient learning of
+  deep Boltzmann machines. In Artificial Intelligence and Statistics.
+\item
+  Stuhlmüller, A., Taylor, J., & Goodman, N. (2013). Learning
+  Stochastic Inverses. In Neural Information Processing Systems.
+\item
+  Tran, D., Ranganath, R., & Blei, D. M. (2016). The Variational
+  Gaussian Process. In International Conference on Learning
+  Representations.
+\end{itemize}
