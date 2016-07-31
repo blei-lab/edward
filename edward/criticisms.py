@@ -205,9 +205,9 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
 
     Txreps = []
     Txs = []
-    for xrep, z in zip(yreps, tf.unpack(zs)):
+    for xrep, z in zip(xreps, tf.unpack(zs)):
         Txreps += [T(xrep, z)]
-        if y is not None:
+        if x is not None:
             Txs += [T(x, z)]
 
     if x is None:
