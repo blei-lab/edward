@@ -15,12 +15,12 @@ ed.set_seed(1512351)
 
 class NormalModel:
     """
-    p(x, z) = Normal(x; z, 1) Normal(z; 0, 1)
+    p(x, mu) = Normal(x; mu, 1) Normal(mu; 0, 1)
     """
     def log_prob(self, xs, zs):
-        log_prior = norm.logpdf(zs['z'], 0.0, 1.0)
-        log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], z, 1.0))
-                           for z in tf.unpack(zs['z'])])
+        log_prior = norm.logpdf(zs['mu'], 0.0, 1.0)
+        log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], mu, 1.0))
+                           for mu in tf.unpack(zs['mu'])])
         return log_lik + log_prior
 
 
@@ -43,7 +43,7 @@ def _test(data, n_minibatch, x=None, is_file=False):
     model = NormalModel()
     qz = Normal()
 
-    inference = ed.MFVI({'z': qz}, data, model)
+    inference = ed.MFVI({'mu': qz}, data, model)
     inference.initialize(n_minibatch=n_minibatch)
 
     if x is not None:

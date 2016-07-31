@@ -22,18 +22,18 @@ from edward.stats import bernoulli, beta
 
 
 class BetaBernoulli:
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+    """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
     def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs['z'], a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                           for z in tf.unpack(zs['z'])])
+        log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p))
+                           for p in tf.unpack(zs['p'])])
         return log_lik + log_prior
 
 
 ed.set_seed(42)
 model = BetaBernoulli()
-qz = Beta()
+qp = Beta()
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=10000)
