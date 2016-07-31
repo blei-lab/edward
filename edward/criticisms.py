@@ -9,17 +9,16 @@ import tensorflow as tf
 from edward.util import logit, get_dims, get_session
 
 
-def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
+def evaluate(metrics, latent_vars, data, y_true=None, model_wrapper=None, n_samples=100):
     """Evaluate fitted model using a set of metrics.
 
     Parameters
     ----------
     metrics : list or str
         List of metrics or a single metric.
-    model : ed.Model
-        Probability model p(x, z)
-    variational : ed.Variational
-        Variational approximation to the posterior p(z | x)
+    latent_vars : dict of str to RandomVariable
+        Collection of random variables (of type `str`) binded to their
+        approximate posterior (of type `RandomVariable`)
     data : dict
         Data dictionary to evaluate model with. For TensorFlow,
         Python, and Stan models, the key type is a string; for PyMC3,
@@ -29,6 +28,8 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
         according to the Stan program's data block.
     y_true : np.ndarray or tf.Tensor
         True values to compare to in supervised learning tasks.
+    model_wrapper : ed.Model
+        Probability model.
     n_samples : int, optional
         Number of posterior samples for making predictions,
         using the posterior predictive distribution.
@@ -46,9 +47,9 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
     sess = get_session()
     # Monte Carlo estimate the mean of the posterior predictive:
     # 1. Sample a batch of latent variables from posterior
-    zs = variational.sample(n_samples)
+    zs = {key: rv.sample(n_samples) for key, rv in six.iteritems(latent_vars)}
     # 2. Make predictions, averaging over each sample of latent variables
-    y_pred = model.predict(data, zs)
+    y_pred = model_wrapper.predict(data, zs)
 
     # Evaluate y_pred according to y_true for all metrics.
     evaluations = []
@@ -107,7 +108,7 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
         return evaluations
 
 
-def ppc(model, variational=None, data=None, T=None, n_samples=100):
+def ppc(latent_vars, data=None, T=None, model_wrapper=None, n_samples=100):
     """Posterior predictive check.
     (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
     If no posterior approximation is provided through ``variational``,
@@ -124,14 +125,12 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
 
     Parameters
     ----------
-    model : ed.Model
-        Class object that implements the ``sample_likelihood`` method
-    variational : ed.Variational, optional
-        Latent variable distribution q(z) to sample from. It is an
-        approximation to the posterior, e.g., a variational
-        approximation or an empirical distribution from MCMC samples.
-        If not specified, samples will be obtained from the model
-        through the ``sample_prior`` method.
+    latent_vars : list of str or dict of str to RandomVariable
+        Collection of random variables (of type `str`). If dictionary,
+        binded to their approximate posterior (of type
+        `RandomVariable`). If list, not binded to any posterior, and
+        samples are obtained from the model through the
+        ``sample_prior`` method.
     data : dict, optional
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
@@ -141,6 +140,9 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
         value type is a NumPy array or TensorFlow placeholder; for
         Stan, the value type is the type according to the Stan
         program's data block.
+    model_wrapper : ed.Model
+        Probability model. Class object that implements the
+        ``sample_likelihood`` method.
     T : function, optional
         Discrepancy function, which takes a data dictionary and list
         of latent variables as input and outputs a tf.Tensor. Default
@@ -177,24 +179,21 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
         x = data
 
     # 1. Sample from posterior (or prior).
-    # We must fetch zs out of the session because sample_likelihood()
-    # may require a SciPy-based sampler.
-    if variational is not None:
-        zs = variational.sample(n_samples)
-        # This is to avoid fetching, e.g., a placeholder x with the
-        # dictionary {x: np.array()}. TensorFlow will raise an error.
-        if isinstance(zs, list):
-            zs = [tf.identity(zs_elem) for zs_elem in zs]
-        else:
-            zs = tf.identity(zs)
-
+    # We fetch zs out of the session because sample_likelihood() may
+    # require a SciPy-based sampler.
+    if isinstance(latent_vars, dict):
+        # `tf.identity()` is to avoid fetching, e.g., a placeholder x
+        # when feeding the dictionary {x: np.array()}. TensorFlow will
+        # raise an error.
+        zs = {key: tf.identity(rv.sample(n_samples))
+              for key, rv in six.iteritems(latent_vars)}
         zs = sess.run(zs)
     else:
-        zs = model.sample_prior(n_samples)
-        zs = zs.eval()
+        zs = model_wrapper.sample_prior(n_samples)
+        zs = sess.run(zs)
 
     # 2. Sample from likelihood.
-    xreps = model.sample_likelihood(zs, N)
+    xreps = model_wrapper.sample_likelihood(zs, N)
 
     # 3. Calculate discrepancy.
     if T is None:
@@ -205,9 +204,13 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
 
     Txreps = []
     Txs = []
-    for xrep, z in zip(yreps, tf.unpack(zs)):
+    zs_unpacked = {key: tf.unpack(z_samples)
+                   for key, z_samples in six.iteritems(zs)}
+    for n, xrep in enumerate(xreps):
+        z = {key: z_samples[n]
+             for key, z_samples in six.iteritems(zs_unpacked)}
         Txreps += [T(xrep, z)]
-        if y is not None:
+        if x is not None:
             Txs += [T(x, z)]
 
     if x is None:

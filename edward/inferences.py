@@ -7,8 +7,8 @@ import numpy as np
 import six
 import tensorflow as tf
 
-#from edward.models import StanModel, Variational, PointMass
-from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
+from edward.models import StanModel, Normal, PointMass
+from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
 
 try:
     import prettytensor as pt
@@ -21,20 +21,32 @@ class Inference(object):
 
     Attributes
     ----------
-    model : ed.Model
-        probability model
+    latent_vars : list of str, or dict of str to RandomVariable
+        Collection of random variables to perform inference on. If
+        list, each random variable (of type `str`) will be inferred
+        nonparametrically (e.g., MCMC). If dictionary, each random
+        variable (of type `str`) is binded to another random
+        variable (of type `RandomVariable`); the latter will infer the
+        former's posterior (e.g., VI).
     data : dict of tf.Tensor
         Data dictionary whose values may vary at each session run.
+    model_wrapper : ed.Model
+        Probability model.
     """
-    def __init__(self, model, data=None):
+    def __init__(self, latent_vars, data=None, model_wrapper=None):
         """Initialization.
 
         Calls ``util.get_session()``
 
         Parameters
         ----------
-        model : ed.Model
-            probability model
+        latent_vars : list of str, or dict of str to RandomVariable
+            Collection of random variables to perform inference on. If
+            list, each random variable (of type `str`) will be inferred
+            nonparametrically (e.g., MCMC). If dictionary, each random
+            variable (of type `str`) is binded to to another random
+            variable (of type `RandomVariable`); the latter will infer the
+            former's posterior (e.g., VI).
         data : dict, optional
             Data dictionary. For TensorFlow, Python, and Stan models,
             the key type is a string; for PyMC3, the key type is a
@@ -42,6 +54,8 @@ class Inference(object):
             models, the value type is a NumPy array or TensorFlow
             tensor; for Stan, the value type is the type
             according to the Stan program's data block.
+        model_wrapper : ed.Model
+            Probability model.
 
         Notes
         -----
@@ -56,11 +70,22 @@ class Inference(object):
            which are the outputs of data readers.
         """
         sess = get_session()
-        self.model = model
+        if not isinstance(latent_vars, list) and \
+           not isinstance(latent_vars, dict):
+            raise TypeError()
+
         if data is None:
             data = {}
+        elif not isinstance(data, dict):
+            raise TypeError()
 
-        if isinstance(model, StanModel):
+        if model_wrapper is None:
+            raise TypeError()
+
+        self.latent_vars = latent_vars
+        self.model_wrapper = model_wrapper
+
+        if isinstance(model_wrapper, StanModel):
             # Stan models do no support data subsampling because they
             # take arbitrary data structure types in the data block
             # and not just NumPy arrays (this makes it unamenable to
@@ -97,8 +122,10 @@ class MonteCarlo(Inference):
 
         Parameters
         ----------
-        model : ed.Model
-            probability model
+        latent_vars : list of str
+            Collection of random variables to perform inference on.
+            Each random variable (of type `str`) will be inferred
+            nonparametrically (e.g., MCMC).
         data : dict, optional
             Data dictionary. For TensorFlow, Python, and Stan models,
             the key type is a string; for PyMC3, the key type is a
@@ -106,22 +133,34 @@ class MonteCarlo(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
+        model_wrapper : ed.Model
+            Probability model.
+
+        Examples
+        --------
+        >>> model = ...
+        >>> data = {'x': np.array()}
+        >>> MonteCarlo(['pi', 'mu', 'sigma'], data, model)
         """
+        if not isinstance(latent_vars, list):
+            raise TypeError()
+
         super(MonteCarlo, self).__init__(*args, **kwargs)
 
 
 class VariationalInference(Inference):
     """Base class for variational inference methods.
     """
-    def __init__(self, model, variational, data=None):
+    def __init__(self, latent_vars, data=None, model_wrapper=None):
         """Initialization.
 
         Parameters
         ----------
-        model : ed.Model
-            probability model
-        variational : ed.Variational
-            variational model or distribution
+        latent_vars : dict of str to RandomVariable
+            Collection of random variables to perform inference on.
+            Each random variable (of type `str`) is binded to to
+            another random variable (of type `RandomVariable`); the
+            latter will infer the former's posterior.
         data : dict, optional
             Data dictionary. For TensorFlow, Python, and Stan models,
             the key type is a string; for PyMC3, the key type is a
@@ -129,9 +168,20 @@ class VariationalInference(Inference):
             models, the value type is a NumPy array or TensorFlow
             placeholder; for Stan, the value type is the type
             according to the Stan program's data block.
+        model_wrapper : ed.Model
+            Probability model.
+
+        Examples
+        --------
+        >>> model = LinearModel()
+        >>> qz = Normal(model.n_vars)
+        >>> data = {'x': np.array(), 'y': np.array()}
+        >>> VariationalInference({'z': qz}, data, model)
         """
-        super(VariationalInference, self).__init__(model, data)
-        self.variational = variational
+        if not isinstance(latent_vars, dict):
+            raise TypeError()
+
+        super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
     def run(self, *args, **kwargs):
         """A simple wrapper to run variational inference.
@@ -187,7 +237,7 @@ class VariationalInference(Inference):
         self.n_print = n_print
         self.loss = tf.constant(0.0)
 
-        if n_minibatch is not None and not isinstance(self.model, StanModel):
+        if n_minibatch is not None and not isinstance(self.model_wrapper, StanModel):
             # Re-assign data to batch tensors, with size given by `n_data`.
             values = list(six.itervalues(self.data))
             slices = tf.train.slice_input_producer(values)
@@ -254,7 +304,8 @@ class VariationalInference(Inference):
         if self.n_print is not None:
             if t % self.n_print == 0:
                 print("iter {:d} loss {:.2f}".format(t, loss))
-                print(self.variational)
+                for rv in six.itervalues(self.latent_vars):
+                    print(rv)
 
     def finalize(self):
         """Function to call after convergence.
@@ -313,8 +364,9 @@ class MFVI(VariationalInference):
             gradient estimator. Otherwise default is to use the
             reparameterization gradient if available.
         """
-        if score is None and self.variational.is_reparameterized and \
-                             self.variational.is_differentiable:
+        if score is None and \
+           all([rv.is_reparameterized and rv.is_differentiable
+                for rv in six.itervalues(self.latent_vars)]):
             self.score = False
         else:
             self.score = True
@@ -354,19 +406,21 @@ class MFVI(VariationalInference):
         result :
             an appropriately selected loss function form
         """
+        q_is_normal = all([isinstance(rv, Normal) for
+                           rv in six.itervalues(self.latent_vars)])
         if self.score:
-            if self.variational.is_normal and hasattr(self.model, 'log_lik'):
+            if q_is_normal and hasattr(self.model_wrapper, 'log_lik'):
                 return self.build_score_loss_kl()
             # Analytic entropies may lead to problems around
             # convergence; for now it is deactivated.
-            #elif self.variational.is_entropy:
+            #elif is_entropy:
             #    return self.build_score_loss_entropy()
             else:
                 return self.build_score_loss()
         else:
-            if self.variational.is_normal and hasattr(self.model, 'log_lik'):
+            if q_is_normal and hasattr(self.model_wrapper, 'log_lik'):
                 return self.build_reparam_loss_kl()
-            #elif self.variational.is_entropy:
+            #elif is_entropy:
             #    return self.build_reparam_loss_entropy()
             else:
                 return self.build_reparam_loss()
@@ -385,12 +439,16 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        q_log_prob = self.variational.log_prob(stop_gradient(z))
-        losses = self.model.log_prob(x, z) - q_log_prob
+        p_log_prob = self.model_wrapper.log_prob(x, z)
+        q_log_prob = 0.0
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+
+        losses = p_log_prob - q_log_prob
         self.loss = tf.reduce_mean(losses)
-        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
     def build_reparam_loss(self):
         """Build loss function. Its automatic differentiation
@@ -406,10 +464,14 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
-                                   self.variational.log_prob(z))
+        p_log_prob = self.model_wrapper.log_prob(x, z)
+        q_log_prob = 0.0
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(z[key])
+
+        self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
         return -self.loss
 
     def build_score_loss_kl(self):
@@ -431,15 +493,18 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        q_log_prob = self.variational.log_prob(stop_gradient(z))
-        p_log_lik = self.model.log_lik(x, z)
-        mu = tf.pack([layer.loc for layer in self.variational.layers])
-        sigma = tf.pack([layer.scale for layer in self.variational.layers])
+        p_log_lik = self.model_wrapper.log_lik(x, z)
+        q_log_prob = 0.0
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+
+        mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
+        sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
-        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_lik)) - kl)
+        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
     def build_score_loss_entropy(self):
         """Build loss function. Its automatic differentiation
@@ -458,13 +523,17 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        q_log_prob = self.variational.log_prob(stop_gradient(z))
-        p_log_prob = self.model.log_prob(x, z)
-        q_entropy = self.variational.entropy()
+        p_log_prob = self.model_wrapper.log_prob(x, z)
+        q_log_prob = 0.0
+        q_entropy = 0.0
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+            q_entropy += rv.entropy()
+
         self.loss = tf.reduce_mean(p_log_prob) + q_entropy
-        return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_prob)) +
+        return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
                  q_entropy)
 
     def build_reparam_loss_kl(self):
@@ -486,11 +555,12 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
-        mu = tf.pack([layer.loc for layer in self.variational.layers])
-        sigma = tf.pack([layer.scale for layer in self.variational.layers])
-        self.loss = tf.reduce_mean(self.model.log_lik(x, z)) - \
+        p_log_lik = self.model_wrapper.log_lik(x, z)
+        mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
+        sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
+        self.loss = tf.reduce_mean(p_log_lik) - \
                     kl_multivariate_normal(mu, sigma)
         return -self.loss
 
@@ -511,9 +581,14 @@ class MFVI(VariationalInference):
         expectation using Monte Carlo sampling.
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
-                    self.variational.entropy()
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
+
+        p_log_prob = self.model_wrapper.log_prob(x, z)
+        q_entropy = 0.0
+        for rv in six.iterkeys(z):
+            q_entropy += rv.entropy()
+
+        self.loss = tf.reduce_mean(p_log_prob) + q_entropy
         return -self.loss
 
 
@@ -574,16 +649,19 @@ class KLpq(VariationalInference):
 
         """
         x = self.data
-        z = self.variational.sample(self.n_samples)
+        z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
         # normalized importance weights
-        q_log_prob = self.variational.log_prob(stop_gradient(z))
-        log_w = self.model.log_prob(x, z) - q_log_prob
+        q_log_prob = 0.0
+        for key, rv in six.iteritems(self.latent_vars):
+            q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+
+        log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
         log_w_norm = log_w - log_sum_exp(log_w)
         w_norm = tf.exp(log_w_norm)
 
         self.loss = tf.reduce_mean(w_norm * log_w)
-        return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
+        return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 
 
 class MAP(VariationalInference):
@@ -596,16 +674,56 @@ class MAP(VariationalInference):
 
         \min_{z} - \log p(x,z)
     """
-    def __init__(self, model, data=None, params=None):
-        with tf.variable_scope("variational"):
-            if hasattr(model, 'n_vars'):
-                variational = Variational()
-                variational.add(PointMass(model.n_vars, params))
-            else:
-                variational = Variational()
-                variational.add(PointMass(0))
+    def __init__(self, latent_vars, data=None, model_wrapper=None):
+        """
+        Parameters
+        ----------
+        latent_vars : list of str or dict of str to tf.Tensor
+            Collection of random variables to perform inference on. If
+            list, each random variable (of type `str`) will be
+            implictly optimized using a ``PointMass` distribution that
+            is defined internally. If dictionary, each random variable
+            (of type `str`) is binded to the set of trainable
+            parameters (of type `tf.Tensor`); the latter will
+            approximate the former using its posterior mode.
 
-        super(MAP, self).__init__(model, variational, data)
+        Examples
+        --------
+        >>> MAP(['z'], data, model_wrapper)
+
+        For now, the list can only have one element. For example,
+        the following is not currently supported:
+
+        >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
+
+        This is because internally we have no way of knowing the
+        dimensions in which to optimize each parameter. To pass in
+        more than one parameter, at the moment one must define the
+        trainable parameters outside:
+
+        >>> MAP({'pi': tf.Variable(), 'mu': tf.Variable(), 'sigma': tf.Variable()},
+        ...     data, model_wrapper)
+
+        Defining the parameters outside is also useful when the
+        parameters must be constrained, e.g., 'sigma' must be
+        positive.
+        """
+        if isinstance(latent_vars, list):
+            if len(latent_vars) > 1:
+                raise NotImplementedError("A list of more than one element is not currently supported. See documentation.")
+
+            with tf.variable_scope("variational"):
+                if hasattr(model_wrapper, 'n_vars'):
+                    latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
+                else:
+                    latent_vars = {latent_vars[0]: PointMass(0)}
+        elif isinstance(latent_vars, dict):
+            latent_vars = {key: PointMass([int(dim) for dim in params.get_shape()], params)
+                           for key, params in latent_vars}
+        else:
+            raise TypeError()
+
+        super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
     def build_loss(self):
         """Build loss function. Its automatic differentiation
@@ -615,8 +733,8 @@ class MAP(VariationalInference):
             - \log p(x,z)
         """
         x = self.data
-        z = self.variational.sample()
-        self.loss = tf.squeeze(self.model.log_prob(x, z))
+        z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+        self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
         return -self.loss
 
 
@@ -631,8 +749,8 @@ class Laplace(MAP):
     the Hessian at the mode of the posterior. This forms the
     covariance of the normal approximation.
     """
-    def __init__(self, model, data=None, params=None):
-        super(Laplace, self).__init__(model, data, params)
+    def __init__(self, latent_vars, data=None, model_wrapper=None):
+        super(Laplace, self).__init__(latent_vars, data, model_wrapper)
 
     def finalize(self):
         """Function to call after convergence.
@@ -641,10 +759,10 @@ class Laplace(MAP):
         """
         # use only a batch of data to estimate hessian
         x = self.data
-        z = self.variational.sample()
+        z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                      scope='variational')
-        inv_cov = hessian(self.model.log_prob(x, z), var_list)
+        inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
         print("Precision matrix:")
         print(inv_cov.eval())
         super(Laplace, self).finalize()

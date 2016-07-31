@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 
@@ -329,25 +330,6 @@ def softplus(x):
         size corresponding to size of input
     """
     return tf.log(1.0 + tf.exp(x))
-
-
-def stop_gradient(x):
-    """Apply ``tf.stop_gradient()`` element-wise.
-
-    Parameters
-    ----------
-    x : tf.Tensor or list
-        scalar, vector, matrix, or n-Tensor or list thereof
-
-    Returns
-    -------
-    tf.Tensor or list
-        size corresponding to size of input
-    """
-    if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-        return tf.stop_gradient(x)
-    else: # list
-        return [tf.stop_gradient(i) for i in x]
 
 
 def to_simplex(x):

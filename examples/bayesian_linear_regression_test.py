@@ -17,7 +17,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 
 
@@ -48,10 +48,10 @@ class LinearModel:
     def log_prob(self, xs, zs):
         """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+        log_prior = -tf.reduce_sum(zs['z']*zs['z'], 1) / self.prior_variance
         # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
-        b = zs[:, 0]
-        W = tf.transpose(zs[:, 1:])
+        b = zs['z'][:, 0]
+        W = tf.transpose(zs['z'][:, 1:])
         mus = tf.matmul(x, W) + b
         # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
         y = tf.expand_dims(y, 1)
@@ -62,8 +62,8 @@ class LinearModel:
         """Return a prediction for each data point, averaging over
         each set of latent variables z in zs."""
         x_test = xs['x']
-        b = zs[:, 0]
-        W = tf.transpose(zs[:, 1:])
+        b = zs['z'][:, 0]
+        W = tf.transpose(zs['z'][:, 1:])
         y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
         return y_pred
 
@@ -77,15 +77,14 @@ def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel()
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 
 coeff = np.random.randn(10)
 data = build_toy_dataset(coeff=coeff)
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=250, n_samples=5, n_print=10)
 
 data_test = build_toy_dataset(coeff=coeff)
 x_test, y_test = data_test['x'], data_test['y']
-print(ed.evaluate('mse', model, variational, {'x': x_test}, y_test))
+print(ed.evaluate('mse', {'z': qz}, {'x': x_test}, y_test, model))

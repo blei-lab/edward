@@ -17,7 +17,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 
 
@@ -48,10 +48,10 @@ class LinearModel:
     def log_prob(self, xs, zs):
         """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+        log_prior = -tf.reduce_sum(zs['z']*zs['z'], 1) / self.prior_variance
         # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
-        W = tf.expand_dims(zs[:, 0], 0)
-        b = zs[:, 1]
+        W = tf.expand_dims(zs['z'][:, 0], 0)
+        b = zs['z'][:, 1]
         mus = tf.matmul(x, W) + b
         # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
         y = tf.expand_dims(y, 1)
@@ -71,9 +71,8 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel()
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 data = build_toy_dataset()
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=250, n_samples=5, n_print=10)

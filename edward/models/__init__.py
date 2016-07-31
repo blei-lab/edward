@@ -5,4 +5,5 @@ from __future__ import print_function
 # TEMP
 from edward.models import stochastic_graph
 
+from edward.models.models import *
 from edward.models.random_variables import *
