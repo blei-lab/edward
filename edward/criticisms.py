@@ -17,7 +17,9 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
     metrics : list or str
         List of metrics or a single metric.
     model : ed.Model
-        Probability model p(x, z)
+        Probability model, a class object with an implemented
+        ``predict`` method. PyMC3 and Stan models do not currently
+        support this method.
     variational : ed.Variational
         Variational approximation to the posterior p(z | x)
     data : dict
@@ -125,13 +127,15 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
     Parameters
     ----------
     model : ed.Model
-        Class object that implements the ``sample_likelihood`` method
+        Probability model, a class object with an implemented
+        ``sample_likelihood`` method. If ``variational`` is not
+        provided (i.e., a prior predictive check), ``model`` must also
+        have a ``sample_prior`` method. PyMC3 and Stan models do not
+        currently support either method.
     variational : ed.Variational, optional
         Latent variable distribution q(z) to sample from. It is an
         approximation to the posterior, e.g., a variational
         approximation or an empirical distribution from MCMC samples.
-        If not specified, samples will be obtained from the model
-        through the ``sample_prior`` method.
     data : dict, optional
         Observed data to compare to. If not specified, will return
         only the reference distribution with an assumed replicated
