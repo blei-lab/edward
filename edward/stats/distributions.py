@@ -203,7 +203,7 @@ class Bernoulli(object):
             if matrix input, where each element in the vector
             evaluates a row in the matrix.
         """
-        p = tf.cast(tf.squeeze(p), dtype=tf.float32)
+        p = tf.cast(p, dtype=tf.float32)
         return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
 
 
