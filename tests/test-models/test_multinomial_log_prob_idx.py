@@ -9,9 +9,7 @@ import tensorflow as tf
 from edward.models import Multinomial
 from scipy.special import gammaln
 
-sess = tf.Session()
 ed.set_seed(98765)
-
 
 def multinomial_logpmf(x, n, p):
     """
@@ -40,31 +38,32 @@ def _test(shape, n):
     K = shape[-1]
     rv = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
     rv_sample = rv.sample(n)
-    with sess.as_default():
-        x = rv_sample.eval()
-        x_tf = tf.constant(x, dtype=tf.float32)
-        pi = rv.pi.eval()
-        if len(shape) == 1:
+    x = rv_sample.eval()
+    x_tf = tf.constant(x, dtype=tf.float32)
+    pi = rv.pi.eval()
+    if len(shape) == 1:
+        assert np.allclose(
+            rv.log_prob_idx((), x_tf).eval(),
+            multinomial_logpmf_vec(x[:, :], 1, pi[:]))
+    elif len(shape) == 2:
+        for i in range(shape[0]):
             assert np.allclose(
-                rv.log_prob_idx((), x_tf).eval(),
-                multinomial_logpmf_vec(x[:, :], 1, pi[:]))
-        elif len(shape) == 2:
-            for i in range(shape[0]):
-                assert np.allclose(
-                    rv.log_prob_idx((i, ), x_tf).eval(),
-                    multinomial_logpmf_vec(x[:, i, :], 1, pi[i, :]))
-        else:
-            assert False
+                rv.log_prob_idx((i, ), x_tf).eval(),
+                multinomial_logpmf_vec(x[:, i, :], 1, pi[i, :]))
+    else:
+        assert False
 
+class test_multinomial_log_prob_idx_class(tf.test.TestCase):
 
-def test_1d():
-    _test((2, ), 1)
-    _test((2, ), 2)
+    def test_1d(self):
+        with self.test_session():
+            _test((2, ), 1)
+            _test((2, ), 2)
 
-
-def test_2d():
-    _test((1, 2), 1)
-    _test((1, 3), 1)
-    _test((1, 2), 2)
-    _test((2, 2), 1)
-    _test((2, 2), 2)
+    def test_2d(self):
+        with self.test_session():
+            _test((1, 2), 1)
+            _test((1, 3), 1)
+            _test((1, 2), 2)
+            _test((2, 2), 1)
+            _test((2, 2), 2)
