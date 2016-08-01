@@ -1,9 +1,12 @@
 sudo: required
 dist: trusty
 language: python
-python:
-    - "2.7"
-    - "3.4"
+matrix:
+    include:
+        - python: 2.7
+        - python: 2.7
+          env: TEST_MODE=PEP8
+        - python: 3.4
 notifications:
     email: false
 install:
@@ -23,9 +26,10 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pep8 pystan pytest
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pystan pytest
   - source activate test-environment
-  - pip install python-coveralls
+  - pip install pep8 pytest-pep8 pytest-xdist
+  - pip install python-coveralls pytest-cov
   - pip install numpydoc
   - pip install git+https://github.com/pymc-devs/pymc3
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -35,6 +39,10 @@ install:
     fi
   - python setup.py install
 script:
-  - PYTHONPATH=$PWD:$PYTHONPATH py.test tests/
+  - if [[ "$TEST_MODE" == "PEP8" ]]; then
+       PYTHONPATH=$PWD:$PYTHONPATH py.test --pep8 -m pep8 -n0;
+    else
+       PYTHONPATH=$PWD:$PYTHONPATH py.test tests/;
+    fi
 after_success:
   - coveralls
