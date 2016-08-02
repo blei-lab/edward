@@ -52,13 +52,15 @@ class test_hessian_class(tf.test.TestCase):
 
     def test_all_finite_raises(self):
         with self.test_session():
-            x1 = tf.Variable(np.inf * tf.random_normal([1], dtype=tf.float32))
+            x1 = tf.Variable(np.nan * tf.random_normal([1], dtype=tf.float32))
             x2 = tf.Variable(tf.random_normal([1], dtype=tf.float32))
             y = tf.pow(x1, tf.constant(2.0)) + tf.constant(2.0) * x1 * x2 + \
                 tf.constant(3.0) * tf.pow(x2, tf.constant(2.0)) + \
                 tf.constant(4.0) * x1 + tf.constant(5.0) * x2 + tf.constant(6.0)            
             tf.initialize_all_variables().run()
-            with self.assertRaisesOpError('Inf'):
+            with self.assertRaisesOpError('NaN'):
+                hessian(y, [x1]).eval()  
+            with self.assertRaisesOpError('NaN'):
                 hessian(y, [x1, x2]).eval()             
 
 if __name__ == '__main__':

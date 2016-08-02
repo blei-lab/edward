@@ -232,7 +232,7 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
         return 0.5 * tf.reduce_sum(
             tf.square(scale_one/scale_two) + \
             tf.square((loc_two - loc_one)/scale_two) - \
-            1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one))
+            1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
 
 
 def log_mean_exp(x):
