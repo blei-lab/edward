@@ -16,7 +16,6 @@ except ImportError:
     pass
 
 try:
-    #import pymc3 as pm
     from theano import theano, scalar, tensor as tt
     from theano.gof.graph import inputs
     def makeiter(a):
@@ -117,11 +116,9 @@ class PyMC3Model(object):
         """
         self.model = model
 
-        #vars = pm.inputvars(model.cont_vars)
         vars = [v for v in inputs(makeiter(model.cont_vars)) if isinstance(v, tt.TensorVariable)]
         self.n_vars = len(vars)
 
-        #bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
         bij = DictToArrayBijection(ArrayOrdering(vars), model.test_point)
         self.logp = bij.mapf(model.fastlogp)
         self.dlogp = bij.mapf(model.fastdlogp(vars))
