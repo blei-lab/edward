@@ -59,9 +59,7 @@ class test_hessian_class(tf.test.TestCase):
                 tf.constant(4.0) * x1 + tf.constant(5.0) * x2 + tf.constant(6.0)            
             tf.initialize_all_variables().run()
             with self.assertRaisesOpError('Inf'):
-                hessian(y, [x1, x2]).eval()
-            with self.assertRaisesOpError('Inf'):
-                hessian(y, [x1]).eval()                
+                hessian(y, [x1, x2]).eval()             
 
 if __name__ == '__main__':
     tf.test.main()
