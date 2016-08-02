@@ -13,8 +13,8 @@ class test_invgamma_entropy_class(tf.test.TestCase):
     def _test(self, a, scale=1):
         val_true = stats.invgamma.entropy(a, scale=scale)
         with self.test_session():
-            self.assertAllClose(invgamma.entropy(a, scale).eval(), val_true)
-            self.assertAllClose(invgamma.entropy(tf.constant(a), tf.constant(scale)).eval(), val_true)
+            self.assertAllClose(invgamma.entropy(a, scale).eval(), val_true, atol=1e-4)
+            self.assertAllClose(invgamma.entropy(tf.constant(a), tf.constant(scale)).eval(), val_true, atol=1e-4)
 
     def test_0d(self):
         self._test(a=1.0, scale=1.0)
