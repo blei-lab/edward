@@ -92,7 +92,7 @@ def get_dims(x):
     Returns
     -------
     list
-        Python list containing dimensions of `x`
+        Python list containing dimensions of ``x``.
     """
     if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
         dims = x.get_shape()
