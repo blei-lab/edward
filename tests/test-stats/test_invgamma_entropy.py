@@ -8,28 +8,19 @@ import tensorflow as tf
 from edward.stats import invgamma
 from scipy import stats
 
-sess = tf.Session()
+class test_invgamma_entropy_class(tf.test.TestCase):
+
+    def _test(self, a, scale=1):
+        val_true = stats.invgamma.entropy(a, scale=scale)
+        with self.test_session():
+            self.assertAllClose(invgamma.entropy(a, scale).eval(), val_true)
+            self.assertAllClose(invgamma.entropy(tf.constant(a), tf.constant(scale)).eval(), val_true)
+
+    def test_0d(self):
+        self._test(a=1.0, scale=1.0)
+        self._test(a=0.5, scale=5.0)
+        self._test(a=5.0, scale=0.5)
 
 
-def _assert_eq(val_ed, val_true):
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
-
-
-def _test(a, scale=1):
-    val_true = stats.invgamma.entropy(a, scale=scale)
-    _assert_eq(invgamma.entropy(a, scale), val_true)
-    _assert_eq(invgamma.entropy(tf.constant(a), tf.constant(scale)), val_true)
-    _assert_eq(invgamma.entropy(tf.constant([a]), tf.constant(scale)), val_true)
-    _assert_eq(invgamma.entropy(tf.constant(a), tf.constant([scale])), val_true)
-    _assert_eq(invgamma.entropy(tf.constant([a]), tf.constant([scale])), val_true)
-
-
-def test_0d():
-    _test(a=1.0, scale=1.0)
-    _test(a=0.5, scale=5.0)
-    _test(a=5.0, scale=0.5)
-
-
-def test_1d():
-    _test([0.5, 1.2, 5.3, 8.7], [0.5, 1.2, 5.3, 8.7])
+    def test_1d(self):
+        self._test([0.5, 1.2, 5.3, 8.7], [0.5, 1.2, 5.3, 8.7])
