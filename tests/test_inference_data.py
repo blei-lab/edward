@@ -66,6 +66,10 @@ class test_inference_data_class(tf.test.TestCase):
             # Check data is full data.
             val = sess.run(inference.data)
             assert np.all(val['x'] == data['x'])
+        elif n_minibatch == 1:
+            # Preloaded batch setting, with n_minibatch=1.
+            # Check data is randomly shuffled.
+            assert not np.all([sess.run(inference.data)['x'] == data['x'][i] for i in range(10)])
         else:
             # Preloaded batch setting.
             # Check data is randomly shuffled.
@@ -86,12 +90,12 @@ class test_inference_data_class(tf.test.TestCase):
         with self.test_session() as sess:
             data = {'x': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])}
             self._test(sess, data, 1)
-        
+
     def test_preloaded_batch_5(self):
         with self.test_session() as sess:
             data = {'x': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])}
             self._test(sess, data, 5)
-    
+
     def test_feeding(self):
         with self.test_session() as sess:
             x = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
