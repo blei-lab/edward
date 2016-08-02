@@ -100,7 +100,7 @@ class test_inference_data_class(tf.test.TestCase):
 
     def test_read_file(self):
         with self.test_session() as sess:
-            x = self.read_and_decode_single_example("data/toy_data.tfrecords")
+            x = self.read_and_decode_single_example("tests/data/toy_data.tfrecords")
             data = {'x': x}
             self._test(sess, data, None, is_file=True)
 
