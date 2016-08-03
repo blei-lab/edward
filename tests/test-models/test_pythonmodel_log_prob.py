@@ -9,8 +9,6 @@ import tensorflow as tf
 from edward.models import PythonModel
 from scipy.stats import beta, bernoulli
 
-sess = tf.Session()
-
 
 class BetaBernoulli(PythonModel):
     """
@@ -28,21 +26,21 @@ class BetaBernoulli(PythonModel):
 
         return lp
 
-
 def _test(model, data, zs):
     val_ed = model.log_prob(data, zs)
     val_true = model._py_log_prob(data, zs)
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
-        zs_tf = tf.constant(zs, dtype=tf.float32)
-        val_ed = model.log_prob(data, zs_tf)
-        assert np.allclose(val_ed.eval(), val_true)
+    assert np.allclose(val_ed.eval(), val_true)
+    zs_tf = tf.constant(zs, dtype=tf.float32)
+    val_ed = model.log_prob(data, zs_tf)
+    assert np.allclose(val_ed.eval(), val_true)
 
+class test_pythonmodel_log_prob_class(tf.test.TestCase):
 
-def test_1d():
-    model = BetaBernoulli()
-    data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-    zs = np.array([[0.5]])
-    _test(model, data, zs)
-    zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
-    _test(model, data, zs)
+    def test_1d(self):
+        with self.test_session():
+            model = BetaBernoulli()
+            data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+            zs = np.array([[0.5]])
+            _test(model, data, zs)
+            zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
+            _test(model, data, zs)

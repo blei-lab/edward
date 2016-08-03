@@ -8,41 +8,39 @@ import tensorflow as tf
 from edward.stats import multivariate_normal
 from scipy import stats
 
-sess = tf.Session()
+class test_multivariate_normal_entropy_class(tf.test.TestCase):
+
+    def test_empty(self):
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.entropy().eval(),
+                       stats.multivariate_normal.entropy())
 
 
-def _assert_eq(val_ed, val_true):
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
+    def test_1d(self):
+        diag = [1.0, 1.0]
+        cov = tf.constant(diag)
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.entropy(cov=cov).eval(),
+                       stats.multivariate_normal.entropy(cov=np.diag(diag)))
+            self.assertAllClose(multivariate_normal.entropy(cov=np.diag(diag)).eval(),
+                       stats.multivariate_normal.entropy(cov=np.diag(diag)))
 
 
-def test_empty():
-    _assert_eq(multivariate_normal.entropy(),
-               stats.multivariate_normal.entropy())
+    def test_2d_diag(self):
+        cm = [[1.0, 0.0], [0.0, 1.0]]
+        cov = tf.constant(cm)
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.entropy(cov=cov).eval(),
+                       stats.multivariate_normal.entropy(cov=np.array(cm)))
+            self.assertAllClose(multivariate_normal.entropy(cov=np.array(cm)).eval(),
+                       stats.multivariate_normal.entropy(cov=np.array(cm)))
 
 
-def test_1d():
-    diag = [1.0, 1.0]
-    cov = tf.constant(diag)
-    _assert_eq(multivariate_normal.entropy(cov=cov),
-               stats.multivariate_normal.entropy(cov=np.diag(diag)))
-    _assert_eq(multivariate_normal.entropy(cov=np.diag(diag)),
-               stats.multivariate_normal.entropy(cov=np.diag(diag)))
-
-
-def test_2d_diag():
-    cm = [[1.0, 0.0], [0.0, 1.0]]
-    cov = tf.constant(cm)
-    _assert_eq(multivariate_normal.entropy(cov=cov),
-               stats.multivariate_normal.entropy(cov=np.array(cm)))
-    _assert_eq(multivariate_normal.entropy(cov=np.array(cm)),
-               stats.multivariate_normal.entropy(cov=np.array(cm)))
-
-
-def test_2d_full():
-    cm = [[1.0, 0.9], [0.9, 1.0]]
-    cov = tf.constant(cm)
-    _assert_eq(multivariate_normal.entropy(cov=cov),
-               stats.multivariate_normal.entropy(cov=np.array(cm)))
-    _assert_eq(multivariate_normal.entropy(cov=np.array(cm)),
-               stats.multivariate_normal.entropy(cov=np.array(cm)))
+    def test_2d_full(self):
+        cm = [[1.0, 0.9], [0.9, 1.0]]
+        cov = tf.constant(cm)
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.entropy(cov=cov).eval(),
+                       stats.multivariate_normal.entropy(cov=np.array(cm)))
+            self.assertAllClose(multivariate_normal.entropy(cov=np.array(cm)).eval(),
+                       stats.multivariate_normal.entropy(cov=np.array(cm)))
