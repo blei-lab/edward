@@ -16,88 +16,7 @@ except ImportError:
     pass
 
 try:
-    from theano import theano, scalar, tensor as tt
-    from theano.gof.graph import inputs
-    def makeiter(a):
-        if isinstance(a, (tuple, list)):
-            return a
-        else:
-            return [a]
-
-    import collections
-    VarMap = collections.namedtuple('VarMap', 'var, slc, shp, dtyp')
-
-    class ArrayOrdering(object):
-        """
-        An ordering for an array space
-        """
-        def __init__(self, vars):
-            self.vmap = []
-            dim = 0
-
-            for var in vars:
-                slc = slice(dim, dim + var.dsize)
-                self.vmap.append(VarMap(str(var), slc, var.dshape, var.dtype))
-                dim += var.dsize
-
-            self.dimensions = dim
-
-    class DictToArrayBijection(object):
-        """
-        A mapping between a dict space and an array space
-        """
-        def __init__(self, ordering, dpoint):
-            self.ordering = ordering
-            self.dpt = dpoint
-
-        def map(self, dpt):
-            """
-            Maps value from dict space to array space
-            Parameters
-            ----------
-            dpt : dict
-            """
-            apt = np.empty(self.ordering.dimensions)
-            for var, slc, _, _ in self.ordering.vmap:
-                apt[slc] = dpt[var].ravel()
-            return apt
-
-        def rmap(self, apt):
-            """
-            Maps value from array space to dict space
-            Parameters
-            ----------
-            apt : array
-            """
-            dpt = self.dpt.copy()
-
-            for var, slc, shp, dtyp in self.ordering.vmap:
-                dpt[var] = np.atleast_1d(apt)[slc].reshape(shp).astype(dtyp)
-
-            return dpt
-
-        def mapf(self, f):
-            """
-             function f : DictSpace -> T to ArraySpace -> T
-            Parameters
-            ----------
-            f : dict -> T
-            Returns
-            -------
-            f : array -> T
-            """
-            return Compose(f, self.rmap)
-
-    class Compose(object):
-        """
-        Compose two functions in a pickleable way
-        """
-        def __init__(self, fa, fb):
-            self.fa = fa
-            self.fb = fb
-
-        def __call__(self, x):
-            return self.fa(self.fb(x))
+    import pymc3 as pm
 except ImportError:
     pass
 
@@ -116,10 +35,10 @@ class PyMC3Model(object):
         """
         self.model = model
 
-        vars = [v for v in inputs(makeiter(model.cont_vars)) if isinstance(v, tt.TensorVariable)]
+        vars = pm.inputvars(model.cont_vars)
         self.n_vars = len(vars)
 
-        bij = DictToArrayBijection(ArrayOrdering(vars), model.test_point)
+        bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
         self.logp = bij.mapf(model.fastlogp)
         self.dlogp = bij.mapf(model.fastdlogp(vars))
 
