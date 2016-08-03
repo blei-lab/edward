@@ -8,38 +8,33 @@ import tensorflow as tf
 from edward.stats import expon
 from scipy import stats
 
-sess = tf.Session()
+class test_expon_logpdf_class(tf.test.TestCase):
 
 
-def _assert_eq(val_ed, val_true):
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
+    def _test(self, x, scale=1):
+        xtf = tf.constant(x)
+        val_true = stats.expon.logpdf(x, scale=scale)
+        with self.test_session():
+            self.assertAllClose(expon.logpdf(xtf, scale=tf.constant(scale)).eval(), val_true)
 
 
-def _test(x, scale=1):
-    xtf = tf.constant(x)
-    val_true = stats.expon.logpdf(x, scale=scale)
-    _assert_eq(expon.logpdf(xtf, scale=tf.constant(scale)), val_true)
-    _assert_eq(expon.logpdf(xtf, scale=tf.constant([scale])), val_true)
+    def test_0d(self):
+        self._test(0.3)
+        self._test(0.7)
+
+        self._test(0.3, scale=1.0)
+        self._test(0.7, scale=1.0)
+
+        self._test(0.3, scale=0.5)
+        self._test(0.7, scale=0.5)
+
+        self._test(0.3, scale=5.0)
+        self._test(0.7, scale=5.0)
 
 
-def test_0d():
-    _test(0.3)
-    _test(0.7)
-
-    _test(0.3, scale=1.0)
-    _test(0.7, scale=1.0)
-
-    _test(0.3, scale=0.5)
-    _test(0.7, scale=0.5)
-
-    _test(0.3, scale=5.0)
-    _test(0.7, scale=5.0)
+    def test_1d(self):
+        self._test([0.5, 2.3, 5.8, 10.1], scale=5.0)
 
 
-def test_1d():
-    _test([0.5, 2.3, 5.8, 10.1], scale=5.0)
-
-
-def test_2d():
-    _test(np.array([[0.5, 2.3, 5.8, 10.1],[0.5, 2.3, 5.8, 10.1]]), scale=5.0)
+    def test_2d(self):
+        self._test(np.array([[0.5, 2.3, 5.8, 10.1],[0.5, 2.3, 5.8, 10.1]]), scale=5.0)
