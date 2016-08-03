@@ -8,53 +8,51 @@ import tensorflow as tf
 from edward.stats import multivariate_normal
 from scipy import stats
 
-sess = tf.Session()
+class test_multivariate_normal_logpdf_class(tf.test.TestCase):
+
+    def _test(self, x, mean=None, cov=1):
+        xtf = tf.constant(x)
+        mean_tf = tf.convert_to_tensor(mean)
+        cov_tf = tf.convert_to_tensor(cov)
+        val_true = stats.multivariate_normal.logpdf(x, mean, cov)
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.logpdf(xtf, mean, cov).eval(), val_true)
+            self.assertAllClose(multivariate_normal.logpdf(xtf, mean_tf, cov).eval(), val_true)
+            self.assertAllClose(multivariate_normal.logpdf(xtf, mean, cov_tf).eval(), val_true)
+            self.assertAllClose(multivariate_normal.logpdf(xtf, mean_tf, cov_tf).eval(), val_true)
 
 
-def _assert_eq(val_ed, val_true):
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
+    def test_int_1d(self):
+        x = [0, 0]
+        self._test(x, np.zeros([2]), np.ones([2]))
+        self._test(x, np.zeros(2), np.diag(np.ones(2)))
+        xtf = tf.constant(x)
+        val_true = stats.multivariate_normal.logpdf(x, np.zeros(2), np.diag(np.ones(2)))
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.logpdf(xtf).eval(), val_true)
+
+        self._test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
 
 
-def _test(x, mean=None, cov=1):
-    xtf = tf.constant(x)
-    mean_tf = tf.convert_to_tensor(mean)
-    cov_tf = tf.convert_to_tensor(cov)
-    val_true = stats.multivariate_normal.logpdf(x, mean, cov)
-    _assert_eq(multivariate_normal.logpdf(xtf, mean, cov), val_true)
-    _assert_eq(multivariate_normal.logpdf(xtf, mean_tf, cov), val_true)
-    _assert_eq(multivariate_normal.logpdf(xtf, mean, cov_tf), val_true)
-    _assert_eq(multivariate_normal.logpdf(xtf, mean_tf, cov_tf), val_true)
+    def test_float_1d(self):
+        x = [0.0, 0.0]
+        self._test(x, np.zeros([2]), np.ones([2]))
+        self._test(x, np.zeros(2), np.diag(np.ones(2)))
+        xtf = tf.constant(x)
+        val_true = stats.multivariate_normal.logpdf(x, np.zeros(2), np.diag(np.ones(2)))
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.logpdf(xtf).eval(), val_true)
+
+        self._test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
 
 
-def test_int_1d():
-    x = [0, 0]
-    _test(x, np.zeros([2]), np.ones([2]))
-    _test(x, np.zeros(2), np.diag(np.ones(2)))
-    xtf = tf.constant(x)
-    val_true = stats.multivariate_normal.logpdf(x, np.zeros(2), np.diag(np.ones(2)))
-    _assert_eq(multivariate_normal.logpdf(xtf), val_true)
+    def test_float_2d(self):
+        x = np.array([[0.3, 0.7],[0.2, 0.8]])
+        self._test(x, np.zeros([2]), np.ones([2]))
+        self._test(x, np.zeros(2), np.diag(np.ones(2)))
+        xtf = tf.constant(x)
+        val_true = stats.multivariate_normal.logpdf(x, np.zeros(2), np.diag(np.ones(2)))
+        with self.test_session():
+            self.assertAllClose(multivariate_normal.logpdf(xtf).eval(), val_true)
 
-    _test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
-
-
-def test_float_1d():
-    x = [0.0, 0.0]
-    _test(x, np.zeros([2]), np.ones([2]))
-    _test(x, np.zeros(2), np.diag(np.ones(2)))
-    xtf = tf.constant(x)
-    val_true = stats.multivariate_normal.logpdf(x, np.zeros(2), np.diag(np.ones(2)))
-    _assert_eq(multivariate_normal.logpdf(xtf), val_true)
-
-    _test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
-
-
-def test_float_2d():
-    x = np.array([[0.3, 0.7],[0.2, 0.8]])
-    _test(x, np.zeros([2]), np.ones([2]))
-    _test(x, np.zeros(2), np.diag(np.ones(2)))
-    xtf = tf.constant(x)
-    val_true = stats.multivariate_normal.logpdf(x, np.zeros(2), np.diag(np.ones(2)))
-    _assert_eq(multivariate_normal.logpdf(xtf), val_true)
-
-    _test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
+        self._test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))

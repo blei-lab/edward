@@ -258,7 +258,7 @@ class Beta(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(a, b):
-            # get `n` from lexical scoping
+            # get ``n`` from lexical scoping
             return beta.rvs(a, b, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
@@ -300,7 +300,7 @@ class Dirichlet(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(alpha):
-            # get `n` from lexical scoping
+            # get ``n`` from lexical scoping
             return dirichlet.rvs(alpha, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha], [tf.float32])[0]
@@ -354,7 +354,7 @@ class InvGamma(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(a, scale):
-            # get `n` from lexical scoping
+            # get ``n`` from lexical scoping
             return invgamma.rvs(a, scale=scale, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
@@ -412,7 +412,7 @@ class Multinomial(RandomVariable):
         # array. This is necessary for sampling from distributions
         # unavailable in TensorFlow natively.
         def np_sample(p):
-            # get `n` from lexical scoping
+            # get ``n`` from lexical scoping
             return multinomial.rvs(np.ones(self.shape[:-1]), p, size=n).astype(np.float32)
 
         x = tf.py_func(np_sample, [self.pi], [tf.float32])[0]

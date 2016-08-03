@@ -29,8 +29,6 @@ class Inference(object):
     def __init__(self, model, data=None):
         """Initialization.
 
-        Calls ``util.get_session()``
-
         Parameters
         ----------
         model : ed.Model
@@ -45,7 +43,7 @@ class Inference(object):
 
         Notes
         -----
-        If `data` is not passed in, the dictionary is empty.
+        If ``data`` is not passed in, the dictionary is empty.
 
         Three options are available for batch training:
         1. internally if user passes in data as a dictionary of NumPy
@@ -65,21 +63,21 @@ class Inference(object):
             # take arbitrary data structure types in the data block
             # and not just NumPy arrays (this makes it unamenable to
             # TensorFlow placeholders). Therefore fix the data
-            # dictionary `self.data` at compile time to `data`.
+            # dictionary ``self.data`` at compile time to ``data``.
             self.data = data
         else:
             self.data = {}
             for key, value in six.iteritems(data):
                 if isinstance(value, tf.Tensor):
-                    # If `data` has TensorFlow placeholders, the user
+                    # If ``data`` has TensorFlow placeholders, the user
                     # must manually feed them at each step of
                     # inference.
-                    # If `data` has tensors that are the output of
+                    # If ``data`` has tensors that are the output of
                     # data readers, then batch training operates
                     # according to the reader.
                     self.data[key] = value
                 elif isinstance(value, np.ndarray):
-                    # If `data` has NumPy arrays, store the data
+                    # If ``data`` has NumPy arrays, store the data
                     # in the computational graph.
                     placeholder = tf.placeholder(tf.float32, value.shape)
                     var = tf.Variable(placeholder, trainable=False, collections=[])
@@ -161,7 +159,7 @@ class VariationalInference(Inference):
 
         Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
 
-        Initialize all variables
+        Initialize all variables.
 
         Parameters
         ----------
@@ -172,7 +170,7 @@ class VariationalInference(Inference):
             all the data. Subsampling is available only if all data
             passed in are NumPy arrays and the model is not a Stan
             model. For subsampling details, see
-            `tf.train.slice_input_producer` and `tf.train.batch`.
+            ``tf.train.slice_input_producer`` and ``tf.train.batch``.
         n_print : int, optional
             Number of iterations for each print progress. To suppress print
             progress, then specify None.
@@ -188,14 +186,15 @@ class VariationalInference(Inference):
         self.loss = tf.constant(0.0)
 
         if n_minibatch is not None and not isinstance(self.model, StanModel):
-            # Re-assign data to batch tensors, with size given by `n_data`.
+            # Re-assign data to batch tensors, with size given by
+            # ``n_data``.
             values = list(six.itervalues(self.data))
             slices = tf.train.slice_input_producer(values)
             # By default use as many threads as CPUs.
             batches = tf.train.batch(slices, n_minibatch,
                                      num_threads=multiprocessing.cpu_count())
             if not isinstance(batches, list):
-                # `tf.train.batch` returns tf.Tensor if `slices` is a
+                # ``tf.train.batch`` returns tf.Tensor if ``slices`` is a
                 # list of size 1.
                 batches = [batches]
 
@@ -235,7 +234,7 @@ class VariationalInference(Inference):
         Returns
         -------
         loss : double
-            Loss function values after one iteration
+            Loss function values after one iteration.
         """
         sess = get_session()
         _, loss = sess.run([self.train, self.loss])
@@ -247,9 +246,9 @@ class VariationalInference(Inference):
         Parameters
         ----------
         t : int
-            Iteration counter
+            Iteration counter.
         loss : double
-            Loss function value at iteration ``t``
+            Loss function value at iteration ``t``.
         """
         if self.n_print is not None:
             if t % self.n_print == 0:

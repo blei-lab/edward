@@ -16,7 +16,88 @@ except ImportError:
     pass
 
 try:
-    import pymc3 as pm
+    from theano import theano, scalar, tensor as tt
+    from theano.gof.graph import inputs
+    def makeiter(a):
+        if isinstance(a, (tuple, list)):
+            return a
+        else:
+            return [a]
+
+    import collections
+    VarMap = collections.namedtuple('VarMap', 'var, slc, shp, dtyp')
+
+    class ArrayOrdering(object):
+        """
+        An ordering for an array space
+        """
+        def __init__(self, vars):
+            self.vmap = []
+            dim = 0
+
+            for var in vars:
+                slc = slice(dim, dim + var.dsize)
+                self.vmap.append(VarMap(str(var), slc, var.dshape, var.dtype))
+                dim += var.dsize
+
+            self.dimensions = dim
+
+    class DictToArrayBijection(object):
+        """
+        A mapping between a dict space and an array space
+        """
+        def __init__(self, ordering, dpoint):
+            self.ordering = ordering
+            self.dpt = dpoint
+
+        def map(self, dpt):
+            """
+            Maps value from dict space to array space
+            Parameters
+            ----------
+            dpt : dict
+            """
+            apt = np.empty(self.ordering.dimensions)
+            for var, slc, _, _ in self.ordering.vmap:
+                apt[slc] = dpt[var].ravel()
+            return apt
+
+        def rmap(self, apt):
+            """
+            Maps value from array space to dict space
+            Parameters
+            ----------
+            apt : array
+            """
+            dpt = self.dpt.copy()
+
+            for var, slc, shp, dtyp in self.ordering.vmap:
+                dpt[var] = np.atleast_1d(apt)[slc].reshape(shp).astype(dtyp)
+
+            return dpt
+
+        def mapf(self, f):
+            """
+             function f : DictSpace -> T to ArraySpace -> T
+            Parameters
+            ----------
+            f : dict -> T
+            Returns
+            -------
+            f : array -> T
+            """
+            return Compose(f, self.rmap)
+
+    class Compose(object):
+        """
+        Compose two functions in a pickleable way
+        """
+        def __init__(self, fa, fb):
+            self.fa = fa
+            self.fb = fb
+
+        def __call__(self, x):
+            return self.fa(self.fb(x))
 except ImportError:
     pass
 
@@ -35,10 +116,10 @@ class PyMC3Model(object):
         """
         self.model = model
 
-        vars = pm.inputvars(model.cont_vars)
+        vars = [v for v in inputs(makeiter(model.cont_vars)) if isinstance(v, tt.TensorVariable)]
         self.n_vars = len(vars)
 
-        bij = pm.DictToArrayBijection(pm.ArrayOrdering(vars), model.test_point)
+        bij = DictToArrayBijection(ArrayOrdering(vars), model.test_point)
         self.logp = bij.mapf(model.fastlogp)
         self.dlogp = bij.mapf(model.fastdlogp(vars))
 
@@ -65,29 +146,29 @@ class PyMC3Model(object):
         It wraps around a Python function. The Python function takes
         inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # Store ``xs.keys()`` so that ``_py_log_prob_args`` knows how each
         # data value corresponds to a key.
         self.keys = list(six.iterkeys(xs))
         if not xs:
-            # If `xs` is an empty dictionary, then store their (empty)
-            # values to pass into `_py_log_prob_args`.
+            # If ``xs`` is an empty dictionary, then store their (empty)
+            # values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         elif isinstance(list(six.itervalues(xs))[0], np.ndarray):
-            # If `xs` is a dictionary of NumPy arrays, then store
-            # their values to pass into `_py_log_prob_args`.
+            # If ``xs`` is a dictionary of NumPy arrays, then store
+            # their values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         else:
-            # If `xs` is a dictionary of TensorFlow tensors, then
+            # If ``xs`` is a dictionary of TensorFlow tensors, then
             # pass the tensors into tf.py_func.
             inp = [zs] + list(six.itervalues(xs))
 
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 
     def _py_log_prob_args(self, zs, *args):
-        # Set `values` to NumPy arrays that were passed in via
-        # `self.values` or via `*args`.
+        # Set ``values`` to NumPy arrays that were passed in via
+        # ``self.values`` or via ``*args``.
         if hasattr(self, 'values'):
             values = self.values
         else:
@@ -135,29 +216,29 @@ class PythonModel(object):
         It wraps around a Python function. The Python function takes
         inputs of type np.ndarray and outputs a np.ndarray.
         """
-        # Store `xs.keys()` so that `_py_log_prob_args` knows how each
+        # Store ``xs.keys()`` so that ``_py_log_prob_args`` knows how each
         # data value corresponds to a key.
         self.keys = list(six.iterkeys(xs))
         if not xs:
-            # If `xs` is an empty dictionary, then store their (empty)
-            # values to pass into `_py_log_prob_args`.
+            # If ``xs`` is an empty dictionary, then store their (empty)
+            # values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         elif isinstance(list(six.itervalues(xs))[0], np.ndarray):
-            # If `xs` is a dictionary of NumPy arrays, then store
-            # their values to pass into `_py_log_prob_args`.
+            # If ``xs`` is a dictionary of NumPy arrays, then store
+            # their values to pass into ``_py_log_prob_args``.
             self.values = list(six.itervalues(xs))
             inp = [zs]
         else:
-            # If `xs` is a dictionary of TensorFlow tensors, then
+            # If ``xs`` is a dictionary of TensorFlow tensors, then
             # pass the tensors into tf.py_func.
             inp = [zs] + list(six.itervalues(xs))
 
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 
     def _py_log_prob_args(self, zs, *args):
-        # Set `values` to NumPy arrays that were passed in via
-        # `self.values` or via `*args`.
+        # Set ``values`` to NumPy arrays that were passed in via
+        # ``self.values`` or via ``*args``.
         if hasattr(self, 'values'):
             values = self.values
         else:
