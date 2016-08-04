@@ -35,7 +35,7 @@ class MixtureDensityNetwork:
     def __init__(self, K):
         self.K = K
 
-    def mapping(self, X):
+    def neural_network(self, X):
         """pi, mu, sigma = NN(x; theta)"""
         hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 25 hidden units
         hidden2 = Dense(25, activation='relu')(hidden1)
@@ -48,7 +48,7 @@ class MixtureDensityNetwork:
         # Note there are no parameters we're being Bayesian about. The
         # parameters are baked into how we specify the neural networks.
         X, y = xs['X'], xs['y']
-        self.mapping(X)
+        self.neural_network(X)
         result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
         result = tf.mul(result, self.pi)
         result = tf.reduce_sum(result, 1)
