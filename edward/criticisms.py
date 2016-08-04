@@ -205,7 +205,7 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
         if x is None:
             return xreps
         else:
-            return [xreps, y]
+            return [xreps, x]
 
     Txreps = []
     Txs = []
