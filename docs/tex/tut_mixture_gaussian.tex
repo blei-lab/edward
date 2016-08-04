@@ -4,9 +4,10 @@
 % Begin the content of the page
 \subsection{Mixture of Gaussians}
 
-A mixture of Gaussians, also known as a Gaussian mixture model,
-clusters data points $\mathbf{x}_n\in\mathbb{R}^D$ using $K$
-individual Gaussian distributions.
+A mixture model is a model typically used for clustering.
+It assigns a mixture component to each data point, and this mixture component
+determines the distribution that the data point is generated from. A
+mixture of Gaussians uses Gaussian distributions to generate this data.
 
 For a set of $N$ data points,
 the likelihood of each observation $\mathbf{x}_n$ is
@@ -40,7 +41,50 @@ Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
   \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).
 \end{align*}
 
-Let's build the model in Edward using TensorFlow.
+Let's build the model in Edward using TensorFlow. This simply requires
+writing down the model's log joint density,
+\begin{align*}
+  \log p(\pi) +
+  \Big[ \sum_{k=1}^K \log p(\mathbf{\mu}_k) + \log
+  p(\mathbf{\sigma}_k) \Big] +
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma).
+\end{align*}
+Writing
+the model's log-likelihood can be tricky:
+\begin{align*}
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &=
+  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ;
+  \mu_k, \sigma_k).
+\end{align*}
+To prevent numerical instability, we'd like to work on the log-scale
+when calculating densities,
+\begin{align*}
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &=
+  \sum_{n=1}^N \log \sum_{k=1}^K \exp\Big(
+  \log \pi_k + \log \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k)\Big).
+\end{align*}
+This expression involves a log sum exp operation, which is
+numerically unstable as exponentiation will often lead to one value
+dominating the rest. Therefore we use the log-sum-exp trick,
+which is based on the identity
+\begin{align*}
+  \mathbf{x}_{\mathrm{max}}
+  &=
+  \arg\max \mathbf{x},
+  \\
+  \log \sum_i \exp(\mathbf{x}_i)
+  &=
+  \log \Big(\exp(\mathbf{x}_{\mathrm{max}}) \sum_i \exp(\mathbf{x}_i -
+  \mathbf{x}_{\mathrm{max}})\Big)
+  \\
+  &=
+  \mathbf{x}_{\mathrm{max}} + \log \sum_i \exp(\mathbf{x}_i -
+  \mathbf{x}_{\mathrm{max}}).
+\end{align*}
+Subtracting the maximum value before taking the log-sum-exp leads to
+more numerically stable output.
 \begin{lstlisting}[language=Python]
 class MixtureGaussian:
     """
