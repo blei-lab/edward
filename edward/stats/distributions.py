@@ -1082,41 +1082,34 @@ class Multivariate_Normal(object):
             r = x - mean
 
         if cov is 1:
-            cov_inv = tf.diag(tf.ones([d]))
+            L_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
         else:
             cov = tf.cast(cov, dtype=tf.float32)
             if len(cov.get_shape()) == 1: # vector
-                cov_inv = tf.diag(1.0 / cov)
+                L_inv = tf.diag(1.0 / tf.sqrt(cov))
                 det_cov = tf.reduce_prod(cov)
             else: # matrix
-                cov_inv = tf.matrix_inverse(cov)
-                det_cov = tf.matrix_determinant(cov)
+                L = tf.cholesky(cov)
+                L_inv = tf.matrix_inverse(L)
+                det_cov = tf.pow(tf.reduce_prod(tf.diag_part(L)), 2)
 
         lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov)
-        if len(x_shape) == 1:
+        if len(x_shape) == 1: # vector
             r = tf.reshape(r, shape=(d, 1))
-            lps -= 0.5 * tf.matmul(tf.matmul(r, cov_inv, transpose_a=True), r)
+            inner = tf.matmul(L_inv, r)
+            lps -= 0.5 * tf.matmul(inner, inner, transpose_a=True)
             return tf.squeeze(lps)
-        else:
+        else: # matrix
             # TODO vectorize further
             out = []
             for r_vec in tf.unpack(r):
                 r_vec = tf.reshape(r_vec, shape=(d, 1))
-                out += [tf.squeeze(lps - 0.5 * tf.matmul(
-                                   tf.matmul(r_vec, cov_inv, transpose_a=True),
-                                   r_vec))]
+                inner = tf.matmul(L_inv, r_vec)
+                out += [tf.squeeze(lps -
+                        0.5 * tf.matmul(inner, inner, transpose_a=True))]
+
             return tf.pack(out)
-        """
-        # TensorFlow can't reverse-mode autodiff Cholesky
-        L = tf.cholesky(cov)
-        L_inv = tf.matrix_inverse(L)
-        det_cov = tf.pow(tf.matrix_determinant(L), 2)
-        inner = dot(L_inv, r)
-        out = -0.5*d*tf.log(2*np.pi) - \
-              0.5*tf.log(det_cov) - \
-              0.5*tf.matmul(inner, inner, transpose_a=True)
-        """
 
     def entropy(self, mean=None, cov=1):
         """Entropy of probability distribution
