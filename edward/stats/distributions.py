@@ -491,7 +491,7 @@ class Dirichlet(object):
             the vector evaluates a row in the matrix.
         """
         x = tf.cast(x, dtype=tf.float32)
-        alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
+        alpha = tf.cast(alpha, dtype=tf.float32)
         if len(get_dims(x)) == 1:
             return -tf.lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
         else:
@@ -514,7 +514,7 @@ class Dirichlet(object):
             if matrix input, where each element in the vector
             evaluates a row in the matrix.
         """
-        alpha = tf.cast(tf.convert_to_tensor(alpha), dtype=tf.float32)
+        alpha = tf.cast(alpha, dtype=tf.float32)
         if len(get_dims(alpha)) == 1:
             K = get_dims(alpha)[0]
             a = tf.reduce_sum(alpha)
@@ -998,7 +998,7 @@ class Multinomial(object):
                 k = get_dims(p)[0]
                 max_range = np.zeros(k, dtype=np.int32) + n[j]
                 x = np.array([i for i in product(*(range(i+1) for i in max_range))
-                                     if sum(i)==n[j]])
+                              if sum(i)==n[j]])
                 logpmf = self.logpmf(x, n[j], p[j, :])
                 out += [tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))]
 
@@ -1068,7 +1068,7 @@ class Multivariate_Normal(object):
             input and vector if matrix input, where each element in
             the vector evaluates a row in the matrix.
         """
-        x = tf.cast(tf.convert_to_tensor(x), dtype=tf.float32)
+        x = tf.cast(x, dtype=tf.float32)
         x_shape = get_dims(x)
         if len(x_shape) == 1:
             d = x_shape[0]
@@ -1078,14 +1078,14 @@ class Multivariate_Normal(object):
         if mean is None:
             r = x
         else:
-            mean = tf.cast(tf.convert_to_tensor(mean), dtype=tf.float32)
+            mean = tf.cast(mean, dtype=tf.float32)
             r = x - mean
 
         if cov is 1:
             cov_inv = tf.diag(tf.ones([d]))
             det_cov = tf.constant(1.0)
         else:
-            cov = tf.cast(tf.convert_to_tensor(cov), dtype=tf.float32)
+            cov = tf.cast(cov, dtype=tf.float32)
             if len(cov.get_shape()) == 1: # vector
                 cov_inv = tf.diag(1.0 / cov)
                 det_cov = tf.reduce_prod(cov)
@@ -1143,7 +1143,7 @@ class Multivariate_Normal(object):
             d = 1
             det_cov = 1.0
         else:
-            cov = tf.cast(tf.convert_to_tensor(cov), dtype=tf.float32)
+            cov = tf.cast(cov, dtype=tf.float32)
             d = get_dims(cov)[0]
             if len(cov.get_shape()) == 1:
                 det_cov = tf.reduce_prod(cov)
