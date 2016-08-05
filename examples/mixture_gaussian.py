@@ -115,6 +115,7 @@ class MixtureGaussian:
 
         return tf.pack(matrix)
 
+
 def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
     mus = [[1, 1], [-1, -1]]
@@ -129,6 +130,7 @@ def build_toy_dataset(N):
 ed.set_seed(42)
 data = build_toy_dataset(500)
 plt.scatter(data['x'][:, 0], data['x'][:, 1])
+plt.title("Artificial dataset")
 plt.show()
 
 model = MixtureGaussian(K=2, D=2)
@@ -142,4 +144,5 @@ inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 
 clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data), axis=0)
 plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
+plt.title("Estimated cluster assignments")
 plt.show()
