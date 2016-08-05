@@ -29,6 +29,7 @@ def cumprod(xs):
     """
     dependencies = [tf.verify_tensor_all_finite(xs, msg='')]
     xs = control_flow_ops.with_dependencies(dependencies, xs)
+    xs = tf.cast(xs, dtype=tf.float32)
 
     values = tf.unpack(xs)
     out = []
@@ -70,6 +71,8 @@ def dot(x, y):
                     tf.verify_tensor_all_finite(y, msg='')]
     x = control_flow_ops.with_dependencies(dependencies, x)
     y = control_flow_ops.with_dependencies(dependencies, y)
+    x = tf.cast(x, dtype=tf.float32)
+    y = tf.cast(y, dtype=tf.float32)
 
     if len(x.get_shape()) == 1:
         vec = x
@@ -216,23 +219,31 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
         variables are not positive.
     """
     dependencies = [tf.verify_tensor_all_finite(loc_one, msg=''),
-                  tf.verify_tensor_all_finite(loc_two, msg=''),
-                  tf.assert_positive(scale_one),
-                  tf.assert_positive(scale_two)]
+                    tf.verify_tensor_all_finite(loc_two, msg=''),
+                    tf.assert_positive(scale_one),
+                    tf.assert_positive(scale_two)]
     loc_one = control_flow_ops.with_dependencies(dependencies, loc_one)
-    loc_two = control_flow_ops.with_dependencies(dependencies, loc_two)
     scale_one = control_flow_ops.with_dependencies(dependencies, scale_one)
-    scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
+    loc_one = tf.cast(loc_one, tf.float32)
+    scale_one = tf.cast(scale_one, tf.float32)
 
     if loc_two == 0.0 and scale_two == 1.0:
-        return 0.5 * tf.reduce_sum(
-            tf.square(scale_one) + tf.square(loc_one) - \
-            1.0 - 2.0 * tf.log(scale_one))
+        # With default arguments, we can avoid some intermediate computation.
+        out = tf.square(scale_one) + tf.square(loc_one) - \
+              1.0 - 2.0 * tf.log(scale_one)
     else:
-        return 0.5 * tf.reduce_sum(
-            tf.square(scale_one/scale_two) + \
-            tf.square((loc_two - loc_one)/scale_two) - \
-            1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one), 1)
+        loc_two = control_flow_ops.with_dependencies(dependencies, loc_two)
+        scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
+        loc_two = tf.cast(loc_two, tf.float32)
+        scale_two = tf.cast(scale_two, tf.float32)
+        out = tf.square(scale_one/scale_two) + \
+              tf.square((loc_two - loc_one)/scale_two) - \
+              1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one)
+
+    if len(out.get_shape()) == 1: # vector
+        return 0.5 * tf.reduce_sum(out)
+    else: # matrix
+        return 0.5 * tf.reduce_sum(out, 1)
 
 
 def log_mean_exp(x):
@@ -249,7 +260,7 @@ def log_mean_exp(x):
     -------
     tf.Tensor
         scalar if vector input, vector if matrix tensor input
-    
+
     Raises
     ------
     InvalidArgumentError
@@ -257,9 +268,10 @@ def log_mean_exp(x):
     """
     dependencies = [tf.verify_tensor_all_finite(x, msg='')]
     x = control_flow_ops.with_dependencies(dependencies, x)
+    x = tf.cast(x, dtype=tf.float32)
 
     x_max = tf.reduce_max(x)
-    return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))  
+    return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))
 
 
 def log_sum_exp(x):
@@ -276,7 +288,7 @@ def log_sum_exp(x):
     -------
     tf.Tensor
         scalar if vector input, vector if matrix tensor input
-    
+
     Raises
     ------
     InvalidArgumentError
@@ -284,6 +296,7 @@ def log_sum_exp(x):
     """
     dependencies = [tf.verify_tensor_all_finite(x, msg='')]
     x = control_flow_ops.with_dependencies(dependencies, x);
+    x = tf.cast(x, dtype=tf.float32)
 
     x_max = tf.reduce_max(x)
     return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
@@ -310,6 +323,7 @@ def logit(x):
     dependencies = [tf.assert_positive(x),
                     tf.assert_less(x, 1.0)]
     x = control_flow_ops.with_dependencies(dependencies, x)
+    x = tf.cast(x, dtype=tf.float32)
 
     return tf.log(x) - tf.log(1.0 - x)
 
@@ -349,6 +363,10 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     y = control_flow_ops.with_dependencies(dependencies, y)
     sigma = control_flow_ops.with_dependencies(dependencies, sigma)
     l = control_flow_ops.with_dependencies(dependencies, l)
+    x = tf.cast(x, dtype=tf.float32)
+    y = tf.cast(y, dtype=tf.float32)
+    sigma = tf.cast(sigma, dtype=tf.float32)
+    l = tf.cast(l, dtype=tf.float32)
 
     return tf.pow(sigma, 2.0) * \
             tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
@@ -375,7 +393,7 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     -------
     tf.Tensor
         size corresponding to size of input
-    
+
     Raises
     ------
     InvalidArgumentError
@@ -383,13 +401,17 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
         and length variables are not positive.
     """
     dependencies = [tf.verify_tensor_all_finite(x, msg=''),
-                  tf.verify_tensor_all_finite(y, msg=''),
-                  tf.assert_positive(sigma),
-                  tf.assert_positive(l)]
+                    tf.verify_tensor_all_finite(y, msg=''),
+                    tf.assert_positive(sigma),
+                    tf.assert_positive(l)]
     x = control_flow_ops.with_dependencies(dependencies, x)
     y = control_flow_ops.with_dependencies(dependencies, y)
     sigma = control_flow_ops.with_dependencies(dependencies, sigma)
     l = control_flow_ops.with_dependencies(dependencies, l)
+    x = tf.cast(x, dtype=tf.float32)
+    y = tf.cast(y, dtype=tf.float32)
+    sigma = tf.cast(sigma, dtype=tf.float32)
+    l = tf.cast(l, dtype=tf.float32)
 
     return tf.pow(sigma, 2.0) * \
             tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
@@ -427,7 +449,7 @@ def softplus(x):
     -------
     tf.Tensor
         size corresponding to size of input
-    
+
     Raises
     ------
     InvalidArgumentError
@@ -435,6 +457,7 @@ def softplus(x):
     """
     dependencies = [tf.verify_tensor_all_finite(x, msg='')]
     x = control_flow_ops.with_dependencies(dependencies, x)
+    x = tf.cast(x, dtype=tf.float32)
 
     result = tf.log(1.0 + tf.exp(x))
 
@@ -491,6 +514,7 @@ def to_simplex(x):
     """
     dependencies = [tf.verify_tensor_all_finite(x, msg='')]
     x = control_flow_ops.with_dependencies(dependencies, x)
+    x = tf.cast(x, dtype=tf.float32)
 
     if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
         shape = get_dims(x)
