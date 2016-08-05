@@ -24,10 +24,10 @@
   as you are developing it. If you're informally writing short scripts
   that output various things anyways, I suggest saving the file in the
   \texttt{tests/} directory. This gets the momentum going as the test
-  becomes formalized. For testing, simply run
-  \href{http://nose2.readthedocs.io/en/latest/getting_started.html}{\texttt{nose2}}
-  in the repo; it will automatically find and run all tests in
-  \texttt{tests/}. Most if not all pull requests should have unit tests.
+  becomes formalized. For testing, run
+  \href{http://doc.pytest.org/}{\texttt{py.test
+  tests/}}
+  in the repo. Most if not all pull requests should have unit tests.
 \item
   \textbf{Issue labeling system.} We use
   \href{https://github.com/stan-dev/stan/issues}{Stan's labeling system}.
@@ -45,20 +45,25 @@
   including its
   \href{https://www.tensorflow.org/versions/r0.9/how_tos/documentation/index.html}{documentation guidelines}.
   The only exceptions are detailed below. Some below are not
-  necessarily exceptions but simply emphasize style guidelines you
+  necessarily exceptions but emphasize style guidelines you
   should be following from TensorFlow or PEP 8 anyways.
 \item
   Use four-space indents rather than two-space.
+\item
+  Aim for 70 characters per line, with some exceptions.
 \item
   To organize imports in a script, use three blocks: 1. any \texttt{from __future__
   import [...]} lines; 2. any \texttt{import [...]} lines; and 3. any
   \texttt{from [...] import [...]} lines. Each block is separated by a blank line,
   and within each block the lines are sorted alphabetically.
 \item
-  \texttt{edward.stats} uses SciPy standards. This
-  includes, for example, the argument specification and the choice of
-  how a distribution is parameterized. \texttt{edward.models}
-  uses \texttt{tf.contrib.distributions} standards.
+  When writing functions with tensor inputs, convert to
+  tensor (\texttt{tf.convert_to_tensor}) at the beginning. This
+  enables support for any input type compatible with tensor
+  conversion. Internally, always aim to work in float32:
+  \texttt{tf.cast(, dtype=tf.float32)} will both do the casting and the
+  tensor conversion. For methods that simply call other methods you
+  may not need this casting or tensor conversion.
 \item
   For arguments that are positive integers, use \texttt{n\_}, e.g.,
   \texttt{n\_minibatch}, \texttt{n\_print}, to represent ``number of
@@ -66,10 +71,10 @@
   \texttt{is_}, e.g., \texttt{is_reparameterized},
   \texttt{is_multivariate}.
 \item
-  Aim for 70 characters per line, with some exceptions.
-\item
-  \href{http://programmers.stackexchange.com/questions/75919/should-package-names-be-singular-or-plural}{Package
-  names are almost always plural, with the exception of} \texttt{util.py}.
+  Always prefer overloadable operators such as \texttt{x + y} over
+  \texttt{tf.add(x, y)}. See
+  \href{http://stackoverflow.com/questions/37900780/in-tensorflow-what-is-the-difference-between-tf-add-and-operator}{here}
+  for an explanation.
 \item
   Use a blank line to separate the end of an indented procedure:
 \begin{lstlisting}[language=Python]
@@ -78,6 +83,14 @@ for i in range(5):
 
 more_code()
 \end{lstlisting}
+\item
+  \href{http://programmers.stackexchange.com/questions/75919/should-package-names-be-singular-or-plural}{Package
+  names are almost always plural, with the exception of} \texttt{util.py}.
+\item
+  \texttt{edward.stats} uses SciPy standards. This
+  includes, for example, the argument specification and the choice of
+  how a distribution is parameterized. \texttt{edward.models}
+  uses \texttt{tf.contrib.distributions} standards.
 \end{itemize}
 
 
@@ -85,26 +98,14 @@ more_code()
 
 \begin{itemize}
 \item
-  \textbf{Update your Python path.} As you make changes, it can be
-  cumbersome to constantly reinstall the package to test these changes.
-  We recommend adding the path to your local repo to your
-  \texttt{PYTHONPATH}. That is, run the following on the command-line:
-
-\begin{lstlisting}[class=JSON]
-export PYTHONPATH="${PYTHONPATH}:/path/to/repo"
-\end{lstlisting}
-
-  For this to work permanently, add this line to your
-  \texttt{\textasciitilde{}/.bashrc} if you use Bash or
-  \texttt{\textasciitilde{}/.zshenv} if you use zsh. Any time you import
-  the package, it will look for the package locally via this directory
-  path.
-\item
-  \textbf{Local installation.} Sometimes it does make sense to check the
-  installation. To install locally, run the following when at the parent
-  directory of the repo:
+  \textbf{Local installation.}
+  We recommend downloading and installing Edward locally. This enables
+  any local changes you make to Edward to appear the next time you
+  import Edward in a Python session. To install locally, run the
+  following:
 
 \begin{verbatim}
+git clone git@github.com:blei-lab/edward.git
 pip install -e edward
 \end{verbatim}
 
@@ -165,10 +166,7 @@ git push origin master
 
 Now create your branch on the private repo, develop stuff, and pull any
 latest changes from the public repo as you develop
-(\texttt{git\ pull\ public\ master}). Make sure that as you're running
-Edward, you're using the Edward library pointing to the private repo so
-it reflects your developer changes and not pointed to the public repo
-where it won't see any changes.
+(\texttt{git\ pull\ public\ master}).
 
 Finally, to create a pull request from a private repo's branch to the
 public repo, push the private branch to the public repo.

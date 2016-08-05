@@ -49,25 +49,17 @@ class HierarchicalLogistic:
         self.prior_variance = prior_variance
         self.n_vars = (self.weight_dim[0]+1)*self.weight_dim[1]
 
-    def mapping(self, x, z):
-        """
-        Inverse link function on linear transformation,
-        link^{-1}(W*x + b)
-        """
-        m, n = self.weight_dim[0], self.weight_dim[1]
-        W = tf.reshape(z[:m*n], [m, n])
-        b = tf.reshape(z[m*n:], [1, n])
-        # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
-        h = self.inv_link(tf.matmul(x, W) + b)
-        h = tf.squeeze(h) # n_minibatch x 1 to n_minibatch
-        return h
-
     def log_prob(self, xs, zs):
         """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
+        m, n = self.weight_dim[0], self.weight_dim[1]
         log_lik = []
         for z in tf.unpack(zs):
-            p = self.mapping(x, z)
+            W = tf.reshape(z[:m*n], [m, n])
+            b = tf.reshape(z[m*n:], [1, n])
+            # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
+            p = self.inv_link(tf.matmul(x, W) + b)
+            p = tf.squeeze(p) # n_minibatch x 1 to n_minibatch
             log_lik += [bernoulli.logpmf(y, p)]
 
         log_lik = tf.pack(log_lik)
@@ -115,9 +107,17 @@ for t in range(600):
         zs = rs.randn(10, variational.n_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
-        x = tf.expand_dims(tf.constant(inputs), 1)
-        mus = tf.pack([model.mapping(x, z) for z in tf.unpack(zs)])
-        outputs = mus.eval()
+        x = tf.expand_dims(inputs, 1)
+        m, n = model.weight_dim[0], model.weight_dim[1]
+        ps = []
+        for z in tf.unpack(zs):
+            W = tf.reshape(z[:m*n], [m, n])
+            b = tf.reshape(z[m*n:], [1, n])
+            p = model.inv_link(tf.matmul(x, W) + b)
+            p = tf.squeeze(p)
+            ps += [p]
+
+        outputs = tf.pack(ps).eval()
 
         # Get data
         x, y = data['x'], data['y']
