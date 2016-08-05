@@ -192,16 +192,16 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     Parameters
     ----------
     loc_one : tf.Tensor
-        n-dimensional vector, or M x n-dimensional matrix where each
+        scalar, n-dimensional vector, or M x n-dimensional matrix where each
         row represents the mean of a n-dimensional Gaussian
     scale_one : tf.Tensor
-        n-dimensional vector, or M x n-dimensional matrix where each
+        scalar, n-dimensional vector, or M x n-dimensional matrix where each
         row represents the standard deviation of a n-dimensional Gaussian
     loc_two : tf.Tensor, optional
-        n-dimensional vector, or M x n-dimensional matrix where each
+        scalar, n-dimensional vector, or M x n-dimensional matrix where each
         row represents the mean of a n-dimensional Gaussian
     scale_two : tf.Tensor, optional
-        n-dimensional vector, or M x n-dimensional matrix where each
+        scalar, n-dimensional vector, or M x n-dimensional matrix where each
         row represents the standard deviation of a n-dimensional Gaussian
 
     Returns
@@ -240,7 +240,7 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
               tf.square((loc_two - loc_one)/scale_two) - \
               1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one)
 
-    if len(out.get_shape()) == 1: # vector
+    if len(out.get_shape()) <= 1: # scalar or vector
         return 0.5 * tf.reduce_sum(out)
     else: # matrix
         return 0.5 * tf.reduce_sum(out, 1)
