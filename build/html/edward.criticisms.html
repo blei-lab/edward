@@ -251,7 +251,9 @@ that data point per row.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>metrics</strong> (<em>list or str</em>) &#8211; List of metrics or a single metric.</li>
-<li><strong>model</strong> (<em>ed.Model</em>) &#8211; Probability model p(x, z)</li>
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; Probability model, a class object with an implemented
+<code class="docutils literal"><span class="pre">predict</span></code> method. PyMC3 and Stan models do not currently
+support this method.</li>
 <li><strong>variational</strong> (<em>ed.Variational</em>) &#8211; Variational approximation to the posterior p(z | x)</li>
 <li><strong>data</strong> (<em>dict</em>) &#8211; Data dictionary to evaluate model with. For TensorFlow,
 Python, and Stan models, the key type is a string; for PyMC3,
@@ -405,12 +407,14 @@ then we default to a prior predictive check (Box, 1980).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>model</strong> (<em>ed.Model</em>) &#8211; Class object that implements the <code class="docutils literal"><span class="pre">sample_likelihood</span></code> method</li>
+<li><strong>model</strong> (<em>ed.Model</em>) &#8211; Probability model, a class object with an implemented
+<code class="docutils literal"><span class="pre">sample_likelihood</span></code> method. If <code class="docutils literal"><span class="pre">variational</span></code> is not
+provided (i.e., a prior predictive check), <code class="docutils literal"><span class="pre">model</span></code> must also
+have a <code class="docutils literal"><span class="pre">sample_prior</span></code> method. PyMC3 and Stan models do not
+currently support either method.</li>
 <li><strong>variational</strong> (<em>ed.Variational, optional</em>) &#8211; Latent variable distribution q(z) to sample from. It is an
 approximation to the posterior, e.g., a variational
-approximation or an empirical distribution from MCMC samples.
-If not specified, samples will be obtained from the model
-through the <code class="docutils literal"><span class="pre">sample_prior</span></code> method.</li>
+approximation or an empirical distribution from MCMC samples.</li>
 <li><strong>data</strong> (<em>dict, optional</em>) &#8211; Observed data to compare to. If not specified, will return
 only the reference distribution with an assumed replicated
 data set size of 1. For TensorFlow, Python, and Stan models,

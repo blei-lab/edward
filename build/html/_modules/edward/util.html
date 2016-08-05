@@ -138,6 +138,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">control_flow_ops</span>
 
 <div class="viewcode-block" id="cumprod"><a class="viewcode-back" href="../../edward.util.html#edward.util.cumprod">[docs]</a><span class="k">def</span> <span class="nf">cumprod</span><span class="p">(</span><span class="n">xs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Cumulative product of a tensor along first dimension.</span>
@@ -146,14 +147,23 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x : tf.Tensor</span>
+<span class="sd">    xs : tf.Tensor</span>
 <span class="sd">        vector, matrix, or n-Tensor</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        A Tensor with ``cumprod`` applied along its first dimension.</span>
+<span class="sd">        A Tensor with `cumprod` applied along its first dimension.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the input has Inf or NaN values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">prev</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -184,7 +194,19 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        ``N``-vector</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the inputs have Inf or NaN values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">x</span>
         <span class="n">mat</span> <span class="o">=</span> <span class="n">y</span>
@@ -214,7 +236,6 @@
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span> <span class="c"># array</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">dim</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
-
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -234,6 +255,8 @@
     <span class="k">global</span> <span class="n">_ED_SESSION</span>
     <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
         <span class="n">_ED_SESSION</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">InteractiveSession</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_ED_SESSION</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">_ED_SESSION</span></div>
 
@@ -254,55 +277,64 @@
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        A matrix where each row is</span>
 <span class="sd">        .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the inputs have Inf or NaN values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c"># Calculate flattened vector grad_{xs} y.</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">grad</span> <span class="ow">in</span> <span class="n">grads</span><span class="p">]</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
-    <span class="c"># Loop over each element in the vector.</span>
-    <span class="n">mat</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">])</span>
 
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="c"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
-        <span class="n">gradjgrads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">xs</span><span class="p">)</span>
-        <span class="c"># Flatten into vector.</span>
-        <span class="n">hi</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)):</span>
-            <span class="n">hij</span> <span class="o">=</span> <span class="n">gradjgrads</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-            <span class="c"># return 0 if gradient doesn&#39;t exist; TensorFlow returns None</span>
-            <span class="k">if</span> <span class="n">hij</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-                <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">):</span>
+        <span class="c"># Calculate flattened vector grad_{xs} y.</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">grad</span> <span class="ow">in</span> <span class="n">grads</span><span class="p">]</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
+        <span class="c"># Loop over each element in the vector.</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">hij</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">hi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hij</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+            <span class="c"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
+            <span class="n">gradjgrads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">xs</span><span class="p">)</span>
+            <span class="c"># Flatten into vector.</span>
+            <span class="n">hi</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)):</span>
+                <span class="n">hij</span> <span class="o">=</span> <span class="n">gradjgrads</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
+                <span class="c"># return 0 if gradient doesn&#39;t exist; TensorFlow returns None</span>
+                <span class="k">if</span> <span class="n">hij</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+                    <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-        <span class="n">hi</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
-        <span class="n">mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
+                <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">hij</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">hi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hij</span><span class="p">)</span>
 
-    <span class="c"># Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
+            <span class="n">hi</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+            <span class="n">mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
+
+        <span class="c"># Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="kl_multivariate_normal"><a class="viewcode-back" href="../../edward.util.html#edward.util.kl_multivariate_normal">[docs]</a><span class="k">def</span> <span class="nf">kl_multivariate_normal</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">scale_one</span><span class="p">,</span> <span class="n">loc_two</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale_two</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="kl_multivariate_normal"><a class="viewcode-back" href="../../edward.util.html#edward.util.kl_multivariate_normal">[docs]</a><span class="k">def</span> <span class="nf">kl_multivariate_normal</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">scale_one</span><span class="p">,</span> <span class="n">loc_two</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale_two</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the KL of multivariate normal distributions with</span>
 <span class="sd">    diagonal covariances.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    loc_one : tf.Tensor</span>
-<span class="sd">        n-dimensional vector, or M x n-dimensional matrix where each</span>
+<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
 <span class="sd">        row represents the mean of a n-dimensional Gaussian</span>
 <span class="sd">    scale_one : tf.Tensor</span>
-<span class="sd">        n-dimensional vector, or M x n-dimensional matrix where each</span>
+<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
 <span class="sd">        row represents the standard deviation of a n-dimensional Gaussian</span>
 <span class="sd">    loc_two : tf.Tensor, optional</span>
-<span class="sd">        n-dimensional vector, or M x n-dimensional matrix where each</span>
+<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
 <span class="sd">        row represents the mean of a n-dimensional Gaussian</span>
 <span class="sd">    scale_two : tf.Tensor, optional</span>
-<span class="sd">        n-dimensional vector, or M x n-dimensional matrix where each</span>
+<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
 <span class="sd">        row represents the standard deviation of a n-dimensional Gaussian</span>
 
 <span class="sd">    Returns</span>
@@ -312,16 +344,39 @@
 <span class="sd">        ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``</span>
 <span class="sd">        for matrix inputs, outputs the vector</span>
 <span class="sd">        ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the location variables have Inf or NaN values, or if the scale</span>
+<span class="sd">        variables are not positive.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">loc_two</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">scale_two</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span>
-            <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">loc_one</span><span class="p">)</span> <span class="o">-</span> \
-            <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">))</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_two</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">scale_one</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)]</span>
+    <span class="n">loc_one</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">loc_one</span><span class="p">)</span>
+    <span class="n">scale_one</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">scale_one</span><span class="p">)</span>
+    <span class="n">loc_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">scale_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">scale_one</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">loc_two</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">scale_two</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="c"># With default arguments, we can avoid some intermediate computation.</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">loc_one</span><span class="p">)</span> <span class="o">-</span> \
+              <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span>
-            <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">scale_one</span><span class="o">/</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">+</span> \
-            <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">loc_two</span> <span class="o">-</span> <span class="n">loc_one</span><span class="p">)</span><span class="o">/</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> \
-            <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span></div>
+        <span class="n">loc_two</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">loc_two</span><span class="p">)</span>
+        <span class="n">scale_two</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">scale_two</span><span class="p">)</span>
+        <span class="n">loc_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">loc_two</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">scale_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">scale_two</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">scale_one</span><span class="o">/</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">+</span> \
+              <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">loc_two</span> <span class="o">-</span> <span class="n">loc_one</span><span class="p">)</span><span class="o">/</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> \
+              <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># scalar or vector</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># matrix</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="log_mean_exp"><a class="viewcode-back" href="../../edward.util.html#edward.util.log_mean_exp">[docs]</a><span class="k">def</span> <span class="nf">log_mean_exp</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -338,7 +393,16 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        scalar if vector input, vector if matrix tensor input</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the input has Inf or NaN values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)))))</span></div>
 
@@ -357,15 +421,22 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        scalar if vector input, vector if matrix tensor input</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the input has Inf or NaN values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)))))</span></div>
 
 
 <div class="viewcode-block" id="logit"><a class="viewcode-back" href="../../edward.util.html#edward.util.logit">[docs]</a><span class="k">def</span> <span class="nf">logit</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Evaluate :math:`\log(x / (1 - x))` elementwise.</span>
-
-<span class="sd">    Clips all elements to be between :math:`(0,1)`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -376,8 +447,17 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        size corresponding to size of input</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the input is not between :math:`(0,1)` elementwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_less</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
 
 
@@ -401,16 +481,35 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        scalar if vector input, rank-(n-1) if n-Tensor input</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the mean variables have Inf or NaN values, or if the scale</span>
+<span class="sd">        and length variables are not positive.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
-           <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> \
-                  <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span></div>
+            <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> \
+            <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="rbf"><a class="viewcode-back" href="../../edward.util.html#edward.util.rbf">[docs]</a><span class="k">def</span> <span class="nf">rbf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Squared-exponential kernel element-wise</span>
 
-<span class="sd">    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }</span>
+<span class="sd">    .. math:: k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x - y)^2 }</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -427,9 +526,28 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        size corresponding to size of input</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the mean variables have Inf or NaN values, or if the scale</span>
+<span class="sd">        and length variables are not positive.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
-           <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span></div>
+            <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="set_seed"><a class="viewcode-back" href="../../edward.util.html#edward.util.set_seed">[docs]</a><span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -449,6 +567,10 @@
 
 <span class="sd">    .. math:: \log(1 + \exp(x))</span>
 
+<span class="sd">    If input `x &lt; -30`, returns `0.0` exactly.</span>
+
+<span class="sd">    If input `x &gt; 30`, returns `x` exactly.</span>
+
 <span class="sd">    TensorFlow can&#39;t currently autodiff through ``tf.nn.softplus()``.</span>
 
 <span class="sd">    Parameters</span>
@@ -460,8 +582,25 @@
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        size corresponding to size of input</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the input has Inf or NaN values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="n">less_than_thirty</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">less</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mf">30.0</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">less_than_thirty</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">result</span><span class="p">)</span>
+
+    <span class="n">greater_than_thirty</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">greater</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">greater_than_thirty</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="stop_gradient"><a class="viewcode-back" href="../../edward.util.html#edward.util.stop_gradient">[docs]</a><span class="k">def</span> <span class="nf">stop_gradient</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -490,17 +629,26 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.tensor or np.array</span>
-<span class="sd">        scalar, vector, or matrix</span>
+<span class="sd">        vector, or matrix</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
 <span class="sd">        Same shape as input but with last dimension of size ``K``.</span>
 
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    InvalidArgumentError</span>
+<span class="sd">        If the input has Inf or NaN values.</span>
+
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    x as a 3d or higher tensor is not guaranteed to be supported.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

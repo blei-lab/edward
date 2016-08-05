@@ -150,7 +150,9 @@
 <span class="sd">    metrics : list or str</span>
 <span class="sd">        List of metrics or a single metric.</span>
 <span class="sd">    model : ed.Model</span>
-<span class="sd">        Probability model p(x, z)</span>
+<span class="sd">        Probability model, a class object with an implemented</span>
+<span class="sd">        ``predict`` method. PyMC3 and Stan models do not currently</span>
+<span class="sd">        support this method.</span>
 <span class="sd">    variational : ed.Variational</span>
 <span class="sd">        Variational approximation to the posterior p(z | x)</span>
 <span class="sd">    data : dict</span>
@@ -258,13 +260,15 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : ed.Model</span>
-<span class="sd">        Class object that implements the ``sample_likelihood`` method</span>
+<span class="sd">        Probability model, a class object with an implemented</span>
+<span class="sd">        ``sample_likelihood`` method. If ``variational`` is not</span>
+<span class="sd">        provided (i.e., a prior predictive check), ``model`` must also</span>
+<span class="sd">        have a ``sample_prior`` method. PyMC3 and Stan models do not</span>
+<span class="sd">        currently support either method.</span>
 <span class="sd">    variational : ed.Variational, optional</span>
 <span class="sd">        Latent variable distribution q(z) to sample from. It is an</span>
 <span class="sd">        approximation to the posterior, e.g., a variational</span>
 <span class="sd">        approximation or an empirical distribution from MCMC samples.</span>
-<span class="sd">        If not specified, samples will be obtained from the model</span>
-<span class="sd">        through the ``sample_prior`` method.</span>
 <span class="sd">    data : dict, optional</span>
 <span class="sd">        Observed data to compare to. If not specified, will return</span>
 <span class="sd">        only the reference distribution with an assumed replicated</span>
@@ -334,7 +338,7 @@
         <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">xreps</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">xreps</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">xreps</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span>
 
     <span class="n">Txreps</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">Txs</span> <span class="o">=</span> <span class="p">[]</span>

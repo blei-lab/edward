@@ -153,11 +153,13 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector, matrix, or n-Tensor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xs</strong> (<em>tf.Tensor</em>) &#8211; vector, matrix, or n-Tensor</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Tensor with <code class="docutils literal"><span class="pre">cumprod</span></code> applied along its first dimension.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Tensor with <cite>cumprod</cite> applied along its first dimension.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
 </tr>
 </tbody>
 </table>
@@ -182,7 +184,10 @@
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">N</span></code>-vector</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the inputs have Inf or NaN values.</p>
 </td>
 </tr>
 </tbody>
@@ -244,7 +249,10 @@ The variables can have different shapes.</li>
 .. math:: partial_{xs} ( [ partial_{xs} y ]_j ).</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the inputs have Inf or NaN values.</p>
 </td>
 </tr>
 </tbody>
@@ -253,7 +261,7 @@ The variables can have different shapes.</li>
 
 <dl class="function">
 <dt id="edward.util.kl_multivariate_normal">
-<code class="descclassname">edward.util.</code><code class="descname">kl_multivariate_normal</code><span class="sig-paren">(</span><em>loc_one</em>, <em>scale_one</em>, <em>loc_two=0</em>, <em>scale_two=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#kl_multivariate_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.kl_multivariate_normal" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.util.</code><code class="descname">kl_multivariate_normal</code><span class="sig-paren">(</span><em>loc_one</em>, <em>scale_one</em>, <em>loc_two=0.0</em>, <em>scale_two=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#kl_multivariate_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.kl_multivariate_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the KL of multivariate normal distributions with
 diagonal covariances.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -261,13 +269,13 @@ diagonal covariances.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>loc_one</strong> (<em>tf.Tensor</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+<li><strong>loc_one</strong> (<em>tf.Tensor</em>) &#8211; scalar, n-dimensional vector, or M x n-dimensional matrix where each
 row represents the mean of a n-dimensional Gaussian</li>
-<li><strong>scale_one</strong> (<em>tf.Tensor</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+<li><strong>scale_one</strong> (<em>tf.Tensor</em>) &#8211; scalar, n-dimensional vector, or M x n-dimensional matrix where each
 row represents the standard deviation of a n-dimensional Gaussian</li>
-<li><strong>loc_two</strong> (<em>tf.Tensor, optional</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+<li><strong>loc_two</strong> (<em>tf.Tensor, optional</em>) &#8211; scalar, n-dimensional vector, or M x n-dimensional matrix where each
 row represents the mean of a n-dimensional Gaussian</li>
-<li><strong>scale_two</strong> (<em>tf.Tensor, optional</em>) &#8211; n-dimensional vector, or M x n-dimensional matrix where each
+<li><strong>scale_two</strong> (<em>tf.Tensor, optional</em>) &#8211; scalar, n-dimensional vector, or M x n-dimensional matrix where each
 row represents the standard deviation of a n-dimensional Gaussian</li>
 </ul>
 </td>
@@ -278,7 +286,11 @@ for matrix inputs, outputs the vector
 <code class="docutils literal"><span class="pre">[KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one[m,:],</span> <span class="pre">scale_one[m,:])</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two[m,:],</span> <span class="pre">scale_two[m,:])</span> <span class="pre">)]_{m=1}^M</span></code></p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the location variables have Inf or NaN values, or if the scale
+variables are not positive.</p>
 </td>
 </tr>
 </tbody>
@@ -301,6 +313,8 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -321,6 +335,8 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
 </tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -329,7 +345,6 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <dt id="edward.util.logit">
 <code class="descclassname">edward.util.</code><code class="descname">logit</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#logit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.logit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate <span class="math">\(\log(x / (1 - x))\)</span> elementwise.</p>
-<p>Clips all elements to be between <span class="math">\((0,1)\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -339,6 +354,8 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input is not between <span class="math">\((0,1)\)</span> elementwise.</td>
 </tr>
 </tbody>
 </table>
@@ -365,7 +382,11 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">scalar if vector input, rank-(n-1) if n-Tensor input</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the mean variables have Inf or NaN values, or if the scale
+and length variables are not positive.</p>
 </td>
 </tr>
 </tbody>
@@ -377,7 +398,7 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <code class="descclassname">edward.util.</code><code class="descname">rbf</code><span class="sig-paren">(</span><em>x</em>, <em>y=0.0</em>, <em>sigma=1.0</em>, <em>l=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#rbf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.rbf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Squared-exponential kernel element-wise</p>
 <div class="math">
-\[k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x_i - y_i)^2 }\]</div>
+\[k(x, y) = \sigma^2 \exp{ -1/(2l^2) (x - y)^2 }\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -393,7 +414,11 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">size corresponding to size of input</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the mean variables have Inf or NaN values, or if the scale
+and length variables are not positive.</p>
 </td>
 </tr>
 </tbody>
@@ -420,6 +445,8 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <dd><p>Elementwise Softplus function</p>
 <div class="math">
 \[\log(1 + \exp(x))\]</div>
+<p>If input <cite>x &lt; -30</cite>, returns <cite>0.0</cite> exactly.</p>
+<p>If input <cite>x &gt; 30</cite>, returns <cite>x</cite> exactly.</p>
 <p>TensorFlow can&#8217;t currently autodiff through <code class="docutils literal"><span class="pre">tf.nn.softplus()</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -430,6 +457,8 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">size corresponding to size of input</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
 </tr>
 </tbody>
 </table>
@@ -462,11 +491,13 @@ using a backward stick breaking construction.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.tensor or np.array</em>) &#8211; scalar, vector, or matrix</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.tensor or np.array</em>) &#8211; vector, or matrix</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Same shape as input but with last dimension of size <code class="docutils literal"><span class="pre">K</span></code>.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
 </tr>
 </tbody>
 </table>
