@@ -20,6 +20,7 @@ import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
+from edward.datasets import simulate_regression_data
 
 
 class LinearModel:
@@ -74,7 +75,7 @@ ed.set_seed(42)
 model = LinearModel()
 variational = Variational()
 variational.add(Normal(model.n_vars))
-data = build_toy_dataset()
+data = simulate_regression_data(n_dims = 1)
 
 # Set up figure
 fig = plt.figure(figsize=(8,8), facecolor='white')

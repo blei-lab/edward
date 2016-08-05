@@ -20,6 +20,7 @@ import tensorflow as tf
 from edward.models import Variational, InvGamma, Normal
 from edward.stats import bernoulli, invgamma, multivariate_normal
 from edward.util import multivariate_rbf
+from edward.datasets import load_crabs_data
 
 
 class GaussianProcess:
@@ -78,10 +79,10 @@ class GaussianProcess:
 
 
 ed.set_seed(42)
-df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
-data = {'x': df[:, 1:], 'y': df[:, 0]}
 
-model = GaussianProcess(N=len(df))
+data = load_crabs_data(N=25)
+
+model = GaussianProcess(N=len(data['x']))
 variational = Variational()
 variational.add(Normal(model.n_vars))
 variational.add(InvGamma(1))
