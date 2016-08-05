@@ -17,8 +17,8 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, InvGamma, Normal
-from edward.stats import bernoulli, invgamma, multivariate_normal
+from edward.models import Variational, Normal
+from edward.stats import bernoulli, multivariate_normal
 from edward.util import multivariate_rbf
 
 
@@ -26,8 +26,8 @@ class GaussianProcess:
     """
     Gaussian process classification
 
-    p((x,y), z) = Bernoulli(y | logit^{-1}(w*z)) *
-                  Normal(w | 0, K) * InvGamma(l | 1, 1)
+    p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
+                  Normal(z | 0, K),
 
     where z are weights drawn from a GP with covariance given by k(x,
     x') for each pair of inputs (x, x'), and with squared-exponential
@@ -37,27 +37,30 @@ class GaussianProcess:
     ----------
     N : int
         Number of data points.
+    sigma : float, optional
+        Signal variance parameter.
     l : float, optional
         Length scale parameter.
     """
-    def __init__(self, N, sigma=1.0):
+    def __init__(self, N, sigma=1.0, l=1.0):
         self.N = N
         self.sigma = sigma
+        self.l = l
 
         self.n_vars = N
         self.inverse_link = tf.sigmoid
 
-    def kernel(self, x, l):
+    def kernel(self, x):
         mat = []
         for i in range(self.N):
             mat += [[]]
             xi = x[i, :]
             for j in range(self.N):
                 if j == i:
-                    mat[i] += [multivariate_rbf(xi, xi, self.sigma, l)]
+                    mat[i] += [multivariate_rbf(xi, xi, self.sigma, self.l)]
                 else:
                     xj = x[j, :]
-                    mat[i] += [multivariate_rbf(xi, xj, self.sigma, l)]
+                    mat[i] += [multivariate_rbf(xi, xj, self.sigma, self.l)]
 
             mat[i] = tf.pack(mat[i])
 
@@ -66,14 +69,10 @@ class GaussianProcess:
     def log_prob(self, xs, zs):
         """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        ws, ls = zs
-        log_prior = tf.pack(
-            [tf.reduce_sum(multivariate_normal.logpdf(ws, cov=self.kernel(x, tf.squeeze(l))))
-             for l in tf.unpack(ls)])
-        log_prior += tf.reduce_sum(invgamma.logpdf(ls, 1.0, 1.0), 1)
+        log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
         log_lik = tf.pack([tf.reduce_sum(
-            bernoulli.logpmf(y, self.inverse_link(tf.mul(y, w)))
-            ) for w in tf.unpack(ws)])
+            bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
+            ) for z in tf.unpack(zs)])
         return log_prior + log_lik
 
 
@@ -84,7 +83,6 @@ data = {'x': df[:, 1:], 'y': df[:, 0]}
 model = GaussianProcess(N=len(df))
 variational = Variational()
 variational.add(Normal(model.n_vars))
-variational.add(InvGamma(1))
 
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_samples=5)
+inference.run(n_iter=500)
