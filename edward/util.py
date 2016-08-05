@@ -246,15 +246,19 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
         return 0.5 * tf.reduce_sum(out, 1)
 
 
-def log_mean_exp(x):
-    """Compute the ``log_mean_exp`` of the elements in x.
+def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
+    """Compute the ``log_mean_exp`` of elements in a tensor, taking
+    the mean across axes given by ``reduction_indices``.
 
     Parameters
     ----------
-    x : tf.Tensor
-        vector or matrix with second dimension 1
-        shape=TensorShape([Dimension(N)])
-        shape=TensorShape([Dimension(N), Dimension(1)])
+    input_tensor : tf.Tensor
+        The tensor to reduce. Should have numeric type.
+    reduction_indices : int or list, optional
+        The dimensions to reduce. If `None` (the default), reduces all
+        dimensions.
+    keep_dims : bool, optional
+        If true, retains reduced dimensions with length 1.
 
     Returns
     -------
@@ -266,23 +270,28 @@ def log_mean_exp(x):
     InvalidArgumentError
         If the input has Inf or NaN values.
     """
-    dependencies = [tf.verify_tensor_all_finite(x, msg='')]
-    x = control_flow_ops.with_dependencies(dependencies, x)
-    x = tf.cast(x, dtype=tf.float32)
+    dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
+    input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
+    input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
-    x_max = tf.reduce_max(x)
-    return tf.add(x_max, tf.log(tf.reduce_mean(tf.exp(tf.sub(x, x_max)))))
+    x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
+    return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
+        tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
 
 
-def log_sum_exp(x):
-    """Compute the ``log_sum_exp`` of the elements in x.
+def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
+    """Compute the ``log_sum_exp`` of elements in a tensor, taking
+    the sum across axes given by ``reduction_indices``.
 
     Parameters
     ----------
-    x : tf.Tensor
-        vector or matrix with second dimension 1
-        shape=TensorShape([Dimension(N)])
-        shape=TensorShape([Dimension(N), Dimension(1)])
+    input_tensor : tf.Tensor
+        The tensor to reduce. Should have numeric type.
+    reduction_indices : int or list, optional
+        The dimensions to reduce. If `None` (the default), reduces all
+        dimensions.
+    keep_dims : bool, optional
+        If true, retains reduced dimensions with length 1.
 
     Returns
     -------
@@ -294,12 +303,13 @@ def log_sum_exp(x):
     InvalidArgumentError
         If the input has Inf or NaN values.
     """
-    dependencies = [tf.verify_tensor_all_finite(x, msg='')]
-    x = control_flow_ops.with_dependencies(dependencies, x);
-    x = tf.cast(x, dtype=tf.float32)
+    dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
+    input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor);
+    input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
-    x_max = tf.reduce_max(x)
-    return tf.add(x_max, tf.log(tf.reduce_sum(tf.exp(tf.sub(x, x_max)))))
+    x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
+    return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
+        tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
 
 
 def logit(x):
