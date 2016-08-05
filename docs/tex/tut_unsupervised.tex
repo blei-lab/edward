@@ -15,7 +15,7 @@ The script is available
 
 \subsubsection{Data}
 
-Use a simulated (pre-generated) dataset of datapoints
+Use a simulated dataset of 2-dimensional datapoints
 $\mathbf{x}_n\in\mathbb{R}^2$.
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N):
@@ -32,8 +32,9 @@ def build_toy_dataset(N):
     plt.show()
     return {'x': x}
 \end{lstlisting}
-TODO picture here
 
+We visualize the generated data points, colored by their cluster membership.
+\includegraphics[width=700px]{images/unsupervised-fig0.png}
 
 \subsubsection{Model}
 
@@ -149,6 +150,13 @@ gradient.
 For more details on inference, see the \href{tut_KLqp.html}{$\text{KL}(q\|p)$ tutorial}.
 
 
-\subsubsection{Criticism}
+%\subsubsection{Criticism}
 
-TODO picture of predicted memberships
+%We visualize the predicted memberships of each data point.
+%We pick the cluster assignment which produces
+%the highest log-likelihood for each data point.
+%First we output a K x N matrix of log-likelihoods, per
+%per-cluster assignment $k$ and per data-point $\mathbf{x}_n$. Then
+%take the $\arg\max$ along the rows.
+
+%\includegraphics[width=700px]{images/unsupervised-fig1.png}
