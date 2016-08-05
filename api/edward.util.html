@@ -299,21 +299,29 @@ variables are not positive.</p>
 
 <dl class="function">
 <dt id="edward.util.log_mean_exp">
-<code class="descclassname">edward.util.</code><code class="descname">log_mean_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#log_mean_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.log_mean_exp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the <code class="docutils literal"><span class="pre">log_mean_exp</span></code> of the elements in x.</p>
+<code class="descclassname">edward.util.</code><code class="descname">log_mean_exp</code><span class="sig-paren">(</span><em>input_tensor</em>, <em>reduction_indices=None</em>, <em>keep_dims=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#log_mean_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.log_mean_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <code class="docutils literal"><span class="pre">log_mean_exp</span></code> of elements in a tensor, taking
+the mean across axes given by <code class="docutils literal"><span class="pre">reduction_indices</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector or matrix with second dimension 1
-shape=TensorShape([Dimension(N)])
-shape=TensorShape([Dimension(N), Dimension(1)])</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_tensor</strong> (<em>tf.Tensor</em>) &#8211; The tensor to reduce. Should have numeric type.</li>
+<li><strong>reduction_indices</strong> (<em>int or list, optional</em>) &#8211; The dimensions to reduce. If <cite>None</cite> (the default), reduces all
+dimensions.</li>
+<li><strong>keep_dims</strong> (<em>bool, optional</em>) &#8211; If true, retains reduced dimensions with length 1.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, vector if matrix tensor input</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">scalar if vector input, vector if matrix tensor input</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -321,21 +329,29 @@ shape=TensorShape([Dimension(N), Dimension(1)])</td>
 
 <dl class="function">
 <dt id="edward.util.log_sum_exp">
-<code class="descclassname">edward.util.</code><code class="descname">log_sum_exp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#log_sum_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.log_sum_exp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the <code class="docutils literal"><span class="pre">log_sum_exp</span></code> of the elements in x.</p>
+<code class="descclassname">edward.util.</code><code class="descname">log_sum_exp</code><span class="sig-paren">(</span><em>input_tensor</em>, <em>reduction_indices=None</em>, <em>keep_dims=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#log_sum_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.log_sum_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <code class="docutils literal"><span class="pre">log_sum_exp</span></code> of elements in a tensor, taking
+the sum across axes given by <code class="docutils literal"><span class="pre">reduction_indices</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; vector or matrix with second dimension 1
-shape=TensorShape([Dimension(N)])
-shape=TensorShape([Dimension(N), Dimension(1)])</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_tensor</strong> (<em>tf.Tensor</em>) &#8211; The tensor to reduce. Should have numeric type.</li>
+<li><strong>reduction_indices</strong> (<em>int or list, optional</em>) &#8211; The dimensions to reduce. If <cite>None</cite> (the default), reduces all
+dimensions.</li>
+<li><strong>keep_dims</strong> (<em>bool, optional</em>) &#8211; If true, retains reduced dimensions with length 1.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scalar if vector input, vector if matrix tensor input</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">scalar if vector input, vector if matrix tensor input</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</p>
+</td>
 </tr>
 </tbody>
 </table>
