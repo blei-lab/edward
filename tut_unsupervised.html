@@ -96,7 +96,7 @@
 <p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math inline">\(\{x_n\}\)</span>.</p>
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>Use a simulated (pre-generated) dataset of 2-dimensional datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
+<p>Use a simulated dataset of 2-dimensional datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
     mus = [[1, 1], [-1, -1]]
