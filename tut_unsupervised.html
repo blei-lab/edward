@@ -96,7 +96,7 @@
 <p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math inline">\(\{x_n\}\)</span>.</p>
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>Use a simulated (pre-generated) dataset of datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
+<p>Use a simulated (pre-generated) dataset of 2-dimensional datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
     mus = [[1, 1], [-1, -1]]
@@ -110,7 +110,7 @@
 
     plt.show()
     return {&#39;x&#39;: x}</code></pre>
-<p>TODO picture here</p>
+<p>We visualize the generated data points, colored by their cluster membership. <img src="images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
 <p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="tut_mixture_gaussian">Mixture of Gaussians tutorial</a>.</p>
 <p>Here we build the model in Edward using TensorFlow, and set the number of mixture components to be 2.</p>
@@ -186,8 +186,6 @@ variational.add(InvGamma(model.K*model.D))</code></pre>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=500, n_samples=5, n_minibatch=5)</code></pre>
 <p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
-<h3 id="criticism">Criticism</h3>
-<p>TODO picture of predicted memberships</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
