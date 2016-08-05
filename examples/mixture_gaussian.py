@@ -98,24 +98,40 @@ class MixtureGaussian:
 
         return log_prior + tf.pack(log_lik)
 
+    def predict(self, xs, zs):
+        """Return matrix with log-likelihoods for each data point under each cluster, 
+        averaging over each set of latent variables z in zs."""
+        x = xs['x']
+        pi, mus, sigmas = zs
+        pi = tf.reduce_mean(pi, 0)
+        mus = tf.reduce_mean(mus, 0)
+        sigmas = tf.reduce_mean(sigmas, 0)
+
+        matrix = []
+        for k in range(self.K):
+            matrix += [multivariate_normal.logpdf(x,
+                               mus[(k*self.D):((k+1)*self.D)],
+                               sigmas[(k*self.D):((k+1)*self.D)])]
+
+        return tf.pack(matrix)
+
 
 def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
     mus = [[1, 1], [-1, -1]]
     stds = [[0.1, 0.1], [0.1, 0.1]]
     x = np.zeros((N, 2), dtype=np.float32)
-    colors = cm.rainbow(np.linspace(0, 1, 2))
     for n in range(N):
         k = np.argmax(np.random.multinomial(1, pi))
         x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
-        plt.scatter(x[n, 0], x[n, 1], color=colors[k])
-
-    plt.show()
     return {'x': x}
 
 
 ed.set_seed(42)
 data = build_toy_dataset(500)
+plt.scatter(data['x'][:, 0], data['x'][:, 1])
+plt.title("Artificial dataset")
+plt.show()
 
 model = MixtureGaussian(K=2, D=2)
 variational = Variational()
@@ -125,3 +141,8 @@ variational.add(InvGamma(model.K*model.D))
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
+
+clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data), axis=0)
+plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
+plt.title("Estimated cluster assignments")
+plt.show()
