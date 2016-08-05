@@ -184,7 +184,7 @@ class Bernoulli(object):
         """
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
-        return tf.mul(x, tf.log(p)) + tf.mul(1.0 - x, tf.log(1.0-p))
+        return x * tf.log(p) + (1.0 - x) * tf.log(1.0-p)
 
     def entropy(self, p):
         """Entropy of probability distribution
@@ -204,7 +204,7 @@ class Bernoulli(object):
             evaluates a row in the matrix.
         """
         p = tf.cast(p, dtype=tf.float32)
-        return -tf.mul(p, tf.log(p)) - tf.mul(1.0 - p, tf.log(1.0-p))
+        return -p * tf.log(p) - (1.0 - p) * tf.log(1.0-p)
 
 
 class Beta(object):
@@ -292,15 +292,15 @@ class Beta(object):
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
         if len(a.get_shape()) == 0:
             return tf.lbeta(tf.pack([a, b])) - \
-                   tf.mul(a - 1.0, tf.digamma(a)) - \
-                   tf.mul(b - 1.0, tf.digamma(b)) + \
-                   tf.mul(a + b - 2.0, tf.digamma(a+b))
+                   (a - 1.0) * tf.digamma(a) - \
+                   (b - 1.0) * tf.digamma(b) + \
+                   (a + b - 2.0) * tf.digamma(a+b)
         else:
             return tf.lbeta(tf.concat(1,
                          [tf.expand_dims(a, 1), tf.expand_dims(b, 1)])) - \
-                   tf.mul(a - 1.0, tf.digamma(a)) - \
-                   tf.mul(b - 1.0, tf.digamma(b)) + \
-                   tf.mul(a + b - 2.0, tf.digamma(a+b))
+                   (a - 1.0) * tf.digamma(a) - \
+                   (b - 1.0) * tf.digamma(b) + \
+                   (a + b - 2.0) * tf.digamma(a+b)
 
 
 class Binom(object):
@@ -364,7 +364,7 @@ class Binom(object):
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         return tf.lgamma(n + 1.0) - tf.lgamma(x + 1.0) - tf.lgamma(n - x + 1.0) + \
-               tf.mul(x, tf.log(p)) + tf.mul(n - x, tf.log(1.0-p))
+               x * tf.log(p) + (n - x) * tf.log(1.0-p)
 
     def entropy(self, n, p):
         """
@@ -428,8 +428,8 @@ class Chi2(object):
         """
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
-        return tf.mul(0.5*df - 1, tf.log(x)) - 0.5*x - \
-               tf.mul(0.5*df, tf.log(2.0)) - tf.lgamma(0.5*df)
+        return (0.5*df - 1) * tf.log(x) - 0.5*x - \
+               0.5*df * tf.log(2.0) - tf.lgamma(0.5*df)
 
     def entropy(self, df):
         """
@@ -493,9 +493,9 @@ class Dirichlet(object):
         x = tf.cast(x, dtype=tf.float32)
         alpha = tf.cast(alpha, dtype=tf.float32)
         if len(get_dims(x)) == 1:
-            return -tf.lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)))
+            return -tf.lbeta(alpha) + tf.reduce_sum((alpha-1) * tf.log(x))
         else:
-            return -tf.lbeta(alpha) + tf.reduce_sum(tf.mul(alpha-1, tf.log(x)), 1)
+            return -tf.lbeta(alpha) + tf.reduce_sum((alpha-1) * tf.log(x), 1)
 
     def entropy(self, alpha):
         """Entropy of probability distribution
@@ -519,14 +519,14 @@ class Dirichlet(object):
             K = get_dims(alpha)[0]
             a = tf.reduce_sum(alpha)
             return tf.lbeta(alpha) + \
-                   tf.mul(a - K, tf.digamma(a)) - \
-                   tf.reduce_sum(tf.mul(alpha-1, tf.digamma(alpha)))
+                   (a - K) * tf.digamma(a) - \
+                   tf.reduce_sum((alpha-1) * tf.digamma(alpha))
         else:
             K = get_dims(alpha)[1]
             a = tf.reduce_sum(alpha, 1)
             return tf.lbeta(alpha) + \
-                   tf.mul(a - K, tf.digamma(a)) - \
-                   tf.reduce_sum(tf.mul(alpha-1, tf.digamma(alpha)), 1)
+                   (a - K) * tf.digamma(a) - \
+                   tf.reduce_sum((alpha-1) * tf.digamma(alpha), 1)
 
 
 class Expon(object):
@@ -677,7 +677,7 @@ class Gamma(object):
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return a + tf.log(scale) + tf.lgamma(a) + \
-               tf.mul(1.0 - a, tf.digamma(a))
+               (1.0 - a) * tf.digamma(a)
 
 
 class Geom(object):
@@ -732,7 +732,7 @@ class Geom(object):
         """
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
-        return tf.mul(x-1, tf.log(1.0-p)) + tf.log(p)
+        return (x-1) * tf.log(1.0-p) + tf.log(p)
 
     def entropy(self, p):
         """
@@ -809,8 +809,8 @@ class InvGamma(object):
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
-        return tf.mul(a, tf.log(scale)) - tf.lgamma(a) + \
-               tf.mul(-a-1, tf.log(x)) - tf.truediv(scale, x)
+        return a * tf.log(scale) - tf.lgamma(a) + \
+               (-a-1) * tf.log(x) - scale / x
 
     def entropy(self, a, scale=1):
         """Entropy of probability distribution
@@ -967,11 +967,11 @@ class Multinomial(object):
         if len(get_dims(x)) == 1:
             return tf.lgamma(n + 1.0) - \
                    tf.reduce_sum(tf.lgamma(x + 1.0)) + \
-                   tf.reduce_sum(tf.mul(x, tf.log(p)))
+                   tf.reduce_sum(x * tf.log(p))
         else:
             return tf.lgamma(n + 1.0) - \
                    tf.reduce_sum(tf.lgamma(x + 1.0), 1) + \
-                   tf.reduce_sum(tf.mul(x, tf.log(p)), 1)
+                   tf.reduce_sum(x * tf.log(p), 1)
 
     def entropy(self, n, p):
         """TODO
@@ -991,7 +991,7 @@ class Multinomial(object):
             x = np.array([i for i in product(*(range(i+1) for i in max_range))
                                  if sum(i)==n])
             logpmf = self.logpmf(x, n, p)
-            return tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))
+            return tf.reduce_sum(tf.exp(logpmf) * logpmf)
         else:
             out = []
             for j in range(n.shape[0]):
@@ -1000,7 +1000,7 @@ class Multinomial(object):
                 x = np.array([i for i in product(*(range(i+1) for i in max_range))
                               if sum(i)==n[j]])
                 logpmf = self.logpmf(x, n[j], p[j, :])
-                out += [tf.reduce_sum(tf.mul(tf.exp(logpmf), logpmf))]
+                out += [tf.reduce_sum(tf.exp(logpmf) * logpmf)]
 
             return tf.pack(out)
 
@@ -1206,7 +1206,7 @@ class NBinom(object):
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         return tf.lgamma(x + n) - tf.lgamma(x + 1.0) - tf.lgamma(n) + \
-               tf.mul(n, tf.log(p)) + tf.mul(x, tf.log(1.0-p))
+               n * tf.log(p) + x * tf.log(1.0-p)
 
     def entropy(self, n, p):
         """
