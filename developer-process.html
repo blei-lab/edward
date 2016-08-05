@@ -134,7 +134,7 @@ twine upload dist/*</code></pre>
 git remote add public https://github.com/blei-lab/edward.git
 git pull public master # Creates a merge commit
 git push origin master</code></pre>
-<p>Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo as you develop (<code>git pull public master</code>). Make sure that as you’re running Edward, you’re using the Edward library pointing to the private repo so it reflects your developer changes and not pointed to the public repo where it won’t see any changes.</p>
+<p>Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo as you develop (<code>git pull public master</code>).</p>
 <p>Finally, to create a pull request from a private repo’s branch to the public repo, push the private branch to the public repo.</p>
 <pre class="JSON"><code>git clone https://github.com/blei-lab/edward.git
 cd edward
