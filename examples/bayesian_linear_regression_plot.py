@@ -95,7 +95,7 @@ for t in range(250):
         zs = rs.randn(10, qz.n_vars) * std + mean
         zs = tf.constant(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
-        x = tf.expand_dims(tf.constant(inputs), 1)
+        x = tf.expand_dims(inputs, 1)
         W = tf.expand_dims(zs[:, 0], 0)
         b = zs[:, 1]
         mus = tf.matmul(x, W) + b

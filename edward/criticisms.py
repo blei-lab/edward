@@ -14,7 +14,7 @@ def evaluate(metrics, latent_vars, data, y_true=None, model_wrapper=None, n_samp
 
     Parameters
     ----------
-    metrics : list or str
+    metrics : list of str or str
         List of metrics or a single metric.
     latent_vars : dict of str to RandomVariable
         Collection of random variables (of type `str`) binded to their
@@ -36,7 +36,7 @@ def evaluate(metrics, latent_vars, data, y_true=None, model_wrapper=None, n_samp
 
     Returns
     -------
-    list or float
+    list of float or float
         A list of evaluations or a single evaluation.
 
     Raises
@@ -152,7 +152,7 @@ def ppc(latent_vars, data=None, T=None, model_wrapper=None, n_samples=100):
 
     Returns
     -------
-    list
+    list of np.ndarray
         List containing the reference distribution, which is a Numpy
         vector of size elements,
 
@@ -200,7 +200,7 @@ def ppc(latent_vars, data=None, T=None, model_wrapper=None, n_samples=100):
         if x is None:
             return xreps
         else:
-            return [xreps, y]
+            return [xreps, x]
 
     Txreps = []
     Txs = []
