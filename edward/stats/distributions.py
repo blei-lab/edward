@@ -54,7 +54,7 @@ class Bernoulli(object):
         return x
 
     def logpmf(self, x, p):
-        """Logarithm of probability mass function.
+        """Log of the probability mass function.
 
         Parameters
         ----------
@@ -129,7 +129,7 @@ class Beta(object):
         return x
 
     def logpdf(self, x, a, b):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -224,7 +224,7 @@ class Binom(object):
         return x
 
     def logpmf(self, x, n, p):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -290,7 +290,7 @@ class Chi2(object):
         return x
 
     def logpdf(self, x, df):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -352,7 +352,7 @@ class Dirichlet(object):
         return x
 
     def logpdf(self, x, alpha):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -439,7 +439,7 @@ class Expon(object):
         return x
 
     def logpdf(self, x, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -507,7 +507,7 @@ class Gamma(object):
         return x
 
     def logpdf(self, x, a, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -586,7 +586,7 @@ class Geom(object):
         return x
 
     def logpmf(self, x, p):
-        """Logarithm of probability mass function.
+        """Log of the probability mass function.
 
         Parameters
         ----------
@@ -659,7 +659,7 @@ class InvGamma(object):
         return x
 
     def logpdf(self, x, a, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -739,7 +739,7 @@ class LogNorm(object):
         return x
 
     def logpdf(self, x, s):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -809,7 +809,7 @@ class Multinomial(object):
         return x
 
     def logpmf(self, x, n, p):
-        """Logarithm of probability mass function.
+        """Log of the probability mass function.
 
         Parameters
         ----------
@@ -919,7 +919,7 @@ class Multivariate_Normal(object):
         return x
 
     def logpdf(self, x, mean=None, cov=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -1047,7 +1047,7 @@ class NBinom(object):
         return x
 
     def logpmf(self, x, n, p):
-        """Logarithm of probability mass function.
+        """Log of the probability mass function.
 
         Parameters
         ----------
@@ -1117,7 +1117,7 @@ class Norm(object):
         return x
 
     def logpdf(self, x, loc=0, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -1193,7 +1193,7 @@ class Poisson(object):
         return x
 
     def logpmf(self, x, mu):
-        """Logarithm of probability mass function.
+        """Log of the probability mass function.
 
         Parameters
         ----------
@@ -1263,7 +1263,7 @@ class T(object):
         return x
 
     def logpdf(self, x, df, loc=0, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -1348,7 +1348,7 @@ class TruncNorm(object):
         return x
 
     def logpdf(self, x, a, b, loc=0, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
@@ -1434,7 +1434,7 @@ class Uniform(object):
         return x
 
     def logpdf(self, x, loc=0, scale=1):
-        """Logarithm of probability density function.
+        """Log of the probability density function.
 
         Parameters
         ----------
