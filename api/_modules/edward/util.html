@@ -141,19 +141,19 @@
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">control_flow_ops</span>
 
 <div class="viewcode-block" id="cumprod"><a class="viewcode-back" href="../../edward.util.html#edward.util.cumprod">[docs]</a><span class="k">def</span> <span class="nf">cumprod</span><span class="p">(</span><span class="n">xs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Cumulative product of a tensor along first dimension.</span>
+    <span class="sd">&quot;&quot;&quot;Cumulative product of a tensor along its outer dimension.</span>
 
 <span class="sd">    https://github.com/tensorflow/tensorflow/issues/813</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    xs : tf.Tensor</span>
-<span class="sd">        vector, matrix, or n-Tensor</span>
+<span class="sd">        A 1-D or higher tensor.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        A Tensor with `cumprod` applied along its first dimension.</span>
+<span class="sd">        A tensor with `cumprod` applied along its outer dimension.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -177,7 +177,7 @@
 
 
 <div class="viewcode-block" id="dot"><a class="viewcode-back" href="../../edward.util.html#edward.util.dot">[docs]</a><span class="k">def</span> <span class="nf">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute dot product between a Tensor matrix and a Tensor vector.</span>
+    <span class="sd">&quot;&quot;&quot;Compute dot product between a 2-D tensor and a 1-D tensor.</span>
 
 <span class="sd">    If x is a ``[M x N]`` matrix, then y is a ``M``-vector.</span>
 
@@ -186,14 +186,14 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.Tensor</span>
-<span class="sd">        ``M x N`` matrix or ``M`` vector (see above)</span>
+<span class="sd">        A 1-D or 2-D tensor (see above).</span>
 <span class="sd">    y : tf.Tensor</span>
-<span class="sd">        ``M`` vector or ``M x N`` matrix (see above)</span>
+<span class="sd">        A 1-D or 2-D tensor (see above).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        ``N``-vector</span>
+<span class="sd">        A 1-D tensor of length ``N``.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -223,11 +223,11 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.Tensor or np.ndarray</span>
-<span class="sd">        scalar, vector, matrix, or n-tensor</span>
+<span class="sd">        A n-D tensor.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    list</span>
+<span class="sd">    list of int</span>
 <span class="sd">        Python list containing dimensions of ``x``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
@@ -268,14 +268,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    y : tf.Tensor</span>
 <span class="sd">        Tensor to calculate Hessian of.</span>
-<span class="sd">    xs : list</span>
+<span class="sd">    xs : list of tf.Variable</span>
 <span class="sd">        List of TensorFlow variables to calculate with respect to.</span>
 <span class="sd">        The variables can have different shapes.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        A matrix where each row is</span>
+<span class="sd">        A 2-D tensor where each row is</span>
 <span class="sd">        .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).</span>
 
 <span class="sd">    Raises</span>
@@ -325,24 +325,25 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    loc_one : tf.Tensor</span>
-<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
-<span class="sd">        row represents the mean of a n-dimensional Gaussian</span>
+<span class="sd">        A 0-D tensor, 1-D tensor of length n, or 2-D tensor of shape M</span>
+<span class="sd">        x n where each row represents the mean of a n-dimensional</span>
+<span class="sd">        Gaussian.</span>
 <span class="sd">    scale_one : tf.Tensor</span>
-<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
-<span class="sd">        row represents the standard deviation of a n-dimensional Gaussian</span>
+<span class="sd">        A tensor of same shape as ``loc_one``, representing the</span>
+<span class="sd">        standard deviation.</span>
 <span class="sd">    loc_two : tf.Tensor, optional</span>
-<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
-<span class="sd">        row represents the mean of a n-dimensional Gaussian</span>
+<span class="sd">        A tensor of same shape as ``loc_one``, representing the</span>
+<span class="sd">        mean of another Gaussian.</span>
 <span class="sd">    scale_two : tf.Tensor, optional</span>
-<span class="sd">        scalar, n-dimensional vector, or M x n-dimensional matrix where each</span>
-<span class="sd">        row represents the standard deviation of a n-dimensional Gaussian</span>
+<span class="sd">        A tensor of same shape as ``loc_one``, representing the</span>
+<span class="sd">        standard deviation of another Gaussian.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        for scalar or vector inputs, outputs the scalar</span>
+<span class="sd">        For 0-D or 1-D tensor inputs, outputs the 0-D tensor</span>
 <span class="sd">        ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``</span>
-<span class="sd">        for matrix inputs, outputs the vector</span>
+<span class="sd">        For 2-D tensor inputs, outputs the 1-D tensor</span>
 <span class="sd">        ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``</span>
 
 <span class="sd">    Raises</span>
@@ -387,7 +388,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    input_tensor : tf.Tensor</span>
 <span class="sd">        The tensor to reduce. Should have numeric type.</span>
-<span class="sd">    reduction_indices : int or list, optional</span>
+<span class="sd">    reduction_indices : int or list of int, optional</span>
 <span class="sd">        The dimensions to reduce. If `None` (the default), reduces all</span>
 <span class="sd">        dimensions.</span>
 <span class="sd">    keep_dims : bool, optional</span>
@@ -396,7 +397,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        scalar if vector input, vector if matrix tensor input</span>
+<span class="sd">        The reduced tensor.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -420,7 +421,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    input_tensor : tf.Tensor</span>
 <span class="sd">        The tensor to reduce. Should have numeric type.</span>
-<span class="sd">    reduction_indices : int or list, optional</span>
+<span class="sd">    reduction_indices : int or list of int, optional</span>
 <span class="sd">        The dimensions to reduce. If `None` (the default), reduces all</span>
 <span class="sd">        dimensions.</span>
 <span class="sd">    keep_dims : bool, optional</span>
@@ -429,7 +430,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        scalar if vector input, vector if matrix tensor input</span>
+<span class="sd">        The reduced tensor.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -451,12 +452,12 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.Tensor</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor</span>
+<span class="sd">        A n-D tensor.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        size corresponding to size of input</span>
+<span class="sd">        A tensor of same shape as input.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -479,18 +480,20 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.Tensor</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor</span>
-<span class="sd">    y : Optional[tf.Tensor], default 0.0</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor</span>
-<span class="sd">    sigma : Optional[double], default 1.0</span>
-<span class="sd">        standard deviation of radial basis function</span>
-<span class="sd">    l : Optional[double], default 1.0</span>
-<span class="sd">        lengthscale of radial basis function</span>
+<span class="sd">        A n-D tensor.</span>
+<span class="sd">    y : tf.Tensor, optional</span>
+<span class="sd">        A tensor of same shape as ``x``.</span>
+<span class="sd">    sigma : tf.Tensor, optional</span>
+<span class="sd">        A 0-D tensor, representing the standard deviation of radial</span>
+<span class="sd">        basis function.</span>
+<span class="sd">    l : tf.Tensor, optional</span>
+<span class="sd">        A 0-D tensor, representing the lengthscale of radial basis</span>
+<span class="sd">        function.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        scalar if vector input, rank-(n-1) if n-Tensor input</span>
+<span class="sd">        A tensor of one less dimension than the input.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -512,8 +515,8 @@
     <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> \
-            <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span></div>
+           <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> \
+           <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="rbf"><a class="viewcode-back" href="../../edward.util.html#edward.util.rbf">[docs]</a><span class="k">def</span> <span class="nf">rbf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
@@ -524,18 +527,20 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.Tensor</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor</span>
-<span class="sd">    y : Optional[tf.Tensor], default 0.0</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor</span>
-<span class="sd">    sigma : Optional[double], default 1.0</span>
-<span class="sd">        standard deviation of radial basis function</span>
-<span class="sd">    l : Optional[double], default 1.0</span>
-<span class="sd">        lengthscale of radial basis function</span>
+<span class="sd">        A n-D tensor.</span>
+<span class="sd">    y : tf.Tensor, optional</span>
+<span class="sd">        A tensor of same shape as ``x``.</span>
+<span class="sd">    sigma : tf.Tensor, optional</span>
+<span class="sd">        A 0-D tensor, representing the standard deviation of radial</span>
+<span class="sd">        basis function.</span>
+<span class="sd">    l : tf.Tensor, optional</span>
+<span class="sd">        A 0-D tensor, representing the lengthscale of radial basis</span>
+<span class="sd">        function.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        size corresponding to size of input</span>
+<span class="sd">        A tensor of one less dimension than the input.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -557,7 +562,7 @@
     <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span></div>
+           <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="set_seed"><a class="viewcode-back" href="../../edward.util.html#edward.util.set_seed">[docs]</a><span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -586,12 +591,12 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : tf.Tensor</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor</span>
+<span class="sd">        A n-D tensor.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        size corresponding to size of input</span>
+<span class="sd">        A tensor of same shape as input.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -618,13 +623,13 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x : tf.Tensor or list</span>
-<span class="sd">        scalar, vector, matrix, or n-Tensor or list thereof</span>
+<span class="sd">    x : tf.Tensor or list of tf.Tensor</span>
+<span class="sd">        A n-D tensor or list thereof.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    tf.Tensor or list</span>
-<span class="sd">        size corresponding to size of input</span>
+<span class="sd">    tf.Tensor or list of tf.Tensor</span>
+<span class="sd">        A object of same type and shape as input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -638,13 +643,14 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x : tf.tensor or np.array</span>
-<span class="sd">        vector, or matrix</span>
+<span class="sd">    x : tf.Tensor</span>
+<span class="sd">        A 1-D or 2-D tensor.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        Same shape as input but with last dimension of size ``K``.</span>
+<span class="sd">        A tensor of same shape as input but with last dimension of</span>
+<span class="sd">        size ``K``.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -653,7 +659,7 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    x as a 3d or higher tensor is not guaranteed to be supported.</span>
+<span class="sd">    x as a 3-D or higher tensor is not guaranteed to be supported.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>

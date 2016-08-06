@@ -183,14 +183,14 @@
 <span class="sd">            Data dictionary. Each key is a data placeholder (Theano</span>
 <span class="sd">            shared variable) in the PyMC3 model, and its value is the</span>
 <span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">        zs : list of tf.Tensor or tf.Tensor</span>
+<span class="sd">            A list if multiple varational families, otherwise a</span>
+<span class="sd">            tf.Tensor if single variational family.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            A 1-D tensor of type tf.float32,</span>
 <span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
 
 <span class="sd">        Notes</span>
@@ -253,14 +253,14 @@
 <span class="sd">            Data dictionary. Each key names a data structure used in</span>
 <span class="sd">            the model (str), and its value is the corresponding</span>
 <span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">        zs : list of tf.Tensor or tf.Tensor</span>
+<span class="sd">            A list if multiple varational families, otherwise a</span>
+<span class="sd">            tf.Tensor if single variational family.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            A 1-D tensor of type tf.float32,</span>
 <span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
 
 <span class="sd">        Notes</span>
@@ -339,14 +339,14 @@
 <span class="sd">            Data dictionary. Each key and value is according to</span>
 <span class="sd">            the Stan program&#39;s data block. The key type is str; the</span>
 <span class="sd">            value type is any supported in the data block.</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">        zs : list of tf.Tensor or tf.Tensor</span>
+<span class="sd">            A list if multiple varational families, otherwise a</span>
+<span class="sd">            tf.Tensor if single variational family.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            S-vector of type tf.float32,</span>
+<span class="sd">            A 1-D tensor of type tf.float32,</span>
 <span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
 
 <span class="sd">        Notes</span>
@@ -471,11 +471,11 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list or tf.Tensor</span>
+<span class="sd">        list of tf.Tensor or tf.Tensor</span>
 <span class="sd">            If more than one layer, a list of tf.Tensors of dimension</span>
-<span class="sd">            (n x shape), one for each layer. If one layer, a</span>
-<span class="sd">            tf.Tensor of (n x shape). If a layer requires SciPy to</span>
-<span class="sd">            sample, its corresponding tensor is a tf.placeholder.</span>
+<span class="sd">            (n x shape), one for each layer. If one layer, a tf.Tensor</span>
+<span class="sd">            of (n x shape). If a layer requires SciPy to sample, its</span>
+<span class="sd">            corresponding tensor is a tf.placeholder.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -487,10 +487,10 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        xs : list or tf.Tensor or np.array</span>
-<span class="sd">            If more than one layer, a list of tf.Tensors or np.array&#39;s</span>
-<span class="sd">            of dimension (batch x shape). If one layer, a tf.Tensor or</span>
-<span class="sd">            np.array of (batch x shape).</span>
+<span class="sd">        xs : list of tf.Tensor or tf.Tensor</span>
+<span class="sd">            If more than one layer, a list of tf.Tensors of dimension</span>
+<span class="sd">            (batch x shape). If one layer, a tf.Tensor of (batch x</span>
+<span class="sd">            shape).</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>

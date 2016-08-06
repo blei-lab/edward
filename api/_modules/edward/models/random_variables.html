@@ -153,7 +153,7 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : tuple</span>
+<span class="sd">    shape : tuple of int</span>
 <span class="sd">        Shape of random variable(s); see below.</span>
 <span class="sd">    n_vars : int</span>
 <span class="sd">        The number of variables; equals the product of ``shape``.</span>
@@ -173,7 +173,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        shape : int, list, or tuple, optional</span>
+<span class="sd">        shape : int, list of int, or tuple of int, optional</span>
 <span class="sd">            Shape of random variable(s). If ``is_multivariate=True``,</span>
 <span class="sd">            then the inner-most (right-most) dimension indicates the</span>
 <span class="sd">            multivariate dimension. Otherwise, all dimensions are</span>
@@ -206,7 +206,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            A (n x shape) array of type tf.float32, where each</span>
+<span class="sd">            A (n x shape) tensor of type tf.float32, where each</span>
 <span class="sd">            slice along the first dimension is a sample from p.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
@@ -218,13 +218,13 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        xs : tf.Tensor or np.ndarray</span>
+<span class="sd">        xs : tf.Tensor</span>
 <span class="sd">            n x self.shape</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            A vector for each log density evaluation,</span>
+<span class="sd">            A 1-D tensor for each log density evaluation,</span>
 
 <span class="sd">            .. code-block:: none</span>
 
@@ -277,19 +277,19 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        idx : tuple</span>
+<span class="sd">        idx : tuple of int</span>
 <span class="sd">            Index of the random variable to take the log density of.</span>
 <span class="sd">            If univariate random variable, idx is of length</span>
 <span class="sd">            len(self.shape). If multivariate random variable, idx is of</span>
 <span class="sd">            length len(self.shape[:-1]); note if len(self.shape) is 1</span>
 <span class="sd">            for multivariate, then idx must be an empty tuple.</span>
-<span class="sd">        xs : tf.Tensor or np.ndarray</span>
-<span class="sd">            of size ``[n x self.shape]``</span>
+<span class="sd">        xs : tf.Tensor</span>
+<span class="sd">            n x self.shape</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            A vector</span>
+<span class="sd">            A 1-D tensor for each log density evaluation,</span>
 
 <span class="sd">            .. code-block:: none</span>
 
@@ -315,7 +315,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            scalar</span>
+<span class="sd">            A 0-D tensor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
 
@@ -614,7 +614,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    params : np.ndarray or tf.Tensor, optional</span>
+<span class="sd">    params : tf.Tensor, optional</span>
 <span class="sd">             If not specified, everything initialized to :math:`\mathcal{N}(0,1)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
@@ -655,7 +655,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        tf.Tensor</span>
-<span class="sd">            A vector where the jth element is 1 if xs[j, idx] is equal</span>
+<span class="sd">            A 1-D tensor where the jth element is 1 if xs[j, idx] is equal</span>
 <span class="sd">            to params[idx], 0 otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">full_idx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">None</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">idx</span> <span class="c"># slice over sample size</span>

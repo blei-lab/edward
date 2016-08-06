@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Developer Process</title>
+<title>Edward – Contributing</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -75,7 +75,7 @@
 <a class="button u-full-width" href="api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
 <a class="button2 u-full-width" href="design-philosophy">Design Philosophy</a>
-<a class="button2 u-full-width" href="developer-process">Developer Process</a>
+<a class="button2 u-full-width" href="contributing">Contributing</a>
 <a class="button2 u-full-width" href="troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="license">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
@@ -87,21 +87,27 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="developer-process">Developer Process</h2>
-<h3 id="standards">Standards</h3>
+<h2 id="contributing">Contributing</h2>
+<p>Interested in contributing to Edward? We appreciate all kinds of help!</p>
+<h3 id="bug-reports-feature-requests-user-related-questions">Bug reports, feature requests, user-related questions</h3>
+<p>Report any bugs in Edward’s <a href="https://github.com/blei-lab/edward/issues">Github issues</a>. We also appreciate feature requests so that we can prioritize development according to the users. We plan to have a mailing list for Edward users in the future, but for now also submit usage questions there.</p>
+<h3 id="pull-requests">Pull requests</h3>
+<p>We gladly welcome pull requests.</p>
+<p>Before making any changes, we recommend opening an issue (if it doesn’t already exist) and discussing your proposed changes. This will let us give you feedback on whether the changes should be made and advice on how they should be made. If the changes are minor, then feel free to make them without discussion.</p>
+<p>Want to contribute but not sure what to contribute? Here are two suggestions:</p>
+<ol>
+<li>Add a new example or tutorial. New scripts in the <a href="https://github.com/blei-lab/edward/tree/master/examples"><code>examples/</code></a> directory are easy to add. They can also get you acquainted with Edward’s developer process. Alternatively, add new tutorials to the <a href="tutorials">website</a> from the <a href="https://github.com/blei-lab/edward/tree/master/docs"><code>docs/tex/</code></a> directory.</li>
+<li>Solve one of Edward’s existing <a href="https://github.com/blei-lab/edward/issues">Github issues</a>. They range from low-level software bugs to higher-level design problems. One or two may pique your interest!</li>
+</ol>
+<p>To make changes, <a href="https://help.github.com/articles/working-with-forks/">fork the repo</a>. Write code in this fork with the following guidelines in mind:</p>
+<p><strong>Style guide.</strong> Follow <a href="https://www.tensorflow.org/versions/master/how_tos/style_guide.html">TensorFlow’s style guide</a> for writing code, which more or less follows PEP 8. Follow <a href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">NumPy’s documentation guide</a> for writing documention, and follow <a href="https://www.tensorflow.org/versions/master/how_tos/documentation/index.html">TensorFlow’s documentation guide</a> to describe TensorFlow tensors within the documentation.</p>
+<p>Exceptions are detailed as follows. These points may not even be exceptions but rather emphasize style guidelines you should be following from TensorFlow or PEP 8 anyways.</p>
 <ul>
-<li><strong>Pull request and branches.</strong> Contribute by developing on a clone of the repo and writing the code in a branch. Submit a pull request when ready.
-<p>For developers with push permission to the repo, see <a href="https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request">Stan’s process</a> for how to name branches. Do not merge your own pull requests or ever push to master. Someone should always review your code. After merging (or deciding to close the request without merging), always delete the branch from the repo.</p></li>
-<li><strong>Unit testing.</strong> Unit testing is awesome. It’s useful not only for checking code after having written it, but also in checking code as you are developing it. If you’re informally writing short scripts that output various things anyways, I suggest saving the file in the <code>tests/</code> directory. This gets the momentum going as the test becomes formalized. For testing, run <a href="http://doc.pytest.org/"><code>py.test tests/</code></a> in the repo. Most if not all pull requests should have unit tests.</li>
-<li><strong>Issue labeling system.</strong> We use <a href="https://github.com/stan-dev/stan/issues">Stan’s labeling system</a>. While several labels obviously don’t apply to us, it’s better than the default labels.</li>
-</ul>
-<h3 id="coding">Coding</h3>
-<ul>
-<li><strong>Style guidelines.</strong> Follow <a href="https://www.tensorflow.org/versions/r0.9/how_tos/style_guide.html">TensorFlow</a>, including its <a href="https://www.tensorflow.org/versions/r0.9/how_tos/documentation/index.html">documentation guidelines</a>. The only exceptions are detailed below. Some below are not necessarily exceptions but emphasize style guidelines you should be following from TensorFlow or PEP 8 anyways.</li>
 <li>Use four-space indents rather than two-space.</li>
 <li>Aim for 70 characters per line, with some exceptions.</li>
+<li>Trailing whitespace is the devil. Avoid it.</li>
 <li>To organize imports in a script, use three blocks: 1. any <code>from __future__ import [...]</code> lines; 2. any <code>import [...]</code> lines; and 3. any <code>from [...] import [...]</code> lines. Each block is separated by a blank line, and within each block the lines are sorted alphabetically.</li>
-<li>When writing functions with tensor inputs, convert to tensor (<code>tf.convert_to_tensor</code>) at the beginning. This enables support for any input type compatible with tensor conversion. Internally, always aim to work in float32: <code>tf.cast(, dtype=tf.float32)</code> will both do the casting and the tensor conversion. For methods that simply call other methods you may not need this casting or tensor conversion.</li>
+<li>When writing functions with tensor inputs, make sure the function supports any input type compatible with tensor conversion (see <code>tf.convert_to_tensor</code>). Internally, always aim to also work in float32. <code>tf.cast(x, dtype=tf.float32)</code> will both do the casting and the tensor conversion. For methods that simply call other methods you may not need this casting or tensor conversion.</li>
 <li>For arguments that are positive integers, use <code>n_</code>, e.g., <code>n_minibatch</code>, <code>n_print</code>, to represent “number of <span>[</span>…<span>]</span>”. For class attributes that are booleans, use <code>is_</code>, e.g., <code>is_reparameterized</code>, <code>is_multivariate</code>.</li>
 <li>Always prefer overloadable operators such as <code>x + y</code> over <code>tf.add(x, y)</code>. See <a href="http://stackoverflow.com/questions/37900780/in-tensorflow-what-is-the-difference-between-tf-add-and-operator">here</a> for an explanation.</li>
 <li>Use a blank line to separate the end of an indented procedure:
@@ -109,24 +115,18 @@
     do_stuff()
 
 more_code()</code></pre></li>
-<li><a href="http://programmers.stackexchange.com/questions/75919/should-package-names-be-singular-or-plural">Package names are almost always plural, with the exception of</a> <code>util.py</code>.</li>
 <li><code>edward.stats</code> uses SciPy standards. This includes, for example, the argument specification and the choice of how a distribution is parameterized. <code>edward.models</code> uses <code>tf.contrib.distributions</code> standards.</li>
-</ul>
-<h3 id="suggested-workflow">Suggested workflow</h3>
-<ul>
-<li><strong>Local installation.</strong> We recommend downloading and installing Edward locally. This enables any local changes you make to Edward to appear the next time you import Edward in a Python session. To install locally, run the following:
-<pre><code>git clone git@github.com:blei-lab/edward.git
-pip install -e edward</code></pre>
-<p>(We recommend not installing with <code>sudo</code>; rather <a href="http://docs.python-guide.org/en/latest/starting/install/osx/">use virtualenv</a>.)</p></li>
-<li><strong>Packaging and submitting to PyPI.</strong> First, update the version number in <code>setup.py</code>. Second, follow <a href="https://packaging.python.org/en/latest/distributing/#packaging-your-project">these steps</a>. For shorthand, the sequence of commands is
-<pre class="JSON"><code>python setup.py sdist
-python setup.py bdist_wheel
-twine upload dist/*</code></pre>
-<p>Third, tag the release on Github and note the new additions when tagging this release. You can do this by comparing commits from the previous tagged release to master. A link that compares tagged commits to master is available on the <a href="https://github.com/blei-lab/edward/releases">releases page</a>.</p></li>
 <li>In general, all remaining tasks to be completed are raised as Github issues. In other cases, write a TODO comment for things that need to be done but are so minor you’d rather not raise a Github issue; this can be helpful as you are writing code in a branch. None of the intermediate commits which have a TODO comment should still have that comment when submitting the pull request.</li>
 </ul>
-<h3 id="suggested-private-workflow">Suggested private workflow</h3>
-<p>To develop work on a branch privately, we suggest using a private repo that maintains the master branch from the public repo. Development happens on the private repo’s branch, and when it is finished, you can push it to the public repo’s branch to submit as a pull request. We describe this in detail.</p>
+<p><strong>Unit testing.</strong> Unit testing is awesome. It’s useful not only for checking code after having written it, but also in checking code as you are developing it. Most pull requests require unit tests. Follow <a href="https://www.tensorflow.org/versions/master/api_docs/python/test.html">TensorFlow’s testing guide</a>. To run the unit tests, we use <a href="http://doc.pytest.org/">py.test</a>: run <code>py.test tests/</code>. To run specific unit tests, call <code>py.test</code> individually, e.g., <code>py.test tests/test_metrics.py</code>.</p>
+<p>Submit the pull request whenever you’re ready. You can also submit an incomplete pull request to get intermediate feedback.</p>
+<h3 id="suggested-workflow">Suggested developer workflow</h3>
+<p>If you’re developing in Edward, we recommend downloading and installing Edward locally. This enables any local changes you make to Edward to appear the next time you import Edward in a Python session. To install locally, run the following:</p>
+<pre><code>git clone git@github.com:blei-lab/edward.git
+pip install -e edward</code></pre>
+<p>(We recommend not installing with <code>sudo</code>; rather <a href="http://docs.python-guide.org/en/latest/starting/install/osx/">use virtualenv</a>.)</p>
+<h3 id="suggested-private-workflow">Suggested private developer workflow</h3>
+<p>Sometimes it’s useful to work privately on Edward, such as for developing unpublished experiments. To do this, we suggest using a private repo that maintains the master branch from the Edward repo. Development happens on the private repo’s branch, and when it is finished, you can push it to a public repo’s branch and then submit a pull request. We describe this in detail.</p>
 <p>Clone the private repo so you can work on it (create a repo if it does not exist).</p>
 <pre class="JSON"><code>git clone https://github.com/blei-lab/edward-private.git</code></pre>
 <p>Pull changes from the public repo. This will let the private repo have the latest code from the public repo on its master branch.</p>
@@ -143,6 +143,16 @@ git checkout -b pull_request_yourname
 git pull private master
 git push origin pull_request_yourname</code></pre>
 <p>Now simply create a pull request via the Github UI on the public repo. Once project owners review the pull request, they can merge it. <a href="http://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private/30352360#30352360">Source</a></p>
+<h3 id="internal">Internal</h3>
+<ul>
+<li>For developers with push permission to Edward’s repo, see <a href="https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request">Stan’s process</a> for how to name branches. Do not merge your own pull requests or ever push to master. Someone should always review your code. After merging (or deciding to close the request without merging), always delete the branch from the repo.</li>
+<li><strong>Issue labeling system.</strong> We use <a href="https://github.com/stan-dev/stan/issues">Stan’s labeling system</a>. While several labels obviously don’t apply to us, it’s better than the default labels.</li>
+<li><strong>Packaging and submitting to PyPI.</strong> First, update the version number in <code>setup.py</code>. Second, follow <a href="https://packaging.python.org/en/latest/distributing/#packaging-your-project">these steps</a>. For shorthand, the sequence of commands is
+<pre class="JSON"><code>python setup.py sdist
+python setup.py bdist_wheel
+twine upload dist/*</code></pre>
+<p>Third, tag the release on Github and note the new additions when tagging this release. You can do this by comparing commits from the previous tagged release to master. A link that compares tagged commits to master is available on the <a href="https://github.com/blei-lab/edward/releases">releases page</a>.</p></li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
