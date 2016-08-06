@@ -8,19 +8,19 @@ import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops
 
 def cumprod(xs):
-    """Cumulative product of a tensor along first dimension.
+    """Cumulative product of a tensor along its outer dimension.
 
     https://github.com/tensorflow/tensorflow/issues/813
 
     Parameters
     ----------
     xs : tf.Tensor
-        vector, matrix, or n-Tensor
+        A 1-D or higher tensor.
 
     Returns
     -------
     tf.Tensor
-        A Tensor with `cumprod` applied along its first dimension.
+        A tensor with `cumprod` applied along its outer dimension.
 
     Raises
     ------
@@ -44,7 +44,7 @@ def cumprod(xs):
 
 
 def dot(x, y):
-    """Compute dot product between a Tensor matrix and a Tensor vector.
+    """Compute dot product between a 2-D tensor and a 1-D tensor.
 
     If x is a ``[M x N]`` matrix, then y is a ``M``-vector.
 
@@ -53,14 +53,14 @@ def dot(x, y):
     Parameters
     ----------
     x : tf.Tensor
-        ``M x N`` matrix or ``M`` vector (see above)
+        A 1-D or 2-D tensor (see above).
     y : tf.Tensor
-        ``M`` vector or ``M x N`` matrix (see above)
+        A 1-D or 2-D tensor (see above).
 
     Returns
     -------
     tf.Tensor
-        ``N``-vector
+        A 1-D tensor of length ``N``.
 
     Raises
     ------
@@ -90,11 +90,11 @@ def get_dims(x):
     Parameters
     ----------
     x : tf.Tensor or np.ndarray
-        scalar, vector, matrix, or n-tensor
+        A n-D tensor.
 
     Returns
     -------
-    list
+    list of int
         Python list containing dimensions of ``x``.
     """
     if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
@@ -135,14 +135,14 @@ def hessian(y, xs):
     ----------
     y : tf.Tensor
         Tensor to calculate Hessian of.
-    xs : list
+    xs : list of tf.Variable
         List of TensorFlow variables to calculate with respect to.
         The variables can have different shapes.
 
     Returns
     -------
     tf.Tensor
-        A matrix where each row is
+        A 2-D tensor where each row is
         .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).
 
     Raises
@@ -192,24 +192,25 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     Parameters
     ----------
     loc_one : tf.Tensor
-        scalar, n-dimensional vector, or M x n-dimensional matrix where each
-        row represents the mean of a n-dimensional Gaussian
+        A 0-D tensor, 1-D tensor of length n, or 2-D tensor of shape M
+        x n where each row represents the mean of a n-dimensional
+        Gaussian.
     scale_one : tf.Tensor
-        scalar, n-dimensional vector, or M x n-dimensional matrix where each
-        row represents the standard deviation of a n-dimensional Gaussian
+        A tensor of same shape as ``loc_one``, representing the
+        standard deviation.
     loc_two : tf.Tensor, optional
-        scalar, n-dimensional vector, or M x n-dimensional matrix where each
-        row represents the mean of a n-dimensional Gaussian
+        A tensor of same shape as ``loc_one``, representing the
+        mean of another Gaussian.
     scale_two : tf.Tensor, optional
-        scalar, n-dimensional vector, or M x n-dimensional matrix where each
-        row represents the standard deviation of a n-dimensional Gaussian
+        A tensor of same shape as ``loc_one``, representing the
+        standard deviation of another Gaussian.
 
     Returns
     -------
     tf.Tensor
-        for scalar or vector inputs, outputs the scalar
+        For 0-D or 1-D tensor inputs, outputs the 0-D tensor
         ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``
-        for matrix inputs, outputs the vector
+        For 2-D tensor inputs, outputs the 1-D tensor
         ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
 
     Raises
@@ -254,7 +255,7 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
     ----------
     input_tensor : tf.Tensor
         The tensor to reduce. Should have numeric type.
-    reduction_indices : int or list, optional
+    reduction_indices : int or list of int, optional
         The dimensions to reduce. If `None` (the default), reduces all
         dimensions.
     keep_dims : bool, optional
@@ -263,7 +264,7 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
     Returns
     -------
     tf.Tensor
-        scalar if vector input, vector if matrix tensor input
+        The reduced tensor.
 
     Raises
     ------
@@ -287,7 +288,7 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
     ----------
     input_tensor : tf.Tensor
         The tensor to reduce. Should have numeric type.
-    reduction_indices : int or list, optional
+    reduction_indices : int or list of int, optional
         The dimensions to reduce. If `None` (the default), reduces all
         dimensions.
     keep_dims : bool, optional
@@ -296,7 +297,7 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
     Returns
     -------
     tf.Tensor
-        scalar if vector input, vector if matrix tensor input
+        The reduced tensor.
 
     Raises
     ------
@@ -318,12 +319,12 @@ def logit(x):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor
+        A n-D tensor.
 
     Returns
     -------
     tf.Tensor
-        size corresponding to size of input
+        A tensor of same shape as input.
 
     Raises
     ------
@@ -346,18 +347,20 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor
-    y : Optional[tf.Tensor], default 0.0
-        scalar, vector, matrix, or n-Tensor
-    sigma : Optional[double], default 1.0
-        standard deviation of radial basis function
-    l : Optional[double], default 1.0
-        lengthscale of radial basis function
+        A n-D tensor.
+    y : tf.Tensor, optional
+        A tensor of same shape as ``x``.
+    sigma : tf.Tensor, optional
+        A 0-D tensor, representing the standard deviation of radial
+        basis function.
+    l : tf.Tensor, optional
+        A 0-D tensor, representing the lengthscale of radial basis
+        function.
 
     Returns
     -------
     tf.Tensor
-        scalar if vector input, rank-(n-1) if n-Tensor input
+        A tensor of one less dimension than the input.
 
     Raises
     ------
@@ -379,8 +382,8 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     l = tf.cast(l, dtype=tf.float32)
 
     return tf.pow(sigma, 2.0) * \
-            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
-            tf.reduce_sum(tf.pow(x - y , 2.0)))
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
+           tf.reduce_sum(tf.pow(x - y , 2.0)))
 
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
@@ -391,18 +394,20 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor
-    y : Optional[tf.Tensor], default 0.0
-        scalar, vector, matrix, or n-Tensor
-    sigma : Optional[double], default 1.0
-        standard deviation of radial basis function
-    l : Optional[double], default 1.0
-        lengthscale of radial basis function
+        A n-D tensor.
+    y : tf.Tensor, optional
+        A tensor of same shape as ``x``.
+    sigma : tf.Tensor, optional
+        A 0-D tensor, representing the standard deviation of radial
+        basis function.
+    l : tf.Tensor, optional
+        A 0-D tensor, representing the lengthscale of radial basis
+        function.
 
     Returns
     -------
     tf.Tensor
-        size corresponding to size of input
+        A tensor of one less dimension than the input.
 
     Raises
     ------
@@ -424,7 +429,7 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     l = tf.cast(l, dtype=tf.float32)
 
     return tf.pow(sigma, 2.0) * \
-            tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
+           tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
 
 
 def set_seed(x):
@@ -453,12 +458,12 @@ def softplus(x):
     Parameters
     ----------
     x : tf.Tensor
-        scalar, vector, matrix, or n-Tensor
+        A n-D tensor.
 
     Returns
     -------
     tf.Tensor
-        size corresponding to size of input
+        A tensor of same shape as input.
 
     Raises
     ------
@@ -485,13 +490,13 @@ def stop_gradient(x):
 
     Parameters
     ----------
-    x : tf.Tensor or list
-        scalar, vector, matrix, or n-Tensor or list thereof
+    x : tf.Tensor or list of tf.Tensor
+        A n-D tensor or list thereof.
 
     Returns
     -------
-    tf.Tensor or list
-        size corresponding to size of input
+    tf.Tensor or list of tf.Tensor
+        A object of same type and shape as input.
     """
     if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
         return tf.stop_gradient(x)
@@ -505,13 +510,14 @@ def to_simplex(x):
 
     Parameters
     ----------
-    x : tf.tensor or np.array
-        vector, or matrix
+    x : tf.Tensor
+        A 1-D or 2-D tensor.
 
     Returns
     -------
     tf.Tensor
-        Same shape as input but with last dimension of size ``K``.
+        A tensor of same shape as input but with last dimension of
+        size ``K``.
 
     Raises
     ------
@@ -520,7 +526,7 @@ def to_simplex(x):
 
     Notes
     -----
-    x as a 3d or higher tensor is not guaranteed to be supported.
+    x as a 3-D or higher tensor is not guaranteed to be supported.
     """
     dependencies = [tf.verify_tensor_all_finite(x, msg='')]
     x = control_flow_ops.with_dependencies(dependencies, x)

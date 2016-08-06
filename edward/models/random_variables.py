@@ -20,7 +20,7 @@ class RandomVariable(object):
 
     Attributes
     ----------
-    shape : tuple
+    shape : tuple of int
         Shape of random variable(s); see below.
     n_vars : int
         The number of variables; equals the product of ``shape``.
@@ -40,7 +40,7 @@ class RandomVariable(object):
 
         Parameters
         ----------
-        shape : int, list, or tuple, optional
+        shape : int, list of int, or tuple of int, optional
             Shape of random variable(s). If ``is_multivariate=True``,
             then the inner-most (right-most) dimension indicates the
             multivariate dimension. Otherwise, all dimensions are
@@ -73,7 +73,7 @@ class RandomVariable(object):
         Returns
         -------
         tf.Tensor
-            A (n x shape) array of type tf.float32, where each
+            A (n x shape) tensor of type tf.float32, where each
             slice along the first dimension is a sample from p.
         """
         raise NotImplementedError()
@@ -85,13 +85,13 @@ class RandomVariable(object):
 
         Parameters
         ----------
-        xs : tf.Tensor or np.ndarray
+        xs : tf.Tensor
             n x self.shape
 
         Returns
         -------
         tf.Tensor
-            A vector for each log density evaluation,
+            A 1-D tensor for each log density evaluation,
 
             .. code-block:: none
 
@@ -144,19 +144,19 @@ class RandomVariable(object):
 
         Parameters
         ----------
-        idx : tuple
+        idx : tuple of int
             Index of the random variable to take the log density of.
             If univariate random variable, idx is of length
             len(self.shape). If multivariate random variable, idx is of
             length len(self.shape[:-1]); note if len(self.shape) is 1
             for multivariate, then idx must be an empty tuple.
-        xs : tf.Tensor or np.ndarray
-            of size ``[n x self.shape]``
+        xs : tf.Tensor
+            n x self.shape
 
         Returns
         -------
         tf.Tensor
-            A vector
+            A 1-D tensor for each log density evaluation,
 
             .. code-block:: none
 
@@ -182,7 +182,7 @@ class RandomVariable(object):
         Returns
         -------
         tf.Tensor
-            scalar
+            A 0-D tensor.
         """
         raise NotImplementedError()
 
@@ -481,7 +481,7 @@ class PointMass(RandomVariable):
 
     Parameters
     ----------
-    params : np.ndarray or tf.Tensor, optional
+    params : tf.Tensor, optional
              If not specified, everything initialized to :math:`\mathcal{N}(0,1)`.
     """
     def __init__(self, shape=1, params=None):
@@ -522,7 +522,7 @@ class PointMass(RandomVariable):
         Returns
         -------
         tf.Tensor
-            A vector where the jth element is 1 if xs[j, idx] is equal
+            A 1-D tensor where the jth element is 1 if xs[j, idx] is equal
             to params[idx], 0 otherwise.
         """
         full_idx = (slice(0, None), ) + idx # slice over sample size
