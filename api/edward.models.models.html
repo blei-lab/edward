@@ -147,8 +147,218 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="edward-models-models-module">
-<h1>edward.models.models module<a class="headerlink" href="#edward-models-models-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-edward.models.models">
+<span id="edward-models-models-module"></span><h1>edward.models.models module<a class="headerlink" href="#module-edward.models.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="edward.models.models.PyMC3Model">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PyMC3Model</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#PyMC3Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.PyMC3Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Model wrapper for models written in PyMC3.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>pymc3.Model</em>) &#8211; The probability model, written with Theano shared
+variables to form any observations. The Theano shared
+variables are set during inference.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="edward.models.models.PyMC3Model.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#PyMC3Model.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.PyMC3Model.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Data dictionary. Each key is a data placeholder (Theano
+shared variable) in the PyMC3 model, and its value is the
+corresponding realization (np.ndarray or tf.Tensor).</li>
+<li><strong>zs</strong> (<em>list of tf.Tensor or tf.Tensor</em>) &#8211; A list if multiple varational families, otherwise a
+tf.Tensor if single variational family.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A 1-D tensor of type tf.float32,
+[log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It wraps around a Python function. The Python function takes
+inputs of type np.ndarray and outputs a np.ndarray.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.models.PythonModel">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">PythonModel</code><a class="reference internal" href="_modules/edward/models/models.html#PythonModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.PythonModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Model wrapper for models written in NumPy/SciPy.</p>
+<dl class="method">
+<dt id="edward.models.models.PythonModel.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#PythonModel.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.PythonModel.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Data dictionary. Each key names a data structure used in
+the model (str), and its value is the corresponding
+corresponding realization (np.ndarray or tf.Tensor).</li>
+<li><strong>zs</strong> (<em>list of tf.Tensor or tf.Tensor</em>) &#8211; A list if multiple varational families, otherwise a
+tf.Tensor if single variational family.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A 1-D tensor of type tf.float32,
+[log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It wraps around a Python function. The Python function takes
+inputs of type np.ndarray and outputs a np.ndarray.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.models.StanModel">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">StanModel</code><span class="sig-paren">(</span><em>model=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#StanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.StanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Model wrapper for models written in Stan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> (<em>pystan.StanModel, optional</em>) &#8211; An already compiled Stan model. This is useful to avoid
+recompilation of Stan models both within a session (using
+this argument) and across sessions (by loading a pickled
+pystan.StanModel object and passing it in here).
+Alternatively, one can also pickle the ed.StanModel object
+altogether.</li>
+<li><strong>*args</strong> &#8211; Passed into pystan.StanModel.</li>
+<li><strong>**kwargs</strong> &#8211; Passed into pystan.StanModel.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="edward.models.models.StanModel.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em>, <em>zs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#StanModel.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.StanModel.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xs</strong> (<em>dict</em>) &#8211; Data dictionary. Each key and value is according to
+the Stan program&#8217;s data block. The key type is str; the
+value type is any supported in the data block.</li>
+<li><strong>zs</strong> (<em>list of tf.Tensor or tf.Tensor</em>) &#8211; A list if multiple varational families, otherwise a
+tf.Tensor if single variational family.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A 1-D tensor of type tf.float32,
+[log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It wraps around a Python function. The Python function takes
+inputs of type np.ndarray and outputs a np.ndarray.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.models.models.Variational">
+<em class="property">class </em><code class="descclassname">edward.models.models.</code><code class="descname">Variational</code><span class="sig-paren">(</span><em>layers=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A container for collecting distribution objects.</p>
+<dl class="method">
+<dt id="edward.models.models.Variational.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer instance on top of the layer stack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> (<em>layer instance.</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational.entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xs</strong> (<em>list of tf.Tensor or tf.Tensor</em>) &#8211; If more than one layer, a list of tf.Tensors of dimension
+(batch x shape). If one layer, a tf.Tensor of (batch x
+shape).</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This method may be removed in the future in favor of indexable
+log_prob methods, e.g., for automatic Rao-Blackwellization.</p>
+<p>This method assumes each xs[l] in xs has the same batch size,
+i.e., dimensions (batch x shape) for fixed batch and varying
+shape.</p>
+<p>This method assumes length of xs == length of self.layers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.models.models.Variational.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/models.html#Variational.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.models.Variational.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws a mix of tensors and placeholders, corresponding to
+TensorFlow-based samplers and SciPy-based samplers depending
+on the layer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int, optional</em>) &#8211; Number of samples.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If more than one layer, a list of tf.Tensors of dimension
+(n x shape), one for each layer. If one layer, a tf.Tensor
+of (n x shape). If a layer requires SciPy to sample, its
+corresponding tensor is a tf.placeholder.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of tf.Tensor or tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
