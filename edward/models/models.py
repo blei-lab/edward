@@ -83,7 +83,17 @@ class PyMC3Model(object):
             # pass the tensors into tf.py_func.
             inp = [zs] + list(six.itervalues(xs))
 
-        return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
+        # Register gradient here rather than as a property in the
+        # class method. User has option to modify _py_log_prob_grad()
+        # and therefore modify this method's gradient.
+        tf.RegisterGradient("PythonModel_PyFunc_Grad")(self._py_log_prob_grad)
+        g = tf.get_default_graph()
+        # TODO which one is it? what is the name of the pyfunc op to
+        # be used in the dictionary?
+        #with g.gradient_override_map({'PyFunc': name}):
+        with g.gradient_override_map({"PythonModel_PyFunc": "PythonModel_PyFunc_Grad"}):
+            return tf.py_func(self._py_log_prob_args, inp, [tf.float32],
+                              name="PythonModel_PyFunc")[0]
 
     def _py_log_prob_args(self, zs, *args):
         # Set ``values`` to NumPy arrays that were passed in via
@@ -104,6 +114,13 @@ class PyMC3Model(object):
             lp[s] = self.logp(zs[s, :])
 
         return lp
+
+    # TODO is this still registered appropriately when the method is
+    # overwritten in a derived class?
+    @tf.RegisterGradient("PythonModel_PyFunc_Grad")
+    def _py_log_prob_grad(op, grad):
+        # TODO use PyMC3's autodiff; wrap around it with a py_func
+        pass
 
 
 class PythonModel(object):
@@ -153,6 +170,7 @@ class PythonModel(object):
             # pass the tensors into tf.py_func.
             inp = [zs] + list(six.itervalues(xs))
 
+        # TODO whatever is done in PyMC3Model
         return tf.py_func(self._py_log_prob_args, inp, [tf.float32])[0]
 
     def _py_log_prob_args(self, zs, *args):
@@ -169,6 +187,9 @@ class PythonModel(object):
     def _py_log_prob(self, xs, zs):
         raise NotImplementedError()
 
+    def _py_log_prob_grad(op, grad):
+        # TODO use autograd's autodiff; wrap around it with a py_func
+        pass
 
 class StanModel(object):
     """Model wrapper for models written in Stan.
@@ -226,6 +247,7 @@ class StanModel(object):
         if not self.is_initialized:
             self._initialize()
 
+        # TODO whatever is done in PyMC3Model
         return tf.py_func(self._py_log_prob, [zs], [tf.float32])[0]
 
     def _initialize(self):
@@ -267,6 +289,9 @@ class StanModel(object):
 
         return lp
 
+    def _py_log_prob_grad(op, grad):
+        # TODO use Stan's autodiff; wrap around it with a py_func
+        pass
 
 class Variational(object):
     """A container for collecting distribution objects."""
