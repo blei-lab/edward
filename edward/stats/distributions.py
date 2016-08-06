@@ -10,133 +10,24 @@ from itertools import product
 from scipy import stats
 
 
-class Distribution(object):
-    """Template for all distributions."""
-    def rvs(self, size=1):
-        """
-        Parameters
-        ----------
-        size : int, list, or tuple, optional
-            Number of samples, in a particular shape if specified in a
-            list or tuple with more than one element.
-
-        params : float or np.array
-
-        Returns
-        -------
-        np.ndarray
-            np.array of dimension (size x shape), where shape is the
-            shape of its parameter argument. For multivariate
-            distributions, shape may correspond to only one of the
-            parameter arguments, e.g., alpha in Dirichlet, p in
-            Multinomial, mean in Multivariate_Normal.
-
-        Notes
-        -----
-        This is written in NumPy/SciPy, as TensorFlow does not support
-        many distributions for random number generation. It follows
-        SciPy's naming and argument conventions. It does not support
-        taking in tf.Tensors as input.
-
-        The equivalent method in SciPy is not guaranteed to be
-        supported with a batch of parameter inputs, e.g., a vector of
-        location parameters in a normal distribution, or a matrix of
-        concentration parameters in a Dirichlet. This is.
-
-        This does not follow SciPy's behavior, e.g., the number (or
-        shape) of the draws will always be denoted by its outer
-        dimension(s).
-
-        params as a 2d or higher tensor is not guaranteed to be
-        supported (for either univariate or multivariate
-        distribution).
-
-        size as a list or tuple of more than one element is not
-        guaranteed to be supported.
-
-        For most distributions, the parameters must be of the same
-        shape and type, e.g., n and p in Binomial must be np.arrays()
-        of same shape or both floats. For some, they may differ by one
-        dimension, e.g., n and p in Multinomial can be float and
-        np.array(), or both np.arrays, and n always has one less
-        dimension.
-        """
-        raise NotImplementedError()
-
-    def logpmf(self, x):
-        """
-        Parameters
-        ---------
-        x : float, np.array or tf.Tensor
-            If univariate distribution, can be a scalar or tensor.
-            If multivariate distribution, can be a tensor; the outer
-            dimension carries the multivariate dimension.
-        params : float, np.array or tf.Tensor
-            scalar unless documented otherwise
-
-        Returns
-        -------
-        tf.Tensor
-            If univariate distribution, returns a tensor of same shape
-            as input. If multivariate distribution, returns a tensor
-            of shape[:-1] from input: the outer dimension representing
-            the multivariate dimension is collapsed.
-
-        Notes
-        -----
-        x as a 3d or higher tensor is not guaranteed to be supported
-        (for either univariate or multivariate distribution).
-        """
-        raise NotImplementedError()
-
-    def entropy(self):
-        """
-        Parameters
-        ---------
-        params : float, np.array or tf.Tensor
-            If univariate distribution, can be a scalar or vector.
-            If multivariate distribution, can be a vector or matrix.
-
-        Returns
-        -------
-        tf.Tensor
-            If univariate distribution, returns a tensor of same
-            shape as input.
-            If multivariate distribution, returns a tensor of
-            shape[-1] from input: the outer dimension representing the
-            multivariate dimension is collapsed.
-
-        Notes
-        -----
-        The equivalent method in SciPy is not guaranteed to be
-        supported for vector inputs for univariate distributions and
-        matrix inputs for multivariate distributions. This is.
-
-        params as a 2d or higher tensor is not guaranteed to be
-        supported for univariate distributions. params as a 3d or
-        higher tensor is not guaranteed to be supported for
-        multivariate distributions.
-        """
-        raise NotImplementedError()
-
-
 class Bernoulli(object):
-    """Bernoulli distribution
+    """Bernoulli distribution.
     """
     def rvs(self, p, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        p : float or np.array
-            constrained to :math:`p\in(0,1)`
+        p : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`p\in(0,1)`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
 
         Examples
         --------
@@ -163,69 +54,64 @@ class Bernoulli(object):
         return x
 
     def logpmf(self, x, p):
-        """Logarithm of probability mass function
+        """Logarithm of probability mass function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            If univariate distribution, can be a scalar, vector, or matrix.
-            If multivariate distribution, can be a vector or matrix.
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`
+        x : tf.Tensor
+            A n-D tensor.
+        p : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`p\in(0,1)`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
         return x * tf.log(p) + (1.0 - x) * tf.log(1.0-p)
 
     def entropy(self, p):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`
+        p : tf.Tensor
+            A n-D tensor with all elements constrained to
+            :math:`p\in(0,1)`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         p = tf.cast(p, dtype=tf.float32)
         return -p * tf.log(p) - (1.0 - p) * tf.log(1.0-p)
 
 
 class Beta(object):
-    """Beta distribution
+    """Beta distribution.
     """
     def rvs(self, a, b, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        a : float or np.array
-            constrained to :math:`a > 0`
-        b : float or np.array
-            constrained to :math:`b > 0`
+        a : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`a > 0`.
+        b : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`b > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
@@ -243,50 +129,47 @@ class Beta(object):
         return x
 
     def logpdf(self, x, a, b):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            If univariate distribution, can be a scalar, vector, or matrix.
-            If multivariate distribution, can be a vector or matrix.
-        a : float, np.array, tf.Tensor
-            constrained to :math:`a > 0`
-        b : float, np.array, tf.Tensor
-            constrained to :math:`b > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        a : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`a > 0`.
+        b : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`b > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
-        return (a-1) * tf.log(x) + (b-1) * tf.log(1-x) - tf.lbeta(tf.pack([a, b]))
+        return (a - 1.0) * tf.log(x) + \
+               (b - 1.0) * tf.log(1.0-x) - \
+               tf.lbeta(tf.pack([a, b]))
 
     def entropy(self, a, b):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        a : float, np.array, tf.Tensor
-            constrained to :math:`a > 0`
-        b : float, np.array, tf.Tensor
-            constrained to :math:`b > 0`
+        a : tf.Tensor
+            A n-D tensor with all elements constrained to :math:`a >
+            0`.
+        b : tf.Tensor
+            A n-D tensor with all elements constrained to :math:`b >
+            0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         a = tf.cast(tf.squeeze(a), dtype=tf.float32)
         b = tf.cast(tf.squeeze(b), dtype=tf.float32)
@@ -304,24 +187,26 @@ class Beta(object):
 
 
 class Binom(object):
-    """Binomial distribution
+    """Binomial distribution.
     """
     def rvs(self, n, p, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        n : int or np.array
-            constrained to :math:`n > 0`
-        p : float or np.array
-            constrained to :math:`p\in(0,1)`
+        n : int or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`n > 0`.
+        p : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`p\in(0,1)`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(n, np.ndarray):
             n = np.asarray(n)
@@ -339,26 +224,23 @@ class Binom(object):
         return x
 
     def logpmf(self, x, n, p):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            If univariate distribution, can be a scalar, vector, or matrix.
-            If multivariate distribution, can be a vector or matrix.
+        x : tf.Tensor
+            A n-D tensor.
         n : int
-            constrained to :math:`n > 0`
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`n > 0`.
+        p : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`p\in(0,1)`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
@@ -376,22 +258,23 @@ class Binom(object):
 
 
 class Chi2(object):
-    """:math:`\chi^2` distribution
+    """:math:`\chi^2` distribution.
     """
     def rvs(self, df, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        df : float or np.array
-            constrained to :math:`df > 0`
+        df : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`df > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(df, np.ndarray):
             df = np.asarray(df)
@@ -407,24 +290,20 @@ class Chi2(object):
         return x
 
     def logpdf(self, x, df):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            If univariate distribution, can be a scalar, vector, or matrix.
-            If multivariate distribution, can be a vector or matrix.
-        df : float, np.array, tf.Tensor
-            constrained to :math:`df > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        df : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`df > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
@@ -441,22 +320,23 @@ class Chi2(object):
 
 
 class Dirichlet(object):
-    """Dirichlet distribution
+    """Dirichlet distribution.
     """
     def rvs(self, alpha, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        alpha : np.array
-            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`
+        alpha : np.ndarray
+            1-D or 2-D tensor, with each :math:`\\alpha` constrained
+            to :math:`\\alpha_i > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if len(alpha.shape) == 1:
             # stats.dirichlet.rvs defaults to (size x alpha.shape)
@@ -472,80 +352,78 @@ class Dirichlet(object):
         return x
 
     def logpdf(self, x, alpha):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        alpha : np.array or tf.Tensor
-            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`
+        x : tf.Tensor
+            A n-D tensor for n > 1, where the inner (right-most)
+            dimension represents the multivariate dimension.
+        alpha : tf.Tensor
+            A tensor of same shape as ``x``, and with each
+            :math:`\\alpha` constrained to :math:`\\alpha_i > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of one dimension less than the input.
         """
         x = tf.cast(x, dtype=tf.float32)
         alpha = tf.cast(alpha, dtype=tf.float32)
-        if len(get_dims(x)) == 1:
-            return -tf.lbeta(alpha) + tf.reduce_sum((alpha-1) * tf.log(x))
+        multivariate_idx = len(get_dims(x)) - 1
+        if multivariate_idx == 0:
+            return -tf.lbeta(alpha) + tf.reduce_sum((alpha-1.0) * tf.log(x))
         else:
-            return -tf.lbeta(alpha) + tf.reduce_sum((alpha-1) * tf.log(x), 1)
+            return -tf.lbeta(alpha) + \
+                   tf.reduce_sum((alpha-1.0) * tf.log(x), multivariate_idx)
 
     def entropy(self, alpha):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        alpha : np.array or tf.Tensor
-            each :math:`\\alpha` constrained to :math:`\\alpha_i > 0`
+        alpha : tf.Tensor
+            A n-D tensor with each :math:`\\alpha` constrained to
+            :math:`\\alpha_i > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            A tensor of one dimension less than the input.
         """
         alpha = tf.cast(alpha, dtype=tf.float32)
-        if len(get_dims(alpha)) == 1:
-            K = get_dims(alpha)[0]
+        multivariate_idx = len(get_dims(alpha)) - 1
+        K = get_dims(alpha)[multivariate_idx]
+        if multivariate_idx == 0:
             a = tf.reduce_sum(alpha)
             return tf.lbeta(alpha) + \
                    (a - K) * tf.digamma(a) - \
-                   tf.reduce_sum((alpha-1) * tf.digamma(alpha))
+                   tf.reduce_sum((alpha-1.0) * tf.digamma(alpha))
         else:
-            K = get_dims(alpha)[1]
-            a = tf.reduce_sum(alpha, 1)
+            a = tf.reduce_sum(alpha, multivariate_idx)
             return tf.lbeta(alpha) + \
                    (a - K) * tf.digamma(a) - \
-                   tf.reduce_sum((alpha-1) * tf.digamma(alpha), 1)
+                   tf.reduce_sum((alpha-1.0) * tf.digamma(alpha), multivariate_idx)
 
 
 class Expon(object):
-    """Exponential distribution
+    """Exponential distribution.
     """
     def rvs(self, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        scale : float or np.array
-            constrained to :math:`scale > 0`
+        scale : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(scale, np.ndarray):
             scale = np.asarray(scale)
@@ -561,23 +439,20 @@ class Expon(object):
         return x
 
     def logpdf(self, x, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        scale : float, np.array, tf.Tensor
-            constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        scale : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
@@ -593,26 +468,28 @@ class Expon(object):
 
 
 class Gamma(object):
-    """Gamma distribution
+    """Gamma distribution.
 
     Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
     """
     def rvs(self, a, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        a : float or np.array
-            **shape** parameter: constrained to :math:`a > 0`
-        scale : float or np.array
-            **scale** parameter: constrained to :math:`scale > 0`
+        a : float or np.ndarray
+            **Shape** parameter. 0-D or 1-D tensor, with all elements
+            constrained to :math:`a > 0`.
+        scale : float or np.ndarray
+            **Scale** parameter. 0-D or 1-D tensor, with all elements
+            constrained to :math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
@@ -630,25 +507,23 @@ class Gamma(object):
         return x
 
     def logpdf(self, x, a, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`
-        scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        a : tf.Tensor
+            **Shape** parameter. A tensor of same shape as ``x``, and with
+            all elements constrained to :math:`a > 0`.
+        scale : tf.Tensor
+            **Scale** parameter. A tensor of same shape as ``x``, and with
+            all elements constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
@@ -656,23 +531,21 @@ class Gamma(object):
         return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - tf.lgamma(a)
 
     def entropy(self, a, scale=1):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`
-        scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`
+        a : tf.Tensor
+            **Shape** parameter. A n-D tensor with all elements
+            constrained to :math:`a > 0`.
+        scale : tf.Tensor
+            **Scale** parameter. A n-D tensor with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
@@ -681,22 +554,23 @@ class Gamma(object):
 
 
 class Geom(object):
-    """Geometric distribution
+    """Geometric distribution.
     """
     def rvs(self, p, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        p : float or np.array
-            constrained to :math:`p\in(0,1)`
+        p : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`p\in(0,1)`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(p, np.ndarray):
             p = np.asarray(p)
@@ -712,23 +586,20 @@ class Geom(object):
         return x
 
     def logpmf(self, x, p):
-        """Logarithm of probability mass function
+        """Logarithm of probability mass function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`
+        x : tf.Tensor
+            A n-D tensor.
+        p : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`p\in(0,1)`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
@@ -744,26 +615,28 @@ class Geom(object):
 
 
 class InvGamma(object):
-    """Inverse Gamma distribution
+    """Inverse Gamma distribution.
 
     Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
     """
     def rvs(self, a, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        a : float or np.array
-            **shape** parameter: constrained to :math:`a > 0`
-        scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`
+        a : float or np.ndarray
+            **Shape** parameter. 0-D or 1-D tensor, with all elements
+            constrained to :math:`a > 0`.
+        scale : float or np.ndarray
+            **Scale** parameter. 0-D or 1-D tensor, with all elements
+            constrained to :math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
@@ -786,50 +659,46 @@ class InvGamma(object):
         return x
 
     def logpdf(self, x, a, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`
-        scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        a : tf.Tensor
+            **Shape** parameter. A tensor of same shape as ``x``, and with
+            all elements constrained to :math:`a > 0`.
+        scale : tf.Tensor
+            **Scale** parameter. A tensor of same shape as ``x``, and with
+            all elements constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
         return a * tf.log(scale) - tf.lgamma(a) + \
-               (-a-1) * tf.log(x) - scale / x
+               (-a-1.0) * tf.log(x) - scale / x
 
     def entropy(self, a, scale=1):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        a : float, np.array, tf.Tensor
-            **shape** parameter: constrained to :math:`a > 0`
-        scale : float, np.array, tf.Tensor
-            **scale** parameter: constrained to :math:`scale > 0`
+        a : tf.Tensor
+            **Shape** parameter. A n-D tensor with all elements
+            constrained to :math:`a > 0`.
+        scale : tf.Tensor
+            **Scale** parameter. A n-D tensor with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar or vector
-            corresponding to the size of input. For multivariate
-            distributions, returns a scalar if vector input and vector
-            if matrix input, where each element in the vector
-            evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         a = tf.cast(a, dtype=tf.float32)
         scale = tf.cast(scale, dtype=tf.float32)
@@ -838,22 +707,23 @@ class InvGamma(object):
 
 
 class LogNorm(object):
-    """LogNormal distribution
+    """LogNormal distribution.
     """
     def rvs(self, s, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        s : float or np.array
-            constrained to :math:`s > 0`
+        s : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`s > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(s, np.ndarray):
             s = np.asarray(s)
@@ -869,23 +739,20 @@ class LogNorm(object):
         return x
 
     def logpdf(self, x, s):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        s : float, np.array, tf.Tensor
-            constrained to :math:`s > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        s : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`s > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         s = tf.cast(s, dtype=tf.float32)
@@ -902,26 +769,28 @@ class LogNorm(object):
 
 
 class Multinomial(object):
-    """Multinomial distribution
+    """Multinomial distribution.
 
     Note: there is no equivalent version implemented in SciPy.
     """
     def rvs(self, n, p, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        n : int or np.array
-            constrained to :math:`n > 0`
-        p : np.array
-            constrained to :math:`\sum_i p_k = 1`
+        n : int or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`n > 0`.
+        p : np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`\sum_i p_k = 1`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if len(p.shape) == 1:
             # np.random.multinomial defaults to (size x p.shape)
@@ -940,38 +809,40 @@ class Multinomial(object):
         return x
 
     def logpmf(self, x, n, p):
-        """Logarithm of probability mass function
+        """Logarithm of probability mass function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector of length K, where x[i] is the number of outcomes
-            in the ith bucket, or matrix with column length K
-        n : int, tf.Tensor
-            number of outcomes equal to sum x[i]
-        p : np.array, tf.Tensor
-            vector of probabilities summing to 1
+        x : tf.Tensor
+            A n-D tensor for n > 1, where the inner (right-most)
+            dimension represents the multivariate dimension. Each
+            element is the number of outcomes in a bucket and not a
+            one-hot.
+        n : tf.Tensor
+            A tensor of one less dimension than ``x``,
+            representing the number of outcomes, equal to sum x[i]
+            along the inner (right-most) dimension.
+        p : tf.Tensor
+            A tensor of one less dimension than ``x``, representing
+            probabilities which sum to 1.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of one dimension less than the input.
         """
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
         p = tf.cast(p, dtype=tf.float32)
-        if len(get_dims(x)) == 1:
+        multivariate_idx = len(get_dims(x)) - 1
+        if multivariate_idx == 0:
             return tf.lgamma(n + 1.0) - \
                    tf.reduce_sum(tf.lgamma(x + 1.0)) + \
                    tf.reduce_sum(x * tf.log(p))
         else:
             return tf.lgamma(n + 1.0) - \
-                   tf.reduce_sum(tf.lgamma(x + 1.0), 1) + \
-                   tf.reduce_sum(x * tf.log(p), 1)
+                   tf.reduce_sum(tf.lgamma(x + 1.0), multivariate_idx) + \
+                   tf.reduce_sum(x * tf.log(p), multivariate_idx)
 
     def entropy(self, n, p):
         """TODO
@@ -1006,24 +877,24 @@ class Multinomial(object):
 
 
 class Multivariate_Normal(object):
-    """Multivariate Normal distribution
+    """Multivariate Normal distribution.
     """
     def rvs(self, mean=None, cov=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        mean : np.array, optional
-            vector. Defaults to zero mean.
-        cov : np.array, optional
-            vector or matrix. Defaults to identity matrix.
+        mean : np.ndarray, optional
+            1-D tensor. Defaults to zero mean.
+        cov : np.ndarray, optional
+            1-D or 2-D tensor. Defaults to identity matrix.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if len(mean.shape) == 1:
             x = stats.multivariate_normal.rvs(mean, cov, size=size)
@@ -1048,25 +919,21 @@ class Multivariate_Normal(object):
         return x
 
     def logpdf(self, x, mean=None, cov=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        mean : np.array or tf.Tensor, optional
-            vector. Defaults to zero mean.
-        cov : np.array or tf.Tensor, optional
-            vector or matrix. Defaults to identity matrix.
+        x : tf.Tensor
+            A 1-D or 2-D tensor.
+        mean : tf.Tensor, optional
+            A 1-D tensor. Defaults to zero mean.
+        cov : tf.Tensor, optional
+            A 1-D or 2-D tensor. Defaults to identity matrix.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of one dimension less than the input.
         """
         x = tf.cast(x, dtype=tf.float32)
         x_shape = get_dims(x)
@@ -1112,25 +979,21 @@ class Multivariate_Normal(object):
             return tf.pack(out)
 
     def entropy(self, mean=None, cov=1):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         This is not vectorized with respect to any arguments.
 
         Parameters
         ----------
-        mean : np.array or tf.Tensor, optional
-            vector. Defaults to zero mean.
-        cov : np.array or tf.Tensor, optional
-            vector or matrix. Defaults to identity matrix.
+        mean : tf.Tensor, optional
+            A 1-D tensor. Defaults to zero mean.
+        cov : tf.Tensor, optional
+            A 1-D or 2-D tensor. Defaults to identity matrix.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of one dimension less than the input.
         """
         if cov is 1:
             d = 1
@@ -1147,24 +1010,26 @@ class Multivariate_Normal(object):
 
 
 class NBinom(object):
-    """Negative binomial distribution
+    """Negative binomial distribution.
     """
     def rvs(self, n, p, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        n : int or np.array
-            constrained to :math:`n > 0`
-        p : float or np.array
-            constrained to :math:`p\in(0,1)`
+        n : int or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`n > 0`.
+        p : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`p\in(0,1)`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(n, np.ndarray):
             n = np.asarray(n)
@@ -1182,25 +1047,23 @@ class NBinom(object):
         return x
 
     def logpmf(self, x, n, p):
-        """Logarithm of probability mass function
+        """Logarithm of probability mass function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
+        x : tf.Tensor
+            A n-D tensor.
         n : int
-            constrained to :math:`n > 0`
-        p : float, np.array, tf.Tensor
-            constrained to :math:`p\in(0,1)`
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`n > 0`.
+        p : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`p\in(0,1)`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         n = tf.cast(n, dtype=tf.float32)
@@ -1218,24 +1081,25 @@ class NBinom(object):
 
 
 class Norm(object):
-    """Normal (Gaussian) distribution
+    """Normal (Gaussian) distribution.
     """
     def rvs(self, loc=0, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        loc : float or np.array
-            mean
-        scale : float or np.array
-            standard deviation, constrained to :math:`scale > 0`
+        loc : float or np.ndarray
+            0-D or 1-D tensor.
+        scale : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(loc, np.ndarray):
             loc = np.asarray(loc)
@@ -1253,25 +1117,22 @@ class Norm(object):
         return x
 
     def logpdf(self, x, loc=0, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        loc : float, np.array, tf.Tensor
-            mean
-        scale : float, np.array, tf.Tensor
-            standard deviation, constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        loc : tf.Tensor
+            A tensor of same shape as ``x``.
+        scale : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         loc = tf.cast(loc, dtype=tf.float32)
@@ -1280,45 +1141,43 @@ class Norm(object):
         return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*tf.square(z)
 
     def entropy(self, loc=0, scale=1):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        loc : float, np.array, tf.Tensor
-            mean
-        scale : float, np.array, tf.Tensor
-            standard deviation, constrained to :math:`scale > 0`
+        loc : tf.Tensor
+            A n-D tensor.
+        scale : tf.Tensor
+            A n-D tensor with all elements constrained to :math:`scale
+            > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         scale = tf.cast(scale, dtype=tf.float32)
         return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
 
 
 class Poisson(object):
-    """Poisson distribution
+    """Poisson distribution.
     """
     def rvs(self, mu, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        mu : float or np.array
-            parameter, constrained to :math:`mu > 0`
+        mu : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`mu > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(mu, np.ndarray):
             mu = np.asarray(mu)
@@ -1334,23 +1193,20 @@ class Poisson(object):
         return x
 
     def logpmf(self, x, mu):
-        """Logarithm of probability mass function
+        """Logarithm of probability mass function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        mu : float, np.array, tf.Tensor
-            parameter, constrained to :math:`mu > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        mu : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`mu > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         mu = tf.cast(mu, dtype=tf.float32)
@@ -1369,23 +1225,25 @@ class T(object):
     """Student-t distribution.
     """
     def rvs(self, df, loc=0, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        df : float or np.array
-            constrained to :math:`df > 0`
-        loc : float or np.array
-            mean
-        scale : float or np.array
-            standard deviation, constrained to :math:`scale > 0`
+        df : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`df > 0`.
+        loc : float or np.ndarray
+            0-D or 1-D tensor.
+        scale : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(df, np.ndarray):
             df = np.asarray(df)
@@ -1405,27 +1263,25 @@ class T(object):
         return x
 
     def logpdf(self, x, df, loc=0, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        df : float, np.array, tf.Tensor
-            constrained to :math:`df > 0`
-        loc : float, np.array, tf.Tensor
-            mean
-        scale : float, np.array, tf.Tensor
-            standard deviation, constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        df : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`df > 0`.
+        loc : tf.Tensor
+            A tensor of same shape as ``x``.
+        scale : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         x = tf.cast(x, dtype=tf.float32)
         df = tf.cast(df, dtype=tf.float32)
@@ -1446,28 +1302,31 @@ class T(object):
 
 
 class TruncNorm(object):
-    """Truncated Normal (Gaussian) distribution
+    """Truncated Normal (Gaussian) distribution.
     """
     def rvs(self, a, b, loc=0, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        a : float or np.array
-            left boundary, with respect to the standard normal
-        b : float or np.array
-            right boundary, with respect to the standard normal
-        loc : float or np.array
-            mean
-        scale : float or np.array
-            standard deviation, constrained to :math:`scale > 0`
+        a : float or np.ndarray
+            Left boundary, with respect to the standard normal.
+            0-D or 1-D tensor.
+        b : float or np.ndarray
+            Right boundary, with respect to the standard normal.
+            0-D or 1-D tensor, and with ``b > a`` element-wise.
+        loc : float or np.ndarray
+            0-D or 1-D tensor.
+        scale : float or np.ndarray
+            0-D or 1-D tensor, with all elements constrained to
+            :math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(a, np.ndarray):
             a = np.asarray(a)
@@ -1489,29 +1348,29 @@ class TruncNorm(object):
         return x
 
     def logpdf(self, x, a, b, loc=0, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        a : float, np.array, tf.Tensor
-            left boundary, with respect to the standard normal
-        b : float, np.array, tf.Tensor
-            right boundary, with respect to the standard normal
-        loc : float, np.array, tf.Tensor
-            mean
-        scale : float, np.array, tf.Tensor
-            standard deviation, constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        a : tf.Tensor
+            Left boundary, with respect to the standard normal.
+            A tensor of same shape as ``x``.
+        b : tf.Tensor
+            Right boundary, with respect to the standard normal.
+            A tensor of same shape as ``x``, and with ``b > a``
+            element-wise.
+        loc : tf.Tensor
+            A tensor of same shape as ``x``.
+        scale : tf.Tensor
+            A tensor of same shape as ``x``, and with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         # Note there is no error checking if x is outside domain.
         x = tf.cast(x, dtype=tf.float32)
@@ -1542,21 +1401,22 @@ class Uniform(object):
     This distribution is constant between ``loc`` and ``loc + scale``
     """
     def rvs(self, loc=0, scale=1, size=1):
-        """Random variable generator
+        """Random variates.
 
         Parameters
         ----------
-        loc : float or np.array
-            left boundary
-        scale : float or np.array
-            width of distribution, constrained to :math:`scale > 0`
+        loc : float or np.ndarray
+            Left boundary. 0-D or 1-D tensor.
+        scale : float or np.ndarray
+            Width of distribution. 0-D or 1-D tensor, with all
+            elements constrained to math:`scale > 0`.
         size : int
-            number of random variable samples to return
+            Number of random variable samples to return.
 
         Returns
         -------
         np.ndarray
-            size-dimensional vector; scalar if size=1
+            A np.ndarray of dimensions size x shape.
         """
         if not isinstance(loc, np.ndarray):
             loc = np.asarray(loc)
@@ -1574,48 +1434,42 @@ class Uniform(object):
         return x
 
     def logpdf(self, x, loc=0, scale=1):
-        """Logarithm of probability density function
+        """Logarithm of probability density function.
 
         Parameters
         ----------
-        x : float, np.array, tf.Tensor
-            vector or matrix
-        loc : float, np.array, tf.Tensor
-            left boundary
-        scale : float, np.array, tf.Tensor
-            width of distribution, constrained to :math:`scale > 0`
+        x : tf.Tensor
+            A n-D tensor.
+        loc : tf.Tensor
+            Left boundary. A tensor of same shape as ``x``.
+        scale : tf.Tensor
+            Width of distribution. A tensor of same shape as ``x``,
+            and with all elements constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         # Note there is no error checking if x is outside domain.
         scale = tf.cast(scale, dtype=tf.float32)
-        return tf.squeeze(tf.ones(get_dims(x)) * -tf.log(scale))
+        return tf.ones(list(x.get_shape())) * -tf.log(scale)
 
     def entropy(self, loc=0, scale=1):
-        """Entropy of probability distribution
+        """Entropy of probability distribution.
 
         Parameters
         ----------
-        loc : float, np.array, tf.Tensor
-            left boundary
-        scale : float, np.array, tf.Tensor
-            width of distribution, constrained to :math:`scale > 0`
+        loc : tf.Tensor
+            Left boundary. A n-D tensor.
+        scale : tf.Tensor
+            Width of distribution. A n-D tensor, with all elements
+            constrained to :math:`scale > 0`.
 
         Returns
         -------
         tf.Tensor
-            For univariate distributions, returns a scalar, vector, or
-            matrix corresponding to the size of input. For
-            multivariate distributions, returns a scalar if vector
-            input and vector if matrix input, where each element in
-            the vector evaluates a row in the matrix.
+            A tensor of same shape as input.
         """
         scale = tf.cast(scale, dtype=tf.float32)
         return tf.log(scale)
