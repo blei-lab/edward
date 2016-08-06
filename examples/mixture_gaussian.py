@@ -28,6 +28,7 @@ from __future__ import print_function
 
 import edward as ed
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 import matplotlib.cm as cm
 import numpy as np
 import tensorflow as tf
@@ -99,7 +100,7 @@ class MixtureGaussian:
         return log_prior + tf.pack(log_lik)
 
     def predict(self, xs, zs):
-        """Return matrix with log-likelihoods for each data point under each cluster, 
+        """Return matrix with log-likelihoods for each data point under each cluster,
         averaging over each set of latent variables z in zs."""
         x = xs['x']
         pi, mus, sigmas = zs
@@ -124,13 +125,15 @@ def build_toy_dataset(N):
     for n in range(N):
         k = np.argmax(np.random.multinomial(1, pi))
         x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
+
     return {'x': x}
 
 
 ed.set_seed(42)
 data = build_toy_dataset(500)
 plt.scatter(data['x'][:, 0], data['x'][:, 1])
-plt.title("Artificial dataset")
+plt.axis([-3, 3, -3, 3])
+plt.title("Simulated dataset")
 plt.show()
 
 model = MixtureGaussian(K=2, D=2)
@@ -144,5 +147,6 @@ inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 
 clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data), axis=0)
 plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
-plt.title("Estimated cluster assignments")
+plt.axis([-3, 3, -3, 3])
+plt.title("Predicted cluster assignments")
 plt.show()
