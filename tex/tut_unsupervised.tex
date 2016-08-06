@@ -23,17 +23,21 @@ def build_toy_dataset(N):
     mus = [[1, 1], [-1, -1]]
     stds = [[0.1, 0.1], [0.1, 0.1]]
     x = np.zeros((N, 2), dtype=np.float32)
-    colors = cm.rainbow(np.linspace(0, 1, 2))
     for n in range(N):
         k = np.argmax(np.random.multinomial(1, pi))
         x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
-        plt.scatter(x[n, 0], x[n, 1], color=colors[k])
 
-    plt.show()
     return {'x': x}
+
+data = build_toy_dataset(500)
 \end{lstlisting}
 
-We visualize the generated data points, colored by their cluster membership.
+We visualize the generated data points.
+\begin{lstlisting}[language=Python]
+plt.scatter(data['x'][:, 0], data['x'][:, 1])
+plt.axis([-3, 3, -3, 3])
+plt.show()
+\end{lstlisting}
 \includegraphics[width=700px]{images/unsupervised-fig0.png}
 
 \subsubsection{Model}
@@ -137,11 +141,11 @@ variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))
 \end{lstlisting}
 
-Run mean-field variational inference for 500 iterations, using a batch
-of 5 datapoints and 5 latent variable samples per iteration.
+Run mean-field variational inference for 4000 iterations, using a batch
+of 10 datapoints and 50 latent variable samples per iteration.
 \begin{lstlisting}[language=Python]
 inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_samples=5, n_minibatch=5)
+inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 \end{lstlisting}
 In this case
 \texttt{MFVI} defaults to minimizing the
@@ -150,13 +154,47 @@ gradient.
 For more details on inference, see the \href{tut_KLqp}{$\text{KL}(q\|p)$ tutorial}.
 
 
-%\subsubsection{Criticism}
+\subsubsection{Criticism}
 
-%We visualize the predicted memberships of each data point.
-%We pick the cluster assignment which produces
-%the highest log-likelihood for each data point.
-%First we output a K x N matrix of log-likelihoods, per
-%per-cluster assignment $k$ and per data-point $\mathbf{x}_n$. Then
-%take the $\arg\max$ along the rows.
+We visualize the predicted memberships of each data point.
+We pick the cluster assignment which produces
+the highest log-likelihood for each data point.
+First we output a K x N matrix of log-likelihoods, per
+per-cluster assignment $k$ and per data-point $\mathbf{x}_n$.
 
-%\includegraphics[width=700px]{images/unsupervised-fig1.png}
+We do this by adding the \texttt{predict()} method in the
+probability model.
+\begin{lstlisting}[language=Python]
+class MixtureGaussian:
+    ...
+    def predict(self, xs, zs):
+        """Return matrix with log-likelihoods for each data point under each cluster,
+        averaging over each set of latent variables z in zs."""
+        x = xs['x']
+        pi, mus, sigmas = zs
+        pi = tf.reduce_mean(pi, 0)
+        mus = tf.reduce_mean(mus, 0)
+        sigmas = tf.reduce_mean(sigmas, 0)
+
+        matrix = []
+        for k in range(self.K):
+            matrix += [multivariate_normal.logpdf(x,
+                               mus[(k*self.D):((k+1)*self.D)],
+                               sigmas[(k*self.D):((k+1)*self.D)])]
+
+        return tf.pack(matrix)
+\end{lstlisting}
+Then we evaluate the log-likelihood on the training data
+and take the $\arg\max$ along the rows.
+\begin{lstlisting}[language=Python]
+clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data), axis=0)
+\end{lstlisting}
+
+Plot the data points, colored by their predicted membership.
+\begin{lstlisting}[language=Python]
+plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
+plt.axis([-3, 3, -3, 3])
+plt.show()
+\end{lstlisting}
+
+\includegraphics[width=700px]{images/unsupervised-fig1.png}

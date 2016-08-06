@@ -102,15 +102,18 @@
     mus = [[1, 1], [-1, -1]]
     stds = [[0.1, 0.1], [0.1, 0.1]]
     x = np.zeros((N, 2), dtype=np.float32)
-    colors = cm.rainbow(np.linspace(0, 1, 2))
     for n in range(N):
         k = np.argmax(np.random.multinomial(1, pi))
         x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
-        plt.scatter(x[n, 0], x[n, 1], color=colors[k])
 
-    plt.show()
-    return {&#39;x&#39;: x}</code></pre>
-<p>We visualize the generated data points, colored by their cluster membership. <img src="images/unsupervised-fig0.png" alt="image" width="700" /></p>
+    return {&#39;x&#39;: x}
+
+data = build_toy_dataset(500)</code></pre>
+<p>We visualize the generated data points.</p>
+<pre class="python" language="Python"><code>plt.scatter(data[&#39;x&#39;][:, 0], data[&#39;x&#39;][:, 1])
+plt.axis([-3, 3, -3, 3])
+plt.show()</code></pre>
+<p><img src="images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
 <p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="tut_mixture_gaussian">Mixture of Gaussians tutorial</a>.</p>
 <p>Here we build the model in Edward using TensorFlow, and set the number of mixture components to be 2.</p>
@@ -182,10 +185,38 @@ model = MixtureGaussian(K=2, D=2)</code></pre>
 variational.add(Dirichlet(model.K))
 variational.add(Normal(model.K*model.D))
 variational.add(InvGamma(model.K*model.D))</code></pre>
-<p>Run mean-field variational inference for 500 iterations, using a batch of 5 datapoints and 5 latent variable samples per iteration.</p>
+<p>Run mean-field variational inference for 4000 iterations, using a batch of 10 datapoints and 50 latent variable samples per iteration.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI(model, variational, data)
-inference.run(n_iter=500, n_samples=5, n_minibatch=5)</code></pre>
+inference.run(n_iter=4000, n_samples=50, n_minibatch=10)</code></pre>
 <p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<h3 id="criticism">Criticism</h3>
+<p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest log-likelihood for each data point. First we output a K x N matrix of log-likelihoods, per per-cluster assignment <span class="math inline">\(k\)</span> and per data-point <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
+<p>We do this by adding the <code>predict()</code> method in the probability model.</p>
+<pre class="python" language="Python"><code>class MixtureGaussian:
+    ...
+    def predict(self, xs, zs):
+        &quot;&quot;&quot;Return matrix with log-likelihoods for each data point under each cluster,
+        averaging over each set of latent variables z in zs.&quot;&quot;&quot;
+        x = xs[&#39;x&#39;]
+        pi, mus, sigmas = zs
+        pi = tf.reduce_mean(pi, 0)
+        mus = tf.reduce_mean(mus, 0)
+        sigmas = tf.reduce_mean(sigmas, 0)
+
+        matrix = []
+        for k in range(self.K):
+            matrix += [multivariate_normal.logpdf(x,
+                               mus[(k*self.D):((k+1)*self.D)],
+                               sigmas[(k*self.D):((k+1)*self.D)])]
+
+        return tf.pack(matrix)</code></pre>
+<p>Then we evaluate the log-likelihood on the training data and take the <span class="math inline">\(\arg\max\)</span> along the rows.</p>
+<pre class="python" language="Python"><code>clusters = np.argmax(ed.evaluate(&#39;log_likelihood&#39;, model, variational, data), axis=0)</code></pre>
+<p>Plot the data points, colored by their predicted membership.</p>
+<pre class="python" language="Python"><code>plt.scatter(data[&#39;x&#39;][:, 0], data[&#39;x&#39;][:, 1], c=clusters, cmap=cm.bwr)
+plt.axis([-3, 3, -3, 3])
+plt.show()</code></pre>
+<p><img src="images/unsupervised-fig1.png" alt="image" width="700" /></p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
