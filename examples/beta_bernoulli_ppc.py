@@ -50,5 +50,5 @@ data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=200)
 
-T = lambda x, z=None: tf.reduce_mean(x['x'])
+T = lambda x, z=None: tf.reduce_mean(tf.cast(x['x'], tf.float32))
 print(ed.ppc(model, variational, data, T))

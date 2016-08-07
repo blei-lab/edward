@@ -14,7 +14,7 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
 
     Parameters
     ----------
-    metrics : list or str
+    metrics : list of str or str
         List of metrics or a single metric.
     model : ed.Model
         Probability model, a class object with an implemented
@@ -37,7 +37,7 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
 
     Returns
     -------
-    list or float
+    list of float or float
         A list of evaluations or a single evaluation.
 
     Raises
@@ -154,7 +154,7 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
 
     Returns
     -------
-    list
+    list of np.ndarray
         List containing the reference distribution, which is a Numpy
         vector of size elements,
 
@@ -205,7 +205,7 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
         if x is None:
             return xreps
         else:
-            return [xreps, y]
+            return [xreps, x]
 
     Txreps = []
     Txs = []
