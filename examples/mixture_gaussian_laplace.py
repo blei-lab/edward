@@ -68,7 +68,7 @@ class MixtureGaussian:
 
     def log_prob(self, xs, zs):
         """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        N = get_dims(xs['x'])[0]
+        x = xs['x']
         pi, mus, sigmas = self.unpack_params(zs)
         log_prior = dirichlet.logpdf(pi, self.alpha)
         log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))

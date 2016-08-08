@@ -105,7 +105,7 @@ for t in range(600):
                               variational.layers[0].scale])
         rs = np.random.RandomState(0)
         zs = rs.randn(10, variational.n_vars) * std + mean
-        zs = tf.constant(zs, dtype=tf.float32)
+        zs = tf.convert_to_tensor(zs, dtype=tf.float32)
         inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
         x = tf.expand_dims(inputs, 1)
         m, n = model.weight_dim[0], model.weight_dim[1]

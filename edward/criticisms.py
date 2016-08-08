@@ -181,12 +181,13 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
         x = data
 
     # 1. Sample from posterior (or prior).
-    # We must fetch zs out of the session because sample_likelihood()
-    # may require a SciPy-based sampler.
+    # We fetch zs out of the session because sample_likelihood() may
+    # require a SciPy-based sampler.
     if variational is not None:
         zs = variational.sample(n_samples)
-        # This is to avoid fetching, e.g., a placeholder x with the
-        # dictionary {x: np.array()}. TensorFlow will raise an error.
+        # `tf.identity()` is to avoid fetching, e.g., a placeholder x
+        # when feeding the dictionary {x: np.array()}. TensorFlow will
+        # raise an error.
         if isinstance(zs, list):
             zs = [tf.identity(zs_elem) for zs_elem in zs]
         else:
@@ -195,7 +196,7 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
         zs = sess.run(zs)
     else:
         zs = model.sample_prior(n_samples)
-        zs = zs.eval()
+        zs = sess.run(zs)
 
     # 2. Sample from likelihood.
     xreps = model.sample_likelihood(zs, N)
