@@ -4,13 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-#sg = tf.contrib.bayesflow.stochastic_graph
-from edward.models.stochastic_graph import DistributionTensor
-class SG:
-    def __init__(self):
-        self.DistributionTensor = DistributionTensor
-
-sg = SG()
+sg = tf.contrib.bayesflow.stochastic_graph
 distributions = tf.contrib.distributions
 
 
@@ -155,6 +149,11 @@ class Beta(RandomVariable):
                                   a=a_lambda_fn(cond_set),
                                   b=b_lambda_fn(cond_set))
         super(Beta, self).__init__(lambda_fn, cond_set)
+
+
+# TODO (not supported in v0.10rc0)
+# + binomial
+# + multinomial
 
 
 class Categorical(RandomVariable):

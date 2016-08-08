@@ -12,15 +12,7 @@ import tensorflow as tf
 from edward.models import StanModel, Normal
 from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
 
-#sg = tf.contrib.bayesflow.stochastic_graph
-from edward.models.stochastic_graph import value_type, SampleAndReshapeValue, SampleValue
-class SG:
-    def __init__(self):
-        self.value_type = value_type
-        self.SampleAndReshapeValue = SampleAndReshapeValue
-        self.SampleValue = SampleValue
-
-sg = SG()
+sg = tf.contrib.bayesflow.stochastic_graph
 
 try:
     import prettytensor as pt
@@ -536,10 +528,10 @@ class MFVI(VariationalInference):
             qz_tensor = self.built_dict[qz]
             z_samples = qz_tensor.value() # (n_samples, shape) tensor
             # Sum over all dimensions except the one corresponding to n_samples.
-            q_log_prob += tf.reduce_sum(qz_tensor.distribution.log_pdf(z_samples),
+            q_log_prob += tf.reduce_sum(qz_tensor.distribution.log_prob(z_samples),
                                         range(1, len(qz_tensor.value().get_shape())))
             if self.model_wrapper is None:
-                p_log_prob += tf.reduce_sum(pz_tensor.distribution.log_pdf(z_samples),
+                p_log_prob += tf.reduce_sum(pz_tensor.distribution.log_prob(z_samples),
                                             range(1, len(pz_tensor.value().get_shape())))
 
         if self.model_wrapper is None:
@@ -552,7 +544,7 @@ class MFVI(VariationalInference):
                     shape = tuple([int(i) for i in obs.get_shape()])
                     obs = tf.reshape(obs, shape + (1,)*(len(px_tensor.value().get_shape())-1))
                     # Sum over all dimensions except the one corresponding to n_samples.
-                    p_log_prob += tf.reduce_sum(px_tensor.distribution.log_pdf(obs),
+                    p_log_prob += tf.reduce_sum(px_tensor.distribution.log_prob(obs),
                                                 [0] + range(2, len(px_tensor.value().get_shape())))
 
         self.loss = tf.reduce_mean(p_log_prob - q_log_prob)

@@ -15,29 +15,27 @@ def build_toy_dataset(N=40, noise_std=0.1):
     ed.set_seed(0)
     X  = np.concatenate([np.linspace(0, 2, num=N/2),
                          np.linspace(6, 8, num=N/2)])
-    y = 0.075*X + norm.rvs(0, noise_std, size=N)
+    y = 5.0*X + norm.rvs(0, noise_std, size=N)
     X = (X - 4.0) / 4.0
     X = X.reshape((N, 1))
     return X, y.astype(np.float32)
 
 
-N = 40
-p = 1
+N = 40 # num data points
+p = 1 # num features
 
-# probability model
 X = tf.placeholder(tf.float32, [N, p])
 z = Normal([tf.zeros(p), tf.ones(p)])
 y = Normal([z, tf.ones(N)],
            lambda cond_set: tf.matmul(X, cond_set[0]))
 
-# variational model
 mu = tf.Variable(tf.random_normal([p]))
 sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
 qz = Normal([mu, sigma])
 
-# inference
 data = {}
 data[X], data[y] = build_toy_dataset(N)
+
 inference = ed.MFVI({z: qz}, data)
 inference.initialize()
 
