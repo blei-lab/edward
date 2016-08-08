@@ -17,10 +17,10 @@ class RandomVariable(object):
 
     Attributes
     ----------
-    lambda_fn : function
-        Function of conditioning set, returning a stochastic tensor.
     conditioning_set : list
         Default inputs to stochastic tensor when building.
+    lambda_fn : function
+        Function of conditioning set, returning a stochastic tensor.
 
     Examples
     --------
@@ -35,9 +35,9 @@ class RandomVariable(object):
     initialized conditioning set. `sess.run(x_tensor)` returns samples
     from the generative process.
     """
-    def __init__(self, lambda_fn, conditioning_set):
-        self.lambda_fn = lambda_fn
+    def __init__(self, conditioning_set, lambda_fn):
         self.conditioning_set = conditioning_set
+        self.lambda_fn = lambda_fn
 
     def build(self, conditioning_set=None, built_dict=None, latent_vars=None):
         """Build tensor according to conditioning set.
@@ -131,7 +131,7 @@ class Bernoulli(RandomVariable):
         lambda_fn = lambda cond_set: \
             sg.DistributionTensor(distributions.Bernoulli,
                                   p=p_lambda_fn(cond_set))
-        super(Bernoulli, self).__init__(lambda_fn, cond_set)
+        super(Bernoulli, self).__init__(cond_set, lambda_fn)
 
 
 class Beta(RandomVariable):
@@ -148,7 +148,7 @@ class Beta(RandomVariable):
             sg.DistributionTensor(distributions.Beta,
                                   a=a_lambda_fn(cond_set),
                                   b=b_lambda_fn(cond_set))
-        super(Beta, self).__init__(lambda_fn, cond_set)
+        super(Beta, self).__init__(cond_set, lambda_fn)
 
 
 # TODO (not supported in v0.10rc0)
@@ -166,7 +166,7 @@ class Categorical(RandomVariable):
         lambda_fn = lambda cond_set: \
             sg.DistributionTensor(distributions.Categorical,
                                   logits=logits_lambda_fn(cond_set))
-        super(Categorical, self).__init__(lambda_fn, cond_set)
+        super(Categorical, self).__init__(cond_set, lambda_fn)
 
 
 class Chi2(RandomVariable):
@@ -179,7 +179,7 @@ class Chi2(RandomVariable):
         lambda_fn = lambda cond_set: \
             sg.DistributionTensor(distributions.Chi2,
                                   df=df_lambda_fn(cond_set))
-        super(Chi2, self).__init__(lambda_fn, cond_set)
+        super(Chi2, self).__init__(cond_set, lambda_fn)
 
 
 class Dirichlet(RandomVariable):
@@ -192,7 +192,7 @@ class Dirichlet(RandomVariable):
         lambda_fn = lambda cond_set: \
             sg.DistributionTensor(distributions.Dirichlet,
                                   alpha=alpha_lambda_fn(cond_set))
-        super(Dirichlet, self).__init__(lambda_fn, cond_set)
+        super(Dirichlet, self).__init__(cond_set, lambda_fn)
 
 
 class DirichletMultinomial(RandomVariable):
@@ -209,7 +209,7 @@ class DirichletMultinomial(RandomVariable):
             sg.DistributionTensor(distributions.DirichletMultinomial,
                                   n=n_lambda_fn(cond_set),
                                   alpha=alpha_lambda_fn(cond_set))
-        super(DirichletMultinomial, self).__init__(lambda_fn, cond_set)
+        super(DirichletMultinomial, self).__init__(cond_set, lambda_fn)
 
 
 class Exponential(RandomVariable):
@@ -222,7 +222,7 @@ class Exponential(RandomVariable):
         lambda_fn = lambda cond_set: \
             sg.DistributionTensor(distributions.Exponential,
                                   lam=lam_lambda_fn(cond_set))
-        super(Exponential, self).__init__(lambda_fn, cond_set)
+        super(Exponential, self).__init__(cond_set, lambda_fn)
 
 
 class Gamma(RandomVariable):
@@ -239,7 +239,7 @@ class Gamma(RandomVariable):
             sg.DistributionTensor(distributions.Gamma,
                                   alpha=alpha_lambda_fn(cond_set),
                                   beta=beta_lambda_fn(cond_set))
-        super(Gamma, self).__init__(lambda_fn, cond_set)
+        super(Gamma, self).__init__(cond_set, lambda_fn)
 
 
 class InverseGamma(RandomVariable):
@@ -256,7 +256,7 @@ class InverseGamma(RandomVariable):
             sg.DistributionTensor(distributions.InverseGamma,
                                   alpha=alpha_lambda_fn(cond_set),
                                   beta=beta_lambda_fn(cond_set))
-        super(InverseGamma, self).__init__(lambda_fn, cond_set)
+        super(InverseGamma, self).__init__(cond_set, lambda_fn)
 
 
 class Laplace(RandomVariable):
@@ -273,7 +273,7 @@ class Laplace(RandomVariable):
             sg.DistributionTensor(distributions.Laplace,
                                   loc=loc_lambda_fn(cond_set),
                                   scale=scale_lambda_fn(cond_set))
-        super(Laplace, self).__init__(lambda_fn, cond_set)
+        super(Laplace, self).__init__(cond_set, lambda_fn)
 
 
 class MultivariateMultivariateNormalCholeskyCholesky(RandomVariable):
@@ -290,7 +290,7 @@ class MultivariateMultivariateNormalCholeskyCholesky(RandomVariable):
             sg.DistributionTensor(distributions.MultivariateNormalCholesky,
                                   mu=mu_lambda_fn(cond_set),
                                   chol=chol_lambda_fn(cond_set))
-        super(MultivariateNormalCholesky, self).__init__(lambda_fn, cond_set)
+        super(MultivariateNormalCholesky, self).__init__(cond_set, lambda_fn)
 
 
 class MultivariateNormalDiag(RandomVariable):
@@ -307,7 +307,7 @@ class MultivariateNormalDiag(RandomVariable):
             sg.DistributionTensor(distributions.MultivariateNormalDiag,
                                   mu=mu_lambda_fn(cond_set),
                                   diag_stdev=diag_stdev_lambda_fn(cond_set))
-        super(MultivariateNormalDiag, self).__init__(lambda_fn, cond_set)
+        super(MultivariateNormalDiag, self).__init__(cond_set, lambda_fn)
 
 
 class MultivariateNormalDiagPlusVDVT(RandomVariable):
@@ -332,7 +332,7 @@ class MultivariateNormalDiagPlusVDVT(RandomVariable):
                                   diag_large=diag_large_lambda_fn(cond_set),
                                   v=v_lambda_fn(cond_set),
                                   diag_small=diag_small_lambda_fn(cond_set))
-        super(MultivariateNormalDiagPlutVDVT, self).__init__(lambda_fn, cond_set)
+        super(MultivariateNormalDiagPlutVDVT, self).__init__(cond_set, lambda_fn)
 
 
 class MultivariateNormalFull(RandomVariable):
@@ -349,7 +349,7 @@ class MultivariateNormalFull(RandomVariable):
             sg.DistributionTensor(distributions.MultivariateNormalFull,
                                   mu=mu_lambda_fn(cond_set),
                                   sigma=sigma_lambda_fn(cond_set))
-        super(MultivariateNormalFull, self).__init__(lambda_fn, cond_set)
+        super(MultivariateNormalFull, self).__init__(cond_set, lambda_fn)
 
 
 class Normal(RandomVariable):
@@ -373,7 +373,7 @@ class Normal(RandomVariable):
             sg.DistributionTensor(distributions.Normal,
                                   mu=mu_lambda_fn(cond_set),
                                   sigma=sigma_lambda_fn(cond_set))
-        super(Normal, self).__init__(lambda_fn, cond_set)
+        super(Normal, self).__init__(cond_set, lambda_fn)
 
 
 class StudentT(RandomVariable):
@@ -394,7 +394,7 @@ class StudentT(RandomVariable):
                                   df=df_lambda_fn(cond_set),
                                   mu=mu_lambda_fn(cond_set),
                                   sigma=sigma_lambda_fn(cond_set))
-        super(StudentT, self).__init__(lambda_fn, cond_set)
+        super(StudentT, self).__init__(cond_set, lambda_fn)
 
 
 class Uniform(RandomVariable):
@@ -411,4 +411,4 @@ class Uniform(RandomVariable):
             sg.DistributionTensor(distributions.Uniform,
                                   a=a_lambda_fn(cond_set),
                                   b=b_lambda_fn(cond_set))
-        super(Uniform, self).__init__(lambda_fn, cond_set)
+        super(Uniform, self).__init__(cond_set, lambda_fn)
