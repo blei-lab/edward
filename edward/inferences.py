@@ -538,14 +538,17 @@ class MFVI(VariationalInference):
             # Take log-densities over data.
             for px, obs in six.iteritems(self.data):
                 if not isinstance(px, tf.Tensor):
-                    # TODO don't call px
+                    # TODO don't call px as it can just be a
+                    # placeholder and not a random variable
                     px_tensor = self.built_dict[px]
-                    # reshape in order to broadcast along outer dimension
-                    shape = tuple([int(i) for i in obs.get_shape()])
-                    obs = tf.reshape(obs, shape + (1,)*(len(px_tensor.value().get_shape())-1))
+                    len_px_tensor = len(px_tensor.value().get_shape())
+                    # reshape `obs` in order to broadcast along outer dimension
+                    obs_shape = tuple([int(i) for i in obs.get_shape()])
+                    len_obs = len(obs_shape)
+                    obs = tf.reshape(obs, obs_shape + (1,)*(len_px_tensor-len_obs))
                     # Sum over all dimensions except the one corresponding to n_samples.
                     p_log_prob += tf.reduce_sum(px_tensor.distribution.log_prob(obs),
-                                                [0] + range(2, len(px_tensor.value().get_shape())))
+                                                range(len_obs) + range(len_obs, len_px_tensor))
 
         self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
         return -self.loss

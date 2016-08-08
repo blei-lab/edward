@@ -26,9 +26,10 @@ class RandomVariable(object):
     --------
     >>> mu = tf.constant([0.0])
     >>> sigma = tf.constant([1.0])
-    >>> x = RandomVariable(
-    ...   lambda mu, sigma: sg.DistributionTensor(distributions.Normal, mu=mu, sigma=sigma),
-    ...   [mu, sigma])
+    >>> x = RandomVariable([mu, sigma],
+    ...   lambda cond_set: sg.DistributionTensor(distributions.Normal,
+    ...                                          mu=cond_set[0],
+    ...                                          sigma=cond_set[1]))
     >>> x_tensor = x.build()
 
     `x.build()` builds the distribution tensor, defaulting to the
@@ -100,7 +101,8 @@ class RandomVariable(object):
                 else:
                     # Recursively build any RandomVariable's in
                     # the conditioning set.
-                    x_tensor = x.build(built_dict=built_dict)
+                    x_tensor = x.build(built_dict=built_dict,
+                                       latent_vars=latent_vars)
             else:
                 x_tensor = x
 

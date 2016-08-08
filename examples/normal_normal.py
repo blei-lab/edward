@@ -9,6 +9,8 @@ import tensorflow as tf
 
 from edward.models import Normal
 
+ed.set_seed(42)
+
 # probability model: Normal-Normal with known variance
 mu = tf.constant([0.0])
 sigma = tf.constant([1.0])

@@ -16,7 +16,6 @@ def build_toy_dataset(N=40, noise_std=0.1):
     X  = np.concatenate([np.linspace(0, 2, num=N/2),
                          np.linspace(6, 8, num=N/2)])
     y = 5.0*X + norm.rvs(0, noise_std, size=N)
-    X = (X - 4.0) / 4.0
     X = X.reshape((N, 1))
     return X, y.astype(np.float32)
 
@@ -24,10 +23,15 @@ def build_toy_dataset(N=40, noise_std=0.1):
 N = 40 # num data points
 p = 1 # num features
 
+ed.set_seed(42)
+
 X = tf.placeholder(tf.float32, [N, p])
 beta = Normal([tf.zeros(p), tf.ones(p)])
+# We require (input_size, n_samples) for y, so do (input_size, p) %*%
+# (p, n_samples).
+# TODO does this apply to non-stochastic inference approaches?
 y = Normal([beta, tf.ones(p)],
-           lambda cond_set: tf.matmul(X, cond_set[0]))
+           lambda cond_set: tf.matmul(X, cond_set[0], transpose_b=True))
 
 mu = tf.Variable(tf.random_normal([p]))
 sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
@@ -40,6 +44,6 @@ inference = ed.MFVI({beta: qbeta}, data)
 inference.initialize()
 
 sess = ed.get_session()
-for t in range(1000):
+for t in range(500):
     _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
     inference.print_progress(t, loss)
