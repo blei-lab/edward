@@ -25,18 +25,18 @@ N = 40 # num data points
 p = 1 # num features
 
 X = tf.placeholder(tf.float32, [N, p])
-z = Normal([tf.zeros(p), tf.ones(p)])
-y = Normal([z, tf.ones(N)],
+beta = Normal([tf.zeros(p), tf.ones(p)])
+y = Normal([beta, tf.ones(p)],
            lambda cond_set: tf.matmul(X, cond_set[0]))
 
 mu = tf.Variable(tf.random_normal([p]))
 sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
-qz = Normal([mu, sigma])
+qbeta = Normal([mu, sigma])
 
 data = {}
 data[X], data[y] = build_toy_dataset(N)
 
-inference = ed.MFVI({z: qz}, data)
+inference = ed.MFVI({beta: qbeta}, data)
 inference.initialize()
 
 sess = ed.get_session()
