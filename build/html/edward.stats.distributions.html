@@ -147,8 +147,1414 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="edward-stats-distributions-module">
-<h1>edward.stats.distributions module<a class="headerlink" href="#edward-stats-distributions-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-edward.stats.distributions">
+<span id="edward-stats-distributions-module"></span><h1>edward.stats.distributions module<a class="headerlink" href="#module-edward.stats.distributions" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="edward.stats.distributions.Bernoulli">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Bernoulli</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Bernoulli"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Bernoulli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Bernoulli distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Bernoulli.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Bernoulli.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Bernoulli.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor with all elements constrained to
+<span class="math">\(p\in(0,1)\)</span>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A tensor of same shape as input.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Bernoulli.logpmf">
+<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Bernoulli.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Bernoulli.logpmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability mass function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(p\in(0,1)\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Bernoulli.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Bernoulli.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Bernoulli.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(p\in(0,1)\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(1,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(1, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(3, 2)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Beta">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Beta</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Beta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Beta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Beta distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Beta.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Beta.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Beta.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor with all elements constrained to <span class="math">\(a &gt;
+0\)</span>.</li>
+<li><strong>b</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor with all elements constrained to <span class="math">\(b &gt;
+0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Beta.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Beta.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Beta.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>b</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(b &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Beta.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Beta.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Beta.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>b</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(b &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Binom">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Binom</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Binom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Binom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Binomial distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Binom.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Binom.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Binom.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Binom.logpmf">
+<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Binom.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Binom.logpmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>n</strong> (<em>int</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(n &gt; 0\)</span>.</li>
+<li><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(p\in(0,1)\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Binom.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>n</em>, <em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Binom.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Binom.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> (<em>int or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(n &gt; 0\)</span>.</li>
+<li><strong>p</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(p\in(0,1)\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Chi2">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Chi2</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Chi2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Chi2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p><span class="math">\(\chi^2\)</span> distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Chi2.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Chi2.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Chi2.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Chi2.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Chi2.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Chi2.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>df</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(df &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Chi2.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>df</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Chi2.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Chi2.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(df &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Dirichlet">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Dirichlet</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Dirichlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Dirichlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Dirichlet distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Dirichlet.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>alpha</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Dirichlet.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Dirichlet.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>alpha</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor with each <span class="math">\(\alpha\)</span> constrained to
+<span class="math">\(\alpha_i &gt; 0\)</span>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A tensor of one dimension less than the input.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Dirichlet.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>alpha</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Dirichlet.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Dirichlet.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor for n &gt; 1, where the inner (right-most)
+dimension represents the multivariate dimension.</li>
+<li><strong>alpha</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with each
+<span class="math">\(\alpha\)</span> constrained to <span class="math">\(\alpha_i &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Dirichlet.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>alpha</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Dirichlet.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Dirichlet.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>alpha</strong> (<em>np.ndarray</em>) &#8211; 1-D or 2-D tensor, with each <span class="math">\(\alpha\)</span> constrained
+to <span class="math">\(\alpha_i &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Expon">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Expon</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Expon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Expon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Exponential distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Expon.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Expon.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Expon.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Expon.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Expon.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Expon.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Expon.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Expon.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Expon.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(scale &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Gamma">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Gamma</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Gamma distribution.</p>
+<p>Shape/scale parameterization (typically denoted: <span class="math">\((k, \theta)\)</span>)</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Gamma.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>a</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Gamma.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Gamma.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; <strong>Shape</strong> parameter. A n-D tensor with all elements
+constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; <strong>Scale</strong> parameter. A n-D tensor with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Gamma.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>a</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Gamma.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Gamma.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; <strong>Shape</strong> parameter. A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with
+all elements constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; <strong>Scale</strong> parameter. A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with
+all elements constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Gamma.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>a</em>, <em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Gamma.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Gamma.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float or np.ndarray</em>) &#8211; <strong>Shape</strong> parameter. 0-D or 1-D tensor, with all elements
+constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; <strong>Scale</strong> parameter. 0-D or 1-D tensor, with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Geom">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Geom</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Geometric distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Geom.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Geom.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Geom.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Geom.logpmf">
+<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Geom.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Geom.logpmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability mass function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(p\in(0,1)\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Geom.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Geom.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Geom.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(p\in(0,1)\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.InvGamma">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">InvGamma</code><a class="reference internal" href="_modules/edward/stats/distributions.html#InvGamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.InvGamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Inverse Gamma distribution.</p>
+<p>Shape/scale parameterization (typically denoted: <span class="math">\((k, \theta)\)</span>)</p>
+<dl class="method">
+<dt id="edward.stats.distributions.InvGamma.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>a</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#InvGamma.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.InvGamma.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; <strong>Shape</strong> parameter. A n-D tensor with all elements
+constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; <strong>Scale</strong> parameter. A n-D tensor with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.InvGamma.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>a</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#InvGamma.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.InvGamma.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; <strong>Shape</strong> parameter. A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with
+all elements constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; <strong>Scale</strong> parameter. A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with
+all elements constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.InvGamma.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>a</em>, <em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#InvGamma.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.InvGamma.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float or np.ndarray</em>) &#8211; <strong>Shape</strong> parameter. 0-D or 1-D tensor, with all elements
+constrained to <span class="math">\(a &gt; 0\)</span>.</li>
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; <strong>Scale</strong> parameter. 0-D or 1-D tensor, with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.LogNorm">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">LogNorm</code><a class="reference internal" href="_modules/edward/stats/distributions.html#LogNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.LogNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>LogNormal distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.LogNorm.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#LogNorm.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.LogNorm.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.LogNorm.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#LogNorm.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.LogNorm.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>s</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(s &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.LogNorm.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>s</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#LogNorm.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.LogNorm.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(s &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Multinomial">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Multinomial</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Multinomial distribution.</p>
+<p>Note: there is no equivalent version implemented in SciPy.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Multinomial.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Multinomial.logpmf">
+<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial.logpmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability mass function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor for n &gt; 1, where the inner (right-most)
+dimension represents the multivariate dimension. Each
+element is the number of outcomes in a bucket and not a
+one-hot.</li>
+<li><strong>n</strong> (<em>tf.Tensor</em>) &#8211; A tensor of one less dimension than <code class="docutils literal"><span class="pre">x</span></code>,
+representing the number of outcomes, equal to sum x[i]
+along the inner (right-most) dimension.</li>
+<li><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of one less dimension than <code class="docutils literal"><span class="pre">x</span></code>, representing
+probabilities which sum to 1.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Multinomial.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>n</em>, <em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> (<em>int or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(n &gt; 0\)</span>.</li>
+<li><strong>p</strong> (<em>np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(\sum_i p_k = 1\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Multivariate_Normal">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Multivariate_Normal</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Multivariate_Normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multivariate_Normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Multivariate Normal distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Multivariate_Normal.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>mean=None</em>, <em>cov=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multivariate_Normal.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multivariate_Normal.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<p>This is not vectorized with respect to any arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mean</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D tensor. Defaults to zero mean.</li>
+<li><strong>cov</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D or 2-D tensor. Defaults to identity matrix.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Multivariate_Normal.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>mean=None</em>, <em>cov=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multivariate_Normal.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multivariate_Normal.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A 1-D or 2-D tensor.</li>
+<li><strong>mean</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D tensor. Defaults to zero mean.</li>
+<li><strong>cov</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D or 2-D tensor. Defaults to identity matrix.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Multivariate_Normal.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>mean=None</em>, <em>cov=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multivariate_Normal.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multivariate_Normal.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mean</strong> (<em>np.ndarray, optional</em>) &#8211; 1-D tensor. Defaults to zero mean.</li>
+<li><strong>cov</strong> (<em>np.ndarray, optional</em>) &#8211; 1-D or 2-D tensor. Defaults to identity matrix.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.NBinom">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">NBinom</code><a class="reference internal" href="_modules/edward/stats/distributions.html#NBinom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.NBinom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Negative binomial distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.NBinom.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#NBinom.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.NBinom.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.NBinom.logpmf">
+<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#NBinom.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.NBinom.logpmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability mass function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>n</strong> (<em>int</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(n &gt; 0\)</span>.</li>
+<li><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(p\in(0,1)\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.NBinom.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>n</em>, <em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#NBinom.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.NBinom.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> (<em>int or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(n &gt; 0\)</span>.</li>
+<li><strong>p</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(p\in(0,1)\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Norm">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Norm</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Normal (Gaussian) distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Norm.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Norm.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Norm.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loc</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor with all elements constrained to <span class="math">\(scale
+&gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Norm.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Norm.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Norm.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>loc</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Norm.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>loc=0</em>, <em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Norm.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Norm.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loc</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor.</li>
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(scale &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Poisson">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Poisson</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Poisson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Poisson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Poisson distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.Poisson.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>mu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Poisson.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Poisson.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Poisson.logpmf">
+<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>mu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Poisson.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Poisson.logpmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability mass function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>mu</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(mu &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Poisson.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>mu</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Poisson.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Poisson.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mu</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(mu &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.T">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">T</code><a class="reference internal" href="_modules/edward/stats/distributions.html#T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Student-t distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.T.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>df</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#T.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.T.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.T.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>df</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#T.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.T.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>df</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(df &gt; 0\)</span>.</li>
+<li><strong>loc</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.T.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>df</em>, <em>loc=0</em>, <em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#T.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.T.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(df &gt; 0\)</span>.</li>
+<li><strong>loc</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor.</li>
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(scale &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.TruncNorm">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">TruncNorm</code><a class="reference internal" href="_modules/edward/stats/distributions.html#TruncNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.TruncNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Truncated Normal (Gaussian) distribution.</p>
+<dl class="method">
+<dt id="edward.stats.distributions.TruncNorm.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#TruncNorm.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.TruncNorm.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.TruncNorm.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>a</em>, <em>b</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#TruncNorm.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.TruncNorm.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>a</strong> (<em>tf.Tensor</em>) &#8211; Left boundary, with respect to the standard normal.
+A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>.</li>
+<li><strong>b</strong> (<em>tf.Tensor</em>) &#8211; Right boundary, with respect to the standard normal.
+A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with <code class="docutils literal"><span class="pre">b</span> <span class="pre">&gt;</span> <span class="pre">a</span></code>
+element-wise.</li>
+<li><strong>loc</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.TruncNorm.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>loc=0</em>, <em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#TruncNorm.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.TruncNorm.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float or np.ndarray</em>) &#8211; Left boundary, with respect to the standard normal.
+0-D or 1-D tensor.</li>
+<li><strong>b</strong> (<em>float or np.ndarray</em>) &#8211; Right boundary, with respect to the standard normal.
+0-D or 1-D tensor, and with <code class="docutils literal"><span class="pre">b</span> <span class="pre">&gt;</span> <span class="pre">a</span></code> element-wise.</li>
+<li><strong>loc</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor.</li>
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; 0-D or 1-D tensor, with all elements constrained to
+<span class="math">\(scale &gt; 0\)</span>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="edward.stats.distributions.Uniform">
+<em class="property">class </em><code class="descclassname">edward.stats.distributions.</code><code class="descname">Uniform</code><a class="reference internal" href="_modules/edward/stats/distributions.html#Uniform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Uniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Uniform distribution (continous)</p>
+<p>This distribution is constant between <code class="docutils literal"><span class="pre">loc</span></code> and <code class="docutils literal"><span class="pre">loc</span> <span class="pre">+</span> <span class="pre">scale</span></code></p>
+<dl class="method">
+<dt id="edward.stats.distributions.Uniform.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Uniform.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Uniform.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy of probability distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loc</strong> (<em>tf.Tensor</em>) &#8211; Left boundary. A n-D tensor.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; Width of distribution. A n-D tensor, with all elements
+constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Uniform.logpdf">
+<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>loc=0</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Uniform.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Uniform.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the probability density function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</li>
+<li><strong>loc</strong> (<em>tf.Tensor</em>) &#8211; Left boundary. A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>.</li>
+<li><strong>scale</strong> (<em>tf.Tensor</em>) &#8211; Width of distribution. A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>,
+and with all elements constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of same shape as input.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="edward.stats.distributions.Uniform.rvs">
+<code class="descname">rvs</code><span class="sig-paren">(</span><em>loc=0</em>, <em>scale=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Uniform.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Uniform.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random variates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loc</strong> (<em>float or np.ndarray</em>) &#8211; Left boundary. 0-D or 1-D tensor.</li>
+<li><strong>scale</strong> (<em>float or np.ndarray</em>) &#8211; Width of distribution. 0-D or 1-D tensor, with all
+elements constrained to math:<cite>scale &gt; 0</cite>.</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Number of random variable samples to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A np.ndarray of dimensions size x shape.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
