@@ -18,18 +18,17 @@ import numpy as np
 import pymc3 as pm
 import theano
 
-from edward.models import PyMC3Model, Variational, Beta
+from edward.models import PyMC3Model, Beta
 
 x_obs = theano.shared(np.zeros(1))
 with pm.Model() as pm_model:
-    beta = pm.Beta('beta', 1, 1, transform=None)
-    x = pm.Bernoulli('x', beta, observed=x_obs)
+    p = pm.Beta('p', 1, 1, transform=None)
+    x = pm.Bernoulli('x', p, observed=x_obs)
 
 ed.set_seed(42)
 model = PyMC3Model(pm_model)
-variational = Variational()
-variational.add(Beta())
+qp = Beta()
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=10000)

@@ -8,30 +8,31 @@ import tensorflow as tf
 from edward.stats import gamma
 from scipy import stats
 
-sess = tf.Session()
+def gamma_entropy_vec(a, scale):
+    """Vectorized version of stats.gamma.entropy."""
+    if isinstance(scale, float):
+        return stats.gamma.entropy(a, scale=scale)
+    else:
+        return np.array([stats.gamma.entropy(a_x, scale=scale_x)
+                         for a_x, scale_x in zip(a, scale)])
 
 
-def _assert_eq(val_ed, val_true):
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
+class test_gamma_entropy_class(tf.test.TestCase):
+
+    def _test(self, a, scale=1):
+        val_true = gamma_entropy_vec(a, scale=scale)
+        with self.test_session():
+            self.assertAllClose(gamma.entropy(a, scale).eval(), val_true)
+            self.assertAllClose(gamma.entropy(tf.constant(a), tf.constant(scale)).eval(), val_true)
 
 
-def _test(a, scale=1):
-    val_true = stats.gamma.entropy(a, scale=scale)
-    _assert_eq(gamma.entropy(a, scale), val_true)
-    _assert_eq(gamma.entropy(tf.constant(a), tf.constant(scale)), val_true)
-    _assert_eq(gamma.entropy(tf.constant([a]), tf.constant(scale)), val_true)
-    _assert_eq(gamma.entropy(tf.constant(a), tf.constant([scale])), val_true)
-    _assert_eq(gamma.entropy(tf.constant([a]), tf.constant([scale])), val_true)
+    def test_0d(self):
+        self._test(a=1.0, scale=1.0)
+        self._test(a=1.0, scale=1.0)
+
+        self._test(a=0.5, scale=5.0)
+        self._test(a=5.0, scale=0.5)
 
 
-def test_0d():
-    _test(a=1.0, scale=1.0)
-    _test(a=1.0, scale=1.0)
-
-    _test(a=0.5, scale=5.0)
-    _test(a=5.0, scale=0.5)
-
-
-def test_1d():
-    _test(a=[0.5, 1.2, 5.3, 8.7], scale=[0.5, 1.2, 5.3, 8.7])
+    def test_1d(self):
+        self._test(a=[0.5, 1.2, 5.3, 8.7], scale=[0.5, 1.2, 5.3, 8.7])

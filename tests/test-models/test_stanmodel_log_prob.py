@@ -4,51 +4,49 @@ from __future__ import print_function
 
 import edward as ed
 import numpy as np
-import pystan
+import six
 import tensorflow as tf
 
-sess = tf.Session()
+from scipy.stats import bernoulli, beta
 
 
-def log_prob(zs, stanfit):
-    lp = np.zeros(zs.shape[0], dtype=np.float32)
-    for b, z in enumerate(zs):
-        z_unconst = stanfit.unconstrain_pars({'theta': z[0]})
-        lp[b] = stanfit.log_prob(z_unconst, adjust_transform=False)
+def _test(model, xs, zs):
+    n_samples = zs['p'].shape[0]
+    val_true = np.zeros(n_samples, dtype=np.float32)
+    for s in range(n_samples):
+        p = np.squeeze(zs['p'][s, :])
+        val_true[s] = beta.logpdf(p, 1, 1)
+        val_true[s] += np.sum([bernoulli.logpmf(x, p)
+                               for x in xs['x']])
 
-    return lp
+    val_ed = model.log_prob(xs, zs)
+    assert np.allclose(val_ed.eval(), val_true)
+    zs_tf = {key: tf.cast(value, dtype=tf.float32)
+             for key, value in six.iteritems(zs)}
+    val_ed = model.log_prob(xs, zs_tf)
+    assert np.allclose(val_ed.eval(), val_true)
 
+class test_stanmodel_log_prob_class(tf.test.TestCase):
 
-def _test(ed_model, pystan_model, data, zs):
-    stanfit = pystan_model.sampling(data=data, iter=1, chains=1)
-    val_ed = ed_model.log_prob(data, zs)
-    val_true = log_prob(zs, stanfit)
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
-        zs_tf = tf.constant(zs, dtype=tf.float32)
-        val_ed = ed_model.log_prob(data, zs_tf)
-        assert np.allclose(val_ed.eval(), val_true)
-
-
-def test_1d():
-    model_code = """
-        data {
-          int<lower=0> N;
-          int<lower=0,upper=1> y[N];
-        }
-        parameters {
-          real<lower=0,upper=1> theta;
-        }
-        model {
-          theta ~ beta(0.5, 0.5);  // Jeffreys' prior
-          for (n in 1:N)
-            y[n] ~ bernoulli(theta);
-        }
-    """
-    pystan_model = pystan.StanModel(model_code=model_code)
-    ed_model = ed.StanModel(model=pystan_model)
-    data = {'N': 10, 'y': [0, 1, 0, 1, 0, 1, 0, 1, 1, 1]}
-    zs = np.array([[0.5]])
-    _test(ed_model, pystan_model, data, zs)
-    zs = np.array([[0.4], [0.2], [0.2351], [0.6213]])
-    _test(ed_model, pystan_model, data, zs)
+    def test_1latent(self):
+        model_code = """
+            data {
+              int<lower=0> N;
+              int<lower=0,upper=1> x[N];
+            }
+            parameters {
+              real<lower=0,upper=1> p;
+            }
+            model {
+              p ~ beta(1.0, 1.0);
+              for (n in 1:N)
+                x[n] ~ bernoulli(p);
+            }
+        """
+        with self.test_session():
+            model = ed.StanModel(model_code=model_code)
+            data = {'N': 10, 'x': [0, 1, 0, 1, 0, 1, 0, 1, 1, 1]}
+            zs = {'p': np.array([[0.5]])}
+            _test(model, data, zs)
+            zs = {'p': np.array([[0.4], [0.2], [0.2351], [0.6213]])}
+            _test(model, data, zs)

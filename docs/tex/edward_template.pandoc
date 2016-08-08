@@ -105,7 +105,7 @@ $endfor$
     <a class="button u-full-width" href="api/index.html">API</a>
     <a class="button u-full-width" href="#">Advanced</a>
     <a class="button2 u-full-width" href="design-philosophy.html">Design Philosophy</a>
-    <a class="button2 u-full-width" href="developer-process.html">Developer Process</a>
+    <a class="button2 u-full-width" href="contributing.html">Contributing</a>
     <a class="button2 u-full-width" href="troubleshooting.html">Troubleshooting</a>
     <a class="button2 u-full-width" href="license.html">License</a>
     <div class="row" style="padding-bottom: 5%"> </div>

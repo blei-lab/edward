@@ -9,8 +9,6 @@ from edward.stats import multinomial
 from itertools import product
 from scipy.special import gammaln
 
-sess = tf.Session()
-
 
 def multinomial_logpmf(x, n, p):
     """
@@ -59,26 +57,23 @@ def multinomial_entropy_vec(n, p):
         return np.array([multinomial_entropy(n[i], p[i, :])
                          for i in range(size)])
 
+class test_multinomial_entropy_class(tf.test.TestCase):
 
-def _assert_eq(val_ed, val_true):
-    with sess.as_default():
-        assert np.allclose(val_ed.eval(), val_true)
-
-
-def _test(n, p):
-    val_true = multinomial_entropy_vec(n, p)
-    _assert_eq(multinomial.entropy(n, p), val_true)
-    _assert_eq(multinomial.entropy(n, tf.constant(p, dtype=tf.float32)), val_true)
-    _assert_eq(multinomial.entropy(n, p), val_true)
-    _assert_eq(multinomial.entropy(n, tf.constant(p, dtype=tf.float32)), val_true)
+    def _test(self, n, p):
+        val_true = multinomial_entropy_vec(n, p)
+        with self.test_session():
+            self.assertAllClose(multinomial.entropy(n, p).eval(), val_true)
+            self.assertAllClose(multinomial.entropy(n, tf.constant(p, dtype=tf.float32)).eval(), val_true)
+            self.assertAllClose(multinomial.entropy(n, p).eval(), val_true)
+            self.assertAllClose(multinomial.entropy(n, tf.constant(p, dtype=tf.float32)).eval(), val_true)
 
 
-def test_1d():
-    _test(1, np.array([0.5, 0.5]))
-    _test(2, np.array([0.5, 0.5]))
-    _test(3, np.array([0.75, 0.25]))
+    def test_1d(self):
+        self._test(1, np.array([0.5, 0.5]))
+        self._test(2, np.array([0.5, 0.5]))
+        self._test(3, np.array([0.75, 0.25]))
 
 
-def test_2d():
-    _test(np.array([1, 3]), np.array([[0.5, 0.5],[0.75, 0.25]]))
-    _test(np.array([5, 2]), np.array([[0.5, 0.5],[0.75, 0.25]]))
+    def test_2d(self):
+        self._test(np.array([1, 3]), np.array([[0.5, 0.5],[0.75, 0.25]]))
+        self._test(np.array([5, 2]), np.array([[0.5, 0.5],[0.75, 0.25]]))

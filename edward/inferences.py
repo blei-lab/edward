@@ -49,8 +49,6 @@ class Inference(object):
     def __init__(self, latent_vars, data=None, model_wrapper=None):
         """Initialization.
 
-        Calls ``util.get_session()``
-
         Parameters
         ----------
         latent_vars : list of str, or dict of str to RandomVariable
@@ -78,7 +76,7 @@ class Inference(object):
 
         Notes
         -----
-        If `data` is not passed in, the dictionary is empty.
+        If ``data`` is not passed in, the dictionary is empty.
 
         Three options are available for batch training:
         1. internally if user passes in data as a dictionary of NumPy
@@ -106,21 +104,21 @@ class Inference(object):
             # take arbitrary data structure types in the data block
             # and not just NumPy arrays (this makes it unamenable to
             # TensorFlow placeholders). Therefore fix the data
-            # dictionary `self.data` at compile time to `data`.
+            # dictionary ``self.data`` at compile time to ``data``.
             self.data = data
         else:
             self.data = {}
             for key, value in six.iteritems(data):
                 if isinstance(value, tf.Tensor):
-                    # If `data` has TensorFlow placeholders, the user
+                    # If ``data`` has TensorFlow placeholders, the user
                     # must manually feed them at each step of
                     # inference.
-                    # If `data` has tensors that are the output of
+                    # If ``data`` has tensors that are the output of
                     # data readers, then batch training operates
                     # according to the reader.
                     self.data[key] = value
                 elif isinstance(value, np.ndarray):
-                    # If `data` has NumPy arrays, store the data
+                    # If ``data`` has NumPy arrays, store the data
                     # in the computational graph.
                     placeholder = tf.placeholder(tf.float32, value.shape)
                     var = tf.Variable(placeholder, trainable=False, collections=[])
@@ -238,7 +236,7 @@ class VariationalInference(Inference):
 
         Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
 
-        Initialize all variables
+        Initialize all variables.
 
         Parameters
         ----------
@@ -249,7 +247,7 @@ class VariationalInference(Inference):
             all the data. Subsampling is available only if all data
             passed in are NumPy arrays and the model is not a Stan
             model. For subsampling details, see
-            `tf.train.slice_input_producer` and `tf.train.batch`.
+            ``tf.train.slice_input_producer`` and ``tf.train.batch``.
         n_print : int, optional
             Number of iterations for each print progress. To suppress print
             progress, then specify None.
@@ -272,7 +270,7 @@ class VariationalInference(Inference):
             batches = tf.train.batch(slices, n_minibatch,
                                      num_threads=multiprocessing.cpu_count())
             if not isinstance(batches, list):
-                # `tf.train.batch` returns tf.Tensor if `slices` is a
+                # ``tf.train.batch`` returns tf.Tensor if ``slices`` is a
                 # list of size 1.
                 batches = [batches]
 
@@ -340,7 +338,7 @@ class VariationalInference(Inference):
         Returns
         -------
         loss : double
-            Loss function values after one iteration
+            Loss function values after one iteration.
         """
         sess = get_session()
         _, loss = sess.run([self.train, self.loss])
@@ -352,9 +350,9 @@ class VariationalInference(Inference):
         Parameters
         ----------
         t : int
-            Iteration counter
+            Iteration counter.
         loss : double
-            Loss function value at iteration ``t``
+            Loss function value at iteration ``t``.
         """
         if self.n_print is not None:
             if t % self.n_print == 0:
@@ -586,8 +584,8 @@ class MFVI(VariationalInference):
         for key, rv in six.iteritems(self.latent_vars):
             q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
 
-        mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
-        sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
+        mu = tf.concat(0, [rv.loc for rv in six.itervalues(self.latent_vars)])
+        sigma = tf.concat(0, [rv.scale for rv in six.itervalues(self.latent_vars)])
         kl = kl_multivariate_normal(mu, sigma)
         self.loss = tf.reduce_mean(p_log_lik) - kl
         return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
@@ -644,8 +642,8 @@ class MFVI(VariationalInference):
         z = {key: rv.sample(self.n_samples) for key, rv in six.iteritems(self.latent_vars)}
 
         p_log_lik = self.model_wrapper.log_lik(x, z)
-        mu = tf.pack([rv.loc for rv in six.itervalues(self.latent_vars)])
-        sigma = tf.pack([rv.scale for rv in six.itervalues(self.latent_vars)])
+        mu = tf.concat(0, [rv.loc for rv in six.itervalues(self.latent_vars)])
+        sigma = tf.concat(0, [rv.scale for rv in six.itervalues(self.latent_vars)])
         self.loss = tf.reduce_mean(p_log_lik) - \
                     kl_multivariate_normal(mu, sigma)
         return -self.loss
@@ -807,8 +805,7 @@ class MAP(VariationalInference):
                 else:
                     latent_vars = {latent_vars[0]: PointMass(0)}
         elif isinstance(latent_vars, dict):
-            latent_vars = {key: PointMass([int(dim) for dim in params.get_shape()], params)
-                           for key, params in latent_vars}
+            pass
         else:
             raise TypeError()
 

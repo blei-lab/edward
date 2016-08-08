@@ -15,27 +15,26 @@ from __future__ import print_function
 
 import edward as ed
 
-from edward.models import Variational, Beta
+from edward.models import Beta
 
 model_code = """
     data {
       int<lower=0> N;
-      int<lower=0,upper=1> y[N];
+      int<lower=0,upper=1> x[N];
     }
     parameters {
-      real<lower=0,upper=1> theta;
+      real<lower=0,upper=1> p;
     }
     model {
-      theta ~ beta(1.0, 1.0);
+      p ~ beta(1.0, 1.0);
       for (n in 1:N)
-        y[n] ~ bernoulli(theta);
+        x[n] ~ bernoulli(p);
     }
 """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
-variational = Variational()
-variational.add(Beta())
-data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+qp = Beta()
+data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=10000)

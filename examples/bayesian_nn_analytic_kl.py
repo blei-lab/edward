@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 from edward.util import rbf
 
@@ -83,7 +83,7 @@ class BayesianNN:
     def log_lik(self, xs, zs):
         """Return a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
         x, y = xs['x'], xs['y']
-        mus = self.neural_network(x, zs)
+        mus = self.neural_network(x, zs['z'])
         # broadcasting to do mus - y (n_samples x n_minibatch - n_minibatch)
         log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 1) / self.lik_variance
         return log_lik
@@ -102,8 +102,7 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 data = build_toy_dataset()
 
 # Set up figure
@@ -116,7 +115,7 @@ plt.show(block=False)
 # assuming a standard normal prior on the weights; this enables VI
 # with an analytic KL term which provides faster inference.
 sess = ed.get_session()
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=10)
 for t in range(1000):
     loss = inference.update()
@@ -124,13 +123,12 @@ for t in range(1000):
         print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
         # Sample functions from variational model
-        mean, std = sess.run([variational.layers[0].loc,
-                              variational.layers[0].scale])
+        mean, std = sess.run([qz.loc, qz.scale])
         rs = np.random.RandomState(0)
-        zs = rs.randn(10, variational.n_vars) * std + mean
-        zs = tf.constant(zs, dtype=tf.float32)
+        zs = rs.randn(10, qz.n_vars) * std + mean
+        zs = tf.convert_to_tensor(zs, dtype=tf.float32)
         inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
-        x = tf.expand_dims(tf.constant(inputs), 1)
+        x = tf.expand_dims(inputs, 1)
         mus = model.neural_network(x, zs)
         outputs = mus.eval()
 

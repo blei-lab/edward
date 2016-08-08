@@ -30,29 +30,29 @@ all_regression_metrics = [
     criticisms.cosine_proximity,
 ]
 
-sess = tf.Session()
+class test_metrics_class(tf.test.TestCase):
 
+    def test_classification_metrics(self):
+        with self.test_session():
+            y_a = tf.convert_to_tensor(np.random.randint(0, 7, (6, 7)), dtype=tf.float32)
+            y_b = tf.convert_to_tensor(np.random.random((6, 7)))
+            for metric in all_classification_metrics:
+                assert metric(y_a, y_b).eval().shape == ()
 
-def test_classification_metrics():
-    y_a = tf.convert_to_tensor(np.random.randint(0, 7, (6, 7)), dtype=tf.float32)
-    y_b = tf.convert_to_tensor(np.random.random((6, 7)))
-    for metric in all_classification_metrics:
-        with sess.as_default():
-            assert metric(y_a, y_b).eval().shape == ()
+    def test_sparse_classification_metrics(self):
+        with self.test_session():
+            y_a = tf.convert_to_tensor(np.random.randint(0, 7, (6,)), dtype=tf.float32)
+            y_b = tf.convert_to_tensor(np.random.random((6, 7)))
+            for metric in all_sparse_metrics:
+                assert metric(y_a, y_b).eval().shape == ()
 
+    def test_regression_metrics(self):
+        with self.test_session():
+            y_a = tf.convert_to_tensor(np.random.random((6, 7)))
+            y_b = tf.convert_to_tensor(np.random.random((6, 7)))
+            for metric in all_regression_metrics:
+                output = metric(y_a, y_b)
+                assert output.eval().shape == ()
 
-def test_sparse_classification_metrics():
-    y_a = tf.convert_to_tensor(np.random.randint(0, 7, (6,)), dtype=tf.float32)
-    y_b = tf.convert_to_tensor(np.random.random((6, 7)))
-    for metric in all_sparse_metrics:
-        with sess.as_default():
-            assert metric(y_a, y_b).eval().shape == ()
-
-
-def test_regression_metrics():
-    y_a = tf.convert_to_tensor(np.random.random((6, 7)))
-    y_b = tf.convert_to_tensor(np.random.random((6, 7)))
-    for metric in all_regression_metrics:
-        output = metric(y_a, y_b)
-        with sess.as_default():
-            assert output.eval().shape == ()
+if __name__ == '__main__':
+    tf.test.main()

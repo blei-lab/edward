@@ -23,9 +23,9 @@ class NormalModel:
         self.n_vars = 1
 
     def log_prob(self, xs, zs):
-        log_prior = norm.logpdf(zs, self.mu, self.std)
+        log_prior = norm.logpdf(zs['z'], self.mu, self.std)
         log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], z, self.std))
-                           for z in tf.unpack(zs)])
+                           for z in tf.unpack(zs['z'])])
         return log_lik + log_prior
 
 
@@ -35,5 +35,5 @@ std = tf.constant(0.1)
 model = NormalModel(mu, std)
 data = {'x': np.array([3]*20 + [0, 1, 0, 0, 0, 0, 0, 0, 0, 1], dtype=np.float32)}
 
-inference = ed.MAP(model, data)
+inference = ed.MAP(['z'], data, model)
 inference.run(n_iter=200, n_print=50)
