@@ -11,9 +11,7 @@ from scipy.stats import beta, bernoulli
 
 
 class BetaBernoulli(PythonModel):
-    """
-    p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)
-    """
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
     def _py_log_prob(self, xs, zs):
         # This example is written for pedagogy. We recommend
         # vectorizing operations in practice.
@@ -26,17 +24,24 @@ class BetaBernoulli(PythonModel):
 
         return lp
 
-def _test(model, data, zs):
-    val_ed = model.log_prob(data, zs)
-    val_true = model._py_log_prob(data, zs)
+def _test(model, xs, zs):
+    n_samples = zs.shape[0]
+    val_true = np.zeros(n_samples, dtype=np.float32)
+    for s in range(n_samples):
+        p = np.squeeze(zs[s, :])
+        val_true[s] = beta.logpdf(p, 1, 1)
+        val_true[s] += np.sum([bernoulli.logpmf(x, p)
+                               for x in xs['x']])
+
+    val_ed = model.log_prob(xs, zs)
     assert np.allclose(val_ed.eval(), val_true)
-    zs_tf = tf.constant(zs, dtype=tf.float32)
-    val_ed = model.log_prob(data, zs_tf)
+    zs_tf = tf.cast(zs, dtype=tf.float32)
+    val_ed = model.log_prob(xs, zs_tf)
     assert np.allclose(val_ed.eval(), val_true)
 
 class test_pythonmodel_log_prob_class(tf.test.TestCase):
 
-    def test_1d(self):
+    def test_1latent(self):
         with self.test_session():
             model = BetaBernoulli()
             data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
