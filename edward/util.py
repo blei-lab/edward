@@ -7,6 +7,7 @@ import tensorflow as tf
 
 from tensorflow.python.ops import control_flow_ops
 
+
 def cumprod(xs):
   """Cumulative product of a tensor along its outer dimension.
 
@@ -68,7 +69,7 @@ def dot(x, y):
     If the inputs have Inf or NaN values.
   """
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
-          tf.verify_tensor_all_finite(y, msg='')]
+                  tf.verify_tensor_all_finite(y, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
   y = control_flow_ops.with_dependencies(dependencies, y)
   x = tf.cast(x, dtype=tf.float32)
@@ -99,9 +100,9 @@ def get_dims(x):
   """
   if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
     dims = x.get_shape()
-    if len(dims) == 0: # scalar
+    if len(dims) == 0:  # scalar
       return []
-    else: # array
+    else:  # array
       return [dim.value for dim in dims]
   elif isinstance(x, np.ndarray):
     return list(x.shape)
@@ -211,7 +212,8 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     For 0-D or 1-D tensor inputs, outputs the 0-D tensor
     ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``
     For 2-D tensor inputs, outputs the 1-D tensor
-    ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
+    ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || ``
+    ``N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
 
   Raises
   ------
@@ -220,9 +222,9 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     variables are not positive.
   """
   dependencies = [tf.verify_tensor_all_finite(loc_one, msg=''),
-          tf.verify_tensor_all_finite(loc_two, msg=''),
-          tf.assert_positive(scale_one),
-          tf.assert_positive(scale_two)]
+                  tf.verify_tensor_all_finite(loc_two, msg=''),
+                  tf.assert_positive(scale_one),
+                  tf.assert_positive(scale_two)]
   loc_one = control_flow_ops.with_dependencies(dependencies, loc_one)
   scale_one = control_flow_ops.with_dependencies(dependencies, scale_one)
   loc_one = tf.cast(loc_one, tf.float32)
@@ -237,13 +239,13 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
     loc_two = tf.cast(loc_two, tf.float32)
     scale_two = tf.cast(scale_two, tf.float32)
-    out = tf.square(scale_one/scale_two) + \
-        tf.square((loc_two - loc_one)/scale_two) - \
+    out = tf.square(scale_one / scale_two) + \
+        tf.square((loc_two - loc_one) / scale_two) - \
         1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one)
 
-  if len(out.get_shape()) <= 1: # scalar or vector
+  if len(out.get_shape()) <= 1:  # scalar or vector
     return 0.5 * tf.reduce_sum(out)
-  else: # matrix
+  else:  # matrix
     return 0.5 * tf.reduce_sum(out, 1)
 
 
@@ -277,7 +279,7 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
 
   x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
-    tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
+      tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
 
 
 def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
@@ -305,12 +307,12 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
     If the input has Inf or NaN values.
   """
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
-  input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor);
+  input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
   input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
   x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
-    tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
+      tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
 
 
 def logit(x):
@@ -332,7 +334,7 @@ def logit(x):
     If the input is not between :math:`(0,1)` elementwise.
   """
   dependencies = [tf.assert_positive(x),
-          tf.assert_less(x, 1.0)]
+                  tf.assert_less(x, 1.0)]
   x = control_flow_ops.with_dependencies(dependencies, x)
   x = tf.cast(x, dtype=tf.float32)
 
@@ -369,9 +371,9 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     and length variables are not positive.
   """
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
-          tf.verify_tensor_all_finite(y, msg=''),
-          tf.assert_positive(sigma),
-          tf.assert_positive(l)]
+                  tf.verify_tensor_all_finite(y, msg=''),
+                  tf.assert_positive(sigma),
+                  tf.assert_positive(l)]
   x = control_flow_ops.with_dependencies(dependencies, x)
   y = control_flow_ops.with_dependencies(dependencies, y)
   sigma = control_flow_ops.with_dependencies(dependencies, sigma)
@@ -382,8 +384,7 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
   l = tf.cast(l, dtype=tf.float32)
 
   return tf.pow(sigma, 2.0) * \
-       tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * \
-       tf.reduce_sum(tf.pow(x - y , 2.0)))
+      tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.reduce_sum(tf.pow(x - y, 2.0)))
 
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
@@ -416,9 +417,9 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     and length variables are not positive.
   """
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
-          tf.verify_tensor_all_finite(y, msg=''),
-          tf.assert_positive(sigma),
-          tf.assert_positive(l)]
+                  tf.verify_tensor_all_finite(y, msg=''),
+                  tf.assert_positive(sigma),
+                  tf.assert_positive(l)]
   x = control_flow_ops.with_dependencies(dependencies, x)
   y = control_flow_ops.with_dependencies(dependencies, y)
   sigma = control_flow_ops.with_dependencies(dependencies, sigma)
@@ -429,7 +430,7 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
   l = tf.cast(l, dtype=tf.float32)
 
   return tf.pow(sigma, 2.0) * \
-       tf.exp(-1.0/(2.0*tf.pow(l, 2.0)) * tf.pow(x - y , 2.0))
+      tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.pow(x - y, 2.0))
 
 
 def set_seed(x):
@@ -441,8 +442,9 @@ def set_seed(x):
     seed
   """
   if len(tf.get_default_graph()._nodes_by_id.keys()) > 0:
-    raise RuntimeError("Seeding is not supported after initializing part of the graph. "
-               "Please move set_seed to the beginning of your code.")
+    raise RuntimeError("Seeding is not supported after initializing "
+                       "part of the graph. "
+                       "Please move set_seed to the beginning of your code.")
 
   np.random.seed(x)
   tf.set_random_seed(x)
@@ -504,7 +506,7 @@ def stop_gradient(x):
   """
   if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
     return tf.stop_gradient(x)
-  else: # list
+  else:  # list
     return [tf.stop_gradient(i) for i in x]
 
 
@@ -544,8 +546,7 @@ def to_simplex(x):
   if len(shape) == 1:
     n_rows = ()
     K_minus_one = shape[0]
-    eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
-               dtype=tf.float32))
+    eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
     pil = tf.concat(0, [z, tf.constant([1.0])])
     piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
@@ -554,8 +555,7 @@ def to_simplex(x):
   else:
     n_rows = shape[0]
     K_minus_one = shape[1]
-    eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one),
-               dtype=tf.float32))
+    eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
     pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
     piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
