@@ -440,6 +440,10 @@ def set_seed(x):
     x : int, float
         seed
     """
+    if len(tf.get_default_graph()._nodes_by_id.keys()) > 0:
+        raise RuntimeError("Seeding is not supported after initializing part of the graph. "
+                           "Please move set_seed to the beginning of your code.")
+
     np.random.seed(x)
     tf.set_random_seed(x)
 
