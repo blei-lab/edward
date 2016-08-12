@@ -128,10 +128,12 @@ class RandomVariable(object):
           log_prob += self.log_prob_idx(idx, xs)
 
       else:
-        for idx in product(range(self.shape[0]), range(self.shape[1]), range(self.shape[2])):
+        for idx in product(range(self.shape[0]),
+                           range(self.shape[1]),
+                           range(self.shape[2])):
           log_prob += self.log_prob_idx(idx, xs)
 
-    else: # len(self.shape) >= 4
+    else:  # len(self.shape) >= 4
       # There should be a generic solution.
       raise NotImplementedError()
 
@@ -177,7 +179,8 @@ class RandomVariable(object):
 
       H(p(x| params))
       = E_{p(x | params)} [ - log p(x | params) ]
-      = sum_{idx in shape} E_{p(x[idx] | params[idx])} [ - log p(x[idx] | params[idx]) ]
+      = sum_{idx in shape} E_{p(x[idx] | params[idx])}
+        [ - log p(x[idx] | params[idx]) ]
 
     Returns
     -------
@@ -217,7 +220,7 @@ class Bernoulli(RandomVariable):
     return tf.cast(tf.less(eps, self.p), tf.float32)
 
   def log_prob_idx(self, idx, xs):
-    full_idx = (slice(0, None), ) + idx # slice over sample size
+    full_idx = (slice(0, None), ) + idx  # slice over sample size
     return bernoulli.logpmf(xs[full_idx], self.p[idx])
 
   def entropy(self):
@@ -231,7 +234,7 @@ class Beta(RandomVariable):
   """
   def __init__(self, shape=1, alpha=None, beta=None):
     super(Beta, self).__init__(shape)
-    self.n_params = 2*self.n_vars
+    self.n_params = 2 * self.n_vars
     self.is_differentiable = True
     self.is_multivariate = False
     self.is_reparameterized = False
@@ -251,7 +254,7 @@ class Beta(RandomVariable):
     sess = get_session()
     a, b = sess.run([self.alpha, self.beta])
     return "shape: \n" + a.__str__() + "\n" + \
-         "scale: \n" + b.__str__()
+           "scale: \n" + b.__str__()
 
   def sample(self, n=1):
     # Define Python function which returns samples as a Numpy
@@ -262,11 +265,11 @@ class Beta(RandomVariable):
       return beta.rvs(a, b, size=n).astype(np.float32)
 
     x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
-    x.set_shape((n, ) + self.shape) # set shape from unknown shape
+    x.set_shape((n, ) + self.shape)  # set shape from unknown shape
     return x
 
   def log_prob_idx(self, idx, xs):
-    full_idx = (slice(0, None), ) + idx # slice over sample size
+    full_idx = (slice(0, None), ) + idx  # slice over sample size
     return beta.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
   def entropy(self):
@@ -304,7 +307,7 @@ class Dirichlet(RandomVariable):
       return dirichlet.rvs(alpha, size=n).astype(np.float32)
 
     x = tf.py_func(np_sample, [self.alpha], [tf.float32])[0]
-    x.set_shape((n, ) + self.shape) # set shape from unknown shape
+    x.set_shape((n, ) + self.shape)  # set shape from unknown shape
     return x
 
   def log_prob_idx(self, idx, xs):
@@ -312,8 +315,8 @@ class Dirichlet(RandomVariable):
     ``log p(xs[:, idx, :] | params[idx, :])``
     where ``idx`` is of dimension ``shape[:-1]``
     """
-    idx = idx + (slice(0, None), ) # slice over multivariate dimension
-    full_idx = (slice(0, None), ) + idx # slice over sample size
+    idx = idx + (slice(0, None), )  # slice over multivariate dimension
+    full_idx = (slice(0, None), ) + idx  # slice over sample size
     return dirichlet.logpdf(xs[full_idx], self.alpha[idx])
 
   def entropy(self):
@@ -327,7 +330,7 @@ class InvGamma(RandomVariable):
   """
   def __init__(self, shape=1, alpha=None, beta=None):
     super(InvGamma, self).__init__(shape)
-    self.n_params = 2*self.n_vars
+    self.n_params = 2 * self.n_vars
     self.is_differentiable = True
     self.is_multivariate = False
     self.is_reparameterized = False
@@ -347,7 +350,7 @@ class InvGamma(RandomVariable):
     sess = get_session()
     a, b = sess.run([self.alpha, self.beta])
     return "shape: \n" + a.__str__() + "\n" + \
-         "scale: \n" + b.__str__()
+           "scale: \n" + b.__str__()
 
   def sample(self, n=1):
     # Define Python function which returns samples as a Numpy
@@ -358,11 +361,11 @@ class InvGamma(RandomVariable):
       return invgamma.rvs(a, scale=scale, size=n).astype(np.float32)
 
     x = tf.py_func(np_sample, [self.alpha, self.beta], [tf.float32])[0]
-    x.set_shape((n, ) + self.shape) # set shape from unknown shape
+    x.set_shape((n, ) + self.shape)  # set shape from unknown shape
     return x
 
   def log_prob_idx(self, idx, xs):
-    full_idx = (slice(0, None), ) + idx # slice over sample size
+    full_idx = (slice(0, None), ) + idx  # slice over sample size
     return invgamma.logpdf(xs[full_idx], self.alpha[idx], self.beta[idx])
 
   def entropy(self):
@@ -390,7 +393,7 @@ class Multinomial(RandomVariable):
     if self.shape[-1] == 1:
       raise ValueError("Multinomial is not supported for K=1. Use Bernoulli.")
 
-    self.n_params = np.prod(self.shape[:-1]) * (self.shape[-1] -1)
+    self.n_params = np.prod(self.shape[:-1]) * (self.shape[-1] - 1)
     self.is_differentiable = False
     self.is_multivariate = True
     self.is_reparameterized = False
@@ -413,10 +416,11 @@ class Multinomial(RandomVariable):
     # unavailable in TensorFlow natively.
     def np_sample(p):
       # get ``n`` from lexical scoping
-      return multinomial.rvs(np.ones(self.shape[:-1]), p, size=n).astype(np.float32)
+      return multinomial.rvs(np.ones(self.shape[:-1]),
+                             p, size=n).astype(np.float32)
 
     x = tf.py_func(np_sample, [self.pi], [tf.float32])[0]
-    x.set_shape((n, ) + self.shape) # set shape from unknown shape
+    x.set_shape((n, ) + self.shape)  # set shape from unknown shape
     return x
 
   def log_prob_idx(self, idx, xs):
@@ -424,9 +428,10 @@ class Multinomial(RandomVariable):
     ``log p(xs[:, idx, :] | params[idx, :])``
     where ``idx`` is of dimension ``shape[:-1]``
     """
-    idx_K = idx + (slice(0, None), ) # slice over multivariate dimension
-    full_idx = (slice(0, None), ) + idx_K # slice over sample size
-    return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx], self.pi[idx_K])
+    idx_K = idx + (slice(0, None), )  # slice over multivariate dimension
+    full_idx = (slice(0, None), ) + idx_K  # slice over sample size
+    return multinomial.logpmf(xs[full_idx], np.ones(self.shape[:-1])[idx],
+                              self.pi[idx_K])
 
   def entropy(self):
     return tf.reduce_sum(multinomial.entropy(np.ones(self.shape[:-1]), self.pi))
@@ -439,7 +444,7 @@ class Normal(RandomVariable):
   """
   def __init__(self, shape=1, loc=None, scale=None):
     super(Normal, self).__init__(shape)
-    self.n_params = 2*self.n_vars
+    self.n_params = 2 * self.n_vars
     self.is_differentiable = True
     self.is_multivariate = False
     self.is_reparameterized = True
@@ -458,13 +463,13 @@ class Normal(RandomVariable):
     sess = get_session()
     m, s = sess.run([self.loc, self.scale])
     return "mean: \n" + m.__str__() + "\n" + \
-         "std dev: \n" + s.__str__()
+           "std dev: \n" + s.__str__()
 
   def sample(self, n=1):
     return self.loc + tf.random_normal((n, ) + self.shape) * self.scale
 
   def log_prob_idx(self, idx, xs):
-    full_idx = (slice(0, None), ) + idx # slice over sample size
+    full_idx = (slice(0, None), ) + idx  # slice over sample size
     return norm.logpdf(xs[full_idx], self.loc[idx], self.scale[idx])
 
   def entropy(self):
@@ -514,7 +519,7 @@ class PointMass(RandomVariable):
     n: int
       number of samples
     """
-    return tf.pack([self.params]*n)
+    return tf.pack([self.params] * n)
 
   def log_prob_idx(self, idx, xs):
     """Log probability at an index of a point mass distribution.
@@ -525,5 +530,5 @@ class PointMass(RandomVariable):
       A 1-D tensor where the jth element is 1 if xs[j, idx] is equal
       to params[idx], 0 otherwise.
     """
-    full_idx = (slice(0, None), ) + idx # slice over sample size
+    full_idx = (slice(0, None), ) + idx  # slice over sample size
     return tf.cast(tf.equal(xs[full_idx], self.params[idx]), dtype=tf.float32)
