@@ -2,13 +2,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import six
 import tensorflow as tf
 
 sg = tf.contrib.bayesflow.stochastic_graph
 distributions = tf.contrib.distributions
 
 
-class RandomVariable(object):
+class DelayedTensor(object):
     """Node in a metagraph, representing a random variable in a model.
 
     The metagraph carries instructions about how to build model
@@ -26,7 +27,7 @@ class RandomVariable(object):
     --------
     >>> mu = tf.constant([0.0])
     >>> sigma = tf.constant([1.0])
-    >>> x = RandomVariable([mu, sigma],
+    >>> x = DelayedTensor([mu, sigma],
     ...   lambda cond_set: sg.DistributionTensor(distributions.Normal,
     ...                                          mu=cond_set[0],
     ...                                          sigma=cond_set[1]))
@@ -52,14 +53,14 @@ class RandomVariable(object):
             default to the corresponding element in
             `self.conditioning_set`.
         built_dict : dict, optional
-            Dictionary of `RandomVariable`s binded to their built
+            Dictionary of `DelayedTensor`s binded to their built
             stochastic tensor. Will use any built tensors from random
             variables in this dictionary that `self` depends on.
             `built_dict` is also modified in-place to include any
             random variables built during this function.
         latent_vars : dict, optional
-            Dictionary of `RandomVariable`s binded to a
-            value. For a `RandomVariable` `x` in
+            Dictionary of `DelayedTensor`s binded to a
+            value. For a `DelayedTensor` `x` in
             the conditioning set, we will condition on
             `latent_vars[x]` instead. For example, this is
             used to replace conditioning on the prior with
@@ -87,7 +88,7 @@ class RandomVariable(object):
             if x is None:
                 x = self.conditioning_set[i]
 
-            if isinstance(x, RandomVariable):
+            if isinstance(x, DelayedTensor):
                 # Set to corresponding value in `latent_vars`
                 # if it is available.
                 if latent_vars is not None:
@@ -99,7 +100,7 @@ class RandomVariable(object):
                 if x in built_dict:
                     x_tensor = built_dict[x]
                 else:
-                    # Recursively build any RandomVariable's in
+                    # Recursively build any DelayedTensor's in
                     # the conditioning set.
                     x_tensor = x.build(built_dict=built_dict,
                                        latent_vars=latent_vars)
@@ -113,304 +114,119 @@ class RandomVariable(object):
         return rv_tensor
 
 
-class Bernoulli(RandomVariable):
+class DelayedOperation(DelayedTensor):
+    """Wrapper for delayed tensor using a pre-existing TensorFlow
+    operation."""
+    def __init__(self, op, *args, **kwargs):
+        cond_set = list(args) + list(six.itervalues(kwargs))
+        self.op = op
+        self.args_len = len(args)
+        self.kwargs_keys = list(six.iterkeys(kwargs))
+        def lambda_fn(cond_set):
+            args = cond_set[:self.args_len]
+            kwargs_values = cond_set[self.args_len:]
+            kwargs = {key: value for key, value in zip(self.kwargs_keys, kwargs_values)}
+            return self.op(*args, **kwargs)
+
+        super(DelayedOperation, self).__init__(cond_set, lambda_fn)
+
+
+class Bernoulli(DelayedOperation):
     """
     Examples
     --------
     >>> p = tf.constant([0.5])
-    >>> x = Bernoulli([p])
+    >>> x = Bernoulli(p=p)
     >>>
-    >>> z1 = tf.constant([2.0, 8.0])
-    >>> z2 = tf.constant([1.0, 2.0])
-    >>> x = Bernoulli([z1, z2], lambda cond_set: tf.matmul(cond_set[0], cond_set[1]))
+    >>> z1 = tf.constant([[2.0, 8.0]])
+    >>> z2 = tf.constant([[1.0, 2.0]])
+    >>> x = Bernoulli(p=ed.matmul(z1, z2))
     """
-    def __init__(self, cond_set, p_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [p].
-        if p_lambda_fn is None:
-            p_lambda_fn = lambda cond_set: cond_set[0]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Bernoulli,
-                                  p=p_lambda_fn(cond_set))
-        super(Bernoulli, self).__init__(cond_set, lambda_fn)
+    def __init__(self, *args, **kwargs):
+        super(Bernoulli, self).__init__(sg.DistributionTensor, distributions.Bernoulli, *args, **kwargs)
 
 
-class Beta(RandomVariable):
-    def __init__(self, cond_set, a_lambda_fn=None, b_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [a, b].
-        if a_lambda_fn is None:
-            a_lambda_fn = lambda cond_set: cond_set[0]
-
-        if b_lambda_fn is None:
-            b_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Beta,
-                                  a=a_lambda_fn(cond_set),
-                                  b=b_lambda_fn(cond_set))
-        super(Beta, self).__init__(cond_set, lambda_fn)
+class Beta(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Beta, self).__init__(sg.DistributionTensor, distributions.Beta, *args, **kwargs)
 
 
-# TODO (not supported in v0.10rc0)
-# + binomial
-# + multinomial
+class Categorical(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Categorical, self).__init__(sg.DistributionTensor, distributions.Categorical, *args, **kwargs)
 
 
-class Categorical(RandomVariable):
-    def __init__(self, cond_set, logits_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [logits].
-        if logits_lambda_fn is None:
-            logits_lambda_fn = lambda cond_set: cond_set[0]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Categorical,
-                                  logits=logits_lambda_fn(cond_set))
-        super(Categorical, self).__init__(cond_set, lambda_fn)
+class Chi2(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Chi2, self).__init__(sg.DistributionTensor, distributions.Chi2, *args, **kwargs)
 
 
-class Chi2(RandomVariable):
-    def __init__(self, cond_set, df_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [df].
-        if df_lambda_fn is None:
-            df_lambda_fn = lambda cond_set: cond_set[0]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Chi2,
-                                  df=df_lambda_fn(cond_set))
-        super(Chi2, self).__init__(cond_set, lambda_fn)
+class Dirichlet(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Dirichlet, self).__init__(sg.DistributionTensor, distributions.Dirichlet, *args, **kwargs)
 
 
-class Dirichlet(RandomVariable):
-    def __init__(self, cond_set, alpha_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [alpha].
-        if alpha_lambda_fn is None:
-            alpha_lambda_fn = lambda cond_set: cond_set[0]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Dirichlet,
-                                  alpha=alpha_lambda_fn(cond_set))
-        super(Dirichlet, self).__init__(cond_set, lambda_fn)
+class DirichletMultinomial(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(DirichletMultinomial, self).__init__(sg.DistributionTensor, distributions.DirichletMultinomial, *args, **kwargs)
 
 
-class DirichletMultinomial(RandomVariable):
-    def __init__(self, cond_set, n_lambda_fn=None, alpha_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [n, alpha].
-        if n_lambda_fn is None:
-            n_lambda_fn = lambda cond_set: cond_set[0]
-
-        if alpha_lambda_fn is None:
-            alpha_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.DirichletMultinomial,
-                                  n=n_lambda_fn(cond_set),
-                                  alpha=alpha_lambda_fn(cond_set))
-        super(DirichletMultinomial, self).__init__(cond_set, lambda_fn)
+class Exponential(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Exponential, self).__init__(sg.DistributionTensor, distributions.Exponential, *args, **kwargs)
 
 
-class Exponential(RandomVariable):
-    def __init__(self, cond_set, lam_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [lam].
-        if lam_lambda_fn is None:
-            lam_lambda_fn = lambda cond_set: cond_set[0]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Exponential,
-                                  lam=lam_lambda_fn(cond_set))
-        super(Exponential, self).__init__(cond_set, lambda_fn)
+class Gamma(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Gamma, self).__init__(sg.DistributionTensor, distributions.Gamma, *args, **kwargs)
 
 
-class Gamma(RandomVariable):
-    def __init__(self, cond_set, alpha_lambda_fn=None, beta_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [alpha, beta].
-        if alpha_lambda_fn is None:
-            alpha_lambda_fn = lambda cond_set: cond_set[0]
-
-        if beta_lambda_fn is None:
-            beta_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Gamma,
-                                  alpha=alpha_lambda_fn(cond_set),
-                                  beta=beta_lambda_fn(cond_set))
-        super(Gamma, self).__init__(cond_set, lambda_fn)
+class InverseGamma(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(InverseGamma, self).__init__(sg.DistributionTensor, distributions.InverseGamma, *args, **kwargs)
 
 
-class InverseGamma(RandomVariable):
-    def __init__(self, cond_set, alpha_lambda_fn=None, beta_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [alpha, beta].
-        if alpha_lambda_fn is None:
-            alpha_lambda_fn = lambda cond_set: cond_set[0]
-
-        if beta_lambda_fn is None:
-            beta_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.InverseGamma,
-                                  alpha=alpha_lambda_fn(cond_set),
-                                  beta=beta_lambda_fn(cond_set))
-        super(InverseGamma, self).__init__(cond_set, lambda_fn)
+class Laplace(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Laplace, self).__init__(sg.DistributionTensor, distributions.Laplace, *args, **kwargs)
 
 
-class Laplace(RandomVariable):
-    def __init__(self, cond_set, loc_lambda_fn=None, scale_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [loc, scale].
-        if loc_lambda_fn is None:
-            loc_lambda_fn = lambda cond_set: cond_set[0]
-
-        if scale_lambda_fn is None:
-            scale_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Laplace,
-                                  loc=loc_lambda_fn(cond_set),
-                                  scale=scale_lambda_fn(cond_set))
-        super(Laplace, self).__init__(cond_set, lambda_fn)
+class MultivariateNormalCholesky(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(MultivariateNormalCholesky, self).__init__(sg.DistributionTensor, distributions.MultivariateNormalCholesky, *args, **kwargs)
 
 
-class MultivariateMultivariateNormalCholeskyCholesky(RandomVariable):
-    def __init__(self, cond_set, mu_lambda_fn=None, chol_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [mu, chol].
-        if mu_lambda_fn is None:
-            mu_lambda_fn = lambda cond_set: cond_set[0]
-
-        if chol_lambda_fn is None:
-            chol_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.MultivariateNormalCholesky,
-                                  mu=mu_lambda_fn(cond_set),
-                                  chol=chol_lambda_fn(cond_set))
-        super(MultivariateNormalCholesky, self).__init__(cond_set, lambda_fn)
+class MultivariateNormalDiag(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(MultivariateNormalDiag, self).__init__(sg.DistributionTensor, distributions.MultivariateNormalDiag, *args, **kwargs)
 
 
-class MultivariateNormalDiag(RandomVariable):
-    def __init__(self, cond_set, mu_lambda_fn=None, diag_stdev_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [mu, diag_stdev].
-        if mu_lambda_fn is None:
-            mu_lambda_fn = lambda cond_set: cond_set[0]
-
-        if diag_stdev_lambda_fn is None:
-            diag_stdev_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.MultivariateNormalDiag,
-                                  mu=mu_lambda_fn(cond_set),
-                                  diag_stdev=diag_stdev_lambda_fn(cond_set))
-        super(MultivariateNormalDiag, self).__init__(cond_set, lambda_fn)
+class MultivariateNormalFull(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(MultivariateNormalFull, self).__init__(sg.DistributionTensor, distributions.MultivariateNormalFull, *args, **kwargs)
 
 
-class MultivariateNormalDiagPlusVDVT(RandomVariable):
-    def __init__(self, cond_set, mu_lambda_fn=None, diag_large_lambda_fn=None, v_lambda_fn=None, diag_small_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [mu, diag_large, v, diag_small].
-        if mu_lambda_fn is None:
-            mu_lambda_fn = lambda cond_set: cond_set[0]
-
-        if diag_large_lambda_fn is None:
-            diag_large_lambda_fn = lambda cond_set: cond_set[1]
-
-        if v_lambda_fn is None:
-            v_lambda_fn = lambda cond_set: cond_set[2]
-
-        if diag_small_lambda_fn is None:
-            diag_small_lambda_fn = lambda cond_set: cond_set[3]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.MultivariateNormalDiagPlutVDVT,
-                                  mu=mu_lambda_fn(cond_set),
-                                  diag_large=diag_large_lambda_fn(cond_set),
-                                  v=v_lambda_fn(cond_set),
-                                  diag_small=diag_small_lambda_fn(cond_set))
-        super(MultivariateNormalDiagPlutVDVT, self).__init__(cond_set, lambda_fn)
-
-
-class MultivariateNormalFull(RandomVariable):
-    def __init__(self, cond_set, mu_lambda_fn=None, sigma_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [mu, sigma].
-        if mu_lambda_fn is None:
-            mu_lambda_fn = lambda cond_set: cond_set[0]
-
-        if sigma_lambda_fn is None:
-            sigma_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.MultivariateNormalFull,
-                                  mu=mu_lambda_fn(cond_set),
-                                  sigma=sigma_lambda_fn(cond_set))
-        super(MultivariateNormalFull, self).__init__(cond_set, lambda_fn)
-
-
-class Normal(RandomVariable):
+class Normal(DelayedOperation):
     """
     Examples
     --------
-    >>> mu = Normal([tf.constant(0.0), tf.constant(1.0)])
-    >>> sigma = tf.constant([1.0])
-    >>> x = Normal([mu, sigma])
+    >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0)])
+    >>> x = Normal(mu=mu, sigma=tf.constant([1.0]))
     """
-    def __init__(self, cond_set, mu_lambda_fn=None, sigma_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [mu, sigma].
-        if mu_lambda_fn is None:
-            mu_lambda_fn = lambda cond_set: cond_set[0]
-
-        if sigma_lambda_fn is None:
-            sigma_lambda_fn = lambda cond_set: cond_set[1]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Normal,
-                                  mu=mu_lambda_fn(cond_set),
-                                  sigma=sigma_lambda_fn(cond_set))
-        super(Normal, self).__init__(cond_set, lambda_fn)
+    def __init__(self, *args, **kwargs):
+        super(Normal, self).__init__(sg.DistributionTensor, distributions.Normal, *args, **kwargs)
 
 
-class StudentT(RandomVariable):
-    def __init__(self, cond_set, df_lambda_fn=None, mu_lambda_fn=None, sigma_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [df, mu, sigma].
-        if df_lambda_fn is None:
-            df_lambda_fn = lambda cond_set: cond_set[0]
-
-        if mu_lambda_fn is None:
-            mu_lambda_fn = lambda cond_set: cond_set[1]
-
-        if sigma_lambda_fn is None:
-            sigma_lambda_fn = lambda cond_set: cond_set[2]
-
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.StudentT,
-                                  df=df_lambda_fn(cond_set),
-                                  mu=mu_lambda_fn(cond_set),
-                                  sigma=sigma_lambda_fn(cond_set))
-        super(StudentT, self).__init__(cond_set, lambda_fn)
+class StudentT(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(StudentT, self).__init__(sg.DistributionTensor, distributions.StudentT, *args, **kwargs)
 
 
-class Uniform(RandomVariable):
-    def __init__(self, cond_set, a_lambda_fn=None, b_lambda_fn=None):
-        # If lambda functions are not passed in, default is to assume
-        # `cond_set` is passed in as [a, b].
-        if a_lambda_fn is None:
-            a_lambda_fn = lambda cond_set: cond_set[0]
+class TransformedDistribution(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(TransformedDistribution, self).__init__(sg.DistributionTensor, distributions.TransformedDistribution, *args, **kwargs)
 
-        if b_lambda_fn is None:
-            b_lambda_fn = lambda cond_set: cond_set[1]
 
-        lambda_fn = lambda cond_set: \
-            sg.DistributionTensor(distributions.Uniform,
-                                  a=a_lambda_fn(cond_set),
-                                  b=b_lambda_fn(cond_set))
-        super(Uniform, self).__init__(cond_set, lambda_fn)
+class Uniform(DelayedOperation):
+    def __init__(self, *args, **kwargs):
+        super(Uniform, self).__init__(sg.DistributionTensor, distributions.Uniform, *args, **kwargs)
