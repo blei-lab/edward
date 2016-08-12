@@ -83,16 +83,16 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
     elif metric == 'squared_hinge':
       evaluations += [sess.run(squared_hinge(y_true, y_pred))]
     elif metric == 'mse' or metric == 'MSE' or \
-       metric == 'mean_squared_error':
+            metric == 'mean_squared_error':
       evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
     elif metric == 'mae' or metric == 'MAE' or \
-       metric == 'mean_absolute_error':
+            metric == 'mean_absolute_error':
       evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
     elif metric == 'mape' or metric == 'MAPE' or \
-       metric == 'mean_absolute_percentage_error':
+            metric == 'mean_absolute_percentage_error':
       evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
     elif metric == 'msle' or metric == 'MSLE' or \
-       metric == 'mean_squared_logarithmic_error':
+            metric == 'mean_squared_logarithmic_error':
       evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
     elif metric == 'poisson':
       evaluations += [sess.run(poisson(y_true, y_pred))]
@@ -323,7 +323,8 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   """
   y_true = tf.cast(y_true, tf.int64)
   y_pred = logit(tf.cast(y_pred, tf.float32))
-  return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
+  return tf.reduce_mean(
+      tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
 
 
 def hinge(y_true, y_pred):
@@ -392,7 +393,8 @@ def mean_absolute_percentage_error(y_true, y_pred):
   y_pred : tf.Tensor
     Tensors of same shape and type.
   """
-  diff = tf.abs((y_true - y_pred) / tf.clip_by_value(tf.abs(y_true), 1e-8, np.inf))
+  diff = tf.abs((y_true - y_pred) / tf.clip_by_value(tf.abs(y_true),
+                                                     1e-8, np.inf))
   return 100.0 * tf.reduce_mean(diff)
 
 
