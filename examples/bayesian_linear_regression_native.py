@@ -26,19 +26,18 @@ p = 1 # num features
 ed.set_seed(42)
 
 X = tf.placeholder(tf.float32, [N, p])
-beta = Normal([tf.zeros(p), tf.ones(p)])
+beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p))
 # We require (input_size, n_samples) for y, so do (input_size, p) %*%
 # (p, n_samples).
 # TODO does this apply to non-stochastic inference approaches?
-y = Normal([beta, tf.ones(p)],
-           lambda cond_set: tf.matmul(X, cond_set[0], transpose_b=True))
-
-mu = tf.Variable(tf.random_normal([p]))
-sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
-qbeta = Normal([mu, sigma])
+y = Normal(mu=ed.matmul(X, beta, transpose_b=True), sigma=tf.ones(p))
 
 data = {}
 data[X], data[y] = build_toy_dataset(N)
+
+mu = tf.Variable(tf.random_normal([p]))
+sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
+qbeta = Normal(mu=mu, sigma=sigma)
 
 inference = ed.MFVI({beta: qbeta}, data)
 inference.initialize()
