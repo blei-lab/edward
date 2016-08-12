@@ -71,7 +71,7 @@ class Bernoulli(object):
     """
     x = tf.cast(x, dtype=tf.float32)
     p = tf.cast(p, dtype=tf.float32)
-    return x * tf.log(p) + (1.0 - x) * tf.log(1.0-p)
+    return x * tf.log(p) + (1.0 - x) * tf.log(1.0 - p)
 
   def entropy(self, p):
     """Entropy of probability distribution.
@@ -88,7 +88,7 @@ class Bernoulli(object):
       A tensor of same shape as input.
     """
     p = tf.cast(p, dtype=tf.float32)
-    return -p * tf.log(p) - (1.0 - p) * tf.log(1.0-p)
+    return -p * tf.log(p) - (1.0 - p) * tf.log(1.0 - p)
 
 
 class Beta(object):
@@ -150,9 +150,8 @@ class Beta(object):
     x = tf.cast(x, dtype=tf.float32)
     a = tf.cast(tf.squeeze(a), dtype=tf.float32)
     b = tf.cast(tf.squeeze(b), dtype=tf.float32)
-    return (a - 1.0) * tf.log(x) + \
-         (b - 1.0) * tf.log(1.0-x) - \
-         tf.lbeta(tf.pack([a, b]))
+    return (a - 1.0) * tf.log(x) + (b - 1.0) * tf.log(1.0 - x) - \
+        tf.lbeta(tf.pack([a, b]))
 
   def entropy(self, a, b):
     """Entropy of probability distribution.
@@ -175,15 +174,15 @@ class Beta(object):
     b = tf.cast(tf.squeeze(b), dtype=tf.float32)
     if len(a.get_shape()) == 0:
       return tf.lbeta(tf.pack([a, b])) - \
-           (a - 1.0) * tf.digamma(a) - \
-           (b - 1.0) * tf.digamma(b) + \
-           (a + b - 2.0) * tf.digamma(a+b)
+          (a - 1.0) * tf.digamma(a) - \
+          (b - 1.0) * tf.digamma(b) + \
+          (a + b - 2.0) * tf.digamma(a + b)
     else:
-      return tf.lbeta(tf.concat(1,
-             [tf.expand_dims(a, 1), tf.expand_dims(b, 1)])) - \
-           (a - 1.0) * tf.digamma(a) - \
-           (b - 1.0) * tf.digamma(b) + \
-           (a + b - 2.0) * tf.digamma(a+b)
+      return tf.lbeta(tf.concat(1, [tf.expand_dims(a, 1),
+                                    tf.expand_dims(b, 1)])) - \
+          (a - 1.0) * tf.digamma(a) - \
+          (b - 1.0) * tf.digamma(b) + \
+          (a + b - 2.0) * tf.digamma(a + b)
 
 
 class Binom(object):
@@ -246,7 +245,7 @@ class Binom(object):
     n = tf.cast(n, dtype=tf.float32)
     p = tf.cast(p, dtype=tf.float32)
     return tf.lgamma(n + 1.0) - tf.lgamma(x + 1.0) - tf.lgamma(n - x + 1.0) + \
-         x * tf.log(p) + (n - x) * tf.log(1.0-p)
+        x * tf.log(p) + (n - x) * tf.log(1.0 - p)
 
   def entropy(self, n, p):
     """
@@ -307,8 +306,8 @@ class Chi2(object):
     """
     x = tf.cast(x, dtype=tf.float32)
     df = tf.cast(df, dtype=tf.float32)
-    return (0.5*df - 1) * tf.log(x) - 0.5*x - \
-         0.5*df * tf.log(2.0) - tf.lgamma(0.5*df)
+    return (0.5 * df - 1) * tf.log(x) - 0.5 * x - \
+        0.5 * df * tf.log(2.0) - tf.lgamma(0.5 * df)
 
   def entropy(self, df):
     """
@@ -372,10 +371,10 @@ class Dirichlet(object):
     alpha = tf.cast(alpha, dtype=tf.float32)
     multivariate_idx = len(get_dims(x)) - 1
     if multivariate_idx == 0:
-      return -tf.lbeta(alpha) + tf.reduce_sum((alpha-1.0) * tf.log(x))
+      return -tf.lbeta(alpha) + tf.reduce_sum((alpha - 1.0) * tf.log(x))
     else:
       return -tf.lbeta(alpha) + \
-           tf.reduce_sum((alpha-1.0) * tf.log(x), multivariate_idx)
+          tf.reduce_sum((alpha - 1.0) * tf.log(x), multivariate_idx)
 
   def entropy(self, alpha):
     """Entropy of probability distribution.
@@ -397,13 +396,13 @@ class Dirichlet(object):
     if multivariate_idx == 0:
       a = tf.reduce_sum(alpha)
       return tf.lbeta(alpha) + \
-           (a - K) * tf.digamma(a) - \
-           tf.reduce_sum((alpha-1.0) * tf.digamma(alpha))
+          (a - K) * tf.digamma(a) - \
+          tf.reduce_sum((alpha - 1.0) * tf.digamma(alpha))
     else:
       a = tf.reduce_sum(alpha, multivariate_idx)
       return tf.lbeta(alpha) + \
-           (a - K) * tf.digamma(a) - \
-           tf.reduce_sum((alpha-1.0) * tf.digamma(alpha), multivariate_idx)
+          (a - K) * tf.digamma(a) - \
+          tf.reduce_sum((alpha - 1.0) * tf.digamma(alpha), multivariate_idx)
 
 
 class Expon(object):
@@ -456,7 +455,7 @@ class Expon(object):
     """
     x = tf.cast(x, dtype=tf.float32)
     scale = tf.cast(scale, dtype=tf.float32)
-    return - x/scale - tf.log(scale)
+    return - x / scale - tf.log(scale)
 
   def entropy(self, scale=1):
     """
@@ -528,7 +527,7 @@ class Gamma(object):
     x = tf.cast(x, dtype=tf.float32)
     a = tf.cast(a, dtype=tf.float32)
     scale = tf.cast(scale, dtype=tf.float32)
-    return (a - 1.0) * tf.log(x) - x/scale - a * tf.log(scale) - tf.lgamma(a)
+    return (a - 1.0) * tf.log(x) - x / scale - a * tf.log(scale) - tf.lgamma(a)
 
   def entropy(self, a, scale=1):
     """Entropy of probability distribution.
@@ -549,8 +548,7 @@ class Gamma(object):
     """
     a = tf.cast(a, dtype=tf.float32)
     scale = tf.cast(scale, dtype=tf.float32)
-    return a + tf.log(scale) + tf.lgamma(a) + \
-         (1.0 - a) * tf.digamma(a)
+    return a + tf.log(scale) + tf.lgamma(a) + (1.0 - a) * tf.digamma(a)
 
 
 class Geom(object):
@@ -603,7 +601,7 @@ class Geom(object):
     """
     x = tf.cast(x, dtype=tf.float32)
     p = tf.cast(p, dtype=tf.float32)
-    return (x-1) * tf.log(1.0-p) + tf.log(p)
+    return (x - 1) * tf.log(1.0 - p) + tf.log(p)
 
   def entropy(self, p):
     """
@@ -681,7 +679,7 @@ class InvGamma(object):
     a = tf.cast(a, dtype=tf.float32)
     scale = tf.cast(scale, dtype=tf.float32)
     return a * tf.log(scale) - tf.lgamma(a) + \
-         (-a-1.0) * tf.log(x) - scale / x
+        (-a - 1.0) * tf.log(x) - scale / x
 
   def entropy(self, a, scale=1):
     """Entropy of probability distribution.
@@ -702,8 +700,8 @@ class InvGamma(object):
     """
     a = tf.cast(a, dtype=tf.float32)
     scale = tf.cast(scale, dtype=tf.float32)
-    return a + tf.log(scale*tf.exp(tf.lgamma(a))) - \
-         (1.0 + a) * tf.digamma(a)
+    return a + tf.log(scale * tf.exp(tf.lgamma(a))) - \
+        (1.0 + a) * tf.digamma(a)
 
 
 class LogNorm(object):
@@ -756,8 +754,8 @@ class LogNorm(object):
     """
     x = tf.cast(x, dtype=tf.float32)
     s = tf.cast(s, dtype=tf.float32)
-    return -0.5*tf.log(2*np.pi) - tf.log(s) - tf.log(x) - \
-         0.5*tf.square(tf.log(x) / s)
+    return -0.5 * tf.log(2 * np.pi) - tf.log(s) - tf.log(x) - \
+        0.5 * tf.square(tf.log(x) / s)
 
   def entropy(self, s):
     """
@@ -837,12 +835,12 @@ class Multinomial(object):
     multivariate_idx = len(get_dims(x)) - 1
     if multivariate_idx == 0:
       return tf.lgamma(n + 1.0) - \
-           tf.reduce_sum(tf.lgamma(x + 1.0)) + \
-           tf.reduce_sum(x * tf.log(p))
+          tf.reduce_sum(tf.lgamma(x + 1.0)) + \
+          tf.reduce_sum(x * tf.log(p))
     else:
       return tf.lgamma(n + 1.0) - \
-           tf.reduce_sum(tf.lgamma(x + 1.0), multivariate_idx) + \
-           tf.reduce_sum(x * tf.log(p), multivariate_idx)
+          tf.reduce_sum(tf.lgamma(x + 1.0), multivariate_idx) + \
+          tf.reduce_sum(x * tf.log(p), multivariate_idx)
 
   def entropy(self, n, p):
     """TODO
@@ -859,8 +857,8 @@ class Multinomial(object):
     if isinstance(n, np.int32):
       k = get_dims(p)[0]
       max_range = np.zeros(k, dtype=np.int32) + n
-      x = np.array([i for i in product(*(range(i+1) for i in max_range))
-                 if sum(i)==n])
+      x = np.array([i for i in product(*(range(i + 1) for i in max_range))
+                    if sum(i) == n])
       logpmf = self.logpmf(x, n, p)
       return tf.reduce_sum(tf.exp(logpmf) * logpmf)
     else:
@@ -868,8 +866,8 @@ class Multinomial(object):
       for j in range(n.shape[0]):
         k = get_dims(p)[0]
         max_range = np.zeros(k, dtype=np.int32) + n[j]
-        x = np.array([i for i in product(*(range(i+1) for i in max_range))
-                if sum(i)==n[j]])
+        x = np.array([i for i in product(*(range(i + 1) for i in max_range))
+                      if sum(i) == n[j]])
         logpmf = self.logpmf(x, n[j], p[j, :])
         out += [tf.reduce_sum(tf.exp(logpmf) * logpmf)]
 
@@ -901,7 +899,7 @@ class Multivariate_Normal(object):
       # stats.multivariate_normal.rvs returns (size, ) if
       # mean has shape (1,). Expand last dimension.
       if mean.shape[0] == 1:
-        x =  np.expand_dims(x, axis=-1)
+        x = np.expand_dims(x, axis=-1)
       # stats.multivariate_normal.rvs returns (size x shape) if
       # size > 1, and shape if size == 1. Expand first dimension.
       if size == 1:
@@ -953,28 +951,28 @@ class Multivariate_Normal(object):
       det_cov = tf.constant(1.0)
     else:
       cov = tf.cast(cov, dtype=tf.float32)
-      if len(cov.get_shape()) == 1: # vector
+      if len(cov.get_shape()) == 1:  # vector
         L_inv = tf.diag(1.0 / tf.sqrt(cov))
         det_cov = tf.reduce_prod(cov)
-      else: # matrix
+      else:  # matrix
         L = tf.cholesky(cov)
         L_inv = tf.matrix_inverse(L)
         det_cov = tf.pow(tf.reduce_prod(tf.diag_part(L)), 2)
 
-    lps = -0.5*d*tf.log(2*np.pi) - 0.5*tf.log(det_cov)
-    if len(x_shape) == 1: # vector
+    lps = -0.5 * d * tf.log(2 * np.pi) - 0.5 * tf.log(det_cov)
+    if len(x_shape) == 1:  # vector
       r = tf.reshape(r, shape=(d, 1))
       inner = tf.matmul(L_inv, r)
       lps -= 0.5 * tf.matmul(inner, inner, transpose_a=True)
       return tf.squeeze(lps)
-    else: # matrix
+    else:  # matrix
       # TODO vectorize further
       out = []
       for r_vec in tf.unpack(r):
         r_vec = tf.reshape(r_vec, shape=(d, 1))
         inner = tf.matmul(L_inv, r_vec)
         out += [tf.squeeze(lps -
-            0.5 * tf.matmul(inner, inner, transpose_a=True))]
+                0.5 * tf.matmul(inner, inner, transpose_a=True))]
 
       return tf.pack(out)
 
@@ -1006,7 +1004,7 @@ class Multivariate_Normal(object):
       else:
         det_cov = tf.matrix_determinant(cov)
 
-    return 0.5 * (d + d*tf.log(2*np.pi) + tf.log(det_cov))
+    return 0.5 * (d + d * tf.log(2 * np.pi) + tf.log(det_cov))
 
 
 class NBinom(object):
@@ -1069,7 +1067,7 @@ class NBinom(object):
     n = tf.cast(n, dtype=tf.float32)
     p = tf.cast(p, dtype=tf.float32)
     return tf.lgamma(x + n) - tf.lgamma(x + 1.0) - tf.lgamma(n) + \
-         n * tf.log(p) + x * tf.log(1.0-p)
+        n * tf.log(p) + x * tf.log(1.0 - p)
 
   def entropy(self, n, p):
     """
@@ -1138,7 +1136,7 @@ class Norm(object):
     loc = tf.cast(loc, dtype=tf.float32)
     scale = tf.cast(scale, dtype=tf.float32)
     z = (x - loc) / scale
-    return -0.5*tf.log(2*np.pi) - tf.log(scale) - 0.5*tf.square(z)
+    return -0.5 * tf.log(2 * np.pi) - tf.log(scale) - 0.5 * tf.square(z)
 
   def entropy(self, loc=0, scale=1):
     """Entropy of probability distribution.
@@ -1157,7 +1155,7 @@ class Norm(object):
       A tensor of same shape as input.
     """
     scale = tf.cast(scale, dtype=tf.float32)
-    return 0.5 * (1 + tf.log(2*np.pi)) + tf.log(scale)
+    return 0.5 * (1 + tf.log(2 * np.pi)) + tf.log(scale)
 
 
 class Poisson(object):
@@ -1255,7 +1253,9 @@ class T(object):
       return stats.t.rvs(df, loc=loc, scale=scale, size=size)
 
     x = []
-    for dfidx, locidx, scaleidx in zip(np.nditer(df), np.nditer(loc), np.nditer(scale)):
+    for dfidx, locidx, scaleidx in zip(np.nditer(df),
+                                       np.nditer(loc),
+                                       np.nditer(scale)):
       x += [stats.t.rvs(dfidx, loc=locidx, scale=scaleidx, size=size)]
 
     # Note this doesn't work for multi-dimensional sizes.
@@ -1289,8 +1289,8 @@ class T(object):
     scale = tf.cast(scale, dtype=tf.float32)
     z = (x - loc) / scale
     return tf.lgamma(0.5 * (df + 1.0)) - tf.lgamma(0.5 * df) - \
-         0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
-         0.5 * (df + 1.0) * tf.log(1.0 + (1.0/df) * tf.square(z))
+        0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
+        0.5 * (df + 1.0) * tf.log(1.0 + (1.0 / df) * tf.square(z))
 
   def entropy(self, df, loc=0, scale=1):
     """
@@ -1340,7 +1340,10 @@ class TruncNorm(object):
       return stats.truncnorm.rvs(a, b, loc, scale, size=size)
 
     x = []
-    for aidx, bidx, locidx, scaleidx in zip(np.nditer(a), np.nditer(b), np.nditer(loc), np.nditer(scale)):
+    for aidx, bidx, locidx, scaleidx in zip(np.nditer(a),
+                                            np.nditer(b),
+                                            np.nditer(loc),
+                                            np.nditer(scale)):
       x += [stats.truncnorm.rvs(aidx, bidx, locidx, scaleidx, size=size)]
 
     # Note this doesn't work for multi-dimensional sizes.
@@ -1382,9 +1385,8 @@ class TruncNorm(object):
     scale = sess.run(tf.cast(scale, dtype=tf.float32))
     sess.close()
     return -tf.log(scale) + norm.logpdf(x, loc, scale) - \
-         tf.log(tf.cast(stats.norm.cdf((b - loc)/scale) - \
-            stats.norm.cdf((a - loc)/scale),
-            dtype=tf.float32))
+        tf.log(tf.cast(stats.norm.cdf((b - loc) / scale) -
+               stats.norm.cdf((a - loc) / scale), dtype=tf.float32))
 
   def entropy(self, a, b, loc=0, scale=1):
     """
