@@ -8,7 +8,8 @@ import six
 import tensorflow as tf
 
 from edward.models import StanModel, Variational, PointMass
-from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp, stop_gradient
+from edward.util import get_dims, get_session, hessian, \
+    kl_multivariate_normal, log_sum_exp, stop_gradient
 
 try:
   import prettytensor as pt
@@ -147,14 +148,14 @@ class VariationalInference(Inference):
       Passed into ``initialize``.
     """
     self.initialize(*args, **kwargs)
-    for t in range(self.n_iter+1):
+    for t in range(self.n_iter + 1):
       loss = self.update()
       self.print_progress(t, loss)
 
     self.finalize()
 
   def initialize(self, n_iter=1000, n_minibatch=None, n_print=100,
-    optimizer=None, scope=None):
+                 optimizer=None, scope=None):
     """Initialize variational inference algorithm.
 
     Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
@@ -192,31 +193,32 @@ class VariationalInference(Inference):
       slices = tf.train.slice_input_producer(values)
       # By default use as many threads as CPUs.
       batches = tf.train.batch(slices, n_minibatch,
-                   num_threads=multiprocessing.cpu_count())
+                               num_threads=multiprocessing.cpu_count())
       if not isinstance(batches, list):
         # ``tf.train.batch`` returns tf.Tensor if ``slices`` is a
         # list of size 1.
         batches = [batches]
 
       self.data = {key: value for key, value in
-             zip(six.iterkeys(self.data), batches)}
+                   zip(six.iterkeys(self.data), batches)}
 
     loss = self.build_loss()
     if optimizer is None:
       var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                     scope=scope)
+                                   scope=scope)
       # Use ADAM with a decaying scale factor.
       global_step = tf.Variable(0, trainable=False)
       starter_learning_rate = 0.1
       learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                        global_step,
-                        100, 0.9, staircase=True)
+                                                 global_step,
+                                                 100, 0.9, staircase=True)
       optimizer = tf.train.AdamOptimizer(learning_rate)
       self.train = optimizer.minimize(loss, global_step=global_step,
-                      var_list=var_list)
+                                      var_list=var_list)
     else:
       if scope is not None:
-        raise NotImplementedError("PrettyTensor optimizer does not accept a variable scope.")
+        raise NotImplementedError("PrettyTensor optimizer does not accept "
+                                  "a variable scope.")
 
       optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
       self.train = pt.apply_optimizer(optimizer, losses=[loss])
@@ -313,7 +315,7 @@ class MFVI(VariationalInference):
       reparameterization gradient if available.
     """
     if score is None and self.variational.is_reparameterized and \
-               self.variational.is_differentiable:
+            self.variational.is_differentiable:
       self.score = False
     else:
       self.score = True
@@ -358,14 +360,14 @@ class MFVI(VariationalInference):
         return self.build_score_loss_kl()
       # Analytic entropies may lead to problems around
       # convergence; for now it is deactivated.
-      #elif self.variational.is_entropy:
+      # elif self.variational.is_entropy:
       #    return self.build_score_loss_entropy()
       else:
         return self.build_score_loss()
     else:
       if self.variational.is_normal and hasattr(self.model, 'log_lik'):
         return self.build_reparam_loss_kl()
-      #elif self.variational.is_entropy:
+      # elif self.variational.is_entropy:
       #    return self.build_reparam_loss_entropy()
       else:
         return self.build_reparam_loss()
@@ -408,7 +410,7 @@ class MFVI(VariationalInference):
     z = self.variational.sample(self.n_samples)
 
     self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
-                   self.variational.log_prob(z))
+                               self.variational.log_prob(z))
     return -self.loss
 
   def build_score_loss_kl(self):
@@ -464,7 +466,7 @@ class MFVI(VariationalInference):
     q_entropy = self.variational.entropy()
     self.loss = tf.reduce_mean(p_log_prob) + q_entropy
     return -(tf.reduce_mean(q_log_prob * stop_gradient(p_log_prob)) +
-         q_entropy)
+             q_entropy)
 
   def build_reparam_loss_kl(self):
     """Build loss function. Its automatic differentiation
@@ -490,7 +492,7 @@ class MFVI(VariationalInference):
     mu = tf.concat(0, [layer.loc for layer in self.variational.layers])
     sigma = tf.concat(0, [layer.scale for layer in self.variational.layers])
     self.loss = tf.reduce_mean(self.model.log_lik(x, z)) - \
-          kl_multivariate_normal(mu, sigma)
+        kl_multivariate_normal(mu, sigma)
     return -self.loss
 
   def build_reparam_loss_entropy(self):
@@ -512,7 +514,7 @@ class MFVI(VariationalInference):
     x = self.data
     z = self.variational.sample(self.n_samples)
     self.loss = tf.reduce_mean(self.model.log_prob(x, z)) + \
-          self.variational.entropy()
+        self.variational.entropy()
     return -self.loss
 
 
@@ -561,7 +563,7 @@ class KLpq(VariationalInference):
     .. math::
       z^b \sim q(z^b; \lambda)
 
-      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B ( w(z^b; \lambda) )
+      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda))
 
       w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)
 
@@ -642,7 +644,7 @@ class Laplace(MAP):
     x = self.data
     z = self.variational.sample()
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                   scope='variational')
+                                 scope='variational')
     inv_cov = hessian(self.model.log_prob(x, z), var_list)
     print("Precision matrix:")
     print(inv_cov.eval())
