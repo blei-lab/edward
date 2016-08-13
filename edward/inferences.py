@@ -10,7 +10,7 @@ import tensorflow as tf
 # TODO
 #from edward.models import StanModel, Normal, PointMass
 from edward.models import StanModel, Normal
-from edward.util import get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
+from edward.util import build_op, get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
 
 sg = tf.contrib.bayesflow.stochastic_graph
 
@@ -269,33 +269,46 @@ class VariationalInference(Inference):
             self.data = {key: value for key, value in
                          zip(six.iterkeys(self.data), batches)}
 
+        # TODO
+        # Note (in doc somewhere) we are using a single graph for
+        # everything instead of concretely having a graph for the
+        # model, for the variational model, and for inference. This
+        # makes it more convenient to use tf.Variables() already
+        # built, without re-building them, and juggling which
+        # variables to optimize.
         # TODO n_samples for VI that isn't stochastic
-        # Use a dictionary to store bindings of `RandomVariable`s to
-        # their built tensors.
-        self.built_dict = {}
-        with sg.value_type(sg.SampleValue(n=self.n_samples)): # latent variable samples
-            # Build random variables in q(z).
-            for rv in six.itervalues(self.latent_vars):
-                rv.build(built_dict=self.built_dict)
-
+        # TODO sg.value_type(), where does it go?
         if self.model_wrapper is None:
-            with sg.value_type(sg.SampleValue(n=self.n_samples)): # latent variable samples
-                # Build random variables in p(z). `latent_vars`
-                # replaces conditioning on priors with conditioning on
-                # (variational) posteriors.
-                for rv in six.iterkeys(self.latent_vars):
-                    rv.build(built_dict=self.built_dict, latent_vars=self.latent_vars)
+            # Build random variables in p(z). `latent_vars`
+            # replaces conditioning on priors with conditioning on
+            # (variational) posteriors.
+            built_latent_vars = {}
+            for z, qz in six.iteritems(self.latent_vars):
+                # TODO this is waht's technically being done, as we're
+                # rebuilding all of the variatinoal model graph too;
+                # but in our special case, we could just have reused
+                # all of the variational model graph as we know it
+                # won't change
+                #built_latent_vars[build_op(z, dict_swap=self.latent_vars)] = qz
+                built_latent_vars[build_op(z, dict_swap=self.latent_vars)] = \
+                    build_op(qz, dict_swap=self.latent_vars)
 
-            with sg.value_type(sg.SampleAndReshapeValue(n=1)): # 1 data set
-                # Build random variables in p(x | z). `latent_vars`
-                # replaces conditioning on priors with conditioning on
-                # (variational) posteriors.
-                for rv in six.iterkeys(self.data):
-                    # TODO don't call rv
-                    if not isinstance(rv, tf.Tensor):
-                        # TODO for placeholders as in covariates or pre-built
-                        # model tensors
-                        rv.build(built_dict=self.built_dict, latent_vars=self.latent_vars)
+            # Build random variables in p(x | z). `latent_vars`
+            # replaces conditioning on priors with conditioning on
+            # (variational) posteriors.
+            built_data = {}
+            for tensor, obs in six.iteritems(self.data):
+                # Only build random variables, not any passed-in data
+                # tensors.
+                if isinstance(tensor, sg.DistributionTensor):
+                    built_data[build_op(tensor, dict_swap=self.latent_vars)] = obs
+                else:
+                    built_data[tensor] = obs
+
+            # TODO For now, we are replacing the objects themselves
+            # with the new dependencies.
+            self.latent_vars = built_latent_vars
+            self.data = built_data
 
         loss = self.build_loss()
         if optimizer is None:
@@ -524,31 +537,27 @@ class MFVI(VariationalInference):
         q_log_prob = 0.0
         # Take log-densities over latent variables.
         for pz, qz in six.iteritems(self.latent_vars):
-            pz_tensor = self.built_dict[pz]
-            qz_tensor = self.built_dict[qz]
-            z_samples = qz_tensor.value() # (n_samples, shape) tensor
+            z_samples = qz.value() # (n_samples, shape) tensor
             # Sum over all dimensions except the one corresponding to n_samples.
-            q_log_prob += tf.reduce_sum(qz_tensor.distribution.log_prob(z_samples),
-                                        range(1, len(qz_tensor.value().get_shape())))
+            q_log_prob += tf.reduce_sum(qz.distribution.log_prob(z_samples),
+                                        range(1, len(qz.value().get_shape())))
             if self.model_wrapper is None:
-                p_log_prob += tf.reduce_sum(pz_tensor.distribution.log_prob(z_samples),
-                                            range(1, len(pz_tensor.value().get_shape())))
+                p_log_prob += tf.reduce_sum(pz.distribution.log_prob(z_samples),
+                                            range(1, len(pz.value().get_shape())))
 
         if self.model_wrapper is None:
             # Take log-densities over data.
-            for px, obs in six.iteritems(self.data):
-                if not isinstance(px, tf.Tensor):
-                    # TODO don't call px as it can just be a
-                    # placeholder and not a random variable
-                    px_tensor = self.built_dict[px]
-                    len_px_tensor = len(px_tensor.value().get_shape())
+            for tensor, obs in six.iteritems(self.data):
+                if isinstance(tensor, sg.DistributionTensor):
+                    px = tensor
+                    len_px = len(px.value().get_shape())
                     # reshape `obs` in order to broadcast along outer dimension
                     obs_shape = tuple([int(i) for i in obs.get_shape()])
                     len_obs = len(obs_shape)
-                    obs = tf.reshape(obs, obs_shape + (1,)*(len_px_tensor-len_obs))
+                    obs = tf.reshape(obs, obs_shape + (1,)*(len_px-len_obs))
                     # Sum over all dimensions except the one corresponding to n_samples.
-                    p_log_prob += tf.reduce_sum(px_tensor.distribution.log_prob(obs),
-                                                range(len_obs) + range(len_obs, len_px_tensor))
+                    p_log_prob += tf.reduce_sum(px.distribution.log_prob(obs),
+                                                range(len_obs) + range(len_obs, len_px))
 
         self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
         return -self.loss

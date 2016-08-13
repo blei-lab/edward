@@ -3,9 +3,205 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
+from copy import deepcopy
 from tensorflow.python.ops import control_flow_ops
+
+distributions = tf.contrib.distributions
+sg = tf.contrib.bayesflow.stochastic_graph
+
+
+def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False):
+    """Build a new node in the TensorFlow graph from `org_instance`,
+    where any of its ancestors are replaced with the correspondence in
+    `dict_swap` if in there.
+
+    The building is done recursively, so any `Operation` whose output
+    is required to evaluate `org_instance` is also built (if it isn't
+    already built within the new scope). This is with the exception of
+    `tf.Variable`s and `tf.placeholder`s, which are reused and not newly built.
+
+    Parameters
+    ----------
+    org_instance : sg.DistributionTensor, tf.Variable, tf.Tensor, or tf.Operation
+        Node to add in graph with replaced ancestors.
+    dict_swap : dict, optional
+        Distribution tensors, variables, tensors, or operations to
+        swap with. Its keys are what `org_instance` may depend on,
+        and its values are the corresponding object (of the same type)
+        that will be used in exchange.
+    scope : str, optional
+        A scope for the new node(s). This is used to avoid name
+        conflicts with the original node(s).
+    replace_itself : bool, optional
+        Whether to replace `org_instance` itself if it exists in
+        `dict_swap`. This is used for the recursion.
+
+    Returns
+    -------
+    sg.DistributionTensor, tf.Variable, tf.Tensor, or tf.Operation
+        The built node.
+
+    Raises
+    ------
+    TypeError
+        If `org_instance` is not one of the above types.
+
+    Examples
+    --------
+    >>> x = tf.constant(2.0)
+    >>> y = tf.constant(3.0)
+    >>> z = x * y
+    >>>
+    >>> qx = tf.constant(4.0)
+    >>> z_new = build_op(z, {x: qx})
+    >>>
+    >>> sess = tf.Session()
+    >>> sess.run(z)
+    6.0
+    >>> sess.run(z_new)
+    12.0
+    """
+    if not isinstance(org_instance, sg.DistributionTensor) and \
+       not isinstance(org_instance, tf.Variable) and \
+       not isinstance(org_instance, tf.Tensor) and \
+       not isinstance(org_instance, tf.Operation):
+        raise TypeError("Could not build instance: " + str(org_instance))
+
+    graph = tf.get_default_graph()
+    new_name = scope + '/' + org_instance.name
+
+    # If an instance of the same name exists, return appropriately.
+    try:
+        already_present = graph.as_graph_element(new_name,
+                                                 allow_tensor=True,
+                                                 allow_operation=True)
+        return already_present
+    except:
+        pass
+
+    # Swap instance if in dictionary.
+    if org_instance in dict_swap and replace_itself:
+        instance = dict_swap[org_instance]
+    else:
+        instance = org_instance
+
+    # If instance is a variable, return it; do not re-build any.
+    # Note we check variables via their name and not their type. This is
+    # because if we get variables through an op's inputs, it is a
+    # tf.Tensor type: we can only tell it is a variable under the hood
+    # via its name.
+    variables = {x.name: x for x in graph.get_collection(tf.GraphKeys.VARIABLES)}
+    if instance.name in variables:
+        return graph.get_tensor_by_name(variables[instance.name].name)
+
+    # # Above is also for placeholders.
+    # TODO assume placeholders are all in this collection
+    placeholders = {x.name: x for x in graph.get_collection('placeholders')}
+    if instance.name in placeholders:
+        return graph.get_tensor_by_name(placeholders[instance.name].name)
+
+    if isinstance(org_instance, sg.DistributionTensor):
+        dist_tensor = instance
+
+        # A random variable is determined by its parameters. Therefore
+        # build them.
+        dist_args = {}
+        for key, value in six.iteritems(dist_tensor._dist_args):
+            dist_args[key] = build_op(value, dict_swap, scope, True)
+
+        # Copy all of `dist_tensor` excluding _dist_args, _dist, and
+        # _value. We will set and build these afterwards. We do this
+        # by creating a new DT object whose elements will all be
+        # replaced.
+        new_dist_tensor = sg.DistributionTensor(
+            distributions.Bernoulli, p=tf.constant([0.0]))
+        for key, value in zip(six.iterkeys(new_dist_tensor.__dict__),
+                              six.itervalues(dist_tensor.__dict__)):
+            if key != '_dist_args' and key != '_dist' and \
+               key != '_value':
+                setattr(new_dist_tensor, key, deepcopy(value))
+
+        setattr(new_dist_tensor, '_dist_args', dist_args)
+        setattr(new_dist_tensor, '_dist',
+                new_dist_tensor._dist_cls(**new_dist_tensor._dist_args))
+        setattr(new_dist_tensor, '_value',
+                new_dist_tensor._create_value())
+        return new_dist_tensor
+    elif isinstance(org_instance, tf.Variable):
+        variable = instance
+        # Use the same variables; do not re-build any.
+        return variable
+    elif isinstance(org_instance, tf.Tensor):
+        tensor = instance
+
+        # A tensor is one of the outputs of its underlying
+        # op. Therefore build the op itself.
+        op = tensor.op
+        new_op = build_op(op, dict_swap, scope, True)
+
+        output_index = org_instance.op.outputs.index(org_instance)
+        new_tensor = new_op.outputs[output_index]
+        new_tensor.set_shape(tensor.get_shape())
+
+        # Add built tensor to collections that the original one is in.
+        for name, collection in org_instance.graph._collections.items():
+            # org_instance or tensor?
+            if org_instance in collection:
+                graph.add_to_collection(name, new_tensor)
+
+        return new_tensor
+    else:  # tf.Operation
+        op = instance
+
+        # If it has an original op, build it.
+        if op._original_op is not None:
+            new_original_op = build_op(op._original_op, dict_swap, scope, True)
+        else:
+            new_original_op = None
+
+        # If it has control inputs, build them.
+        new_control_inputs = [build_op(x, dict_swap, scope, True)
+                              for x in op.control_inputs]
+
+        # If it has inputs, build them.
+        new_inputs = [build_op(x, dict_swap, scope, True)
+                      for x in op.inputs]
+
+        # Make a copy of the node def.
+        # As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it
+        # stores string-based info such as name, device, and type of the op.
+        # It is unique to every Operation instance.
+        new_node_def = deepcopy(op.node_def)
+        new_node_def.name = new_name
+
+        # Copy the other inputs needed for initialization.
+        output_types = op._output_types[:]
+        input_types = op._input_types[:]
+
+        # Make a copy of the op def.
+        # It is unique to every Operation type.
+        op_def = deepcopy(op.op_def)
+
+        new_op = tf.Operation(new_node_def,
+                              graph,
+                              new_inputs,
+                              output_types,
+                              new_control_inputs,
+                              input_types,
+                              new_original_op,
+                              op_def)
+
+        # Use Graph's private methods to add the op.
+        graph._add_op(new_op)
+        graph._record_op_seen_by_control_dependencies(new_op)
+        for device_function in reversed(graph._device_function_stack):
+            new_op._set_device(device_function(new_op))
+
+        return new_op
+
 
 def cumprod(xs):
     """Cumulative product of a tensor along its outer dimension.
