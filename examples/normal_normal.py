@@ -11,16 +11,15 @@ from edward.models import Normal
 
 ed.set_seed(42)
 
-# probability model: Normal-Normal with known variance
-mu = tf.constant([0.0])
-sigma = tf.constant([1.0])
-pmu = Normal([mu, sigma])
-x = Normal([pmu, sigma],
-           lambda cond_set: tf.pack([cond_set[0] for n in range(50)]))
+# Normal-Normal with known variance
+pmu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
+# TODO work with lists of tensors
+x = Normal(mu=ed.pack([pmu for n in range(50)]),
+           sigma=tf.constant([1.0]*50))
 
-mu2 = tf.Variable(tf.random_normal([1]))
-sigma2 = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-qmu = Normal([mu2, sigma2])
+qmu_mu = tf.Variable(tf.random_normal([1]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
 data = {x: np.array([0.0]*50, dtype=np.float32)}
 

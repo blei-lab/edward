@@ -32,6 +32,14 @@ class DelayedTensor(object):
     ...                                          mu=cond_set[0],
     ...                                          sigma=cond_set[1]))
     >>> x_tensor = x.build()
+    >>>
+    >>> x = ed.constant([[1.0, 2.0], [3.0, 4.0]])
+    >>> y = ed.constant([[1.0, 2.0], [3.0, 4.0]])
+    >>> out = ed.matmul(x, y)
+    >>> out_tensor = out.build()
+    >>>
+    >>> sess = tf.Session()
+    >>> sess.run(out_tensor)
 
     `x.build()` builds the distribution tensor, defaulting to the
     initialized conditioning set. `sess.run(x_tensor)` returns samples
