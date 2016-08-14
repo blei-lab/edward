@@ -284,12 +284,10 @@ class VariationalInference(Inference):
             # (variational) posteriors.
             built_latent_vars = {}
             for z, qz in six.iteritems(self.latent_vars):
-                # TODO this is waht's technically being done, as we're
-                # rebuilding all of the variatinoal model graph too;
-                # but in our special case, we could just have reused
-                # all of the variational model graph as we know it
-                # won't change
+                # In this one, we reuse all of the variational model
+                # graph; need to add `build_q=False` everywhere
                 #built_latent_vars[build_op(z, dict_swap=self.latent_vars)] = qz
+                # this one is if we also want to build q tensors
                 built_latent_vars[build_op(z, dict_swap=self.latent_vars)] = \
                     build_op(qz, dict_swap=self.latent_vars)
 
