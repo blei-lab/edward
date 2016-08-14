@@ -223,7 +223,7 @@ class VariationalInference(Inference):
         self.finalize()
 
     def initialize(self, n_iter=1000, n_minibatch=None, n_print=100,
-        optimizer=None, scope=None):
+        optimizer=None, scope=None, logdir=None):
         """Initialize variational inference algorithm.
 
         Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
@@ -248,6 +248,9 @@ class VariationalInference(Inference):
             optimizer when using PrettyTensor. Defaults to TensorFlow.
         scope : str, optional
             Scope of TensorFlow variable objects to optimize over.
+        logdir : str, optional
+            Directory where event file will be written. For details,
+            see `tf.train.SummaryWriter`. Default is to write nothing.
         """
         self.n_iter = n_iter
         self.n_minibatch = n_minibatch
@@ -284,12 +287,9 @@ class VariationalInference(Inference):
             # (variational) posteriors.
             built_latent_vars = {}
             for z, qz in six.iteritems(self.latent_vars):
-                # In this one, we reuse all of the variational model
-                # graph; need to add `build_q=False` everywhere
-                #built_latent_vars[build_op(z, dict_swap=self.latent_vars)] = qz
-                # this one is if we also want to build q tensors
-                built_latent_vars[build_op(z, dict_swap=self.latent_vars)] = \
-                    build_op(qz, dict_swap=self.latent_vars)
+                built_z = build_op(z, dict_swap=self.latent_vars)
+                built_qz = build_op(qz, dict_swap=self.latent_vars)
+                built_latent_vars[built_z] = built_qz
 
             # Build random variables in p(x | z). `latent_vars`
             # replaces conditioning on priors with conditioning on
@@ -299,7 +299,8 @@ class VariationalInference(Inference):
                 # Only build random variables, not any passed-in data
                 # tensors.
                 if isinstance(tensor, sg.DistributionTensor):
-                    built_data[build_op(tensor, dict_swap=self.latent_vars)] = obs
+                    built_x = build_op(tensor, dict_swap=self.latent_vars)
+                    built_data[built_x] = obs
                 else:
                     built_data[tensor] = obs
 
@@ -327,6 +328,9 @@ class VariationalInference(Inference):
 
             optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
             self.train = pt.apply_optimizer(optimizer, losses=[loss])
+
+        if logdir is not None:
+            train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
 
         init = tf.initialize_all_variables()
         init.run()

@@ -25,10 +25,13 @@ qmu = Normal(mu=qmu_mu, sigma=qmu_sigma, name='qmu')
 
 data = {x: np.array([0.0]*50, dtype=np.float32)}
 
-x_built = build_op(x, {mu: qmu})
+# analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
+inference = ed.MFVI({mu: qmu}, data)
+inference.initialize(logdir='train')
 
-# Show graph (of just the probability model and variational model)
-train_writer = tf.train.SummaryWriter('train', tf.get_default_graph())
-init = tf.initialize_all_variables()
-sess = tf.Session()
-sess.run(init)
+sess = ed.get_session()
+for t in range(1000):
+    _, loss = sess.run([inference.train, inference.loss])
+    inference.print_progress(t, loss)
+
+print(sess.run([qmu_mu, qmu_sigma]))

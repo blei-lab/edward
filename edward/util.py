@@ -15,8 +15,8 @@ sg = tf.contrib.bayesflow.stochastic_graph
 
 def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, build_q=True):
     """Build a new node in the TensorFlow graph from `org_instance`,
-    where any of its ancestors are replaced with the correspondence in
-    `dict_swap` if in there.
+    where any of its ancestors existing in `dict_swap` are
+    replaced with `dict_swap`'s corresponding value.
 
     The building is done recursively, so any `Operation` whose output
     is required to evaluate `org_instance` is also built (if it isn't
@@ -31,16 +31,16 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
         Distribution tensors, variables, tensors, or operations to
         swap with. Its keys are what `org_instance` may depend on,
         and its values are the corresponding object (of the same type)
-        that will be used in exchange.
+        that is used in exchange.
     scope : str, optional
         A scope for the new node(s). This is used to avoid name
         conflicts with the original node(s).
     replace_itself : bool, optional
         Whether to replace `org_instance` itself if it exists in
-        `dict_swap`. This is used for the recursion.
+        `dict_swap`. (This is used for the recursion.)
     build_q : bool, optional
-        Whether to build the replaced tensors recursively too (if not
-        already built within the new scope).
+        Whether to build the replaced tensors too (if not already
+        built within the new scope). Otherwise will reuse them.
 
     Returns
     -------
@@ -59,6 +59,11 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
     >>> z = x * y
     >>>
     >>> qx = tf.constant(4.0)
+    >>> # The TensorFlow graph is currently
+    >>> # `x` -> `z` <- y`, `qx`
+    >>>
+    >>> # This adds a subgraph with newly built nodes,
+    >>> # `built/qx` -> `built/z` <- `built/y`
     >>> z_new = build_op(z, {x: qx})
     >>>
     >>> sess = tf.Session()
@@ -73,10 +78,33 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
        not isinstance(org_instance, tf.Operation):
         raise TypeError("Could not build instance: " + str(org_instance))
 
+    # Swap instance if in dictionary.
+    if org_instance in dict_swap and replace_itself:
+        org_instance = dict_swap[org_instance]
+        if not build_q:
+            return org_instance
+    elif isinstance(org_instance, tf.Tensor) and replace_itself:
+        # Deal with case when `org_instance` is the associated tensor
+        # from the DistributionTensor, e.g., `z.value()`. If
+        # `dict_swap={z: qz}`, we aim to swap it with `qz.value()`.
+        for key, value in six.iteritems(dict_swap):
+            if isinstance(key, sg.DistributionTensor):
+                if org_instance == key.value():
+                    org_instance = value.value()
+                    if not build_q:
+                        return org_instance
+                    break
+
     graph = tf.get_default_graph()
     new_name = scope + '/' + org_instance.name
 
     # If an instance of the same name exists, return appropriately.
+    # Do this for stochastic tensors.
+    stochastic_tensors = {x.name: x for x in graph.get_collection('_stochastic_tensor_collection_')}
+    if new_name in stochastic_tensors:
+        return stochastic_tensors[new_name]
+
+    # Do this for tensors and operations.
     try:
         already_present = graph.as_graph_element(new_name,
                                                  allow_tensor=True,
@@ -85,32 +113,15 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
     except:
         pass
 
-    # Swap instance if in dictionary.
-    if org_instance in dict_swap and replace_itself:
-        org_instance = dict_swap[org_instance]
-        if not build_q:
-            return org_instance
-    else:
-        # TODO this is slow; i think we may have to check names using
-        # the stochastic tensor collection just like below
-        built_dict_swap = {}
-        for key, value in six.iteritems(dict_swap):
-            if isinstance(key, sg.DistributionTensor):
-                if org_instance == key.value():
-                    org_instance = value.value()
-                    if not build_q:
-                        return org_instance
-
     # If instance is a variable, return it; do not re-build any.
-    # Note we check variables via their name and not their type. This is
-    # because if we get variables through an op's inputs, it is a
-    # tf.Tensor type: we can only tell it is a variable under the hood
-    # via its name.
+    # Note we check variables via their name and not their type. This
+    # is because if we get variables through an op's inputs, it has
+    # type tf.Tensor: we can only tell it is a variable via its name.
     variables = {x.name: x for x in graph.get_collection(tf.GraphKeys.VARIABLES)}
     if org_instance.name in variables:
         return graph.get_tensor_by_name(variables[org_instance.name].name)
 
-    # # Above is also for placeholders.
+    # Do the same for placeholders. Same logic holds.
     # TODO assume placeholders are all in this collection
     placeholders = {x.name: x for x in graph.get_collection('placeholders')}
     if org_instance.name in placeholders:
@@ -119,23 +130,33 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
     if isinstance(org_instance, sg.DistributionTensor):
         dist_tensor = org_instance
 
-        # A random variable is determined by its parameters. Therefore
-        # build them.
+        # If it has buildable arguments, build them.
         dist_args = {}
         for key, value in six.iteritems(dist_tensor._dist_args):
-            dist_args[key] = build_op(value, dict_swap, scope, True, build_q)
+            if isinstance(value, sg.DistributionTensor) or \
+               isinstance(value, tf.Variable) or \
+               isinstance(value, tf.Tensor) or \
+               isinstance(value, tf.Operation):
+               value = build_op(value, dict_swap, scope, True, build_q)
 
-        # Copy all of `dist_tensor` excluding _dist_args, _dist, and
-        # _value. We will set and build these afterwards. We do this
-        # by creating a new DT object whose elements will all be
-        # replaced.
-        new_dist_tensor = sg.DistributionTensor(
-            distributions.Bernoulli, p=tf.constant([0.0]))
+            dist_args[key] = value
+
+        dist_args['name'] = new_name + dist_tensor.distribution.name
+
+        # Build a new `dist_tensor` with any newly built arguments.
+        # We do this by instantiating another DistributionTensor,
+        # whose elements will be replaced.
+        with tf.name_scope("TEMPORARY"):
+            # TODO get all temporary distribution tensors in the same
+            # name scope
+            new_dist_tensor = sg.DistributionTensor(
+                distributions.Bernoulli, p=tf.constant([0.0]))
+
         for key, value in six.iteritems(dist_tensor.__dict__):
-            if key != '_dist_args' and key != '_dist' and \
-               key != '_value':
+            if key not in ['_name', '_dist_args', '_dist', '_value']:
                 setattr(new_dist_tensor, key, deepcopy(value))
 
+        setattr(new_dist_tensor, '_name', new_name)
         setattr(new_dist_tensor, '_dist_args', dist_args)
         setattr(new_dist_tensor, '_dist',
                 new_dist_tensor._dist_cls(**new_dist_tensor._dist_args))
@@ -155,9 +176,8 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
         new_tensor.set_shape(tensor.get_shape())
 
         # Add built tensor to collections that the original one is in.
-        for name, collection in org_instance.graph._collections.items():
-            # org_instance or tensor?
-            if org_instance in collection:
+        for name, collection in tensor.graph._collections.items():
+            if tensor in collection:
                 graph.add_to_collection(name, new_tensor)
 
         return new_tensor
