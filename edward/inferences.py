@@ -272,15 +272,6 @@ class VariationalInference(Inference):
             self.data = {key: value for key, value in
                          zip(six.iterkeys(self.data), batches)}
 
-        # TODO
-        # Note (in doc somewhere) we are using a single graph for
-        # everything instead of concretely having a graph for the
-        # model, for the variational model, and for inference. This
-        # makes it more convenient to use tf.Variables() already
-        # built, without re-building them, and juggling which
-        # variables to optimize.
-        # TODO n_samples for VI that isn't stochastic
-        # TODO sg.value_type(), where does it go?
         if self.model_wrapper is None:
             # Build random variables in p(z). `latent_vars`
             # replaces conditioning on priors with conditioning on
