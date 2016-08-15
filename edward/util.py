@@ -188,12 +188,22 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
             new_original_op = None
 
         # If it has control inputs, build them.
-        new_control_inputs = [build(x, dict_swap, scope, True, build_q)
-                              for x in op.control_inputs]
+        new_control_inputs = []
+        for x in op.control_inputs:
+            elem = build(x, dict_swap, scope, True, build_q)
+            if not isinstance(elem, tf.Operation):
+                elem = tf.convert_to_tensor(elem)
+
+            new_control_inputs += [elem]
 
         # If it has inputs, build them.
-        new_inputs = [build(x, dict_swap, scope, True, build_q)
-                      for x in op.inputs]
+        new_inputs = []
+        for x in op.inputs:
+            elem = build(x, dict_swap, scope, True, build_q)
+            if not isinstance(elem, tf.Operation):
+                elem = tf.convert_to_tensor(elem)
+
+            new_inputs += [elem]
 
         # Make a copy of the node def.
         # As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it
