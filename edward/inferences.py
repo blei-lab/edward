@@ -277,11 +277,16 @@ class VariationalInference(Inference):
             # replaces conditioning on priors with conditioning on
             # (variational) posteriors.
             # TODO still build qz if model_wrapper is used
+            # TODO put in MFVI as it relies on self.n_samples
+            # TODO technically don't need to change value type for z
+            # Rewrite value type based on number of latent variable
+            # samples during inference.
             built_latent_vars = {}
-            for z, qz in six.iteritems(self.latent_vars):
-                built_z = build(z, dict_swap=self.latent_vars)
-                built_qz = build(qz, dict_swap=self.latent_vars)
-                built_latent_vars[built_z] = built_qz
+            with sg.value_type(sg.SampleValue(n=self.n_samples)):
+                for z, qz in six.iteritems(self.latent_vars):
+                    built_z = build(z, dict_swap=self.latent_vars)
+                    built_qz = build(qz, dict_swap=self.latent_vars)
+                    built_latent_vars[built_z] = built_qz
 
             # Build random variables in p(x | z). `latent_vars`
             # replaces conditioning on priors with conditioning on

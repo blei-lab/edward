@@ -7,7 +7,10 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
+from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.framework.ops import set_shapes_for_outputs
+from tensorflow.python.util import compat
 
 distributions = tf.contrib.distributions
 sg = tf.contrib.bayesflow.stochastic_graph
@@ -150,13 +153,24 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
         new_dist_tensor = Empty()
         new_dist_tensor.__class__ = sg.DistributionTensor
         for key, value in six.iteritems(dist_tensor.__dict__):
-            if key not in ['_name', '_dist_args', '_dist', '_value']:
+            if key not in \
+            ['_name', '_dist_args', '_dist', 'value_type', '_value']:
                 setattr(new_dist_tensor, key, deepcopy(value))
 
         setattr(new_dist_tensor, '_name', new_name)
         setattr(new_dist_tensor, '_dist_args', dist_args)
         setattr(new_dist_tensor, '_dist',
                 new_dist_tensor._dist_cls(**new_dist_tensor._dist_args))
+        try:
+            # Use value type context during build(); otherwise default
+            # to the original value type.
+            # TODO i think it's more like we should augment the value
+            # type with another
+            setattr(new_dist_tensor, '_value_type', sg.get_current_value_type())
+        except sg.NoValueTypeSetError:
+            setattr(new_dist_tensor, '_value_type', dist_tensor._value_type)
+
+        new_dist_tensor._value_type.declare_inputs(new_dist_tensor, dist_args)
         setattr(new_dist_tensor, '_value',
                 new_dist_tensor._create_value())
         return new_dist_tensor
@@ -170,7 +184,6 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
 
         output_index = op.outputs.index(tensor)
         new_tensor = new_op.outputs[output_index]
-        new_tensor.set_shape(tensor.get_shape())
 
         # Add built tensor to collections that the original one is in.
         for name, collection in tensor.graph._collections.items():
@@ -220,22 +233,64 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
         # It is unique to every Operation type.
         op_def = deepcopy(op.op_def)
 
-        new_op = tf.Operation(new_node_def,
-                              graph,
-                              new_inputs,
-                              output_types,
-                              new_control_inputs,
-                              input_types,
-                              new_original_op,
-                              op_def)
+        ret = tf.Operation(new_node_def,
+                           graph,
+                           new_inputs,
+                           output_types,
+                           new_control_inputs,
+                           input_types,
+                           new_original_op,
+                           op_def)
 
-        # Use Graph's private methods to add the op.
-        graph._add_op(new_op)
-        graph._record_op_seen_by_control_dependencies(new_op)
-        for device_function in reversed(graph._device_function_stack):
-            new_op._set_device(device_function(new_op))
+        # Use Graph's private methods to add the op, following
+        # implementation of `tf.Graph().create_op()`.
+        compute_shapes = True
+        compute_device = True
+        op_type = new_name
 
-        return new_op
+        if compute_shapes:
+            set_shapes_for_outputs(ret)
+        graph._add_op(ret)
+        graph._record_op_seen_by_control_dependencies(ret)
+
+        if compute_device:
+            graph._apply_device_functions(ret)
+
+        if graph._colocation_stack:
+            all_colocation_groups = []
+            for colocation_op in graph._colocation_stack:
+                all_colocation_groups.extend(colocation_op.colocation_groups())
+                if colocation_op.device:
+                    # Make this device match the device of the colocated op, to
+                    # provide consistency between the device and the colocation
+                    # property.
+                    if ret.device and ret.device != colocation_op.device:
+                        logging.warning("Tried to colocate %s with an op %s that had "
+                                         "a different device: %s vs %s. "
+                                         "Ignoring colocation property.",
+                                          name, colocation_op.name,
+                                          ret.device, colocation_op.device)
+                    else:
+                        ret._set_device(colocation_op.device)
+
+            all_colocation_groups = sorted(set(all_colocation_groups))
+            ret.node_def.attr["_class"].CopyFrom(attr_value_pb2.AttrValue(
+                    list=attr_value_pb2.AttrValue.ListValue(s=all_colocation_groups)))
+
+        # Sets "container" attribute if
+        # (1) graph._container is not None
+        # (2) "is_stateful" is set in OpDef
+        # (3) "container" attribute is in OpDef
+        # (4) "container" attribute is None
+        if (graph._container and
+            op_type in graph._registered_ops and
+            graph._registered_ops[op_type].is_stateful and
+            "container" in ret.node_def.attr and
+            not ret.node_def.attr["container"].s):
+            ret.node_def.attr["container"].CopyFrom(
+                    attr_value_pb2.AttrValue(s=compat.as_bytes(graph._container)))
+
+        return ret
 
 
 def cumprod(xs):
