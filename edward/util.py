@@ -13,7 +13,7 @@ distributions = tf.contrib.distributions
 sg = tf.contrib.bayesflow.stochastic_graph
 
 
-def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, build_q=True):
+def build(org_instance, dict_swap=None, scope="built", replace_itself=False, build_q=True):
     """Build a new node in the TensorFlow graph from `org_instance`,
     where any of its ancestors existing in `dict_swap` are
     replaced with `dict_swap`'s corresponding value.
@@ -64,7 +64,7 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
     >>>
     >>> # This adds a subgraph with newly built nodes,
     >>> # `built/qx` -> `built/z` <- `built/y`
-    >>> z_new = build_op(z, {x: qx})
+    >>> z_new = build(z, {x: qx})
     >>>
     >>> sess = tf.Session()
     >>> sess.run(z)
@@ -137,21 +137,18 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
                isinstance(value, tf.Variable) or \
                isinstance(value, tf.Tensor) or \
                isinstance(value, tf.Operation):
-               value = build_op(value, dict_swap, scope, True, build_q)
+               value = build(value, dict_swap, scope, True, build_q)
 
             dist_args[key] = value
 
         dist_args['name'] = new_name + dist_tensor.distribution.name
 
         # Build a new `dist_tensor` with any newly built arguments.
-        # We do this by instantiating another DistributionTensor,
-        # whose elements will be replaced.
-        with tf.name_scope("TEMPORARY"):
-            # TODO get all temporary distribution tensors in the same
-            # name scope
-            new_dist_tensor = sg.DistributionTensor(
-                distributions.Bernoulli, p=tf.constant([0.0]))
-
+        # We do this by creating an empty class object and setting
+        # its attributes. (This is to avoid a throwaway tensor in the
+        # graph, during instantiation of DistributionTensor.)
+        new_dist_tensor = Empty()
+        new_dist_tensor.__class__ = sg.DistributionTensor
         for key, value in six.iteritems(dist_tensor.__dict__):
             if key not in ['_name', '_dist_args', '_dist', '_value']:
                 setattr(new_dist_tensor, key, deepcopy(value))
@@ -169,7 +166,7 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
         # A tensor is one of the outputs of its underlying
         # op. Therefore build the op itself.
         op = tensor.op
-        new_op = build_op(op, dict_swap, scope, True, build_q)
+        new_op = build(op, dict_swap, scope, True, build_q)
 
         output_index = op.outputs.index(tensor)
         new_tensor = new_op.outputs[output_index]
@@ -186,16 +183,16 @@ def build_op(org_instance, dict_swap=None, scope="built", replace_itself=False, 
 
         # If it has an original op, build it.
         if op._original_op is not None:
-            new_original_op = build_op(op._original_op, dict_swap, scope, True, build_q)
+            new_original_op = build(op._original_op, dict_swap, scope, True, build_q)
         else:
             new_original_op = None
 
         # If it has control inputs, build them.
-        new_control_inputs = [build_op(x, dict_swap, scope, True, build_q)
+        new_control_inputs = [build(x, dict_swap, scope, True, build_q)
                               for x in op.control_inputs]
 
         # If it has inputs, build them.
-        new_inputs = [build_op(x, dict_swap, scope, True, build_q)
+        new_inputs = [build(x, dict_swap, scope, True, build_q)
                       for x in op.inputs]
 
         # Make a copy of the node def.
@@ -306,6 +303,11 @@ def dot(x, y):
         mat = x
         vec = y
         return tf.matmul(mat, tf.expand_dims(vec, 1))
+
+
+class Empty(object):
+    """Empty class."""
+    pass
 
 
 def get_dims(x):

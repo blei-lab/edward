@@ -8,7 +8,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.util import build_op
 
 sg = tf.contrib.bayesflow.stochastic_graph
 

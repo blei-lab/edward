@@ -10,7 +10,7 @@ import tensorflow as tf
 # TODO
 #from edward.models import StanModel, Normal, PointMass
 from edward.models import StanModel, Normal
-from edward.util import build_op, get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
+from edward.util import build, get_dims, get_session, hessian, kl_multivariate_normal, log_sum_exp
 
 sg = tf.contrib.bayesflow.stochastic_graph
 
@@ -278,8 +278,8 @@ class VariationalInference(Inference):
             # (variational) posteriors.
             built_latent_vars = {}
             for z, qz in six.iteritems(self.latent_vars):
-                built_z = build_op(z, dict_swap=self.latent_vars)
-                built_qz = build_op(qz, dict_swap=self.latent_vars)
+                built_z = build(z, dict_swap=self.latent_vars)
+                built_qz = build(qz, dict_swap=self.latent_vars)
                 built_latent_vars[built_z] = built_qz
 
             # Build random variables in p(x | z). `latent_vars`
@@ -290,7 +290,7 @@ class VariationalInference(Inference):
                 # Only build random variables, not any passed-in data
                 # tensors.
                 if isinstance(tensor, sg.DistributionTensor):
-                    built_x = build_op(tensor, dict_swap=self.latent_vars)
+                    built_x = build(tensor, dict_swap=self.latent_vars)
                     built_data[built_x] = obs
                 else:
                     built_data[tensor] = obs
