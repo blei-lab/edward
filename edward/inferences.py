@@ -276,6 +276,7 @@ class VariationalInference(Inference):
             # Build random variables in p(z). `latent_vars`
             # replaces conditioning on priors with conditioning on
             # (variational) posteriors.
+            # TODO still build qz if model_wrapper is used
             built_latent_vars = {}
             for z, qz in six.iteritems(self.latent_vars):
                 built_z = build(z, dict_swap=self.latent_vars)
@@ -352,12 +353,13 @@ class VariationalInference(Inference):
         loss : double
             Loss function value at iteration ``t``.
         """
+        sess = get_session()
         if self.n_print is not None:
             if t % self.n_print == 0:
                 print("iter {:d} loss {:.2f}".format(t, loss))
                 for rv in six.itervalues(self.latent_vars):
-                    # TODO print parameters
-                    print(rv)
+                    print(sess.run({key: tf.identity(value)
+                    for key, value in six.iteritems(rv._dist_args)}))
 
     def finalize(self):
         """Function to call after convergence.
@@ -521,10 +523,9 @@ class MFVI(VariationalInference):
         """
         if self.model_wrapper is not None:
             x = self.data
-            z = {key: self.built_dict[rv] for key, rv in six.iteritems(self.latent_vars)}
+            z = self.latent_vars
             p_log_prob = self.model_wrapper.log_prob(x, z)
-
-        if self.model_wrapper is None:
+        else:
             p_log_prob = 0.0
 
         q_log_prob = 0.0

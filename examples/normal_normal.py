@@ -29,8 +29,6 @@ inference = ed.MFVI({mu: qmu}, data)
 inference.initialize()
 
 sess = ed.get_session()
-for t in range(1000):
+for t in range(1001):
     _, loss = sess.run([inference.train, inference.loss])
     inference.print_progress(t, loss)
-
-print(sess.run([qmu_mu, qmu_sigma]))
