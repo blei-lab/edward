@@ -155,7 +155,7 @@ class VariationalInference(Inference):
     self.finalize()
 
   def initialize(self, n_iter=1000, n_minibatch=None, n_print=100,
-                 optimizer=None, scope=None):
+                 optimizer=None, scope=None, logdir=None):
     """Initialize variational inference algorithm.
 
     Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
@@ -180,6 +180,9 @@ class VariationalInference(Inference):
       optimizer when using PrettyTensor. Defaults to TensorFlow.
     scope : str, optional
       Scope of TensorFlow variable objects to optimize over.
+    logdir : str, optional
+      Directory where event file will be written. For details,
+      see `tf.train.SummaryWriter`. Default is to write nothing.
     """
     self.n_iter = n_iter
     self.n_minibatch = n_minibatch
@@ -222,6 +225,9 @@ class VariationalInference(Inference):
 
       optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
       self.train = pt.apply_optimizer(optimizer, losses=[loss])
+
+    if logdir is not None:
+      train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
 
     init = tf.initialize_all_variables()
     init.run()
