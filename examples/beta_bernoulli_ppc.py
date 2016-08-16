@@ -4,10 +4,10 @@ A simple coin flipping example. The model is written in TensorFlow.
 Inspired by Stan's toy example.
 
 Probability model
-    Prior: Beta
-    Likelihood: Bernoulli
+  Prior: Beta
+  Likelihood: Bernoulli
 Variational model
-    Likelihood: Mean-field Beta
+  Likelihood: Mean-field Beta
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -22,23 +22,23 @@ from edward.stats import bernoulli, beta
 
 
 class BetaBernoulli:
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
-    def __init__(self):
-        self.n_vars = 1
+  """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+  def __init__(self):
+    self.n_vars = 1
 
-    def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                           for z in tf.unpack(zs)])
-        return log_lik + log_prior
+  def log_prob(self, xs, zs):
+    log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
+               for z in tf.unpack(zs)])
+    return log_lik + log_prior
 
-    def sample_likelihood(self, zs, n):
-        """x | z ~ p(x | z)"""
-        out = []
-        for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
+  def sample_likelihood(self, zs, n):
+    """x | z ~ p(x | z)"""
+    out = []
+    for s in range(zs.shape[0]):
+      out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
 
-        return out
+    return out
 
 
 ed.set_seed(42)

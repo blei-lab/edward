@@ -18,109 +18,109 @@ from edward.util import log_mean_exp, stop_gradient
 
 
 class IWVI(MFVI):
+  """
+  Importance-weighted variational inference. Uses importance
+  sampling to produce an improved lower bound on the log marginal
+  likelihood.
+
+  It is the core idea behind importance-weighted autoencoders (Burda
+  et al. (2016)). IWAEs are the special case when the probabilistic
+  model is among a specific class of deep generative models, and the
+  variational model is parameterized with an inference network.
+
+  Notes
+  -----
+  `IWVI` is implemented by inheriting from mean-field (black box)
+  variational inference (`MFVI`). The loss function to optimize is
+  modified to include importance weights.
+  """
+  def __init__(self, *args, **kwargs):
+    super(IWVI, self).__init__(*args, **kwargs)
+
+  def initialize(self, K=5, *args, **kwargs):
+    """Initialization.
+
+    Parameters
+    ----------
+    K : int, optional
+      Number of importance samples.
     """
-    Importance-weighted variational inference. Uses importance
-    sampling to produce an improved lower bound on the log marginal
-    likelihood.
+    self.K = K
+    return super(IWVI, self).initialize(*args, **kwargs)
 
-    It is the core idea behind importance-weighted autoencoders (Burda
-    et al. (2016)). IWAEs are the special case when the probabilistic
-    model is among a specific class of deep generative models, and the
-    variational model is parameterized with an inference network.
+  def build_loss(self):
+    if self.score:
+      return self.build_score_loss()
+    else:
+      return self.build_reparam_loss()
 
-    Notes
-    -----
-    `IWVI` is implemented by inheriting from mean-field (black box)
-    variational inference (`MFVI`). The loss function to optimize is
-    modified to include importance weights.
+  def build_score_loss(self):
+    """Build loss function. Its automatic differentiation
+    is a stochastic gradient of
+
+    .. math::
+
+      -E_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
+      \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]
+
+    based on the score function estimator. (Paisley et al., 2012)
+
+    Computed by sampling from :math:`q(z;\lambda)` and evaluating
+    the expectation using Monte Carlo sampling. Note there is a
+    difference between the number of samples to approximate the
+    expectations (`n_samples`) and the number of importance
+    samples to determine how many expectations (`K`).
     """
-    def __init__(self, *args, **kwargs):
-        super(IWVI, self).__init__(*args, **kwargs)
+    x = self.data
+    losses = []
+    for s in range(self.n_samples):
+      z = self.variational.sample(self.K)
+      p_log_prob = self.model.log_prob(x, z)
+      q_log_prob = self.variational.log_prob(stop_gradient(z))
+      log_w = p_log_prob - q_log_prob
+      losses += [log_mean_exp(log_w)]
 
-    def initialize(self, K=5, *args, **kwargs):
-        """Initialization.
+    losses = tf.pack(losses)
+    self.loss = tf.reduce_mean(losses)
+    return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
 
-        Parameters
-        ----------
-        K : int, optional
-            Number of importance samples.
-        """
-        self.K = K
-        return super(IWVI, self).initialize(*args, **kwargs)
+  def build_reparam_loss(self):
+    """Build loss function. Its automatic differentiation
+    is a stochastic gradient of
 
-    def build_loss(self):
-        if self.score:
-            return self.build_score_loss()
-        else:
-            return self.build_reparam_loss()
+    .. math::
 
-    def build_score_loss(self):
-        """Build loss function. Its automatic differentiation
-        is a stochastic gradient of
+      -E_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
+      \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]
 
-        .. math::
+    based on the reparameterization trick. (Kingma and Welling, 2014)
 
-            -E_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
-            \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]
+    Computed by sampling from :math:`q(z;\lambda)` and evaluating
+    the expectation using Monte Carlo sampling. Note there is a
+    difference between the number of samples to approximate the
+    expectations (`n_samples`) and the number of importance
+    samples to determine how many expectations (`K`).
+    """
+    x = self.data
+    for s in range(self.n_samples):
+      z = self.variational.sample(self.K)
+      p_log_prob = self.model.log_prob(x, z)
+      q_log_prob = self.variational.log_prob(z)
+      log_w = p_log_prob - q_log_prob
+      losses += [log_mean_exp(log_w)]
 
-        based on the score function estimator. (Paisley et al., 2012)
-
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating
-        the expectation using Monte Carlo sampling. Note there is a
-        difference between the number of samples to approximate the
-        expectations (`n_samples`) and the number of importance
-        samples to determine how many expectations (`K`).
-        """
-        x = self.data
-        losses = []
-        for s in range(self.n_samples):
-            z = self.variational.sample(self.K)
-            p_log_prob = self.model.log_prob(x, z)
-            q_log_prob = self.variational.log_prob(stop_gradient(z))
-            log_w = p_log_prob - q_log_prob
-            losses += [log_mean_exp(log_w)]
-
-        losses = tf.pack(losses)
-        self.loss = tf.reduce_mean(losses)
-        return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
-
-    def build_reparam_loss(self):
-        """Build loss function. Its automatic differentiation
-        is a stochastic gradient of
-
-        .. math::
-
-            -E_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
-            \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]
-
-        based on the reparameterization trick. (Kingma and Welling, 2014)
-
-        Computed by sampling from :math:`q(z;\lambda)` and evaluating
-        the expectation using Monte Carlo sampling. Note there is a
-        difference between the number of samples to approximate the
-        expectations (`n_samples`) and the number of importance
-        samples to determine how many expectations (`K`).
-        """
-        x = self.data
-        for s in range(self.n_samples):
-            z = self.variational.sample(self.K)
-            p_log_prob = self.model.log_prob(x, z)
-            q_log_prob = self.variational.log_prob(z)
-            log_w = p_log_prob - q_log_prob
-            losses += [log_mean_exp(log_w)]
-
-        losses = tf.pack(losses)
-        self.loss = tf.reduce_mean(losses)
-        return -self.loss
+    losses = tf.pack(losses)
+    self.loss = tf.reduce_mean(losses)
+    return -self.loss
 
 
 class BetaBernoulli:
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
-    def log_prob(self, xs, zs):
-        log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-        log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                           for z in tf.unpack(zs)])
-        return log_lik + log_prior
+  """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+  def log_prob(self, xs, zs):
+    log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
+               for z in tf.unpack(zs)])
+    return log_lik + log_prior
 
 
 ed.set_seed(42)
