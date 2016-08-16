@@ -11,10 +11,11 @@ from scipy import stats
 
 ed.set_seed(98765)
 
+
 def _test(shape, n):
   # using Bernoulli's internally implemented log_prob_idx() to check
   # Distribution's log_prob()
-  rv = Bernoulli(shape, p=tf.zeros(shape)+0.5)
+  rv = Bernoulli(shape, p=tf.zeros(shape) + 0.5)
   rv_sample = rv.sample(n)
 
   x = rv_sample.eval()
@@ -26,6 +27,7 @@ def _test(shape, n):
     val_true += stats.bernoulli.logpmf(x[:, idx], p[idx])
 
   assert np.allclose(val_ed, val_true)
+
 
 class test_distribution_log_prob_class(tf.test.TestCase):
 

@@ -11,6 +11,7 @@ from scipy.special import gammaln
 
 ed.set_seed(98765)
 
+
 def multinomial_logpmf(x, n, p):
   """
   Arguments
@@ -24,34 +25,33 @@ def multinomial_logpmf(x, n, p):
     vector of probabilities summing to 1
   """
   return gammaln(n + 1.0) - \
-       np.sum(gammaln(x + 1.0)) + \
-       np.sum(x * np.log(p))
+      np.sum(gammaln(x + 1.0)) + \
+      np.sum(x * np.log(p))
 
 
 def multinomial_logpmf_vec(x, n, p):
   size = x.shape[0]
   return np.array([multinomial_logpmf(x[i, :], n, p)
-           for i in range(size)])
+                   for i in range(size)])
 
 
 def _test(shape, n):
   K = shape[-1]
-  rv = Multinomial(shape, pi=tf.constant(1.0/K, shape=shape))
+  rv = Multinomial(shape, pi=tf.constant(1.0 / K, shape=shape))
   rv_sample = rv.sample(n)
   x = rv_sample.eval()
   x_tf = tf.constant(x, dtype=tf.float32)
   pi = rv.pi.eval()
   if len(shape) == 1:
-    assert np.allclose(
-      rv.log_prob_idx((), x_tf).eval(),
-      multinomial_logpmf_vec(x[:, :], 1, pi[:]))
+    assert np.allclose(rv.log_prob_idx((), x_tf).eval(),
+                       multinomial_logpmf_vec(x[:, :], 1, pi[:]))
   elif len(shape) == 2:
     for i in range(shape[0]):
-      assert np.allclose(
-        rv.log_prob_idx((i, ), x_tf).eval(),
-        multinomial_logpmf_vec(x[:, i, :], 1, pi[i, :]))
+      assert np.allclose(rv.log_prob_idx((i, ), x_tf).eval(),
+                         multinomial_logpmf_vec(x[:, i, :], 1, pi[i, :]))
   else:
     assert False
+
 
 class test_multinomial_log_prob_idx_class(tf.test.TestCase):
 

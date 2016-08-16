@@ -11,20 +11,22 @@ from scipy import stats
 
 ed.set_seed(98765)
 
+
 def pointmass_logpmf_vec(x, params):
   """Vectorized log-density for point mass distribution."""
   return np.equal(x, params).astype(np.float32)
 
+
 def _test(shape, n):
-  rv = PointMass(shape, params=tf.zeros(shape)+0.5)
+  rv = PointMass(shape, params=tf.zeros(shape) + 0.5)
   rv_sample = rv.sample(n)
   x = rv_sample.eval()
   x_tf = tf.constant(x, dtype=tf.float32)
   params = rv.params.eval()
   for idx in range(shape[0]):
-    assert np.allclose(
-      rv.log_prob_idx((idx, ), x_tf).eval(),
-      pointmass_logpmf_vec(x[:, idx], params[idx]))
+    assert np.allclose(rv.log_prob_idx((idx, ), x_tf).eval(),
+                       pointmass_logpmf_vec(x[:, idx], params[idx]))
+
 
 class test_pointmass_log_prob_idx_class(tf.test.TestCase):
 

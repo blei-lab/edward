@@ -8,11 +8,13 @@ import tensorflow as tf
 from edward.models import InvGamma
 from edward.util import get_dims
 
+
 def _test(shape, a, scale, n):
   x = InvGamma(shape, a, scale)
   val_est = tuple(get_dims(x.sample(n)))
   val_true = (n, ) + shape
   assert val_est == val_true
+
 
 class test_invgamma_sample_class(tf.test.TestCase):
 
@@ -32,4 +34,3 @@ class test_invgamma_sample_class(tf.test.TestCase):
       _test((1, ), tf.constant([0.5]), tf.constant([0.5]), 5)
       _test((2, ), tf.constant([0.2, 0.8]), tf.constant([0.2, 0.8]), 1)
       _test((2, ), tf.constant([0.2, 0.8]), tf.constant([0.2, 0.8]), 10)
-

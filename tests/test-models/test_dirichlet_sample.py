@@ -15,6 +15,7 @@ def _test(shape, alpha, n):
   val_true = (n, ) + shape
   assert val_est == val_true
 
+
 class test_dirichlet_sample_class(tf.test.TestCase):
 
   def test_1d(self):

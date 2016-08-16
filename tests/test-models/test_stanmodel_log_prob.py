@@ -16,13 +16,14 @@ def _test(model, xs, zs):
     p = np.squeeze(zs[s, :])
     val_true[s] = beta.logpdf(p, 1, 1)
     val_true[s] += np.sum([bernoulli.logpmf(x, p)
-                 for x in xs['x']])
+                           for x in xs['x']])
 
   val_ed = model.log_prob(xs, zs)
   assert np.allclose(val_ed.eval(), val_true)
   zs_tf = tf.cast(zs, dtype=tf.float32)
   val_ed = model.log_prob(xs, zs_tf)
   assert np.allclose(val_ed.eval(), val_true)
+
 
 class test_stanmodel_log_prob_class(tf.test.TestCase):
 

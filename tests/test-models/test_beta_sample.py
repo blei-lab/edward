@@ -15,6 +15,7 @@ def _test(shape, a, b, n):
   val_true = (n, ) + shape
   assert val_est == val_true
 
+
 class test_beta_sample_class(tf.test.TestCase):
 
   def test_0d(self):

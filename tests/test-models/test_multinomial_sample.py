@@ -15,6 +15,7 @@ def _test(shape, p, n):
   val_true = (n, ) + shape
   assert val_est == val_true
 
+
 class test_multinomial_sample_class(tf.test.TestCase):
 
   def test_1d(self):

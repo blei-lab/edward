@@ -11,6 +11,7 @@ from scipy import stats
 
 ed.set_seed(98765)
 
+
 def _test(shape, n):
   rv = Normal(shape, loc=tf.zeros(shape), scale=tf.ones(shape))
   rv_sample = rv.sample(n)
@@ -19,9 +20,9 @@ def _test(shape, n):
   loc = rv.loc.eval()
   scale = rv.scale.eval()
   for idx in range(shape[0]):
-    assert np.allclose(
-      rv.log_prob_idx((idx, ), x_tf).eval(),
-      stats.norm.logpdf(x[:, idx], loc[idx], scale[idx]))
+    assert np.allclose(rv.log_prob_idx((idx, ), x_tf).eval(),
+                       stats.norm.logpdf(x[:, idx], loc[idx], scale[idx]))
+
 
 class test_normal_log_prob_idx_class(tf.test.TestCase):
 
