@@ -12,6 +12,7 @@ from edward.stats import norm
 
 ed.set_seed(1512351)
 
+
 class NormalModel:
   """
   p(x, z) = Normal(x; z, 1) Normal(z; 0, 1)
@@ -19,8 +20,9 @@ class NormalModel:
   def log_prob(self, xs, zs):
     log_prior = norm.logpdf(zs, 0.0, 1.0)
     log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], z, 1.0))
-               for z in tf.unpack(zs)])
+                       for z in tf.unpack(zs)])
     return log_lik + log_prior
+
 
 class test_inference_data_class(tf.test.TestCase):
 
@@ -33,10 +35,10 @@ class test_inference_data_class(tf.test.TestCase):
     _, serialized_example = reader.read(filename_queue)
     # Convert serialized example back to actual values,
     # describing format of the objects to be returned.
-    features = tf.parse_single_example(serialized_example,
-      features={'outcome': tf.FixedLenFeature([], tf.int64)})
+    features = tf.parse_single_example(
+        serialized_example,
+        features={'outcome': tf.FixedLenFeature([], tf.int64)})
     return features['outcome']
-
 
   def _test(self, sess, data, n_minibatch, x=None, is_file=False):
     model = NormalModel()
@@ -51,8 +53,8 @@ class test_inference_data_class(tf.test.TestCase):
       # Check data is same as data fed to it.
       feed_dict = {inference.data['x']: x}
       # avoid directly fetching placeholder
-      data_id = {k: tf.identity(v) for k,v in
-             six.iteritems(inference.data)}
+      data_id = {k: tf.identity(v) for k, v in
+                 six.iteritems(inference.data)}
       val = sess.run(data_id, feed_dict)
       assert np.all(val['x'] == x)
     elif is_file:
@@ -69,7 +71,8 @@ class test_inference_data_class(tf.test.TestCase):
     elif n_minibatch == 1:
       # Preloaded batch setting, with n_minibatch=1.
       # Check data is randomly shuffled.
-      assert not np.all([sess.run(inference.data)['x'] == data['x'][i] for i in range(10)])
+      assert not np.all([sess.run(inference.data)['x'] == data['x'][i]
+                         for i in range(10)])
     else:
       # Preloaded batch setting.
       # Check data is randomly shuffled.
