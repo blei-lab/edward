@@ -25,10 +25,10 @@ methods are derived from.
 .. code:: python
 
   class Inference(object):
-      """Base class for Edward inference methods.
-      """
-      def __init__(self, model, data=None):
-          ...
+    """Base class for Edward inference methods.
+    """
+    def __init__(self, model, data=None):
+      ...
 
 It takes as input a probabilistic model ``model`` and dataset
 ``data``.
@@ -51,25 +51,25 @@ have their own default methods.
 .. code:: python
 
   class MonteCarlo(Inference):
-      """Base class for Monte Carlo inference methods.
-      """
-      def __init__(self, model, data=None):
-          super(MonteCarlo, self).__init__(model, data)
+    """Base class for Monte Carlo inference methods.
+    """
+    def __init__(self, model, data=None):
+      super(MonteCarlo, self).__init__(model, data)
 
-      ...
+    ...
 
 
   class VariationalInference(Inference):
-      """Base class for variational inference methods.
-      """
-      def __init__(self, model, variational, data=None):
-          """Initialization.
-          ...
-          """
-          super(VariationalInference, self).__init__(model, data)
-          self.variational = variational
-
+    """Base class for variational inference methods.
+    """
+    def __init__(self, model, variational, data=None):
+      """Initialization.
       ...
+      """
+      super(VariationalInference, self).__init__(model, data)
+      self.variational = variational
+
+    ...
 
 Hybrid methods and novel paradigms outside of ``VariationalInference``
 and ``MonteCarlo`` are also possible in Edward. For example, one can
@@ -92,20 +92,20 @@ The main method in ``VariationalInference`` is ``run()``.
 .. code:: python
 
   class VariationalInference(Inference):
-      """Base class for variational inference methods.
+    """Base class for variational inference methods.
+    """
+    ...
+    def run(self, *args, **kwargs):
+      """A simple wrapper to run variational inference.
       """
-      ...
-      def run(self, *args, **kwargs):
-          """A simple wrapper to run variational inference.
-          """
-          self.initialize(*args, **kwargs)
-          for t in range(self.n_iter+1):
-              loss = self.update()
-              self.print_progress(t, loss)
+      self.initialize(*args, **kwargs)
+      for t in range(self.n_iter+1):
+        loss = self.update()
+        self.print_progress(t, loss)
 
-          self.finalize()
+      self.finalize()
 
-      ...
+    ...
 
 First, it calls ``initialize()`` to initialize the algorithm, such as
 setting the number of iterations. Then, within a loop it calls
@@ -122,22 +122,22 @@ as ``run()`` above. Let's go through ``initialize()`` as an example.
 .. code:: python
 
   class VariationalInference(Inference):
+    ...
+    def initialize(self, ...):
       ...
-      def initialize(self, ...):
-          ...
-          if n_minibatch is not None ...
-              ...
-              slices = tf.train.slice_input_producer(values)
-              batches = tf.train.batch(slices, n_minibatch,
-                                       num_threads=multiprocessing.cpu_count())
-              ...
-              self.data = {key: value for key, value in
-                           zip(six.iterkeys(self.data), batches)}
-          ...
-          loss = self.build_loss()
-          ...
-          optimizer = tf.train.AdamOptimizer(learning_rate)
-          self.train = optimizer.minimize(loss, ...)
+      if n_minibatch is not None ...
+        ...
+        slices = tf.train.slice_input_producer(values)
+        batches = tf.train.batch(slices, n_minibatch,
+                                 num_threads=multiprocessing.cpu_count())
+        ...
+        self.data = {key: value for key, value in
+                     zip(six.iterkeys(self.data), batches)}
+      ...
+      loss = self.build_loss()
+      ...
+      optimizer = tf.train.AdamOptimizer(learning_rate)
+      self.train = optimizer.minimize(loss, ...)
 
 Three code snippets are highlighted in ``initialize()``: the first
 enables batch training with an argument ``n_minibatch`` for the batch
@@ -165,9 +165,9 @@ container for the variational distribution.
 
 .. code:: python
 
-    from edward.models import Variational
+  from edward.models import Variational
 
-    variational = Variational()
+  variational = Variational()
 
 To add distributions to this object, use the ``add()`` method, which
 is used to add ``RandomVariable`` objects.  All random variable objects, i.e.,
@@ -179,29 +179,29 @@ example:
 
 .. code:: python
 
-    from edward.models import Variational, Normal, Beta
+  from edward.models import Variational, Normal, Beta
 
-    # first, add a vector of 10 random variables
-    # second, add a 5 x 2 matrix of random variables
-    variational = Variational()
-    variational.add(InvGamma(10))
-    variational.add(Normal([5, 2]))
+  # first, add a vector of 10 random variables
+  # second, add a 5 x 2 matrix of random variables
+  variational = Variational()
+  variational.add(InvGamma(10))
+  variational.add(Normal([5, 2]))
 
-    # vector of 3 random variables with fixed alpha param
-    variational = Variational()
-    variational.add(Beta(3, alpha=tf.ones(3)))
+  # vector of 3 random variables with fixed alpha param
+  variational = Variational()
+  variational.add(Beta(3, alpha=tf.ones(3)))
 
 Multivariate distributions store their multivariate dimension in the
 outer dimension (right-most dimension) of their shape.
 
 .. code:: python
 
-    from edward.models import Dirichlet
+  from edward.models import Dirichlet
 
-    # 1 K-dimensional Dirichlet
-    Dirichlet(alpha=np.array([0.1]*K)
-    # vector of 5 K-dimensional Dirichlet's
-    Dirichlet(alpha=tf.ones([5, K]))
+  # 1 K-dimensional Dirichlet
+  Dirichlet(alpha=np.array([0.1]*K)
+  # vector of 5 K-dimensional Dirichlet's
+  Dirichlet(alpha=tf.ones([5, K]))
 
 The main methods in ``Variational`` are ``log_prob()`` and
 ``sample()``, which mathematically are ``log q(z; \lambda)`` and ``z ~
