@@ -7,43 +7,44 @@ import numpy as np
 
 from edward.util import logit
 
+
 class test_logit_class_class(tf.test.TestCase):
 
   def test_logit_0d(self):
     with self.test_session():
       x = tf.constant(0.01)
       self.assertAllClose(logit(x).eval(),
-               -4.5951198501345898)
+                          -4.5951198501345898)
       x = tf.constant(0.25)
       self.assertAllClose(logit(x).eval(),
-               -1.0986122886681096)
+                          -1.0986122886681096)
       x = tf.constant(0.5)
       self.assertAllEqual(logit(x).eval(),
-               0.0)
+                          0.0)
       x = tf.constant(0.75)
       self.assertAllClose(logit(x).eval(),
-               1.0986122886681096)
+                          1.0986122886681096)
       x = tf.constant(0.99)
       self.assertAllClose(logit(x).eval(),
-               4.5951198501345898)
+                          4.5951198501345898)
 
   def test_logit_1d(self):
     with self.test_session():
       x = tf.constant([0.01, 0.01])
       self.assertAllClose(logit(x).eval(),
-               [-4.5951198501345898, -4.5951198501345898])
+                          [-4.5951198501345898, -4.5951198501345898])
       x = tf.constant([0.25, 0.25])
       self.assertAllClose(logit(x).eval(),
-               [-1.0986122886681096, -1.0986122886681096])
+                          [-1.0986122886681096, -1.0986122886681096])
       x = tf.constant([0.5, 0.5])
       self.assertAllEqual(logit(x).eval(),
-               [0.0, 0.0])
+                          [0.0, 0.0])
       x = tf.constant([0.75, 0.75])
       self.assertAllClose(logit(x).eval(),
-               [1.0986122886681096, 1.0986122886681096])
+                          [1.0986122886681096, 1.0986122886681096])
       x = tf.constant([0.99, 0.99])
       self.assertAllClose(logit(x).eval(),
-               [4.5951198501345898, 4.5951198501345898])
+                          [4.5951198501345898, 4.5951198501345898])
 
   def test_contraint_raises(self):
     with self.test_session():

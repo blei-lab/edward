@@ -7,19 +7,20 @@ import numpy as np
 
 from edward.util import cumprod
 
+
 class test_cumprod_class(tf.test.TestCase):
 
   def test_cumprod_1d(self):
     with self.test_session():
       x = tf.constant([-1.0, -2.0, -3.0, -4.0])
       self.assertAllEqual(cumprod(x).eval(),
-                np.array([ -1.,   2.,  -6.,  24.]))
+                          np.array([-1., 2., -6., 24.]))
 
   def test_cumprod_2d(self):
     with self.test_session():
       x = tf.constant([[-1.0], [-2.0], [-3.0], [-4.0]])
       self.assertAllClose(cumprod(x).eval(),
-                np.array([ [-1.],   [2.],  [-6.],  [24.]]))
+                          np.array([[-1.], [2.], [-6.], [24.]]))
 
   def test_all_finite_raises(self):
     with self.test_session():

@@ -7,26 +7,27 @@ import numpy as np
 
 from edward.util import to_simplex
 
+
 class test_to_simplex_class(tf.test.TestCase):
 
   def test_to_simplex_1d(self):
     with self.test_session():
       x = tf.constant([0.0])
       self.assertAllClose(to_simplex(x).eval(),
-                [0.5, 0.5])
+                          [0.5, 0.5])
       x = tf.constant([0.0, 10.0])
       self.assertAllClose(to_simplex(x).eval(),
-                [3.333333e-01,   6.666363e-01,   3.027916e-05])
+                          [3.333333e-01, 6.666363e-01, 3.027916e-05])
 
   def test_to_simplex_2d(self):
     with self.test_session():
       x = tf.constant([[0.0], [0.0]])
       self.assertAllClose(to_simplex(x).eval(),
-                [[0.5, 0.5], [0.5, 0.5]])
+                          [[0.5, 0.5], [0.5, 0.5]])
       x = tf.constant([[0.0, 10.0], [0.0, 10.0]])
       self.assertAllClose(to_simplex(x).eval(),
-                [[3.333333e-01,   6.666363e-01,   3.027916e-05],
-                 [3.333333e-01,   6.666363e-01,   3.027916e-05]])
+                          [[3.333333e-01, 6.666363e-01, 3.027916e-05],
+                           [3.333333e-01, 6.666363e-01, 3.027916e-05]])
 
   def test_all_finite_raises(self):
     with self.test_session():

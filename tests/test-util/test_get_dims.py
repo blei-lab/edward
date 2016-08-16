@@ -7,6 +7,7 @@ import numpy as np
 
 from edward.util import get_dims
 
+
 class test_get_dims_class(tf.test.TestCase):
 
   def test_get_dims_0d_tf(self):
@@ -31,15 +32,13 @@ class test_get_dims_class(tf.test.TestCase):
 
   def test_get_dims_2d_tf(self):
     with self.test_session():
-      x = tf.zeros([2,2])
-      self.assertEqual(get_dims(x), [2,2])
+      x = tf.zeros([2, 2])
+      self.assertEqual(get_dims(x), [2, 2])
 
   def test_get_dims_2d_np(self):
     with self.test_session():
-      x = np.zeros([2,2])
-      self.assertEqual(get_dims(x), [2,2])
+      x = np.zeros([2, 2])
+      self.assertEqual(get_dims(x), [2, 2])
 
 if __name__ == '__main__':
   tf.test.main()
-
-
