@@ -15,12 +15,12 @@ from edward.stats import bernoulli
 
 
 class BernoulliModel:
-    """p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)"""
-    def __init__(self, p):
-        self.p = p
+  """p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)"""
+  def __init__(self, p):
+    self.p = p
 
-    def log_prob(self, xs, zs):
-        return bernoulli.logpmf(zs, p)
+  def log_prob(self, xs, zs):
+    return bernoulli.logpmf(zs, p)
 
 
 ed.set_seed(42)

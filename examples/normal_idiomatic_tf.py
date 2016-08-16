@@ -5,9 +5,9 @@ running inference.run(), we may want direct access to the TensorFlow
 session and to manipulate various objects during inference.
 
 Probability model
-    Posterior: (1-dimensional) Normal
+  Posterior: (1-dimensional) Normal
 Variational model
-    Likelihood: Mean-field Normal
+  Likelihood: Mean-field Normal
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -21,13 +21,13 @@ from edward.stats import norm
 
 
 class NormalPosterior:
-    """p(x, z) = p(z) = p(z | x) = Normal(z; mu, std)"""
-    def __init__(self, mu, std):
-        self.mu = mu
-        self.std = std
+  """p(x, z) = p(z) = p(z | x) = Normal(z; mu, std)"""
+  def __init__(self, mu, std):
+    self.mu = mu
+    self.std = std
 
-    def log_prob(self, xs, zs):
-        return norm.logpdf(zs, self.mu, self.std)
+  def log_prob(self, xs, zs):
+    return norm.logpdf(zs, self.mu, self.std)
 
 
 ed.set_seed(42)
@@ -40,5 +40,5 @@ variational.add(Normal())
 inference = ed.MFVI(model, variational)
 inference.initialize()
 for t in range(1000):
-    loss = inference.update()
-    inference.print_progress(t, loss)
+  loss = inference.update()
+  inference.print_progress(t, loss)

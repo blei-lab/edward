@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
 Probability model
-    Posterior: (2-dimensional) Normal
+  Posterior: (2-dimensional) Normal
 Variational model
-    Likelihood: Mean-field Normal
+  Likelihood: Mean-field Normal
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -18,21 +18,20 @@ from edward.util import get_dims
 
 
 class NormalPosterior:
-    """p(x, z) = p(z) = p(z | x) = Normal(z; mu, Sigma)"""
-    def __init__(self, mu, Sigma):
-        self.mu = mu
-        self.Sigma = Sigma
-        self.n_vars = get_dims(mu)[0]
+  """p(x, z) = p(z) = p(z | x) = Normal(z; mu, Sigma)"""
+  def __init__(self, mu, Sigma):
+    self.mu = mu
+    self.Sigma = Sigma
+    self.n_vars = get_dims(mu)[0]
 
-    def log_prob(self, xs, zs):
-        return multivariate_normal.logpdf(zs, self.mu, self.Sigma)
+  def log_prob(self, xs, zs):
+    return multivariate_normal.logpdf(zs, self.mu, self.Sigma)
 
 
 ed.set_seed(42)
 mu = tf.constant([1.0, 1.0])
-Sigma = tf.constant(
-[[1.0, 0.1],
- [0.1, 1.0]])
+Sigma = tf.constant([[1.0, 0.1],
+                     [0.1, 1.0]])
 model = NormalPosterior(mu, Sigma)
 variational = Variational()
 variational.add(Normal(model.n_vars))
