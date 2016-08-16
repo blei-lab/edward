@@ -82,17 +82,17 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
       evaluations += [sess.run(hinge(y_true, y_pred))]
     elif metric == 'squared_hinge':
       evaluations += [sess.run(squared_hinge(y_true, y_pred))]
-    elif metric == 'mse' or metric == 'MSE' or \
-            metric == 'mean_squared_error':
+    elif (metric == 'mse' or metric == 'MSE' or
+          metric == 'mean_squared_error'):
       evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
-    elif metric == 'mae' or metric == 'MAE' or \
-            metric == 'mean_absolute_error':
+    elif (metric == 'mae' or metric == 'MAE' or
+          metric == 'mean_absolute_error'):
       evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
-    elif metric == 'mape' or metric == 'MAPE' or \
-            metric == 'mean_absolute_percentage_error':
+    elif (metric == 'mape' or metric == 'MAPE' or
+          metric == 'mean_absolute_percentage_error'):
       evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
-    elif metric == 'msle' or metric == 'MSLE' or \
-            metric == 'mean_squared_logarithmic_error':
+    elif (metric == 'msle' or metric == 'MSLE' or
+          metric == 'mean_squared_logarithmic_error'):
       evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
     elif metric == 'poisson':
       evaluations += [sess.run(poisson(y_true, y_pred))]
