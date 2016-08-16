@@ -103,9 +103,6 @@
 <p><strong>Style guide.</strong> Follow <a href="https://www.tensorflow.org/versions/master/how_tos/style_guide.html">TensorFlow’s style guide</a> for writing code, which more or less follows PEP 8. Follow <a href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">NumPy’s documentation guide</a> for writing documention, and follow <a href="https://www.tensorflow.org/versions/master/how_tos/documentation/index.html">TensorFlow’s documentation guide</a> for describing TensorFlow tensors in the documentation.</p>
 <p>Exceptions are detailed as follows. These points may not even be exceptions but rather emphasize style guidelines you should be following from TensorFlow or PEP 8 anyways.</p>
 <ul>
-<li>Use four-space indents rather than two-space.</li>
-<li>Aim for 70 characters per line, with some exceptions.</li>
-<li>Trailing whitespace is the devil. Avoid it.</li>
 <li>To organize imports in a script, use three blocks: 1. any <code>from __future__ import [...]</code> lines; 2. any <code>import [...]</code> lines; and 3. any <code>from [...] import [...]</code> lines. Each block is separated by a blank line, and within each block the lines are sorted alphabetically.</li>
 <li>When writing functions with tensor inputs, make sure the function supports any input type compatible with tensor conversion (see <code>tf.convert_to_tensor</code>). Internally, always aim to also work in float32. <code>tf.cast(x, dtype=tf.float32)</code> will both do the casting and the tensor conversion. For methods that simply call other methods you may not need this casting or tensor conversion.</li>
 <li>For arguments that are positive integers, use <code>n_</code>, e.g., <code>n_minibatch</code>, <code>n_print</code>, to represent “number of <span>[</span>…<span>]</span>”. For class attributes that are booleans, use <code>is_</code>, e.g., <code>is_reparameterized</code>, <code>is_multivariate</code>.</li>

@@ -276,18 +276,18 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    xs : dict</span>
-<span class="sd">        Data dictionary. Each key names a data structure used in</span>
-<span class="sd">        the model (str), and its value is the corresponding</span>
-<span class="sd">        corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">      Data dictionary. Each key names a data structure used in</span>
+<span class="sd">      the model (str), and its value is the corresponding</span>
+<span class="sd">      corresponding realization (np.ndarray or tf.Tensor).</span>
 <span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        S-vector of type tf.float32,</span>
-<span class="sd">        [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+<span class="sd">      S-vector of type tf.float32,</span>
+<span class="sd">      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
@@ -298,18 +298,18 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    xs : dict</span>
-<span class="sd">        Data dictionary. Each key names a data structure used in</span>
-<span class="sd">        the model (str), and its value is the corresponding</span>
-<span class="sd">        corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">      Data dictionary. Each key names a data structure used in</span>
+<span class="sd">      the model (str), and its value is the corresponding</span>
+<span class="sd">      corresponding realization (np.ndarray or tf.Tensor).</span>
 <span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        S-vector of type tf.float32,</span>
-<span class="sd">        [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].</span>
+<span class="sd">      S-vector of type tf.float32,</span>
+<span class="sd">      [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
@@ -319,28 +319,28 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    xs : dict</span>
-<span class="sd">        Data dictionary. Each key names a data structure used in</span>
-<span class="sd">        the model (str), and its value is the corresponding</span>
-<span class="sd">        corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">      Data dictionary. Each key names a data structure used in</span>
+<span class="sd">      the model (str), and its value is the corresponding</span>
+<span class="sd">      corresponding realization (np.ndarray or tf.Tensor).</span>
 <span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        Vector of predictions, one for each data point.</span>
+<span class="sd">      Vector of predictions, one for each data point.</span>
 
-<span class="sd">        For supervised tasks, the predicted value is the mean of the</span>
-<span class="sd">        output&#39;s likelihood given features from the ith data point and</span>
-<span class="sd">        averaged over the latent variable samples:</span>
-<span class="sd">            + Binary classification. The probability of the success</span>
-<span class="sd">            label.</span>
-<span class="sd">            + Multi-class classification. The probability of each</span>
-<span class="sd">            label, with the entire output of shape N x K.</span>
-<span class="sd">            + Regression. The mean response.</span>
-<span class="sd">        For unsupervised, the predicted value is the log-marginal</span>
-<span class="sd">        likelihood evaluated at the ith data point.</span>
+<span class="sd">      For supervised tasks, the predicted value is the mean of the</span>
+<span class="sd">      output&#39;s likelihood given features from the ith data point and</span>
+<span class="sd">      averaged over the latent variable samples:</span>
+<span class="sd">        + Binary classification. The probability of the success</span>
+<span class="sd">        label.</span>
+<span class="sd">        + Multi-class classification. The probability of each</span>
+<span class="sd">        label, with the entire output of shape N x K.</span>
+<span class="sd">        + Regression. The mean response.</span>
+<span class="sd">      For unsupervised, the predicted value is the log-marginal</span>
+<span class="sd">      likelihood evaluated at the ith data point.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
@@ -351,12 +351,12 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    n : int, optional</span>
-<span class="sd">        Number of latent variable samples.</span>
+<span class="sd">      Number of latent variable samples.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">        n x d matrix, where each row is a set of latent variables.</span>
+<span class="sd">      n x d matrix, where each row is a set of latent variables.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
@@ -367,20 +367,20 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
 <span class="sd">    n : int, optional</span>
-<span class="sd">        Number of data points to generate per set of latent variables.</span>
+<span class="sd">      Number of data points to generate per set of latent variables.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    list of dict&#39;s of tf.Tensor&#39;s</span>
-<span class="sd">        List of replicated data sets from the likelihood,</span>
-<span class="sd">        [x^{rep, 1}, ..., x^{rep, S}],</span>
-<span class="sd">        where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has</span>
-<span class="sd">        n data points. Type-wise, each x^{rep, s} is a</span>
-<span class="sd">        dictionary with the same items and shape of values as the</span>
-<span class="sd">        test data.</span>
+<span class="sd">      List of replicated data sets from the likelihood,</span>
+<span class="sd">      [x^{rep, 1}, ..., x^{rep, S}],</span>
+<span class="sd">      where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has</span>
+<span class="sd">      n data points. Type-wise, each x^{rep, s} is a</span>
+<span class="sd">      dictionary with the same items and shape of values as the</span>
+<span class="sd">      test data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </pre></div>

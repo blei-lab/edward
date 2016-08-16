@@ -163,18 +163,18 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Parameters
       ----------
       xs : dict
-          Data dictionary. Each key names a data structure used in
-          the model (str), and its value is the corresponding
-          corresponding realization (np.ndarray or tf.Tensor).
+        Data dictionary. Each key names a data structure used in
+        the model (str), and its value is the corresponding
+        corresponding realization (np.ndarray or tf.Tensor).
       zs : list or tf.Tensor
-          A list of tf.Tensor's if multiple varational families,
-          otherwise a tf.Tensor if single variational family.
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
 
       Returns
       -------
       tf.Tensor
-          S-vector of type tf.float32,
-          [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+        S-vector of type tf.float32,
+        [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
       """
       pass
 
@@ -185,18 +185,18 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Parameters
       ----------
       xs : dict
-          Data dictionary. Each key names a data structure used in
-          the model (str), and its value is the corresponding
-          corresponding realization (np.ndarray or tf.Tensor).
+        Data dictionary. Each key names a data structure used in
+        the model (str), and its value is the corresponding
+        corresponding realization (np.ndarray or tf.Tensor).
       zs : list or tf.Tensor
-          A list of tf.Tensor's if multiple varational families,
-          otherwise a tf.Tensor if single variational family.
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
 
       Returns
       -------
       tf.Tensor
-          S-vector of type tf.float32,
-          [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].
+        S-vector of type tf.float32,
+        [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].
       """
 
     def predict(self, xs, zs):
@@ -206,28 +206,28 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Parameters
       ----------
       xs : dict
-          Data dictionary. Each key names a data structure used in
-          the model (str), and its value is the corresponding
-          corresponding realization (np.ndarray or tf.Tensor).
+        Data dictionary. Each key names a data structure used in
+        the model (str), and its value is the corresponding
+        corresponding realization (np.ndarray or tf.Tensor).
       zs : list or tf.Tensor
-          A list of tf.Tensor's if multiple varational families,
-          otherwise a tf.Tensor if single variational family.
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
 
       Returns
       -------
       tf.Tensor
-          Vector of predictions, one for each data point.
+        Vector of predictions, one for each data point.
 
-          For supervised tasks, the predicted value is the mean of the
-          output's likelihood given features from the ith data point and
-          averaged over the latent variable samples:
-              + Binary classification. The probability of the success
-              label.
-              + Multi-class classification. The probability of each
-              label, with the entire output of shape N x K.
-              + Regression. The mean response.
-          For unsupervised, the predicted value is the log-marginal
-          likelihood evaluated at the ith data point.
+        For supervised tasks, the predicted value is the mean of the
+        output's likelihood given features from the ith data point and
+        averaged over the latent variable samples:
+          + Binary classification. The probability of the success
+          label.
+          + Multi-class classification. The probability of each
+          label, with the entire output of shape N x K.
+          + Regression. The mean response.
+        For unsupervised, the predicted value is the log-marginal
+        likelihood evaluated at the ith data point.
       """
       pass
 
@@ -238,12 +238,12 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Parameters
       ----------
       n : int, optional
-          Number of latent variable samples.
+        Number of latent variable samples.
 
       Returns
       -------
       tf.Tensor
-          n x d matrix, where each row is a set of latent variables.
+        n x d matrix, where each row is a set of latent variables.
       """
       pass
 
@@ -254,19 +254,19 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Parameters
       ----------
       zs : list or tf.Tensor
-          A list of tf.Tensor's if multiple varational families,
-          otherwise a tf.Tensor if single variational family.
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
       n : int, optional
-          Number of data points to generate per set of latent variables.
+        Number of data points to generate per set of latent variables.
 
       Returns
       -------
       list of dict's of tf.Tensor's
-          List of replicated data sets from the likelihood,
-          [x^{rep, 1}, ..., x^{rep, S}],
-          where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
-          n data points. Type-wise, each x^{rep, s} is a
-          dictionary with the same items and shape of values as the
-          test data.
+        List of replicated data sets from the likelihood,
+        [x^{rep, 1}, ..., x^{rep, S}],
+        where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
+        n data points. Type-wise, each x^{rep, s} is a
+        dictionary with the same items and shape of values as the
+        test data.
       """
       pass
