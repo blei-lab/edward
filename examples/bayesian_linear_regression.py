@@ -48,7 +48,7 @@ class LinearModel:
   def log_prob(self, xs, zs):
     """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x, y = xs['x'], xs['y']
-    log_prior = -tf.reduce_sum(zs*zs, 1) / self.prior_variance
+    log_prior = -tf.reduce_sum(zs * zs, 1) / self.prior_variance
     # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
     W = tf.expand_dims(zs[:, 0], 0)
     b = zs[:, 1]
@@ -61,9 +61,9 @@ class LinearModel:
 
 def build_toy_dataset(N=40, noise_std=0.1):
   ed.set_seed(0)
-  x  = np.concatenate([np.linspace(0, 2, num=N/2),
-             np.linspace(6, 8, num=N/2)])
-  y = 0.075*x + norm.rvs(0, noise_std, size=N)
+  x = np.concatenate([np.linspace(0, 2, num=N / 2),
+                      np.linspace(6, 8, num=N / 2)])
+  y = 0.075 * x + norm.rvs(0, noise_std, size=N)
   x = (x - 4.0) / 4.0
   x = x.reshape((N, 1))
   return {'x': x, 'y': y}

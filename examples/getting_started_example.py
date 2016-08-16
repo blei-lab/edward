@@ -17,12 +17,13 @@ from __future__ import print_function
 
 import edward as ed
 import matplotlib.pyplot as plt
-plt.style.use('ggplot')
 import numpy as np
 import tensorflow as tf
 
 from edward.models import Variational, Normal
 from edward.stats import norm
+
+plt.style.use('ggplot')
 
 
 class BayesianNN:
@@ -46,21 +47,21 @@ class BayesianNN:
     homoscedastic variance, scale parameter.
   """
   def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-    lik_variance=0.01):
+               lik_variance=0.01):
     self.layer_sizes = layer_sizes
     self.nonlinearity = nonlinearity
     self.lik_variance = lik_variance
 
     self.n_layers = len(layer_sizes)
     self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
-    self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
+    self.n_vars = sum((m + 1) * n for m, n in self.weight_dims)
 
   def unpack_weights(self, z):
     """Unpack weight matrices and biases from a flattened vector."""
     for m, n in self.weight_dims:
-      yield tf.reshape(z[:m*n],        [m, n]), \
-          tf.reshape(z[m*n:(m*n+n)], [1, n])
-      z = z[(m+1)*n:]
+      yield tf.reshape(z[:m * n], [m, n]), \
+          tf.reshape(z[m * n:(m * n + n)], [1, n])
+      z = z[(m + 1) * n:]
 
   def neural_network(self, x, zs):
     """
@@ -76,7 +77,7 @@ class BayesianNN:
         # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
         h = self.nonlinearity(tf.matmul(h, W) + b)
 
-      matrix += [tf.squeeze(h)] # n_minibatch x 1 to n_minibatch
+      matrix += [tf.squeeze(h)]  # n_minibatch x 1 to n_minibatch
 
     return tf.pack(matrix)
 
@@ -114,7 +115,7 @@ sess = ed.get_session()
 
 # Sample functions from variational model
 mean, std = sess.run([variational.layers[0].loc,
-            variational.layers[0].scale])
+                      variational.layers[0].scale])
 rs = np.random.RandomState(0)
 zs = rs.randn(10, variational.n_vars) * std + mean
 zs = tf.constant(zs, dtype=tf.float32)
@@ -125,7 +126,7 @@ outputs = mus.eval()
 x, y = data['x'], data['y']
 
 # Plot data and functions
-fig = plt.figure(figsize=(10,6))
+fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot(111)
 ax.set_title("Iteration: 0 - (CLOSE WINDOW TO CONTINUE)")
 ax.plot(x, y, 'ks', alpha=0.5, label='(x, y)')
@@ -145,7 +146,7 @@ inference.run(n_iter=1000, n_samples=5, n_print=100)
 
 # Sample functions from variational model
 mean, std = sess.run([variational.layers[0].loc,
-            variational.layers[0].scale])
+                      variational.layers[0].scale])
 rs = np.random.RandomState(0)
 zs = rs.randn(10, variational.n_vars) * std + mean
 zs = tf.constant(zs, dtype=tf.float32)
@@ -156,7 +157,7 @@ outputs = mus.eval()
 x, y = data['x'], data['y']
 
 # Plot data and functions
-fig = plt.figure(figsize=(10,6))
+fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot(111)
 ax.set_title("Iteration: 1000 - (CLOSE WINDOW TO TERMINATE)")
 ax.plot(x, y, 'ks', alpha=0.5, label='(x, y)')

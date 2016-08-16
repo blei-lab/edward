@@ -22,13 +22,12 @@ class MatrixFactorization:
   where z = {s,t}.
   """
   def __init__(self, K, n_rows, n_cols=None, var=0.01,
-         like ='Poisson',
-         prior='Lognormal',
-         interaction ='additive'):
-    if n_cols == None:
+               like='Poisson',
+               prior='Lognormal',
+               interaction='additive'):
+    if n_cols is None:
        n_cols = n_rows
-
-    self.n_vars = (n_rows+n_cols)* K
+    self.n_vars = (n_rows + n_cols) * K
     self.n_rows = n_rows
     self.n_cols = n_cols
     self.K = K
@@ -37,7 +36,6 @@ class MatrixFactorization:
     self.prior = prior
     self.interaction = interaction
 
-
   def log_prob(self, xs, zs):
     """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     if self.prior == 'Lognormal':
@@ -45,10 +43,10 @@ class MatrixFactorization:
     elif self.prior != 'Gaussian':
       raise NotImplementedError("prior not available.")
 
-    log_prior = -self.prior_variance * tf.reduce_sum(zs*zs)
+    log_prior = -self.prior_variance * tf.reduce_sum(zs * zs)
 
-    s = tf.reshape(zs[:,:self.n_rows*self.K], [self.n_rows,self.K])
-    t = tf.reshape(zs[:,self.n_cols*self.K:], [self.n_cols,self.K])
+    s = tf.reshape(zs[:, :self.n_rows * self.K], [self.n_rows, self.K])
+    t = tf.reshape(zs[:, self.n_cols * self.K:], [self.n_cols, self.K])
 
     xp = tf.matmul(s, t, transpose_b=True)
     if self.interaction == 'multiplicative':
@@ -79,14 +77,14 @@ ed.set_seed(42)
 data, N = load_celegans_brain()
 K = 3
 model = MatrixFactorization(K, N,
-              like='Poisson',
-              prior='Lognormal',
-              interaction='additive')
+                            like='Poisson',
+                            prior='Lognormal',
+                            interaction='additive')
 
 inference = ed.MAP(model, data)
 
-#variational = Variational()
-#variational.add(Normal(model.n_vars))
-#inference = ed.MFVI(model, variational,data)
+# variational = Variational()
+# variational.add(Normal(model.n_vars))
+# inference = ed.MFVI(model, variational,data)
 
 inference.run(n_iter=5000, n_print=500)

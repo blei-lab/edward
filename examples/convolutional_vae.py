@@ -40,22 +40,22 @@ class NormalBernoulli:
   p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
   """
   def __init__(self, n_vars):
-    self.n_vars = n_vars # number of local latent variables
+    self.n_vars = n_vars  # number of local latent variables
 
   def neural_network(self, z):
     """p = neural_network(z)"""
     with pt.defaults_scope(activation_fn=tf.nn.elu,
-                 batch_normalize=True,
-                 learned_moments_update_rate=0.0003,
-                 variance_epsilon=0.001,
-                 scale_after_normalization=True):
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
       return (pt.wrap(z).
-          reshape([N_MINIBATCH, 1, 1, self.n_vars]).
-          deconv2d(3, 128, edges='VALID').
-          deconv2d(5, 64, edges='VALID').
-          deconv2d(5, 32, stride=2).
-          deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
-          flatten()).tensor
+              reshape([N_MINIBATCH, 1, 1, self.n_vars]).
+              deconv2d(3, 128, edges='VALID').
+              deconv2d(5, 64, edges='VALID').
+              deconv2d(5, 32, stride=2).
+              deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+              flatten()).tensor
 
   def log_lik(self, xs, z):
     """
@@ -88,18 +88,18 @@ def neural_network(x):
   """
   n_vars = 10
   with pt.defaults_scope(activation_fn=tf.nn.elu,
-               batch_normalize=True,
-               learned_moments_update_rate=0.0003,
-               variance_epsilon=0.001,
-               scale_after_normalization=True):
+                         batch_normalize=True,
+                         learned_moments_update_rate=0.0003,
+                         variance_epsilon=0.001,
+                         scale_after_normalization=True):
     params = (pt.wrap(x).
-        reshape([N_MINIBATCH, 28, 28, 1]).
-        conv2d(5, 32, stride=2).
-        conv2d(5, 64, stride=2).
-        conv2d(5, 128, edges='VALID').
-        dropout(0.9).
-        flatten().
-        fully_connected(n_vars * 2, activation_fn=None)).tensor
+              reshape([N_MINIBATCH, 28, 28, 1]).
+              conv2d(5, 32, stride=2).
+              conv2d(5, 64, stride=2).
+              conv2d(5, 128, edges='VALID').
+              dropout(0.9).
+              flatten().
+              fully_connected(n_vars * 2, activation_fn=None)).tensor
 
   # Return list of vectors where mean[i], stddev[i] are the
   # parameters of the local variational factor for data point i.
@@ -118,7 +118,8 @@ model = NormalBernoulli(n_vars=10)
 # variational factors q(z_n | x).
 # We also do data subsampling during inference. Therefore we only need
 # to explicitly represent the variational factors for a mini-batch,
-# q(z_{batch} | x) = prod_{m=1}^{n_data} Normal(z_m | loc, scale = neural_network(x_m))
+# q(z_{batch} | x) = prod_{m=1}^{n_data}
+#                    Normal(z_m | loc, scale = neural_network(x_m))
 x_ph = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
 loc, scale = neural_network(x_ph)
 variational = Variational()
@@ -151,7 +152,7 @@ for epoch in range(n_epoch):
     pbar.update(t)
     x_train, _ = mnist.train.next_batch(N_MINIBATCH)
     _, loss = sess.run([inference.train, inference.loss],
-               feed_dict={x: x_train, x_ph: x_train})
+                       feed_dict={x: x_train, x_ph: x_train})
     avg_loss += loss
 
   # Take average over all ELBOs during the epoch, and over minibatch
@@ -169,4 +170,4 @@ for epoch in range(n_epoch):
       os.makedirs(IMG_DIR)
 
     imsave(os.path.join(IMG_DIR, '%d.png') % b,
-         imgs[b].reshape(28, 28))
+           imgs[b].reshape(28, 28))

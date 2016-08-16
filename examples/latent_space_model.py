@@ -22,9 +22,9 @@ class LatentSpaceModel:
 
   """
   def __init__(self, N, K, var=1.0,
-         like='Poisson',
-         prior='Lognormal',
-         dist='euclidean'):
+               like='Poisson',
+               prior='Lognormal',
+               dist='euclidean'):
     self.n_vars = N * K
     self.N = N
     self.K = K
@@ -40,13 +40,14 @@ class LatentSpaceModel:
     elif self.prior != 'Gaussian':
       raise NotImplementedError("prior not available.")
 
-    log_prior = -self.prior_variance * tf.reduce_sum(zs*zs)
+    log_prior = -self.prior_variance * tf.reduce_sum(zs * zs)
 
-    z = tf.reshape(zs, [self.N,self.K])
+    z = tf.reshape(zs, [self.N, self.K])
     if self.dist == 'euclidean':
-      xp = tf.matmul(tf.ones([1,self.N]), tf.reduce_sum(z*z, 1, keep_dims=True))
-      xp = xp + tf.transpose(xp) - 2*tf.matmul(z, z, transpose_b=True)
-      xp = 1.0/xp
+      xp = tf.matmul(tf.ones([1, self.N]),
+                     tf.reduce_sum(z * z, 1, keep_dims=True))
+      xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
+      xp = 1.0 / xp
     elif self.dist == 'cosine':
       xp = tf.matmul(z, z, transpose_b=True)
 
@@ -75,8 +76,8 @@ model = LatentSpaceModel(N, K=3, like='Poisson', prior='Gaussian')
 
 inference = ed.MAP(model, data)
 # Alternatively, run
-#variational = Variational()
-#variational.add(Normal(model.n_vars))
-#inference = ed.MFVI(model, variational,data)
+# variational = Variational()
+# variational.add(Normal(model.n_vars))
+# inference = ed.MFVI(model, variational,data)
 
 inference.run(n_iter=5000, n_print=500)

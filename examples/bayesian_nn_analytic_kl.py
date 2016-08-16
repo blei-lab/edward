@@ -46,21 +46,21 @@ class BayesianNN:
     homoscedastic variance, scale parameter.
   """
   def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-    lik_variance=0.01):
+               lik_variance=0.01):
     self.layer_sizes = layer_sizes
     self.nonlinearity = nonlinearity
     self.lik_variance = lik_variance
 
     self.n_layers = len(layer_sizes)
     self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
-    self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
+    self.n_vars = sum((m + 1) * n for m, n in self.weight_dims)
 
   def unpack_weights(self, z):
     """Unpack weight matrices and biases from a flattened vector."""
     for m, n in self.weight_dims:
-      yield tf.reshape(z[:m*n],        [m, n]), \
-          tf.reshape(z[m*n:(m*n+n)], [1, n])
-      z = z[(m+1)*n:]
+      yield tf.reshape(z[:m * n], [m, n]), \
+          tf.reshape(z[m * n:(m * n + n)], [1, n])
+      z = z[(m + 1) * n:]
 
   def neural_network(self, x, zs):
     """
@@ -76,7 +76,7 @@ class BayesianNN:
         # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
         h = self.nonlinearity(tf.matmul(h, W) + b)
 
-      matrix += [tf.squeeze(h)] # n_minibatch x 1 to n_minibatch
+      matrix += [tf.squeeze(h)]  # n_minibatch x 1 to n_minibatch
 
     return tf.pack(matrix)
 
@@ -92,8 +92,8 @@ class BayesianNN:
 def build_toy_dataset(N=40, noise_std=0.1):
   ed.set_seed(0)
   D = 1
-  x  = np.concatenate([np.linspace(0, 2, num=N/2),
-             np.linspace(6, 8, num=N/2)])
+  x = np.concatenate([np.linspace(0, 2, num=N / 2),
+                      np.linspace(6, 8, num=N / 2)])
   y = np.cos(x) + norm.rvs(0, noise_std, size=N)
   x = (x - 4.0) / 4.0
   x = x.reshape((N, D))
@@ -107,7 +107,7 @@ variational.add(Normal(model.n_vars))
 data = build_toy_dataset()
 
 # Set up figure
-fig = plt.figure(figsize=(8,8), facecolor='white')
+fig = plt.figure(figsize=(8, 8), facecolor='white')
 ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
@@ -125,7 +125,7 @@ for t in range(1000):
 
     # Sample functions from variational model
     mean, std = sess.run([variational.layers[0].loc,
-                variational.layers[0].scale])
+                          variational.layers[0].scale])
     rs = np.random.RandomState(0)
     zs = rs.randn(10, variational.n_vars) * std + mean
     zs = tf.convert_to_tensor(zs, dtype=tf.float32)
@@ -144,4 +144,4 @@ for t in range(1000):
     ax.set_xlim([-8, 8])
     ax.set_ylim([-2, 3])
     plt.draw()
-    plt.pause(1.0/60.0)
+    plt.pause(1.0 / 60.0)

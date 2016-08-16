@@ -40,18 +40,19 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
   samples = np.zeros((amount, 2))
   n_mix = len(pred_weights[0])
   to_choose_from = np.arange(n_mix)
-  for j,(weights, means, std_devs) in enumerate(zip(pred_weights, pred_means, pred_std)):
+  for j, (weights, means, std_devs)
+  in enumerate(zip(pred_weights, pred_means, pred_std)):
     index = np.random.choice(to_choose_from, p=weights)
-    samples[j,1]= normal.rvs(means[index], std_devs[index], size=1)
-    samples[j,0]= x[j]
-    if j == amount -1:
+    samples[j, 1] = normal.rvs(means[index], std_devs[index], size=1)
+    samples[j, 0] = x[j]
+    if j == amount - 1:
       break
   return samples
 
 
 def build_toy_dataset(N=40000):
   y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1))) # random noise
+  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42, train_size=0.1)
 
@@ -72,7 +73,8 @@ class MixtureDensityNetwork:
 
   def neural_network(self, X):
     """pi, mu, sigma = NN(x; theta)"""
-    hidden1 = Dense(15, activation='relu')(X)  # fully-connected layer with 15 hidden units
+    # fully-connected layer with 15 hidden units
+    hidden1 = Dense(15, activation='relu')(X)
     hidden2 = Dense(15, activation='relu')(hidden1)
     self.mus = Dense(self.K)(hidden2)
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
@@ -108,8 +110,8 @@ data = {'X': X, 'y': y}
 model = MixtureDensityNetwork(20)
 
 inference = ed.MAP(model, data)
-sess = ed.get_session() # Start TF session
-K.set_session(sess) # Pass session info to Keras
+sess = ed.get_session()  # Start TF session
+K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
 
 NEPOCH = 1000
@@ -117,15 +119,15 @@ train_loss = np.zeros(NEPOCH)
 test_loss = np.zeros(NEPOCH)
 for i in range(NEPOCH):
   _, train_loss[i] = sess.run([inference.train, inference.loss],
-                feed_dict={X: X_train, y: y_train})
+                              feed_dict={X: X_train, y: y_train})
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
 
-pred_weights, pred_means, pred_std = sess.run([model.pi, model.mus, model.sigmas],
-                        feed_dict={X: X_test})
+pred_weights, pred_means, pred_std =
+sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
 
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), test_loss/len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), train_loss/len(X_train), label='Train')
+plt.plot(np.arange(NEPOCH), test_loss / len(X_test), label='Test')
+plt.plot(np.arange(NEPOCH), train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)
@@ -134,15 +136,20 @@ plt.show()
 obj = [0, 4, 6]
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(16, 6))
 
-plot_normal_mix(pred_weights[obj][0], pred_means[obj][0], pred_std[obj][0], axes[0], comp=False)
+plot_normal_mix(pred_weights[obj][0], pred_means[obj][0],
+                pred_std[obj][0], axes[0], comp=False)
 axes[0].axvline(x=y_test[obj][0], color='black', alpha=0.5)
 
-plot_normal_mix(pred_weights[obj][2], pred_means[obj][2], pred_std[obj][2], axes[1], comp=False)
+plot_normal_mix(pred_weights[obj][2], pred_means[obj][2],
+                pred_std[obj][2], axes[1], comp=False)
 axes[1].axvline(x=y_test[obj][2], color='black', alpha=0.5)
 
-plot_normal_mix(pred_weights[obj][1], pred_means[obj][1], pred_std[obj][1], axes[2], comp=False)
+plot_normal_mix(pred_weights[obj][1], pred_means[obj][1],
+                pred_std[obj][1], axes[2], comp=False)
 axes[2].axvline(x=y_test[obj][1], color='black', alpha=0.5)
 
-a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X_test))
-sns.jointplot(a[:,0], a[:,1], kind="hex", color="#4CB391", ylim=(-10,10), xlim=(-14,14))
+a = sample_from_mixture(X_test, pred_weights, pred_means,
+                        pred_std, amount=len(X_test))
+sns.jointplot(a[:, 0], a[:, 1], kind="hex", color="#4CB391",
+              ylim=(-10, 10), xlim=(-14, 14))
 plt.show()

@@ -37,7 +37,8 @@ class MixtureDensityNetwork:
 
   def neural_network(self, X):
     """pi, mu, sigma = NN(x; theta)"""
-    hidden1 = Dense(25, activation='relu')(X)  # fully-connected layer with 25 hidden units
+    # fully-connected layer with 25 hidden units
+    hidden1 = Dense(25, activation='relu')(X)
     hidden2 = Dense(25, activation='relu')(hidden1)
     self.mus = Dense(self.K)(hidden2)
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
@@ -58,8 +59,8 @@ class MixtureDensityNetwork:
 
 def build_toy_dataset(N=6000):
   y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1))) # random noise
-  x_data = np.float32(np.sin(0.75*y_data)*7.0+y_data*0.5+r_data*1.0)
+  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
+  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42)
 
 
@@ -86,9 +87,10 @@ train_loss = np.zeros(NEPOCH)
 test_loss = np.zeros(NEPOCH)
 for i in range(NEPOCH):
   _, train_loss[i] = sess.run([inference.train, inference.loss],
-                feed_dict={X: X_train, y: y_train})
+                              feed_dict={X: X_train, y: y_train})
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
-  print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i], test_loss[i]))
+  print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i],
+                                                         test_loss[i]))
 
 pred_weights, pred_means, pred_std = sess.run(
     [model.pi, model.mus, model.sigmas], feed_dict={X: X_test})

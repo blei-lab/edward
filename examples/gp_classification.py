@@ -71,8 +71,8 @@ class GaussianProcess:
     x, y = xs['x'], xs['y']
     log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
     log_lik = tf.pack([tf.reduce_sum(
-      bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
-      ) for z in tf.unpack(zs)])
+                       bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z))))
+                       for z in tf.unpack(zs)])
     return log_prior + log_lik
 
 

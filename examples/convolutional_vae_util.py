@@ -21,6 +21,7 @@ from prettytensor.pretty_tensor_class import PAD_SAME
 from prettytensor.pretty_tensor_class import Phase
 from prettytensor.pretty_tensor_class import PROVIDED
 
+
 # pylint: disable=redefined-outer-name,invalid-name
 @prettytensor.Register(
     assign_defaults=('activation_fn', 'l2loss', 'stddev', 'batch_normalize'))
@@ -102,8 +103,9 @@ class deconv2d(prettytensor.VarStoreMethod):
     row_stride = stride[1]
     col_stride = stride[2]
 
-    out_rows, out_cols = get2d_deconv_output_size(input_height, input_width, filter_height,
-                               filter_width, row_stride, col_stride, edges)
+    out_rows, out_cols = get2d_deconv_output_size(input_height, input_width,
+                                                  filter_height, filter_width,
+                                                  row_stride, col_stride, edges)
 
     output_shape = [input_layer.shape[0], out_rows, out_cols, depth]
     y = tf.nn.conv2d_transpose(input_layer, params, output_shape, stride, edges)
@@ -130,11 +132,13 @@ class deconv2d(prettytensor.VarStoreMethod):
     return input_layer.with_tensor(y)
 # pylint: enable=redefined-outer-name,invalid-name
 
-# Helper methods
 
+# Helper methods
 def get2d_deconv_output_size(input_height, input_width, filter_height,
-                           filter_width, row_stride, col_stride, padding_type):
-    """Returns the number of rows and columns in a convolution/pooling output."""
+                             filter_width, row_stride, col_stride,
+                             padding_type):
+    """Returns the number of rows and columns in a convolution/pooling output.
+    """
     input_height = tensor_shape.as_dimension(input_height)
     input_width = tensor_shape.as_dimension(input_width)
     filter_height = tensor_shape.as_dimension(filter_height)
@@ -161,6 +165,7 @@ def get2d_deconv_output_size(input_height, input_width, filter_height,
       out_cols = input_width.value * col_stride
 
     return out_rows, out_cols
+
 
 def _kernel(kernel_spec):
   """Expands the kernel spec into a length 2 list.

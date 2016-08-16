@@ -28,7 +28,6 @@ from __future__ import print_function
 
 import edward as ed
 import matplotlib.pyplot as plt
-plt.style.use('ggplot')
 import matplotlib.cm as cm
 import numpy as np
 import tensorflow as tf
@@ -36,6 +35,8 @@ import tensorflow as tf
 from edward.models import Variational, Dirichlet, Normal, InvGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims, log_sum_exp
+
+plt.style.use('ggplot')
 
 
 class MixtureGaussian:
@@ -58,7 +59,7 @@ class MixtureGaussian:
   def __init__(self, K, D):
     self.K = K
     self.D = D
-    self.n_vars = (2*D + 1) * K
+    self.n_vars = (2 * D + 1) * K
 
     self.a = 1
     self.b = 1
@@ -84,10 +85,10 @@ class MixtureGaussian:
       # log pi_k + log N(x_n; mu_k, sigma_k).
       matrix = []
       for k in range(self.K):
-        matrix += [tf.ones(N)*tf.log(pi[s, k]) +
-               multivariate_normal.logpdf(x,
-                 mus[s, (k*self.D):((k+1)*self.D)],
-                 sigmas[s, (k*self.D):((k+1)*self.D)])]
+        matrix += [tf.ones(N) * tf.log(pi[s, k]) +
+                   multivariate_normal.logpdf(x,
+                   mus[s, (k * self.D):((k + 1) * self.D)],
+                   sigmas[s, (k * self.D):((k + 1) * self.D)])]
 
       matrix = tf.pack(matrix)
       # log_sum_exp() along the rows is a vector, whose nth
@@ -111,8 +112,8 @@ class MixtureGaussian:
     matrix = []
     for k in range(self.K):
       matrix += [multivariate_normal.logpdf(x,
-                 mus[(k*self.D):((k+1)*self.D)],
-                 sigmas[(k*self.D):((k+1)*self.D)])]
+                 mus[(k * self.D):((k + 1) * self.D)],
+                 sigmas[(k * self.D):((k + 1) * self.D)])]
 
     return tf.pack(matrix)
 
@@ -139,13 +140,14 @@ plt.show()
 model = MixtureGaussian(K=2, D=2)
 variational = Variational()
 variational.add(Dirichlet(model.K))
-variational.add(Normal(model.K*model.D))
-variational.add(InvGamma(model.K*model.D))
+variational.add(Normal(model.K * model.D))
+variational.add(InvGamma(model.K * model.D))
 
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 
-clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data), axis=0)
+clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data),
+                     axis=0)
 plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.title("Predicted cluster assignments")

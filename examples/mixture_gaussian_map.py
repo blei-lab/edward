@@ -47,7 +47,7 @@ class MixtureGaussian:
   def __init__(self, K, D):
     self.K = K
     self.D = D
-    self.n_vars = (2*D + 1) * K
+    self.n_vars = (2 * D + 1) * K
 
     self.a = 1
     self.b = 1
@@ -57,12 +57,13 @@ class MixtureGaussian:
   def unpack_params(self, zs):
     """Unpack sets of parameters from a flattened matrix."""
     pi = zs[:, 0:self.K]
-    mus = zs[:, self.K:(self.K+self.K*self.D)]
-    sigmas = zs[:, (self.K+self.K*self.D):(self.K+2*self.K*self.D)]
+    mus = zs[:, self.K:(self.K + self.K * self.D)]
+    sigmas = zs[:, (self.K + self.K * self.D):(self.K + 2 * self.K * self.D)]
     # Do the unconstrained to constrained transformation for MAP here.
     pi = tf.sigmoid(pi)
-    pi = tf.concat(1, [pi[:, 0:(self.K-1)],
-       tf.expand_dims(1.0 - tf.reduce_sum(pi[:, 0:(self.K-1)], 1), 0)])
+    pi = tf.concat(1, [pi[:, 0:(self.K - 1)],
+                   tf.expand_dims(1.0 -
+                                  tf.reduce_sum(pi[:, 0:(self.K - 1)], 1), 0)])
     sigmas = tf.nn.softplus(sigmas)
     return pi, mus, sigmas
 
@@ -85,10 +86,10 @@ class MixtureGaussian:
       # log pi_k + log N(x_n; mu_k, sigma_k).
       matrix = []
       for k in range(self.K):
-        matrix += [tf.ones(N)*tf.log(pi[s, k]) +
-               multivariate_normal.logpdf(x,
-                 mus[s, (k*self.D):((k+1)*self.D)],
-                 sigmas[s, (k*self.D):((k+1)*self.D)])]
+        matrix += [tf.ones(N) * tf.log(pi[s, k]) +
+                   multivariate_normal.logpdf(x,
+                   mus[s, (k * self.D):((k + 1) * self.D)],
+                   sigmas[s, (k * self.D):((k + 1) * self.D)])]
 
       matrix = tf.pack(matrix)
       # log_sum_exp() along the rows is a vector, whose nth

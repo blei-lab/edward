@@ -29,7 +29,7 @@ class BetaBernoulli:
   def log_prob(self, xs, zs):
     log_prior = beta.logpdf(zs, a=1.0, b=1.0)
     log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-               for z in tf.unpack(zs)])
+                       for z in tf.unpack(zs)])
     return log_lik + log_prior
 
   def sample_likelihood(self, zs, n):
@@ -50,5 +50,8 @@ data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=200)
 
-T = lambda x, z=None: tf.reduce_mean(tf.cast(x['x'], tf.float32))
+
+def T(x, z=None):
+  return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+
 print(ed.ppc(model, variational, data, T))
