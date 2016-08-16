@@ -24,10 +24,12 @@ def test_1d():
   _test(np.array([0.2, 0.8]), np.diag([1.0, 1.0]), 10)
 
 
-#def test_2d():
+# def test_2d():
 #    _test(np.array([[0.5]]), np.asarray([np.diag([1.0])]), 1)
 #    _test(np.array([[0.5]]), np.asarray([np.diag([1.0])]), 5)
 #    _test(np.array([[0.2, 0.8]]), np.asarray([np.diag([1.0]*2)]), 1)
 #    _test(np.array([[0.2, 0.8]]), np.asarray([np.diag([1.0]*2)]), 10)
-#    _test(np.array([[0.2, 0.8], [0.7, 0.6]]), np.asarray([np.diag([1.0]*2)]*2), 1)
-#    _test(np.array([[0.2, 0.8], [0.7, 0.6]]), np.asarray([np.diag([1.0]*2)]*2), 10)
+#    _test(np.array([[0.2, 0.8], [0.7, 0.6]]),
+#                   np.asarray([np.diag([1.0]*2)]*2), 1)
+#    _test(np.array([[0.2, 0.8], [0.7, 0.6]]),
+#                   np.asarray([np.diag([1.0]*2)]*2), 10)

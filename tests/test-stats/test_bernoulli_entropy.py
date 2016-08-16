@@ -8,6 +8,7 @@ import tensorflow as tf
 from edward.stats import bernoulli
 from scipy import stats
 
+
 class test_bernoulli_entropy_class(tf.test.TestCase):
 
   def _test(self, p):

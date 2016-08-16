@@ -29,7 +29,7 @@ def test_1d():
   _test(np.array([3, 2]), 10)
 
 
-#def test_2d():
+# def test_2d():
 #    _test(np.array([[3]]), 1)
 #    _test(np.array([[3]]), 5)
 #    _test(np.array([[3, 2]]), 1)

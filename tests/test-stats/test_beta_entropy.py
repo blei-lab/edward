@@ -8,15 +8,20 @@ import tensorflow as tf
 from edward.stats import beta
 from scipy import stats
 
+
 class test_beta_entropy_class(tf.test.TestCase):
 
   def _test(self, a, b):
     val_true = stats.beta.entropy(a, b)
     self.assertAllClose(beta.entropy(a, b).eval(), val_true, atol=1e-4)
-    self.assertAllClose(beta.entropy(tf.constant(a), tf.constant(b)).eval(), val_true, atol=1e-4)
-    self.assertAllClose(beta.entropy(tf.constant([a]), tf.constant(b)).eval(), val_true, atol=1e-4)
-    self.assertAllClose(beta.entropy(tf.constant(a), tf.constant([b])).eval(), val_true, atol=1e-4)
-    self.assertAllClose(beta.entropy(tf.constant([a]), tf.constant([b])).eval(), val_true, atol=1e-4)
+    self.assertAllClose(beta.entropy(tf.constant(a), tf.constant(b)).eval(),
+                        val_true, atol=1e-4)
+    self.assertAllClose(beta.entropy(tf.constant([a]), tf.constant(b)).eval(),
+                        val_true, atol=1e-4)
+    self.assertAllClose(beta.entropy(tf.constant(a), tf.constant([b])).eval(),
+                        val_true, atol=1e-4)
+    self.assertAllClose(beta.entropy(tf.constant([a]), tf.constant([b])).eval(),
+                        val_true, atol=1e-4)
 
   def test_0d(self):
     with self.test_session():
