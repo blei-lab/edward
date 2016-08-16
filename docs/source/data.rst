@@ -14,15 +14,15 @@ to have a different key or value type. We detail each below.
 
 .. code:: python
 
-    class BetaBernoulli:
-        def log_prob(self, xs, zs):
-            log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-            log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                               for z in tf.unpack(zs)])
-            return log_lik + log_prior
+  class BetaBernoulli:
+    def log_prob(self, xs, zs):
+      log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
+                         for z in tf.unpack(zs)])
+      return log_lik + log_prior
 
-    model = BetaBernoulli()
-    data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+  model = BetaBernoulli()
+  data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 -  **Python.** The data carries whatever keys and values the user
    accesses in the user-defined model. Key is a string. Value is a NumPy
@@ -30,19 +30,19 @@ to have a different key or value type. We detail each below.
 
 .. code:: python
 
-    class BetaBernoulli(PythonModel):
-        def _py_log_prob(self, xs, zs):
-            n_minibatch = zs.shape[0]
-            lp = np.zeros(n_minibatch, dtype=np.float32)
-            for b in range(n_minibatch):
-                lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-                for n in range(len(xs['x'])):
-                    lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+  class BetaBernoulli(PythonModel):
+    def _py_log_prob(self, xs, zs):
+        n_minibatch = zs.shape[0]
+        lp = np.zeros(n_minibatch, dtype=np.float32)
+        for b in range(n_minibatch):
+          lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
+          for n in range(len(xs['x'])):
+            lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
 
-            return lp
+        return lp
 
-    model = BetaBernoulli()
-    data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+  model = BetaBernoulli()
+  data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 -  **PyMC3.** The data binds Theano shared variables, which are used to
    mark the observed PyMC3 random variables, to their realizations. Key
@@ -51,35 +51,35 @@ to have a different key or value type. We detail each below.
 
 .. code:: python
 
-    x_obs = theano.shared(np.zeros(1))
-    with pm.Model() as pm_model:
-        beta = pm.Beta('beta', 1, 1, transform=None)
-        x = pm.Bernoulli('x', beta, observed=x_obs)
+  x_obs = theano.shared(np.zeros(1))
+  with pm.Model() as pm_model:
+    beta = pm.Beta('beta', 1, 1, transform=None)
+    x = pm.Bernoulli('x', beta, observed=x_obs)
 
-    model = PyMC3Model(pm_model)
-    data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+  model = PyMC3Model(pm_model)
+  data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 -  **Stan.** The data is according to the Stan program's data block. Key
    is a string. Value is whatever type is used for the data block.
 
 .. code:: python
 
-    model_code = """
-        data {
-          int<lower=0> N;
-          int<lower=0,upper=1> y[N];
-        }
-        parameters {
-          real<lower=0,upper=1> theta;
-        }
-        model {
-          theta ~ beta(1.0, 1.0);
-          for (n in 1:N)
-            y[n] ~ bernoulli(theta);
-        }
-    """
-    model = ed.StanModel(model_code=model_code)
-    data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+  model_code = """
+    data {
+      int<lower=0> N;
+      int<lower=0,upper=1> y[N];
+    }
+    parameters {
+      real<lower=0,upper=1> theta;
+    }
+    model {
+      theta ~ beta(1.0, 1.0);
+      for (n in 1:N)
+        y[n] ~ bernoulli(theta);
+    }
+  """
+  model = ed.StanModel(model_code=model_code)
+  data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
 Reading Data in Edward
 ^^^^^^^^^^^^^^^^^^^^^^

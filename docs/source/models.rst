@@ -21,18 +21,18 @@ evaluation for each set of latent variables. Here is an example:
 
 .. code:: python
 
-    import tensorflow as tf
-    from edward.stats import bernoulli, beta
+  import tensorflow as tf
+  from edward.stats import bernoulli, beta
 
-    class BetaBernoulli:
-        """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
-        def log_prob(self, xs, zs):
-            log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-            log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                               for z in tf.unpack(zs)])
-            return log_lik + log_prior
+  class BetaBernoulli:
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+    def log_prob(self, xs, zs):
+      log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
+                         for z in tf.unpack(zs)])
+      return log_lik + log_prior
 
-    model = BetaBernoulli()
+  model = BetaBernoulli()
 
 Here is a `toy script
 <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
@@ -55,19 +55,18 @@ Here is an example:
   from scipy.stats import bernoulli, beta
 
   class BetaBernoulli(PythonModel):
-      """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
-      def _py_log_prob(self, xs, zs):
-          # This example is written for pedagogy. We recommend
-          # vectorizing operations in practice.
-          n_samples = zs.shape[0]
-          lp = np.zeros(n_samples, dtype=np.float32)
-          for b in range(n_samples):
-              lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-              for n in range(xs['x'].shape[0]):
-                  lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+    def _py_log_prob(self, xs, zs):
+      # This example is written for pedagogy. We recommend
+      # vectorizing operations in practice.
+      n_samples = zs.shape[0]
+      lp = np.zeros(n_samples, dtype=np.float32)
+      for b in range(n_samples):
+        lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
+        for n in range(xs['x'].shape[0]):
+          lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
 
-          return lp
-              return log_lik + log_prior
+      return lp
 
     model = BetaBernoulli()
 
@@ -82,23 +81,23 @@ call it with ``StanModel(file=file)`` or
 
 .. code:: python
 
-    from edward.models import StanModel
+  from edward.models import StanModel
 
-    model_code = """
-        data {
-          int<lower=0> N;
-          int<lower=0,upper=1> y[N];
-        }
-        parameters {
-          real<lower=0,upper=1> theta;
-        }
-        model {
-          theta ~ beta(1.0, 1.0);
-          for (n in 1:N)
-            y[n] ~ bernoulli(theta);
-        }
-    """
-    model = StanModel(model_code=model_code)
+  model_code = """
+    data {
+      int<lower=0> N;
+      int<lower=0,upper=1> y[N];
+    }
+    parameters {
+      real<lower=0,upper=1> theta;
+    }
+    model {
+      theta ~ beta(1.0, 1.0);
+      for (n in 1:N)
+        y[n] ~ bernoulli(theta);
+    }
+  """
+  model = StanModel(model_code=model_code)
 
 Here is a `toy
 script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py>`__
@@ -115,17 +114,17 @@ time. Here is an example:
 
 .. code:: python
 
-    import numpy as np
-    import pymc3 as pm
-    import theano
-    from edward.models import PyMC3Model
+  import numpy as np
+  import pymc3 as pm
+  import theano
+  from edward.models import PyMC3Model
 
-    x_obs = theano.shared(np.zeros(1))
-    with pm.Model() as pm_model:
-        beta = pm.Beta('beta', 1, 1, transform=None)
-        x = pm.Bernoulli('x', beta, observed=x_obs)
+  x_obs = theano.shared(np.zeros(1))
+  with pm.Model() as pm_model:
+    beta = pm.Beta('beta', 1, 1, transform=None)
+    x = pm.Bernoulli('x', beta, observed=x_obs)
 
-    model = PyMC3Model(pm_model)
+  model = PyMC3Model(pm_model)
 
 Here is a `toy
 script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py>`__
@@ -157,117 +156,117 @@ around ``_py_log_prob()`` as a TensorFlow operation.
 .. code:: python
 
   class Model:
-      def log_prob(self, xs, zs):
-          """
-          Used in: (most) inference.
+    def log_prob(self, xs, zs):
+      """
+      Used in: (most) inference.
 
-          Parameters
-          ----------
-          xs : dict
-              Data dictionary. Each key names a data structure used in
-              the model (str), and its value is the corresponding
-              corresponding realization (np.ndarray or tf.Tensor).
-          zs : list or tf.Tensor
-              A list of tf.Tensor's if multiple varational families,
-              otherwise a tf.Tensor if single variational family.
+      Parameters
+      ----------
+      xs : dict
+        Data dictionary. Each key names a data structure used in
+        the model (str), and its value is the corresponding
+        corresponding realization (np.ndarray or tf.Tensor).
+      zs : list or tf.Tensor
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
 
-          Returns
-          -------
-          tf.Tensor
-              S-vector of type tf.float32,
-              [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
-          """
-          pass
+      Returns
+      -------
+      tf.Tensor
+        S-vector of type tf.float32,
+        [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+      """
+      pass
 
-      def log_lik(self, xs, zs):
-          """
-          Used in: inference with analytic KL.
+    def log_lik(self, xs, zs):
+      """
+      Used in: inference with analytic KL.
 
-          Parameters
-          ----------
-          xs : dict
-              Data dictionary. Each key names a data structure used in
-              the model (str), and its value is the corresponding
-              corresponding realization (np.ndarray or tf.Tensor).
-          zs : list or tf.Tensor
-              A list of tf.Tensor's if multiple varational families,
-              otherwise a tf.Tensor if single variational family.
+      Parameters
+      ----------
+      xs : dict
+        Data dictionary. Each key names a data structure used in
+        the model (str), and its value is the corresponding
+        corresponding realization (np.ndarray or tf.Tensor).
+      zs : list or tf.Tensor
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
 
-          Returns
-          -------
-          tf.Tensor
-              S-vector of type tf.float32,
-              [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].
-          """
+      Returns
+      -------
+      tf.Tensor
+        S-vector of type tf.float32,
+        [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].
+      """
 
-      def predict(self, xs, zs):
-          """
-          Used in: ed.evaluate().
+    def predict(self, xs, zs):
+      """
+      Used in: ed.evaluate().
 
-          Parameters
-          ----------
-          xs : dict
-              Data dictionary. Each key names a data structure used in
-              the model (str), and its value is the corresponding
-              corresponding realization (np.ndarray or tf.Tensor).
-          zs : list or tf.Tensor
-              A list of tf.Tensor's if multiple varational families,
-              otherwise a tf.Tensor if single variational family.
+      Parameters
+      ----------
+      xs : dict
+        Data dictionary. Each key names a data structure used in
+        the model (str), and its value is the corresponding
+        corresponding realization (np.ndarray or tf.Tensor).
+      zs : list or tf.Tensor
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
 
-          Returns
-          -------
-          tf.Tensor
-              Vector of predictions, one for each data point.
+      Returns
+      -------
+      tf.Tensor
+        Vector of predictions, one for each data point.
 
-              For supervised tasks, the predicted value is the mean of the
-              output's likelihood given features from the ith data point and
-              averaged over the latent variable samples:
-                  + Binary classification. The probability of the success
-                  label.
-                  + Multi-class classification. The probability of each
-                  label, with the entire output of shape N x K.
-                  + Regression. The mean response.
-              For unsupervised, the predicted value is the log-marginal
-              likelihood evaluated at the ith data point.
-          """
-          pass
+        For supervised tasks, the predicted value is the mean of the
+        output's likelihood given features from the ith data point and
+        averaged over the latent variable samples:
+          + Binary classification. The probability of the success
+          label.
+          + Multi-class classification. The probability of each
+          label, with the entire output of shape N x K.
+          + Regression. The mean response.
+        For unsupervised, the predicted value is the log-marginal
+        likelihood evaluated at the ith data point.
+      """
+      pass
 
-      def sample_prior(self, n=1):
-          """
-          Used in: ed.ppc().
+    def sample_prior(self, n=1):
+      """
+      Used in: ed.ppc().
 
-          Parameters
-          ----------
-          n : int, optional
-              Number of latent variable samples.
+      Parameters
+      ----------
+      n : int, optional
+        Number of latent variable samples.
 
-          Returns
-          -------
-          tf.Tensor
-              n x d matrix, where each row is a set of latent variables.
-          """
-          pass
+      Returns
+      -------
+      tf.Tensor
+        n x d matrix, where each row is a set of latent variables.
+      """
+      pass
 
-      def sample_likelihood(self, zs, n=1):
-          """
-          Used in: ed.ppc().
+    def sample_likelihood(self, zs, n=1):
+      """
+      Used in: ed.ppc().
 
-          Parameters
-          ----------
-          zs : list or tf.Tensor
-              A list of tf.Tensor's if multiple varational families,
-              otherwise a tf.Tensor if single variational family.
-          n : int, optional
-              Number of data points to generate per set of latent variables.
+      Parameters
+      ----------
+      zs : list or tf.Tensor
+        A list of tf.Tensor's if multiple varational families,
+        otherwise a tf.Tensor if single variational family.
+      n : int, optional
+        Number of data points to generate per set of latent variables.
 
-          Returns
-          -------
-          list of dict's of tf.Tensor's
-              List of replicated data sets from the likelihood,
-              [x^{rep, 1}, ..., x^{rep, S}],
-              where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
-              n data points. Type-wise, each x^{rep, s} is a
-              dictionary with the same items and shape of values as the
-              test data.
-          """
-          pass
+      Returns
+      -------
+      list of dict's of tf.Tensor's
+        List of replicated data sets from the likelihood,
+        [x^{rep, 1}, ..., x^{rep, S}],
+        where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
+        n data points. Type-wise, each x^{rep, s} is a
+        dictionary with the same items and shape of values as the
+        test data.
+      """
+      pass
