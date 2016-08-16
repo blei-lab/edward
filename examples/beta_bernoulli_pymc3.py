@@ -4,10 +4,10 @@ A simple coin flipping example. The model is written in PyMC3.
 Inspired by Stan's toy example.
 
 Probability model
-    Prior: Beta
-    Likelihood: Bernoulli
+  Prior: Beta
+  Likelihood: Bernoulli
 Variational model
-    Likelihood: Mean-field Beta
+  Likelihood: Mean-field Beta
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -22,8 +22,8 @@ from edward.models import PyMC3Model, Variational, Beta
 
 x_obs = theano.shared(np.zeros(1))
 with pm.Model() as pm_model:
-    p = pm.Beta('p', 1, 1, transform=None)
-    x = pm.Bernoulli('x', p, observed=x_obs)
+  p = pm.Beta('p', 1, 1, transform=None)
+  x = pm.Bernoulli('x', p, observed=x_obs)
 
 ed.set_seed(42)
 model = PyMC3Model(pm_model)
