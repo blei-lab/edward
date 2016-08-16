@@ -284,7 +284,8 @@ standard deviation of another Gaussian.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">For 0-D or 1-D tensor inputs, outputs the 0-D tensor
 <code class="docutils literal"><span class="pre">KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one,</span> <span class="pre">scale_one)</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two,</span> <span class="pre">scale_two)</span> <span class="pre">)</span></code>
 For 2-D tensor inputs, outputs the 1-D tensor
-<code class="docutils literal"><span class="pre">[KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one[m,:],</span> <span class="pre">scale_one[m,:])</span> <span class="pre">||</span> <span class="pre">N(z;</span> <span class="pre">loc_two[m,:],</span> <span class="pre">scale_two[m,:])</span> <span class="pre">)]_{m=1}^M</span></code></p>
+<code class="docutils literal"><span class="pre">[KL(</span> <span class="pre">N(z;</span> <span class="pre">loc_one[m,:],</span> <span class="pre">scale_one[m,:])</span> <span class="pre">||</span> <span class="pre">``</span>
+<span class="pre">``N(z;</span> <span class="pre">loc_two[m,:],</span> <span class="pre">scale_two[m,:])</span> <span class="pre">)]_{m=1}^M</span></code></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tf.Tensor</p>

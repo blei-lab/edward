@@ -215,10 +215,10 @@ E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]\]</div>
 <p>Computed as</p>
 <div class="math">
 \[1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
-                    (\log p(x, z^b) - \log q(z^b; \lambda) ]\]</div>
+          (\log p(x, z^b) - \log q(z^b; \lambda) ]\]</div>
 <p>where</p>
 <div class="math">
-\[ \begin{align}\begin{aligned}z^b \sim q(z^b; \lambda)\\w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B ( w(z^b; \lambda) )\\w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)\end{aligned}\end{align} \]</div>
+\[ \begin{align}\begin{aligned}z^b \sim q(z^b; \lambda)\\w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda))\\w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)\end{aligned}\end{align} \]</div>
 <p>which gives a gradient</p>
 <div class="math">
 \[- 1/B \sum_{b=1}^B
@@ -345,7 +345,7 @@ expectation using Monte Carlo sampling.</p>
 is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
-            + H(q(z; \lambda)) )\]</div>
+      + H(q(z; \lambda)) )\]</div>
 <p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
 <p>It assumes the entropy is analytic.</p>
 <p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
@@ -359,7 +359,7 @@ expectation using Monte Carlo sampling.</p>
 is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
-            + KL(q(z; \lambda) || p(z)) )\]</div>
+      + KL(q(z; \lambda) || p(z)) )\]</div>
 <p>based on the reparameterization trick. (Kingma and Welling, 2014)</p>
 <p>It assumes the KL is analytic.</p>
 <p>It assumes the prior is <span class="math">\(p(z) = \mathcal{N}(z; 0, 1)\)</span></p>
@@ -386,7 +386,7 @@ expectation using Monte Carlo sampling.</p>
 is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x, z) ]
-            + H(q(z; \lambda)) )\]</div>
+      + H(q(z; \lambda)) )\]</div>
 <p>based on the score function estimator. (Paisley et al., 2012)</p>
 <p>It assumes the entropy is analytic.</p>
 <p>Computed by sampling from <span class="math">\(q(z;\lambda)\)</span> and evaluating the
@@ -400,7 +400,7 @@ expectation using Monte Carlo sampling.</p>
 is a stochastic gradient of</p>
 <div class="math">
 \[-ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
-             + KL(q(z; \lambda) || p(z)) )\]</div>
+       + KL(q(z; \lambda) || p(z)) )\]</div>
 <p>based on the score function estimator. (Paisley et al., 2012)</p>
 <p>It assumes the KL is analytic.</p>
 <p>It assumes the prior is <span class="math">\(p(z) = \mathcal{N}(z; 0, 1)\)</span>.</p>
@@ -507,7 +507,7 @@ overwrite this method.</p>
 
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_minibatch=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_minibatch=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em>, <em>logdir=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize variational inference algorithm.</p>
 <p>Set up <code class="docutils literal"><span class="pre">tf.train.AdamOptimizer</span></code> with a decaying scale factor.</p>
 <p>Initialize all variables.</p>
@@ -527,6 +527,8 @@ progress, then specify None.</li>
 <li><strong>optimizer</strong> (<em>str, optional</em>) &#8211; Whether to use TensorFlow optimizer or PrettyTensor
 optimizer when using PrettyTensor. Defaults to TensorFlow.</li>
 <li><strong>scope</strong> (<em>str, optional</em>) &#8211; Scope of TensorFlow variable objects to optimize over.</li>
+<li><strong>logdir</strong> (<em>str, optional</em>) &#8211; Directory where event file will be written. For details,
+see <cite>tf.train.SummaryWriter</cite>. Default is to write nothing.</li>
 </ul>
 </td>
 </tr>

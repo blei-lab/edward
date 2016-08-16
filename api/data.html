@@ -148,11 +148,11 @@ accesses in the user-defined model. Key is a string. Value is a NumPy
 array or TensorFlow tensor.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>
-                           <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)])</span>
-        <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
+  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>
+                       <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
@@ -164,15 +164,15 @@ accesses in the user-defined model. Key is a string. Value is a NumPy
 array or TensorFlow tensor.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">(</span><span class="n">PythonModel</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_minibatch</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_minibatch</span><span class="p">):</span>
-            <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">])):</span>
-                <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:])</span>
+  <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+      <span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_minibatch</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_minibatch</span><span class="p">):</span>
+        <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">])):</span>
+          <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:])</span>
 
-        <span class="k">return</span> <span class="n">lp</span>
+      <span class="k">return</span> <span class="n">lp</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
@@ -186,8 +186,8 @@ tensor.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
-    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="k">None</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
+  <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="k">None</span><span class="p">)</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">PyMC3Model</span><span class="p">(</span><span class="n">pm_model</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">x_obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
@@ -198,18 +198,18 @@ tensor.</li>
 is a string. Value is whatever type is used for the data block.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="n">model_code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
-<span class="s">    data {</span>
-<span class="s">      int&lt;lower=0&gt; N;</span>
-<span class="s">      int&lt;lower=0,upper=1&gt; y[N];</span>
-<span class="s">    }</span>
-<span class="s">    parameters {</span>
-<span class="s">      real&lt;lower=0,upper=1&gt; theta;</span>
-<span class="s">    }</span>
-<span class="s">    model {</span>
-<span class="s">      theta ~ beta(1.0, 1.0);</span>
-<span class="s">      for (n in 1:N)</span>
-<span class="s">        y[n] ~ bernoulli(theta);</span>
-<span class="s">    }</span>
+<span class="s">  data {</span>
+<span class="s">    int&lt;lower=0&gt; N;</span>
+<span class="s">    int&lt;lower=0,upper=1&gt; y[N];</span>
+<span class="s">  }</span>
+<span class="s">  parameters {</span>
+<span class="s">    real&lt;lower=0,upper=1&gt; theta;</span>
+<span class="s">  }</span>
+<span class="s">  model {</span>
+<span class="s">    theta ~ beta(1.0, 1.0);</span>
+<span class="s">    for (n in 1:N)</span>
+<span class="s">      y[n] ~ bernoulli(theta);</span>
+<span class="s">  }</span>
 <span class="s">&quot;&quot;&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ed</span><span class="o">.</span><span class="n">StanModel</span><span class="p">(</span><span class="n">model_code</span><span class="o">=</span><span class="n">model_code</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;N&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}</span>

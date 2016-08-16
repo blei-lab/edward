@@ -155,12 +155,12 @@ evaluation for each set of latent variables. Here is an example:</p>
 <span class="kn">from</span> <span class="nn">edward.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
 
 <span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>
-                           <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)])</span>
-        <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
+  <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>
+                       <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
 </pre></div>
@@ -181,19 +181,18 @@ Here is an example:</p>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
 
 <span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">(</span><span class="n">PythonModel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="c"># This example is written for pedagogy. We recommend</span>
-        <span class="c"># vectorizing operations in practice.</span>
-        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-            <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:])</span>
+  <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="c"># This example is written for pedagogy. We recommend</span>
+    <span class="c"># vectorizing operations in practice.</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+      <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:])</span>
 
-        <span class="k">return</span> <span class="n">lp</span>
-            <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
+    <span class="k">return</span> <span class="n">lp</span>
 
   <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
 </pre></div>
@@ -207,18 +206,18 @@ call it with <code class="docutils literal"><span class="pre">StanModel(file=fil
 <div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span>
 
 <span class="n">model_code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
-<span class="s">    data {</span>
-<span class="s">      int&lt;lower=0&gt; N;</span>
-<span class="s">      int&lt;lower=0,upper=1&gt; y[N];</span>
-<span class="s">    }</span>
-<span class="s">    parameters {</span>
-<span class="s">      real&lt;lower=0,upper=1&gt; theta;</span>
-<span class="s">    }</span>
-<span class="s">    model {</span>
-<span class="s">      theta ~ beta(1.0, 1.0);</span>
-<span class="s">      for (n in 1:N)</span>
-<span class="s">        y[n] ~ bernoulli(theta);</span>
-<span class="s">    }</span>
+<span class="s">  data {</span>
+<span class="s">    int&lt;lower=0&gt; N;</span>
+<span class="s">    int&lt;lower=0,upper=1&gt; y[N];</span>
+<span class="s">  }</span>
+<span class="s">  parameters {</span>
+<span class="s">    real&lt;lower=0,upper=1&gt; theta;</span>
+<span class="s">  }</span>
+<span class="s">  model {</span>
+<span class="s">    theta ~ beta(1.0, 1.0);</span>
+<span class="s">    for (n in 1:N)</span>
+<span class="s">      y[n] ~ bernoulli(theta);</span>
+<span class="s">  }</span>
 <span class="s">&quot;&quot;&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">StanModel</span><span class="p">(</span><span class="n">model_code</span><span class="o">=</span><span class="n">model_code</span><span class="p">)</span>
 </pre></div>
@@ -241,8 +240,8 @@ time. Here is an example:</p>
 
 <span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
-    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="k">None</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
+  <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="k">None</span><span class="p">)</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">PyMC3Model</span><span class="p">(</span><span class="n">pm_model</span><span class="p">)</span>
 </pre></div>
@@ -270,120 +269,120 @@ model builds a <code class="docutils literal"><span class="pre">_py_log_prob()</
 <code class="docutils literal"><span class="pre">PythonModel</span></code>; <code class="docutils literal"><span class="pre">PythonModel</span></code> implements <code class="docutils literal"><span class="pre">log_prob()</span></code> by wrapping
 around <code class="docutils literal"><span class="pre">_py_log_prob()</span></code> as a TensorFlow operation.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Used in: (most) inference.</span>
+  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used in: (most) inference.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        xs : dict</span>
-<span class="sd">            Data dictionary. Each key names a data structure used in</span>
-<span class="sd">            the model (str), and its value is the corresponding</span>
-<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xs : dict</span>
+<span class="sd">        Data dictionary. Each key names a data structure used in</span>
+<span class="sd">        the model (str), and its value is the corresponding</span>
+<span class="sd">        corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">    zs : list or tf.Tensor</span>
+<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tf.Tensor</span>
-<span class="sd">            S-vector of type tf.float32,</span>
-<span class="sd">            [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tf.Tensor</span>
+<span class="sd">        S-vector of type tf.float32,</span>
+<span class="sd">        [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">log_lik</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Used in: inference with analytic KL.</span>
+  <span class="k">def</span> <span class="nf">log_lik</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used in: inference with analytic KL.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        xs : dict</span>
-<span class="sd">            Data dictionary. Each key names a data structure used in</span>
-<span class="sd">            the model (str), and its value is the corresponding</span>
-<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xs : dict</span>
+<span class="sd">        Data dictionary. Each key names a data structure used in</span>
+<span class="sd">        the model (str), and its value is the corresponding</span>
+<span class="sd">        corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">    zs : list or tf.Tensor</span>
+<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tf.Tensor</span>
-<span class="sd">            S-vector of type tf.float32,</span>
-<span class="sd">            [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tf.Tensor</span>
+<span class="sd">        S-vector of type tf.float32,</span>
+<span class="sd">        [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Used in: ed.evaluate().</span>
+  <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used in: ed.evaluate().</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        xs : dict</span>
-<span class="sd">            Data dictionary. Each key names a data structure used in</span>
-<span class="sd">            the model (str), and its value is the corresponding</span>
-<span class="sd">            corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xs : dict</span>
+<span class="sd">        Data dictionary. Each key names a data structure used in</span>
+<span class="sd">        the model (str), and its value is the corresponding</span>
+<span class="sd">        corresponding realization (np.ndarray or tf.Tensor).</span>
+<span class="sd">    zs : list or tf.Tensor</span>
+<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tf.Tensor</span>
-<span class="sd">            Vector of predictions, one for each data point.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tf.Tensor</span>
+<span class="sd">        Vector of predictions, one for each data point.</span>
 
-<span class="sd">            For supervised tasks, the predicted value is the mean of the</span>
-<span class="sd">            output&#39;s likelihood given features from the ith data point and</span>
-<span class="sd">            averaged over the latent variable samples:</span>
-<span class="sd">                + Binary classification. The probability of the success</span>
-<span class="sd">                label.</span>
-<span class="sd">                + Multi-class classification. The probability of each</span>
-<span class="sd">                label, with the entire output of shape N x K.</span>
-<span class="sd">                + Regression. The mean response.</span>
-<span class="sd">            For unsupervised, the predicted value is the log-marginal</span>
-<span class="sd">            likelihood evaluated at the ith data point.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+<span class="sd">        For supervised tasks, the predicted value is the mean of the</span>
+<span class="sd">        output&#39;s likelihood given features from the ith data point and</span>
+<span class="sd">        averaged over the latent variable samples:</span>
+<span class="sd">            + Binary classification. The probability of the success</span>
+<span class="sd">            label.</span>
+<span class="sd">            + Multi-class classification. The probability of each</span>
+<span class="sd">            label, with the entire output of shape N x K.</span>
+<span class="sd">            + Regression. The mean response.</span>
+<span class="sd">        For unsupervised, the predicted value is the log-marginal</span>
+<span class="sd">        likelihood evaluated at the ith data point.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">sample_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Used in: ed.ppc().</span>
+  <span class="k">def</span> <span class="nf">sample_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used in: ed.ppc().</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        n : int, optional</span>
-<span class="sd">            Number of latent variable samples.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : int, optional</span>
+<span class="sd">        Number of latent variable samples.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tf.Tensor</span>
-<span class="sd">            n x d matrix, where each row is a set of latent variables.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tf.Tensor</span>
+<span class="sd">        n x d matrix, where each row is a set of latent variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">sample_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Used in: ed.ppc().</span>
+  <span class="k">def</span> <span class="nf">sample_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used in: ed.ppc().</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        zs : list or tf.Tensor</span>
-<span class="sd">            A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">            otherwise a tf.Tensor if single variational family.</span>
-<span class="sd">        n : int, optional</span>
-<span class="sd">            Number of data points to generate per set of latent variables.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zs : list or tf.Tensor</span>
+<span class="sd">        A list of tf.Tensor&#39;s if multiple varational families,</span>
+<span class="sd">        otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    n : int, optional</span>
+<span class="sd">        Number of data points to generate per set of latent variables.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list of dict&#39;s of tf.Tensor&#39;s</span>
-<span class="sd">            List of replicated data sets from the likelihood,</span>
-<span class="sd">            [x^{rep, 1}, ..., x^{rep, S}],</span>
-<span class="sd">            where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has</span>
-<span class="sd">            n data points. Type-wise, each x^{rep, s} is a</span>
-<span class="sd">            dictionary with the same items and shape of values as the</span>
-<span class="sd">            test data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of dict&#39;s of tf.Tensor&#39;s</span>
+<span class="sd">        List of replicated data sets from the likelihood,</span>
+<span class="sd">        [x^{rep, 1}, ..., x^{rep, S}],</span>
+<span class="sd">        where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has</span>
+<span class="sd">        n data points. Type-wise, each x^{rep, s} is a</span>
+<span class="sd">        dictionary with the same items and shape of values as the</span>
+<span class="sd">        test data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
 </pre></div>
 </div>
 </div>

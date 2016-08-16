@@ -12,7 +12,7 @@ additional arguments.
 .. code:: python
 
   def criticize(model, variational, data, ...)
-      ...
+    ...
 
 Developing new criticism techniques is easy.  They can be derived from
 the current techniques or built as a standalone function.

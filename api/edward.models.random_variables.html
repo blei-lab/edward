@@ -408,7 +408,8 @@ conceptually the same.</td>
 <dd><p>Entropy.</p>
 <div class="highlight-none"><div class="highlight"><pre>H(p(x| params))
 = E_{p(x | params)} [ - log p(x | params) ]
-= sum_{idx in shape} E_{p(x[idx] | params[idx])} [ - log p(x[idx] | params[idx]) ]
+= sum_{idx in shape} E_{p(x[idx] | params[idx])}
+  [ - log p(x[idx] | params[idx]) ]
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
