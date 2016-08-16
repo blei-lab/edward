@@ -10,17 +10,17 @@ from scipy import stats
 
 class test_bernoulli_entropy_class(tf.test.TestCase):
 
-    def _test(self, p):
-        val_true = stats.bernoulli.entropy(p)
-        self.assertAllClose(bernoulli.entropy(p).eval(), val_true)
-        self.assertAllClose(bernoulli.entropy(tf.constant(p)).eval(), val_true)
+  def _test(self, p):
+    val_true = stats.bernoulli.entropy(p)
+    self.assertAllClose(bernoulli.entropy(p).eval(), val_true)
+    self.assertAllClose(bernoulli.entropy(tf.constant(p)).eval(), val_true)
 
-    def test_0d(self):
-        with self.test_session():
-            self._test(0.5)
-            self._test(0.75)
+  def test_0d(self):
+    with self.test_session():
+      self._test(0.5)
+      self._test(0.75)
 
-    def test_1d(self):
-        with self.test_session():
-            self._test([0.1, 0.9, 0.1])
-            self._test([0.5, 0.75, 0.2])
+  def test_1d(self):
+    with self.test_session():
+      self._test([0.1, 0.9, 0.1])
+      self._test([0.5, 0.75, 0.2])

@@ -12,14 +12,14 @@ sess = tf.Session()
 
 
 def _test(n, p, size):
-    val_est = multinomial.rvs(n, p, size=size).shape
-    val_true = (size, ) + np.asarray(p).shape
-    assert val_est == val_true
+  val_est = multinomial.rvs(n, p, size=size).shape
+  val_true = (size, ) + np.asarray(p).shape
+  assert val_est == val_true
 
 
 def test_1d():
-    _test(3, np.array([0.4, 0.6]), 1)
-    _test(np.array(3), np.array([0.4, 0.6]), 5)
+  _test(3, np.array([0.4, 0.6]), 1)
+  _test(np.array(3), np.array([0.4, 0.6]), 5)
 
 
 #def test_2d():

@@ -12,16 +12,16 @@ sess = tf.Session()
 
 
 def _test(mean, cov, size):
-    val_est = multivariate_normal.rvs(mean, cov, size=size).shape
-    val_true = (size, ) + np.asarray(mean).shape
-    assert val_est == val_true
+  val_est = multivariate_normal.rvs(mean, cov, size=size).shape
+  val_true = (size, ) + np.asarray(mean).shape
+  assert val_est == val_true
 
 
 def test_1d():
-    _test(np.array([0.5]), np.diag([1.0]), 1)
-    _test(np.array([0.5]), np.diag([1.0]), 5)
-    _test(np.array([0.2, 0.8]), np.diag([1.0, 1.0]), 1)
-    _test(np.array([0.2, 0.8]), np.diag([1.0, 1.0]), 10)
+  _test(np.array([0.5]), np.diag([1.0]), 1)
+  _test(np.array([0.5]), np.diag([1.0]), 5)
+  _test(np.array([0.2, 0.8]), np.diag([1.0, 1.0]), 1)
+  _test(np.array([0.2, 0.8]), np.diag([1.0, 1.0]), 10)
 
 
 #def test_2d():
