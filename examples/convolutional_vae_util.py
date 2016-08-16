@@ -1,3 +1,7 @@
+# This file is taken from
+# https://github.com/ikostrikov/TensorFlow-VAE-GAN-DRAW/blob/master/deconv.py
+# We only modify the formatting to pass PEP 8 standards.
+#
 # Copyright 2015 Google Inc. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
