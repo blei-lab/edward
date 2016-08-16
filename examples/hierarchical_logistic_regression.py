@@ -68,7 +68,6 @@ class HierarchicalLogistic:
 
 
 def build_toy_dataset(N=40, noise_std=0.1):
-  ed.set_seed(0)
   D = 1
   x = np.linspace(-3, 3, num=N)
   y = np.tanh(x) + norm.rvs(0, noise_std, size=N)
