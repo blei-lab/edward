@@ -168,7 +168,7 @@ ed.evaluate('mean_squared_error', model, variational, data)
   assessments of the model fit using discrepancy functions
 \end{itemize}
 \begin{lstlisting}[language=Python]
-T = lambda data, z=None: tf.reduce_mean(data['x'])
+T = lambda data, z: tf.reduce_mean(data['x'])
 print(ed.ppc(model, variational, data, T))
 \end{lstlisting}
 

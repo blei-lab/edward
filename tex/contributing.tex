@@ -38,8 +38,8 @@ New scripts in the
 {\texttt{examples/}} directory are easy to add. They can also
 get you acquainted with Edward's developer process.
 Alternatively, add new tutorials to the
-\href{tutorials}{website} from the
-\href{https://github.com/blei-lab/edward/tree/master/docs}
+\href{tutorials.html}{website} from the
+\href{https://github.com/blei-lab/edward/tree/master/docs/tex}
 {\texttt{docs/tex/}} directory.
 \item
 Solve one of Edward's existing
@@ -71,10 +71,10 @@ should be following from TensorFlow or PEP 8 anyways.
 
 \begin{itemize}
 \item
-  To organize imports in a script, use three blocks: 1. any \texttt{from __future__
+  To organize imports in a script, use three blocks: 1. \texttt{from __future__
   import [...]} lines; 2. any \texttt{import [...]} lines; and 3. any
   \texttt{from [...] import [...]} lines. Each block is separated by a blank line,
-  and within each block the lines are sorted alphabetically.
+  and lines within each block are sorted alphabetically.
 \item
   When writing functions with tensor inputs, make sure the function
   supports any input type compatible with tensor
@@ -102,11 +102,6 @@ for i in range(5):
 
 more_code()
 \end{lstlisting}
-\item
-  \texttt{edward.stats} uses SciPy standards. This
-  includes, for example, the argument specification and the choice of
-  how a distribution is parameterized. \texttt{edward.models}
-  uses \texttt{tf.contrib.distributions} standards.
 \item
   In general, all remaining tasks to be completed are raised as Github
   issues. In other cases, write a TODO comment for things that need to

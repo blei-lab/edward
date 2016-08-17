@@ -152,7 +152,7 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 <ul>
 <li>posterior predictive checks, for making probabilistic assessments of the model fit using discrepancy functions</li>
 </ul>
-<pre class="python" language="Python"><code>T = lambda data, z=None: tf.reduce_mean(data['x'])
+<pre class="python" language="Python"><code>T = lambda data, z: tf.reduce_mean(data['x'])
 print(ed.ppc(model, variational, data, T))</code></pre>
 <p>See the <a class="uri" href="tutorials">tutorials</a> for examples of models, inference, and criticism in Edward.</p>
 <p>See the <a href="api/">API</a> for details of how Edward implements these objects.</p>

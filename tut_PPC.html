@@ -111,7 +111,9 @@
             out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
         return out</code></pre>
 <p>The <code>ed.ppc()</code> method provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution</p>
-<pre class="python" language="Python"><code>T = lambda y, z=None: tf.reduce_mean(y['x'])
+<pre class="python" language="Python"><code>def T(x, z):
+    return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+
 print(ed.ppc(model, variational, data, T))</code></pre>
 <p>See the <a href="api/criticisms">criticism API</a> for further details.</p>
 <p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by prior checks and classical hypothesis testing, under the philosophy that models should be criticized under the frequentist perspective of large sample assessment.</p>
