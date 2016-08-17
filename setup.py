@@ -1,8 +1,11 @@
 from setuptools import setup
 
+# import `__version__` from code base
+exec(open('edward/version.py').read())
+
 setup(
     name='edward',
-    version='1.1.0',
+    version=__version__,
     description='A library for probabilistic modeling, inference, and '
                 'criticism',
     author='Dustin Tran',
