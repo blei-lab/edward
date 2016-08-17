@@ -9,8 +9,6 @@ import tensorflow as tf
 from edward.models import Beta
 from scipy import stats
 
-ed.set_seed(98765)
-
 
 def _test(shape, n):
   rv = Beta(shape, alpha=tf.zeros(shape) + 0.5, beta=tf.zeros(shape) + 0.5)
@@ -27,6 +25,7 @@ def _test(shape, n):
 class test_beta_log_prob_idx_class(tf.test.TestCase):
 
   def test_1d(self):
+    ed.set_seed(98765)
     with self.test_session():
       _test((1, ), 1)
       _test((1, ), 5)

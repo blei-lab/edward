@@ -9,8 +9,6 @@ import tensorflow as tf
 from edward.models import Dirichlet
 from scipy import stats
 
-ed.set_seed(98765)
-
 
 def dirichlet_logpdf_vec(x, alpha):
   """Vectorized version of stats.dirichlet.logpdf."""
@@ -43,6 +41,7 @@ def _test(shape, n):
 class test_dirichlet_log_prob_idx_class(tf.test.TestCase):
 
   def test_1d(self):
+    ed.set_seed(98765)
     with self.test_session():
       _test((2, ), 1)
       _test((2, ), 2)

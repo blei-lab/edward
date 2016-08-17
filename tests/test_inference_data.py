@@ -10,8 +10,6 @@ import six
 from edward.models import Variational, Normal
 from edward.stats import norm
 
-ed.set_seed(1512351)
-
 
 class NormalModel:
   """
@@ -112,4 +110,5 @@ class test_inference_data_class(tf.test.TestCase):
       self._test(sess, data, None, is_file=True)
 
 if __name__ == '__main__':
+  ed.set_seed(1512351)
   tf.test.main()

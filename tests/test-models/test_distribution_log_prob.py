@@ -9,8 +9,6 @@ import tensorflow as tf
 from edward.models import Bernoulli
 from scipy import stats
 
-ed.set_seed(98765)
-
 
 def _test(shape, n):
   # using Bernoulli's internally implemented log_prob_idx() to check
@@ -32,6 +30,7 @@ def _test(shape, n):
 class test_distribution_log_prob_class(tf.test.TestCase):
 
   def test_1d(self):
+    ed.set_seed(98765)
     with self.test_session():
       _test((1, ), 1)
       _test((1, ), 5)
