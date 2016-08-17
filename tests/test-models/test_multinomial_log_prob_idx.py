@@ -9,8 +9,6 @@ import tensorflow as tf
 from edward.models import Multinomial
 from scipy.special import gammaln
 
-ed.set_seed(98765)
-
 
 def multinomial_logpmf(x, n, p):
   """
@@ -56,6 +54,7 @@ def _test(shape, n):
 class test_multinomial_log_prob_idx_class(tf.test.TestCase):
 
   def test_1d(self):
+    ed.set_seed(98765)
     with self.test_session():
       _test((2, ), 1)
       _test((2, ), 2)
