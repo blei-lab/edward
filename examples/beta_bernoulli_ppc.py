@@ -51,7 +51,7 @@ inference = ed.MFVI(model, variational, data)
 inference.run(n_iter=200)
 
 
-def T(x, z=None):
+def T(x, z):
   return tf.reduce_mean(tf.cast(x['x'], tf.float32))
 
 print(ed.ppc(model, variational, data, T))
