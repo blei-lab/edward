@@ -9,8 +9,6 @@ import tensorflow as tf
 from edward.models import PointMass
 from scipy import stats
 
-ed.set_seed(98765)
-
 
 def pointmass_logpmf_vec(x, params):
   """Vectorized log-density for point mass distribution."""
@@ -31,6 +29,7 @@ def _test(shape, n):
 class test_pointmass_log_prob_idx_class(tf.test.TestCase):
 
   def test_1d(self):
+    ed.set_seed(98765)
     with self.test_session():
       _test((1, ), 1)
       _test((1, ), 5)
