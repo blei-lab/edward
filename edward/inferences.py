@@ -116,7 +116,7 @@ class Inference(object):
 class MonteCarlo(Inference):
   """Base class for Monte Carlo inference methods.
   """
-  def __init__(self, *args, **kwargs):
+  def __init__(self, latent_vars, data=None, model_wrapper=None):
     """Initialization.
 
     Parameters
@@ -144,7 +144,7 @@ class MonteCarlo(Inference):
     if not isinstance(latent_vars, list):
       raise TypeError()
 
-    super(MonteCarlo, self).__init__(*args, **kwargs)
+    super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
 
 class VariationalInference(Inference):

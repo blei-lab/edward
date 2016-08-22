@@ -87,4 +87,5 @@ inference.run(n_iter=250, n_samples=5, n_print=10)
 
 data_test = build_toy_dataset(coeff=coeff)
 x_test, y_test = data_test['x'], data_test['y']
-print(ed.evaluate('mse', {'z': qz}, {'x': x_test}, y_test, model))
+print(ed.evaluate('mse', data={'x': x_test, 'y': y_test},
+                  latent_vars={'z': qz}, model_wrapper=model))

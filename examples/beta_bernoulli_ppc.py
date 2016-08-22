@@ -36,7 +36,8 @@ class BetaBernoulli:
     """x | p ~ p(x | p)"""
     out = []
     for s in range(zs['p'].shape[0]):
-      out += [{'x': bernoulli.rvs(zs['p'][s, :], size=n).reshape((n,))}]
+      x_new = bernoulli.rvs(zs['p'][s, :], size=n)
+      out += [{'x': x_new.reshape((n,))}]
 
     return out
 
@@ -50,8 +51,8 @@ inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=200)
 
 
-def T(x, z=None):
-  return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+def T(xs, zs):
+  return tf.reduce_mean(tf.cast(xs['x'], tf.float32))
 
 
-print(ed.ppc({'p': qp}, data, T, model))
+print(ed.ppc(T, data, latent_vars={'p': qp}, model_wrapper=model))
