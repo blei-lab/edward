@@ -70,7 +70,9 @@ The \texttt{ed.ppc()} method provides a scaffold for studying
 various discrepancy functions by repeatedly simulating datasets from the
 posterior predictive distribution
 \begin{lstlisting}[language=Python]
-T = lambda y, z=None: tf.reduce_mean(y['x'])
+def T(x, z):
+    return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+
 print(ed.ppc(model, variational, data, T))
 \end{lstlisting}
 

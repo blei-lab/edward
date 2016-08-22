@@ -16,3 +16,4 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
 from edward.util import cumprod, dot, get_dims, get_session, hessian, \
     kl_multivariate_normal, log_sum_exp, logit, multivariate_rbf, rbf, \
     set_seed, softplus, to_simplex
+from edward.version import __version__
