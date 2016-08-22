@@ -22,28 +22,24 @@ class Inference(object):
 
   Attributes
   ----------
-  latent_vars : list of str, or dict of str to RandomVariable
-    Collection of random variables to perform inference on. If
-    list, each random variable (of type `str`) will be inferred
-    nonparametrically (e.g., MCMC). If dictionary, each random
-    variable (of type `str`) is binded to another random
+  latent_vars : dict of str to RandomVariable
+    Collection of random variables to perform inference on. Each
+    random variable (of type `str`) is binded to another random
     variable (of type `RandomVariable`); the latter will infer the
     former's posterior (e.g., VI).
   data : dict of tf.Tensor
     Data dictionary whose values may vary at each session run.
   model_wrapper : ed.Model
-      Probability model.
+    Probability model.
   """
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     """Initialization.
 
     Parameters
     ----------
-    latent_vars : list of str, or dict of str to RandomVariable
-      Collection of random variables to perform inference on. If
-      list, each random variable (of type `str`) will be inferred
-      nonparametrically (e.g., MCMC). If dictionary, each random
-      variable (of type `str`) is binded to to another random
+    latent_vars : dict of str to RandomVariable
+      Collection of random variables to perform inference on. Each
+      random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
       former's posterior (e.g., VI).
     data : dict, optional
@@ -69,8 +65,7 @@ class Inference(object):
        which are the outputs of data readers.
     """
     sess = get_session()
-    if not isinstance(latent_vars, list) and \
-       not isinstance(latent_vars, dict):
+    if not isinstance(latent_vars, dict):
       raise TypeError()
 
     if data is None:
@@ -121,10 +116,11 @@ class MonteCarlo(Inference):
 
     Parameters
     ----------
-    latent_vars : list of str
-      Collection of random variables to perform inference on.
-      Each random variable (of type `str`) will be inferred
-      nonparametrically (e.g., MCMC).
+    latent_vars : dict of str to RandomVariable
+      Collection of random variables to perform inference on. Each
+      random variable (of type `str`) is binded to another random
+      variable (of type `RandomVariable`); the latter will infer the
+      former's posterior (e.g., VI).
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -133,17 +129,15 @@ class MonteCarlo(Inference):
       placeholder; for Stan, the value type is the type
       according to the Stan program's data block.
     model_wrapper : ed.Model
-        Probability model.
+      Probability model.
 
     Examples
     --------
     >>> model = ...
+    >>> qz = Normal(model.n_vars)
     >>> data = {'x': np.array()}
-    >>> MonteCarlo(['pi', 'mu', 'sigma'], data, model)
+    >>> MonteCarlo({'z': qz}, data, model)
     """
-    if not isinstance(latent_vars, list):
-      raise TypeError()
-
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
 
@@ -156,10 +150,10 @@ class VariationalInference(Inference):
     Parameters
     ----------
     latent_vars : dict of str to RandomVariable
-      Collection of random variables to perform inference on.
-      Each random variable (of type `str`) is binded to to
-      another random variable (of type `RandomVariable`); the
-      latter will infer the former's posterior.
+      Collection of random variables to perform inference on. Each
+      random variable (of type `str`) is binded to another random
+      variable (of type `RandomVariable`); the latter will infer the
+      former's posterior (e.g., VI).
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -694,13 +688,12 @@ class MAP(VariationalInference):
     Parameters
     ----------
     latent_vars : list of str or dict of str to RandomVariable
-        Collection of random variables to perform inference on. If
-        list, each random variable will be implictly optimized
-        using a ``PointMass` distribution that is defined
-        internally (with real-valued support). If dictionary, each
-        random variable is binded to a point mass distribution
-        that will be used to approximate the former using its
-        posterior mode.
+      Collection of random variables to perform inference on. If
+      list, each random variable will be implictly optimized using a
+      ``PointMass` distribution that is defined internally (with
+      real-valued support). If dictionary, each random variable is
+      binded to a ``PointMass`` distribution that will be used to
+      infer the former's posterior.
 
     Examples
     --------
