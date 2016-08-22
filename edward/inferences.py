@@ -26,7 +26,7 @@ class Inference(object):
     Collection of random variables to perform inference on. Each
     random variable (of type `str`) is binded to another random
     variable (of type `RandomVariable`); the latter will infer the
-    former's posterior (e.g., VI).
+    former's posterior.
   data : dict of tf.Tensor
     Data dictionary whose values may vary at each session run.
   model_wrapper : ed.Model
@@ -41,7 +41,7 @@ class Inference(object):
       Collection of random variables to perform inference on. Each
       random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
-      former's posterior (e.g., VI).
+      former's posterior.
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -120,7 +120,7 @@ class MonteCarlo(Inference):
       Collection of random variables to perform inference on. Each
       random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
-      former's posterior (e.g., VI).
+      former's posterior.
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -153,7 +153,7 @@ class VariationalInference(Inference):
       Collection of random variables to perform inference on. Each
       random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
-      former's posterior (e.g., VI).
+      former's posterior.
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
