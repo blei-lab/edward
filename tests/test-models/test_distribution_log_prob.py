@@ -9,29 +9,30 @@ import tensorflow as tf
 from edward.models import Bernoulli
 from scipy import stats
 
-ed.set_seed(98765)
 
 def _test(shape, n):
-    # using Bernoulli's internally implemented log_prob_idx() to check
-    # Distribution's log_prob()
-    rv = Bernoulli(shape, p=tf.zeros(shape)+0.5)
-    rv_sample = rv.sample(n)
-    
-    x = rv_sample.eval()
-    x_tf = tf.constant(x, dtype=tf.float32)
-    p = rv.p.eval()
-    val_ed = rv.log_prob(x_tf).eval()
-    val_true = 0.0
-    for idx in range(shape[0]):
-        val_true += stats.bernoulli.logpmf(x[:, idx], p[idx])
+  # using Bernoulli's internally implemented log_prob_idx() to check
+  # Distribution's log_prob()
+  rv = Bernoulli(shape, p=tf.zeros(shape) + 0.5)
+  rv_sample = rv.sample(n)
 
-    assert np.allclose(val_ed, val_true)
+  x = rv_sample.eval()
+  x_tf = tf.constant(x, dtype=tf.float32)
+  p = rv.p.eval()
+  val_ed = rv.log_prob(x_tf).eval()
+  val_true = 0.0
+  for idx in range(shape[0]):
+    val_true += stats.bernoulli.logpmf(x[:, idx], p[idx])
+
+  assert np.allclose(val_ed, val_true)
+
 
 class test_distribution_log_prob_class(tf.test.TestCase):
 
-    def test_1d(self):
-        with self.test_session():
-            _test((1, ), 1)
-            _test((1, ), 5)
-            _test((5, ), 1)
-            _test((5, ), 5)
+  def test_1d(self):
+    ed.set_seed(98765)
+    with self.test_session():
+      _test((1, ), 1)
+      _test((1, ), 5)
+      _test((5, ), 1)
+      _test((5, ), 5)

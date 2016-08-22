@@ -4,10 +4,10 @@ A simple coin flipping example. The model is written in Stan.
 Inspired by Stan's toy example.
 
 Probability model
-    Prior: Beta
-    Likelihood: Bernoulli
+  Prior: Beta
+  Likelihood: Bernoulli
 Variational model
-    Likelihood: Mean-field Beta
+  Likelihood: Mean-field Beta
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -18,18 +18,18 @@ import edward as ed
 from edward.models import Beta
 
 model_code = """
-    data {
-      int<lower=0> N;
-      int<lower=0,upper=1> x[N];
-    }
-    parameters {
-      real<lower=0,upper=1> p;
-    }
-    model {
-      p ~ beta(1.0, 1.0);
-      for (n in 1:N)
-        x[n] ~ bernoulli(p);
-    }
+  data {
+    int<lower=0> N;
+    int<lower=0,upper=1> x[N];
+  }
+  parameters {
+    real<lower=0,upper=1> p;
+  }
+  model {
+    p ~ beta(1.0, 1.0);
+    for (n in 1:N)
+    x[n] ~ bernoulli(p);
+  }
 """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)

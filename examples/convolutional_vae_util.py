@@ -1,3 +1,7 @@
+# This file is taken from
+# https://github.com/ikostrikov/TensorFlow-VAE-GAN-DRAW/blob/master/deconv.py
+# We only modify the formatting to pass PEP 8 standards.
+#
 # Copyright 2015 Google Inc. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +24,7 @@ from prettytensor import pretty_tensor_class as prettytensor
 from prettytensor.pretty_tensor_class import PAD_SAME
 from prettytensor.pretty_tensor_class import Phase
 from prettytensor.pretty_tensor_class import PROVIDED
+
 
 # pylint: disable=redefined-outer-name,invalid-name
 @prettytensor.Register(
@@ -102,8 +107,9 @@ class deconv2d(prettytensor.VarStoreMethod):
     row_stride = stride[1]
     col_stride = stride[2]
 
-    out_rows, out_cols = get2d_deconv_output_size(input_height, input_width, filter_height,
-                               filter_width, row_stride, col_stride, edges)
+    out_rows, out_cols = get2d_deconv_output_size(input_height, input_width,
+                                                  filter_height, filter_width,
+                                                  row_stride, col_stride, edges)
 
     output_shape = [input_layer.shape[0], out_rows, out_cols, depth]
     y = tf.nn.conv2d_transpose(input_layer, params, output_shape, stride, edges)
@@ -130,11 +136,13 @@ class deconv2d(prettytensor.VarStoreMethod):
     return input_layer.with_tensor(y)
 # pylint: enable=redefined-outer-name,invalid-name
 
-# Helper methods
 
+# Helper methods
 def get2d_deconv_output_size(input_height, input_width, filter_height,
-                           filter_width, row_stride, col_stride, padding_type):
-    """Returns the number of rows and columns in a convolution/pooling output."""
+                             filter_width, row_stride, col_stride,
+                             padding_type):
+    """Returns the number of rows and columns in a convolution/pooling output.
+    """
     input_height = tensor_shape.as_dimension(input_height)
     input_width = tensor_shape.as_dimension(input_width)
     filter_height = tensor_shape.as_dimension(filter_height)
@@ -161,6 +169,7 @@ def get2d_deconv_output_size(input_height, input_width, filter_height,
       out_cols = input_width.value * col_stride
 
     return out_rows, out_cols
+
 
 def _kernel(kernel_spec):
   """Expands the kernel spec into a length 2 list.
