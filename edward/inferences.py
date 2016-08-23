@@ -186,9 +186,6 @@ class VariationalInference(Inference):
     >>> data = {'x': np.array(), 'y': np.array()}
     >>> VariationalInference({'z': qz}, data, model)
     """
-    if not isinstance(latent_vars, dict):
-      raise TypeError()
-
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
   def run(self, *args, **kwargs):
@@ -429,7 +426,7 @@ class MFVI(VariationalInference):
     self.score = False
 
     self.n_samples = n_samples
-    super(MFVI, self).initialize(*args, **kwargs)
+    return super(MFVI, self).initialize(*args, **kwargs)
 
   def build_loss(self):
     """Wrapper for the MFVI loss function.
