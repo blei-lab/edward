@@ -26,8 +26,8 @@ class Inference(object):
     Collection of random variables to perform inference on. Each
     random variable (of type `str`) is binded to another random
     variable (of type `RandomVariable`); the latter will infer the
-    former's posterior.
-  data : dict of tf.Tensor
+    former conditional on data.
+  data : dict
     Data dictionary whose values may vary at each session run.
   model_wrapper : ed.Model
     Probability model.
@@ -41,7 +41,7 @@ class Inference(object):
       Collection of random variables to perform inference on. Each
       random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
-      former's posterior.
+      former conditional on data.
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -63,6 +63,13 @@ class Inference(object):
        TensorFlow placeholders (and manually feeds them);
     3. externally if user passes in data as TensorFlow tensors
        which are the outputs of data readers.
+
+    Examples
+    --------
+    >>> model = LinearModel()
+    >>> qz = Normal(model.n_vars)
+    >>> data = {'x': np.array(), 'y': np.array()}
+    >>> Inference({'z': qz}, data, model)
     """
     sess = get_session()
     if not isinstance(latent_vars, dict):
@@ -120,7 +127,7 @@ class MonteCarlo(Inference):
       Collection of random variables to perform inference on. Each
       random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
-      former's posterior.
+      former conditional on data.
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -130,13 +137,6 @@ class MonteCarlo(Inference):
       according to the Stan program's data block.
     model_wrapper : ed.Model
       Probability model.
-
-    Examples
-    --------
-    >>> model = ...
-    >>> qz = Normal(model.n_vars)
-    >>> data = {'x': np.array()}
-    >>> MonteCarlo({'z': qz}, data, model)
     """
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
@@ -153,7 +153,7 @@ class VariationalInference(Inference):
       Collection of random variables to perform inference on. Each
       random variable (of type `str`) is binded to another random
       variable (of type `RandomVariable`); the latter will infer the
-      former's posterior.
+      former conditional on data.
     data : dict, optional
       Data dictionary. For TensorFlow, Python, and Stan models,
       the key type is a string; for PyMC3, the key type is a
@@ -163,13 +163,6 @@ class VariationalInference(Inference):
       according to the Stan program's data block.
     model_wrapper : ed.Model
       Probability model.
-
-    Examples
-    --------
-    >>> model = LinearModel()
-    >>> qz = Normal(model.n_vars)
-    >>> data = {'x': np.array(), 'y': np.array()}
-    >>> VariationalInference({'z': qz}, data, model)
     """
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
@@ -690,15 +683,26 @@ class MAP(VariationalInference):
       ``PointMass` distribution that is defined internally (with
       real-valued support). If dictionary, each random variable is
       binded to a ``PointMass`` distribution that will be used to
-      infer the former's posterior.
+      infer the former conditional on data.
 
     Examples
     --------
-    For model wrappers, the list can only have one element:
+    Most explicitly, MAP is specified via a dictionary:
+
+    >>> qpi = PointMass(K-1, params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+    >>> qmu = PointMass(K*D, params=tf.Variable(tf.zeros(K*D)))
+    >>> qsigma = PointMass(K*D,
+    >>>                    params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+    >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
+
+    We also automate the specification of ``PointMass`` distributions
+    (with real-valued support), so one can pass in a list of latent
+    variables instead. However, for model wrappers, the list can only
+    have one element:
 
     >>> MAP(['z'], data, model_wrapper)
 
-    For example, the following is not currently supported:
+    For example, the following is not supported:
 
     >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
 
@@ -706,13 +710,7 @@ class MAP(VariationalInference):
     of knowing the dimensions in which to optimize each
     distribution; further, we do not know their support. For more
     than one random variable, or for constrained support, one must
-    manually pass in the point mass distributions.
-
-    >>> qpi = PointMass(K-1, params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-    >>> qmu = PointMass(K*D, params=tf.Variable(tf.zeros(K*D)))
-    >>> qsigma = PointMass(K*D,
-    >>>                    params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-    >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
+    explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
       if len(latent_vars) > 1:

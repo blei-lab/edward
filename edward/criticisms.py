@@ -28,7 +28,8 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
     Collection of random variables (of type `str`) binded to their
     inferred posterior (of type `RandomVariable`).
   model_wrapper : ed.Model
-    Probability model.
+    Probability model. Class object that implements the
+    ``predict`` method.
   n_samples : int, optional
     Number of posterior samples for making predictions,
     using the posterior predictive distribution.
@@ -48,9 +49,13 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
 
   Examples
   --------
+  >>> # log-likelihood performance
   >>> evaluate('log_likelihood', data={'x': x_train},
   >>>          latent_vars={'z': qz}, model_wrapper=model)
   >>>
+  >>> # classification accuracy
+  >>> # here, 'x' is any features the model is defined with respect to,
+  >>> # and 'y' is the output of the posterior predictive
   >>> evaluate('binary_accuracy', data={'y': y_train, 'x': x_train},
   >>>          latent_vars={'z': qz}, model_wrapper=model)
   """
@@ -179,15 +184,15 @@ def ppc(T, data, latent_vars, model_wrapper, n_samples=100):
 
   Examples
   --------
-  >>> # Posterior predictive check
+  >>> # posterior predictive check
   >>> ppc(T, data={'x': x_train}, latent_vars={'z': qz},
   >>>     model_wrapper=model)
   >>>
-  >>> # Posterior predictive check (with covariates)
+  >>> # posterior predictive check (with covariates)
   >>> ppc(T, data={'y': y_train, 'x': x_train},
   >>>     latent_vars={'z': qz}, model_wrapper=model)
   >>>
-  >>> # Prior predictive check
+  >>> # prior predictive check
   >>> ppc(T, data={'x': x_train}, latent_vars=None,
   >>>     model_wrapper=model)
   """
