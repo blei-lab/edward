@@ -36,18 +36,6 @@ class Inference(object):
     An optional wrapper for the probability model. If specified, the
     random variables in `latent_vars`' dictionary keys are strings
     used accordingly by the wrapper.
-
-  Examples
-  --------
-  >>> mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-  >>> with sg.value_type(sg.SampleValue(n=50)):
-  >>>     x = Normal(mu=mu, sigma=tf.constant([1.0]))
-  >>>
-  >>> qmu_mu = tf.Variable(tf.random_normal([1]))
-  >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-  >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-  >>>
-  >>> Inference({mu: qmu}, {x: np.array()})
   """
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     """Initialization.
@@ -84,6 +72,18 @@ class Inference(object):
        TensorFlow placeholders (and manually feeds them);
     3. externally if user passes in data as TensorFlow tensors
        which are the outputs of data readers.
+
+    Examples
+    --------
+    >>> mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
+    >>> with sg.value_type(sg.SampleValue(n=50)):
+    >>>     x = Normal(mu=mu, sigma=tf.constant([1.0]))
+    >>>
+    >>> qmu_mu = tf.Variable(tf.random_normal([1]))
+    >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+    >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+    >>>
+    >>> Inference({mu: qmu}, {x: np.array()})
     """
     sess = get_session()
     if not isinstance(latent_vars, dict):
@@ -768,7 +768,7 @@ class MAP(VariationalInference):
 
     Examples
     --------
-    Most explicitly, we support
+    Most explicitly, MAP is specified via a dictionary:
 
     >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
     >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D))),
@@ -776,12 +776,13 @@ class MAP(VariationalInference):
     >>> MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
     We also automate the specification of ``PointMass`` distributions
-    (with matching support), so you can specify
+    (with matching support), so one can pass in a list of latent
+    variables instead:
 
     >>> MAP([beta], {X: np.array(), y: np.array()})
     >>> MAP([pi, mu, sigma], {x: np.array()}
 
-    For model wrappers, the list can only have one element:
+    However, for model wrappers, the list can only have one element:
 
     >>> MAP(['z'], data, model_wrapper)
 
@@ -793,7 +794,7 @@ class MAP(VariationalInference):
     of knowing the dimensions in which to optimize each
     distribution; further, we do not know their support. For more
     than one random variable, or for constrained support, one must
-    manually pass in the point mass distributions.
+    explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
       if len(latent_vars) > 1:

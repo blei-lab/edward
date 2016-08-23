@@ -28,7 +28,7 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     specified.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
-    `predict()` method, and `latent_vars` must be specified. `data` is
+    `predict` method, and `latent_vars` must be specified. `data` is
     also changed. For TensorFlow, Python, and Stan models, the key
     type is a string; for PyMC3, the key type is a Theano shared
     variable. For TensorFlow, Python, and PyMC3 models, the value type
