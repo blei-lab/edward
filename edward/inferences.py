@@ -262,39 +262,39 @@ class VariationalInference(Inference):
       self.data = {key: value for key, value in
                    zip(six.iterkeys(self.data), batches)}
 
-      if self.model_wrapper is None:
-        # Build random variables in p(z). `latent_vars`
-        # replaces conditioning on priors with conditioning on
-        # (variational) posteriors.
-        # TODO still build qz if model_wrapper is used
-        # TODO put in MFVI as it relies on self.n_samples
-        # TODO technically don't need to change value type for z
-        # Rewrite value type based on number of latent variable
-        # samples during inference.
-        built_latent_vars = {}
-        with sg.value_type(sg.SampleValue(n=self.n_samples)):
-          for z, qz in six.iteritems(self.latent_vars):
-            built_z = build(z, dict_swap=self.latent_vars)
-            built_qz = build(qz, dict_swap=self.latent_vars)
-            built_latent_vars[built_z] = built_qz
+    if self.model_wrapper is None:
+      # Build random variables in p(z). `latent_vars`
+      # replaces conditioning on priors with conditioning on
+      # (variational) posteriors.
+      # TODO still build qz if model_wrapper is used
+      # TODO put in MFVI as it relies on self.n_samples
+      # TODO technically don't need to change value type for z
+      # Rewrite value type based on number of latent variable
+      # samples during inference.
+      built_latent_vars = {}
+      with sg.value_type(sg.SampleValue(n=self.n_samples)):
+        for z, qz in six.iteritems(self.latent_vars):
+          built_z = build(z, dict_swap=self.latent_vars)
+          built_qz = build(qz, dict_swap=self.latent_vars)
+          built_latent_vars[built_z] = built_qz
 
-        # Build random variables in p(x | z). `latent_vars`
-        # replaces conditioning on priors with conditioning on
-        # (variational) posteriors.
-        built_data = {}
-        for tensor, obs in six.iteritems(self.data):
-          # Only build random variables, not any passed-in data
-          # tensors.
-          if isinstance(tensor, sg.DistributionTensor):
-            built_x = build(tensor, dict_swap=self.latent_vars)
-            built_data[built_x] = obs
-          else:
-            built_data[tensor] = obs
+      # Build random variables in p(x | z). `latent_vars`
+      # replaces conditioning on priors with conditioning on
+      # (variational) posteriors.
+      built_data = {}
+      for tensor, obs in six.iteritems(self.data):
+        # Only build random variables, not any passed-in data
+        # tensors.
+        if isinstance(tensor, sg.DistributionTensor):
+          built_x = build(tensor, dict_swap=self.latent_vars)
+          built_data[built_x] = obs
+        else:
+          built_data[tensor] = obs
 
-        # TODO For now, we are replacing the objects themselves
-        # with the new dependencies.
-        self.latent_vars = built_latent_vars
-        self.data = built_data
+      # TODO For now, we are replacing the objects themselves
+      # with the new dependencies.
+      self.latent_vars = built_latent_vars
+      self.data = built_data
 
     loss = self.build_loss()
     if optimizer is None:
