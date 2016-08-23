@@ -13,7 +13,7 @@ from edward.models import PyMC3Model, PythonModel, StanModel
 from edward.criticisms import evaluate, ppc
 from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     MFVI, KLpq, MAP, Laplace
-from edward.util import build, cumprod, dot, Empty, get_dims, \
+from edward.util import copy, cumprod, dot, Empty, get_dims, \
     get_session, hessian, kl_multivariate_normal, log_sum_exp, logit, \
     multivariate_rbf, rbf, set_seed, softplus, to_simplex
 from edward.version import __version__

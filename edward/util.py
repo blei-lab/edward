@@ -16,15 +16,15 @@ distributions = tf.contrib.distributions
 sg = tf.contrib.bayesflow.stochastic_graph
 
 
-def build(org_instance, dict_swap=None, scope="built", replace_itself=False, build_q=True):
+def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, copy_q=True):
   """Build a new node in the TensorFlow graph from `org_instance`,
   where any of its ancestors existing in `dict_swap` are
   replaced with `dict_swap`'s corresponding value.
 
-  The building is done recursively, so any `Operation` whose output
-  is required to evaluate `org_instance` is also built (if it isn't
-  already built within the new scope). This is with the exception of
-  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly built.
+  The copying is done recursively, so any `Operation` whose output
+  is required to evaluate `org_instance` is also copied (if it isn't
+  already copied within the new scope). This is with the exception of
+  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly copied.
 
   Parameters
   ----------
@@ -41,14 +41,14 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
   replace_itself : bool, optional
     Whether to replace `org_instance` itself if it exists in
     `dict_swap`. (This is used for the recursion.)
-  build_q : bool, optional
-    Whether to build the replaced tensors too (if not already
-    built within the new scope). Otherwise will reuse them.
+  copy_q : bool, optional
+    Whether to copy the replaced tensors too (if not already
+    copied within the new scope). Otherwise will reuse them.
 
   Returns
   -------
   sg.DistributionTensor, tf.Variable, tf.Tensor, or tf.Operation
-    The built node.
+    The copied node.
 
   Raises
   ------
@@ -65,9 +65,9 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
   >>> # The TensorFlow graph is currently
   >>> # `x` -> `z` <- y`, `qx`
   >>>
-  >>> # This adds a subgraph with newly built nodes,
-  >>> # `built/qx` -> `built/z` <- `built/y`
-  >>> z_new = build(z, {x: qx})
+  >>> # This adds a subgraph with newly copied nodes,
+  >>> # `copied/qx` -> `copied/z` <- `copied/y`
+  >>> z_new = copy(z, {x: qx})
   >>>
   >>> sess = tf.Session()
   >>> sess.run(z)
@@ -79,12 +79,12 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
      not isinstance(org_instance, tf.Variable) and \
      not isinstance(org_instance, tf.Tensor) and \
      not isinstance(org_instance, tf.Operation):
-    raise TypeError("Could not build instance: " + str(org_instance))
+    raise TypeError("Could not copy instance: " + str(org_instance))
 
   # Swap instance if in dictionary.
   if org_instance in dict_swap and replace_itself:
     org_instance = dict_swap[org_instance]
-    if not build_q:
+    if not copy_q:
       return org_instance
   elif isinstance(org_instance, tf.Tensor) and replace_itself:
     # Deal with case when `org_instance` is the associated tensor
@@ -94,7 +94,7 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
       if isinstance(key, sg.DistributionTensor):
         if org_instance == key.value():
           org_instance = value.value()
-          if not build_q:
+          if not copy_q:
             return org_instance
           break
 
@@ -116,7 +116,7 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
   except:
     pass
 
-  # If instance is a variable, return it; do not re-build any.
+  # If instance is a variable, return it; do not re-copy any.
   # Note we check variables via their name and not their type. This
   # is because if we get variables through an op's inputs, it has
   # type tf.Tensor: we can only tell it is a variable via its name.
@@ -133,20 +133,20 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
   if isinstance(org_instance, sg.DistributionTensor):
     dist_tensor = org_instance
 
-    # If it has buildable arguments, build them.
+    # If it has copiable arguments, copy them.
     dist_args = {}
     for key, value in six.iteritems(dist_tensor._dist_args):
       if isinstance(value, sg.DistributionTensor) or \
          isinstance(value, tf.Variable) or \
          isinstance(value, tf.Tensor) or \
          isinstance(value, tf.Operation):
-         value = build(value, dict_swap, scope, True, build_q)
+         value = copy(value, dict_swap, scope, True, copy_q)
 
       dist_args[key] = value
 
     dist_args['name'] = new_name + dist_tensor.distribution.name
 
-    # Build a new `dist_tensor` with any newly built arguments.
+    # Copy a new `dist_tensor` with any newly copied arguments.
     # We do this by creating an empty class object and setting
     # its attributes. (This is to avoid a throwaway tensor in the
     # graph, during instantiation of DistributionTensor.)
@@ -162,7 +162,7 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
     setattr(new_dist_tensor, '_dist',
         new_dist_tensor._dist_cls(**new_dist_tensor._dist_args))
     try:
-      # Use value type context during build(); otherwise default
+      # Use value type context during copy(); otherwise default
       # to the original value type.
       # TODO i think it's more like we should augment the value
       # type with another
@@ -178,14 +178,14 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
     tensor = org_instance
 
     # A tensor is one of the outputs of its underlying
-    # op. Therefore build the op itself.
+    # op. Therefore copy the op itself.
     op = tensor.op
-    new_op = build(op, dict_swap, scope, True, build_q)
+    new_op = copy(op, dict_swap, scope, True, copy_q)
 
     output_index = op.outputs.index(tensor)
     new_tensor = new_op.outputs[output_index]
 
-    # Add built tensor to collections that the original one is in.
+    # Add copied tensor to collections that the original one is in.
     for name, collection in tensor.graph._collections.items():
       if tensor in collection:
         graph.add_to_collection(name, new_tensor)
@@ -194,25 +194,25 @@ def build(org_instance, dict_swap=None, scope="built", replace_itself=False, bui
   else:  # tf.Operation
     op = org_instance
 
-    # If it has an original op, build it.
+    # If it has an original op, copy it.
     if op._original_op is not None:
-      new_original_op = build(op._original_op, dict_swap, scope, True, build_q)
+      new_original_op = copy(op._original_op, dict_swap, scope, True, copy_q)
     else:
       new_original_op = None
 
-    # If it has control inputs, build them.
+    # If it has control inputs, copy them.
     new_control_inputs = []
     for x in op.control_inputs:
-      elem = build(x, dict_swap, scope, True, build_q)
+      elem = copy(x, dict_swap, scope, True, copy_q)
       if not isinstance(elem, tf.Operation):
         elem = tf.convert_to_tensor(elem)
 
       new_control_inputs += [elem]
 
-    # If it has inputs, build them.
+    # If it has inputs, copy them.
     new_inputs = []
     for x in op.inputs:
-      elem = build(x, dict_swap, scope, True, build_q)
+      elem = copy(x, dict_swap, scope, True, copy_q)
       if not isinstance(elem, tf.Operation):
         elem = tf.convert_to_tensor(elem)
 

@@ -10,7 +10,7 @@ import tensorflow as tf
 # TODO
 #from edward.models import StanModel, Normal, PointMass
 from edward.models import StanModel, Normal
-from edward.util import build, get_dims, get_session, hessian, \
+from edward.util import copy, get_dims, get_session, hessian, \
     kl_multivariate_normal, log_sum_exp
 
 sg = tf.contrib.bayesflow.stochastic_graph
@@ -268,30 +268,30 @@ class VariationalInference(Inference):
       # TODO technically don't need to change value type for z
       # Rewrite value type based on number of latent variable
       # samples during inference.
-      built_latent_vars = {}
+      copied_latent_vars = {}
       with sg.value_type(sg.SampleValue(n=self.n_samples)):
         for z, qz in six.iteritems(self.latent_vars):
-          built_z = build(z, dict_swap=self.latent_vars)
-          built_qz = build(qz, dict_swap=self.latent_vars)
-          built_latent_vars[built_z] = built_qz
+          copied_z = copy(z, dict_swap=self.latent_vars)
+          copied_qz = copy(qz, dict_swap=self.latent_vars)
+          copied_latent_vars[copied_z] = copied_qz
 
       # Build random variables in p(x | z). `latent_vars`
       # replaces conditioning on priors with conditioning on
       # (variational) posteriors.
-      built_data = {}
+      copied_data = {}
       for tensor, obs in six.iteritems(self.data):
         # Only build random variables, not any passed-in data
         # tensors.
         if isinstance(tensor, sg.DistributionTensor):
-          built_x = build(tensor, dict_swap=self.latent_vars)
-          built_data[built_x] = obs
+          copied_x = copy(tensor, dict_swap=self.latent_vars)
+          copied_data[copied_x] = obs
         else:
-          built_data[tensor] = obs
+          copied_data[tensor] = obs
 
       # TODO For now, we are replacing the objects themselves
       # with the new dependencies.
-      self.latent_vars = built_latent_vars
-      self.data = built_data
+      self.latent_vars = copied_latent_vars
+      self.data = copied_data
 
     loss = self.build_loss()
     if optimizer is None:
@@ -415,7 +415,7 @@ class MFVI(VariationalInference):
     #   #all([rv.is_reparameterized and rv.is_differentiable
     #   #     for rv in six.itervalues(self.latent_vars)]):
     #if score is None and \
-    #   all([self.built_dict[rv].distribution.is_reparameterized
+    #   all([self.copied_dict[rv].distribution.is_reparameterized
     #        for rv in six.itervalues(self.latent_vars)]):
     #    self.score = False
     #else:
