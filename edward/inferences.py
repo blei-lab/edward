@@ -9,7 +9,6 @@ import tensorflow as tf
 
 # TODO
 #from edward.models import StanModel, Normal, PointMass
-
 from edward.models import StanModel, Normal
 from edward.util import build, get_dims, get_session, hessian, \
     kl_multivariate_normal, log_sum_exp
@@ -30,13 +29,25 @@ class Inference(object):
   latent_vars : dict of RandomVariable to RandomVariable
     Collection of random variables to perform inference on. Each
     random variable is binded to another random variable; the latter
-    will infer the former's posterior.
-  data : dict of tf.Tensor
+    will infer the former conditional on data.
+  data : dict
     Data dictionary whose values may vary at each session run.
   model_wrapper : ed.Model or None
     An optional wrapper for the probability model. If specified, the
     random variables in `latent_vars`' dictionary keys are strings
     used accordingly by the wrapper.
+
+  Examples
+  --------
+  >>> mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
+  >>> with sg.value_type(sg.SampleValue(n=50)):
+  >>>     x = Normal(mu=mu, sigma=tf.constant([1.0]))
+  >>>
+  >>> qmu_mu = tf.Variable(tf.random_normal([1]))
+  >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+  >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+  >>>
+  >>> Inference({mu: qmu}, {x: np.array()})
   """
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     """Initialization.
@@ -46,21 +57,21 @@ class Inference(object):
     latent_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. Each
       random variable is binded to another random variable; the latter
-      will infer the former's posterior.
+      will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
       `RandomVariable`) to their realizations (of type `tf.Tensor` or
       `np.ndarray`). It can also bind placeholders (of type
       `tf.Tensor`) used in the model to their realizations.
     model_wrapper : ed.Model, optional
-       A wrapper for the probability model. If specified, the random
-       variables in `latent_vars`' dictionary keys are strings
-       used accordingly by the wrapper. `data` is also changed. For
-       TensorFlow, Python, and Stan models, the key type is a string;
-       for PyMC3, the key type is a Theano shared variable. For
-       TensorFlow, Python, and PyMC3 models, the value type is a NumPy
-       array or TensorFlow tensor; for Stan, the value type is the
-       type according to the Stan program's data block.
+      A wrapper for the probability model. If specified, the random
+      variables in `latent_vars`' dictionary keys are strings
+      used accordingly by the wrapper. `data` is also changed. For
+      TensorFlow, Python, and Stan models, the key type is a string;
+      for PyMC3, the key type is a Theano shared variable. For
+      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
+      array or TensorFlow tensor; for Stan, the value type is the
+      type according to the Stan program's data block.
 
     Notes
     -----
@@ -126,28 +137,21 @@ class MonteCarlo(Inference):
     latent_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. Each
       random variable is binded to another random variable; the latter
-      will infer the former's posterior.
+      will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
       `RandomVariable`) to their realizations (of type `tf.Tensor` or
       `np.ndarray`). It can also bind placeholders (of type
       `tf.Tensor`) used in the model to their realizations.
     model_wrapper : ed.Model, optional
-       A wrapper for the probability model. If specified, the random
-       variables in `latent_vars`' dictionary keys are strings used
-       accordingly by the wrapper. `data` is also changed. For
-       TensorFlow, Python, and Stan models, the key type is a string;
-       for PyMC3, the key type is a Theano shared variable. For
-       TensorFlow, Python, and PyMC3 models, the value type is a NumPy
-       array or TensorFlow tensor; for Stan, the value type is the
-       type according to the Stan program's data block.
-
-    Examples
-    --------
-    >>> model = ...
-    >>> qz = Normal(model.n_vars)
-    >>> data = {'x': np.array()}
-    >>> MonteCarlo({'z': qz}, data, model)
+      A wrapper for the probability model. If specified, the random
+      variables in `latent_vars`' dictionary keys are strings used
+      accordingly by the wrapper. `data` is also changed. For
+      TensorFlow, Python, and Stan models, the key type is a string;
+      for PyMC3, the key type is a Theano shared variable. For
+      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
+      array or TensorFlow tensor; for Stan, the value type is the
+      type according to the Stan program's data block.
     """
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
@@ -163,7 +167,7 @@ class VariationalInference(Inference):
     latent_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. Each
       random variable is binded to another random variable; the latter
-      will infer the former's posterior.
+      will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
       `RandomVariable`) to their realizations (of type `tf.Tensor` or
@@ -178,13 +182,6 @@ class VariationalInference(Inference):
       TensorFlow, Python, and PyMC3 models, the value type is a NumPy
       array or TensorFlow tensor; for Stan, the value type is the type
       according to the Stan program's data block.
-
-    Examples
-    --------
-    >>> model = LinearModel()
-    >>> qz = Normal(model.n_vars)
-    >>> data = {'x': np.array(), 'y': np.array()}
-    >>> VariationalInference({'z': qz}, data, model)
     """
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
@@ -771,6 +768,16 @@ class MAP(VariationalInference):
 
     Examples
     --------
+    Most explicitly, we support
+
+    >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+    >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D))),
+    >>> qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))]))
+    >>> MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+
+    We also automate the specification of ``PointMass`` distributions
+    (with matching support), so you can specify
+
     >>> MAP([beta], {X: np.array(), y: np.array()})
     >>> MAP([pi, mu, sigma], {x: np.array()}
 
@@ -778,7 +785,7 @@ class MAP(VariationalInference):
 
     >>> MAP(['z'], data, model_wrapper)
 
-    For example, the following is not currently supported:
+    For example, the following is not supported:
 
     >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
 
@@ -787,14 +794,6 @@ class MAP(VariationalInference):
     distribution; further, we do not know their support. For more
     than one random variable, or for constrained support, one must
     manually pass in the point mass distributions.
-
-    >>> qpi = PointMass([tf.Variable(tf.zeros(K-1)],
-    ...                 lambda cond_set: ed.to_simplex(cond_set[0]))
-    >>> qmu = PointMass([tf.Variable(tf.zeros(K*D))],
-    ...                 lambda cond_set: cond_set[0])
-    >>> qsigma = PointMass([tf.Variable(tf.zeros(K*D))],
-    ...                    lambda cond_set: tf.nn.softplus(cond_set[0]))
-    >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
     """
     if isinstance(latent_vars, list):
       if len(latent_vars) > 1:

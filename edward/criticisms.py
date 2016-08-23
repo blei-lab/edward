@@ -22,19 +22,18 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     `RandomVariable`) to their realizations (of type `tf.Tensor` or
     `np.ndarray`). It can also bind placeholders (of type `tf.Tensor`)
     used in the model to their realizations.
-  latent_vars : dict of RandomVariable to RandomVariable, optional
+  latent_vars : dict of str to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
-    Necessary if the model wrapper is specified.
+    It is only used (and in fact required) if the model wrapper is
+    specified.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
-    `predict()` method. If specified, the random variables in
-    `latent_vars`' dictionary keys are strings used accordingly by the
-    wrapper. `data` is also changed. For TensorFlow, Python, and Stan
-    models, the key type is a string; for PyMC3, the key type is a
-    Theano shared variable. For TensorFlow, Python, and PyMC3 models,
-    the value type is a NumPy array or TensorFlow placeholder; for
-    Stan, the value type is the type according to the Stan program's
-    data block.
+    `predict()` method, and `latent_vars` must be specified. `data` is
+    also changed. For TensorFlow, Python, and Stan models, the key
+    type is a string; for PyMC3, the key type is a Theano shared
+    variable. For TensorFlow, Python, and PyMC3 models, the value type
+    is a NumPy array or TensorFlow placeholder; for Stan, the value
+    type is the type according to the Stan program's data block.
   n_samples : int, optional
     Number of posterior samples for making predictions,
     using the posterior predictive distribution.
@@ -54,10 +53,20 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
 
   Examples
   --------
-  >>> TODO
+  >>> # build posterior predictive after inference
+  >>> x_post = build(x, {z: qz, beta: qbeta})
+  >>>
+  >>> # log-likelihood performance
+  >>> evaluate('log_likelihood', data={x_post: x_train})
+  >>>
+  >>> # classification accuracy
+  >>> # here, `x_ph` is any features the model is defined with respect to,
+  >>> # and `y_post` is the posterior predictive distribution
+  >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+  >>>
+  >>> # criticism for model wrappers
   >>> evaluate('log_likelihood', data={'x': x_train},
   >>>          latent_vars={'z': qz}, model_wrapper=model)
-  >>>
   >>> evaluate('binary_accuracy', data={'y': y_train, 'x': x_train},
   >>>          latent_vars={'z': qz}, model_wrapper=model)
   """
@@ -156,23 +165,19 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     specified, will return only the reference distribution with an
     assumed replicated data set size of 1.
   latent_vars : dict of str to RandomVariable, optional
-    TODO
-    Collection of latent variables, where each latent variable key (of
-    type `str`) is binded to its inferred posterior (of type
-    `RandomVariable`). If ``latent_vars`` is ``None``, then samples
-    are obtained from the model through the ``sample_prior`` method.
+    Collection of random variables binded to their inferred posterior.
+    It is an optional argument, necessary for when the discrepancy is
+    a function of latent variables.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
-    ``sample_likelihood`` method. If `latent_vars` is a list (i.e., a
-    prior predictive check), it must also have a ``sample_prior``
-    method. If specified, the random variables in `latent_vars`' list
-    or dictionary keys are strings used accordingly by the wrapper.
-    `data` is also changed.  For TensorFlow, Python, and Stan models,
-    the key type is a string; for PyMC3, the key type is a Theano
-    shared variable. For TensorFlow, Python, and PyMC3 models, the
-    value type is a NumPy array or TensorFlow placeholder; for Stan,
-    the value type is the type according to the Stan program's data
-    block.
+    ``sample_likelihood`` method. If `latent_vars` is not specified,
+    it must also have a ``sample_prior`` method, as ``ppc`` will
+    default to a prior predictive check.  `data` is also changed. For
+    TensorFlow, Python, and Stan models, the key type is a string; for
+    PyMC3, the key type is a Theano shared variable. For TensorFlow,
+    Python, and PyMC3 models, the value type is a NumPy array or
+    TensorFlow placeholder; for Stan, the value type is the type
+    according to the Stan program's data block.
   n_samples : int, optional
     Number of replicated data sets.
 
@@ -197,16 +202,23 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
 
   Examples
   --------
-  >>> TODO
-  >>> # Posterior predictive check
+  >>> # posterior predictive check
+  >>> # T is a user-defined function of data, T(data)
+  >>> ppc(T, data={x_post: x_train})
+  >>>
+  >>> # in general T is a discrepancy function of the data (both response and
+  >>> # covariates) and latent variables, T(data, latent_vars)
+  >>> ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': qbeta})
+  >>>
+  >>> # prior predictive check
+  >>> # running ppc on original x
+  >>> ppc(T, data={x: x_train})
+  >>>
+  >>> # criticism for model wrappers
   >>> ppc(T, data={'x': x_train}, latent_vars={'z': qz},
   >>>     model_wrapper=model)
-  >>>
-  >>> # Posterior predictive check (with covariates)
   >>> ppc(T, data={'y': y_train, 'x': x_train},
   >>>     latent_vars={'z': qz}, model_wrapper=model)
-  >>>
-  >>> # Prior predictive check
   >>> ppc(T, data={'x': x_train}, latent_vars=None,
   >>>     model_wrapper=model)
   """
