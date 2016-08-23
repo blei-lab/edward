@@ -26,27 +26,28 @@ p = 1 # num features
 
 ed.set_seed(42)
 
-X = tf.placeholder(tf.float32, [N, p])
+X = tf.placeholder(tf.float32, [N, p], name='X')
 tf.add_to_collection('placeholders', X)
 with sg.value_type(sg.SampleValue(n=1)):
-    beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p))
+    beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p), name='beta')
 
 # We require (input_size, n_samples) for y, so do (input_size, p) %*%
 # (p, n_samples).
 # TODO does this apply to non-stochastic inference approaches?
-y = Normal(mu=tf.matmul(X, beta, transpose_b=True), sigma=tf.ones(p))
+y = Normal(mu=tf.matmul(X, beta, transpose_b=True), sigma=tf.ones(p),
+name='y')
 #y = Normal(mu=tf.matmul(X, tf.expand_dims(beta, 1)), sigma=tf.ones(p))
 
 qmu_mu = tf.Variable(tf.random_normal([p]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
 with sg.value_type(sg.SampleValue(n=1)):
-    qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma)
+    qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma, name='qbeta')
 
 X_data, y_data = build_toy_dataset(N)
 data = {X: X_data, y: y_data}
 
 inference = ed.MFVI({beta: qbeta}, data)
-inference.initialize()
+inference.initialize(logdir='train')
 
 sess = ed.get_session()
 for t in range(501):
