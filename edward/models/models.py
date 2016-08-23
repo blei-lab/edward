@@ -7,7 +7,6 @@ import six
 import tensorflow as tf
 
 from edward.util import get_dims, get_session
-from edward.models.random_variables import Normal
 
 try:
   import pystan

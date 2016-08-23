@@ -171,9 +171,6 @@ class VariationalInference(Inference):
     >>> data = {'x': np.array(), 'y': np.array()}
     >>> VariationalInference({'z': qz}, data, model)
     """
-    if not isinstance(latent_vars, dict):
-      raise TypeError()
-
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
   def run(self, *args, **kwargs):
