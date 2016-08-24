@@ -723,7 +723,7 @@ class MAP(VariationalInference):
             latent_vars = {latent_vars[0]: PointMass(0)}
       else:
         raise NotImplementedError("A list of more than one element is "
-                                  "not currently supported. See documentation.")
+                                  "not supported. See documentation.")
     elif isinstance(latent_vars, dict):
       pass
     else:

@@ -71,8 +71,8 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = LinearModel()
-data = build_toy_dataset()
 qz = Normal(model.n_vars)
+data = build_toy_dataset()
 
 # Set up figure
 fig = plt.figure(figsize=(8, 8), facecolor='white')

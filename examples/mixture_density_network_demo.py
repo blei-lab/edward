@@ -4,8 +4,8 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
@@ -40,8 +40,8 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
   samples = np.zeros((amount, 2))
   n_mix = len(pred_weights[0])
   to_choose_from = np.arange(n_mix)
-  for j, (weights, means, std_devs)
-  in enumerate(zip(pred_weights, pred_means, pred_std)):
+  for j, (weights, means, std_devs) in enumerate(
+          zip(pred_weights, pred_means, pred_std)):
     index = np.random.choice(to_choose_from, p=weights)
     samples[j, 1] = normal.rvs(means[index], std_devs[index], size=1)
     samples[j, 0] = x[j]
@@ -80,7 +80,7 @@ class MixtureDensityNetwork:
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
 
-  def log_prob(self, xs, zs=None):
+  def log_prob(self, xs, zs):
     """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
     # Note there are no parameters we're being Bayesian about. The
     # parameters are baked into how we specify the neural networks.
@@ -109,7 +109,7 @@ data = {'X': X, 'y': y}
 
 model = MixtureDensityNetwork(20)
 
-inference = ed.MAP(model, data)
+inference = ed.MAP([], data, model)
 sess = ed.get_session()  # Start TF session
 K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
@@ -122,8 +122,8 @@ for i in range(NEPOCH):
                               feed_dict={X: X_train, y: y_train})
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
 
-pred_weights, pred_means, pred_std =
-sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
+pred_weights, pred_means, pred_std = \
+    sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
 
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
 plt.plot(np.arange(NEPOCH), test_loss / len(X_test), label='Test')
