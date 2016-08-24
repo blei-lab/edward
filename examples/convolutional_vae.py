@@ -57,7 +57,7 @@ class NormalBernoulli:
               deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
               flatten()).tensor
 
-  def log_lik(self, xs, z):
+  def log_lik(self, xs, zs):
     """
     Bernoulli log-likelihood, summing over every image n and pixel i
     in image n.
@@ -65,7 +65,9 @@ class NormalBernoulli:
     log p(x | z) = log Bernoulli(x | p = neural_network(z))
      = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
     """
-    return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
+    return tf.pack([
+        tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
+        for z in tf.unpack(zs)])
 
   def sample_prior(self, n):
     """
