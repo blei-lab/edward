@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-This is just to show how fast we can do a minibatch gradient descent
-of 100,000 samples (!).
+This is just to show how fast we can do a gradient descent
+with 100,000 samples (!).
 """
 from __future__ import absolute_import
 from __future__ import division

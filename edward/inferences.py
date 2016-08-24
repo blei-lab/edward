@@ -226,7 +226,7 @@ class VariationalInference(Inference):
     if n_minibatch is not None and \
        not isinstance(self.model_wrapper, StanModel):
       # Re-assign data to batch tensors, with size given by
-      # ``n_data``.
+      # ``n_minibatch``.
       values = list(six.itervalues(self.data))
       slices = tf.train.slice_input_producer(values)
       # By default use as many threads as CPUs.

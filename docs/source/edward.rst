@@ -22,4 +22,5 @@ Submodules
    edward.criticisms
    edward.inferences
    edward.util
+   edward.version
 

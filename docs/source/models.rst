@@ -37,9 +37,8 @@ evaluation for each set of latent variables. Here is an example:
 Here is a `toy script
 <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
 that uses this model. The model class can be more complicated,
-containing fields or other methods required for certain functions in
-Edward, and which can provide more information about the model's
-structure. See the section below for more details.
+containing fields or other methods required for other functionality in
+Edward. See the section below for more details.
 
 **Python.**
 Write a class that inherits from ``PythonModel`` and with the method
