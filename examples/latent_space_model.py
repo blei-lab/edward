@@ -11,7 +11,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm, poisson
 
 
@@ -35,6 +35,7 @@ class LatentSpaceModel:
 
   def log_prob(self, xs, zs):
     """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    zs = zs['z']
     if self.prior == 'Lognormal':
       zs = tf.exp(zs)
     elif self.prior != 'Gaussian':
@@ -74,10 +75,9 @@ ed.set_seed(42)
 data, N = load_celegans_brain()
 model = LatentSpaceModel(N, K=3, like='Poisson', prior='Gaussian')
 
-inference = ed.MAP(model, data)
+inference = ed.MAP(['z'], data, model)
 # Alternatively, run
-# variational = Variational()
-# variational.add(Normal(model.n_vars))
-# inference = ed.MFVI(model, variational,data)
+# qz = Normal(model.n_vars)
+# inference = ed.MFVI({'z': qz}, data, model)
 
 inference.run(n_iter=5000, n_print=500)

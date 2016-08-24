@@ -32,7 +32,7 @@ import matplotlib.cm as cm
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Dirichlet, Normal, InvGamma
+from edward.models import Dirichlet, Normal, InvGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims, log_sum_exp
 
@@ -69,7 +69,7 @@ class MixtureGaussian:
   def log_prob(self, xs, zs):
     """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x = xs['x']
-    pi, mus, sigmas = zs
+    pi, mus, sigmas = zs['pi'], zs['mu'], zs['sigma']
     log_prior = dirichlet.logpdf(pi, self.alpha)
     log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
     log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
@@ -104,10 +104,9 @@ class MixtureGaussian:
     """Return matrix with log-likelihoods for each data point under each cluster,
     averaging over each set of latent variables z in zs."""
     x = xs['x']
-    pi, mus, sigmas = zs
-    pi = tf.reduce_mean(pi, 0)
-    mus = tf.reduce_mean(mus, 0)
-    sigmas = tf.reduce_mean(sigmas, 0)
+    pi = tf.reduce_mean(zs['pi'], 0)
+    mus = tf.reduce_mean(zs['mu'], 0)
+    sigmas = tf.reduce_mean(zs['sigma'], 0)
 
     matrix = []
     for k in range(self.K):
@@ -138,15 +137,14 @@ plt.title("Simulated dataset")
 plt.show()
 
 model = MixtureGaussian(K=2, D=2)
-variational = Variational()
-variational.add(Dirichlet(model.K))
-variational.add(Normal(model.K * model.D))
-variational.add(InvGamma(model.K * model.D))
+qpi = Dirichlet(model.K)
+qmu = Normal(model.K * model.D)
+qsigma = InvGamma(model.K * model.D)
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 
-clusters = np.argmax(ed.evaluate('log_likelihood', model, variational, data),
+clusters = np.argmax(ed.evaluate('log_likelihood', data, latent_vars={'pi': qpi, 'mu': qmu, 'sigma': qsigma}, model_wrapper=model),
                      axis=0)
 plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])

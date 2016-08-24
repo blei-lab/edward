@@ -713,15 +713,17 @@ class MAP(VariationalInference):
     explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
-      if len(latent_vars) > 1:
+      if len(latent_vars) == 0:
+        latent_vars = {}
+      elif len(latent_vars) == 1:
+        with tf.variable_scope("variational"):
+          if hasattr(model_wrapper, 'n_vars'):
+            latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
+          else:
+            latent_vars = {latent_vars[0]: PointMass(0)}
+      else:
         raise NotImplementedError("A list of more than one element is "
                                   "not currently supported. See documentation.")
-
-      with tf.variable_scope("variational"):
-        if hasattr(model_wrapper, 'n_vars'):
-          latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
-        else:
-          latent_vars = {latent_vars[0]: PointMass(0)}
     elif isinstance(latent_vars, dict):
       pass
     else:
