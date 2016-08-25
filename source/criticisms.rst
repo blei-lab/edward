@@ -1,7 +1,7 @@
 Criticism
 ---------
 
-Criticism is about explicitly understanding and analyzing the
+Criticism is about understanding the
 assumptions made in one's analysis. For example, model criticism
 measures the degree to which our model falsely describes the data.
 

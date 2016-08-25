@@ -167,9 +167,8 @@ evaluation for each set of latent variables. Here is an example:</p>
 </div>
 <p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py">toy script</a>
 that uses this model. The model class can be more complicated,
-containing fields or other methods required for certain functions in
-Edward, and which can provide more information about the model&#8217;s
-structure. See the section below for more details.</p>
+containing fields or other methods required for other functionality in
+Edward. See the section below for more details.</p>
 <p><strong>Python.</strong>
 Write a class that inherits from <code class="docutils literal"><span class="pre">PythonModel</span></code> and with the method
 <code class="docutils literal"><span class="pre">_py_log_prob(xs,</span> <span class="pre">zs)</span></code>. The method defines the logarithm of a joint

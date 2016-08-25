@@ -4,9 +4,7 @@ Data
 Data in Edward is stored as a Python dictionary. It is usually comprised
 of strings binded to NumPy arrays such as a key ``'x'`` with value
 ``np.array([0.23512, 13.2])``.
-
-Some modeling languages require the data
-to have a different key or value type. We detail each below.
+We detail specifics for each modeling language below.
 
 -  **TensorFlow.** The data carries whatever keys and values the user
    accesses in the user-defined model. Key is a string. Value is a NumPy
@@ -84,7 +82,7 @@ to have a different key or value type. We detail each below.
 Reading Data in Edward
 ^^^^^^^^^^^^^^^^^^^^^^
 
-There are three ways to read data in Edward, following the `three ways
+There are three ways to read data in Edward. They follow the `three ways
 to read data in TensorFlow
 <https://www.tensorflow.org/versions/r0.9/how_tos/reading_data/index.html>`__.
 
@@ -97,8 +95,7 @@ to read data in TensorFlow
    For inference, pass in the data as a dictionary of NumPy arrays.
    Internally, we will store them in TensorFlow variables to prevent
    copying data more than once in memory. Batch training is available
-   internally via calling ``tf.train.slice_input_producer`` and
-   ``tf.train.batch``. (As an example, see
+   by passing in the ``n_minibatch`` argument to inference. (As an example, see
    the `mixture of Gaussians
    <https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py>`__.)
 
@@ -114,7 +111,7 @@ to read data in TensorFlow
    in ``feed_dict`` you pass in the values for the
    ``tf.placeholder``'s.
    (As an example, see
-   the `mixture of Gaussians
+   the `mixture density network
    <https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py>`__
    or `variational auto-encoder
    <https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py>`__.)
@@ -136,14 +133,12 @@ Training Models with Data
 How do we use the data during training? In general there are three use
 cases:
 
-1. Train over the full data per step. (It is supported for all
-   modeling languages.)
+1. Train over the full data per step.
 
    Follow the setting of preloaded data.
 
 2. Train over a batch per step when the full data fits in memory. This
-   scale inference in terms of computational complexity. (It is
-   supported for all modeling languages except Stan.)
+   scale inference in terms of computational complexity.
 
    Follow the setting of preloaded data. Specify the batch size with
    ``n_minibatch`` in ``Inference``. By default, we will subsample by
@@ -153,9 +148,13 @@ cases:
 
 3. Train over batches per step when the full data does not fit in
    memory. This scales inference in terms of computational complexity and
-   memory complexity. (It is supported for all modeling languages except
-   Stan.)
+   memory complexity.
 
    Follow the setting of reading from files. Alternatively, follow the
    setting of feeding, and use a generator to create and destroy NumPy
    arrays on the fly for feeding the placeholders.
+
+The three use cases are supported for all modeling languages except
+Stan, which is limited to training over the full data per step. (This
+because Stan's data structure requires data subsampling on arbitrary
+data types, which we don't know how to automate.)
