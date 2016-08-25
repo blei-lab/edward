@@ -9,12 +9,13 @@ from __future__ import print_function
 
 import edward as ed
 import numpy as np
+import six
 import tensorflow as tf
 
 from edward.inferences import MFVI
-from edward.models import Variational, Beta
+from edward.models import Beta
 from edward.stats import bernoulli, beta
-from edward.util import log_mean_exp, stop_gradient
+from edward.util import log_mean_exp
 
 
 class IWVI(MFVI):
@@ -74,15 +75,19 @@ class IWVI(MFVI):
     x = self.data
     losses = []
     for s in range(self.n_samples):
-      z = self.variational.sample(self.K)
-      p_log_prob = self.model.log_prob(x, z)
-      q_log_prob = self.variational.log_prob(stop_gradient(z))
+      z = {key: rv.sample(self.K)
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+      q_log_prob = 0.0
+      for key, rv in six.iteritems(self.latent_vars):
+        q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+
       log_w = p_log_prob - q_log_prob
       losses += [log_mean_exp(log_w)]
 
     losses = tf.pack(losses)
     self.loss = tf.reduce_mean(losses)
-    return -tf.reduce_mean(q_log_prob * stop_gradient(losses))
+    return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
   def build_reparam_loss(self):
     """Build loss function. Its automatic differentiation
@@ -103,9 +108,13 @@ class IWVI(MFVI):
     """
     x = self.data
     for s in range(self.n_samples):
-      z = self.variational.sample(self.K)
-      p_log_prob = self.model.log_prob(x, z)
-      q_log_prob = self.variational.log_prob(z)
+      z = {key: rv.sample(self.K)
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+      q_log_prob = 0.0
+      for key, rv in six.iteritems(self.latent_vars):
+        q_log_prob += rv.log_prob(z[key])
+
       log_w = p_log_prob - q_log_prob
       losses += [log_mean_exp(log_w)]
 
@@ -117,17 +126,16 @@ class IWVI(MFVI):
 class BetaBernoulli:
   """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
   def log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
     log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                       for z in tf.unpack(zs)])
+                       for z in tf.unpack(zs['p'])])
     return log_lik + log_prior
 
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Variational()
-variational.add(Beta())
+qp = Beta()
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = IWVI(model, variational, data)
+inference = IWVI({'p': qp}, data, model)
 inference.run(K=10, n_iter=10000)

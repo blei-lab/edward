@@ -44,7 +44,7 @@ class MixtureDensityNetwork:
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
 
-  def log_prob(self, xs, zs=None):
+  def log_prob(self, xs, zs):
     """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
     # Note there are no parameters we're being Bayesian about. The
     # parameters are baked into how we specify the neural networks.
@@ -77,7 +77,7 @@ X = tf.placeholder(tf.float32, shape=(None, 1))
 y = tf.placeholder(tf.float32, shape=(None, 1))
 data = {'X': X, 'y': y}
 
-inference = ed.MAP(model, data)
+inference = ed.MAP([], data, model)
 sess = ed.get_session()
 K.set_session(sess)
 inference.initialize()

@@ -12,11 +12,14 @@ languages: TensorFlow, Python, Stan, and PyMC3.
 
 **TensorFlow.**
 Write a class with the method ``log_prob(xs, zs)``. The method defines
-the logarithm of a joint density.  Here ``xs`` can be a single data
+the logarithm of a joint density, where ``xs`` and ``zs`` are Python
+dictionaries binding the name of a random variable to
+a realization.
+Here ``xs`` can be a single data
 point or a batch of data points, and analogously, ``zs`` can be a
-single set or multiple sets of latent variables.  ``xs`` can be a
-single data point or The method outputs a vector of the joint density
-evaluations ``[log p(xs, zs[0,:]), log p(xs, zs[1,:]), ...]``, with an
+single set or multiple sets of latent variables.
+The method outputs a vector of the joint density
+evaluations ``[log p(xs, zs^1), log p(xs, zs^S), ...]``, with an
 evaluation for each set of latent variables. Here is an example:
 
 .. code:: python
@@ -27,19 +30,26 @@ evaluation for each set of latent variables. Here is an example:
   class BetaBernoulli:
     """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
     def log_prob(self, xs, zs):
-      log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+      log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
       log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                         for z in tf.unpack(zs)])
+                         for z in tf.unpack(zs['p'])])
       return log_lik + log_prior
 
   model = BetaBernoulli()
 
+``BetaBernoulli`` defines a log joint density with a Bernoulli
+likelihood (for an unspecified number of data points) and a Beta prior
+on the Bernoulli's success probability.
+``xs`` is a dictionary with string ``x`` binded to a vector of
+observations. ``zs`` is a dictionary with string ``z`` binded to a
+vector of latent variables, where each element is a sample from the
+one-dimensional Beta latent variable.
+
 Here is a `toy script
 <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
 that uses this model. The model class can be more complicated,
-containing fields or other methods required for certain functions in
-Edward, and which can provide more information about the model's
-structure. See the section below for more details.
+containing fields or other methods required for other functionality in
+Edward. See the section below for more details.
 
 **Python.**
 Write a class that inherits from ``PythonModel`` and with the method
@@ -59,12 +69,14 @@ Here is an example:
     def _py_log_prob(self, xs, zs):
       # This example is written for pedagogy. We recommend
       # vectorizing operations in practice.
-      n_samples = zs.shape[0]
+      xs = xs['x']
+      ps = zs['p']
+      n_samples = ps.shape[0]
       lp = np.zeros(n_samples, dtype=np.float32)
       for b in range(n_samples):
-        lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-        for n in range(xs['x'].shape[0]):
-          lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+        lp[b] = beta.logpdf(ps[b, :], a=1.0, b=1.0)
+        for n in range(xs.shape[0]):
+          lp[b] += bernoulli.logpmf(xs[n], p=ps[b, :])
 
       return lp
 
@@ -86,18 +98,28 @@ call it with ``StanModel(file=file)`` or
   model_code = """
     data {
       int<lower=0> N;
-      int<lower=0,upper=1> y[N];
+      int<lower=0,upper=1> x[N];
     }
     parameters {
-      real<lower=0,upper=1> theta;
+      real<lower=0,upper=1> p;
     }
     model {
-      theta ~ beta(1.0, 1.0);
+      p ~ beta(1.0, 1.0);
       for (n in 1:N)
-        y[n] ~ bernoulli(theta);
+      x[n] ~ bernoulli(p);
     }
   """
   model = StanModel(model_code=model_code)
+
+During inference the latent variable string matches the name of the
+parameters from the parameter block. Analogously, the data's string
+matches the name of the data from the data block.
+
+.. code:: python
+
+  qp = Beta()
+  data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+  inference = Inference({'p': qp}, data, model)
 
 Here is a `toy
 script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py>`__
@@ -108,7 +130,9 @@ latent variables. ``StanModel`` objects also contain no structure about
 the model besides how to calculate its joint density.
 
 **PyMC3.**
-Write a PyMC3 model whose observed values are Theano shared variables.
+Write a PyMC3 model whose observed values are Theano shared variables,
+and whose latent variables use ``transform=None`` to keep them on their
+original (constrained) domain.
 The values in the Theano shared variables can be plugged at a later
 time. Here is an example:
 
@@ -121,10 +145,20 @@ time. Here is an example:
 
   x_obs = theano.shared(np.zeros(1))
   with pm.Model() as pm_model:
-    beta = pm.Beta('beta', 1, 1, transform=None)
-    x = pm.Bernoulli('x', beta, observed=x_obs)
+    p = pm.Beta('p', 1, 1, transform=None)
+    x = pm.Bernoulli('x', p, observed=x_obs)
 
   model = PyMC3Model(pm_model)
+
+During inference the latent variable string matches the name of the
+model's latent variables; the data's string matches the Theano shared
+variables.
+
+.. code:: python
+
+  qp = Beta()
+  data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+  inference = Inference({'p': qp}, data, model)
 
 Here is a `toy
 script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py>`__
@@ -166,9 +200,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
         Data dictionary. Each key names a data structure used in
         the model (str), and its value is the corresponding
         corresponding realization (np.ndarray or tf.Tensor).
-      zs : list or tf.Tensor
-        A list of tf.Tensor's if multiple varational families,
-        otherwise a tf.Tensor if single variational family.
+      zs : dict of str to tf.Tensor
+        Latent variable dictionary. Each key names a latent variable
+        used in the model (str), and its value is the corresponding
+        realization (tf.Tensor).
 
       Returns
       -------
@@ -188,9 +223,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
         Data dictionary. Each key names a data structure used in
         the model (str), and its value is the corresponding
         corresponding realization (np.ndarray or tf.Tensor).
-      zs : list or tf.Tensor
-        A list of tf.Tensor's if multiple varational families,
-        otherwise a tf.Tensor if single variational family.
+      zs : dict of str to tf.Tensor
+        Latent variable dictionary. Each key names a latent variable
+        used in the model (str), and its value is the corresponding
+        realization (tf.Tensor).
 
       Returns
       -------
@@ -209,9 +245,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
         Data dictionary. Each key names a data structure used in
         the model (str), and its value is the corresponding
         corresponding realization (np.ndarray or tf.Tensor).
-      zs : list or tf.Tensor
-        A list of tf.Tensor's if multiple varational families,
-        otherwise a tf.Tensor if single variational family.
+      zs : dict of str to tf.Tensor
+        Latent variable dictionary. Each key names a latent variable
+        used in the model (str), and its value is the corresponding
+        realization (tf.Tensor).
 
       Returns
       -------
@@ -253,9 +290,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
 
       Parameters
       ----------
-      zs : list or tf.Tensor
-        A list of tf.Tensor's if multiple varational families,
-        otherwise a tf.Tensor if single variational family.
+      zs : dict of str to tf.Tensor
+        Latent variable dictionary. Each key names a latent variable
+        used in the model (str), and its value is the corresponding
+        realization (tf.Tensor).
       n : int, optional
         Number of data points to generate per set of latent variables.
 

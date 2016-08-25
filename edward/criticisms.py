@@ -79,7 +79,12 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   y_pred = model_wrapper.predict(data, zs)
 
   # Evaluate y_pred according to y_true for all metrics.
-  y_true = data[output_key]
+  try:
+    # Get y_true (if supervised).
+    y_true = data[output_key]
+  except:
+    pass
+
   evaluations = []
   if isinstance(metrics, str):
     metrics = [metrics]

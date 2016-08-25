@@ -12,7 +12,7 @@ from __future__ import print_function
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 
 
@@ -23,15 +23,14 @@ class NormalPosterior:
     self.std = std
 
   def log_prob(self, xs, zs):
-    return norm.logpdf(zs, self.mu, self.std)
+    return norm.logpdf(zs['z'], self.mu, self.std)
 
 
 ed.set_seed(42)
 mu = tf.constant(1.0)
 std = tf.constant(1.0)
 model = NormalPosterior(mu, std)
-variational = Variational()
-variational.add(Normal())
+qz = Normal()
 
-inference = ed.MFVI(model, variational)
+inference = ed.MFVI({'z': qz}, model_wrapper=model)
 inference.run(n_iter=10000)

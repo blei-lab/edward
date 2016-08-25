@@ -19,7 +19,7 @@ import prettytensor as pt
 import tensorflow as tf
 
 from convolutional_vae_util import deconv2d
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import bernoulli
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
@@ -57,7 +57,7 @@ class NormalBernoulli:
               deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
               flatten()).tensor
 
-  def log_lik(self, xs, z):
+  def log_lik(self, xs, zs):
     """
     Bernoulli log-likelihood, summing over every image n and pixel i
     in image n.
@@ -65,7 +65,9 @@ class NormalBernoulli:
     log p(x | z) = log Bernoulli(x | p = neural_network(z))
      = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
     """
-    return tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
+    return tf.pack([
+        tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
+        for z in tf.unpack(zs['z'])])
 
   def sample_prior(self, n):
     """
@@ -122,8 +124,7 @@ model = NormalBernoulli(n_vars=10)
 #                    Normal(z_m | loc, scale = neural_network(x_m))
 x_ph = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
 loc, scale = neural_network(x_ph)
-variational = Variational()
-variational.add(Normal(model.n_vars * N_MINIBATCH, loc=loc, scale=scale))
+qz = Normal(model.n_vars * N_MINIBATCH, loc=loc, scale=scale)
 
 # MNIST batches are fed at training time.
 if not os.path.exists(DATA_DIR):
@@ -134,7 +135,7 @@ x = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
 data = {'x': x}
 
 sess = ed.get_session()
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 with tf.variable_scope("model") as scope:
   inference.initialize(optimizer="PrettyTensor")
 with tf.variable_scope("model", reuse=True) as scope:

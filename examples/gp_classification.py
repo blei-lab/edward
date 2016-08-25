@@ -17,7 +17,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import bernoulli, multivariate_normal
 from edward.util import multivariate_rbf
 
@@ -69,10 +69,10 @@ class GaussianProcess:
   def log_prob(self, xs, zs):
     """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x, y = xs['x'], xs['y']
-    log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
+    log_prior = multivariate_normal.logpdf(zs['z'], cov=self.kernel(x))
     log_lik = tf.pack([tf.reduce_sum(
                        bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z))))
-                       for z in tf.unpack(zs)])
+                       for z in tf.unpack(zs['z'])])
     return log_prior + log_lik
 
 
@@ -81,8 +81,7 @@ df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
 data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 model = GaussianProcess(N=len(df))
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=500)

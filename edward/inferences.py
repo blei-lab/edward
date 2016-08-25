@@ -245,7 +245,7 @@ class VariationalInference(Inference):
     if n_minibatch is not None and \
        not isinstance(self.model_wrapper, StanModel):
       # Re-assign data to batch tensors, with size given by
-      # ``n_data``.
+      # ``n_minibatch``.
       values = list(six.itervalues(self.data))
       slices = tf.train.slice_input_producer(values)
       # By default use as many threads as CPUs.
@@ -797,15 +797,17 @@ class MAP(VariationalInference):
     explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
-      if len(latent_vars) > 1:
+      if len(latent_vars) == 0:
+        latent_vars = {}
+      elif len(latent_vars) == 1:
+        with tf.variable_scope("variational"):
+          if hasattr(model_wrapper, 'n_vars'):
+            latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
+          else:
+            latent_vars = {latent_vars[0]: PointMass(0)}
+      else:
         raise NotImplementedError("A list of more than one element is "
-                                  "not currently supported. See documentation.")
-
-      with tf.variable_scope("variational"):
-        if hasattr(model_wrapper, 'n_vars'):
-          latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
-        else:
-          latent_vars = {latent_vars[0]: PointMass(0)}
+                                  "not supported. See documentation.")
     elif isinstance(latent_vars, dict):
       pass
     else:

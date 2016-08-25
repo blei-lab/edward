@@ -731,7 +731,8 @@ def set_seed(x):
   x : int, float
     seed
   """
-  if len(tf.get_default_graph()._nodes_by_id.keys()) > 0:
+  node_names = list(six.iterkeys(tf.get_default_graph()._nodes_by_name))
+  if len(node_names) > 0 and node_names != ['keras_learning_phase']:
     raise RuntimeError("Seeding is not supported after initializing "
                        "part of the graph. "
                        "Please move set_seed to the beginning of your code.")
