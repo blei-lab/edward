@@ -51,8 +51,8 @@ inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=200)
 
 
-def T(x, z):
-  return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+def T(xs, zs):
+  return tf.reduce_mean(tf.cast(xs['x'], tf.float32))
 
 
 print(ed.ppc(T, data, latent_vars={'p': qp}, model_wrapper=model))

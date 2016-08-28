@@ -144,8 +144,10 @@ qsigma = InvGamma(model.K * model.D)
 inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 
-clusters = np.argmax(ed.evaluate('log_likelihood', data, latent_vars={'pi': qpi, 'mu': qmu, 'sigma': qsigma}, model_wrapper=model),
-                     axis=0)
+clusters = np.argmax(
+    ed.evaluate('log_likelihood', data,
+                latent_vars={'pi': qpi, 'mu': qmu, 'sigma': qsigma},
+                model_wrapper=model), axis=0)
 plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.title("Predicted cluster assignments")

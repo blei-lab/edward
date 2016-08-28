@@ -127,21 +127,26 @@ such as an optimizer.
 
 \begin{lstlisting}[language=Python]
 class MFVI(VariationalInference):
-    def __init__(self, *args, **kwargs):
-        super(MFVI, self).__init__(*args, **kwargs)
+  def __init__(self, *args, **kwargs):
+    super(MFVI, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_samples=1, ...):
-        ...
-        self.n_samples = n_samples
-        return super(MFVI, self).initialize(*args, **kwargs)
+  def initialize(self, n_samples=1, ...):
+    ...
+    self.n_samples = n_samples
+    return super(MFVI, self).initialize(*args, **kwargs)
 
-    def build_reparam_loss(self):
-        x = self.data
-        z = self.variational.sample(self.n_samples)
+  def build_reparam_loss(self):
+    x = self.data
+    z = {key: rv.sample(self.n_samples)
+         for key, rv in six.iteritems(self.latent_vars)}
 
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
-                                   self.variational.log_prob(z))
-        return -self.loss
+    p_log_prob = self.model_wrapper.log_prob(x, z)
+    q_log_prob = 0.0
+    for key, rv in six.iteritems(self.latent_vars):
+      q_log_prob += rv.log_prob(z[key])
+
+    self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
+    return -self.loss
 \end{lstlisting}
 
 Two methods are added: \texttt{initialize()} and
@@ -161,7 +166,7 @@ reparameterization gradient of the ELBO. The computational graph will
 simply traverse the nodes during backpropagation; unlike the
 \href{tut_KLqp_score.html}{score function gradient}, the
 reparameterization gradient does not need TensorFlow's
-\texttt{stop_gradient()} function.
+\texttt{tf.stop_gradient()} function.
 
 There is a nuance here. TensorFlow's optimizers are configured to
 \emph{minimize} an objective function. So the gradient is set to be
