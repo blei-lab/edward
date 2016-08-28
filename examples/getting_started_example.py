@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 
 plt.style.use('ggplot')
@@ -84,7 +84,7 @@ class BayesianNN:
   def log_lik(self, xs, zs):
     """Return a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
     x, y = xs['x'], xs['y']
-    mus = self.neural_network(x, zs)
+    mus = self.neural_network(x, zs['z'])
     log_lik = tf.reduce_sum(norm.logpdf(y, loc=mus, scale=self.lik_variance), 1)
     return log_lik
 
@@ -100,12 +100,11 @@ ed.set_seed(42)
 
 model = BayesianNN(layer_sizes=[1, 2, 2, 1])
 
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 
 data = build_toy_dataset()
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize()
 
 
@@ -114,10 +113,9 @@ sess = ed.get_session()
 # FIRST VISUALIZATION (prior)
 
 # Sample functions from variational model
-mean, std = sess.run([variational.layers[0].loc,
-                      variational.layers[0].scale])
+mean, std = sess.run([qz.loc, qz.scale])
 rs = np.random.RandomState(0)
-zs = rs.randn(10, variational.n_vars) * std + mean
+zs = rs.randn(10, qz.n_vars) * std + mean
 zs = tf.constant(zs, dtype=tf.float32)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)
@@ -145,10 +143,9 @@ inference.run(n_iter=1000, n_samples=5, n_print=100)
 # SECOND VISUALIZATION (posterior)
 
 # Sample functions from variational model
-mean, std = sess.run([variational.layers[0].loc,
-                      variational.layers[0].scale])
+mean, std = sess.run([qz.loc, qz.scale])
 rs = np.random.RandomState(0)
-zs = rs.randn(10, variational.n_vars) * std + mean
+zs = rs.randn(10, qz.n_vars) * std + mean
 zs = tf.constant(zs, dtype=tf.float32)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)

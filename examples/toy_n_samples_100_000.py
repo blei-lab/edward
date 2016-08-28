@@ -10,7 +10,7 @@ from __future__ import print_function
 import edward as ed
 import tensorflow as tf
 
-from edward.models import Variational, Bernoulli
+from edward.models import Bernoulli
 from edward.stats import bernoulli
 
 
@@ -20,14 +20,13 @@ class BernoulliModel:
     self.p = p
 
   def log_prob(self, xs, zs):
-    return bernoulli.logpmf(zs, p)
+    return bernoulli.logpmf(zs['z'], p)
 
 
 ed.set_seed(42)
 p = tf.constant(0.6)
 model = BernoulliModel(p)
-variational = Variational()
-variational.add(Bernoulli())
+qz = Bernoulli()
 
-inference = ed.MFVI(model, variational)
+inference = ed.MFVI({'z': qz}, model_wrapper=model)
 inference.run(n_samples=int(1e5))

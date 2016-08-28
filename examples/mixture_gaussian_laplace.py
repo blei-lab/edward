@@ -23,6 +23,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
+from edward.models import PointMass
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims, log_sum_exp
 
@@ -54,23 +55,10 @@ class MixtureGaussian:
     self.c = 10
     self.alpha = tf.ones([K])
 
-  def unpack_params(self, zs):
-    """Unpack sets of parameters from a flattened matrix."""
-    pi = zs[:, 0:self.K]
-    mus = zs[:, self.K:(self.K + self.K * self.D)]
-    sigmas = zs[:, (self.K + self.K * self.D):(self.K + 2 * self.K * self.D)]
-    # Do the unconstrained to constrained transformation for MAP here.
-    pi = tf.sigmoid(pi)
-    pi = tf.concat(1, [pi[:, 0:(self.K - 1)],
-                   tf.expand_dims(1.0 -
-                                  tf.reduce_sum(pi[:, 0:(self.K - 1)], 1), 0)])
-    sigmas = ed.softplus(sigmas)
-    return pi, mus, sigmas
-
   def log_prob(self, xs, zs):
     """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x = xs['x']
-    pi, mus, sigmas = self.unpack_params(zs)
+    pi, mus, sigmas = zs['pi'], zs['mu'], zs['sigma']
     log_prior = dirichlet.logpdf(pi, self.alpha)
     log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
     log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
@@ -117,6 +105,16 @@ def build_toy_dataset(N):
 ed.set_seed(42)
 data = build_toy_dataset(500)
 
-model = MixtureGaussian(K=2, D=2)
-inference = ed.Laplace(model, data)
+K = 2
+D = 2
+model = MixtureGaussian(K, D)
+
+with tf.variable_scope("variational"):
+  qpi = PointMass(K - 1,
+                  params=ed.to_simplex(tf.Variable(tf.random_normal([K - 1]))))
+  qmu = PointMass(K * D, params=tf.Variable(tf.random_normal([K * D])))
+  qsigma = PointMass(K * D,
+                     params=tf.exp(tf.Variable(tf.random_normal([K * D]))))
+
+inference = ed.Laplace({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=500, n_minibatch=10, n_print=50)

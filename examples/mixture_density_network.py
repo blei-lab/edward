@@ -77,7 +77,7 @@ X = tf.placeholder(tf.float32, shape=(None, 1))
 y = tf.placeholder(tf.float32, shape=(None, 1))
 data = {'X': X, 'y': y}
 
-inference = ed.MAP(model, data)
+inference = ed.MAP([], data, model)
 sess = ed.get_session()
 K.set_session(sess)
 inference.initialize()

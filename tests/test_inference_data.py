@@ -7,18 +7,18 @@ import numpy as np
 import edward as ed
 import six
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm
 
 
 class NormalModel:
   """
-  p(x, z) = Normal(x; z, 1) Normal(z; 0, 1)
+  p(x, mu) = Normal(x; mu, 1) Normal(mu; 0, 1)
   """
   def log_prob(self, xs, zs):
-    log_prior = norm.logpdf(zs, 0.0, 1.0)
-    log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], z, 1.0))
-                       for z in tf.unpack(zs)])
+    log_prior = norm.logpdf(zs['mu'], 0.0, 1.0)
+    log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], mu, 1.0))
+                       for mu in tf.unpack(zs['mu'])])
     return log_lik + log_prior
 
 
@@ -40,10 +40,9 @@ class test_inference_data_class(tf.test.TestCase):
 
   def _test(self, sess, data, n_minibatch, x=None, is_file=False):
     model = NormalModel()
-    variational = Variational()
-    variational.add(Normal())
+    qz = Normal()
 
-    inference = ed.MFVI(model, variational, data)
+    inference = ed.MFVI({'mu': qz}, data, model)
     inference.initialize(n_minibatch=n_minibatch)
 
     if x is not None:

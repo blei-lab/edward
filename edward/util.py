@@ -493,25 +493,6 @@ def softplus(x):
   return result
 
 
-def stop_gradient(x):
-  """Apply ``tf.stop_gradient()`` element-wise.
-
-  Parameters
-  ----------
-  x : tf.Tensor or list of tf.Tensor
-    A n-D tensor or list thereof.
-
-  Returns
-  -------
-  tf.Tensor or list of tf.Tensor
-    A object of same type and shape as input.
-  """
-  if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    return tf.stop_gradient(x)
-  else:  # list
-    return [tf.stop_gradient(i) for i in x]
-
-
 def to_simplex(x):
   """Transform real vector of length ``(K-1)`` to a simplex of dimension ``K``
   using a backward stick breaking construction.

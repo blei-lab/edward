@@ -17,42 +17,42 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Beta
+from edward.models import Beta
 from edward.stats import bernoulli, beta
 
 
 class BetaBernoulli:
-  """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
   def __init__(self):
     self.n_vars = 1
 
   def log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                       for z in tf.unpack(zs)])
+    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p))
+                       for p in tf.unpack(zs['p'])])
     return log_lik + log_prior
 
   def sample_likelihood(self, zs, n):
-    """x | z ~ p(x | z)"""
+    """x | p ~ p(x | p)"""
     out = []
-    for s in range(zs.shape[0]):
-      out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
+    for s in range(zs['p'].shape[0]):
+      x_new = bernoulli.rvs(zs['p'][s, :], size=n)
+      out += [{'x': x_new.reshape((n,))}]
 
     return out
 
 
 ed.set_seed(42)
 model = BetaBernoulli()
-variational = Variational()
-variational.add(Beta(model.n_vars))
+qp = Beta(model.n_vars)
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=200)
 
 
-def T(x, z):
-  return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+def T(xs, zs):
+  return tf.reduce_mean(tf.cast(xs['x'], tf.float32))
 
 
-print(ed.ppc(model, variational, data, T))
+print(ed.ppc(T, data, latent_vars={'p': qp}, model_wrapper=model))

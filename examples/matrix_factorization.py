@@ -38,6 +38,7 @@ class MatrixFactorization:
 
   def log_prob(self, xs, zs):
     """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    zs = zs['z']
     if self.prior == 'Lognormal':
       zs = tf.exp(zs)
     elif self.prior != 'Gaussian':
@@ -81,10 +82,9 @@ model = MatrixFactorization(K, N,
                             prior='Lognormal',
                             interaction='additive')
 
-inference = ed.MAP(model, data)
+inference = ed.MAP(['z'], data, model)
 
-# variational = Variational()
-# variational.add(Normal(model.n_vars))
-# inference = ed.MFVI(model, variational,data)
+# qz = Normal(model.n_vars)
+# inference = ed.MFVI({'z': qz}, data, model)
 
 inference.run(n_iter=5000, n_print=500)

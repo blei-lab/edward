@@ -15,7 +15,7 @@ from __future__ import print_function
 
 import edward as ed
 
-from edward.models import Variational, Beta
+from edward.models import Beta
 
 model_code = """
   data {
@@ -33,9 +33,8 @@ model_code = """
 """
 ed.set_seed(42)
 model = ed.StanModel(model_code=model_code)
-variational = Variational()
-variational.add(Beta())
+qp = Beta()
 data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=10000)

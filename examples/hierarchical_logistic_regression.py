@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import bernoulli, norm
 
 
@@ -54,7 +54,7 @@ class HierarchicalLogistic:
     x, y = xs['x'], xs['y']
     m, n = self.weight_dim[0], self.weight_dim[1]
     log_lik = []
-    for z in tf.unpack(zs):
+    for z in tf.unpack(zs['z']):
       W = tf.reshape(z[:m * n], [m, n])
       b = tf.reshape(z[m * n:], [1, n])
       # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
@@ -63,7 +63,7 @@ class HierarchicalLogistic:
       log_lik += [bernoulli.logpmf(y, p)]
 
     log_lik = tf.pack(log_lik)
-    log_prior = -tf.reduce_sum(zs * zs, 1) / self.prior_variance
+    log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance
     return log_lik + log_prior
 
 
@@ -80,8 +80,7 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 ed.set_seed(42)
 model = HierarchicalLogistic(weight_dim=[1, 1])
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 data = build_toy_dataset()
 
 # Set up figure
@@ -90,20 +89,18 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=5)
 sess = ed.get_session()
 for t in range(600):
   loss = inference.update()
   if t % inference.n_print == 0:
     print("iter {:d} loss {:.2f}".format(t, loss))
-    print(variational)
 
     # Sample functions from variational model
-    mean, std = sess.run([variational.layers[0].loc,
-                          variational.layers[0].scale])
+    mean, std = sess.run([qz.loc, qz.scale])
     rs = np.random.RandomState(0)
-    zs = rs.randn(10, variational.n_vars) * std + mean
+    zs = rs.randn(10, qz.n_vars) * std + mean
     zs = tf.convert_to_tensor(zs, dtype=tf.float32)
     inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
     x = tf.expand_dims(inputs, 1)

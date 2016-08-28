@@ -27,15 +27,14 @@ methods are derived from.
   class Inference(object):
     """Base class for Edward inference methods.
     """
-    def __init__(self, model, data=None):
+    def __init__(self, latent_vars, data=None, model_wrapper=None):
       ...
 
-It takes as input a probabilistic model ``model`` and dataset
-``data``.
+It takes as input the set of latent variables to infer and a dataset. For now, it must also take as input a model wrapper ``model_wrapper``.
 For more details, see the
-`Model API <models.html>`__
+`Data API <data.html>`__
 and
-`Data API <data.html>`__.
+`Model API <models.html>`__
 
 Note that ``Inference`` says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
@@ -53,8 +52,8 @@ have their own default methods.
   class MonteCarlo(Inference):
     """Base class for Monte Carlo inference methods.
     """
-    def __init__(self, model, data=None):
-      super(MonteCarlo, self).__init__(model, data)
+    def __init__(latent_vars, data=None, model_wrapper=None):
+      super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
     ...
 
@@ -62,12 +61,11 @@ have their own default methods.
   class VariationalInference(Inference):
     """Base class for variational inference methods.
     """
-    def __init__(self, model, variational, data=None):
+    def __init__(self, latent_vars, data=None, model_wrapper=None):
       """Initialization.
       ...
       """
-      super(VariationalInference, self).__init__(model, data)
-      self.variational = variational
+      super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
     ...
 
@@ -81,13 +79,8 @@ Currently, Edward has most of its inference infrastructure within the
 The ``MonteCarlo`` class is still under development. We welcome
 researchers to make significant advances here!
 
-Let's focus on ``VariationalInference``. In addition to a model and
-data as input, ``VariationalInference`` takes in a variational
-model ``variational``, which serves as a model of the posterior
-distribution. For more details, see the Variational Models section
-below.
-
-The main method in ``VariationalInference`` is ``run()``.
+Let's focus on ``VariationalInference``. The main method in
+``VariationalInference`` is ``run()``.
 
 .. code:: python
 
@@ -159,18 +152,10 @@ that probabilistic models specify distributions to approximate the
 true data distribution. After inference, the variational model is used
 as a proxy to the true posterior.
 
-Edward implements variational models using the ``Variational`` class in
-``edward.models``. For example, the following instantiates an empty
-container for the variational distribution.
+Edward implements variational models using the ``RandomVariable`` class in
+``edward.models``. During inference, each latent variable in the model is binded to a ``RandomVariable`` object, which aims to match the latent variable given data.
 
-.. code:: python
-
-  from edward.models import Variational
-
-  variational = Variational()
-
-To add distributions to this object, use the ``add()`` method, which
-is used to add ``RandomVariable`` objects.  All random variable objects, i.e.,
+All random variable objects, i.e.,
 any class inheriting from ``RandomVariable`` in ``edward.models``, takes
 as input a shape and optionally, parameter arguments. If left
 unspecified, the parameter arguments are trainable parameters during
@@ -179,17 +164,16 @@ example:
 
 .. code:: python
 
-  from edward.models import Variational, Normal, Beta
+  from edward.models import Normal, InvGamma, Beta
 
-  # first, add a vector of 10 random variables
-  # second, add a 5 x 2 matrix of random variables
-  variational = Variational()
-  variational.add(InvGamma(10))
-  variational.add(Normal([5, 2]))
+  # a vector of 10 random variables
+  qz1 = InvGamma(10)
+
+  # a 5 x 2 matrix of random variables
+  qz2 = Normal([5, 2])
 
   # vector of 3 random variables with fixed alpha param
-  variational = Variational()
-  variational.add(Beta(3, alpha=tf.ones(3)))
+  qz = Beta(3, alpha=tf.ones(3))
 
 Multivariate distributions store their multivariate dimension in the
 outer dimension (right-most dimension) of their shape.
@@ -203,21 +187,9 @@ outer dimension (right-most dimension) of their shape.
   # vector of 5 K-dimensional Dirichlet's
   Dirichlet(alpha=tf.ones([5, K]))
 
-The main methods in ``Variational`` are ``log_prob()`` and
+The main methods in each ``RandomVariable`` are ``log_prob()`` and
 ``sample()``, which mathematically are ``log q(z; \lambda)`` and ``z ~
-q(z; \lambda)`` respectively.
-
-``samples(n)`` takes as input the number of samples and returns a list
-of TensorFlow tensors, each of whose shape is ``(n, ) + self.shape`` for
-each random variable object within the container. ``log_prob(xs)`` takes
-as input a list of TensorFlow tensors, and returns a vector of density
-evaluations, one for each sample ``x`` in ``xs``.
-
-The ordering of the addition to the container matters. This defines
-the ordering of the lists for the output of ``sample()`` and the input
-of ``log_prob()``.
-(As an example, see the `mixture of Gaussians
-<https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py>`__.)
+q(z; \lambda)`` respectively. See their docstrings for more details.
 
 .. works with a list of tensors
 .. if there is more than one layer, and a single tensor if only one layer.

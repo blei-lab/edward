@@ -109,7 +109,7 @@ data = {'X': X, 'y': y}
 
 model = MixtureDensityNetwork(20)
 
-inference = ed.MAP(model, data)
+inference = ed.MAP([], data, model)
 sess = ed.get_session()  # Start TF session
 K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
