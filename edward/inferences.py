@@ -693,10 +693,9 @@ class MAP(VariationalInference):
     --------
     Most explicitly, MAP is specified via a dictionary:
 
-    >>> qpi = PointMass(K-1, params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-    >>> qmu = PointMass(K*D, params=tf.Variable(tf.zeros(K*D)))
-    >>> qsigma = PointMass(K*D,
-    >>>                    params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+    >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+    >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
+    >>> qsigma = PointMass(params=tf.exp(tf.Variable(tf.zeros(K*D))))
     >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
 
     We also automate the specification of ``PointMass`` distributions
@@ -725,7 +724,7 @@ class MAP(VariationalInference):
             latent_vars = {latent_vars[0]: PointMass(
                 params=tf.Variable(tf.random_normal([model_wrapper.n_vars])))}
           else:
-            latent_vars = {latent_vars[0]: PointMass(0)}
+            latent_vars = {latent_vars[0]: PointMass(params=tf.constant([0.0]))}
       else:
         raise NotImplementedError("A list of more than one element is "
                                   "not supported. See documentation.")
