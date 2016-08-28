@@ -94,23 +94,22 @@ def neural_network(x):
 
     # Return list of vectors where mean[i], stddev[i] are the
     # parameters of the local variational factor for data point i.
-    loc = tf.reshape(params[:, :N_VARS], [-1])
-    scale = tf.reshape(tf.sqrt(tf.exp(params[:, N_VARS:])), [-1])
-    return [loc, scale]
+    mu = tf.reshape(params[:, :N_VARS], [-1])
+    sigma = tf.reshape(tf.sqrt(tf.exp(params[:, N_VARS:])), [-1])
+    return [mu, sigma]
 \end{lstlisting}
 The neural network
 takes a 28 by 28 pixel image and outputs a $2\cdot 10$-dimensional
-output, one for the mean (\texttt{loc}) and one for the standard
-deviation (\texttt{scale}).
+output, one for the mean (\texttt{mu}) and one for the standard
+deviation (\texttt{sigma}).
 
 We define a TensorFlow placeholder \texttt{x_ph} for the neural network's input.
 We define a variational model which is parameterized by the neural network's
 output.
 \begin{lstlisting}[language=Python]
 x_ph = tf.placeholder(tf.float32, [28 * 28])
-loc, scale = neural_network(x_ph)
-variational = Variational()
-variational.add(Normal(N_VARS, loc=loc, scale=scale))
+mu, sigma = neural_network(x_ph)
+qz = Normal(mu=mu, sigma=sigma)
 \end{lstlisting}
 During each step of inference, we pass in a data point to feed the
 placeholder. Then we train the variational parameters (inference

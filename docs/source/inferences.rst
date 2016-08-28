@@ -167,13 +167,13 @@ example:
   from edward.models import Normal, InvGamma, Beta
 
   # a vector of 10 random variables
-  qz1 = InvGamma(10)
+  qz1 = InvGamma(alpha=tf.ones([10]), beta=tf.ones([10]))
 
   # a 5 x 2 matrix of random variables
-  qz2 = Normal([5, 2])
+  qz2 = Normal(mu.zeros([5, 2]), beta=tf.ones([5, 2]))
 
-  # vector of 3 random variables with fixed alpha param
-  qz = Beta(3, alpha=tf.ones(3))
+  # vector of 3 random variables with varying b param
+  qz = Beta(a=tf.ones([3]), b=tf.exp(tf.Variable(tf.ones([3]))))
 
 Multivariate distributions store their multivariate dimension in the
 outer dimension (right-most dimension) of their shape.

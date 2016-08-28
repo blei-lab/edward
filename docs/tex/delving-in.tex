@@ -123,9 +123,15 @@ we would write
 \begin{lstlisting}[language=Python]
 from edward.models import Dirichlet, Normal, InvGamma
 
-qpi = Dirichlet(K)
-qmu = Normal(K*D)
-qsigma = InvGamma(K*D)
+qpi_alpha = ed.to_simplex(tf.Variable(tf.random_normal([K-1])))
+qmu_mu = tf.Variable(tf.random_normal([K*D]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
+qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
+qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
+
+qpi = Dirichlet(alpha=qpi_alpha)
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 \end{lstlisting}
 
 Each algorithm derived from \texttt{VariationalInference} minimizes a
