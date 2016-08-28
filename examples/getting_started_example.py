@@ -97,12 +97,13 @@ def build_toy_dataset(N=50, noise_std=0.1):
 
 
 ed.set_seed(42)
+data = build_toy_dataset()
 
 model = BayesianNN(layer_sizes=[1, 2, 2, 1])
 
-qz = Normal(model.n_vars)
-
-data = build_toy_dataset()
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize()
@@ -113,10 +114,10 @@ sess = ed.get_session()
 # FIRST VISUALIZATION (prior)
 
 # Sample functions from variational model
-mean, std = sess.run([qz.loc, qz.scale])
+mean, std = sess.run([qz.mu, qz.sigma])
 rs = np.random.RandomState(0)
-zs = rs.randn(10, qz.n_vars) * std + mean
-zs = tf.constant(zs, dtype=tf.float32)
+zs = rs.randn(10, model.n_vars) * std + mean
+zs = tf.convert_to_tensor(zs, dtype=tf.float32)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)
 mus = model.neural_network(x, zs)
@@ -143,10 +144,10 @@ inference.run(n_iter=1000, n_samples=5, n_print=100)
 # SECOND VISUALIZATION (posterior)
 
 # Sample functions from variational model
-mean, std = sess.run([qz.loc, qz.scale])
+mean, std = sess.run([qz.mu, qz.sigma])
 rs = np.random.RandomState(0)
-zs = rs.randn(10, qz.n_vars) * std + mean
-zs = tf.constant(zs, dtype=tf.float32)
+zs = rs.randn(10, model.n_vars) * std + mean
+zs = tf.convert_to_tensor(zs, dtype=tf.float32)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)
 mus = model.neural_network(x, zs)

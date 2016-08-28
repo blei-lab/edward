@@ -32,7 +32,7 @@ import matplotlib.cm as cm
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Dirichlet, Normal, InvGamma
+from edward.models import Dirichlet, Normal, InverseGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal, norm
 from edward.util import get_dims, log_sum_exp
 
@@ -136,10 +136,19 @@ plt.axis([-3, 3, -3, 3])
 plt.title("Simulated dataset")
 plt.show()
 
-model = MixtureGaussian(K=2, D=2)
-qpi = Dirichlet(model.K)
-qmu = Normal(model.K * model.D)
-qsigma = InvGamma(model.K * model.D)
+K = 2
+D = 2
+model = MixtureGaussian(K, D)
+
+qpi_alpha = ed.to_simplex(tf.Variable(tf.random_normal([K-1])))
+qmu_mu = tf.Variable(tf.random_normal([K*D]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
+qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
+qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
+
+qpi = Dirichlet(alpha=qpi_alpha)
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 
 inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)

@@ -133,9 +133,13 @@ class BetaBernoulli:
 
 
 ed.set_seed(42)
-model = BetaBernoulli()
-qp = Beta()
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+
+model = BetaBernoulli()
+
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp = Beta(a=qp_a, b=qp_b)
 
 inference = IWVI({'p': qp}, data, model)
 inference.run(K=10, n_iter=10000)

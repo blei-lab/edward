@@ -86,7 +86,7 @@ def neural_network(x):
   Inference network to parameterize variational family. It takes
   data as input and outputs the variational parameters.
 
-  loc, scale = neural_network(x)
+  mu, sigma = neural_network(x)
   """
   n_vars = 10
   with pt.defaults_scope(activation_fn=tf.nn.elu,
@@ -105,26 +105,26 @@ def neural_network(x):
 
   # Return list of vectors where mean[i], stddev[i] are the
   # parameters of the local variational factor for data point i.
-  loc = tf.reshape(params[:, :n_vars], [-1])
-  scale = tf.reshape(tf.sqrt(tf.exp(params[:, n_vars:])), [-1])
-  return [loc, scale]
+  mu = tf.reshape(params[:, :n_vars], [-1])
+  sigma = tf.reshape(tf.sqrt(tf.exp(params[:, n_vars:])), [-1])
+  return [mu, sigma]
 
 
 ed.set_seed(42)
 model = NormalBernoulli(n_vars=10)
 
 # Use the variational model
-# q(z | x) = prod_{n=1}^n Normal(z_n | loc, scale = neural_network(x_n))
+# q(z | x) = prod_{n=1}^n Normal(z_n | mu, sigma = neural_network(x_n))
 # It is a distribution of the latent variables z_n for each data
 # point x_n. We use neural_network() to globally parameterize the local
 # variational factors q(z_n | x).
 # We also do data subsampling during inference. Therefore we only need
 # to explicitly represent the variational factors for a mini-batch,
 # q(z_{batch} | x) = prod_{m=1}^{n_data}
-#                    Normal(z_m | loc, scale = neural_network(x_m))
+#                    Normal(z_m | mu, sigma = neural_network(x_m))
 x_ph = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
-loc, scale = neural_network(x_ph)
-qz = Normal(model.n_vars * N_MINIBATCH, loc=loc, scale=scale)
+mu, sigma = neural_network(x_ph)
+qz = Normal(mu=mu, sigma=sigma)
 
 # MNIST batches are fed at training time.
 if not os.path.exists(DATA_DIR):

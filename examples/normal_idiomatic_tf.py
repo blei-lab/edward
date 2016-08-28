@@ -34,7 +34,10 @@ ed.set_seed(42)
 mu = tf.constant(1.0)
 std = tf.constant(1.0)
 model = NormalPosterior(mu, std)
-qz = Normal()
+
+qz_mu = tf.Variable(tf.random_normal([1]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, model_wrapper=model)
 inference.initialize()

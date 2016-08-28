@@ -27,8 +27,12 @@ with pm.Model() as pm_model:
 
 ed.set_seed(42)
 model = PyMC3Model(pm_model)
-qp = Beta()
+
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp = Beta(a=qp_a, b=qp_b)
 
 inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=10000)
