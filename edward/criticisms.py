@@ -62,7 +62,7 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
   sess = get_session()
   # Monte Carlo estimate the mean of the posterior predictive:
   # 1. Sample a batch of latent variables from posterior
-  zs = {key: rv.sample(n_samples) for key, rv in six.iteritems(latent_vars)}
+  zs = {key: rv.sample([n_samples]) for key, rv in six.iteritems(latent_vars)}
   # 2. Make predictions, averaging over each sample of latent variables
   y_pred = model_wrapper.predict(data, zs)
 
@@ -212,7 +212,7 @@ def ppc(T, data, latent_vars, model_wrapper, n_samples=100):
     # `tf.identity()` is to avoid fetching, e.g., a placeholder x
     # when feeding the dictionary {x: np.array()}. TensorFlow will
     # raise an error.
-    zs = {key: tf.identity(rv.sample(n_samples))
+    zs = {key: tf.identity(rv.sample([n_samples]))
           for key, rv in six.iteritems(latent_vars)}
 
   # 2. Sample from likelihood.

@@ -1,0 +1,2 @@
+class PointMass(object):
+  pass
