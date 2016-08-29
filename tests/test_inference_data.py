@@ -40,9 +40,9 @@ class test_inference_data_class(tf.test.TestCase):
 
   def _test(self, sess, data, n_minibatch, x=None, is_file=False):
     model = NormalModel()
-    qz = Normal()
+    qmu = Normal(mu=tf.Variable(tf.random_normal([1])), sigma=tf.constant([1.0]))
 
-    inference = ed.MFVI({'mu': qz}, data, model)
+    inference = ed.MFVI({'mu': qmu}, data, model)
     inference.initialize(n_minibatch=n_minibatch)
 
     if x is not None:
