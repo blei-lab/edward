@@ -30,11 +30,12 @@ class NormalModel:
 
 
 ed.set_seed(42)
+data = {'x': np.array([3] * 20 + [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        dtype=np.float32)}
+
 mu = tf.constant(3.0)
 std = tf.constant(0.1)
 model = NormalModel(mu, std)
-data = {'x': np.array([3] * 20 + [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        dtype=np.float32)}
 
 inference = ed.MAP(['z'], data, model)
 inference.run(n_iter=200, n_print=50)

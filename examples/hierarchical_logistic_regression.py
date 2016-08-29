@@ -79,9 +79,12 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 
 ed.set_seed(42)
-model = HierarchicalLogistic(weight_dim=[1, 1])
-qz = Normal(model.n_vars)
 data = build_toy_dataset()
+model = HierarchicalLogistic(weight_dim=[1, 1])
+
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 # Set up figure
 fig = plt.figure(figsize=(8, 8), facecolor='white')
@@ -98,9 +101,9 @@ for t in range(600):
     print("iter {:d} loss {:.2f}".format(t, loss))
 
     # Sample functions from variational model
-    mean, std = sess.run([qz.loc, qz.scale])
+    mean, std = sess.run([qz.mu, qz.sigma])
     rs = np.random.RandomState(0)
-    zs = rs.randn(10, qz.n_vars) * std + mean
+    zs = rs.randn(10, model.n_vars) * std + mean
     zs = tf.convert_to_tensor(zs, dtype=tf.float32)
     inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
     x = tf.expand_dims(inputs, 1)

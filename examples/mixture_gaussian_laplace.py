@@ -110,11 +110,9 @@ D = 2
 model = MixtureGaussian(K, D)
 
 with tf.variable_scope("variational"):
-  qpi = PointMass(K - 1,
-                  params=ed.to_simplex(tf.Variable(tf.random_normal([K - 1]))))
-  qmu = PointMass(K * D, params=tf.Variable(tf.random_normal([K * D])))
-  qsigma = PointMass(K * D,
-                     params=tf.exp(tf.Variable(tf.random_normal([K * D]))))
+  qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.random_normal([K - 1]))))
+  qmu = PointMass(params=tf.Variable(tf.random_normal([K * D])))
+  qsigma = PointMass(params=tf.exp(tf.Variable(tf.random_normal([K * D]))))
 
 inference = ed.Laplace({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=500, n_minibatch=10, n_print=50)

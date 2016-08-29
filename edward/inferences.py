@@ -357,7 +357,7 @@ class MFVI(VariationalInference):
       reparameterization gradient if available.
     """
     if score is None and \
-       all([rv.is_reparameterized and rv.is_differentiable
+       all([rv.is_reparameterized and rv.is_continuous
             for rv in six.itervalues(self.latent_vars)]):
       self.score = False
     else:
@@ -431,13 +431,14 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_prob = self.model_wrapper.log_prob(x, z)
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     losses = p_log_prob - q_log_prob
     self.loss = tf.reduce_mean(losses)
@@ -457,13 +458,14 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_prob = self.model_wrapper.log_prob(x, z)
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += rv.log_prob(z[key])
+      q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
     return -self.loss
@@ -487,16 +489,17 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_lik = self.model_wrapper.log_lik(x, z)
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
-    mu = tf.concat(0, [rv.loc for rv in six.itervalues(self.latent_vars)])
-    sigma = tf.concat(0, [rv.scale for rv in six.itervalues(self.latent_vars)])
+    mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
+    sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
     kl = kl_multivariate_normal(mu, sigma)
     self.loss = tf.reduce_mean(p_log_lik) - kl
     return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
@@ -518,14 +521,15 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_prob = self.model_wrapper.log_prob(x, z)
     q_log_prob = 0.0
     q_entropy = 0.0
     for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
       q_entropy += rv.entropy()
 
     self.loss = tf.reduce_mean(p_log_prob) + q_entropy
@@ -551,12 +555,12 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_lik = self.model_wrapper.log_lik(x, z)
-    mu = tf.concat(0, [rv.loc for rv in six.itervalues(self.latent_vars)])
-    sigma = tf.concat(0, [rv.scale for rv in six.itervalues(self.latent_vars)])
+    mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
+    sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
     self.loss = tf.reduce_mean(p_log_lik) - \
         kl_multivariate_normal(mu, sigma)
     return -self.loss
@@ -578,7 +582,7 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_prob = self.model_wrapper.log_prob(x, z)
@@ -647,7 +651,7 @@ class KLpq(VariationalInference):
 
     """
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     # normalized importance weights
@@ -689,10 +693,9 @@ class MAP(VariationalInference):
     --------
     Most explicitly, MAP is specified via a dictionary:
 
-    >>> qpi = PointMass(K-1, params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-    >>> qmu = PointMass(K*D, params=tf.Variable(tf.zeros(K*D)))
-    >>> qsigma = PointMass(K*D,
-    >>>                    params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+    >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+    >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
+    >>> qsigma = PointMass(params=tf.exp(tf.Variable(tf.zeros(K*D))))
     >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
 
     We also automate the specification of ``PointMass`` distributions
@@ -718,9 +721,10 @@ class MAP(VariationalInference):
       elif len(latent_vars) == 1:
         with tf.variable_scope("variational"):
           if hasattr(model_wrapper, 'n_vars'):
-            latent_vars = {latent_vars[0]: PointMass(model_wrapper.n_vars)}
+            latent_vars = {latent_vars[0]: PointMass(
+                params=tf.Variable(tf.random_normal([model_wrapper.n_vars])))}
           else:
-            latent_vars = {latent_vars[0]: PointMass(0)}
+            latent_vars = {latent_vars[0]: PointMass(params=tf.constant([0.0]))}
       else:
         raise NotImplementedError("A list of more than one element is "
                                   "not supported. See documentation.")
@@ -739,7 +743,7 @@ class MAP(VariationalInference):
       - \log p(x,z)
     """
     x = self.data
-    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
     self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
     return -self.loss
 
@@ -765,7 +769,7 @@ class Laplace(MAP):
     """
     # use only a batch of data to estimate hessian
     x = self.data
-    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                  scope='variational')
     inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)

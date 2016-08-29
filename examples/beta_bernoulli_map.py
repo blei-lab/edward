@@ -21,7 +21,7 @@ from edward.stats import bernoulli, beta
 
 
 class BetaBernoulli:
-  """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
   def __init__(self):
     self.n_vars = 1
 
@@ -33,8 +33,9 @@ class BetaBernoulli:
 
 
 ed.set_seed(42)
-model = BetaBernoulli()
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+
+model = BetaBernoulli()
 
 inference = ed.MAP(['p'], data, model)
 inference.run(n_iter=100, n_print=10)

@@ -23,9 +23,6 @@ from edward.stats import bernoulli, beta
 
 class BetaBernoulli:
   """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
-  def __init__(self):
-    self.n_vars = 1
-
   def log_prob(self, xs, zs):
     log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
     log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p))
@@ -42,17 +39,20 @@ class BetaBernoulli:
     return out
 
 
-ed.set_seed(42)
-model = BetaBernoulli()
-qp = Beta(model.n_vars)
-data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-
-inference = ed.MFVI({'p': qp}, data, model)
-inference.run(n_iter=200)
-
-
 def T(xs, zs):
   return tf.reduce_mean(tf.cast(xs['x'], tf.float32))
 
+
+ed.set_seed(42)
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+
+model = BetaBernoulli()
+
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp = Beta(a=qp_a, b=qp_b)
+
+inference = ed.MFVI({'p': qp}, data, model)
+inference.run(n_iter=200)
 
 print(ed.ppc(T, data, latent_vars={'p': qp}, model_wrapper=model))

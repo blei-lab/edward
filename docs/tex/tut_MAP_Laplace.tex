@@ -51,7 +51,7 @@ class Laplace(MAP):
     """
     # use only a batch of data to estimate hessian
     x = self.data
-    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                  scope='variational')
     inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
