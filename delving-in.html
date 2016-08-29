@@ -130,12 +130,18 @@ model = Model(...)</code></pre>
   \times
   \mathcal{N}(z_\mu)
   \times
-  \text{InvGamma}(z_\sigma)\end{aligned}\]</span> we would write</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, Normal, InvGamma
+  \text{InverseGamma}(z_\sigma)\end{aligned}\]</span> we would write</p>
+<pre class="python" language="Python"><code>from edward.models import Dirichlet, Normal, InverseGamma
 
-qpi = Dirichlet(K)
-qmu = Normal(K*D)
-qsigma = InvGamma(K*D)</code></pre>
+qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
+qmu_mu = tf.Variable(tf.random_normal([K * D]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+
+qpi = Dirichlet(alpha=qpi_alpha)
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
 <p>Each algorithm derived from <code>VariationalInference</code> minimizes a different loss function between the variational model and the posterior. For example, to minimize the Kullback-Leibler divergence <span class="math display">\[\begin{aligned}
   \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))\end{aligned}\]</span> we first instantiate the inference class: bind each latent variable to its corresponding variational distribution; then pass in data and the model; then run it.</p>
 <pre class="python" language="Python"><code>inference = ed.KLpq({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)

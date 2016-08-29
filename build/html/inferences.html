@@ -274,16 +274,16 @@ as input a shape and optionally, parameter arguments. If left
 unspecified, the parameter arguments are trainable parameters during
 inference.  The shape denotes the shape of its random variable. For
 example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">InvGamma</span><span class="p">,</span> <span class="n">Beta</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">InverseGamma</span><span class="p">,</span> <span class="n">Beta</span>
 
 <span class="c"># a vector of 10 random variables</span>
-<span class="n">qz1</span> <span class="o">=</span> <span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">qz1</span> <span class="o">=</span> <span class="n">InverseGamma</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">10</span><span class="p">]),</span> <span class="n">beta</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">10</span><span class="p">]))</span>
 
 <span class="c"># a 5 x 2 matrix of random variables</span>
-<span class="n">qz2</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">qz2</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">beta</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
 
-<span class="c"># vector of 3 random variables with fixed alpha param</span>
-<span class="n">qz</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="c"># vector of 3 random variables with varying b param</span>
+<span class="n">qz</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">3</span><span class="p">]),</span> <span class="n">b</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">3</span><span class="p">]))))</span>
 </pre></div>
 </div>
 <p>Multivariate distributions store their multivariate dimension in the

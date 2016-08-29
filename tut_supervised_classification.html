@@ -159,7 +159,9 @@ data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
 model = GaussianProcess(N=len(df))</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. Define the variational model to be a fully factorized normal</p>
-<pre class="python" language="Python"><code>qz = Normal(model.n_vars)</code></pre>
+<pre class="python" language="Python"><code>qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)</code></pre>
 <p>Run mean-field variational inference for 500 iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI({&#39;z&#39;: qz}, data, model)
 inference.run(n_iter=500)</code></pre>

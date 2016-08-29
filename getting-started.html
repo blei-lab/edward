@@ -136,8 +136,10 @@ data = {&#39;x&#39;: x, &#39;y&#39;: y}</code></pre>
 <p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation as</p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
-qz = Normal(model.n_vars)</code></pre>
-<p>The number of latent variables <code>model.n_vars</code> is the number of weights and biases in the neural network.</p>
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)</code></pre>
+<p>Defining <code>tf.Variable</code> enables its parameters to vary, and its standard deviation parameter is constrained to be greater than zero according to a <a href="https://en.wikipedia.org/wiki/Rectifier_(neural_networks)">softplus</a> transformation. The number of latent variables <code>model.n_vars</code> is the number of weights and biases in the neural network.</p>
 <p>Now, run mean-field variational inference. Infer the latent variable <code>’z’</code> using <code>qz</code> conditional on the data (and model). We specify <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
 <pre class="python" language="Python"><code>import edward as ed
 

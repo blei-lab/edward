@@ -139,9 +139,8 @@
 
 <span class="kn">import</span> <span class="nn">math</span>
 
-<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="k">import</span> <span class="n">distribution</span>  <span class="c"># pylint: disable=line-too-long</span>
-<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="k">import</span> <span class="n">kullback_leibler</span>  <span class="c"># pylint: disable=line-too-long</span>
-<span class="kn">from</span> <span class="nn">tensorflow.contrib.framework.python.framework</span> <span class="k">import</span> <span class="n">tensor_util</span> <span class="k">as</span> <span class="n">contrib_tensor_util</span>  <span class="c"># pylint: disable=line-too-long</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="k">import</span> \
+    <span class="n">distribution</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">constant_op</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">dtypes</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">ops</span>
@@ -281,7 +280,7 @@
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
           <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Input x dtype does not match dtype: %s vs. %s&quot;</span>
                           <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">full_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PointMass.cdf"><a class="viewcode-back" href="../../../edward.models.pointmass.html#edward.models.pointmass.PointMass.cdf">[docs]</a>  <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;cdf&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;CDF of observations in `x` under these Normal distribution(s).</span>
@@ -348,7 +347,7 @@
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
         <span class="c"># TODO</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">]</span><span class="o">*</span><span class="n">n</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">is_reparameterized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

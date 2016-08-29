@@ -464,31 +464,6 @@ and length variables are not positive.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="edward.util.softplus">
-<code class="descclassname">edward.util.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#softplus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.softplus" title="Permalink to this definition">¶</a></dt>
-<dd><p>Elementwise Softplus function</p>
-<div class="math">
-\[\log(1 + \exp(x))\]</div>
-<p>If input <cite>x &lt; -30</cite>, returns <cite>0.0</cite> exactly.</p>
-<p>If input <cite>x &gt; 30</cite>, returns <cite>x</cite> exactly.</p>
-<p>TensorFlow can&#8217;t currently autodiff through <code class="docutils literal"><span class="pre">tf.nn.softplus()</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A n-D tensor.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A tensor of same shape as input.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">InvalidArgumentError</span></code> &#8211; If the input has Inf or NaN values.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="edward.util.to_simplex">
 <code class="descclassname">edward.util.</code><code class="descname">to_simplex</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#to_simplex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.to_simplex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform real vector of length <code class="docutils literal"><span class="pre">(K-1)</span></code> to a simplex of dimension <code class="docutils literal"><span class="pre">K</span></code>

@@ -142,7 +142,7 @@
 
   def build_loss(self):
     x = self.data
-    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
     self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
     return -self.loss</code></pre>
 <p>The <code>MAP</code> class inherits from <code>VariationalInference</code> and initializes a point mass as the variational distribution. It requires defining only one method: <code>build_loss()</code>, which implicitly specifies the gradient of the log joint. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus backpropagating (applying the chain rule of differentiation) to compute the gradient of the objective.</p>

@@ -164,13 +164,14 @@
 
   def build_reparam_loss(self):
     x = self.data
-    z = {key: rv.sample(self.n_samples)
+    z = {key: rv.sample([self.n_samples])
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_prob = self.model_wrapper.log_prob(x, z)
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += rv.log_prob(z[key])
+      q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
     return -self.loss</code></pre>

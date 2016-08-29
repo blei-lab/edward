@@ -12,5 +12,6 @@ Submodules
 .. toctree::
 
    edward.models.models
+   edward.models.pointmass
    edward.models.random_variables
 

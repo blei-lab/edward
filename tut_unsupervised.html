@@ -182,9 +182,15 @@ plt.show()</code></pre>
 model = MixtureGaussian(K=2, D=2)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be a Dirichlet <span class="math inline">\(\times\)</span> fully factorized normal <span class="math inline">\(\times\)</span> fully factorized inverse Gamma.</p>
-<pre class="python" language="Python"><code>qpi = Dirichlet(model.K)
-qmu = Normal(model.K * model.D)
-qsigma = InvGamma(model.K * model.D)</code></pre>
+<pre class="python" language="Python"><code>qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
+qmu_mu = tf.Variable(tf.random_normal([K * D]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+
+qpi = Dirichlet(alpha=qpi_alpha)
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
 <p>Run mean-field variational inference for 4000 iterations, using a batch of 10 datapoints and 50 latent variable samples per iteration.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)</code></pre>

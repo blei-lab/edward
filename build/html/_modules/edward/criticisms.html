@@ -195,7 +195,7 @@
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
   <span class="c"># Monte Carlo estimate the mean of the posterior predictive:</span>
   <span class="c"># 1. Sample a batch of latent variables from posterior</span>
-  <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
+  <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="n">n_samples</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
   <span class="c"># 2. Make predictions, averaging over each sample of latent variables</span>
   <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
 
@@ -345,7 +345,7 @@
     <span class="c"># `tf.identity()` is to avoid fetching, e.g., a placeholder x</span>
     <span class="c"># when feeding the dictionary {x: np.array()}. TensorFlow will</span>
     <span class="c"># raise an error.</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">))</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="n">n_samples</span><span class="p">]))</span>
           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
 
   <span class="c"># 2. Sample from likelihood.</span>
