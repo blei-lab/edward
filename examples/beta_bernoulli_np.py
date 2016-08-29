@@ -15,6 +15,7 @@ from __future__ import print_function
 
 import edward as ed
 import numpy as np
+import tensorflow as tf
 
 from edward.models import PythonModel, Beta
 from scipy.stats import beta, bernoulli

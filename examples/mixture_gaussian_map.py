@@ -50,9 +50,9 @@ class MixtureGaussian:
     self.D = D
     self.n_vars = (2 * D + 1) * K
 
-    self.a = 1
-    self.b = 1
-    self.c = 10
+    self.a = 1.0
+    self.b = 1.0
+    self.c = 3.0
     self.alpha = tf.ones([K])
 
   def log_prob(self, xs, zs):
@@ -60,7 +60,7 @@ class MixtureGaussian:
     x = xs['x']
     pi, mus, sigmas = zs['pi'], zs['mu'], zs['sigma']
     log_prior = dirichlet.logpdf(pi, self.alpha)
-    log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)))
+    log_prior += tf.reduce_sum(norm.logpdf(mus, 0.0, self.c))
     log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
 
     # Loop over each sample zs[s, :].

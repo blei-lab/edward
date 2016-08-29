@@ -17,19 +17,19 @@ from edward.stats import norm
 
 
 class NormalPosterior:
-  """p(x, z) = p(z) = p(z | x) = Normal(z; mu, std)"""
-  def __init__(self, mu, std):
+  """p(x, z) = p(z) = p(z | x) = Normal(z; mu, sigma)"""
+  def __init__(self, mu, sigma):
     self.mu = mu
-    self.std = std
+    self.sigma = sigma
 
   def log_prob(self, xs, zs):
-    return norm.logpdf(zs['z'], self.mu, self.std)
+    return norm.logpdf(zs['z'], self.mu, self.sigma)
 
 
 ed.set_seed(42)
 mu = tf.constant(1.0)
-std = tf.constant(1.0)
-model = NormalPosterior(mu, std)
+sigma = tf.constant(1.0)
+model = NormalPosterior(mu, sigma)
 
 qz_mu = tf.Variable(tf.random_normal([1]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))

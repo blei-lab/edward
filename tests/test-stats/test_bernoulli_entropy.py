@@ -12,9 +12,9 @@ from scipy import stats
 class test_bernoulli_entropy_class(tf.test.TestCase):
 
   def _test(self, p):
-    val_true = stats.bernoulli.entropy(p)
-    self.assertAllClose(bernoulli.entropy(p).eval(), val_true)
-    self.assertAllClose(bernoulli.entropy(tf.constant(p)).eval(), val_true)
+    val_true = stats.bernoulli.entropy(p=p)
+    self.assertAllClose(bernoulli.entropy(p=p).eval(), val_true)
+    self.assertAllClose(bernoulli.entropy(p=tf.constant(p)).eval(), val_true)
 
   def test_0d(self):
     with self.test_session():

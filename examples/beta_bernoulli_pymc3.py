@@ -17,6 +17,7 @@ import edward as ed
 import numpy as np
 import pymc3 as pm
 import theano
+import tensorflow as tf
 
 from edward.models import PyMC3Model, Beta
 

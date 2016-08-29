@@ -11,29 +11,27 @@ from scipy import stats
 
 class test_expon_logpdf_class(tf.test.TestCase):
 
-  def _test(self, x, scale=1):
+  def _test(self, x, lam):
     xtf = tf.constant(x)
-    val_true = stats.expon.logpdf(x, scale=scale)
+    val_true = stats.expon.logpdf(x, scale=1.0 / lam)
     with self.test_session():
-      self.assertAllClose(expon.logpdf(xtf, scale=tf.constant(scale)).eval(),
+      self.assertAllClose(expon.logpdf(xtf, lam=tf.constant(lam)).eval(),
                           val_true)
 
   def test_0d(self):
-    self._test(0.3)
-    self._test(0.7)
+    self._test(0.3, lam=1.0)
+    self._test(0.7, lam=1.0)
 
-    self._test(0.3, scale=1.0)
-    self._test(0.7, scale=1.0)
+    self._test(0.3, lam=0.5)
+    self._test(0.7, lam=0.5)
 
-    self._test(0.3, scale=0.5)
-    self._test(0.7, scale=0.5)
-
-    self._test(0.3, scale=5.0)
-    self._test(0.7, scale=5.0)
+    self._test(0.3, lam=5.0)
+    self._test(0.7, lam=5.0)
 
   def test_1d(self):
-    self._test([0.5, 2.3, 5.8, 10.1], scale=5.0)
+    self._test([0.5, 2.3, 5.8, 10.1], lam=5.0)
 
   def test_2d(self):
-    self._test(np.array([[0.5, 2.3, 5.8, 10.1], [0.5, 2.3, 5.8, 10.1]]),
-               scale=5.0)
+    self._test(np.array([[0.5, 2.3, 5.8, 10.1], [0.5, 2.3, 5.8, 10.1]],
+                        dtype=np.float32),
+               lam=5.0)

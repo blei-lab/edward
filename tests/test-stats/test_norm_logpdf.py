@@ -11,21 +11,26 @@ from scipy import stats
 
 class test_norm_logpdf_class(tf.test.TestCase):
 
-  def _test(self, x, loc=0, scale=1):
+  def _test(self, x, mu, sigma):
     xtf = tf.constant(x)
-    val_true = stats.norm.logpdf(x, loc, scale)
+    val_true = stats.norm.logpdf(x, mu, sigma)
     with self.test_session():
-      self.assertAllClose(norm.logpdf(xtf, loc, scale).eval(), val_true)
+      self.assertAllClose(norm.logpdf(xtf, mu, sigma).eval(), val_true)
       self.assertAllClose(
-          norm.logpdf(xtf, tf.constant(loc), tf.constant(scale)).eval(),
+          norm.logpdf(xtf, tf.constant(mu), tf.constant(sigma)).eval(),
           val_true)
 
   def test_0d(self):
-    self._test(0.0)
-    self._test(0.623)
+    self._test(0.0, 0.0, 1.0)
+    self._test(0.623, 0.0, 1.0)
 
   def test_1d(self):
-    self._test([0.0, 1.0, 0.58, 2.3])
+    self._test([0.0, 1.0, 0.58, 2.3],
+               np.array([0.0] * 4, dtype=np.float32),
+               np.array([1.0] * 4, dtype=np.float32))
 
   def test_2d(self):
-    self._test(np.array([[0.0, 1.0, 0.58, 2.3], [0.1, 1.5, 4.18, 0.3]]))
+    self._test(np.array([[0.0, 1.0, 0.58, 2.3], [0.1, 1.5, 4.18, 0.3]],
+                        dtype=np.float32),
+               np.array([0.0] * 4, dtype=np.float32),
+               np.array([1.0] * 4, dtype=np.float32))

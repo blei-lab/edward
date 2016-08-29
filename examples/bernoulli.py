@@ -19,7 +19,7 @@ from edward.stats import bernoulli
 class BernoulliPosterior:
   """p(x, z) = p(z) = p(z | x) = Bernoulli(z; p)"""
   def log_prob(self, xs, zs):
-    return bernoulli.logpmf(zs['p'], 0.6)
+    return bernoulli.logpmf(zs['p'], p=0.6)
 
 
 ed.set_seed(42)

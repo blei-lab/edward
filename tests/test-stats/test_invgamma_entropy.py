@@ -19,19 +19,20 @@ def invgamma_entropy_vec(a, scale):
 
 class test_invgamma_entropy_class(tf.test.TestCase):
 
-  def _test(self, a, scale=1):
-    val_true = invgamma_entropy_vec(a, scale=scale)
+  def _test(self, alpha, beta):
+    val_true = invgamma_entropy_vec(alpha, scale=beta)
     with self.test_session():
-      self.assertAllClose(invgamma.entropy(a, scale).eval(), val_true,
+      self.assertAllClose(invgamma.entropy(alpha, beta).eval(), val_true,
                           atol=1e-4)
-      self.assertAllClose(invgamma.entropy(tf.constant(a),
-                                           tf.constant(scale)).eval(), val_true,
+      self.assertAllClose(invgamma.entropy(tf.constant(alpha),
+                                           tf.constant(beta)).eval(), val_true,
                           atol=1e-4)
 
   def test_0d(self):
-    self._test(a=1.0, scale=1.0)
-    self._test(a=0.5, scale=5.0)
-    self._test(a=5.0, scale=0.5)
+    self._test(alpha=1.0, beta=1.0)
+    self._test(alpha=0.5, beta=5.0)
+    self._test(alpha=5.0, beta=0.5)
 
   def test_1d(self):
-    self._test([0.5, 1.2, 5.3, 8.7], [0.5, 1.2, 5.3, 8.7])
+    self._test(alpha=np.array([0.5, 1.2, 5.3, 8.7], dtype=np.float32),
+               beta=np.array([0.5, 1.2, 5.3, 8.7], dtype=np.float32))
