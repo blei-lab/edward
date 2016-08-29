@@ -57,23 +57,25 @@ $x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)$ from the
 model likelihood given a set of latent variables.
 \begin{lstlisting}[language=Python]
 class BetaBernoulli:
-    ...
-    def sample_likelihood(self, zs, n):
-        """x | z ~ p(x | z)"""
-        out = []
-        for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
-        return out
+  ...
+  def sample_likelihood(self, zs, n):
+    """x | p ~ p(x | p)"""
+    out = []
+    for s in range(zs['p'].shape[0]):
+      x_new = bernoulli.rvs(zs['p'][s, :], size=n)
+      out += [{'x': x_new.reshape((n,))}]
+
+    return out
 \end{lstlisting}
 
 The \texttt{ed.ppc()} method provides a scaffold for studying
 various discrepancy functions by repeatedly simulating datasets from the
 posterior predictive distribution
 \begin{lstlisting}[language=Python]
-def T(x, z):
-    return tf.reduce_mean(tf.cast(x['x'], tf.float32))
+def T(xs, zs):
+  return tf.reduce_mean(tf.cast(xs['x'], tf.float32))
 
-print(ed.ppc(model, variational, data, T))
+ed.ppc(T, data, latent_vars={'p': qp}, model_wrapper=model)
 \end{lstlisting}
 
 See the \href{api/criticisms}{criticism API} for further details.

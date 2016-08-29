@@ -136,22 +136,15 @@
 <h3 id="implementation">Implementation</h3>
 <p>In Edward, we view MAP estimation as a special case of <a href="tut_KLqp"><span class="math inline">\(KL(q\|p)\)</span> minimization</a>, where the variational distribution is a point mass (delta function) distribution. This makes explicit the additional assumptions underlying MAP estimation from the viewpoint of variational inference: namely, it approximates the posterior using a point to summarize the full distribution.</p>
 <pre class="python" language="Python"><code>class MAP(VariationalInference):
-    def __init__(self, model, data=None, params=None):
-        with tf.variable_scope("variational"):
-            if hasattr(model, 'n_vars'):
-                variational = Variational()
-                variational.add(PointMass(model.n_vars, params))
-            else:
-                variational = Variational()
-                variational.add(PointMass(0))
+  def __init__(self, latent_vars, data=None, model_wrapper=None):
+    ...
+    super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
-        super(MAP, self).__init__(model, variational, data)
-
-    def build_loss(self):
-        x = self.data
-        z = self.variational.sample()
-        self.loss = tf.squeeze(self.model.log_prob(x, z))
-        return -self.loss</code></pre>
+  def build_loss(self):
+    x = self.data
+    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
+    return -self.loss</code></pre>
 <p>The <code>MAP</code> class inherits from <code>VariationalInference</code> and initializes a point mass as the variational distribution. It requires defining only one method: <code>build_loss()</code>, which implicitly specifies the gradient of the log joint. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus backpropagating (applying the chain rule of differentiation) to compute the gradient of the objective.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the log density’s gradient.</p>
 <h3 id="references">References</h3>

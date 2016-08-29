@@ -14,9 +14,9 @@ We detail specifics for each modeling language below.
 
   class BetaBernoulli:
     def log_prob(self, xs, zs):
-      log_prior = beta.logpdf(zs, a=1.0, b=1.0)
+      log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
       log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                         for z in tf.unpack(zs)])
+                         for z in tf.unpack(zs['p'])])
       return log_lik + log_prior
 
   model = BetaBernoulli()
@@ -30,14 +30,16 @@ We detail specifics for each modeling language below.
 
   class BetaBernoulli(PythonModel):
     def _py_log_prob(self, xs, zs):
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for b in range(n_minibatch):
-          lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-          for n in range(len(xs['x'])):
-            lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
+      xs = xs['x']
+      ps = zs['p']
+      n_samples = ps.shape[0]
+      lp = np.zeros(n_samples, dtype=np.float32)
+      for b in range(n_samples):
+        lp[b] = beta.logpdf(ps[b, :], a=1.0, b=1.0)
+        for n in range(xs.shape[0]):
+          lp[b] += bernoulli.logpmf(xs[n], p=ps[b, :])
 
-        return lp
+      return lp
 
   model = BetaBernoulli()
   data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
@@ -51,8 +53,8 @@ We detail specifics for each modeling language below.
 
   x_obs = theano.shared(np.zeros(1))
   with pm.Model() as pm_model:
-    beta = pm.Beta('beta', 1, 1, transform=None)
-    x = pm.Bernoulli('x', beta, observed=x_obs)
+    p = pm.Beta('p', 1, 1, transform=None)
+    x = pm.Bernoulli('x', p, observed=x_obs)
 
   model = PyMC3Model(pm_model)
   data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
@@ -65,19 +67,19 @@ We detail specifics for each modeling language below.
   model_code = """
     data {
       int<lower=0> N;
-      int<lower=0,upper=1> y[N];
+      int<lower=0,upper=1> x[N];
     }
     parameters {
-      real<lower=0,upper=1> theta;
+      real<lower=0,upper=1> p;
     }
     model {
-      theta ~ beta(1.0, 1.0);
+      p ~ beta(1.0, 1.0);
       for (n in 1:N)
-        y[n] ~ bernoulli(theta);
+      x[n] ~ bernoulli(p);
     }
   """
   model = ed.StanModel(model_code=model_code)
-  data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+  data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
 Reading Data in Edward
 ^^^^^^^^^^^^^^^^^^^^^^

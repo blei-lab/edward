@@ -113,8 +113,9 @@ class BayesianNN:
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def log_prob(self, xs, zs):
-        # Extract inputs/outputs from data `xs`.
+        # Extract inputs/outputs from data `xs` and latent vars `zs`.
         x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
+        zs = zs[&#39;z&#39;]
         # Specify the prior on neural network weights `zs`.
         log_prior = tf.reduce_sum(norm.logpdf(zs, loc=0, scale=1), 1)
         # Specify the likelihood. Its mean is the output of a neural
@@ -133,15 +134,14 @@ y = np.cos(x) + norm.rvs(0, 0.1, size=50)
 data = {&#39;x&#39;: x, &#39;y&#39;: y}</code></pre>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
 <p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a mean-field normal approximation as</p>
-<pre class="python" language="Python"><code>from edward.models import Variational, Normal
+<pre class="python" language="Python"><code>from edward.models import Normal
 
-variational = Variational()
-variational.add(Normal(model.n_vars))</code></pre>
+qz = Normal(model.n_vars)</code></pre>
 <p>The number of latent variables <code>model.n_vars</code> is the number of weights and biases in the neural network.</p>
-<p>Now, run mean-field variational inference. We specify <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
+<p>Now, run mean-field variational inference. Infer the latent variable <code>’z’</code> using <code>qz</code> conditional on the data (and model). We specify <code>1000</code> iterations with a batch of <code>10</code> datapoints per iteration.</p>
 <pre class="python" language="Python"><code>import edward as ed
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({&#39;z&#39;: qz}, data, model)
 inference.run(n_iter=1000, n_minibatch=10)</code></pre>
 <p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
 <p><img src="images/getting-started-fig1.png" alt="image" width="700" /></p>

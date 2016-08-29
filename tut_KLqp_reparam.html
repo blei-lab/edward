@@ -154,24 +154,29 @@
 <h3 id="implementation">Implementation</h3>
 <p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the reparameterization gradient in the class <code>MFVI</code> (mean-field variational inference). It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
-    def __init__(self, *args, **kwargs):
-        super(MFVI, self).__init__(*args, **kwargs)
+  def __init__(self, *args, **kwargs):
+    super(MFVI, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_samples=1, ...):
-        ...
-        self.n_samples = n_samples
-        return super(MFVI, self).initialize(*args, **kwargs)
+  def initialize(self, n_samples=1, ...):
+    ...
+    self.n_samples = n_samples
+    return super(MFVI, self).initialize(*args, **kwargs)
 
-    def build_reparam_loss(self):
-        x = self.data
-        z = self.variational.sample(self.n_samples)
+  def build_reparam_loss(self):
+    x = self.data
+    z = {key: rv.sample(self.n_samples)
+         for key, rv in six.iteritems(self.latent_vars)}
 
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
-                                   self.variational.log_prob(z))
-        return -self.loss</code></pre>
+    p_log_prob = self.model_wrapper.log_prob(x, z)
+    q_log_prob = 0.0
+    for key, rv in six.iteritems(self.latent_vars):
+      q_log_prob += rv.log_prob(z[key])
+
+    self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
+    return -self.loss</code></pre>
 <p>Two methods are added: <code>initialize()</code> and <code>build_reparam_loss()</code>. The method <code>initialize()</code> follows the same initialization as <code>VariationalInference</code>, and adds an argument: <code>n_samples</code> for the number of samples from the variational model.</p>
 <p>The method <code>build_reparam_loss()</code> implements the ELBO and its gradient. It draws <code>self.n_samples</code> samples from the variational model. It registers the Monte Carlo estimate of the ELBO in TensorFlow’s computational graph, and stores it in <code>self.loss</code>, to track progress of the inference for diagnostics.</p>
-<p>The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>stop_gradient()</code> function.</p>
+<p>The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>tf.stop_gradient()</code> function.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
 <p>See the <a href="api/">API</a> for more details.</p>
 <h3 id="references">References</h3>

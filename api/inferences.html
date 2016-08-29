@@ -155,16 +155,15 @@ methods are derived from.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Base class for Edward inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>It takes as input a probabilistic model <code class="docutils literal"><span class="pre">model</span></code> and dataset
-<code class="docutils literal"><span class="pre">data</span></code>.
+<p>It takes as input the set of latent variables to infer and a dataset. For now, it must also take as input a model wrapper <code class="docutils literal"><span class="pre">model_wrapper</span></code>.
 For more details, see the
-<a class="reference external" href="models">Model API</a>
+<a class="reference external" href="data">Data API</a>.
 and
-<a class="reference external" href="data">Data API</a>.</p>
+<a class="reference external" href="models">Model API</a></p>
 <p>Note that <code class="docutils literal"><span class="pre">Inference</span></code> says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
 tailored to a restricted class of models available in Edward (such as
@@ -177,8 +176,8 @@ have their own default methods.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Base class for Monte Carlo inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 
   <span class="o">...</span>
 
@@ -186,12 +185,11 @@ have their own default methods.</p>
 <span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialization.</span>
 <span class="sd">    ...</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">variational</span> <span class="o">=</span> <span class="n">variational</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 
   <span class="o">...</span>
 </pre></div>
@@ -204,12 +202,8 @@ carry both <code class="docutils literal"><span class="pre">VariationalInference
 <code class="docutils literal"><span class="pre">VariationalInference</span></code> class.
 The <code class="docutils literal"><span class="pre">MonteCarlo</span></code> class is still under development. We welcome
 researchers to make significant advances here!</p>
-<p>Let&#8217;s focus on <code class="docutils literal"><span class="pre">VariationalInference</span></code>. In addition to a model and
-data as input, <code class="docutils literal"><span class="pre">VariationalInference</span></code> takes in a variational
-model <code class="docutils literal"><span class="pre">variational</span></code>, which serves as a model of the posterior
-distribution. For more details, see the Variational Models section
-below.</p>
-<p>The main method in <code class="docutils literal"><span class="pre">VariationalInference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
+<p>Let&#8217;s focus on <code class="docutils literal"><span class="pre">VariationalInference</span></code>. The main method in
+<code class="docutils literal"><span class="pre">VariationalInference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -272,32 +266,24 @@ another distribution to approximate it. This is analogous to the way
 that probabilistic models specify distributions to approximate the
 true data distribution. After inference, the variational model is used
 as a proxy to the true posterior.</p>
-<p>Edward implements variational models using the <code class="docutils literal"><span class="pre">Variational</span></code> class in
-<code class="docutils literal"><span class="pre">edward.models</span></code>. For example, the following instantiates an empty
-container for the variational distribution.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span>
-
-<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>To add distributions to this object, use the <code class="docutils literal"><span class="pre">add()</span></code> method, which
-is used to add <code class="docutils literal"><span class="pre">RandomVariable</span></code> objects.  All random variable objects, i.e.,
+<p>Edward implements variational models using the <code class="docutils literal"><span class="pre">RandomVariable</span></code> class in
+<code class="docutils literal"><span class="pre">edward.models</span></code>. During inference, each latent variable in the model is binded to a <code class="docutils literal"><span class="pre">RandomVariable</span></code> object, which aims to match the latent variable given data.</p>
+<p>All random variable objects, i.e.,
 any class inheriting from <code class="docutils literal"><span class="pre">RandomVariable</span></code> in <code class="docutils literal"><span class="pre">edward.models</span></code>, takes
 as input a shape and optionally, parameter arguments. If left
 unspecified, the parameter arguments are trainable parameters during
 inference.  The shape denotes the shape of its random variable. For
 example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Variational</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Beta</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">InvGamma</span><span class="p">,</span> <span class="n">Beta</span>
 
-<span class="c"># first, add a vector of 10 random variables</span>
-<span class="c"># second, add a 5 x 2 matrix of random variables</span>
-<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
-<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+<span class="c"># a vector of 10 random variables</span>
+<span class="n">qz1</span> <span class="o">=</span> <span class="n">InvGamma</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c"># a 5 x 2 matrix of random variables</span>
+<span class="n">qz2</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 
 <span class="c"># vector of 3 random variables with fixed alpha param</span>
-<span class="n">variational</span> <span class="o">=</span> <span class="n">Variational</span><span class="p">()</span>
-<span class="n">variational</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<span class="n">qz</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Multivariate distributions store their multivariate dimension in the
@@ -310,18 +296,9 @@ outer dimension (right-most dimension) of their shape.</p>
 <span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p>The main methods in <code class="docutils literal"><span class="pre">Variational</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
+<p>The main methods in each <code class="docutils literal"><span class="pre">RandomVariable</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
 <code class="docutils literal"><span class="pre">sample()</span></code>, which mathematically are <code class="docutils literal"><span class="pre">log</span> <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> and <code class="docutils literal"><span class="pre">z</span> <span class="pre">~</span>
-<span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively.</p>
-<p><code class="docutils literal"><span class="pre">samples(n)</span></code> takes as input the number of samples and returns a list
-of TensorFlow tensors, each of whose shape is <code class="docutils literal"><span class="pre">(n,</span> <span class="pre">)</span> <span class="pre">+</span> <span class="pre">self.shape</span></code> for
-each random variable object within the container. <code class="docutils literal"><span class="pre">log_prob(xs)</span></code> takes
-as input a list of TensorFlow tensors, and returns a vector of density
-evaluations, one for each sample <code class="docutils literal"><span class="pre">x</span></code> in <code class="docutils literal"><span class="pre">xs</span></code>.</p>
-<p>The ordering of the addition to the container matters. This defines
-the ordering of the lists for the output of <code class="docutils literal"><span class="pre">sample()</span></code> and the input
-of <code class="docutils literal"><span class="pre">log_prob()</span></code>.
-(As an example, see the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture of Gaussians</a>.)</p>
+<span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively. See their docstrings for more details.</p>
 </div>
 </div>
 

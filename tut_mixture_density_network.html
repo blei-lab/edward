@@ -92,12 +92,11 @@
 <p>If you are not familiar with MDNs have a look at the <a href="http://cbonnett.github.io/MDN.html">following blog post</a> or at original <a href="http://research.microsoft.com/en-us/um/people/cmbishop/downloads/Bishop-NCRG-94-004.pdf">paper</a> by Bishop. Note you have to manually <a href="https://keras.io/backend/">configure Keras</a> to work with TensorFlow. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network_demo.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">blog post</a> by Otoro, where he explains MDNs. This is an inverse problem: for every input <span class="math inline">\(X\)</span> there are multiple outputs <span class="math inline">\(y\)</span>.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N=40000):
-    y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-    r_data = np.float32(np.random.normal(size=(N, 1))) # random noise
-    x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
-    return train_test_split(x_data, y_data, random_state=42, train_size=0.1)
-
+<pre class="python" language="Python"><code>def build_toy_dataset(N=6000):
+  y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
+  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
+  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
+  return train_test_split(x_data, y_data, random_state=42)
 
 X_train, X_test, y_train, y_test = build_toy_dataset()
 print("Size of features in training data: {:s}".format(X_train.shape))
@@ -118,43 +117,44 @@ data = {'X': X, 'y': y}</code></pre>
 <h3 id="model">Model</h3>
 <p>We define a class that can be used to construct MDNs. Here we use a mixture of normal distributions parameterized by a feedforward network. In other words, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network.</p>
 <pre class="python" language="Python"><code>class MixtureDensityNetwork:
-    """
-    Mixture density network for outputs y on inputs x.
+  """
+  Mixture density network for outputs y on inputs x.
 
-    p((x,y), (z,theta))
-    = sum_{k=1}^K pi_k(x; theta) Normal(y; mu_k(x; theta), sigma_k(x; theta))
+  p((x,y), (z,theta))
+  = sum_{k=1}^K pi_k(x; theta) Normal(y; mu_k(x; theta), sigma_k(x; theta))
 
-    where pi, mu, sigma are the output of a neural network taking x
-    as input and with parameters theta. There are no latent variables
-    z, which are hidden variables we aim to be Bayesian about.
-    """
-    def __init__(self, K):
-        self.K = K
+  where pi, mu, sigma are the output of a neural network taking x
+  as input and with parameters theta. There are no latent variables
+  z, which are hidden variables we aim to be Bayesian about.
+  """
+  def __init__(self, K):
+    self.K = K
 
-    def neural_network(self, X):
-        """pi, mu, sigma = NN(x; theta)"""
-        hidden1 = Dense(15, activation='relu')(X)  # fully-connected layer with 15 hidden units
-        hidden2 = Dense(15, activation='relu')(hidden1)
-        self.mus = Dense(self.K)(hidden2)
-        self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
-        self.pi = Dense(self.K, activation=K.softmax)(hidden2)
+  def neural_network(self, X):
+    """pi, mu, sigma = NN(x; theta)"""
+    # fully-connected layer with 25 hidden units
+    hidden1 = Dense(25, activation='relu')(X)
+    hidden2 = Dense(25, activation='relu')(hidden1)
+    self.mus = Dense(self.K)(hidden2)
+    self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
+    self.pi = Dense(self.K, activation=K.softmax)(hidden2)
 
-    def log_prob(self, xs, zs=None):
-        """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
-        # Note there are no parameters we're being Bayesian about. The
-        # parameters are baked into how we specify the neural networks.
-        X, y = xs['X'], xs['y']
-        self.neural_network(X)
-        result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
-        result = tf.mul(result, self.pi)
-        result = tf.reduce_sum(result, 1)
-        result = tf.log(result)
-        return tf.reduce_sum(result)</code></pre>
-<p>We instantiate the mixture density network with 20 mixtures.</p>
-<pre class="python" language="Python"><code>model = MixtureDensityNetwork(20)</code></pre>
+  def log_prob(self, xs, zs):
+    """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
+    # Note there are no parameters we're being Bayesian about. The
+    # parameters are baked into how we specify the neural networks.
+    X, y = xs['X'], xs['y']
+    self.neural_network(X)
+    result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = tf.mul(result, self.pi)
+    result = tf.reduce_sum(result, 1)
+    result = tf.log(result)
+    return tf.reduce_sum(result)</code></pre>
+<p>We instantiate the mixture density network with 10 mixtures.</p>
+<pre class="python" language="Python"><code>model = MixtureDensityNetwork(10)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="tut_MAP">MAP estimation in Edward</a>.</p>
-<pre class="python" language="Python"><code>inference = ed.MAP(model, data)</code></pre>
+<pre class="python" language="Python"><code>inference = ed.MAP([], data, model)</code></pre>
 <p>Here, we will manually control the inference and how data is passed into it at each step. First, start a TensorFlow session and pass it into Keras so that it shares the same TensorFlow session as Edward. Then initialize the algorithm.</p>
 <pre class="python" language="Python"><code>sess = ed.get_session()
 K.set_session(sess)

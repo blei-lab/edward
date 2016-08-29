@@ -106,10 +106,10 @@ approximate the posterior $p(z \mid x)$.
 %posterior of the probability model.
 
 
-Edward provides a \texttt{Variational} class and a library of
-\texttt{RandomVariable} objects. Variational models combine these using
-the \texttt{add()} syntax.
-For example, to specify this variational model (e.g.~for a Gaussian mixture)
+Edward provides a library of
+\texttt{RandomVariable} objects. Variational models use these to infer
+each latent variable in the probability model.
+For example, to specify a variational model (e.g.~for a Gaussian mixture)
 \begin{align*}
   q(z \;;\; \lambda)
   &=
@@ -121,15 +121,12 @@ For example, to specify this variational model (e.g.~for a Gaussian mixture)
 \end{align*}
 we would write
 \begin{lstlisting}[language=Python]
-from edward.models import Variational, Dirichlet, Normal, InvGamma
+from edward.models import Dirichlet, Normal, InvGamma
 
-variational = Variational()
-variational.add(Dirichlet(K))
-variational.add(Normal(K*D))
-variational.add(InvGamma(K*D))
+qpi = Dirichlet(K)
+qmu = Normal(K*D)
+qsigma = InvGamma(K*D)
 \end{lstlisting}
-%Ordering matters: variational models must match the same ordering as latent
-%variables accessed in \texttt{Model.log_prob(xs, zs)}.
 
 Each algorithm derived from \texttt{VariationalInference} minimizes a
 different loss function between the variational model and the
@@ -140,9 +137,11 @@ For example, to minimize the Kullback-Leibler divergence
 \begin{align*}
   \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))
 \end{align*}
-we first instantiate the inference class and then run it.
+we first instantiate the inference class: bind each latent variable to
+its corresponding variational distribution; then pass in data and the
+model; then run it.
 \begin{lstlisting}[language=Python]
-inference = ed.KLpq(model, variational, data)
+inference = ed.KLpq({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=500, n_minibatch=5)
 \end{lstlisting}
 This runs the \texttt{KLpq} minimization algorithm for \texttt{500} iterations,
@@ -161,15 +160,16 @@ Edward explores model and inference criticism using
   classification accuracy
 \end{itemize}
 \begin{lstlisting}[language=Python]
-ed.evaluate('mean_squared_error', model, variational, data)
+ed.evaluate('mean_squared_error', data={'y': y_train, 'x': x_train},
+            latent_vars={'z': qz}, model_wrapper=model)
 \end{lstlisting}
 \begin{itemize}
   \item posterior predictive checks, for making probabilistic
   assessments of the model fit using discrepancy functions
 \end{itemize}
 \begin{lstlisting}[language=Python]
-T = lambda data, z: tf.reduce_mean(data['x'])
-print(ed.ppc(model, variational, data, T))
+T = lambda xs, zs: tf.reduce_mean(xs['x'])
+ed.ppc(T, data={'x': x_train}, latent_vars={'z': qz}, model_wrapper=model)
 \end{lstlisting}
 
 See the \href{tutorials}{tutorials} for examples of models,

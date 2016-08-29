@@ -626,25 +626,6 @@
   <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="stop_gradient"><a class="viewcode-back" href="../../edward.util.html#edward.util.stop_gradient">[docs]</a><span class="k">def</span> <span class="nf">stop_gradient</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Apply ``tf.stop_gradient()`` element-wise.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  x : tf.Tensor or list of tf.Tensor</span>
-<span class="sd">    A n-D tensor or list thereof.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  tf.Tensor or list of tf.Tensor</span>
-<span class="sd">    A object of same type and shape as input.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>  <span class="c"># list</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span></div>
-
-
 <div class="viewcode-block" id="to_simplex"><a class="viewcode-back" href="../../edward.util.html#edward.util.to_simplex">[docs]</a><span class="k">def</span> <span class="nf">to_simplex</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Transform real vector of length ``(K-1)`` to a simplex of dimension ``K``</span>
 <span class="sd">  using a backward stick breaking construction.</span>

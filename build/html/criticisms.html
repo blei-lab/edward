@@ -136,10 +136,10 @@
 <p>Criticism is about understanding the
 assumptions made in one&#8217;s analysis. For example, model criticism
 measures the degree to which our model falsely describes the data.</p>
-<p>Criticism techniques are simply functions which take the probability
-model, variational model, and data as input along with other
-additional arguments.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">criticize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<p>Criticism techniques are simply functions which take as input data,
+the probability model and variational model (binded through a latent
+variable dictionary), and any additional inputs.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">criticize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
   <span class="o">...</span>
 </pre></div>
 </div>

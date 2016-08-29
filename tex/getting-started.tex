@@ -41,8 +41,9 @@ class BayesianNN:
         self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
     def log_prob(self, xs, zs):
-        # Extract inputs/outputs from data `xs`.
+        # Extract inputs/outputs from data `xs` and latent vars `zs`.
         x, y = xs['x'], xs['y']
+        zs = zs['z']
         # Specify the prior on neural network weights `zs`.
         log_prior = tf.reduce_sum(norm.logpdf(zs, loc=0, scale=1), 1)
         # Specify the likelihood. Its mean is the output of a neural
@@ -73,20 +74,21 @@ Next, make inferences about the model from data.
 Edward focuses on variational inference. Specify a mean-field normal
 approximation as
 \begin{lstlisting}[language=Python]
-from edward.models import Variational, Normal
+from edward.models import Normal
 
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz = Normal(model.n_vars)
 \end{lstlisting}
 The number of latent variables \texttt{model.n_vars} is the number
 of weights and biases in the neural network.
 
-Now, run mean-field variational inference. We specify \texttt{1000} iterations
-with a batch of \texttt{10} datapoints per iteration.
+Now, run mean-field variational inference. Infer the latent variable
+\texttt{'z'} using \texttt{qz} conditional on the data (and model). We
+specify \texttt{1000} iterations with a batch of \texttt{10}
+datapoints per iteration.
 \begin{lstlisting}[language=Python]
 import edward as ed
 
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=1000, n_minibatch=10)
 \end{lstlisting}
 

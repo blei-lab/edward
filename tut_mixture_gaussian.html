@@ -131,65 +131,66 @@
   \mathbf{x}_{\mathrm{max}} + \log \sum_i \exp(\mathbf{x}_i -
   \mathbf{x}_{\mathrm{max}}).\end{aligned}\]</span> Subtracting the maximum value before taking the log-sum-exp leads to more numerically stable output.</p>
 <pre class="python" language="Python"><code>class MixtureGaussian:
-    """
-    Mixture of Gaussians
+  """
+  Mixture of Gaussians
 
-    p(x, z) = [ prod_{n=1}^N sum_{k=1}^K pi_k N(x_n; mu_k, sigma_k) ]
-              [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-              Dirichlet(pi; alpha)
+  p(x, z) = [ prod_{n=1}^N sum_{k=1}^K pi_k N(x_n; mu_k, sigma_k) ]
+        [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
+        Dirichlet(pi; alpha)
 
-    where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
+  where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
 
-    Parameters
-    ----------
-    K : int
-        Number of mixture components.
-    D : float, optional
-        Dimension of the Gaussians.
-    """
-    def __init__(self, K, D):
-        self.K = K
-        self.D = D
-        self.n_vars = (2*D + 1) * K
+  Parameters
+  ----------
+  K : int
+    Number of mixture components.
+  D : float, optional
+    Dimension of the Gaussians.
+  """
+  def __init__(self, K, D):
+    self.K = K
+    self.D = D
+    self.n_vars = (2 * D + 1) * K
 
-        self.a = 1
-        self.b = 1
-        self.c = 10
-        self.alpha = tf.ones([K])
+    self.a = 1
+    self.b = 1
+    self.c = 10
+    self.alpha = tf.ones([K])
 
-    def log_prob(self, xs, zs):
-        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        x = xs['x']
-        pi, mus, sigmas = zs
-        log_prior = dirichlet.logpdf(pi, self.alpha)
-        log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
-        log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+  def log_prob(self, xs, zs):
+    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    x = xs['x']
+    pi, mus, sigmas = zs['pi'], zs['mu'], zs['sigma']
+    log_prior = dirichlet.logpdf(pi, self.alpha)
+    log_prior += tf.reduce_sum(norm.logpdf(mus, 0, np.sqrt(self.c)), 1)
+    log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
 
-        # Loop over each sample zs[s, :].
-        log_lik = []
-        N = get_dims(x)[0]
-        n_samples = get_dims(pi)[0]
-        for s in range(n_samples):
-            # log-likelihood is
-            # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
-            # Create a K x N matrix, whose entry (k, n) is
-            # log pi_k + log N(x_n; mu_k, sigma_k).
-            matrix = []
-            for k in range(self.K):
-                matrix += [tf.ones(N)*tf.log(pi[s, k]) +
-                           multivariate_normal.logpdf(x,
-                               mus[s, (k*self.D):((k+1)*self.D)],
-                               sigmas[s, (k*self.D):((k+1)*self.D)])]
+    # Loop over each sample zs[s, :].
+    log_lik = []
+    N = get_dims(x)[0]
+    n_samples = get_dims(pi)[0]
+    for s in range(n_samples):
+      # log-likelihood is
+      # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
+      # Create a K x N matrix, whose entry (k, n) is
+      # log pi_k + log N(x_n; mu_k, sigma_k).
+      matrix = []
+      for k in range(self.K):
+        matrix += [tf.ones(N) * tf.log(pi[s, k]) +
+                   multivariate_normal.logpdf(x,
+                   mus[s, (k * self.D):((k + 1) * self.D)],
+                   sigmas[s, (k * self.D):((k + 1) * self.D)])]
 
-            matrix = tf.pack(matrix)
-            # log_sum_exp() along the rows is a vector, whose nth
-            # element is the log-likelihood of data point x_n.
-            vector = log_sum_exp(matrix, 0)
-            # Sum over data points to get the full log-likelihood.
-            log_lik_z = tf.reduce_sum(vector)
-            log_lik += [log_lik_z]
+      matrix = tf.pack(matrix)
+      # log_sum_exp() along the rows is a vector, whose nth
+      # element is the log-likelihood of data point x_n.
+      vector = log_sum_exp(matrix, 0)
+      # Sum over data points to get the full log-likelihood.
+      log_lik_z = tf.reduce_sum(vector)
+      log_lik += [log_lik_z]
 
-        return log_prior + tf.pack(log_lik)
+    return log_prior + tf.pack(log_lik)
+
 
 model = MixtureGaussian(K=2, D=2)</code></pre>
 <p>We experiment with this model using variational inference in the <a href="tut_unsupervised">unsupervised learning</a> tutorial. Example scripts using this model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_map.py">here with MAP estimation</a> and <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_laplace.py">here with the Laplace approximation</a>.</p>

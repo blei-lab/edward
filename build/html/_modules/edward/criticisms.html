@@ -142,19 +142,14 @@
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">logit</span><span class="p">,</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span>
 
 
-<div class="viewcode-block" id="evaluate"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.evaluate">[docs]</a><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">y_true</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluate"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.evaluate">[docs]</a><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">,</span>
+             <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">output_key</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Evaluate fitted model using a set of metrics.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  metrics : list of str or str</span>
 <span class="sd">    List of metrics or a single metric.</span>
-<span class="sd">  model : ed.Model</span>
-<span class="sd">    Probability model, a class object with an implemented</span>
-<span class="sd">    ``predict`` method. PyMC3 and Stan models do not currently</span>
-<span class="sd">    support this method.</span>
-<span class="sd">  variational : ed.Variational</span>
-<span class="sd">    Variational approximation to the posterior p(z | x)</span>
 <span class="sd">  data : dict</span>
 <span class="sd">    Data dictionary to evaluate model with. For TensorFlow,</span>
 <span class="sd">    Python, and Stan models, the key type is a string; for PyMC3,</span>
@@ -162,11 +157,18 @@
 <span class="sd">    Python, and PyMC3 models, the value type is a NumPy array or</span>
 <span class="sd">    TensorFlow placeholder; for Stan, the value type is the type</span>
 <span class="sd">    according to the Stan program&#39;s data block.</span>
-<span class="sd">  y_true : np.ndarray or tf.Tensor</span>
-<span class="sd">    True values to compare to in supervised learning tasks.</span>
+<span class="sd">  latent_vars : dict of str to RandomVariable</span>
+<span class="sd">    Collection of random variables (of type `str`) binded to their</span>
+<span class="sd">    inferred posterior (of type `RandomVariable`).</span>
+<span class="sd">  model_wrapper : ed.Model</span>
+<span class="sd">    Probability model. Class object that implements the</span>
+<span class="sd">    ``predict`` method.</span>
 <span class="sd">  n_samples : int, optional</span>
 <span class="sd">    Number of posterior samples for making predictions,</span>
 <span class="sd">    using the posterior predictive distribution.</span>
+<span class="sd">  output_key : str, optional</span>
+<span class="sd">    If using a supervised metric, it is the key in ``data`` which</span>
+<span class="sd">    corresponds to the predicted output.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -177,15 +179,33 @@
 <span class="sd">  ------</span>
 <span class="sd">  NotImplementedError</span>
 <span class="sd">    If an input metric does not match an implemented metric in Edward.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # log-likelihood performance</span>
+<span class="sd">  &gt;&gt;&gt; evaluate(&#39;log_likelihood&#39;, data={&#39;x&#39;: x_train},</span>
+<span class="sd">  &gt;&gt;&gt;          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # classification accuracy</span>
+<span class="sd">  &gt;&gt;&gt; # here, &#39;x&#39; is any features the model is defined with respect to,</span>
+<span class="sd">  &gt;&gt;&gt; # and &#39;y&#39; is the output of the posterior predictive</span>
+<span class="sd">  &gt;&gt;&gt; evaluate(&#39;binary_accuracy&#39;, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},</span>
+<span class="sd">  &gt;&gt;&gt;          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
   <span class="c"># Monte Carlo estimate the mean of the posterior predictive:</span>
   <span class="c"># 1. Sample a batch of latent variables from posterior</span>
-  <span class="n">zs</span> <span class="o">=</span> <span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+  <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
   <span class="c"># 2. Make predictions, averaging over each sample of latent variables</span>
-  <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
+  <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
 
   <span class="c"># Evaluate y_pred according to y_true for all metrics.</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="c"># Get y_true (if supervised).</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">output_key</span><span class="p">]</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
   <span class="n">evaluations</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
@@ -242,11 +262,12 @@
     <span class="k">return</span> <span class="n">evaluations</span></div>
 
 
-<div class="viewcode-block" id="ppc"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.ppc">[docs]</a><span class="k">def</span> <span class="nf">ppc</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">variational</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="ppc"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.ppc">[docs]</a><span class="k">def</span> <span class="nf">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Posterior predictive check.</span>
 <span class="sd">  (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)</span>
-<span class="sd">  If no posterior approximation is provided through ``variational``,</span>
-<span class="sd">  then we default to a prior predictive check (Box, 1980).</span>
+
+<span class="sd">  If ``latent_vars`` is inputted as ``None``, then it is a prior</span>
+<span class="sd">  predictive check (Box, 1980).</span>
 
 <span class="sd">  PPC&#39;s form an empirical distribution for the predictive discrepancy,</span>
 
@@ -259,36 +280,31 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  model : ed.Model</span>
-<span class="sd">    Probability model, a class object with an implemented</span>
-<span class="sd">    ``sample_likelihood`` method. If ``variational`` is not</span>
-<span class="sd">    provided (i.e., a prior predictive check), ``model`` must also</span>
-<span class="sd">    have a ``sample_prior`` method. PyMC3 and Stan models do not</span>
-<span class="sd">    currently support either method.</span>
-<span class="sd">  variational : ed.Variational, optional</span>
-<span class="sd">    Latent variable distribution q(z) to sample from. It is an</span>
-<span class="sd">    approximation to the posterior, e.g., a variational</span>
-<span class="sd">    approximation or an empirical distribution from MCMC samples.</span>
-<span class="sd">  data : dict, optional</span>
-<span class="sd">    Observed data to compare to. If not specified, will return</span>
-<span class="sd">    only the reference distribution with an assumed replicated</span>
-<span class="sd">    data set size of 1. For TensorFlow, Python, and Stan models,</span>
-<span class="sd">    the key type is a string; for PyMC3, the key type is a Theano</span>
-<span class="sd">    shared variable. For TensorFlow, Python, and PyMC3 models, the</span>
-<span class="sd">    value type is a NumPy array or TensorFlow placeholder; for</span>
-<span class="sd">    Stan, the value type is the type according to the Stan</span>
-<span class="sd">    program&#39;s data block.</span>
-<span class="sd">  T : function, optional</span>
-<span class="sd">    Discrepancy function, which takes a data dictionary and list</span>
-<span class="sd">    of latent variables as input and outputs a tf.Tensor. Default</span>
-<span class="sd">    is the identity function.</span>
+<span class="sd">  T : function</span>
+<span class="sd">    Discrepancy function, which takes a dictionary of data and</span>
+<span class="sd">    dictionary of latent variables as input and outputs a `tf.Tensor`.</span>
+<span class="sd">  data : dict</span>
+<span class="sd">    Observed data to compare to. For TensorFlow, Python, and Stan</span>
+<span class="sd">    models, the key type is a string; for PyMC3, the key type is a</span>
+<span class="sd">    Theano shared variable. For TensorFlow, Python, and PyMC3 models,</span>
+<span class="sd">    the value type is a NumPy array or TensorFlow placeholder; for</span>
+<span class="sd">    Stan, the value type is the type according to the Stan program&#39;s</span>
+<span class="sd">    data block.</span>
+<span class="sd">  latent_vars : dict of str to RandomVariable</span>
+<span class="sd">    Collection of latent variables, where each latent variable key (of</span>
+<span class="sd">    type `str`) is binded to its inferred posterior (of type</span>
+<span class="sd">    `RandomVariable`). If ``latent_vars`` is ``None``, then samples</span>
+<span class="sd">    are obtained from the model through the ``sample_prior`` method.</span>
+<span class="sd">  model_wrapper : ed.Model</span>
+<span class="sd">    Probability model. Class object that implements the</span>
+<span class="sd">    ``sample_likelihood`` method.</span>
 <span class="sd">  n_samples : int, optional</span>
 <span class="sd">    Number of replicated data sets.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  list of np.ndarray</span>
-<span class="sd">    List containing the reference distribution, which is a Numpy</span>
+<span class="sd">    List containing the reference distribution, which is a NumPy</span>
 <span class="sd">    vector of size elements,</span>
 
 <span class="sd">    .. math::</span>
@@ -303,55 +319,52 @@
 <span class="sd">    If the discrepancy function is not specified, then the list</span>
 <span class="sd">    contains the full data distribution where each element is a</span>
 <span class="sd">    data set (dictionary).</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # posterior predictive check</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;x&#39;: x_train}, latent_vars={&#39;z&#39;: qz},</span>
+<span class="sd">  &gt;&gt;&gt;     model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # posterior predictive check (with covariates)</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},</span>
+<span class="sd">  &gt;&gt;&gt;     latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # prior predictive check</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;x&#39;: x_train}, latent_vars=None,</span>
+<span class="sd">  &gt;&gt;&gt;     model_wrapper=model)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-  <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="c"># Assume all values have the same data set size.</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">data</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">data</span>
+  <span class="c"># Assume all values have the same data set size.</span>
+  <span class="n">N</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">data</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
 
   <span class="c"># 1. Sample from posterior (or prior).</span>
-  <span class="c"># We fetch zs out of the session because sample_likelihood() may</span>
-  <span class="c"># require a SciPy-based sampler.</span>
-  <span class="k">if</span> <span class="n">variational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="n">variational</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_prior</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
     <span class="c"># `tf.identity()` is to avoid fetching, e.g., a placeholder x</span>
     <span class="c"># when feeding the dictionary {x: np.array()}. TensorFlow will</span>
     <span class="c"># raise an error.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-      <span class="n">zs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">zs_elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">zs_elem</span> <span class="ow">in</span> <span class="n">zs</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">zs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
-
-    <span class="n">zs</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sample_prior</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n_samples</span><span class="p">))</span>
+          <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
 
   <span class="c"># 2. Sample from likelihood.</span>
-  <span class="n">xreps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sample_likelihood</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+  <span class="c"># We fetch zs out of the session because sample_likelihood() may</span>
+  <span class="c"># require a SciPy-based sampler.</span>
+  <span class="n">xreps</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_likelihood</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">zs</span><span class="p">),</span> <span class="n">N</span><span class="p">)</span>
 
   <span class="c"># 3. Calculate discrepancy.</span>
-  <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">xreps</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">[</span><span class="n">xreps</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span>
-
   <span class="n">Txreps</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">Txs</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">for</span> <span class="n">xrep</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xreps</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)):</span>
+  <span class="n">zs_unpacked</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">z_samples</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">z_samples</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">zs</span><span class="p">)}</span>
+  <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">xrep</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">xreps</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">z_samples</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">z_samples</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">zs_unpacked</span><span class="p">)}</span>
     <span class="n">Txreps</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">xrep</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
-      <span class="n">Txs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+    <span class="n">Txs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
 
-  <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txreps</span><span class="p">))</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txreps</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txs</span><span class="p">)])</span></div>
+  <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txreps</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txs</span><span class="p">)])</span></div>
 
 
 <span class="c"># Classification metrics</span>

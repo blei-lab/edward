@@ -100,23 +100,23 @@
 <h3 id="implementation">Implementation</h3>
 <p>Edward implements the Laplace approximation by extending the class built for <a href="tut_MAP">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
 <pre class="python" language="Python"><code>class Laplace(MAP):
-    def __init__(self, model, data=None, params=None):
-        super(Laplace, self).__init__(model, data, params)
+  def __init__(self, model, data=None, params=None):
+    super(Laplace, self).__init__(model, data, params)
 
-    def finalize(self):
-        """Function to call after convergence.
+  def finalize(self):
+    """Function to call after convergence.
 
-        Computes the Hessian at the mode.
-        """
-        # use only a batch of data to estimate hessian
-        x = self.data
-        z = self.variational.sample()
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                     scope='variational')
-        inv_cov = hessian(self.model.log_prob(x, z), var_list)
-        print("Precision matrix:")
-        print(inv_cov.eval())
-        super(Laplace, self).finalize()</code></pre>
+    Computes the Hessian at the mode.
+    """
+    # use only a batch of data to estimate hessian
+    x = self.data
+    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                 scope='variational')
+    inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
+    print("Precision matrix:")
+    print(inv_cov.eval())
+    super(Laplace, self).finalize()</code></pre>
 <p>The <code>Laplace</code> class simply defines an additional method <code>finalize()</code> to run after <code>MAP</code> has found the posterior mode. The <code>hessian</code> function in <code>edward.util</code> uses TensorFlow’s automatic differentiation to compute the Hessian without any additional mathematical derivations.</p>
 <h3 id="references">References</h3>
 <ul>

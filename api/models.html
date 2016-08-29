@@ -145,11 +145,14 @@ it can be written in any of the currently supported modeling
 languages: TensorFlow, Python, Stan, and PyMC3.</p>
 <p><strong>TensorFlow.</strong>
 Write a class with the method <code class="docutils literal"><span class="pre">log_prob(xs,</span> <span class="pre">zs)</span></code>. The method defines
-the logarithm of a joint density.  Here <code class="docutils literal"><span class="pre">xs</span></code> can be a single data
+the logarithm of a joint density, where <code class="docutils literal"><span class="pre">xs</span></code> and <code class="docutils literal"><span class="pre">zs</span></code> are Python
+dictionaries binding the name of a random variable to
+a realization.
+Here <code class="docutils literal"><span class="pre">xs</span></code> can be a single data
 point or a batch of data points, and analogously, <code class="docutils literal"><span class="pre">zs</span></code> can be a
-single set or multiple sets of latent variables.  <code class="docutils literal"><span class="pre">xs</span></code> can be a
-single data point or The method outputs a vector of the joint density
-evaluations <code class="docutils literal"><span class="pre">[log</span> <span class="pre">p(xs,</span> <span class="pre">zs[0,:]),</span> <span class="pre">log</span> <span class="pre">p(xs,</span> <span class="pre">zs[1,:]),</span> <span class="pre">...]</span></code>, with an
+single set or multiple sets of latent variables.
+The method outputs a vector of the joint density
+evaluations <code class="docutils literal"><span class="pre">[log</span> <span class="pre">p(xs,</span> <span class="pre">zs^1),</span> <span class="pre">log</span> <span class="pre">p(xs,</span> <span class="pre">zs^S),</span> <span class="pre">...]</span></code>, with an
 evaluation for each set of latent variables. Here is an example:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">edward.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
@@ -157,14 +160,21 @@ evaluation for each set of latent variables. Here is an example:</p>
 <span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-    <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s">&#39;p&#39;</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>
-                       <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">)])</span>
+                       <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s">&#39;p&#39;</span><span class="p">])])</span>
     <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
 </pre></div>
 </div>
+<p><code class="docutils literal"><span class="pre">BetaBernoulli</span></code> defines a log joint density with a Bernoulli
+likelihood (for an unspecified number of data points) and a Beta prior
+on the Bernoulli&#8217;s success probability.
+<code class="docutils literal"><span class="pre">xs</span></code> is a dictionary with string <code class="docutils literal"><span class="pre">x</span></code> binded to a vector of
+observations. <code class="docutils literal"><span class="pre">zs</span></code> is a dictionary with string <code class="docutils literal"><span class="pre">z</span></code> binded to a
+vector of latent variables, where each element is a sample from the
+one-dimensional Beta latent variable.</p>
 <p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py">toy script</a>
 that uses this model. The model class can be more complicated,
 containing fields or other methods required for other functionality in
@@ -184,12 +194,14 @@ Here is an example:</p>
   <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="c"># This example is written for pedagogy. We recommend</span>
     <span class="c"># vectorizing operations in practice.</span>
-    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">zs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span>
+    <span class="n">ps</span> <span class="o">=</span> <span class="n">zs</span><span class="p">[</span><span class="s">&#39;p&#39;</span><span class="p">]</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-      <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-        <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:])</span>
+      <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">lp</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">ps</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:])</span>
 
     <span class="k">return</span> <span class="n">lp</span>
 
@@ -207,18 +219,26 @@ call it with <code class="docutils literal"><span class="pre">StanModel(file=fil
 <span class="n">model_code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
 <span class="s">  data {</span>
 <span class="s">    int&lt;lower=0&gt; N;</span>
-<span class="s">    int&lt;lower=0,upper=1&gt; y[N];</span>
+<span class="s">    int&lt;lower=0,upper=1&gt; x[N];</span>
 <span class="s">  }</span>
 <span class="s">  parameters {</span>
-<span class="s">    real&lt;lower=0,upper=1&gt; theta;</span>
+<span class="s">    real&lt;lower=0,upper=1&gt; p;</span>
 <span class="s">  }</span>
 <span class="s">  model {</span>
-<span class="s">    theta ~ beta(1.0, 1.0);</span>
+<span class="s">    p ~ beta(1.0, 1.0);</span>
 <span class="s">    for (n in 1:N)</span>
-<span class="s">      y[n] ~ bernoulli(theta);</span>
+<span class="s">    x[n] ~ bernoulli(p);</span>
 <span class="s">  }</span>
 <span class="s">&quot;&quot;&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">StanModel</span><span class="p">(</span><span class="n">model_code</span><span class="o">=</span><span class="n">model_code</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>During inference the latent variable string matches the name of the
+parameters from the parameter block. Analogously, the data&#8217;s string
+matches the name of the data from the data block.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">qp</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;N&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}</span>
+<span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="p">({</span><span class="s">&#39;p&#39;</span><span class="p">:</span> <span class="n">qp</span><span class="p">},</span> <span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py">toy
@@ -229,7 +249,9 @@ although they are limited to probability models with differentiable
 latent variables. <code class="docutils literal"><span class="pre">StanModel</span></code> objects also contain no structure about
 the model besides how to calculate its joint density.</p>
 <p><strong>PyMC3.</strong>
-Write a PyMC3 model whose observed values are Theano shared variables.
+Write a PyMC3 model whose observed values are Theano shared variables,
+and whose latent variables use <code class="docutils literal"><span class="pre">transform=None</span></code> to keep them on their
+original (constrained) domain.
 The values in the Theano shared variables can be plugged at a later
 time. Here is an example:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -239,10 +261,18 @@ time. Here is an example:</p>
 
 <span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
-  <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="k">None</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
+  <span class="n">p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s">&#39;p&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="k">None</span><span class="p">)</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">PyMC3Model</span><span class="p">(</span><span class="n">pm_model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>During inference the latent variable string matches the name of the
+model&#8217;s latent variables; the data&#8217;s string matches the Theano shared
+variables.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">qp</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">x_obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
+<span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="p">({</span><span class="s">&#39;p&#39;</span><span class="p">:</span> <span class="n">qp</span><span class="p">},</span> <span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py">toy
@@ -278,9 +308,10 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">      Data dictionary. Each key names a data structure used in</span>
 <span class="sd">      the model (str), and its value is the corresponding</span>
 <span class="sd">      corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    zs : dict of str to tf.Tensor</span>
+<span class="sd">      Latent variable dictionary. Each key names a latent variable</span>
+<span class="sd">      used in the model (str), and its value is the corresponding</span>
+<span class="sd">      realization (tf.Tensor).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -300,9 +331,10 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">      Data dictionary. Each key names a data structure used in</span>
 <span class="sd">      the model (str), and its value is the corresponding</span>
 <span class="sd">      corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    zs : dict of str to tf.Tensor</span>
+<span class="sd">      Latent variable dictionary. Each key names a latent variable</span>
+<span class="sd">      used in the model (str), and its value is the corresponding</span>
+<span class="sd">      realization (tf.Tensor).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -321,9 +353,10 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">      Data dictionary. Each key names a data structure used in</span>
 <span class="sd">      the model (str), and its value is the corresponding</span>
 <span class="sd">      corresponding realization (np.ndarray or tf.Tensor).</span>
-<span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    zs : dict of str to tf.Tensor</span>
+<span class="sd">      Latent variable dictionary. Each key names a latent variable</span>
+<span class="sd">      used in the model (str), and its value is the corresponding</span>
+<span class="sd">      realization (tf.Tensor).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -365,9 +398,10 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    zs : list or tf.Tensor</span>
-<span class="sd">      A list of tf.Tensor&#39;s if multiple varational families,</span>
-<span class="sd">      otherwise a tf.Tensor if single variational family.</span>
+<span class="sd">    zs : dict of str to tf.Tensor</span>
+<span class="sd">      Latent variable dictionary. Each key names a latent variable</span>
+<span class="sd">      used in the model (str), and its value is the corresponding</span>
+<span class="sd">      realization (tf.Tensor).</span>
 <span class="sd">    n : int, optional</span>
 <span class="sd">      Number of data points to generate per set of latent variables.</span>
 
