@@ -6,9 +6,8 @@ from __future__ import print_function
 
 import math
 
-from tensorflow.contrib.distributions.python.ops import distribution  # pylint: disable=line-too-long
-from tensorflow.contrib.distributions.python.ops import kullback_leibler  # pylint: disable=line-too-long
-from tensorflow.contrib.framework.python.framework import tensor_util as contrib_tensor_util  # pylint: disable=line-too-long
+from tensorflow.contrib.distributions.python.ops import \
+    distribution
 from tensorflow.python.framework import constant_op
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import ops
@@ -215,7 +214,7 @@ class PointMass(distribution.Distribution):
       with ops.op_scope([self._params, n], name):
         # TODO
         n = n.eval()
-        return tf.pack([self.params]*n)
+        return tf.pack([self.params] * n)
 
   @property
   def is_reparameterized(self):

@@ -31,7 +31,8 @@ class Beta(sg.DistributionTensor):
 
 class Categorical(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(Categorical, self).__init__(distributions.Categorical, *args, **kwargs)
+    super(Categorical, self).__init__(
+        distributions.Categorical, *args, **kwargs)
 
 
 class Chi2(sg.DistributionTensor):
@@ -46,12 +47,14 @@ class Dirichlet(sg.DistributionTensor):
 
 class DirichletMultinomial(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(DirichletMultinomial, self).__init__(distributions.DirichletMultinomial, *args, **kwargs)
+    super(DirichletMultinomial, self).__init__(
+        distributions.DirichletMultinomial, *args, **kwargs)
 
 
 class Exponential(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(Exponential, self).__init__(distributions.Exponential, *args, **kwargs)
+    super(Exponential, self).__init__(
+        distributions.Exponential, *args, **kwargs)
 
 
 class Gamma(sg.DistributionTensor):
@@ -61,7 +64,8 @@ class Gamma(sg.DistributionTensor):
 
 class InverseGamma(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(InverseGamma, self).__init__(distributions.InverseGamma, *args, **kwargs)
+    super(InverseGamma, self).__init__(
+        distributions.InverseGamma, *args, **kwargs)
 
 
 class Laplace(sg.DistributionTensor):
@@ -71,17 +75,20 @@ class Laplace(sg.DistributionTensor):
 
 class MultivariateNormalCholesky(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(MultivariateNormalCholesky, self).__init__(distributions.MultivariateNormalCholesky, *args, **kwargs)
+    super(MultivariateNormalCholesky, self).__init__(
+        distributions.MultivariateNormalCholesky, *args, **kwargs)
 
 
 class MultivariateNormalDiag(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(MultivariateNormalDiag, self).__init__(distributions.MultivariateNormalDiag, *args, **kwargs)
+    super(MultivariateNormalDiag, self).__init__(
+        distributions.MultivariateNormalDiag, *args, **kwargs)
 
 
 class MultivariateNormalFull(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(MultivariateNormalFull, self).__init__(distributions.MultivariateNormalFull, *args, **kwargs)
+    super(MultivariateNormalFull, self).__init__(
+        distributions.MultivariateNormalFull, *args, **kwargs)
 
 
 class Normal(sg.DistributionTensor):
@@ -102,7 +109,8 @@ class StudentT(sg.DistributionTensor):
 
 class TransformedDistribution(sg.DistributionTensor):
   def __init__(self, *args, **kwargs):
-    super(TransformedDistribution, self).__init__(distributions.TransformedDistribution, *args, **kwargs)
+    super(TransformedDistribution, self).__init__(
+        distributions.TransformedDistribution, *args, **kwargs)
 
 
 class Uniform(sg.DistributionTensor):
