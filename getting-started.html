@@ -117,7 +117,7 @@ class BayesianNN:
         x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
         zs = zs[&#39;z&#39;]
         # Specify the prior on neural network weights `zs`.
-        log_prior = tf.reduce_sum(norm.logpdf(zs, loc=0, scale=1), 1)
+        log_prior = tf.reduce_sum(norm.logpdf(zs, mu=0.0, sigma=1.0), 1)
         # Specify the likelihood. Its mean is the output of a neural
         # network taking `x` as input with weights `zs`.
         mus = self.neural_network(x, zs)
