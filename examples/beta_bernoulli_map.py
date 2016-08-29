@@ -27,7 +27,7 @@ class BetaBernoulli:
 
   def log_prob(self, xs, zs):
     log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p))
+    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
                        for p in tf.unpack(zs['p'])])
     return log_lik + log_prior
 

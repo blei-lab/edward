@@ -75,12 +75,14 @@ class IWVI(MFVI):
     x = self.data
     losses = []
     for s in range(self.n_samples):
-      z = {key: rv.sample(self.K)
+      z = {key: rv.sample([self.K])
            for key, rv in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
       q_log_prob = 0.0
       for key, rv in six.iteritems(self.latent_vars):
-        q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+        q_log_prob += tf.reduce_sum(
+            rv.log_prob(tf.stop_gradient(z[key])),
+            list(range(1, len(rv.get_batch_shape()) + 1)))
 
       log_w = p_log_prob - q_log_prob
       losses += [log_mean_exp(log_w)]
@@ -108,12 +110,14 @@ class IWVI(MFVI):
     """
     x = self.data
     for s in range(self.n_samples):
-      z = {key: rv.sample(self.K)
+      z = {key: rv.sample([self.K])
            for key, rv in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
       q_log_prob = 0.0
       for key, rv in six.iteritems(self.latent_vars):
-        q_log_prob += rv.log_prob(z[key])
+        q_log_prob += tf.reduce_sum(
+            rv.log_prob(z[key]),
+            list(range(1, len(rv.get_batch_shape()) + 1)))
 
       log_w = p_log_prob - q_log_prob
       losses += [log_mean_exp(log_w)]
@@ -124,11 +128,11 @@ class IWVI(MFVI):
 
 
 class BetaBernoulli:
-  """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+  """p(x, p) = Bernoulli(x | z) * Beta(p | 1, 1)"""
   def log_prob(self, xs, zs):
     log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                       for z in tf.unpack(zs['p'])])
+    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
+                       for p in tf.unpack(zs['p'])])
     return log_lik + log_prior
 
 

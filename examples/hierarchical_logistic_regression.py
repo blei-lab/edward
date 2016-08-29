@@ -60,7 +60,7 @@ class HierarchicalLogistic:
       # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
       p = self.inv_link(tf.matmul(x, W) + b)
       p = tf.squeeze(p)  # n_minibatch x 1 to n_minibatch
-      log_lik += [bernoulli.logpmf(y, p)]
+      log_lik += [bernoulli.logpmf(y, p=p)]
 
     log_lik = tf.pack(log_lik)
     log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance

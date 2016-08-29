@@ -53,7 +53,7 @@ class LatentSpaceModel:
       xp = tf.matmul(z, z, transpose_b=True)
 
     if self.like == 'Gaussian':
-      log_lik = tf.reduce_sum(norm.logpdf(xs['x'], xp))
+      log_lik = tf.reduce_sum(norm.logpdf(xs['x'], xp, 1.0))
     elif self.like == 'Poisson':
       if not (self.dist == 'euclidean' or self.prior == "Lognormal"):
         raise NotImplementedError("Rate of Poisson has to be nonnegatve.")
