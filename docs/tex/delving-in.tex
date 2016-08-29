@@ -117,13 +117,13 @@ For example, to specify a variational model (e.g.~for a Gaussian mixture)
   \times
   \mathcal{N}(z_\mu)
   \times
-  \text{InvGamma}(z_\sigma)
+  \text{InverseGamma}(z_\sigma)
 \end{align*}
 we would write
 \begin{lstlisting}[language=Python]
-from edward.models import Dirichlet, Normal, InvGamma
+from edward.models import Dirichlet, Normal, InverseGamma
 
-qpi_alpha = ed.to_simplex(tf.Variable(tf.random_normal([K-1])))
+qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
 qmu_mu = tf.Variable(tf.random_normal([K*D]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
 qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))

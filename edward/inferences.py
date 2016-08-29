@@ -498,8 +498,8 @@ class MFVI(VariationalInference):
       q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
                                   range(1, len(rv.get_batch_shape()) + 1))
 
-    mu = tf.concat(0, [rv.loc for rv in six.itervalues(self.latent_vars)])
-    sigma = tf.concat(0, [rv.scale for rv in six.itervalues(self.latent_vars)])
+    mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
+    sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
     kl = kl_multivariate_normal(mu, sigma)
     self.loss = tf.reduce_mean(p_log_lik) - kl
     return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
@@ -559,8 +559,8 @@ class MFVI(VariationalInference):
          for key, rv in six.iteritems(self.latent_vars)}
 
     p_log_lik = self.model_wrapper.log_lik(x, z)
-    mu = tf.concat(0, [rv.loc for rv in six.itervalues(self.latent_vars)])
-    sigma = tf.concat(0, [rv.scale for rv in six.itervalues(self.latent_vars)])
+    mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
+    sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
     self.loss = tf.reduce_mean(p_log_lik) - \
         kl_multivariate_normal(mu, sigma)
     return -self.loss

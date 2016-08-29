@@ -140,7 +140,7 @@ K = 2
 D = 2
 model = MixtureGaussian(K, D)
 
-qpi_alpha = ed.to_simplex(tf.Variable(tf.random_normal([K-1])))
+qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
 qmu_mu = tf.Variable(tf.random_normal([K*D]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))
 qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K*D])))

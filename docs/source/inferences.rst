@@ -164,10 +164,10 @@ example:
 
 .. code:: python
 
-  from edward.models import Normal, InvGamma, Beta
+  from edward.models import Normal, InverseGamma, Beta
 
   # a vector of 10 random variables
-  qz1 = InvGamma(alpha=tf.ones([10]), beta=tf.ones([10]))
+  qz1 = InverseGamma(alpha=tf.ones([10]), beta=tf.ones([10]))
 
   # a 5 x 2 matrix of random variables
   qz2 = Normal(mu.zeros([5, 2]), beta=tf.ones([5, 2]))
