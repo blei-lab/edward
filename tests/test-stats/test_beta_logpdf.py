@@ -18,12 +18,6 @@ class test_beta_logpdf_class(tf.test.TestCase):
       self.assertAllClose(beta.logpdf(xtf, a, b).eval(), val_true)
       self.assertAllClose(beta.logpdf(xtf, tf.constant(a),
                                       tf.constant(b)).eval(), val_true)
-      self.assertAllClose(beta.logpdf(xtf, tf.constant([a]),
-                                      tf.constant(b)).eval(), val_true)
-      self.assertAllClose(beta.logpdf(xtf, tf.constant(a),
-                                      tf.constant([b])).eval(), val_true)
-      self.assertAllClose(beta.logpdf(xtf, tf.constant([a]),
-                                      tf.constant([b])).eval(), val_true)
 
   def test_0d(self):
     self._test(0.3, a=0.5, b=0.5)
@@ -42,5 +36,6 @@ class test_beta_logpdf_class(tf.test.TestCase):
     self._test([0.5, 0.3, 0.8, 0.1], a=0.5, b=0.5)
 
   def test_2d(self):
-    self._test(np.array([[0.5, 0.3, 0.8, 0.1], [0.1, 0.7, 0.2, 0.4]]),
+    self._test(np.array([[0.5, 0.3, 0.8, 0.1], [0.1, 0.7, 0.2, 0.4]],
+                        dtype=np.float32),
                a=0.5, b=0.5)
