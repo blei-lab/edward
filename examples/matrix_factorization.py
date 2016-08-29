@@ -10,7 +10,7 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.models import Variational, Normal
+from edward.models import Normal
 from edward.stats import norm, poisson
 
 
@@ -56,7 +56,7 @@ class MatrixFactorization:
       raise NotImplementedError("interaction type unknown.")
 
     if self.like == 'Gaussian':
-      log_lik = tf.reduce_sum(norm.logpdf(xs['x'], xp))
+      log_lik = tf.reduce_sum(norm.logpdf(xs['x'], xp, 1.0))
     elif self.like == 'Poisson':
       if not (self.interaction == "additive" or self.prior == "Lognormal"):
         raise NotImplementedError("Rate of Poisson has to be nonnegatve.")

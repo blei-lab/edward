@@ -20,18 +20,18 @@ def uniform_entropy_vec(loc, scale):
 
 class test_uniform_entropy_class(tf.test.TestCase):
 
-  def _test(self, loc=0, scale=1):
-    val_true = uniform_entropy_vec(loc, scale)
+  def _test(self, a, b):
+    val_true = uniform_entropy_vec(a, b - a)
     with self.test_session():
-      self.assertAllClose(uniform.entropy(loc, scale).eval(), val_true)
-      self.assertAllClose(uniform.entropy(tf.constant(loc),
-                                          tf.constant(scale)).eval(), val_true)
+      self.assertAllClose(uniform.entropy(a, b).eval(), val_true)
+      self.assertAllClose(uniform.entropy(tf.constant(a),
+                                          tf.constant(b)).eval(), val_true)
 
   def test_0d(self):
-    self._test()
-    self._test(loc=1.0, scale=1.0)
-    self._test(loc=0.5, scale=5.0)
-    self._test(loc=5.0, scale=0.5)
+    self._test(a=1.0, b=2.0)
+    self._test(a=0.5, b=5.0)
+    self._test(a=5.0, b=5.5)
 
   def test_1d(self):
-    self._test([0.5, 0.3, 0.8, 0.2], [0.5, 0.3, 0.8, 0.2])
+    self._test(np.array([0.5, 0.3, 0.8, 0.2], dtype=np.float32),
+               np.array([0.6, 0.4, 0.9, 0.3], dtype=np.float32))

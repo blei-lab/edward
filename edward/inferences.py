@@ -103,7 +103,7 @@ class Inference(object):
           # If ``data`` has tensors that are the output of
           # data readers, then batch training operates
           # according to the reader.
-          self.data[key] = value
+          self.data[key] = tf.cast(value, tf.float32)
         elif isinstance(value, np.ndarray):
           # If ``data`` has NumPy arrays, store the data
           # in the computational graph.

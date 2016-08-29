@@ -85,7 +85,7 @@ class BayesianNN:
     """Return a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
     x, y = xs['x'], xs['y']
     mus = self.neural_network(x, zs['z'])
-    log_lik = tf.reduce_sum(norm.logpdf(y, loc=mus, scale=self.lik_variance), 1)
+    log_lik = tf.reduce_sum(norm.logpdf(y, mus, self.lik_variance), 1)
     return log_lik
 
 
