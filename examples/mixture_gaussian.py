@@ -113,19 +113,19 @@ class MixtureGaussian:
                                mus[(k*self.D):((k+1)*self.D)],
                                sigmas[(k*self.D):((k+1)*self.D)])]
 
-        return tf.pack(matrix)        
+        return tf.pack(matrix)
 
 
 def build_toy_dataset(N):
-  pi = np.array([0.4, 0.6])
-  mus = [[1, 1], [-1, -1]]
-  stds = [[0.1, 0.1], [0.1, 0.1]]
-  x = np.zeros((N, 2), dtype=np.float32)
-  for n in range(N):
-    k = np.argmax(np.random.multinomial(1, pi))
-    x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
+    pi = np.array([0.4, 0.6])
+    mus = [[1, 1], [-1, -1]]
+    stds = [[0.1, 0.1], [0.1, 0.1]]
+    x = np.zeros((N, 2), dtype=np.float32)
+    for n in range(N):
+        k = np.argmax(np.random.multinomial(1, pi))
+        x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
 
-  return {'x': x}
+    return {'x': x}
 
 
 ed.set_seed(42)
