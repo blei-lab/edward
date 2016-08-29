@@ -5,18 +5,18 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Beta
+from edward.models import InverseGamma
 from edward.util import get_dims
 
 
-def _test(a, b, n):
-  x = Beta(a=a, b=b)
+def _test(alpha, beta, n):
+  x = InverseGamma(alpha=alpha, beta=beta)
   val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(a)
+  val_true = n + get_dims(alpha)
   assert val_est == val_true
 
 
-class test_beta_sample_class(tf.test.TestCase):
+class test_inversegamma_sample_class(tf.test.TestCase):
 
   def test_0d(self):
     with self.test_session():

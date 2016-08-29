@@ -99,7 +99,9 @@ def get_dims(x):
   list of int
     Python list containing dimensions of ``x``.
   """
-  if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
+  if isinstance(x, float) or isinstance(x, int):
+    return []
+  elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
     dims = x.get_shape()
     if len(dims) == 0:  # scalar
       return []
