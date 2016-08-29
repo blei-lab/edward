@@ -33,7 +33,10 @@ mu = tf.constant([1.0, 1.0])
 Sigma = tf.constant([[1.0, 0.1],
                      [0.1, 1.0]])
 model = NormalPosterior(mu, Sigma)
-qz = Normal(model.n_vars)
+
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, model_wrapper=model)
 inference.run(n_iter=10000)

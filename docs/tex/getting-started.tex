@@ -76,8 +76,15 @@ approximation as
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-qz = Normal(model.n_vars)
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 \end{lstlisting}
+Defining \texttt{tf.Variable} enables its parameters to vary, and its
+standard deviation parameter is constrained to be greater than zero
+according to a
+\href{https://en.wikipedia.org/wiki/Rectifier_(neural_networks)}{softplus}
+transformation.
 The number of latent variables \texttt{model.n_vars} is the number
 of weights and biases in the neural network.
 

@@ -21,7 +21,7 @@ from scipy.stats import beta, bernoulli
 
 
 class BetaBernoulli(PythonModel):
-  """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
   def _py_log_prob(self, xs, zs):
     # This example is written for pedagogy. We recommend
     # vectorizing operations in practice.
@@ -38,9 +38,13 @@ class BetaBernoulli(PythonModel):
 
 
 ed.set_seed(42)
-model = BetaBernoulli()
-qp = Beta()
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+
+model = BetaBernoulli()
+
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp = Beta(a=qp_a, b=qp_b)
 
 inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=10000)

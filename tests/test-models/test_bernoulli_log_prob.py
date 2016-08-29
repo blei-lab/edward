@@ -7,26 +7,26 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Bernoulli
+from edward.util import get_dims
 from scipy import stats
 
 
-def _test(shape, n):
-  rv = Bernoulli(shape, p=tf.zeros(shape) + 0.5)
+def _test(p, n):
+  rv = Bernoulli(p=p)
   rv_sample = rv.sample(n)
   x = rv_sample.eval()
   x_tf = tf.constant(x, dtype=tf.float32)
-  p = rv.p.eval()
-  for idx in range(shape[0]):
-    assert np.allclose(rv.log_prob_idx((idx, ), x_tf).eval(),
-                       stats.bernoulli.logpmf(x[:, idx], p[idx]))
+  p = p.eval()
+  assert np.allclose(rv.log_prob(x_tf).eval(),
+                     stats.bernoulli.logpmf(x, p))
 
 
-class test_bernoulli_log_prob_idx_class(tf.test.TestCase):
+class test_bernoulli_log_prob_class(tf.test.TestCase):
 
   def test_1d(self):
     ed.set_seed(98765)
     with self.test_session():
-      _test((1, ), 1)
-      _test((1, ), 5)
-      _test((5, ), 1)
-      _test((5, ), 5)
+      _test(tf.zeros([1]) + 0.5, [1])
+      _test(tf.zeros([1]) + 0.5, [5])
+      _test(tf.zeros([5]) + 0.5, [1])
+      _test(tf.zeros([5]) + 0.5, [5])

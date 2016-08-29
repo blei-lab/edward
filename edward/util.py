@@ -388,7 +388,9 @@ def get_dims(x):
   list of int
     Python list containing dimensions of ``x``.
   """
-  if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
+  if isinstance(x, float) or isinstance(x, int):
+    return []
+  elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
     dims = x.get_shape()
     if len(dims) == 0:  # scalar
       return []
@@ -739,47 +741,6 @@ def set_seed(x):
 
   np.random.seed(x)
   tf.set_random_seed(x)
-
-
-def softplus(x):
-  """Elementwise Softplus function
-
-  .. math:: \log(1 + \exp(x))
-
-  If input `x < -30`, returns `0.0` exactly.
-
-  If input `x > 30`, returns `x` exactly.
-
-  TensorFlow can't currently autodiff through ``tf.nn.softplus()``.
-
-  Parameters
-  ----------
-  x : tf.Tensor
-    A n-D tensor.
-
-  Returns
-  -------
-  tf.Tensor
-    A tensor of same shape as input.
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the input has Inf or NaN values.
-  """
-  dependencies = [tf.verify_tensor_all_finite(x, msg='')]
-  x = control_flow_ops.with_dependencies(dependencies, x)
-  x = tf.cast(x, dtype=tf.float32)
-
-  result = tf.log(1.0 + tf.exp(x))
-
-  less_than_thirty = tf.less(x, -30.0)
-  result = tf.select(less_than_thirty, tf.zeros_like(x), result)
-
-  greater_than_thirty = tf.greater(x, 30.0)
-  result = tf.select(greater_than_thirty, x, result)
-
-  return result
 
 
 def to_simplex(x):

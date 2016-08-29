@@ -81,7 +81,10 @@ df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
 data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 model = GaussianProcess(N=len(df))
-qz = Normal(model.n_vars)
+
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=500)

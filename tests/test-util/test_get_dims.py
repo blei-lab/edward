@@ -10,6 +10,16 @@ from edward.util import get_dims
 
 class test_get_dims_class(tf.test.TestCase):
 
+  def test_get_dims_0d_int(self):
+    with self.test_session():
+      x = 0
+      self.assertEqual(get_dims(x), [])
+
+  def test_get_dims_0d_float(self):
+    with self.test_session():
+      x = 0.0
+      self.assertEqual(get_dims(x), [])
+
   def test_get_dims_0d_tf(self):
     with self.test_session():
       x = tf.constant(0.0)

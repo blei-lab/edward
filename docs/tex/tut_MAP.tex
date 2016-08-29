@@ -109,7 +109,7 @@ class MAP(VariationalInference):
 
   def build_loss(self):
     x = self.data
-    z = {key: rv.sample() for key, rv in six.iteritems(self.latent_vars)}
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
     self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
     return -self.loss
 \end{lstlisting}

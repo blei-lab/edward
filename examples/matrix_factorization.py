@@ -76,6 +76,7 @@ def load_celegans_brain():
 
 ed.set_seed(42)
 data, N = load_celegans_brain()
+
 K = 3
 model = MatrixFactorization(K, N,
                             like='Poisson',
@@ -83,8 +84,10 @@ model = MatrixFactorization(K, N,
                             interaction='additive')
 
 inference = ed.MAP(['z'], data, model)
-
-# qz = Normal(model.n_vars)
+# Alternatively, run
+# qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+# qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+# qz = Normal(mu=qz_mu, sigma=qz_sigma)
 # inference = ed.MFVI({'z': qz}, data, model)
 
 inference.run(n_iter=5000, n_print=500)

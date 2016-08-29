@@ -76,11 +76,14 @@ def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
 
 
 ed.set_seed(42)
-model = LinearModel()
-qz = Normal(model.n_vars)
-
 coeff = np.random.randn(10)
 data = build_toy_dataset(coeff=coeff)
+
+model = LinearModel()
+
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=250, n_samples=5, n_print=10)
