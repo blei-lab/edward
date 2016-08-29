@@ -65,7 +65,7 @@ class GaussianProcess:
   Gaussian process classification
 
   p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
-          Normal(z | 0, K),
+                Normal(z | 0, K),
 
   where z are weights drawn from a GP with covariance given by k(x,
   x') for each pair of inputs (x, x'), and with squared-exponential
@@ -109,7 +109,7 @@ class GaussianProcess:
     x, y = xs['x'], xs['y']
     log_prior = multivariate_normal.logpdf(zs['z'], cov=self.kernel(x))
     log_lik = tf.pack([tf.reduce_sum(
-                       bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z))))
+                       bernoulli.logpmf(y, p=self.inverse_link(tf.mul(y, z))))
                        for z in tf.unpack(zs['z'])])
     return log_prior + log_lik
 

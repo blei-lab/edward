@@ -121,7 +121,7 @@ class BayesianNN:
         # Specify the likelihood. Its mean is the output of a neural
         # network taking `x` as input with weights `zs`.
         mus = self.neural_network(x, zs)
-        log_lik = tf.reduce_sum(norm.logpdf(y, loc=mus, scale=1), 1)
+        log_lik = tf.reduce_sum(norm.logpdf(y, mu=mus, sigma=1.0), 1)
         return log_prior + log_lik</code></pre>
 <p>Instantiate this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>

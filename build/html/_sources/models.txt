@@ -28,11 +28,11 @@ evaluation for each set of latent variables. Here is an example:
   from edward.stats import bernoulli, beta
 
   class BetaBernoulli:
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+    """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
     def log_prob(self, xs, zs):
       log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                         for z in tf.unpack(zs['p'])])
+      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
+                         for p in tf.unpack(zs['p'])])
       return log_lik + log_prior
 
   model = BetaBernoulli()
@@ -65,7 +65,7 @@ Here is an example:
   from scipy.stats import bernoulli, beta
 
   class BetaBernoulli(PythonModel):
-    """p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)"""
+    """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
     def _py_log_prob(self, xs, zs):
       # This example is written for pedagogy. We recommend
       # vectorizing operations in practice.

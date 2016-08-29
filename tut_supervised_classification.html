@@ -107,7 +107,7 @@ data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
   Gaussian process classification
 
   p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
-          Normal(z | 0, K),
+                Normal(z | 0, K),
 
   where z are weights drawn from a GP with covariance given by k(x,
   x&#39;) for each pair of inputs (x, x&#39;), and with squared-exponential
@@ -151,7 +151,7 @@ data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
     x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
     log_prior = multivariate_normal.logpdf(zs[&#39;z&#39;], cov=self.kernel(x))
     log_lik = tf.pack([tf.reduce_sum(
-                       bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z))))
+                       bernoulli.logpmf(y, p=self.inverse_link(tf.mul(y, z))))
                        for z in tf.unpack(zs[&#39;z&#39;])])
     return log_prior + log_lik
 

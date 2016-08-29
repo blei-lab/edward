@@ -158,11 +158,11 @@ evaluation for each set of latent variables. Here is an example:</p>
 <span class="kn">from</span> <span class="nn">edward.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
 
 <span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s">&#39;p&#39;</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>
-                       <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s">&#39;p&#39;</span><span class="p">])])</span>
+    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">))</span>
+                       <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s">&#39;p&#39;</span><span class="p">])])</span>
     <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
@@ -190,7 +190,7 @@ Here is an example:</p>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">beta</span>
 
 <span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">(</span><span class="n">PythonModel</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;p(x, z) = Bernoulli(x | z) * Beta(z | 1, 1)&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="c"># This example is written for pedagogy. We recommend</span>
     <span class="c"># vectorizing operations in practice.</span>
