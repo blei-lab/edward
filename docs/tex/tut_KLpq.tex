@@ -164,7 +164,7 @@ class KLpq(VariationalInference):
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
       q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  range(1, len(rv.get_batch_shape()) + 1))
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
     log_w_norm = log_w - log_sum_exp(log_w)

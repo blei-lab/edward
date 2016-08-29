@@ -135,6 +135,7 @@ class Bernoulli(RandomVariable):
     p = self.distribution.p.eval()
     return "p: \n" + p.__str__()
 
+
 class Beta(RandomVariable):
   def __init__(self, *args, **kwargs):
     super(Beta, self).__init__(distributions.Beta, *args, **kwargs)
@@ -148,7 +149,8 @@ class Beta(RandomVariable):
 
 class Categorical(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(Categorical, self).__init__(distributions.Categorical, *args, **kwargs)
+    super(Categorical, self).__init__(
+        distributions.Categorical, *args, **kwargs)
 
   def __str__(self):
     logits = self.distribution.logits.eval()
@@ -175,7 +177,8 @@ class Dirichlet(RandomVariable):
 
 class DirichletMultinomial(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(DirichletMultinomial, self).__init__(distributions.DirichletMultinomial, *args, **kwargs)
+    super(DirichletMultinomial, self).__init__(
+        distributions.DirichletMultinomial, *args, **kwargs)
 
   def __str__(self):
     sess = get_session()
@@ -186,7 +189,8 @@ class DirichletMultinomial(RandomVariable):
 
 class Exponential(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(Exponential, self).__init__(distributions.Exponential, *args, **kwargs)
+    super(Exponential, self).__init__(
+        distributions.Exponential, *args, **kwargs)
 
   def __str__(self):
     lam = self.distribution.lam.eval()
@@ -206,7 +210,8 @@ class Gamma(RandomVariable):
 
 class InverseGamma(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(InverseGamma, self).__init__(distributions.InverseGamma, *args, **kwargs)
+    super(InverseGamma, self).__init__(
+        distributions.InverseGamma, *args, **kwargs)
 
   def __str__(self):
     sess = get_session()
@@ -228,7 +233,8 @@ class Laplace(RandomVariable):
 
 class MultivariateNormalCholesky(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(MultivariateNormalCholesky, self).__init__(distributions.MultivariateNormalCholesky, *args, **kwargs)
+    super(MultivariateNormalCholesky, self).__init__(
+        distributions.MultivariateNormalCholesky, *args, **kwargs)
 
   def __str__(self):
     sess = get_session()
@@ -239,18 +245,21 @@ class MultivariateNormalCholesky(RandomVariable):
 
 class MultivariateNormalDiag(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(MultivariateNormalDiag, self).__init__(distributions.MultivariateNormalDiag, *args, **kwargs)
+    super(MultivariateNormalDiag, self).__init__(
+        distributions.MultivariateNormalDiag, *args, **kwargs)
 
   def __str__(self):
     sess = get_session()
-    mu, diag_stdev = sess.run([self.distribution.mu, self.distribution.diag_stdev])
+    mu, diag_stdev = sess.run([self.distribution.mu,
+                               self.distribution.diag_stdev])
     return "mu: \n" + mu.__str__() + "\n" + \
            "diag_stdev: \n" + diag_stdev.__str__()
 
 
 class MultivariateNormalFull(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(MultivariateNormalFull, self).__init__(distributions.MultivariateNormalFull, *args, **kwargs)
+    super(MultivariateNormalFull, self).__init__(
+        distributions.MultivariateNormalFull, *args, **kwargs)
 
   def __str__(self):
     sess = get_session()
@@ -285,7 +294,8 @@ class StudentT(RandomVariable):
   def __str__(self):
     sess = get_session()
     df, mu, sigma = sess.run([self.distribution.df,
-        self.distribution.mu, self.distribution.sigma])
+                              self.distribution.mu,
+                              self.distribution.sigma])
     return "df: \n" + df.__str__() + "\n" + \
            "mu: \n" + mu.__str__() + "\n" + \
            "sigma: \n" + sigma.__str__()
@@ -293,7 +303,8 @@ class StudentT(RandomVariable):
 
 class TransformedDistribution(RandomVariable):
   def __init__(self, *args, **kwargs):
-    super(TransformedDistribution, self).__init__(distributions.TransformedDistribution, *args, **kwargs)
+    super(TransformedDistribution, self).__init__(
+        distributions.TransformedDistribution, *args, **kwargs)
 
   def __str__(self):
     return self.distribution.base_distribution.__str__()

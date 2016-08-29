@@ -438,7 +438,7 @@ class MFVI(VariationalInference):
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
       q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  range(1, len(rv.get_batch_shape()) + 1))
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     losses = p_log_prob - q_log_prob
     self.loss = tf.reduce_mean(losses)
@@ -465,7 +465,7 @@ class MFVI(VariationalInference):
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
       q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
-                                  range(1, len(rv.get_batch_shape()) + 1))
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
     return -self.loss
@@ -496,7 +496,7 @@ class MFVI(VariationalInference):
     q_log_prob = 0.0
     for key, rv in six.iteritems(self.latent_vars):
       q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  range(1, len(rv.get_batch_shape()) + 1))
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
     mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
     sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
@@ -529,7 +529,7 @@ class MFVI(VariationalInference):
     q_entropy = 0.0
     for key, rv in six.iteritems(self.latent_vars):
       q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  range(1, len(rv.get_batch_shape()) + 1))
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
       q_entropy += rv.entropy()
 
     self.loss = tf.reduce_mean(p_log_prob) + q_entropy

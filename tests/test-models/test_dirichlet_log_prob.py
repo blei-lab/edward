@@ -35,6 +35,7 @@ def dirichlet_logpdf_vec(x, alpha):
   else:
     raise NotImplementedError()
 
+
 def _test(alpha, n):
   rv = Dirichlet(alpha=alpha)
   rv_sample = rv.sample(n)
