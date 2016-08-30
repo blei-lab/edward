@@ -18,21 +18,21 @@ from edward.util import get_dims
 
 
 class NormalPosterior:
-  """p(x, z) = p(z) = p(z | x) = Normal(z; mu, Sigma)"""
-  def __init__(self, mu, Sigma):
+  """p(x, z) = p(z) = p(z | x) = Normal(z; mu, sigma)"""
+  def __init__(self, mu, sigma):
     self.mu = mu
-    self.Sigma = Sigma
+    self.sigma = sigma
     self.n_vars = get_dims(mu)[0]
 
   def log_prob(self, xs, zs):
-    return multivariate_normal.logpdf(zs['z'], self.mu, self.Sigma)
+    return multivariate_normal.logpdf(zs['z'], self.mu, self.sigma)
 
 
 ed.set_seed(42)
 mu = tf.constant([1.0, 1.0])
-Sigma = tf.constant([[1.0, 0.1],
+sigma = tf.constant([[1.0, 0.1],
                      [0.1, 1.0]])
-model = NormalPosterior(mu, Sigma)
+model = NormalPosterior(mu, sigma)
 
 qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
