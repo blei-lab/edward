@@ -104,7 +104,7 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
   # If an instance of the same name exists, return appropriately.
   # Do this for random variables.
   random_variables = {x.name: x for x in
-  graph.get_collection('_random_variable_collection_')}
+                      graph.get_collection('_random_variable_collection_')}
   if new_name in random_variables:
     return random_variables[new_name]
 

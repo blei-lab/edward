@@ -481,15 +481,29 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = self.latent_vars
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      p_log_prob = 0.0
 
-    p_log_prob = self.model_wrapper.log_prob(x, z)
     q_log_prob = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  list(range(1, len(rv.get_batch_shape()) + 1)))
+    # Take log-densities over latent variables.
+    for pz, qz in six.iteritems(self.latent_vars):
+      z_samples = tf.stop_gradient(qz.value()) # (shape) tensor
+      # Sum over all dimensions except the one corresponding to n_samples.
+      q_log_prob += tf.reduce_sum(qz.distribution.log_prob(z_samples))
+      if self.model_wrapper is None:
+        p_log_prob += tf.reduce_sum(pz.distribution.log_prob(z_samples))
+
+    if self.model_wrapper is None:
+      # Take log-densities over data.
+      for tensor, obs in six.iteritems(self.data):
+        if isinstance(tensor, RandomVariable):
+          px = tensor
+          # Sum over all dimensions except the one corresponding to n_samples.
+          p_log_prob += tf.reduce_sum(px.distribution.log_prob(obs))
 
     losses = p_log_prob - q_log_prob
     self.loss = tf.reduce_mean(losses)
