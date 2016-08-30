@@ -615,10 +615,10 @@ def logit(x):
   InvalidArgumentError
     If the input is not between :math:`(0,1)` elementwise.
   """
+  x = tf.convert_to_tensor(x)
   dependencies = [tf.assert_positive(x),
                   tf.assert_less(x, 1.0)]
   x = control_flow_ops.with_dependencies(dependencies, x)
-  x = tf.cast(x, dtype=tf.float32)
 
   return tf.log(x) - tf.log(1.0 - x)
 
