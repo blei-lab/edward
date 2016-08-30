@@ -819,56 +819,6 @@ probabilities which sum to 1.</li>
 <dd><p>Bases: <a class="reference internal" href="#edward.stats.distributions.Distribution" title="edward.stats.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Distribution</span></code></a></p>
 <p>Multivariate Normal (with full rank covariance) distribution.</p>
 <dl class="method">
-<dt id="edward.stats.distributions.MultivariateNormalFull.entropy">
-<code class="descname">entropy</code><span class="sig-paren">(</span><em>mean=None</em>, <em>cov=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#MultivariateNormalFull.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.MultivariateNormalFull.entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Entropy of probability distribution.</p>
-<p>This is not vectorized with respect to any arguments.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>mean</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D tensor. Defaults to zero mean.</li>
-<li><strong>cov</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D or 2-D tensor. Defaults to identity matrix.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.stats.distributions.MultivariateNormalFull.logpdf">
-<code class="descname">logpdf</code><span class="sig-paren">(</span><em>x</em>, <em>mean=None</em>, <em>cov=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#MultivariateNormalFull.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.MultivariateNormalFull.logpdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Log of the probability density function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>tf.Tensor</em>) &#8211; A 1-D or 2-D tensor.</li>
-<li><strong>mean</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D tensor. Defaults to zero mean.</li>
-<li><strong>cov</strong> (<em>tf.Tensor, optional</em>) &#8211; A 1-D or 2-D tensor. Defaults to identity matrix.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="edward.stats.distributions.MultivariateNormalFull.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>mean=None</em>, <em>cov=1</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#MultivariateNormalFull.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.MultivariateNormalFull.rvs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Random variates.</p>

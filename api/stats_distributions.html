@@ -187,62 +187,6 @@ distribution methods for use in TensorFlow.</p>
 <span class="sd">    dimension.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">logpmf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parameters</span>
-<span class="sd">    ---------</span>
-<span class="sd">    x : tf.Tensor</span>
-<span class="sd">        If univariate distribution, can be a 0-D or higher.</span>
-<span class="sd">        If multivariate distribution, can be a 1-D or higher; the</span>
-<span class="sd">        outer dimension carries the multivariate dimension.</span>
-<span class="sd">    params : tf.Tensor</span>
-<span class="sd">        0-D unless documented otherwise.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    tf.Tensor</span>
-<span class="sd">        If univariate distribution, returns a tensor of same shape</span>
-<span class="sd">        as input. If multivariate distribution, returns a tensor</span>
-<span class="sd">        of shape[:-1] from input: the outer dimension representing</span>
-<span class="sd">        the multivariate dimension is collapsed.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    x as a 3-D or higher tensor is not guaranteed to be supported</span>
-<span class="sd">    (for either univariate or multivariate distribution).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parameters</span>
-<span class="sd">    ---------</span>
-<span class="sd">    params : tf.Tensor</span>
-<span class="sd">        If univariate distribution, can be a scalar or vector.</span>
-<span class="sd">        If multivariate distribution, can be a vector or matrix.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    tf.Tensor</span>
-<span class="sd">        If univariate distribution, returns a tensor of same</span>
-<span class="sd">        shape as input.</span>
-<span class="sd">        If multivariate distribution, returns a tensor of</span>
-<span class="sd">        shape[-1] from input: the outer dimension representing the</span>
-<span class="sd">        multivariate dimension is collapsed.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    The equivalent method in SciPy is not guaranteed to be</span>
-<span class="sd">    supported for vector inputs for univariate distributions and</span>
-<span class="sd">    matrix inputs for multivariate distributions. This is.</span>
-
-<span class="sd">    params as a 2-D or higher tensor is not guaranteed to be</span>
-<span class="sd">    supported for univariate distributions. params as a 3-D or</span>
-<span class="sd">    higher tensor is not guaranteed to be supported for</span>
-<span class="sd">    multivariate distributions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </pre></div>
 </div>
 
