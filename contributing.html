@@ -144,7 +144,7 @@ git push origin pull_request_yourname</code></pre>
 <ul>
 <li>For developers with push permission to Edward’s repo, see <a href="https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request">Stan’s process</a> for how to name branches. Do not merge your own pull requests or ever push to master. Someone should always review your code. After merging (or deciding to close the request without merging), always delete the branch from the repo.</li>
 <li><strong>Issue labeling system.</strong> We use <a href="https://github.com/stan-dev/stan/issues">Stan’s labeling system</a>. While several labels obviously don’t apply to us, it’s better than the default labels.</li>
-<li><strong>Packaging and submitting to PyPI.</strong> First, update the version number in <code>setup.py</code>. Second, follow <a href="https://packaging.python.org/en/latest/distributing/#packaging-your-project">these steps</a>. For shorthand, the sequence of commands is
+<li><strong>Packaging and submitting to PyPI.</strong> First, update the version number in <code>version.py</code>. Second, follow <a href="https://packaging.python.org/en/latest/distributing/#packaging-your-project">these steps</a>. For shorthand, the sequence of commands is
 <pre class="JSON"><code>python setup.py sdist
 python setup.py bdist_wheel
 twine upload dist/*</code></pre>
