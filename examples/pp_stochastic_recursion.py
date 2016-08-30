@@ -7,8 +7,9 @@ Bernoulli random variable. It uses a recursive function and requires
 lazy evaluation of the condition.
 
 Recursion is not available in TensorFlow and so neither is stochastic
-recursion available in Edward's modeling language. Instead use
-(stochastic) while loops.
+recursion available in Edward's modeling language. There are several
+alternatives: (stochastic) while loops, wrapping around a Python
+implementation (`tf.py_func`), and a CPS-style formulation.
 
 References
 ----------

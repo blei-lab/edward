@@ -264,8 +264,8 @@ class VariationalInference(Inference):
       # TODO put in MFVI as it is specific to MFVI's computatoin
       copied_latent_vars = {}
       for z, qz in six.iteritems(self.latent_vars):
-        copied_z = copy(z, dict_swap=self.latent_vars)
-        copied_qz = copy(qz, dict_swap=self.latent_vars)
+        copied_z = copy(z, dict_swap=self.latent_vars, scope='inference')
+        copied_qz = copy(qz, dict_swap=self.latent_vars, scope='inference')
         copied_latent_vars[copied_z] = copied_qz
 
       # Build random variables in p(x | z). `latent_vars`
@@ -276,7 +276,7 @@ class VariationalInference(Inference):
         # Only build random variables, not any passed-in data
         # tensors.
         if isinstance(tensor, RandomVariable):
-          copied_x = copy(tensor, dict_swap=self.latent_vars)
+          copied_x = copy(tensor, dict_swap=self.latent_vars, scope='inference')
           copied_data[copied_x] = obs
         else:
           copied_data[tensor] = obs

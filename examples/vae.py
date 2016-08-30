@@ -23,14 +23,14 @@ ed.set_seed(42)
 
 # Probability model (subgraph)
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
-hidden = Dense(64)(tf.identity(z)) # (M, 64); identity() for tensor conversion
+hidden = Dense(500)(tf.identity(z)) # (M, 500); identity() for tensor conversion
 logits = Dense(28*28)(hidden)
 x = Bernoulli(logits=logits) # (M, 784)
 
 # Variational model (subgraph)
 x_ph = tf.placeholder(tf.float32, [M, 28*28])
 tf.add_to_collection('placeholders', x_ph)
-hidden = Dense(64, activation=K.sigmoid)(x_ph) # (M, 64)
+hidden = Dense(500, activation=K.sigmoid)(x_ph) # (M, 500)
 mu = Dense(d)(hidden) # (M, d)
 sigma = Dense(d, activation=K.softplus)(hidden) # (M, d)
 qz = Normal(mu=mu, sigma=sigma)
@@ -70,5 +70,5 @@ for epoch in range(n_epoch):
 
     # Prior predictive check.
     imgs = sess.run(x.value())
-    for b in range(M):
-        imsave("img/%d.png" % b, imgs[b].reshape(28, 28))
+    for m in range(M):
+        imsave("img/%d.png" % m, imgs[m].reshape(28, 28))
