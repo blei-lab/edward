@@ -7,13 +7,13 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
+from edward.models.random_variable import RandomVariable
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
 
 distributions = tf.contrib.distributions
-sg = tf.contrib.bayesflow.stochastic_graph
 
 
 def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, copy_q=True):
@@ -28,10 +28,10 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
 
   Parameters
   ----------
-  org_instance : sg.DistributionTensor, tf.Variable, tf.Tensor, or tf.Operation
+  org_instance : RandomVariable, tf.Variable, tf.Tensor, or tf.Operation
     Node to add in graph with replaced ancestors.
   dict_swap : dict, optional
-    Distribution tensors, variables, tensors, or operations to
+    Random variables, variables, tensors, or operations to
     swap with. Its keys are what `org_instance` may depend on,
     and its values are the corresponding object (of the same type)
     that is used in exchange.
@@ -47,7 +47,7 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
 
   Returns
   -------
-  sg.DistributionTensor, tf.Variable, tf.Tensor, or tf.Operation
+  RandomVariable, tf.Variable, tf.Tensor, or tf.Operation
     The copied node.
 
   Raises
@@ -75,7 +75,7 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
   >>> sess.run(z_new)
   12.0
   """
-  if not isinstance(org_instance, sg.DistributionTensor) and \
+  if not isinstance(org_instance, RandomVariable) and \
      not isinstance(org_instance, tf.Variable) and \
      not isinstance(org_instance, tf.Tensor) and \
      not isinstance(org_instance, tf.Operation):
@@ -88,10 +88,10 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
       return org_instance
   elif isinstance(org_instance, tf.Tensor) and replace_itself:
     # Deal with case when `org_instance` is the associated tensor
-    # from the DistributionTensor, e.g., `z.value()`. If
+    # from the RandomVariable, e.g., `z.value()`. If
     # `dict_swap={z: qz}`, we aim to swap it with `qz.value()`.
     for key, value in six.iteritems(dict_swap):
-      if isinstance(key, sg.DistributionTensor):
+      if isinstance(key, RandomVariable):
         if org_instance == key.value():
           org_instance = value.value()
           if not copy_q:
@@ -102,16 +102,17 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
   new_name = scope + '/' + org_instance.name
 
   # If an instance of the same name exists, return appropriately.
-  # Do this for stochastic tensors.
-  stochastic_tensors = {x.name: x for x in graph.get_collection('_stochastic_tensor_collection_')}
-  if new_name in stochastic_tensors:
-    return stochastic_tensors[new_name]
+  # Do this for random variables.
+  random_variables = {x.name: x for x in
+  graph.get_collection('_random_variable_collection_')}
+  if new_name in random_variables:
+    return random_variables[new_name]
 
   # Do this for tensors and operations.
   try:
     already_present = graph.as_graph_element(new_name,
-                         allow_tensor=True,
-                         allow_operation=True)
+                                             allow_tensor=True,
+                                             allow_operation=True)
     return already_present
   except:
     pass
@@ -130,13 +131,13 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
   if org_instance.name in placeholders:
     return graph.get_tensor_by_name(placeholders[org_instance.name].name)
 
-  if isinstance(org_instance, sg.DistributionTensor):
-    dist_tensor = org_instance
+  if isinstance(org_instance, RandomVariable):
+    rv = org_instance
 
     # If it has copiable arguments, copy them.
     dist_args = {}
-    for key, value in six.iteritems(dist_tensor._dist_args):
-      if isinstance(value, sg.DistributionTensor) or \
+    for key, value in six.iteritems(rv._dist_args):
+      if isinstance(value, RandomVariable) or \
          isinstance(value, tf.Variable) or \
          isinstance(value, tf.Tensor) or \
          isinstance(value, tf.Operation):
@@ -144,36 +145,23 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
 
       dist_args[key] = value
 
-    dist_args['name'] = new_name + dist_tensor.distribution.name
+    dist_args['name'] = new_name + rv.distribution.name
 
-    # Copy a new `dist_tensor` with any newly copied arguments.
+    # Copy a new `rv` with any newly copied arguments.
     # We do this by creating an empty class object and setting
     # its attributes. (This is to avoid a throwaway tensor in the
     # graph, during instantiation of DistributionTensor.)
-    new_dist_tensor = Empty()
-    new_dist_tensor.__class__ = sg.DistributionTensor
-    for key, value in six.iteritems(dist_tensor.__dict__):
-      if key not in \
-      ['_name', '_dist_args', '_dist', 'value_type', '_value']:
-        setattr(new_dist_tensor, key, deepcopy(value))
+    new_rv = Empty()
+    new_rv.__class__ = RandomVariable
+    for key, value in six.iteritems(rv.__dict__):
+      if key not in ['_name', '_dist_args', '_dist', '_value']:
+        setattr(new_rv, key, deepcopy(value))
 
-    setattr(new_dist_tensor, '_name', new_name)
-    setattr(new_dist_tensor, '_dist_args', dist_args)
-    setattr(new_dist_tensor, '_dist',
-        new_dist_tensor._dist_cls(**new_dist_tensor._dist_args))
-    try:
-      # Use value type context during copy(); otherwise default
-      # to the original value type.
-      # TODO i think it's more like we should augment the value
-      # type with another
-      setattr(new_dist_tensor, '_value_type', sg.get_current_value_type())
-    except sg.NoValueTypeSetError:
-      setattr(new_dist_tensor, '_value_type', dist_tensor._value_type)
-
-    new_dist_tensor._value_type.declare_inputs(new_dist_tensor, dist_args)
-    setattr(new_dist_tensor, '_value',
-        new_dist_tensor._create_value())
-    return new_dist_tensor
+    setattr(new_rv, '_name', new_name)
+    setattr(new_rv, '_dist_args', dist_args)
+    setattr(new_rv, '_dist', new_rv._dist_cls(**new_rv._dist_args))
+    setattr(new_rv, '_value', new_rv._dist.sample())
+    return new_rv
   elif isinstance(org_instance, tf.Tensor):
     tensor = org_instance
 
@@ -353,6 +341,8 @@ def dot(x, y):
   InvalidArgumentError
     If the inputs have Inf or NaN values.
   """
+  x = tf.convert_to_tensor(x)
+  y = tf.convert_to_tensor(y)
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
@@ -363,11 +353,11 @@ def dot(x, y):
   if len(x.get_shape()) == 1:
     vec = x
     mat = y
-    return tf.matmul(tf.expand_dims(vec, 0), mat)
+    return tf.reshape(tf.matmul(tf.expand_dims(vec, 0), mat), [-1])
   else:
     mat = x
     vec = y
-    return tf.matmul(mat, tf.expand_dims(vec, 1))
+    return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
 class Empty(object):

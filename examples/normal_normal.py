@@ -9,14 +9,11 @@ import tensorflow as tf
 
 from edward.models import Normal
 
-sg = tf.contrib.bayesflow.stochastic_graph
-
 ed.set_seed(42)
 
 # Normal-Normal with known variance
 mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-with sg.value_type(sg.SampleValue(n=50)):
-    x = Normal(mu=mu, sigma=tf.constant([1.0]))
+x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant([1.0]))
 
 qmu_mu = tf.Variable(tf.random_normal([1]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
@@ -30,5 +27,5 @@ inference.initialize()
 
 sess = ed.get_session()
 for t in range(1001):
-    _, loss = sess.run([inference.train, inference.loss])
-    inference.print_progress(t, loss)
+  _, loss = sess.run([inference.train, inference.loss])
+  inference.print_progress(t, loss)

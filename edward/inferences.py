@@ -7,9 +7,7 @@ import numpy as np
 import six
 import tensorflow as tf
 
-# TODO
-#from edward.models import StanModel, Normal, PointMass
-from edward.models import StanModel, Normal
+from edward.models import StanModel, RandomVariable, Normal, PointMass
 from edward.util import copy, get_dims, get_session, hessian, \
     kl_multivariate_normal, log_sum_exp
 
@@ -76,8 +74,7 @@ class Inference(object):
     Examples
     --------
     >>> mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-    >>> with sg.value_type(sg.SampleValue(n=50)):
-    >>>     x = Normal(mu=mu, sigma=tf.constant([1.0]))
+    >>> x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant([1.0]))
     >>>
     >>> qmu_mu = tf.Variable(tf.random_normal([1]))
     >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
@@ -264,16 +261,12 @@ class VariationalInference(Inference):
       # replaces conditioning on priors with conditioning on
       # (variational) posteriors.
       # TODO still build qz if model_wrapper is used
-      # TODO put in MFVI as it relies on self.n_samples
-      # TODO technically don't need to change value type for z
-      # Rewrite value type based on number of latent variable
-      # samples during inference.
+      # TODO put in MFVI as it is specific to MFVI's computatoin
       copied_latent_vars = {}
-      with sg.value_type(sg.SampleValue(n=self.n_samples)):
-        for z, qz in six.iteritems(self.latent_vars):
-          copied_z = copy(z, dict_swap=self.latent_vars)
-          copied_qz = copy(qz, dict_swap=self.latent_vars)
-          copied_latent_vars[copied_z] = copied_qz
+      for z, qz in six.iteritems(self.latent_vars):
+        copied_z = copy(z, dict_swap=self.latent_vars)
+        copied_qz = copy(qz, dict_swap=self.latent_vars)
+        copied_latent_vars[copied_z] = copied_qz
 
       # Build random variables in p(x | z). `latent_vars`
       # replaces conditioning on priors with conditioning on
@@ -282,14 +275,17 @@ class VariationalInference(Inference):
       for tensor, obs in six.iteritems(self.data):
         # Only build random variables, not any passed-in data
         # tensors.
-        if isinstance(tensor, sg.DistributionTensor):
+        if isinstance(tensor, RandomVariable):
           copied_x = copy(tensor, dict_swap=self.latent_vars)
           copied_data[copied_x] = obs
         else:
           copied_data[tensor] = obs
 
       # TODO For now, we are replacing the objects themselves
-      # with the new dependencies.
+      # with the new dependencies. In geneeral we don't want to do
+      # this as user may work with inference.latent_vars, e.g., in the
+      # case of passing in a list and getting out the inferred
+      # variational factors.
       self.latent_vars = copied_latent_vars
       self.data = copied_data
 
@@ -520,29 +516,23 @@ class MFVI(VariationalInference):
       p_log_prob = 0.0
 
     q_log_prob = 0.0
+    # TODO for now assume n_samples=1 and therefore nothing of the for
+    # loop/outer packing is required.
     # Take log-densities over latent variables.
     for pz, qz in six.iteritems(self.latent_vars):
-      z_samples = qz.value() # (n_samples, shape) tensor
+      z_samples = qz.value() # (shape) tensor
       # Sum over all dimensions except the one corresponding to n_samples.
-      q_log_prob += tf.reduce_sum(qz.distribution.log_prob(z_samples),
-                                  range(1, len(qz.value().get_shape())))
+      q_log_prob += tf.reduce_sum(qz.distribution.log_prob(z_samples))
       if self.model_wrapper is None:
-        p_log_prob += tf.reduce_sum(pz.distribution.log_prob(z_samples),
-                                    range(1, len(pz.value().get_shape())))
+        p_log_prob += tf.reduce_sum(pz.distribution.log_prob(z_samples))
 
     if self.model_wrapper is None:
       # Take log-densities over data.
       for tensor, obs in six.iteritems(self.data):
-        if isinstance(tensor, sg.DistributionTensor):
+        if isinstance(tensor, RandomVariable):
           px = tensor
-          len_px = len(px.value().get_shape())
-          # reshape `obs` in order to broadcast along outer dimension
-          obs_shape = tuple([int(i) for i in obs.get_shape()])
-          len_obs = len(obs_shape)
-          obs = tf.reshape(obs, obs_shape + (1,)*(len_px-len_obs))
           # Sum over all dimensions except the one corresponding to n_samples.
-          p_log_prob += tf.reduce_sum(px.distribution.log_prob(obs),
-                                      range(len_obs) + range(len_obs, len_px))
+          p_log_prob += tf.reduce_sum(px.distribution.log_prob(obs))
 
     self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
     return -self.loss

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Convolutional variational auto-encoder for MNIST data.
+Variational auto-encoder for MNIST data.
 Assumes the directories "img/" and "data/mnist/" exist.
 """
 from __future__ import absolute_import
