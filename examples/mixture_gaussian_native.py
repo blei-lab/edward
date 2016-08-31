@@ -32,7 +32,7 @@ ed.set_seed(42)
 pi = Dirichlet(alpha=tf.constant([0.1]*K), name='pi') # (K, )
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]), name='mu') # (K, D)
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]), name='sigma') # (K, D)
-c = Categorical(logits=tf.pack([ed.logit(pi) for i in range(N)]), name='c') # (N, )
+c = Categorical(logits=ed.tile(ed.logit(pi), [N, 1]), name='c') # (N, )
 x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c), name='x') # (N, D)
 
 qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))

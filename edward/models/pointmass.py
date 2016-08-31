@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import math
 
+from edward.util import tile
 from tensorflow.contrib.distributions.python.ops import \
     distribution
 from tensorflow.python.framework import constant_op
@@ -212,9 +213,7 @@ class PointMass(distribution.Distribution):
     """
     with ops.name_scope(self.name):
       with ops.op_scope([self._params, n], name):
-        # TODO
-        n = n.eval()
-        return tf.pack([self.params] * n)
+        return tile(self.params, tf.expand_dims(n, 0))
 
   @property
   def is_reparameterized(self):
