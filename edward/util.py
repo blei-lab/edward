@@ -152,7 +152,7 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
     # its attributes. (This is to avoid a throwaway tensor in the
     # graph, during instantiation of DistributionTensor.)
     new_rv = Empty()
-    new_rv.__class__ = RandomVariable
+    new_rv.__class__ = rv.__class__
     for key, value in six.iteritems(rv.__dict__):
       if key not in ['_name', '_dist_args', '_dist', '_value']:
         setattr(new_rv, key, deepcopy(value))

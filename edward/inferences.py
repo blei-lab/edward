@@ -11,8 +11,6 @@ from edward.models import StanModel, RandomVariable, Normal, PointMass
 from edward.util import copy, get_dims, get_session, hessian, \
     kl_multivariate_normal, log_sum_exp
 
-sg = tf.contrib.bayesflow.stochastic_graph
-
 try:
   import prettytensor as pt
 except ImportError:
@@ -352,13 +350,11 @@ class VariationalInference(Inference):
     loss : double
       Loss function value at iteration ``t``.
     """
-    sess = get_session()
     if self.n_print is not None:
       if t % self.n_print == 0:
         print("iter {:d} loss {:.2f}".format(t, loss))
         for rv in six.itervalues(self.latent_vars):
-          print(sess.run({key: tf.identity(value)
-                          for key, value in six.iteritems(rv._dist_args)}))
+          print(rv)
 
   def finalize(self):
     """Function to call after convergence.
