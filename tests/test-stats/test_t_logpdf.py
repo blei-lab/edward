@@ -31,3 +31,6 @@ class test_t_logpdf_class(tf.test.TestCase):
                         dtype=np.float32),
                3.0, np.array([0.0] * 4, dtype=np.float32),
                np.array([1.0] * 4, dtype=np.float32))
+
+if __name__ == '__main__':
+  tf.test.main()

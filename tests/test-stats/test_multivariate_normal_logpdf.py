@@ -35,3 +35,6 @@ class test_multivariate_normal_logpdf_class(tf.test.TestCase):
     x = np.array([[0.3, 0.7], [0.2, 0.8]])
     self._test(x, np.zeros(2), np.diag(np.ones(2)))
     self._test(x, np.zeros(2), np.array([[2.0, 0.5], [0.5, 1.0]]))
+
+if __name__ == '__main__':
+  tf.test.main()

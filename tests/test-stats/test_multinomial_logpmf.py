@@ -68,3 +68,6 @@ class test_gamma_logpdf_class(tf.test.TestCase):
   def test_float_2d(self):
     self._test(np.array([[0.0, 1.0], [1.0, 0.0]]), 1, np.array([0.5, 0.5]))
     self._test(np.array([[1.0, 0.0], [0.0, 1.0]]), 1, np.array([0.75, 0.25]))
+
+if __name__ == '__main__':
+  tf.test.main()

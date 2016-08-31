@@ -35,3 +35,6 @@ class test_pointmass_log_prob_class(tf.test.TestCase):
       _test(tf.zeros([1]) + 0.5, [5])
       _test(tf.zeros([5]) + 0.5, [1])
       _test(tf.zeros([5]) + 0.5, [5])
+
+if __name__ == '__main__':
+  tf.test.main()

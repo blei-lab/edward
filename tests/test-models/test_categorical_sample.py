@@ -23,3 +23,6 @@ class test_categorical_sample_class(tf.test.TestCase):
       _test(np.array([0.4, 0.6]), [1])
       _test(np.array([0.4, 0.6]), [5])
       _test(tf.constant([0.4, 0.6]), [5])
+
+if __name__ == '__main__':
+  tf.test.main()

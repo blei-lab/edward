@@ -27,3 +27,6 @@ class test_beta_entropy_class(tf.test.TestCase):
   def test_1d(self):
     with self.test_session():
       self._test([0.5, 0.3, 0.8, 0.1], [0.1, 0.7, 0.2, 0.4])
+
+if __name__ == '__main__':
+  tf.test.main()

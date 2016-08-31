@@ -39,3 +39,6 @@ class test_beta_logpdf_class(tf.test.TestCase):
     self._test(np.array([[0.5, 0.3, 0.8, 0.1], [0.1, 0.7, 0.2, 0.4]],
                         dtype=np.float32),
                a=0.5, b=0.5)
+
+if __name__ == '__main__':
+  tf.test.main()

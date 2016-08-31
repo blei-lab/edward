@@ -42,3 +42,6 @@ class test_bernoulli_logpmf_class(tf.test.TestCase):
   def test_float_2d(self):
     self._test(np.array([[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]), 0.5)
     self._test(np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]), 0.75)
+
+if __name__ == '__main__':
+  tf.test.main()

@@ -34,3 +34,6 @@ class test_multivariate_normal_entropy_class(tf.test.TestCase):
       self.assertAllClose(
           multivariate_normal_full.entropy(mu, tf.constant(cm)).eval(),
           stats.multivariate_normal.entropy(cov=np.array(cm)))
+
+if __name__ == '__main__':
+  tf.test.main()

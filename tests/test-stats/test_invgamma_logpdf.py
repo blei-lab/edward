@@ -39,3 +39,6 @@ class test_invgamma_logpdf_class(tf.test.TestCase):
     self._test(np.array([[0.5, 1.2, 5.3, 8.7], [0.5, 1.2, 5.3, 8.7]],
                         dtype=np.float32),
                alpha=0.5, beta=0.5)
+
+if __name__ == '__main__':
+  tf.test.main()
