@@ -818,18 +818,17 @@ class MAP(VariationalInference):
     explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
-      if len(latent_vars) == 0:
-        latent_vars = {}
-      elif len(latent_vars) == 1:
-        with tf.variable_scope("variational"):
-          if hasattr(model_wrapper, 'n_vars'):
-            latent_vars = {latent_vars[0]: PointMass(
-                params=tf.Variable(tf.random_normal([model_wrapper.n_vars])))}
-          else:
-            latent_vars = {latent_vars[0]: PointMass(params=tf.constant([0.0]))}
-      else:
-        raise NotImplementedError("A list of more than one element is "
-                                  "not supported. See documentation.")
+      with tf.variable_scope("variational"):
+        if model_wrapper is None:
+          latent_vars = {rv:
+              PointMass(params=tf.Variable(tf.random_normal(rv.batch_shape())))
+              for rv in latent_vars}
+        elif len(latent_vars) == 1:
+          latent_vars = {latent_vars[0]: PointMass(
+              params=tf.Variable(tf.random_normal([model_wrapper.n_vars])))}
+        else:
+          raise NotImplementedError("A list of more than one element is "
+                                    "not supported. See documentation.")
 
     super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
@@ -840,9 +839,26 @@ class MAP(VariationalInference):
     .. math::
       - \log p(x,z)
     """
-    x = self.data
-    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
-    self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([1])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      p_log_prob = 0.0
+
+      # Take log-densities over latent variables.
+      for pz, qz in six.iteritems(self.latent_vars):
+        z_samples = qz.value() # (shape) tensor
+        p_log_prob += tf.reduce_sum(pz.log_prob(z_samples))
+
+      # Take log-densities over data.
+      for tensor, obs in six.iteritems(self.data):
+        if isinstance(tensor, RandomVariable):
+          px = tensor
+          p_log_prob += tf.reduce_sum(px.log_prob(obs))
+
+    self.loss = tf.reduce_mean(p_log_prob)
     return -self.loss
 
 
