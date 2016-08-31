@@ -213,9 +213,9 @@ class PointMass(distribution.Distribution):
     """
     with ops.name_scope(self.name):
       with ops.op_scope([self._params, n], name):
-        # TODO
-        n = n.eval()
-        return tf.pack([self._params] * n)
+        multiples = tf.concat(0, [tf.expand_dims(n, 0),
+                                  [1] * len(self._params.get_shape())])
+        return tile(self._params, multiples)
 
   @property
   def is_reparameterized(self):
