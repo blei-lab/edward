@@ -162,9 +162,9 @@
 <span class="sd">  InvalidArgumentError</span>
 <span class="sd">    If the input has Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">xs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">xs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
-  <span class="n">xs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
   <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
@@ -202,21 +202,21 @@
 <span class="sd">  InvalidArgumentError</span>
 <span class="sd">    If the inputs have Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
   <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">vec</span> <span class="o">=</span> <span class="n">x</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="n">y</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">mat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">mat</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="n">x</span>
     <span class="n">vec</span> <span class="o">=</span> <span class="n">y</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="get_dims"><a class="viewcode-back" href="../../edward.util.html#edward.util.get_dims">[docs]</a><span class="k">def</span> <span class="nf">get_dims</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -235,11 +235,7 @@
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[]</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-    <span class="n">dims</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c"># scalar</span>
-      <span class="k">return</span> <span class="p">[]</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c"># array</span>
-      <span class="k">return</span> <span class="p">[</span><span class="n">dim</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
@@ -287,6 +283,7 @@
 <span class="sd">  InvalidArgumentError</span>
 <span class="sd">    If the inputs have Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">])</span>
 
@@ -357,14 +354,16 @@
 <span class="sd">    If the location variables have Inf or NaN values, or if the scale</span>
 <span class="sd">    variables are not positive.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">loc_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">loc_one</span><span class="p">)</span>
+  <span class="n">scale_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
+  <span class="n">loc_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">loc_two</span><span class="p">)</span>
+  <span class="n">scale_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_two</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">scale_one</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)]</span>
   <span class="n">loc_one</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">loc_one</span><span class="p">)</span>
   <span class="n">scale_one</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">scale_one</span><span class="p">)</span>
-  <span class="n">loc_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">scale_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">scale_one</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">loc_two</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">scale_two</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
     <span class="c"># With default arguments, we can avoid some intermediate computation.</span>
@@ -373,8 +372,6 @@
   <span class="k">else</span><span class="p">:</span>
     <span class="n">loc_two</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">loc_two</span><span class="p">)</span>
     <span class="n">scale_two</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">scale_two</span><span class="p">)</span>
-    <span class="n">loc_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">loc_two</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">scale_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">scale_two</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">scale_one</span> <span class="o">/</span> <span class="n">scale_two</span><span class="p">)</span> <span class="o">+</span> \
         <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">loc_two</span> <span class="o">-</span> <span class="n">loc_one</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> \
         <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
@@ -409,9 +406,9 @@
 <span class="sd">  InvalidArgumentError</span>
 <span class="sd">    If the input has Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">input_tensor</span><span class="p">)</span>
-  <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x_max</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span>
@@ -442,9 +439,9 @@
 <span class="sd">  InvalidArgumentError</span>
 <span class="sd">    If the input has Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">input_tensor</span><span class="p">)</span>
-  <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x_max</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span>
@@ -469,10 +466,10 @@
 <span class="sd">  InvalidArgumentError</span>
 <span class="sd">    If the input is not between :math:`(0,1)` elementwise.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_less</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
 
@@ -506,6 +503,10 @@
 <span class="sd">    If the mean variables have Inf or NaN values, or if the scale</span>
 <span class="sd">    and length variables are not positive.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+  <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+  <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span>
@@ -514,10 +515,6 @@
   <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
   <span class="n">sigma</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
   <span class="n">l</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
       <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span></div>
@@ -552,6 +549,10 @@
 <span class="sd">    If the mean variables have Inf or NaN values, or if the scale</span>
 <span class="sd">    and length variables are not positive.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+  <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+  <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span>
@@ -560,10 +561,6 @@
   <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
   <span class="n">sigma</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
   <span class="n">l</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
       <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span></div>
@@ -585,6 +582,105 @@
 
   <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
   <span class="n">tf</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tile"><a class="viewcode-back" href="../../edward.util.html#edward.util.tile">[docs]</a><span class="k">def</span> <span class="nf">tile</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">multiples</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Constructs a tensor by tiling a given tensor.</span>
+
+<span class="sd">  This extends ``tf.tile`` to features available in ``np.tile``.</span>
+<span class="sd">  Namely, ``inputs`` and ``multiples`` can be a 0-D tensor.  Further,</span>
+<span class="sd">  if 1-D, ``multiples`` can be of any length according to broadcasting</span>
+<span class="sd">  rules (see documentation of ``np.tile`` or examples below).</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  input : tf.Tensor</span>
+<span class="sd">    The input tensor.</span>
+<span class="sd">  multiples : tf.Tensor</span>
+<span class="sd">    The number of repetitions of ``input`` along each axis. Has type</span>
+<span class="sd">    ``tf.int32``. 0-D or 1-D.</span>
+<span class="sd">  *args :</span>
+<span class="sd">    Passed into ``tf.tile``.</span>
+<span class="sd">  **kwargs :</span>
+<span class="sd">    Passed into ``tf.tile``.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  tf.Tensor</span>
+<span class="sd">      Has the same type as ``input``.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; a = tf.constant([0, 1, 2])</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(ed.tile(a, 2))</span>
+<span class="sd">  array([0, 1, 2, 0, 1, 2], dtype=int32)</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(ed.tile(a, (2, 2)))</span>
+<span class="sd">  array([[0, 1, 2, 0, 1, 2],</span>
+<span class="sd">         [0, 1, 2, 0, 1, 2]], dtype=int32)</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(ed.tile(a, (2, 1, 2)))</span>
+<span class="sd">  array([[[0, 1, 2, 0, 1, 2]],</span>
+<span class="sd">         [[0, 1, 2, 0, 1, 2]]], dtype=int32)</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; b = tf.constant([[1, 2], [3, 4]])</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(ed.tile(b, 2))</span>
+<span class="sd">  array([[1, 2, 1, 2],</span>
+<span class="sd">         [3, 4, 3, 4]], dtype=int32)</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(ed.tile(b, (2, 1)))</span>
+<span class="sd">  array([[1, 2],</span>
+<span class="sd">         [3, 4],</span>
+<span class="sd">         [1, 2],</span>
+<span class="sd">         [3, 4]], dtype=int32)</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; c = tf.constant([1, 2, 3, 4])</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(ed.tile(c, (4, 1)))</span>
+<span class="sd">  array([[1, 2, 3, 4],</span>
+<span class="sd">         [1, 2, 3, 4],</span>
+<span class="sd">         [1, 2, 3, 4],</span>
+<span class="sd">         [1, 2, 3, 4]], dtype=int32)</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  Sometimes this can result in an unknown shape. The core reason for</span>
+<span class="sd">  this is the following behavior:</span>
+
+<span class="sd">  &gt;&gt;&gt; n = tf.constant([1])</span>
+<span class="sd">  &gt;&gt;&gt; tf.tile(tf.constant([[1.0]]),</span>
+<span class="sd">  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))</span>
+<span class="sd">  &lt;tf.Tensor &#39;Tile:0&#39; shape=(1, 1) dtype=float32&gt;</span>
+<span class="sd">  &gt;&gt;&gt; n = tf.reshape(tf.constant(1), [1])</span>
+<span class="sd">  &gt;&gt;&gt; tf.tile(tf.constant([[1.0]]),</span>
+<span class="sd">  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))</span>
+<span class="sd">  &lt;tf.Tensor &#39;Tile_1:0&#39; shape=(?, ?) dtype=float32&gt;</span>
+
+<span class="sd">  For this reason, we try to fetch ``multiples`` out of session if</span>
+<span class="sd">  possible. This can be slow if ``multiples`` has computationally</span>
+<span class="sd">  intensive dependencies in order to perform this fetch.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="nb">input</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+  <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">multiples</span><span class="p">)</span>
+
+  <span class="c"># 0-d tensor</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+  <span class="c"># 0-d tensor</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">multiples</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">multiples</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">get_session</span><span class="p">()</span>
+    <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">multiples</span><span class="o">.</span><span class="n">eval</span><span class="p">())</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+  <span class="c"># broadcasting</span>
+  <span class="n">diff</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">-</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">multiples</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">+</span> <span class="n">get_dims</span><span class="p">(</span><span class="nb">input</span><span class="p">))</span>
+  <span class="k">elif</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">multiples</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">multiples</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="to_simplex"><a class="viewcode-back" href="../../edward.util.html#edward.util.to_simplex">[docs]</a><span class="k">def</span> <span class="nf">to_simplex</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -611,9 +707,9 @@
 <span class="sd">  -----</span>
 <span class="sd">  x as a 3-D or higher tensor is not guaranteed to be supported.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
   <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
     <span class="n">shape</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>

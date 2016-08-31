@@ -828,7 +828,7 @@
 
 <span class="sd">    &gt;&gt;&gt; qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))</span>
 <span class="sd">    &gt;&gt;&gt; qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))</span>
-<span class="sd">    &gt;&gt;&gt; qsigma = PointMass(params=tf.exp(tf.Variable(tf.zeros(K*D))))</span>
+<span class="sd">    &gt;&gt;&gt; qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))</span>
 <span class="sd">    &gt;&gt;&gt; MAP({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model_wrapper)</span>
 
 <span class="sd">    We also automate the specification of ``PointMass`` distributions</span>
@@ -861,10 +861,6 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;A list of more than one element is &quot;</span>
                                   <span class="s">&quot;not supported. See documentation.&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-      <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">MAP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 

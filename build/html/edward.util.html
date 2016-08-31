@@ -464,6 +464,82 @@ and length variables are not positive.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="edward.util.tile">
+<code class="descclassname">edward.util.</code><code class="descname">tile</code><span class="sig-paren">(</span><em>input</em>, <em>multiples</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#tile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.tile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a tensor by tiling a given tensor.</p>
+<p>This extends <code class="docutils literal"><span class="pre">tf.tile</span></code> to features available in <code class="docutils literal"><span class="pre">np.tile</span></code>.
+Namely, <code class="docutils literal"><span class="pre">inputs</span></code> and <code class="docutils literal"><span class="pre">multiples</span></code> can be a 0-D tensor.  Further,
+if 1-D, <code class="docutils literal"><span class="pre">multiples</span></code> can be of any length according to broadcasting
+rules (see documentation of <code class="docutils literal"><span class="pre">np.tile</span></code> or examples below).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input</strong> (<em>tf.Tensor</em>) &#8211; The input tensor.</li>
+<li><strong>multiples</strong> (<em>tf.Tensor</em>) &#8211; The number of repetitions of <code class="docutils literal"><span class="pre">input</span></code> along each axis. Has type
+<code class="docutils literal"><span class="pre">tf.int32</span></code>. 0-D or 1-D.</li>
+<li><strong>*args</strong> &#8211; Passed into <code class="docutils literal"><span class="pre">tf.tile</span></code>.</li>
+<li><strong>**kwargs</strong> &#8211; Passed into <code class="docutils literal"><span class="pre">tf.tile</span></code>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Has the same type as <code class="docutils literal"><span class="pre">input</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">array([0, 1, 2, 0, 1, 2], dtype=int32)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="go">array([[0, 1, 2, 0, 1, 2],</span>
+<span class="go">       [0, 1, 2, 0, 1, 2]], dtype=int32)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="go">array([[[0, 1, 2, 0, 1, 2]],</span>
+<span class="go">       [[0, 1, 2, 0, 1, 2]]], dtype=int32)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">array([[1, 2, 1, 2],</span>
+<span class="go">       [3, 4, 3, 4]], dtype=int32)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="go">array([[1, 2],</span>
+<span class="go">       [3, 4],</span>
+<span class="go">       [1, 2],</span>
+<span class="go">       [3, 4]], dtype=int32)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="go">array([[1, 2, 3, 4],</span>
+<span class="go">       [1, 2, 3, 4],</span>
+<span class="go">       [1, 2, 3, 4],</span>
+<span class="go">       [1, 2, 3, 4]], dtype=int32)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Sometimes this can result in an unknown shape. The core reason for
+this is the following behavior:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">]]),</span>
+<span class="gp">... </span>        <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">1.0</span><span class="p">])</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()]))</span>
+<span class="go">&lt;tf.Tensor &#39;Tile:0&#39; shape=(1, 1) dtype=float32&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">]]),</span>
+<span class="gp">... </span>        <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">1.0</span><span class="p">])</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()]))</span>
+<span class="go">&lt;tf.Tensor &#39;Tile_1:0&#39; shape=(?, ?) dtype=float32&gt;</span>
+</pre></div>
+</div>
+<p>For this reason, we try to fetch <code class="docutils literal"><span class="pre">multiples</span></code> out of session if
+possible. This can be slow if <code class="docutils literal"><span class="pre">multiples</span></code> has computationally
+intensive dependencies in order to perform this fetch.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="edward.util.to_simplex">
 <code class="descclassname">edward.util.</code><code class="descname">to_simplex</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#to_simplex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.to_simplex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform real vector of length <code class="docutils literal"><span class="pre">(K-1)</span></code> to a simplex of dimension <code class="docutils literal"><span class="pre">K</span></code>
