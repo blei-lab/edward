@@ -30,3 +30,6 @@ class test_trucnorm_logpdf_class(tf.test.TestCase):
   def test_2d(self):
     self._test(np.array([[0.0, 1.0, 0.58, 2.3], [0.0, 1.0, 0.58, 2.3]]),
                a=-1.0, b=3.0)
+
+if __name__ == '__main__':
+  tf.test.main()

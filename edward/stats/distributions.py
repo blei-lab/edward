@@ -789,96 +789,6 @@ class MultivariateNormalFull(Distribution):
     x = np.rollaxis(np.asarray(x), 1)
     return x
 
-  def logpdf(self, x, mean=None, cov=1):
-    """Log of the probability density function.
-
-    Parameters
-    ----------
-    x : tf.Tensor
-      A 1-D or 2-D tensor.
-    mean : tf.Tensor, optional
-      A 1-D tensor. Defaults to zero mean.
-    cov : tf.Tensor, optional
-      A 1-D or 2-D tensor. Defaults to identity matrix.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of one dimension less than the input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    x_shape = get_dims(x)
-    if len(x_shape) == 1:
-      d = x_shape[0]
-    else:
-      d = x_shape[1]
-
-    if mean is None:
-      r = x
-    else:
-      mean = tf.cast(mean, dtype=tf.float32)
-      r = x - mean
-
-    if cov is 1:
-      L_inv = tf.diag(tf.ones([d]))
-      det_cov = tf.constant(1.0)
-    else:
-      cov = tf.cast(cov, dtype=tf.float32)
-      if len(cov.get_shape()) == 1:  # vector
-        L_inv = tf.diag(1.0 / tf.sqrt(cov))
-        det_cov = tf.reduce_prod(cov)
-      else:  # matrix
-        L = tf.cholesky(cov)
-        L_inv = tf.matrix_inverse(L)
-        det_cov = tf.pow(tf.reduce_prod(tf.diag_part(L)), 2)
-
-    lps = -0.5 * d * tf.log(2 * np.pi) - 0.5 * tf.log(det_cov)
-    if len(x_shape) == 1:  # vector
-      r = tf.reshape(r, shape=(d, 1))
-      inner = tf.matmul(L_inv, r)
-      lps -= 0.5 * tf.matmul(inner, inner, transpose_a=True)
-      return tf.squeeze(lps)
-    else:  # matrix
-      # TODO vectorize further
-      out = []
-      for r_vec in tf.unpack(r):
-        r_vec = tf.reshape(r_vec, shape=(d, 1))
-        inner = tf.matmul(L_inv, r_vec)
-        out += [tf.squeeze(lps -
-                0.5 * tf.matmul(inner, inner, transpose_a=True))]
-
-      return tf.pack(out)
-
-  def entropy(self, mean=None, cov=1):
-    """Entropy of probability distribution.
-
-    This is not vectorized with respect to any arguments.
-
-    Parameters
-    ----------
-    mean : tf.Tensor, optional
-      A 1-D tensor. Defaults to zero mean.
-    cov : tf.Tensor, optional
-      A 1-D or 2-D tensor. Defaults to identity matrix.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of one dimension less than the input.
-    """
-    if cov is 1:
-      d = 1
-      det_cov = 1.0
-    else:
-      cov = tf.cast(cov, dtype=tf.float32)
-      d = get_dims(cov)[0]
-      if len(cov.get_shape()) == 1:
-        det_cov = tf.reduce_prod(cov)
-      else:
-        det_cov = tf.matrix_determinant(cov)
-
-    return 0.5 * (d + d * tf.log(2 * np.pi) + tf.log(det_cov))
-
 
 class NBinom(Distribution):
   """Negative binomial distribution.
@@ -1224,9 +1134,9 @@ bernoulli = Bernoulli()
 beta = Beta()
 binom = Binom()
 categorical = Categorical()
-dirichlet_multinomial = DirichletMultinomial()
 chi2 = Chi2()
 dirichlet = Dirichlet()
+dirichlet_multinomial = DirichletMultinomial()
 exponential = Exponential()
 gamma = Gamma()
 geom = Geom()

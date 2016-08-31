@@ -133,7 +133,7 @@ class MixtureGaussian:
       matrix = []
       for k in range(self.K):
         matrix += [tf.ones(N) * tf.log(pi[s, k]) +
-                   multivariate_normal.logpdf(x,
+                   multivariate_normal_diag.logpdf(x,
                    mus[s, (k * self.D):((k + 1) * self.D)],
                    sigmas[s, (k * self.D):((k + 1) * self.D)])]
 

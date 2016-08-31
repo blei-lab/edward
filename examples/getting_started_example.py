@@ -30,10 +30,11 @@ class BayesianNN:
   """
   Bayesian neural network for regressing outputs y on inputs x.
 
-  p((x,y), z) = Normal(y | NN(x; z), lik_variance) *
+  p((x,y), z) = Normal(y | NN(x; z), lik_stddev) *
           Normal(z | 0, 1),
 
-  where z are neural network weights, and with known lik_variance.
+  where z are neural network weights, and with known likelihood
+  standard deviation.
 
   Parameters
   ----------
@@ -42,15 +43,15 @@ class BayesianNN:
   nonlinearity : function, optional
     Non-linearity after each linear transformation in the neural
     network; aka activation function.
-  lik_variance : float, optional
-    Variance of the normal likelihood; aka noise parameter,
-    homoscedastic variance, scale parameter.
+  lik_stddev : float, optional
+    Standard deviation of the normal likelihood; aka noise parameter,
+    homoscedasticity, scale parameter.
   """
   def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-               lik_variance=0.01):
+               lik_stddev=0.01):
     self.layer_sizes = layer_sizes
     self.nonlinearity = nonlinearity
-    self.lik_variance = lik_variance
+    self.lik_stddev = lik_stddev
 
     self.n_layers = len(layer_sizes)
     self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
@@ -85,7 +86,7 @@ class BayesianNN:
     """Return a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
     x, y = xs['x'], xs['y']
     mus = self.neural_network(x, zs['z'])
-    log_lik = tf.reduce_sum(norm.logpdf(y, mus, self.lik_variance), 1)
+    log_lik = tf.reduce_sum(norm.logpdf(y, mus, self.lik_stddev), 1)
     return log_lik
 
 

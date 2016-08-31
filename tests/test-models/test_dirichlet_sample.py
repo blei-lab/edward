@@ -28,3 +28,6 @@ class test_dirichlet_sample_class(tf.test.TestCase):
       _test(tf.constant([0.2, 0.8]), [10])
       _test(tf.constant([0.2, 1.1, 0.8]), [1])
       _test(tf.constant([0.2, 1.1, 0.8]), [10])
+
+if __name__ == '__main__':
+  tf.test.main()

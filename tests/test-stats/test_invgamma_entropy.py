@@ -36,3 +36,6 @@ class test_invgamma_entropy_class(tf.test.TestCase):
   def test_1d(self):
     self._test(alpha=np.array([0.5, 1.2, 5.3, 8.7], dtype=np.float32),
                beta=np.array([0.5, 1.2, 5.3, 8.7], dtype=np.float32))
+
+if __name__ == '__main__':
+  tf.test.main()

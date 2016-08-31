@@ -39,3 +39,6 @@ class test_uniform_logpdf_class(tf.test.TestCase):
     self._test(np.array([[0.5, 0.3, 0.8, 0.2], [0.5, 0.3, 0.8, 0.2]],
                         dtype=np.float32),
                a=0.1, b=0.9)
+
+if __name__ == '__main__':
+  tf.test.main()

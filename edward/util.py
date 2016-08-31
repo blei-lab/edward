@@ -781,6 +781,24 @@ def tile(input, multiples, *args, **kwargs):
          [1, 2, 3, 4],
          [1, 2, 3, 4],
          [1, 2, 3, 4]], dtype=int32)
+
+  Notes
+  -----
+  Sometimes this can result in an unknown shape. The core reason for
+  this is the following behavior:
+
+  >>> n = tf.constant([1])
+  >>> tf.tile(tf.constant([[1.0]]),
+  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  <tf.Tensor 'Tile:0' shape=(1, 1) dtype=float32>
+  >>> n = tf.reshape(tf.constant(1), [1])
+  >>> tf.tile(tf.constant([[1.0]]),
+  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  <tf.Tensor 'Tile_1:0' shape=(?, ?) dtype=float32>
+
+  For this reason, we try to fetch ``multiples`` out of session if
+  possible. This can be slow if ``multiples`` has computationally
+  intensive dependencies in order to perform this fetch.
   """
   input = tf.convert_to_tensor(input)
   multiples = tf.convert_to_tensor(multiples)
@@ -793,10 +811,16 @@ def tile(input, multiples, *args, **kwargs):
   if len(multiples.get_shape()) == 0:
     multiples = tf.expand_dims(multiples, 0)
 
+  try:
+    get_session()
+    multiples = tf.convert_to_tensor(multiples.eval())
+  except:
+    pass
+
   # broadcasting
   diff = len(input.get_shape()) - get_dims(multiples)[0]
   if diff < 0:
-    input = tf.reshape(input, [1]*np.abs(diff) + get_dims(input))
+    input = tf.reshape(input, [1] * np.abs(diff) + get_dims(input))
   elif diff > 0:
     multiples = tf.concat(0, [tf.ones(diff, dtype=tf.int32), multiples])
 

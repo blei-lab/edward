@@ -35,3 +35,6 @@ class test_expon_logpdf_class(tf.test.TestCase):
     self._test(np.array([[0.5, 2.3, 5.8, 10.1], [0.5, 2.3, 5.8, 10.1]],
                         dtype=np.float32),
                lam=5.0)
+
+if __name__ == '__main__':
+  tf.test.main()

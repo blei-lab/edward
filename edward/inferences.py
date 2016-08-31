@@ -830,10 +830,6 @@ class MAP(VariationalInference):
       else:
         raise NotImplementedError("A list of more than one element is "
                                   "not supported. See documentation.")
-    elif isinstance(latent_vars, dict):
-      pass
-    else:
-      raise TypeError()
 
     super(MAP, self).__init__(latent_vars, data, model_wrapper)
 

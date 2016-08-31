@@ -44,3 +44,6 @@ class test_dirichlet_entropy_class(tf.test.TestCase):
   def test_2d(self):
     self._test(np.array([[0.3, 0.7], [0.5, 0.5]]))
     self._test(np.array([[0.2, 0.8], [0.3, 0.7]]))
+
+if __name__ == '__main__':
+  tf.test.main()

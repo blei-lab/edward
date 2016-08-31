@@ -33,7 +33,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Dirichlet, Normal, InverseGamma
-from edward.stats import dirichlet, invgamma, multivariate_normal, norm
+from edward.stats import dirichlet, invgamma, multivariate_normal_diag, norm
 from edward.util import get_dims, log_sum_exp
 
 plt.style.use('ggplot')
@@ -86,7 +86,7 @@ class MixtureGaussian:
       matrix = []
       for k in range(self.K):
         matrix += [tf.ones(N) * tf.log(pi[s, k]) +
-                   multivariate_normal.logpdf(x,
+                   multivariate_normal_diag.logpdf(x,
                    mus[s, (k * self.D):((k + 1) * self.D)],
                    sigmas[s, (k * self.D):((k + 1) * self.D)])]
 

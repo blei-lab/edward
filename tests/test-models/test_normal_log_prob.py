@@ -31,3 +31,6 @@ class test_normal_log_prob_class(tf.test.TestCase):
       _test(tf.zeros([1]), tf.ones([1]), [5])
       _test(tf.zeros([5]), tf.ones([5]), [1])
       _test(tf.zeros([5]), tf.ones([5]), [5])
+
+if __name__ == '__main__':
+  tf.test.main()

@@ -35,3 +35,6 @@ class test_uniform_entropy_class(tf.test.TestCase):
   def test_1d(self):
     self._test(np.array([0.5, 0.3, 0.8, 0.2], dtype=np.float32),
                np.array([0.6, 0.4, 0.9, 0.3], dtype=np.float32))
+
+if __name__ == '__main__':
+  tf.test.main()

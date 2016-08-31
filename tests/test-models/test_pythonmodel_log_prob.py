@@ -55,3 +55,6 @@ class test_pythonmodel_log_prob_class(tf.test.TestCase):
       _test(model, data, zs)
       zs = {'p': np.array([[0.4], [0.2], [0.2351], [0.6213]])}
       _test(model, data, zs)
+
+if __name__ == '__main__':
+  tf.test.main()

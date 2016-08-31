@@ -148,7 +148,7 @@ class PointMass(distribution.Distribution):
         if x.dtype != self.dtype:
           raise TypeError("Input x dtype does not match dtype: %s vs. %s"
                           % (x.dtype, self.dtype))
-        return tf.cast(tf.equal(x, self.params), dtype=self.dtype)
+        return tf.cast(tf.equal(x, self._params), dtype=self.dtype)
 
   def cdf(self, x, name="cdf"):
     """CDF of observations in `x` under these Normal distribution(s).
@@ -213,7 +213,9 @@ class PointMass(distribution.Distribution):
     """
     with ops.name_scope(self.name):
       with ops.op_scope([self._params, n], name):
-        return tile(self.params, tf.expand_dims(n, 0))
+        multiples = tf.concat(0, [tf.expand_dims(n, 0),
+                                  [1] * len(self._params.get_shape())])
+        return tile(self._params, multiples)
 
   @property
   def is_reparameterized(self):

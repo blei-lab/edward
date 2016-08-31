@@ -25,3 +25,6 @@ class test_bernoulli_entropy_class(tf.test.TestCase):
     with self.test_session():
       self._test([0.1, 0.9, 0.1])
       self._test([0.5, 0.75, 0.2])
+
+if __name__ == '__main__':
+  tf.test.main()
