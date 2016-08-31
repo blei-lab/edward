@@ -412,20 +412,11 @@ class MFVI(VariationalInference):
     result :
       an appropriately selected loss function form
     """
-    # Whether to re-use or copy q(z), the posterior graph.
-    if False:
-      qzs = list(six.itervalues(self.latent_vars))
-    else:
-      qzs = []
-      for z, qz in six.iteritems(self.latent_vars):
-        copied_qz = copy(qz, scope='inference')
-        qzs.append(copied_qz)
-
     if self.model_wrapper is None:
       # Copy random variables in p(z), replacing conditioning on
       # priors with conditioning on inferred posteriors.
       self.copied_vars = {}
-      for z, qz in zip(six.iterkeys(self.latent_vars), qzs):
+      for z, qz in six.iteritems(self.latent_vars):
         copied_z = copy(z, dict_swap=self.latent_vars, scope='inference')
         self.copied_vars[copied_z] = qz
 
@@ -440,10 +431,6 @@ class MFVI(VariationalInference):
           self.copied_data[copied_x] = obs
         else:
           self.copied_data[tensor] = obs
-    else:
-      self.copied_vars = {z: qz for z, qz in
-          zip(six.iterkeys(self.latent_vars), qzs)}
-      self.copied_data = self.data
 
     qz_is_normal = all([isinstance(rv, Normal) for
                        rv in six.itervalues(self.latent_vars)])
@@ -478,9 +465,9 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     if self.model_wrapper is not None:
-      x = self.copied_data
+      x = self.data
       z = {key: rv.sample([self.n_samples])
-           for key, rv in six.iteritems(self.copied_vars)}
+           for key, rv in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = []
@@ -525,9 +512,9 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     if self.model_wrapper is not None:
-      x = self.copied_data
+      x = self.data
       z = {key: rv.sample([self.n_samples])
-           for key, rv in six.iteritems(self.copied_vars)}
+           for key, rv in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = []
@@ -827,20 +814,16 @@ class MAP(VariationalInference):
     .. math::
       - \log p(x,z)
     """
-    # Whether to re-use or copy q(z), the posterior graph.
-    if False:
-      qzs = list(six.itervalues(self.latent_vars))
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([1])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
-      qzs = []
-      for z, qz in six.iteritems(self.latent_vars):
-        copied_qz = copy(qz, scope='inference')
-        qzs.append(copied_qz)
-
-    if self.model_wrapper is None:
       # Copy random variables in p(z), replacing conditioning on
       # priors with conditioning on inferred posteriors.
       copied_vars = {}
-      for z, qz in zip(six.iterkeys(self.latent_vars), qzs):
+      for z, qz in six.iteritems(self.latent_vars):
         copied_z = copy(z, dict_swap=self.latent_vars, scope='inference')
         copied_vars[copied_z] = qz
 
@@ -855,17 +838,7 @@ class MAP(VariationalInference):
           copied_data[copied_x] = obs
         else:
           copied_data[tensor] = obs
-    else:
-      copied_vars = {z: qz for z, qz in
-          zip(six.iterkeys(self.latent_vars), qzs)}
-      copied_data = self.data
 
-    if self.model_wrapper is not None:
-      x = copied_data
-      z = {key: rv.sample([1])
-           for key, rv in six.iteritems(copied_latent_vars)}
-      p_log_prob = self.model_wrapper.log_prob(x, z)
-    else:
       p_log_prob = 0.0
 
       # Take log-densities over latent variables.
