@@ -79,11 +79,11 @@ def dot(x, y):
   if len(x.get_shape()) == 1:
     vec = x
     mat = y
-    return tf.matmul(tf.expand_dims(vec, 0), mat)
+    return tf.reshape(tf.matmul(tf.expand_dims(vec, 0), mat), [-1])
   else:
     mat = x
     vec = y
-    return tf.matmul(mat, tf.expand_dims(vec, 1))
+    return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
 def get_dims(x):
@@ -102,11 +102,7 @@ def get_dims(x):
   if isinstance(x, float) or isinstance(x, int):
     return []
   elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    dims = x.get_shape()
-    if len(dims) == 0:  # scalar
-      return []
-    else:  # array
-      return [dim.value for dim in dims]
+    return x.get_shape().as_list()
   elif isinstance(x, np.ndarray):
     return list(x.shape)
   else:

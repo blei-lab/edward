@@ -19,7 +19,6 @@ class LatentSpaceModel:
   """
   p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; 1/||z_i - z_j|| ) ]
         [ prod_{i=1}^N N(z_i; 0, I)) ]
-
   """
   def __init__(self, N, K, var=1.0,
                like='Poisson',

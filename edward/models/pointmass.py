@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import math
 
+from edward.util import tile
 from tensorflow.contrib.distributions.python.ops import \
     distribution
 from tensorflow.python.framework import constant_op
@@ -147,7 +148,7 @@ class PointMass(distribution.Distribution):
         if x.dtype != self.dtype:
           raise TypeError("Input x dtype does not match dtype: %s vs. %s"
                           % (x.dtype, self.dtype))
-        return tf.cast(tf.equal(x, self.params), dtype=self.dtype)
+        return tf.cast(tf.equal(x, self._params), dtype=self.dtype)
 
   def cdf(self, x, name="cdf"):
     """CDF of observations in `x` under these Normal distribution(s).
@@ -214,7 +215,7 @@ class PointMass(distribution.Distribution):
       with ops.op_scope([self._params, n], name):
         # TODO
         n = n.eval()
-        return tf.pack([self.params] * n)
+        return tf.pack([self._params] * n)
 
   @property
   def is_reparameterized(self):
