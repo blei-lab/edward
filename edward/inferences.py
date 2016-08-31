@@ -358,7 +358,7 @@ class VariationalInference(Inference):
         print("iter {:d} loss {:.2f}".format(t, loss))
         for rv in six.itervalues(self.latent_vars):
           print(sess.run({key: tf.identity(value)
-          for key, value in six.iteritems(rv._dist_args)}))
+                          for key, value in six.iteritems(rv._dist_args)}))
 
   def finalize(self):
     """Function to call after convergence.
@@ -493,7 +493,8 @@ class MFVI(VariationalInference):
     """
     if self.model_wrapper is not None:
       x = self.data
-      z = self.latent_vars
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = []
@@ -506,7 +507,6 @@ class MFVI(VariationalInference):
       # Take log-densities over latent variables.
       for pz, qz in six.iteritems(self.latent_vars):
         z_samples = tf.stop_gradient(qz.value()) # (shape) tensor
-        # Sum over all dimensions except the one corresponding to n_samples.
         q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_samples))
         if self.model_wrapper is None:
           p_log_prob[s] += tf.reduce_sum(pz.log_prob(z_samples))
@@ -516,7 +516,6 @@ class MFVI(VariationalInference):
         for tensor, obs in six.iteritems(self.data):
           if isinstance(tensor, RandomVariable):
             px = tensor
-            # Sum over all dimensions except the one corresponding to n_samples.
             p_log_prob[s] += tf.reduce_sum(px.log_prob(obs))
 
     p_log_prob = tf.pack(p_log_prob)
@@ -540,7 +539,8 @@ class MFVI(VariationalInference):
     """
     if self.model_wrapper is not None:
       x = self.data
-      z = self.latent_vars
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = []
@@ -553,18 +553,16 @@ class MFVI(VariationalInference):
       # Take log-densities over latent variables.
       for pz, qz in six.iteritems(self.latent_vars):
         z_samples = qz.value() # (shape) tensor
-        # Sum over all dimensions except the one corresponding to n_samples.
-        q_log_prob += tf.reduce_sum(qz.log_prob(z_samples))
+        q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_samples))
         if self.model_wrapper is None:
-          p_log_prob += tf.reduce_sum(pz.log_prob(z_samples))
+          p_log_prob[s] += tf.reduce_sum(pz.log_prob(z_samples))
 
       if self.model_wrapper is None:
         # Take log-densities over data.
         for tensor, obs in six.iteritems(self.data):
           if isinstance(tensor, RandomVariable):
             px = tensor
-            # Sum over all dimensions except the one corresponding to n_samples.
-            p_log_prob += tf.reduce_sum(px.log_prob(obs))
+            p_log_prob[s] += tf.reduce_sum(px.log_prob(obs))
 
     p_log_prob = tf.pack(p_log_prob)
     q_log_prob = tf.pack(q_log_prob)

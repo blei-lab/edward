@@ -301,9 +301,9 @@ def cumprod(xs):
   InvalidArgumentError
     If the input has Inf or NaN values.
   """
+  xs = tf.convert_to_tensor(xs)
   dependencies = [tf.verify_tensor_all_finite(xs, msg='')]
   xs = control_flow_ops.with_dependencies(dependencies, xs)
-  xs = tf.cast(xs, dtype=tf.float32)
 
   values = tf.unpack(xs)
   out = []
@@ -347,8 +347,6 @@ def dot(x, y):
                   tf.verify_tensor_all_finite(y, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
   y = control_flow_ops.with_dependencies(dependencies, y)
-  x = tf.cast(x, dtype=tf.float32)
-  y = tf.cast(y, dtype=tf.float32)
 
   if len(x.get_shape()) == 1:
     vec = x
@@ -381,11 +379,7 @@ def get_dims(x):
   if isinstance(x, float) or isinstance(x, int):
     return []
   elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    dims = x.get_shape()
-    if len(dims) == 0:  # scalar
-      return []
-    else:  # array
-      return [dim.value for dim in dims]
+    return x.get_shape().as_list()
   elif isinstance(x, np.ndarray):
     return list(x.shape)
   else:
@@ -433,6 +427,7 @@ def hessian(y, xs):
   InvalidArgumentError
     If the inputs have Inf or NaN values.
   """
+  y = tf.convert_to_tensor(y)
   dependencies = [tf.verify_tensor_all_finite(y, msg='')]
   dependencies.extend([tf.verify_tensor_all_finite(x, msg='') for x in xs])
 
@@ -503,14 +498,16 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     If the location variables have Inf or NaN values, or if the scale
     variables are not positive.
   """
+  loc_one = tf.convert_to_tensor(loc_one)
+  scale_one = tf.convert_to_tensor(scale_one)
+  loc_two = tf.convert_to_tensor(loc_two)
+  scale_two = tf.convert_to_tensor(scale_two)
   dependencies = [tf.verify_tensor_all_finite(loc_one, msg=''),
                   tf.verify_tensor_all_finite(loc_two, msg=''),
                   tf.assert_positive(scale_one),
                   tf.assert_positive(scale_two)]
   loc_one = control_flow_ops.with_dependencies(dependencies, loc_one)
   scale_one = control_flow_ops.with_dependencies(dependencies, scale_one)
-  loc_one = tf.cast(loc_one, tf.float32)
-  scale_one = tf.cast(scale_one, tf.float32)
 
   if loc_two == 0.0 and scale_two == 1.0:
     # With default arguments, we can avoid some intermediate computation.
@@ -519,8 +516,6 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
   else:
     loc_two = control_flow_ops.with_dependencies(dependencies, loc_two)
     scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
-    loc_two = tf.cast(loc_two, tf.float32)
-    scale_two = tf.cast(scale_two, tf.float32)
     out = tf.square(scale_one / scale_two) + \
         tf.square((loc_two - loc_one) / scale_two) - \
         1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one)
@@ -555,9 +550,9 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
   InvalidArgumentError
     If the input has Inf or NaN values.
   """
+  input_tensor = tf.convert_to_tensor(input_tensor)
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
-  input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
   x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
@@ -588,9 +583,9 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
   InvalidArgumentError
     If the input has Inf or NaN values.
   """
+  input_tensor = tf.convert_to_tensor(input_tensor)
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
-  input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
   x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
@@ -652,6 +647,10 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     If the mean variables have Inf or NaN values, or if the scale
     and length variables are not positive.
   """
+  x = tf.convert_to_tensor(x)
+  y = tf.convert_to_tensor(y)
+  sigma = tf.convert_to_tensor(sigma)
+  l = tf.convert_to_tensor(l)
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg=''),
                   tf.assert_positive(sigma),
@@ -660,10 +659,6 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
   y = control_flow_ops.with_dependencies(dependencies, y)
   sigma = control_flow_ops.with_dependencies(dependencies, sigma)
   l = control_flow_ops.with_dependencies(dependencies, l)
-  x = tf.cast(x, dtype=tf.float32)
-  y = tf.cast(y, dtype=tf.float32)
-  sigma = tf.cast(sigma, dtype=tf.float32)
-  l = tf.cast(l, dtype=tf.float32)
 
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.reduce_sum(tf.pow(x - y, 2.0)))
@@ -698,6 +693,10 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     If the mean variables have Inf or NaN values, or if the scale
     and length variables are not positive.
   """
+  x = tf.convert_to_tensor(x)
+  y = tf.convert_to_tensor(y)
+  sigma = tf.convert_to_tensor(sigma)
+  l = tf.convert_to_tensor(l)
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg=''),
                   tf.assert_positive(sigma),
@@ -706,10 +705,6 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
   y = control_flow_ops.with_dependencies(dependencies, y)
   sigma = control_flow_ops.with_dependencies(dependencies, sigma)
   l = control_flow_ops.with_dependencies(dependencies, l)
-  x = tf.cast(x, dtype=tf.float32)
-  y = tf.cast(y, dtype=tf.float32)
-  sigma = tf.cast(sigma, dtype=tf.float32)
-  l = tf.cast(l, dtype=tf.float32)
 
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.pow(x - y, 2.0))
@@ -757,9 +752,9 @@ def to_simplex(x):
   -----
   x as a 3-D or higher tensor is not guaranteed to be supported.
   """
+  x = tf.cast(x, dtype=tf.float32)
   dependencies = [tf.verify_tensor_all_finite(x, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
-  x = tf.cast(x, dtype=tf.float32)
 
   if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
     shape = get_dims(x)
