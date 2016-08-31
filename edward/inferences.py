@@ -254,49 +254,6 @@ class VariationalInference(Inference):
       self.data = {key: value for key, value in
                    zip(six.iterkeys(self.data), batches)}
 
-    # TODO put in MFVI as it is specific to MFVI's computatoin
-    # Copy the swapped values (qz) first before doing any swapping
-    # (when copying z).
-    # This is necessary before copying any random variables. This is
-    # because when recursively building, it requires tensors that the
-    # copied random variable would instantiate.
-    # We also put it outside so that qz is still built for model
-    # wrappers.
-    temp = []
-    for z, qz in six.iteritems(self.latent_vars):
-      copied_qz = copy(qz, dict_swap=self.latent_vars, scope='inference')
-      temp.append(copied_qz)
-
-    if self.model_wrapper is None:
-      # Build random variables in p(z). `latent_vars`
-      # replaces conditioning on priors with conditioning on
-      # (variational) posteriors.
-      copied_latent_vars = {}
-      for z, qz in zip(six.iterkeys(self.latent_vars), temp):
-        copied_z = copy(z, dict_swap=self.latent_vars, scope='inference')
-        copied_latent_vars[copied_z] = qz
-
-      # Build random variables in p(x | z). `latent_vars`
-      # replaces conditioning on priors with conditioning on
-      # (variational) posteriors.
-      copied_data = {}
-      for tensor, obs in six.iteritems(self.data):
-        # Only build random variables, not any passed-in data
-        # tensors.
-        if isinstance(tensor, RandomVariable):
-          copied_x = copy(tensor, dict_swap=self.latent_vars, scope='inference')
-          copied_data[copied_x] = obs
-        else:
-          copied_data[tensor] = obs
-
-      # TODO For now, we are replacing the objects themselves
-      # with the new dependencies. In geneeral we don't want to do
-      # this as user may work with inference.latent_vars, e.g., in the
-      # case of passing in a list and getting out the inferred
-      # variational factors.
-      self.latent_vars = copied_latent_vars
-      self.data = copied_data
-
     loss = self.build_loss()
     if optimizer is None:
       var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
@@ -455,7 +412,40 @@ class MFVI(VariationalInference):
     result :
       an appropriately selected loss function form
     """
-    q_is_normal = all([isinstance(rv, Normal) for
+    # Whether to re-use or copy q(z), the posterior graph.
+    if False:
+      qzs = list(six.itervalues(self.latent_vars))
+    else:
+      qzs = []
+      for z, qz in six.iteritems(self.latent_vars):
+        copied_qz = copy(qz, scope='inference')
+        qzs.append(copied_qz)
+
+    if self.model_wrapper is None:
+      # Copy random variables in p(z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      self.copied_vars = {}
+      for z, qz in zip(six.iterkeys(self.latent_vars), qzs):
+        copied_z = copy(z, dict_swap=self.latent_vars, scope='inference')
+        self.copied_vars[copied_z] = qz
+
+      # Copy random variables in p(x | z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      self.copied_data = {}
+      for tensor, obs in six.iteritems(self.data):
+        # Only build random variables, not any passed-in data
+        # tensors.
+        if isinstance(tensor, RandomVariable):
+          copied_x = copy(tensor, dict_swap=self.latent_vars, scope='inference')
+          self.copied_data[copied_x] = obs
+        else:
+          self.copied_data[tensor] = obs
+    else:
+      self.copied_vars = {z: qz for z, qz in
+          zip(six.iterkeys(self.latent_vars), qzs)}
+      self.copied_data = self.data
+
+    qz_is_normal = all([isinstance(rv, Normal) for
                        rv in six.itervalues(self.latent_vars)])
     if self.score:
       if q_is_normal and hasattr(self.model_wrapper, 'log_lik'):
@@ -488,9 +478,9 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     if self.model_wrapper is not None:
-      x = self.data
+      x = self.copied_data
       z = {key: rv.sample([self.n_samples])
-           for key, rv in six.iteritems(self.latent_vars)}
+           for key, rv in six.iteritems(self.copied_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = []
@@ -498,10 +488,11 @@ class MFVI(VariationalInference):
     q_log_prob = []
     for s in range(self.n_samples):
       q_log_prob.append(0.0)
-      p_log_prob.append(0.0)
+      if self.model_wrapper is None:
+        p_log_prob.append(0.0)
 
       # Take log-densities over latent variables.
-      for pz, qz in six.iteritems(self.latent_vars):
+      for pz, qz in six.iteritems(self.copied_vars):
         z_samples = tf.stop_gradient(qz.value()) # (shape) tensor
         q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_samples))
         if self.model_wrapper is None:
@@ -509,7 +500,7 @@ class MFVI(VariationalInference):
 
       if self.model_wrapper is None:
         # Take log-densities over data.
-        for tensor, obs in six.iteritems(self.data):
+        for tensor, obs in six.iteritems(self.copied_data):
           if isinstance(tensor, RandomVariable):
             px = tensor
             p_log_prob[s] += tf.reduce_sum(px.log_prob(obs))
@@ -534,9 +525,9 @@ class MFVI(VariationalInference):
     expectation using Monte Carlo sampling.
     """
     if self.model_wrapper is not None:
-      x = self.data
+      x = self.copied_data
       z = {key: rv.sample([self.n_samples])
-           for key, rv in six.iteritems(self.latent_vars)}
+           for key, rv in six.iteritems(self.copied_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = []
@@ -544,10 +535,11 @@ class MFVI(VariationalInference):
     q_log_prob = []
     for s in range(self.n_samples):
       q_log_prob.append(0.0)
-      p_log_prob.append(0.0)
+      if self.model_wrapper is None:
+        p_log_prob.append(0.0)
 
       # Take log-densities over latent variables.
-      for pz, qz in six.iteritems(self.latent_vars):
+      for pz, qz in six.iteritems(self.copied_vars):
         z_samples = qz.value() # (shape) tensor
         q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_samples))
         if self.model_wrapper is None:
@@ -555,7 +547,7 @@ class MFVI(VariationalInference):
 
       if self.model_wrapper is None:
         # Take log-densities over data.
-        for tensor, obs in six.iteritems(self.data):
+        for tensor, obs in six.iteritems(self.copied_data):
           if isinstance(tensor, RandomVariable):
             px = tensor
             p_log_prob[s] += tf.reduce_sum(px.log_prob(obs))
@@ -835,21 +827,54 @@ class MAP(VariationalInference):
     .. math::
       - \log p(x,z)
     """
+    # Whether to re-use or copy q(z), the posterior graph.
+    if False:
+      qzs = list(six.itervalues(self.latent_vars))
+    else:
+      qzs = []
+      for z, qz in six.iteritems(self.latent_vars):
+        copied_qz = copy(qz, scope='inference')
+        qzs.append(copied_qz)
+
+    if self.model_wrapper is None:
+      # Copy random variables in p(z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      copied_vars = {}
+      for z, qz in zip(six.iterkeys(self.latent_vars), qzs):
+        copied_z = copy(z, dict_swap=self.latent_vars, scope='inference')
+        copied_vars[copied_z] = qz
+
+      # Copy random variables in p(x | z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      copied_data = {}
+      for tensor, obs in six.iteritems(self.data):
+        # Only build random variables, not any passed-in data
+        # tensors.
+        if isinstance(tensor, RandomVariable):
+          copied_x = copy(tensor, dict_swap=self.latent_vars, scope='inference')
+          copied_data[copied_x] = obs
+        else:
+          copied_data[tensor] = obs
+    else:
+      copied_vars = {z: qz for z, qz in
+          zip(six.iterkeys(self.latent_vars), qzs)}
+      copied_data = self.data
+
     if self.model_wrapper is not None:
-      x = self.data
+      x = copied_data
       z = {key: rv.sample([1])
-           for key, rv in six.iteritems(self.latent_vars)}
+           for key, rv in six.iteritems(copied_latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
     else:
       p_log_prob = 0.0
 
       # Take log-densities over latent variables.
-      for pz, qz in six.iteritems(self.latent_vars):
+      for pz, qz in six.iteritems(copied_latent_vars):
         z_samples = qz.value() # (shape) tensor
         p_log_prob += tf.reduce_sum(pz.log_prob(z_samples))
 
       # Take log-densities over data.
-      for tensor, obs in six.iteritems(self.data):
+      for tensor, obs in six.iteritems(copied_data):
         if isinstance(tensor, RandomVariable):
           px = tensor
           p_log_prob += tf.reduce_sum(px.log_prob(obs))
