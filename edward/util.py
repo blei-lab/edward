@@ -126,8 +126,8 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
     return graph.get_tensor_by_name(variables[org_instance.name].name)
 
   # Do the same for placeholders. Same logic holds.
-  # TODO assume placeholders are all in this collection
-  placeholders = {x.name: x for x in graph.get_collection('placeholders')}
+  # Note this assumes that placeholders are all in this collection.
+  placeholders = {x.name: x for x in graph.get_collection('PLACEHOLDERS')}
   if org_instance.name in placeholders:
     return graph.get_tensor_by_name(placeholders[org_instance.name].name)
 
@@ -662,6 +662,14 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
 
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.reduce_sum(tf.pow(x - y, 2.0)))
+
+
+def placeholder(*args, **kwargs):
+  """A wrapper around ``tf.placeholder``. It adds the tensor to the
+  ``PLACEHOLDERS`` collection."""
+  x = tf.placeholder(*args, **kwargs)
+  tf.add_to_collection("PLACEHOLDERS", x)
+  return x
 
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):

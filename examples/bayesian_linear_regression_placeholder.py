@@ -24,8 +24,7 @@ p = 1 # num features
 
 ed.set_seed(42)
 
-X = tf.placeholder(tf.float32, [N, p])
-tf.add_to_collection('placeholders', X)
+X = ed.placeholder(tf.float32, [N, p])
 beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p))
 y = Normal(mu=ed.dot(X, beta), sigma=tf.ones(N))
 
