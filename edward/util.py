@@ -16,7 +16,7 @@ from tensorflow.python.util import compat
 distributions = tf.contrib.distributions
 
 
-def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, copy_q=True):
+def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, copy_q=False):
   """Build a new node in the TensorFlow graph from `org_instance`,
   where any of its ancestors existing in `dict_swap` are
   replaced with `dict_swap`'s corresponding value.
