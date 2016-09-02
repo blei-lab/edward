@@ -17,22 +17,20 @@ from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 
-M = 128 # batch size during training
-d = 10 # latent variable dimension
+M = 100  # batch size during training
+d = 2  # latent variable dimension
 ed.set_seed(42)
 
 # Probability model (subgraph)
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
-hidden = Dense(500)(tf.identity(z)) # (M, 500); identity() for tensor conversion
-logits = Dense(28*28)(hidden)
-x = Bernoulli(logits=logits) # (M, 784)
+hidden = Dense(256, activation=K.relu)(z.value())  # (M, 64)
+x = Bernoulli(logits=Dense(28 * 28)(hidden))  # (M, 784)
 
 # Variational model (subgraph)
-x_ph = ed.placeholder(tf.float32, [M, 28*28])
-hidden = Dense(500, activation=K.sigmoid)(x_ph) # (M, 500)
-mu = Dense(d)(hidden) # (M, d)
-sigma = Dense(d, activation=K.softplus)(hidden) # (M, d)
-qz = Normal(mu=mu, sigma=sigma)
+x_ph = ed.placeholder(tf.float32, [M, 28 * 28])
+hidden = Dense(256, activation=K.relu)(x_ph)  # (M, 64)
+qz = Normal(mu=Dense(d)(hidden),
+            sigma=Dense(d, activation=K.softplus)(hidden))
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
 mnist = input_data.read_data_sets("data/mnist", one_hot=True)
@@ -41,7 +39,8 @@ data = {x: x_ph}
 sess = ed.get_session()
 K.set_session(sess)
 inference = ed.MFVI({z: qz}, data)
-inference.initialize()
+optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
+inference.initialize(optimizer=optimizer)
 
 n_epoch = 100
 n_iter_per_epoch = 1000
