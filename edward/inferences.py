@@ -44,9 +44,9 @@ class Inference(object):
       will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      `RandomVariable`) to their realizations (of type `tf.Tensor` or
-      `np.ndarray`). It can also bind placeholders (of type
-      `tf.Tensor`) used in the model to their realizations.
+      `RandomVariable`) to their realizations (of type `tf.Tensor`).
+      It can also bind placeholders (of type `tf.Tensor`) used in the
+      model to their realizations.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings
@@ -135,9 +135,9 @@ class MonteCarlo(Inference):
       will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      `RandomVariable`) to their realizations (of type `tf.Tensor` or
-      `np.ndarray`). It can also bind placeholders (of type
-      `tf.Tensor`) used in the model to their realizations.
+      `RandomVariable`) to their realizations (of type `tf.Tensor`).
+      It can also bind placeholders (of type `tf.Tensor`) used in the
+      model to their realizations.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings used
@@ -165,9 +165,9 @@ class VariationalInference(Inference):
       will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      `RandomVariable`) to their realizations (of type `tf.Tensor` or
-      `np.ndarray`). It can also bind placeholders (of type
-      `tf.Tensor`) used in the model to their realizations.
+      `RandomVariable`) to their realizations (of type `tf.Tensor`).
+      It can also bind placeholders (of type `tf.Tensor`) used in the
+      model to their realizations.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings used
@@ -539,7 +539,8 @@ class MFVI(VariationalInference):
 
     It assumes the KL is analytic.
 
-    It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`.
+    For model wrappers, it assumes the prior is :math:`p(z) =
+    \mathcal{N}(z; 0, 1)`.
 
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
@@ -632,7 +633,8 @@ class MFVI(VariationalInference):
 
     It assumes the KL is analytic.
 
-    It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`
+    For model wrappers, it assumes the prior is :math:`p(z) =
+    \mathcal{N}(z; 0, 1)`.
 
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
@@ -896,7 +898,7 @@ class MAP(VariationalInference):
       for x, obs in six.iteritems(copied_lik):
         p_log_prob += tf.reduce_sum(x.log_prob(obs))
 
-    self.loss = tf.reduce_mean(p_log_prob)
+    self.loss = tf.squeeze(p_log_prob)
     return -self.loss
 
 

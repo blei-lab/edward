@@ -33,7 +33,8 @@ class IWVI(MFVI):
   -----
   `IWVI` is implemented by inheriting from mean-field (black box)
   variational inference (`MFVI`). The loss function to optimize is
-  modified to include importance weights.
+  modified to include importance weights. It is only implemented to
+  work on model wrappers and not Edward's native modeling language.
   """
   def __init__(self, *args, **kwargs):
     super(IWVI, self).__init__(*args, **kwargs)
@@ -146,4 +147,4 @@ qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
 qp = Beta(a=qp_a, b=qp_b)
 
 inference = IWVI({'p': qp}, data, model)
-inference.run(K=10, n_iter=10000)
+inference.run(K=10, n_iter=500)

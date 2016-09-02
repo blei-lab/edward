@@ -28,9 +28,9 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     List of metrics or a single metric.
   data : dict
     Data to evaluate model with. It binds observed variables (of type
-    `RandomVariable`) to their realizations (of type `tf.Tensor` or
-    `np.ndarray`). It can also bind placeholders (of type `tf.Tensor`)
-    used in the model to their realizations.
+    `RandomVariable`) to their realizations (of type `tf.Tensor`). It
+    can also bind placeholders (of type `tf.Tensor`) used in the model
+    to their realizations.
   latent_vars : dict of str to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
     It is only used (and in fact required) if the model wrapper is
@@ -211,9 +211,9 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     dictionary of latent variables as input and outputs a `tf.Tensor`.
   data : dict
     Data to compare to. It binds observed variables (of type
-    `RandomVariable`) to their realizations (of type `tf.Tensor`
-    or `np.ndarray`). It can also bind placeholders (of type
-    `tf.Tensor`) used in the model to their realizations.
+    `RandomVariable`) to their realizations (of type `tf.Tensor`). It
+    can also bind placeholders (of type `tf.Tensor`) used in the model
+    to their realizations.
   latent_vars : dict of str to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
     It is an optional argument, necessary for when the discrepancy is

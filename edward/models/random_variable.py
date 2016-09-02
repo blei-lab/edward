@@ -28,8 +28,8 @@ class RandomVariable(object):
 
   Notes
   -----
-  This is a simplified version of DistributionTensor in BayesFlow.
-  The value type is fixed to SampleValue, several methods are
+  This is a simplified version of StochasticTensor in BayesFlow.
+  The value type is fixed to SampleAndReshapeValue(), several methods are
   removed, and the distribution's methods populate the namespace for
   class methods.
   """
