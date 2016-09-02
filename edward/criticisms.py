@@ -213,9 +213,7 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     Data to compare to. It binds observed variables (of type
     `RandomVariable`) to their realizations (of type `tf.Tensor`
     or `np.ndarray`). It can also bind placeholders (of type
-    `tf.Tensor`) used in the model to their realizations. If not
-    specified, will return only the reference distribution with an
-    assumed replicated data set size of 1.
+    `tf.Tensor`) used in the model to their realizations.
   latent_vars : dict of str to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
     It is an optional argument, necessary for when the discrepancy is
@@ -224,7 +222,7 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     An optional wrapper for the probability model. It must have a
     ``sample_likelihood`` method. If `latent_vars` is not specified,
     it must also have a ``sample_prior`` method, as ``ppc`` will
-    default to a prior predictive check.  `data` is also changed. For
+    default to a prior predictive check. `data` is also changed. For
     TensorFlow, Python, and Stan models, the key type is a string; for
     PyMC3, the key type is a Theano shared variable. For TensorFlow,
     Python, and PyMC3 models, the value type is a NumPy array or
@@ -237,30 +235,38 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   -------
   list of np.ndarray
     List containing the reference distribution, which is a NumPy
-    vector of size elements,
+    array of size elements,
 
     .. math::
       (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))
 
-    and the realized discrepancy, which is a NumPy vector of size
+    and the realized discrepancy, which is a NumPy array of size
     elements,
 
     .. math::
       (T(x, z^{1}), ..., T(x, z^{size})).
 
-    If the discrepancy function is not specified, then the list
-    contains the full data distribution where each element is a
-    data set (dictionary).
+  Notes
+  -----
+  Each element in the returned output is obtained by taking a forward
+  pass (session run) of T. T is a function applied to the model's
+  random variables, and a forward pass provides new samples from the
+  random variables for each calculation of the discrepancy.
 
   Examples
   --------
+  >>> # build posterior predictive after inference: it is
+  >>> # parameterized by posterior means
+  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>>
   >>> # posterior predictive check
   >>> # T is a user-defined function of data, T(data)
   >>> ppc(T, data={x_post: x_train})
   >>>
   >>> # in general T is a discrepancy function of the data (both response and
   >>> # covariates) and latent variables, T(data, latent_vars)
-  >>> ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': qbeta})
+  >>> ppc(T, data={y_post: y_train, x_ph: x_train},
+  ...     latent_vars={'z': qz, 'beta': qbeta})
   >>>
   >>> # prior predictive check
   >>> # running ppc on original x
@@ -268,44 +274,56 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   >>>
   >>> # criticism for model wrappers
   >>> ppc(T, data={'x': x_train}, latent_vars={'z': qz},
-  >>>     model_wrapper=model)
+  ...     model_wrapper=model)
   >>> ppc(T, data={'y': y_train, 'x': x_train},
-  >>>     latent_vars={'z': qz}, model_wrapper=model)
+  ...     latent_vars={'z': qz}, model_wrapper=model)
   >>> ppc(T, data={'x': x_train}, latent_vars=None,
-  >>>     model_wrapper=model)
+  ...     model_wrapper=model)
   """
-  # TODO
   sess = get_session()
-  # Assume all values have the same data set size.
-  N = get_dims(list(six.itervalues(data))[0])[0]
+  # Sample to get replicated data sets and latent variables.
+  if model_wrapper is None:
+    if latent_vars is None:
+      zrep = None
+    else:
+      zrep = {key: value.value()
+              for key, value in six.iteritems(latent_vars)}
 
-  # 1. Sample from posterior (or prior).
-  if latent_vars is None:
-    zs = model_wrapper.sample_prior(n_samples)
+    xrep = {}
+    for x, obs in six.iteritems(data):
+      if isinstance(x, RandomVariable):
+        # Replace observed data with replicated data.
+        xrep[x] = x.value()
+      else:
+        xrep[x] = obs
   else:
-    # `tf.identity()` is to avoid fetching, e.g., a placeholder x
-    # when feeding the dictionary {x: np.array()}. TensorFlow will
-    # raise an error.
-    zs = {key: tf.identity(rv.sample([n_samples]))
-          for key, rv in six.iteritems(latent_vars)}
+    if latent_vars is None:
+      zrep = model_wrapper.sample_prior()
+    else:
+      zrep = {key: value.value()
+              for key, value in six.iteritems(latent_vars)}
 
-  # 2. Sample from likelihood.
-  # We fetch zs out of the session because sample_likelihood() may
-  # require a SciPy-based sampler.
-  xreps = model_wrapper.sample_likelihood(sess.run(zs), N)
+    xrep = model_wrapper.sample_likelihood(zrep)
 
-  # 3. Calculate discrepancy.
-  Txreps = []
-  Txs = []
-  zs_unpacked = {key: tf.unpack(z_samples)
-                 for key, z_samples in six.iteritems(zs)}
-  for n, xrep in enumerate(xreps):
-    z = {key: z_samples[n]
-         for key, z_samples in six.iteritems(zs_unpacked)}
-    Txreps += [T(xrep, z)]
-    Txs += [T(data, z)]
+  # Create feed_dict for data placeholders that the model conditions
+  # on; it is necessary for all session runs.
+  feed_dict = {x: obs for x, obs in six.iteritems(data)
+               if not isinstance(x, RandomVariable) and
+               not isinstance(x, str)}
 
-  return sess.run([tf.pack(Txreps), tf.pack(Txs)])
+  # Calculate discrepancy over many replicated data sets and latent
+  # variables.
+  Trep = T(xrep, zrep)
+  Tobs = T(data, zrep)
+  Treps = []
+  Ts = []
+  for s in range(n_samples):
+    # Take a forward pass (session run) to get new samples for
+    # each calculation of the discrepancy.
+    Treps += [sess.run(Trep, feed_dict)]
+    Ts += [sess.run(Tobs, feed_dict)]
+
+  return [np.stack(Treps), np.stack(Ts)]
 
 
 # Classification metrics
