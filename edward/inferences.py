@@ -189,7 +189,8 @@ class VariationalInference(Inference):
     self.finalize()
 
   def initialize(self, n_iter=1000, n_minibatch=None, n_print=100,
-                 optimizer=None, scope=None, logdir=None):
+                 optimizer=None, scope=None, logdir=None,
+                 use_prettytensor=False):
     """Initialize variational inference algorithm.
 
     Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
@@ -209,14 +210,20 @@ class VariationalInference(Inference):
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
       progress, then specify None.
-    optimizer : str, optional
-      Whether to use TensorFlow optimizer or PrettyTensor
-      optimizer when using PrettyTensor. Defaults to TensorFlow.
+    optimizer : str or tf.train.Optimizer, optional
+      A TensorFlow optimizer, to use for optimizing the variational
+      objective. Alternatively, one can pass in the name of a
+      TensorFlow optimizer, and default parameters for the optimizer
+      will be used.
     scope : str, optional
       Scope of TensorFlow variable objects to optimize over.
     logdir : str, optional
       Directory where event file will be written. For details,
       see `tf.train.SummaryWriter`. Default is to write nothing.
+    use_prettytensor : bool, optional
+      ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
+      to use PrettyTensor optimizer (when using PrettyTensor).
+      Defaults to TensorFlow.
     """
     self.n_iter = n_iter
     self.n_minibatch = n_minibatch
@@ -240,10 +247,7 @@ class VariationalInference(Inference):
       self.data = {key: value for key, value in
                    zip(six.iterkeys(self.data), batches)}
 
-    loss = self.build_loss()
     if optimizer is None:
-      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                   scope=scope)
       # Use ADAM with a decaying scale factor.
       global_step = tf.Variable(0, trainable=False)
       starter_learning_rate = 0.1
@@ -251,6 +255,35 @@ class VariationalInference(Inference):
                                                  global_step,
                                                  100, 0.9, staircase=True)
       optimizer = tf.train.AdamOptimizer(learning_rate)
+    elif isinstance(optimizer, str):
+      if optimizer == 'gradientdescent':
+        optimizer = tf.train.GradientDescentOptimizer(0.01)
+      elif optimizer == 'adadelta':
+        optimizer = tf.train.AdadeltaOptimizer()
+      elif optimizer == 'adagrad':
+        optimizer = tf.train.AdagradOptimizer(0.01)
+      elif optimizer == 'adagrad':
+        optimizer = tf.train.MomentumOptimizer(0.01, 0.9)
+      elif optimizer == 'adam':
+        optimizer = tf.train.AdamOptimizer()
+      elif optimizer == 'ftrl':
+        optimizer = tf.train.FtrlOptimizer(0.01)
+      elif optimizer == 'rmsprop':
+        optimizer = tf.train.RMSPropOptimizer(0.01)
+      else:
+        raise ValueError('Optimizer class not found:', optimizer)
+
+      global_step = None
+    elif isinstance(optimizer, tf.train.Optimizer):
+      # Custom optimizers have no control over global_step.
+      global_step = None
+    else:
+      raise TypeError()
+
+    loss = self.build_loss()
+    if not use_prettytensor:
+      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                   scope=scope)
       self.train = optimizer.minimize(loss, global_step=global_step,
                                       var_list=var_list)
     else:
@@ -258,7 +291,7 @@ class VariationalInference(Inference):
         raise NotImplementedError("PrettyTensor optimizer does not accept "
                                   "a variable scope.")
 
-      optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
+      # Note PrettyTensor cannot use global_step.
       self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
     if logdir is not None:

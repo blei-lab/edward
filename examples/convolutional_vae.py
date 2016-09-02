@@ -137,7 +137,8 @@ data = {'x': x}
 sess = ed.get_session()
 inference = ed.MFVI({'z': qz}, data, model)
 with tf.variable_scope("model") as scope:
-  inference.initialize(optimizer="PrettyTensor")
+  optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
+  inference.initialize(optimizer=optimizer, use_prettytensor=True)
 with tf.variable_scope("model", reuse=True) as scope:
   p_rep = model.sample_prior(N_MINIBATCH)
 
