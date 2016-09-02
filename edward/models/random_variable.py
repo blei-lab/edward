@@ -4,10 +4,15 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+RANDOM_VARIABLE_COLLECTION = "_random_variable_collection_"
+
 
 class RandomVariable(object):
   """
-  A random variable is a light wrapper around tf.contrib.distributions.
+  A random variable is a light wrapper around a tensor. The tensor
+  corresponds to samples from the random variable, and the wrapping
+  carries properties of the random variable such as its density, mean,
+  variance, and sampling.
 
   Examples
   --------
@@ -19,13 +24,23 @@ class RandomVariable(object):
   >>> x = Bernoulli(p=tf.matmul(z1, z2))
   >>>
   >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0)])
+  >>> x = Normal(mu=mu, sigma=tf.constant([1.0]))
+
+  Notes
+  -----
+  This is a simplified version of StochasticTensor in BayesFlow.
+  The value type is fixed to SampleAndReshapeValue(), several methods are
+  removed, and the distribution's methods populate the namespace for
+  class methods.
   """
   def __init__(self, dist_cls, name=None, **dist_args):
+    tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
     self._dist_cls = dist_cls
     self._dist_args = dist_args
     with tf.op_scope(dist_args.values(), name, "RandomVariable") as scope:
       self._name = scope
       self._dist = dist_cls(**dist_args)
+      self._value = self._dist.sample()
 
   @property
   def distribution(self):
@@ -34,10 +49,6 @@ class RandomVariable(object):
   @property
   def name(self):
     return self._name
-
-  @property
-  def value(self):
-    return self._value
 
   @property
   def dtype(self):
@@ -62,6 +73,9 @@ class RandomVariable(object):
   @property
   def validate_args(self):
     return self.distribution.validate_args
+
+  def value(self):
+    return self._value
 
   def batch_shape(self, *args, **kwargs):
     return self.distribution.batch_shape(*args, **kwargs)
@@ -119,3 +133,17 @@ class RandomVariable(object):
 
   def pmf(self, *args, **kwargs):
     return self.distribution.pmf(*args, **kwargs)
+
+  def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
+    _ = name
+    if dtype and not dtype.is_compatible_with(v.dtype):
+      raise ValueError(
+          "Incompatible type conversion requested to type '%s' for variable "
+          "of type '%s'" % (dtype.name, v.dtype.name))
+    if as_ref:
+      raise ValueError("%s: Ref type is not supported." % v)
+    return v.value()
+
+
+tf.register_tensor_conversion_function(
+    RandomVariable, RandomVariable._tensor_conversion_function)

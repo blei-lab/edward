@@ -59,12 +59,12 @@ class LinearModel:
     return log_lik + log_prior
 
   def predict(self, xs, zs):
-    """Return a prediction for each data point, averaging over
-    each set of latent variables z in zs."""
+    """Return a prediction for each data point, via the likelihood's
+    mean."""
     x_test = xs['x']
-    b = zs['z'][:, 0]
-    W = tf.transpose(zs['z'][:, 1:])
-    y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
+    b = zs['z'][0]
+    W = tf.expand_dims(zs['z'][1:], 1)
+    y_pred = tf.reshape(tf.matmul(x_test, W) + b, [-1])
     return y_pred
 
 
@@ -88,7 +88,7 @@ qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'z': qz}, data, model)
-inference.run(n_iter=250, n_samples=5, n_print=10)
+inference.run(n_iter=500, n_samples=5, n_print=50)
 
 print(ed.evaluate('mean_squared_error', data={'x': x_test, 'y': y_test},
                   latent_vars={'z': qz}, model_wrapper=model))

@@ -196,10 +196,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
 
       Parameters
       ----------
-      xs : dict
-        Data dictionary. Each key names a data structure used in
-        the model (str), and its value is the corresponding
-        corresponding realization (np.ndarray or tf.Tensor).
+      xs : dict of str to tf.Tensor
+        Data dictionary. Each key names a data structure used in the
+        model (str), and its value is the corresponding corresponding
+        realization (tf.Tensor).
       zs : dict of str to tf.Tensor
         Latent variable dictionary. Each key names a latent variable
         used in the model (str), and its value is the corresponding
@@ -219,10 +219,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
 
       Parameters
       ----------
-      xs : dict
-        Data dictionary. Each key names a data structure used in
-        the model (str), and its value is the corresponding
-        corresponding realization (np.ndarray or tf.Tensor).
+      xs : dict of str to tf.Tensor
+        Data dictionary. Each key names a data structure used in the
+        model (str), and its value is the corresponding corresponding
+        realization (tf.Tensor).
       zs : dict of str to tf.Tensor
         Latent variable dictionary. Each key names a latent variable
         used in the model (str), and its value is the corresponding
@@ -241,10 +241,10 @@ around ``_py_log_prob()`` as a TensorFlow operation.
 
       Parameters
       ----------
-      xs : dict
-        Data dictionary. Each key names a data structure used in
-        the model (str), and its value is the corresponding
-        corresponding realization (np.ndarray or tf.Tensor).
+      xs : dict of str to tf.Tensor
+        Data dictionary. Each key names a data structure used in the
+        model (str), and its value is the corresponding corresponding
+        realization (tf.Tensor).
       zs : dict of str to tf.Tensor
         Latent variable dictionary. Each key names a latent variable
         used in the model (str), and its value is the corresponding
@@ -253,38 +253,26 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Returns
       -------
       tf.Tensor
-        Vector of predictions, one for each data point.
-
-        For supervised tasks, the predicted value is the mean of the
-        output's likelihood given features from the ith data point and
-        averaged over the latent variable samples:
-          + Binary classification. The probability of the success
-          label.
-          + Multi-class classification. The probability of each
-          label, with the entire output of shape N x K.
-          + Regression. The mean response.
-        For unsupervised, the predicted value is the log-marginal
-        likelihood evaluated at the ith data point.
+        Tensor of predictions, one for each data point. The prediction
+        is the likelihood's mean. For example, in supervised learning
+        of i.i.d. categorical data, it is a vector of labels.
       """
       pass
 
-    def sample_prior(self, n=1):
+    def sample_prior(self):
       """
       Used in: ed.ppc().
 
-      Parameters
-      ----------
-      n : int, optional
-        Number of latent variable samples.
-
       Returns
       -------
-      tf.Tensor
-        n x d matrix, where each row is a set of latent variables.
+      dict of str to tf.Tensor
+        Latent variable dictionary. Each key names a latent variable
+        used in the model (str), and its value is the corresponding
+        realization (tf.Tensor).
       """
       pass
 
-    def sample_likelihood(self, zs, n=1):
+    def sample_likelihood(self, zs):
       """
       Used in: ed.ppc().
 
@@ -294,17 +282,12 @@ around ``_py_log_prob()`` as a TensorFlow operation.
         Latent variable dictionary. Each key names a latent variable
         used in the model (str), and its value is the corresponding
         realization (tf.Tensor).
-      n : int, optional
-        Number of data points to generate per set of latent variables.
 
       Returns
       -------
-      list of dict's of tf.Tensor's
-        List of replicated data sets from the likelihood,
-        [x^{rep, 1}, ..., x^{rep, S}],
-        where x^{rep, s} ~ p(x | zs[s, :]) and x^{rep, s} has
-        n data points. Type-wise, each x^{rep, s} is a
-        dictionary with the same items and shape of values as the
-        test data.
+      dict of str to tf.Tensor
+        Data dictionary. It is a replicated data set, where each key
+        and value matches the same type as any observed data set that
+        the model aims to capture.
       """
       pass

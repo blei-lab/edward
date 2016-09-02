@@ -29,6 +29,10 @@ class BetaBernoulli:
                        for p in tf.unpack(zs['p'])])
     return log_lik + log_prior
 
+  def sample_prior(self):
+    """p ~ p(p)"""
+    return {'p': beta.sample(a=1.0, b=1.0)}
+
   def sample_likelihood(self, zs):
     """x | p ~ p(x | p)"""
     return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}
@@ -50,4 +54,4 @@ qp = Beta(a=qp_a, b=qp_b)
 inference = ed.MFVI({'p': qp}, data, model)
 inference.run(n_iter=200)
 
-print(ed.ppc(T, data, latent_vars={'p': qp}, model_wrapper=model))
+print(ed.ppc(T, data, model_wrapper=model))

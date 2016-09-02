@@ -7,8 +7,8 @@ import numpy as np
 import six
 import tensorflow as tf
 
-from edward.models import StanModel, Normal, PointMass
-from edward.util import get_dims, get_session, hessian, \
+from edward.models import StanModel, RandomVariable, Normal, PointMass
+from edward.util import copy, get_dims, get_session, hessian, \
     kl_multivariate_normal, log_sum_exp
 
 try:
@@ -22,35 +22,40 @@ class Inference(object):
 
   Attributes
   ----------
-  latent_vars : dict of str to RandomVariable
+  latent_vars : dict of RandomVariable to RandomVariable
     Collection of random variables to perform inference on. Each
-    random variable (of type `str`) is binded to another random
-    variable (of type `RandomVariable`); the latter will infer the
-    former conditional on data.
+    random variable is binded to another random variable; the latter
+    will infer the former conditional on data.
   data : dict
     Data dictionary whose values may vary at each session run.
-  model_wrapper : ed.Model
-    Probability model.
+  model_wrapper : ed.Model or None
+    An optional wrapper for the probability model. If specified, the
+    random variables in `latent_vars`' dictionary keys are strings
+    used accordingly by the wrapper.
   """
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     """Initialization.
 
     Parameters
     ----------
-    latent_vars : dict of str to RandomVariable
+    latent_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. Each
-      random variable (of type `str`) is binded to another random
-      variable (of type `RandomVariable`); the latter will infer the
-      former conditional on data.
+      random variable is binded to another random variable; the latter
+      will infer the former conditional on data.
     data : dict, optional
-      Data dictionary. For TensorFlow, Python, and Stan models,
-      the key type is a string; for PyMC3, the key type is a
-      Theano shared variable. For TensorFlow, Python, and PyMC3
-      models, the value type is a NumPy array or TensorFlow
-      tensor; for Stan, the value type is the type
-      according to the Stan program's data block.
-    model_wrapper : ed.Model
-      Probability model.
+      Data dictionary which binds observed variables (of type
+      `RandomVariable`) to their realizations (of type `tf.Tensor`).
+      It can also bind placeholders (of type `tf.Tensor`) used in the
+      model to their realizations.
+    model_wrapper : ed.Model, optional
+      A wrapper for the probability model. If specified, the random
+      variables in `latent_vars`' dictionary keys are strings
+      used accordingly by the wrapper. `data` is also changed. For
+      TensorFlow, Python, and Stan models, the key type is a string;
+      for PyMC3, the key type is a Theano shared variable. For
+      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
+      array or TensorFlow tensor; for Stan, the value type is the
+      type according to the Stan program's data block.
 
     Notes
     -----
@@ -66,10 +71,14 @@ class Inference(object):
 
     Examples
     --------
-    >>> model = LinearModel()
-    >>> qz = Normal(model.n_vars)
-    >>> data = {'x': np.array(), 'y': np.array()}
-    >>> Inference({'z': qz}, data, model)
+    >>> mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
+    >>> x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant([1.0]))
+    >>>
+    >>> qmu_mu = tf.Variable(tf.random_normal([1]))
+    >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+    >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+    >>>
+    >>> Inference({mu: qmu}, {x: np.array()})
     """
     sess = get_session()
     if not isinstance(latent_vars, dict):
@@ -78,9 +87,6 @@ class Inference(object):
     if data is None:
       data = {}
     elif not isinstance(data, dict):
-      raise TypeError()
-
-    if model_wrapper is None:
       raise TypeError()
 
     self.latent_vars = latent_vars
@@ -123,20 +129,24 @@ class MonteCarlo(Inference):
 
     Parameters
     ----------
-    latent_vars : dict of str to RandomVariable
+    latent_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. Each
-      random variable (of type `str`) is binded to another random
-      variable (of type `RandomVariable`); the latter will infer the
-      former conditional on data.
+      random variable is binded to another random variable; the latter
+      will infer the former conditional on data.
     data : dict, optional
-      Data dictionary. For TensorFlow, Python, and Stan models,
-      the key type is a string; for PyMC3, the key type is a
-      Theano shared variable. For TensorFlow, Python, and PyMC3
-      models, the value type is a NumPy array or TensorFlow
-      placeholder; for Stan, the value type is the type
-      according to the Stan program's data block.
-    model_wrapper : ed.Model
-      Probability model.
+      Data dictionary which binds observed variables (of type
+      `RandomVariable`) to their realizations (of type `tf.Tensor`).
+      It can also bind placeholders (of type `tf.Tensor`) used in the
+      model to their realizations.
+    model_wrapper : ed.Model, optional
+      A wrapper for the probability model. If specified, the random
+      variables in `latent_vars`' dictionary keys are strings used
+      accordingly by the wrapper. `data` is also changed. For
+      TensorFlow, Python, and Stan models, the key type is a string;
+      for PyMC3, the key type is a Theano shared variable. For
+      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
+      array or TensorFlow tensor; for Stan, the value type is the
+      type according to the Stan program's data block.
     """
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
@@ -149,20 +159,24 @@ class VariationalInference(Inference):
 
     Parameters
     ----------
-    latent_vars : dict of str to RandomVariable
+    latent_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. Each
-      random variable (of type `str`) is binded to another random
-      variable (of type `RandomVariable`); the latter will infer the
-      former conditional on data.
+      random variable is binded to another random variable; the latter
+      will infer the former conditional on data.
     data : dict, optional
-      Data dictionary. For TensorFlow, Python, and Stan models,
-      the key type is a string; for PyMC3, the key type is a
-      Theano shared variable. For TensorFlow, Python, and PyMC3
-      models, the value type is a NumPy array or TensorFlow
-      placeholder; for Stan, the value type is the type
+      Data dictionary which binds observed variables (of type
+      `RandomVariable`) to their realizations (of type `tf.Tensor`).
+      It can also bind placeholders (of type `tf.Tensor`) used in the
+      model to their realizations.
+    model_wrapper : ed.Model, optional
+      A wrapper for the probability model. If specified, the random
+      variables in `latent_vars`' dictionary keys are strings used
+      accordingly by the wrapper. `data` is also changed. For
+      TensorFlow, Python, and Stan models, the key type is a string;
+      for PyMC3, the key type is a Theano shared variable. For
+      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
+      array or TensorFlow tensor; for Stan, the value type is the type
       according to the Stan program's data block.
-    model_wrapper : ed.Model
-      Probability model.
     """
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
@@ -431,21 +445,39 @@ class MFVI(VariationalInference):
     result :
       an appropriately selected loss function form
     """
-    q_is_normal = all([isinstance(rv, Normal) for
+    if self.model_wrapper is None:
+      # Copy random variables in p(z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      self.copied_prior = \
+          {copy(z, dict_swap=self.latent_vars, scope='inference'): qz
+           for z, qz in six.iteritems(self.latent_vars)}
+
+      # Copy random variables in p(x | z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      self.copied_lik = \
+          {copy(x, dict_swap=self.latent_vars, scope='inference'): obs
+           for x, obs in six.iteritems(self.data)
+           if isinstance(x, RandomVariable)}
+
+    qz_is_normal = all([isinstance(rv, Normal) for
                        rv in six.itervalues(self.latent_vars)])
+    z_is_normal = all([isinstance(rv, Normal) for
+                       rv in six.iterkeys(self.latent_vars)])
+    is_analytic_kl = qz_is_normal and \
+        (z_is_normal or hasattr(self.model_wrapper, 'log_lik'))
     if self.score:
-      if q_is_normal and hasattr(self.model_wrapper, 'log_lik'):
+      if is_analytic_kl:
         return self.build_score_loss_kl()
       # Analytic entropies may lead to problems around
       # convergence; for now it is deactivated.
-      # elif is_entropy:
+      # elif is_analytic_entropy:
       #    return self.build_score_loss_entropy()
       else:
         return self.build_score_loss()
     else:
-      if q_is_normal and hasattr(self.model_wrapper, 'log_lik'):
+      if is_analytic_kl:
         return self.build_reparam_loss_kl()
-      # elif is_entropy:
+      # elif is_analytic_entropy:
       #    return self.build_reparam_loss_entropy()
       else:
         return self.build_reparam_loss()
@@ -463,16 +495,28 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      p_log_prob = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for z, qz in six.iteritems(self.copied_prior):
+          p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
 
-    p_log_prob = self.model_wrapper.log_prob(x, z)
-    q_log_prob = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  list(range(1, len(rv.get_batch_shape()) + 1)))
+        for x, obs in six.iteritems(self.copied_lik):
+          p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
+      p_log_prob = tf.pack(p_log_prob)
+
+    q_log_prob = [0.0] * self.n_samples
+    for s in range(self.n_samples):
+      for qz in six.itervalues(self.latent_vars):
+        q_log_prob[s] += tf.reduce_sum(qz.log_prob(tf.stop_gradient(qz)))
+
+    q_log_prob = tf.pack(q_log_prob)
     losses = p_log_prob - q_log_prob
     self.loss = tf.reduce_mean(losses)
     return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
@@ -490,16 +534,28 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      p_log_prob = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for z, qz in six.iteritems(self.copied_prior):
+          p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
 
-    p_log_prob = self.model_wrapper.log_prob(x, z)
-    q_log_prob = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
-                                  list(range(1, len(rv.get_batch_shape()) + 1)))
+        for x, obs in six.iteritems(self.copied_lik):
+          p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
+      p_log_prob = tf.pack(p_log_prob)
+
+    q_log_prob = [0.0] * self.n_samples
+    for s in range(self.n_samples):
+      for qz in six.itervalues(self.latent_vars):
+        q_log_prob[s] += tf.reduce_sum(qz.log_prob(qz))
+
+    q_log_prob = tf.pack(q_log_prob)
     self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
     return -self.loss
 
@@ -516,24 +572,38 @@ class MFVI(VariationalInference):
 
     It assumes the KL is analytic.
 
-    It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`.
+    For model wrappers, it assumes the prior is :math:`p(z) =
+    \mathcal{N}(z; 0, 1)`.
 
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_lik = self.model_wrapper.log_lik(x, z)
 
-    p_log_lik = self.model_wrapper.log_lik(x, z)
-    q_log_prob = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  list(range(1, len(rv.get_batch_shape()) + 1)))
+      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma)
+                          for qz in six.itervalues(self.latent_vars)])
+    else:
+      p_log_lik = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for x, obs in six.iteritems(self.copied_lik):
+          p_log_lik[s] += tf.reduce_sum(x.log_prob(obs))
 
-    mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
-    sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
-    kl = kl_multivariate_normal(mu, sigma)
+      p_log_lik = tf.pack(p_log_lik)
+
+      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma)
+                          for z, qz in six.iteritems(self.copied_prior)])
+
+    q_log_prob = [0.0] * self.n_samples
+    for s in range(self.n_samples):
+      for qz in six.itervalues(self.latent_vars):
+        q_log_prob[s] += tf.reduce_sum(qz.log_prob(tf.stop_gradient(qz)))
+
+    q_log_prob = tf.pack(q_log_prob)
+
     self.loss = tf.reduce_mean(p_log_lik) - kl
     return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
@@ -553,17 +623,31 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      p_log_prob = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for z, qz in six.iteritems(self.copied_prior):
+          p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
 
-    p_log_prob = self.model_wrapper.log_prob(x, z)
-    q_log_prob = 0.0
-    q_entropy = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  list(range(1, len(rv.get_batch_shape()) + 1)))
-      q_entropy += rv.entropy()
+        for x, obs in six.iteritems(self.copied_lik):
+          p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
+
+      p_log_prob = tf.pack(p_log_prob)
+
+    q_log_prob = [0.0] * self.n_samples
+    for s in range(self.n_samples):
+      for qz in six.itervalues(self.latent_vars):
+        q_log_prob[s] += tf.reduce_sum(qz.log_prob(tf.stop_gradient(qz)))
+
+    q_log_prob = tf.pack(q_log_prob)
+
+    q_entropy = tf.reduce_sum([qz.entropy()
+                               for qz in six.itervalues(self.latent_vars)])
 
     self.loss = tf.reduce_mean(p_log_prob) + q_entropy
     return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
@@ -582,20 +666,32 @@ class MFVI(VariationalInference):
 
     It assumes the KL is analytic.
 
-    It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`
+    For model wrappers, it assumes the prior is :math:`p(z) =
+    \mathcal{N}(z; 0, 1)`.
 
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_lik = self.model_wrapper.log_lik(x, z)
 
-    p_log_lik = self.model_wrapper.log_lik(x, z)
-    mu = tf.concat(0, [rv.mu for rv in six.itervalues(self.latent_vars)])
-    sigma = tf.concat(0, [rv.sigma for rv in six.itervalues(self.latent_vars)])
-    self.loss = tf.reduce_mean(p_log_lik) - \
-        kl_multivariate_normal(mu, sigma)
+      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma)
+                          for qz in six.itervalues(self.latent_vars)])
+    else:
+      p_log_lik = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for x, obs in six.iteritems(self.copied_lik):
+          p_log_lik[s] += tf.reduce_sum(x.log_prob(obs))
+
+      p_log_lik = tf.pack(p_log_lik)
+
+      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma)
+                          for z, qz in six.iteritems(self.copied_prior)])
+
+    self.loss = tf.reduce_mean(p_log_lik) - kl
     return -self.loss
 
   def build_reparam_loss_entropy(self):
@@ -614,14 +710,24 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      p_log_prob = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for z, qz in six.iteritems(self.copied_prior):
+          p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
 
-    p_log_prob = self.model_wrapper.log_prob(x, z)
-    q_entropy = 0.0
-    for rv in six.iterkeys(z):
-      q_entropy += rv.entropy()
+        for x, obs in six.iteritems(self.copied_lik):
+          p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
+
+      p_log_prob = tf.pack(p_log_prob)
+
+    q_entropy = tf.reduce_sum([qz.entropy()
+                               for qz in six.itervalues(self.latent_vars)])
 
     self.loss = tf.reduce_mean(p_log_prob) + q_entropy
     return -self.loss
@@ -683,16 +789,42 @@ class KLpq(VariationalInference):
       w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
 
     """
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([self.n_samples])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      # Copy random variables in p(z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      copied_prior = \
+          {copy(z, dict_swap=self.latent_vars, scope='inference'): qz
+           for z, qz in six.iteritems(self.latent_vars)}
 
-    # normalized importance weights
-    q_log_prob = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-        q_log_prob += rv.log_prob(tf.stop_gradient(z[key]))
+      # Copy random variables in p(x | z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      copied_lik = \
+          {copy(x, dict_swap=self.latent_vars, scope='inference'): obs
+           for x, obs in six.iteritems(self.data)
+           if isinstance(x, RandomVariable)}
 
-    log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
+      p_log_prob = [0.0] * self.n_samples
+      for s in range(self.n_samples):
+        for z, qz in six.iteritems(copied_prior):
+          p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
+
+        for x, obs in six.iteritems(copied_lik):
+          p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
+
+      p_log_prob = tf.pack(p_log_prob)
+
+    q_log_prob = [0.0] * self.n_samples
+    for s in range(self.n_samples):
+      for qz in six.itervalues(self.latent_vars):
+        q_log_prob[s] += tf.reduce_sum(qz.log_prob(tf.stop_gradient(qz)))
+
+    q_log_prob = tf.pack(q_log_prob)
+    log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - log_sum_exp(log_w)
     w_norm = tf.exp(log_w_norm)
 
@@ -714,11 +846,12 @@ class MAP(VariationalInference):
     """
     Parameters
     ----------
-    latent_vars : list of str or dict of str to RandomVariable
+    latent_vars : list of RandomVariable or
+                  dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. If
-      list, each random variable will be implictly optimized using a
-      ``PointMass` distribution that is defined internally (with
-      real-valued support).
+      list, each random variable will be implictly optimized
+      using a ``PointMass`` distribution that is defined
+      internally (with support matching each random variable).
 
     Examples
     --------
@@ -727,12 +860,16 @@ class MAP(VariationalInference):
     >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
     >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
     >>> qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-    >>> MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model_wrapper)
+    >>> MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
     We also automate the specification of ``PointMass`` distributions
-    (with real-valued support), so one can pass in a list of latent
-    variables instead. However, for model wrappers, the list can only
-    have one element:
+    (with matching support), so one can pass in a list of latent
+    variables instead:
+
+    >>> MAP([beta], {X: np.array(), y: np.array()})
+    >>> MAP([pi, mu, sigma], {x: np.array()}
+
+    However, for model wrappers, the list can only have one element:
 
     >>> MAP(['z'], data, model_wrapper)
 
@@ -747,18 +884,17 @@ class MAP(VariationalInference):
     explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
-      if len(latent_vars) == 0:
-        latent_vars = {}
-      elif len(latent_vars) == 1:
-        with tf.variable_scope("variational"):
-          if hasattr(model_wrapper, 'n_vars'):
-            latent_vars = {latent_vars[0]: PointMass(
-                params=tf.Variable(tf.random_normal([model_wrapper.n_vars])))}
-          else:
-            latent_vars = {latent_vars[0]: PointMass(params=tf.constant([0.0]))}
-      else:
-        raise NotImplementedError("A list of more than one element is "
-                                  "not supported. See documentation.")
+      with tf.variable_scope("variational"):
+        if model_wrapper is None:
+          latent_vars = {rv: PointMass(
+              params=tf.Variable(tf.random_normal(rv.batch_shape())))
+              for rv in latent_vars}
+        elif len(latent_vars) == 1:
+          latent_vars = {latent_vars[0]: PointMass(
+              params=tf.Variable(tf.random_normal([model_wrapper.n_vars])))}
+        else:
+          raise NotImplementedError("A list of more than one element is "
+                                    "not supported. See documentation.")
 
     super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
@@ -769,9 +905,33 @@ class MAP(VariationalInference):
     .. math::
       - \log p(x,z)
     """
-    x = self.data
-    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
-    self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
+    if self.model_wrapper is not None:
+      x = self.data
+      z = {key: rv.sample([1])
+           for key, rv in six.iteritems(self.latent_vars)}
+      p_log_prob = self.model_wrapper.log_prob(x, z)
+    else:
+      # Copy random variables in p(z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      copied_prior = \
+          {copy(z, dict_swap=self.latent_vars, scope='inference'): qz
+           for z, qz in six.iteritems(self.latent_vars)}
+
+      # Copy random variables in p(x | z), replacing conditioning on
+      # priors with conditioning on inferred posteriors.
+      copied_lik = \
+          {copy(x, dict_swap=self.latent_vars, scope='inference'): obs
+           for x, obs in six.iteritems(self.data)
+           if isinstance(x, RandomVariable)}
+
+      p_log_prob = 0.0
+      for z, qz in six.iteritems(copied_latent_vars):
+        p_log_prob += tf.reduce_sum(z.log_prob(qz))
+
+      for x, obs in six.iteritems(copied_lik):
+        p_log_prob += tf.reduce_sum(x.log_prob(obs))
+
+    self.loss = tf.squeeze(p_log_prob)
     return -self.loss
 
 
