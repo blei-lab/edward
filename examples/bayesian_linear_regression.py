@@ -65,11 +65,11 @@ def build_toy_dataset(N=40, noise_std=0.1):
   y = 0.075 * x + norm.rvs(0, noise_std, size=N)
   x = (x - 4.0) / 4.0
   x = x.reshape((N, 1))
-  return {'x': x, 'y': y}
+  return x, y
 
 
 ed.set_seed(42)
-data = build_toy_dataset()
+x_train, y_train = build_toy_dataset()
 
 model = LinearModel()
 
@@ -77,5 +77,6 @@ qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
 qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
+data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=250, n_samples=5, n_print=10)

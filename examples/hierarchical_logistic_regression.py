@@ -75,11 +75,11 @@ def build_toy_dataset(N=40, noise_std=0.1):
   y[y >= 0.5] = 1
   x = (x - 4.0) / 4.0
   x = x.reshape((N, D))
-  return {'x': x, 'y': y}
+  return x, y
 
 
 ed.set_seed(42)
-data = build_toy_dataset()
+x_train, y_train = build_toy_dataset()
 model = HierarchicalLogistic(weight_dim=[1, 1])
 
 qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
@@ -92,6 +92,7 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
+data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=5)
 sess = ed.get_session()

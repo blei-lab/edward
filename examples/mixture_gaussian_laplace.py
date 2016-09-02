@@ -99,11 +99,11 @@ def build_toy_dataset(N):
     k = np.argmax(np.random.multinomial(1, pi))
     x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
 
-  return {'x': x}
+  return x
 
 
 ed.set_seed(42)
-data = build_toy_dataset(500)
+x_train = build_toy_dataset(500)
 
 K = 2
 D = 2
@@ -114,5 +114,6 @@ with tf.variable_scope("variational"):
   qmu = PointMass(params=tf.Variable(tf.random_normal([K * D])))
   qsigma = PointMass(params=tf.exp(tf.Variable(tf.random_normal([K * D]))))
 
+data = {'x': x_train}
 inference = ed.Laplace({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=500, n_minibatch=10, n_print=50)

@@ -96,11 +96,11 @@ def build_toy_dataset(N=40, noise_std=0.1):
   y = np.cos(x) + norm.rvs(0, noise_std, size=N)
   x = (x - 4.0) / 4.0
   x = x.reshape((N, D))
-  return {'x': x, 'y': y}
+  return x, y
 
 
 ed.set_seed(42)
-data = build_toy_dataset()
+x_train, y_train = build_toy_dataset()
 
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 
@@ -118,6 +118,7 @@ plt.show(block=False)
 # assuming a standard normal prior on the weights; this enables VI
 # with an analytic KL term which provides faster inference.
 sess = ed.get_session()
+data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=10)
 for t in range(1000):

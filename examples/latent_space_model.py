@@ -67,14 +67,15 @@ class LatentSpaceModel:
 def load_celegans_brain():
   x = np.load('data/celegans_brain.npy')
   N = x.shape[0]
-  return {'x': x}, N
+  return x, N
 
 
 ed.set_seed(42)
-data, N = load_celegans_brain()
+x_train, N = load_celegans_brain()
 
 model = LatentSpaceModel(N, K=3, like='Poisson', prior='Gaussian')
 
+data = {'x': x_train}
 inference = ed.MAP(['z'], data, model)
 # Alternatively, run
 # qz_mu = tf.Variable(tf.random_normal([model.n_vars]))

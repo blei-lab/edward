@@ -71,11 +71,11 @@ class MatrixFactorization:
 def load_celegans_brain():
   x = np.load('data/celegans_brain.npy')
   N = x.shape[0]
-  return {'x': x}, N
+  return x, N
 
 
 ed.set_seed(42)
-data, N = load_celegans_brain()
+x, N = load_celegans_brain()
 
 K = 3
 model = MatrixFactorization(K, N,
@@ -83,6 +83,7 @@ model = MatrixFactorization(K, N,
                             prior='Lognormal',
                             interaction='additive')
 
+data = {'x': x_train}
 inference = ed.MAP(['z'], data, model)
 # Alternatively, run
 # qz_mu = tf.Variable(tf.random_normal([model.n_vars]))

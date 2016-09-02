@@ -34,8 +34,7 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
     Number of posterior samples for making predictions,
     using the posterior predictive distribution.
   output_key : str, optional
-    If using a supervised metric, it is the key in ``data`` which
-    corresponds to the predicted output.
+    It is the key in ``data`` which corresponds to the model's output.
 
   Returns
   -------
@@ -51,13 +50,13 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
   --------
   >>> # log-likelihood performance
   >>> evaluate('log_likelihood', data={'x': x_train},
-  >>>          latent_vars={'z': qz}, model_wrapper=model)
+  ...          latent_vars={'z': qz}, model_wrapper=model)
   >>>
   >>> # classification accuracy
   >>> # here, 'x' is any features the model is defined with respect to,
   >>> # and 'y' is the output of the posterior predictive
   >>> evaluate('binary_accuracy', data={'y': y_train, 'x': x_train},
-  >>>          latent_vars={'z': qz}, model_wrapper=model)
+  ...          latent_vars={'z': qz}, model_wrapper=model)
   """
   sess = get_session()
   # Monte Carlo estimate the mean of the posterior predictive:
@@ -79,7 +78,7 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
 
   for metric in metrics:
     if metric == 'accuracy' or metric == 'crossentropy':
-      # automate binary or sparse cat depending on max(y_true)
+      # automate binary or sparse cat depending on its support
       support = tf.reduce_max(y_true).eval()
       if support <= 1:
         metric = 'binary_' + metric
@@ -87,46 +86,46 @@ def evaluate(metrics, data, latent_vars, model_wrapper,
         metric = 'sparse_categorical_' + metric
 
     if metric == 'binary_accuracy':
-      evaluations += [sess.run(binary_accuracy(y_true, y_pred))]
+      evaluations += [binary_accuracy(y_true, y_pred)]
     elif metric == 'categorical_accuracy':
-      evaluations += [sess.run(categorical_accuracy(y_true, y_pred))]
+      evaluations += [categorical_accuracy(y_true, y_pred)]
     elif metric == 'sparse_categorical_accuracy':
-      evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred))]
+      evaluations += [sparse_categorical_accuracy(y_true, y_pred)]
     elif metric == 'log_loss' or metric == 'binary_crossentropy':
-      evaluations += [sess.run(binary_crossentropy(y_true, y_pred))]
+      evaluations += [binary_crossentropy(y_true, y_pred)]
     elif metric == 'categorical_crossentropy':
-      evaluations += [sess.run(categorical_crossentropy(y_true, y_pred))]
+      evaluations += [categorical_crossentropy(y_true, y_pred)]
     elif metric == 'sparse_categorical_crossentropy':
-      evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred))]
+      evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
     elif metric == 'hinge':
-      evaluations += [sess.run(hinge(y_true, y_pred))]
+      evaluations += [hinge(y_true, y_pred)]
     elif metric == 'squared_hinge':
-      evaluations += [sess.run(squared_hinge(y_true, y_pred))]
+      evaluations += [squared_hinge(y_true, y_pred)]
     elif (metric == 'mse' or metric == 'MSE' or
           metric == 'mean_squared_error'):
-      evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
+      evaluations += [mean_squared_error(y_true, y_pred)]
     elif (metric == 'mae' or metric == 'MAE' or
           metric == 'mean_absolute_error'):
-      evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
+      evaluations += [mean_absolute_error(y_true, y_pred)]
     elif (metric == 'mape' or metric == 'MAPE' or
           metric == 'mean_absolute_percentage_error'):
-      evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
+      evaluations += [mean_absolute_percentage_error(y_true, y_pred)]
     elif (metric == 'msle' or metric == 'MSLE' or
           metric == 'mean_squared_logarithmic_error'):
-      evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
+      evaluations += [mean_squared_logarithmic_error(y_true, y_pred)]
     elif metric == 'poisson':
-      evaluations += [sess.run(poisson(y_true, y_pred))]
+      evaluations += [poisson(y_true, y_pred)]
     elif metric == 'cosine' or metric == 'cosine_proximity':
-      evaluations += [sess.run(cosine_proximity(y_true, y_pred))]
+      evaluations += [cosine_proximity(y_true, y_pred)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
-      evaluations += [sess.run(y_pred)]
+      evaluations += [y_pred]
     else:
       raise NotImplementedError()
 
   if len(evaluations) == 1:
-    return evaluations[0]
+    return sess.run(evaluations[0])
   else:
-    return evaluations
+    return sess.run(evaluations)
 
 
 def ppc(T, data, latent_vars, model_wrapper, n_samples=100):
@@ -172,12 +171,12 @@ def ppc(T, data, latent_vars, model_wrapper, n_samples=100):
   -------
   list of np.ndarray
     List containing the reference distribution, which is a NumPy
-    vector of size elements,
+    array of size elements,
 
     .. math::
       (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))
 
-    and the realized discrepancy, which is a NumPy vector of size
+    and the realized discrepancy, which is a NumPy array of size
     elements,
 
     .. math::
@@ -191,15 +190,15 @@ def ppc(T, data, latent_vars, model_wrapper, n_samples=100):
   --------
   >>> # posterior predictive check
   >>> ppc(T, data={'x': x_train}, latent_vars={'z': qz},
-  >>>     model_wrapper=model)
+  ...     model_wrapper=model)
   >>>
   >>> # posterior predictive check (with covariates)
   >>> ppc(T, data={'y': y_train, 'x': x_train},
-  >>>     latent_vars={'z': qz}, model_wrapper=model)
+  ...     latent_vars={'z': qz}, model_wrapper=model)
   >>>
   >>> # prior predictive check
   >>> ppc(T, data={'x': x_train}, latent_vars=None,
-  >>>     model_wrapper=model)
+  ...     model_wrapper=model)
   """
   sess = get_session()
   # Assume all values have the same data set size.

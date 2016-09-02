@@ -685,9 +685,7 @@ class MAP(VariationalInference):
       Collection of random variables to perform inference on. If
       list, each random variable will be implictly optimized using a
       ``PointMass` distribution that is defined internally (with
-      real-valued support). If dictionary, each random variable is
-      binded to a ``PointMass`` distribution that will be used to
-      infer the former conditional on data.
+      real-valued support).
 
     Examples
     --------
