@@ -93,7 +93,11 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
     for key, value in six.iteritems(dict_swap):
       if isinstance(key, RandomVariable):
         if org_instance == key.value():
-          org_instance = value.value()
+          if isinstance(value, RandomVariable):
+            org_instance = value.value()
+          else:
+            org_instance = value
+
           if not copy_q:
             return org_instance
           break

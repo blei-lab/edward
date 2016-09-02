@@ -23,6 +23,8 @@ N = 40 # num data points
 p = 1 # num features
 
 ed.set_seed(42)
+X_train, y_train = build_toy_dataset(N)
+X_test, y_test = build_toy_dataset(N)
 
 X = ed.placeholder(tf.float32, [N, p], name='X')
 beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p), name='beta')
@@ -32,9 +34,7 @@ qmu_mu = tf.Variable(tf.random_normal([p]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
 qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma, name='qbeta')
 
-X_data, y_data = build_toy_dataset(N)
-data = {X: X_data, y: y_data}
-
+data = {X: X_train, y: y_train}
 inference = ed.MFVI({beta: qbeta}, data)
 inference.initialize(logdir='train')
 
@@ -42,3 +42,9 @@ sess = ed.get_session()
 for t in range(501):
   _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
   inference.print_progress(t, loss)
+
+y_post = ed.copy(y, {beta: qbeta.mean()})
+# This is equivalent to
+# y_post = Normal(mu=ed.dot(X, qbeta.mean()), sigma=tf.ones(N))
+
+print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))

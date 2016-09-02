@@ -6,12 +6,21 @@ import numpy as np
 import six
 import tensorflow as tf
 
+from edward.models import RandomVariable
 from edward.util import logit, get_dims, get_session
 
 
 def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
              n_samples=100, output_key='y'):
   """Evaluate fitted model using a set of metrics.
+
+  A metric, or scoring rule, is a function of observed data under the
+  posterior predictive distribution. For example in supervised metrics
+  such as classification accuracy, the observed data (true output) is
+  compared to the posterior predictive's mean (predicted output). In
+  unsupervised metrics such as log-likelihood, the probability of
+  observing the data is calculated under the posterior predictive's
+  log-density.
 
   Parameters
   ----------
@@ -36,10 +45,10 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     type is the type according to the Stan program's data block.
   n_samples : int, optional
     Number of posterior samples for making predictions,
-    using the posterior predictive distribution.
-  output_key : str, optional
-    If using a supervised metric, it is the key in ``data`` which
-    corresponds to the predicted output.
+    using the posterior predictive distribution. It is only used if
+    the model wrapper is specified.
+  output_key : RandomVariable or str, optional
+    It is the key in ``data`` which corresponds to the model's output.
 
   Returns
   -------
@@ -53,8 +62,9 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
 
   Examples
   --------
-  >>> # build posterior predictive after inference
-  >>> x_post = build(x, {z: qz, beta: qbeta})
+  >>> # build posterior predictive after inference: it is
+  >>> # parameterized by posterior means
+  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
   >>>
   >>> # log-likelihood performance
   >>> evaluate('log_likelihood', data={x_post: x_train})
@@ -66,32 +76,56 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   >>>
   >>> # criticism for model wrappers
   >>> evaluate('log_likelihood', data={'x': x_train},
-  >>>          latent_vars={'z': qz}, model_wrapper=model)
+  ...          latent_vars={'z': qz}, model_wrapper=model)
   >>> evaluate('binary_accuracy', data={'y': y_train, 'x': x_train},
-  >>>          latent_vars={'z': qz}, model_wrapper=model)
+  ...          latent_vars={'z': qz}, model_wrapper=model)
   """
-  # TODO
   sess = get_session()
-  # Monte Carlo estimate the mean of the posterior predictive:
-  # 1. Sample a batch of latent variables from posterior
-  zs = {key: rv.sample([n_samples]) for key, rv in six.iteritems(latent_vars)}
-  # 2. Make predictions, averaging over each sample of latent variables
-  y_pred = model_wrapper.predict(data, zs)
+  # Create feed_dict for data placeholders that the model conditions
+  # on; it is necessary for all session runs.
+  feed_dict = {x: obs for x, obs in six.iteritems(data)
+               if not isinstance(x, RandomVariable) and
+               not isinstance(x, str)}
 
-  # Evaluate y_pred according to y_true for all metrics.
-  try:
-    # Get y_true (if supervised).
-    y_true = data[output_key]
-  except:
-    pass
-
-  evaluations = []
   if isinstance(metrics, str):
     metrics = [metrics]
 
+  # Set default for output_key if not using a model wrapper.
+  if model_wrapper is None:
+    if output_key == 'y':
+      # Try to default to the only one observed random variable.
+      keys = [key for key in six.iterkeys(data)
+              if isinstance(key, RandomVariable)]
+      if len(keys) == 1:
+        output_key = keys[0]
+      else:
+        raise KeyError("User must specify output_key.")
+
+  # Form true data.
+  y_true = data[output_key]
+
+  # Form predicted data (if there are any supervised metrics).
+  if metrics != ['log_lik'] and metrics != ['log_likelihood']:
+    if model_wrapper is None:
+      y_pred = output_key.mean()
+    else:
+      # Monte Carlo estimate the mean of the posterior predictive.
+      zrep = {key: value.value()
+              for key, value in six.iteritems(latent_vars)}
+      pred = model_wrapper.predict(data, zrep)
+      y_pred = []
+      for s in range(n_samples):
+        # Take a forward pass (session run) to get new samples for
+        # each sample-based prediction.
+        y_pred += [sess.run(pred, feed_dict)]
+
+      y_pred = tf.reduce_mean(tf.pack(y_pred), 0)
+
+  # Evaluate y_true (according to y_pred if supervised) for all metrics.
+  evaluations = []
   for metric in metrics:
     if metric == 'accuracy' or metric == 'crossentropy':
-      # automate binary or sparse cat depending on max(y_true)
+      # automate binary or sparse cat depending on its support
       support = tf.reduce_max(y_true).eval()
       if support <= 1:
         metric = 'binary_' + metric
@@ -99,46 +133,59 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
         metric = 'sparse_categorical_' + metric
 
     if metric == 'binary_accuracy':
-      evaluations += [sess.run(binary_accuracy(y_true, y_pred))]
+      evaluations += [binary_accuracy(y_true, y_pred)]
     elif metric == 'categorical_accuracy':
-      evaluations += [sess.run(categorical_accuracy(y_true, y_pred))]
+      evaluations += [categorical_accuracy(y_true, y_pred)]
     elif metric == 'sparse_categorical_accuracy':
-      evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred))]
+      evaluations += [sparse_categorical_accuracy(y_true, y_pred)]
     elif metric == 'log_loss' or metric == 'binary_crossentropy':
-      evaluations += [sess.run(binary_crossentropy(y_true, y_pred))]
+      evaluations += [binary_crossentropy(y_true, y_pred)]
     elif metric == 'categorical_crossentropy':
-      evaluations += [sess.run(categorical_crossentropy(y_true, y_pred))]
+      evaluations += [categorical_crossentropy(y_true, y_pred)]
     elif metric == 'sparse_categorical_crossentropy':
-      evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred))]
+      evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
     elif metric == 'hinge':
-      evaluations += [sess.run(hinge(y_true, y_pred))]
+      evaluations += [hinge(y_true, y_pred)]
     elif metric == 'squared_hinge':
-      evaluations += [sess.run(squared_hinge(y_true, y_pred))]
+      evaluations += [squared_hinge(y_true, y_pred)]
     elif (metric == 'mse' or metric == 'MSE' or
           metric == 'mean_squared_error'):
-      evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
+      evaluations += [mean_squared_error(y_true, y_pred)]
     elif (metric == 'mae' or metric == 'MAE' or
           metric == 'mean_absolute_error'):
-      evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
+      evaluations += [mean_absolute_error(y_true, y_pred)]
     elif (metric == 'mape' or metric == 'MAPE' or
           metric == 'mean_absolute_percentage_error'):
-      evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
+      evaluations += [mean_absolute_percentage_error(y_true, y_pred)]
     elif (metric == 'msle' or metric == 'MSLE' or
           metric == 'mean_squared_logarithmic_error'):
-      evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
+      evaluations += [mean_squared_logarithmic_error(y_true, y_pred)]
     elif metric == 'poisson':
-      evaluations += [sess.run(poisson(y_true, y_pred))]
+      evaluations += [poisson(y_true, y_pred)]
     elif metric == 'cosine' or metric == 'cosine_proximity':
-      evaluations += [sess.run(cosine_proximity(y_true, y_pred))]
+      evaluations += [cosine_proximity(y_true, y_pred)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
-      evaluations += [sess.run(y_pred)]
+      if model_wrapper is None:
+        evaluations += [tf.reduce_mean(output_key.log_prob(y_true))]
+      else:
+        # Monte Carlo estimate the log-density of the posterior predictive.
+        zrep = {key: value.value()
+                for key, value in six.iteritems(latent_vars)}
+        log_lik = model_wrapper.log_lik(data, zrep)
+        log_liks = []
+        for s in range(n_samples):
+          # Take a forward pass (session run) to get new samples for
+          # each sample-based prediction.
+          log_liks += [sess.run(log_lik, feed_dict)]
+
+        evaluations += [tf.reduce_mean(log_liks)]
     else:
       raise NotImplementedError()
 
   if len(evaluations) == 1:
-    return evaluations[0]
+    return sess.run(evaluations[0], feed_dict)
   else:
-    return evaluations
+    return sess.run(evaluations, feed_dict)
 
 
 def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
