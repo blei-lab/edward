@@ -22,9 +22,13 @@ from edward.models import Bernoulli
 
 def geometric(p):
     i = tf.constant(0)
-    cond = lambda i: tf.equal(tf.squeeze(Bernoulli(p=p)),
-                              tf.constant(1))
-    body = lambda i: i + 1
+
+    def cond(i):
+      return tf.equal(tf.squeeze(Bernoulli(p=p)), tf.constant(1))
+
+    def body(i):
+      return i + 1
+
     return tf.while_loop(cond, body, loop_vars=[i])
 
 

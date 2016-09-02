@@ -28,8 +28,13 @@ from edward.models import Bernoulli
 def geometric(p):
     x = tf.squeeze(Bernoulli(p=p))
     cond = tf.equal(x, tf.constant(1))
-    fn1 = lambda: tf.constant(0)
-    fn2 = lambda: geometric(p) + 1
+
+    def fn1():
+      return tf.constant(0)
+
+    def fn2():
+      return geometric(p) + 1
+
     # TensorFlow builds the op non-lazily, unrolling both functions
     # before it checks the condition. This makes this function fail.
     return tf.cond(cond, fn1, fn2)

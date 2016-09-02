@@ -16,7 +16,8 @@ from tensorflow.python.util import compat
 distributions = tf.contrib.distributions
 
 
-def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, copy_q=False):
+def copy(org_instance, dict_swap=None, scope="copied",
+         replace_itself=False, copy_q=False):
   """Build a new node in the TensorFlow graph from `org_instance`,
   where any of its ancestors existing in `dict_swap` are
   replaced with `dict_swap`'s corresponding value.
@@ -226,13 +227,13 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
     op_def = deepcopy(op.op_def)
 
     ret = tf.Operation(new_node_def,
-               graph,
-               new_inputs,
-               output_types,
-               new_control_inputs,
-               input_types,
-               new_original_op,
-               op_def)
+                       graph,
+                       new_inputs,
+                       output_types,
+                       new_control_inputs,
+                       input_types,
+                       new_original_op,
+                       op_def)
 
     # Use Graph's private methods to add the op, following
     # implementation of `tf.Graph().create_op()`.
@@ -260,8 +261,8 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
             logging.warning("Tried to colocate %s with an op %s that had "
                             "a different device: %s vs %s. "
                             "Ignoring colocation property.",
-                             name, colocation_op.name,
-                             ret.device, colocation_op.device)
+                            name, colocation_op.name, ret.device,
+                            colocation_op.device)
           else:
             ret._set_device(colocation_op.device)
 
@@ -275,10 +276,10 @@ def copy(org_instance, dict_swap=None, scope="copied", replace_itself=False, cop
     # (3) "container" attribute is in OpDef
     # (4) "container" attribute is None
     if (graph._container and
-      op_type in graph._registered_ops and
-      graph._registered_ops[op_type].is_stateful and
-      "container" in ret.node_def.attr and
-      not ret.node_def.attr["container"].s):
+        op_type in graph._registered_ops and
+        graph._registered_ops[op_type].is_stateful and
+        "container" in ret.node_def.attr and
+            not ret.node_def.attr["container"].s):
       ret.node_def.attr["container"].CopyFrom(
           attr_value_pb2.AttrValue(s=compat.as_bytes(graph._container)))
 

@@ -19,7 +19,7 @@ qmu_mu = tf.Variable(tf.random_normal([1]), name='qmu_mu')
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])), name='qmu_sigma')
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma, name='qmu')
 
-data = {x: np.array([0.0]*50, dtype=np.float32)}
+data = {x: np.array([0.0] * 50, dtype=np.float32)}
 
 # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
 inference = ed.MFVI({mu: qmu}, data)

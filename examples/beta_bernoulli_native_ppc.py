@@ -22,7 +22,7 @@ from edward.models import Bernoulli, Beta
 ed.set_seed(42)
 
 p = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=tf.ones(10)*p)
+x = Bernoulli(p=tf.ones(10) * p)
 
 x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 data = {x: x_data}

@@ -12,15 +12,15 @@ from scipy.stats import norm
 
 
 def build_toy_dataset(N=40, noise_std=0.1):
-  X  = np.concatenate([np.linspace(0, 2, num=N/2),
-                       np.linspace(6, 8, num=N/2)])
-  y = 5.0*X + norm.rvs(0, noise_std, size=N)
+  X = np.concatenate([np.linspace(0, 2, num=N / 2),
+                      np.linspace(6, 8, num=N / 2)])
+  y = 5.0 * X + norm.rvs(0, noise_std, size=N)
   X = X.reshape((N, 1))
   return X.astype(np.float32), y.astype(np.float32)
 
 
-N = 40 # num data points
-p = 1 # num features
+N = 40  # num data points
+p = 1  # num features
 
 ed.set_seed(42)
 X_train, y_train = build_toy_dataset(N)
