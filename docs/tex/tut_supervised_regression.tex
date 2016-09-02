@@ -24,10 +24,11 @@ def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
   n_dim = len(coeff)
   x = np.random.randn(N, n_dim).astype(np.float32)
   y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
-  return {'x': x, 'y': y}
+  return x, y
 
 coeff = np.random.randn(10)
-data = build_toy_dataset(coeff=coeff)
+x_train, y_train = build_toy_dataset(coeff=coeff)
+data = {'x': x_train, 'y': y_train}
 \end{lstlisting}
 
 
@@ -127,8 +128,7 @@ class LinearModel:
 
 Here the test data is simulated from the same process.
 \begin{lstlisting}[language=Python]
-data_test = build_toy_dataset(coeff=coeff)
-x_test, y_test = data_test['x'], data_test['y']
+x_test, y_test = build_toy_dataset(coeff=coeff)
 print(ed.evaluate('mse', data={'x': x_test, 'y': y_test},
                   latent_vars={'z': qz}, model_wrapper=model))
 ## 0.0236971

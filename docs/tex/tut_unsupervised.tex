@@ -27,14 +27,15 @@ def build_toy_dataset(N):
     k = np.argmax(np.random.multinomial(1, pi))
     x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
 
-  return {'x': x}
+  return x
 
-data = build_toy_dataset(500)
+x_train = build_toy_dataset(500)
+data = {'x': x_train}
 \end{lstlisting}
 
 We visualize the generated data points.
 \begin{lstlisting}[language=Python]
-plt.scatter(data['x'][:, 0], data['x'][:, 1])
+plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.axis([-3, 3, -3, 3])
 plt.show()
 \end{lstlisting}
@@ -200,7 +201,7 @@ clusters = np.argmax(
 
 Plot the data points, colored by their predicted membership.
 \begin{lstlisting}[language=Python]
-plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
+plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.show()
 \end{lstlisting}

@@ -126,12 +126,12 @@ def build_toy_dataset(N):
     k = np.argmax(np.random.multinomial(1, pi))
     x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
 
-  return {'x': x}
+  return x_train
 
 
 ed.set_seed(42)
-data = build_toy_dataset(500)
-plt.scatter(data['x'][:, 0], data['x'][:, 1])
+x_train = build_toy_dataset(500)
+plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.axis([-3, 3, -3, 3])
 plt.title("Simulated dataset")
 plt.show()
@@ -150,6 +150,7 @@ qpi = Dirichlet(alpha=qpi_alpha)
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 
+data = {'x': x_train}
 inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=4000, n_samples=50, n_minibatch=10)
 
@@ -157,7 +158,7 @@ clusters = np.argmax(
     ed.evaluate('log_likelihood', data,
                 latent_vars={'pi': qpi, 'mu': qmu, 'sigma': qsigma},
                 model_wrapper=model), axis=0)
-plt.scatter(data['x'][:, 0], data['x'][:, 1], c=clusters, cmap=cm.bwr)
+plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.title("Predicted cluster assignments")
 plt.show()

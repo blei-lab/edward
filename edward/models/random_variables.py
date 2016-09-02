@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.models.pointmass import PointMass as distributions_PointMass
+from edward.models.point_mass import PointMass as distributions_PointMass
 from edward.models.random_variable import RandomVariable
 from edward.util import get_session
 

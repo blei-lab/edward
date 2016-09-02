@@ -33,9 +33,10 @@ In the example we load the data with
 def load_celegans_brain():
   x = np.load('data/celegans_brain.npy')
   N = x.shape[0]
-  return {'x': x}, N
+  return x, N
 
-data, N = load_celegans_brain()
+x_train, N = load_celegans_brain()
+data = {'x': x_train}
 \end{lstlisting}
 
 \subsubsection{Model}
