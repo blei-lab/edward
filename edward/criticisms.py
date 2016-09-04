@@ -104,7 +104,7 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   # Form true data. (It is not required in the specific setting of the
   # log-likelihood metric with a model wrapper.)
   if (metrics != ['log_lik'] and metrics != ['log_likelihood']) or \
-      model_wrapper is None:
+          model_wrapper is None:
     y_true = data[output_key]
 
   # Form predicted data (if there are any supervised metrics).

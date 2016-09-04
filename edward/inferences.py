@@ -495,17 +495,14 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
+    p_log_prob = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_prob[s] = self.model_wrapper.log_prob(x, z)
-
-      p_log_prob = tf.pack(p_log_prob)
     else:
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         for z, qz in six.iteritems(self.copied_prior):
           p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
@@ -513,7 +510,7 @@ class MFVI(VariationalInference):
         for x, obs in six.iteritems(self.copied_lik):
           p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_prob = tf.pack(p_log_prob)
+    p_log_prob = tf.pack(p_log_prob)
 
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
@@ -538,17 +535,14 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
+    p_log_prob = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_prob[s] = self.model_wrapper.log_prob(x, z)
-
-      p_log_prob = tf.pack(p_log_prob)
     else:
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         for z, qz in six.iteritems(self.copied_prior):
           p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
@@ -556,7 +550,7 @@ class MFVI(VariationalInference):
         for x, obs in six.iteritems(self.copied_lik):
           p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_prob = tf.pack(p_log_prob)
+    p_log_prob = tf.pack(p_log_prob)
 
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
@@ -586,28 +580,25 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
+    p_log_lik = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_lik = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_lik[s] = self.model_wrapper.log_lik(x, z)
 
-      p_log_lik = tf.pack(p_log_lik)
-
       kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma)
                           for qz in six.itervalues(self.latent_vars)])
     else:
-      p_log_lik = [0.0] * self.n_samples
       for s in range(self.n_samples):
         for x, obs in six.iteritems(self.copied_lik):
           p_log_lik[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_lik = tf.pack(p_log_lik)
-
       kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma)
                           for z, qz in six.iteritems(self.copied_prior)])
+
+    p_log_lik = tf.pack(p_log_lik)
 
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
@@ -635,17 +626,14 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
+    p_log_prob = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_prob[s] = self.model_wrapper.log_prob(x, z)
-
-      p_log_prob = tf.pack(p_log_prob)
     else:
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         for z, qz in six.iteritems(self.copied_prior):
           p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
@@ -653,7 +641,7 @@ class MFVI(VariationalInference):
         for x, obs in six.iteritems(self.copied_lik):
           p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_prob = tf.pack(p_log_prob)
+    p_log_prob = tf.pack(p_log_prob)
 
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
@@ -688,29 +676,25 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
+    p_log_lik = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_lik = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_lik[s] = self.model_wrapper.log_lik(x, z)
 
-      p_log_lik = tf.pack(p_log_lik)
-
       kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma)
                           for qz in six.itervalues(self.latent_vars)])
     else:
-      p_log_lik = [0.0] * self.n_samples
       for s in range(self.n_samples):
         for x, obs in six.iteritems(self.copied_lik):
           p_log_lik[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_lik = tf.pack(p_log_lik)
-
       kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma)
                           for z, qz in six.iteritems(self.copied_prior)])
 
+    p_log_lik = tf.pack(p_log_lik)
     self.loss = tf.reduce_mean(p_log_lik) - kl
     return -self.loss
 
@@ -730,17 +714,14 @@ class MFVI(VariationalInference):
     Computed by sampling from :math:`q(z;\lambda)` and evaluating the
     expectation using Monte Carlo sampling.
     """
+    p_log_prob = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_prob[s] = self.model_wrapper.log_prob(x, z)
-
-      p_log_prob = tf.pack(p_log_prob)
     else:
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         for z, qz in six.iteritems(self.copied_prior):
           p_log_prob[s] += tf.reduce_sum(z.log_prob(qz))
@@ -748,8 +729,7 @@ class MFVI(VariationalInference):
         for x, obs in six.iteritems(self.copied_lik):
           p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_prob = tf.pack(p_log_prob)
-
+    p_log_prob = tf.pack(p_log_prob)
     q_entropy = tf.reduce_sum([qz.entropy()
                                for qz in six.itervalues(self.latent_vars)])
 
@@ -813,15 +793,13 @@ class KLpq(VariationalInference):
       w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
 
     """
+    p_log_prob = [0.0] * self.n_samples
     if self.model_wrapper is not None:
       x = self.data
-      p_log_prob = [0.0] * self.n_samples
       for s in range(self.n_samples):
         z = {key: qz.sample(())
              for key, qz in six.iteritems(self.latent_vars)}
         p_log_prob[s] = self.model_wrapper.log_prob(x, z)
-
-      p_log_prob = tf.pack(p_log_prob)
     else:
       # Copy random variables in p(z), replacing conditioning on
       # priors with conditioning on inferred posteriors.
@@ -844,7 +822,7 @@ class KLpq(VariationalInference):
         for x, obs in six.iteritems(copied_lik):
           p_log_prob[s] += tf.reduce_sum(x.log_prob(obs))
 
-      p_log_prob = tf.pack(p_log_prob)
+    p_log_prob = tf.pack(p_log_prob)
 
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
@@ -918,18 +896,11 @@ class MAP(VariationalInference):
               params=tf.Variable(tf.random_normal(rv.batch_shape())))
               for rv in latent_vars}
         elif len(latent_vars) == 1:
-          if model_wrapper.n_vars == 1:
-            # scalar pointmass random variable
-            latent_vars = {latent_vars[0]: PointMass(
-                params=tf.Variable(tf.random_normal([])))}
-          else:
-            # vector of pointmass random variables
-            latent_vars = {latent_vars[0]: PointMass(
-                params=tf.Variable(tf.random_normal(model_wrapper.n_vars)))}
-          # TODO simplify above if-else
-          #latent_vars = {latent_vars[0]: PointMass(
-          #      params=tf.Variable(
-          #      tf.squeeze(tf.random_normal(model_wrapper.n_vars))))}
+          latent_vars = {latent_vars[0]: PointMass(
+              params=tf.Variable(
+                  tf.squeeze(tf.random_normal([model_wrapper.n_vars]))))}
+        elif len(latent_vars) == 0:
+          latent_vars = {}
         else:
           raise NotImplementedError("A list of more than one element is "
                                     "not supported. See documentation.")
