@@ -12,11 +12,11 @@ from edward.models import Normal
 ed.set_seed(42)
 
 # Normal-Normal with known variance
-mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant([1.0]))
+mu = Normal(mu=0.0, sigma=1.0)
+x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
 
-qmu_mu = tf.Variable(tf.random_normal([1]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qmu_mu = tf.Variable(tf.random_normal([]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
 data = {x: np.array([0.0] * 50, dtype=np.float32)}
