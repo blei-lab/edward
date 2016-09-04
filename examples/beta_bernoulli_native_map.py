@@ -25,7 +25,7 @@ x = Bernoulli(p=tf.ones(10) * p)
 
 data = {x: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
-qp_params = tf.nn.sigmoid(tf.Variable(tf.random_normal([1])))
+qp_params = tf.nn.sigmoid(tf.Variable(tf.random_normal([])))
 qp = PointMass(params=qp_params)
 
 inference = ed.MAP({p: qp}, data)

@@ -25,8 +25,7 @@ class BetaBernoulli:
   """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
   def log_prob(self, xs, zs):
     log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
-                       for p in tf.unpack(zs['p'])])
+    log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
     return log_lik + log_prior
 
   def sample_likelihood(self, zs):
@@ -43,8 +42,8 @@ data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 model = BetaBernoulli()
 
-qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp = Beta(a=qp_a, b=qp_b)
 
 inference = ed.MFVI({'p': qp}, data, model)
