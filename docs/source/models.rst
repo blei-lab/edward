@@ -208,8 +208,7 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Returns
       -------
       tf.Tensor
-        S-vector of type tf.float32,
-        [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+        Scalar, the log joint density log p(xs, zs).
       """
       pass
 
@@ -231,8 +230,7 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Returns
       -------
       tf.Tensor
-        S-vector of type tf.float32,
-        [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].
+        Scalar, the log-likelihood log p(xs | zs).
       """
 
     def predict(self, xs, zs):
