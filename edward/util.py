@@ -373,7 +373,7 @@ def get_dims(x):
 
   Parameters
   ----------
-  x : tf.Tensor or np.ndarray
+  x : float, int, tf.Tensor, np.ndarray, or RandomVariable
     A n-D tensor.
 
   Returns
@@ -387,6 +387,8 @@ def get_dims(x):
     return x.get_shape().as_list()
   elif isinstance(x, np.ndarray):
     return list(x.shape)
+  elif isinstance(x, RandomVariable):
+    return x.get_batch_shape().as_list()
   else:
     raise NotImplementedError()
 
