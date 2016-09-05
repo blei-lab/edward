@@ -11,7 +11,7 @@ from edward.models import Normal
 from scipy.stats import norm
 
 
-def build_toy_dataset(N=40, noise_std=0.1):
+def build_toy_dataset(N, noise_std=0.1):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
   y = 5.0 * X + norm.rvs(0, noise_std, size=N)
@@ -20,18 +20,18 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 
 N = 40  # num data points
-p = 1  # num features
+D = 1  # num features
 
 ed.set_seed(42)
 X_train, y_train = build_toy_dataset(N)
 X_test, y_test = build_toy_dataset(N)
 
-X = ed.placeholder(tf.float32, [N, p])
-beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p))
+X = ed.placeholder(tf.float32, [N, D])
+beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 y = Normal(mu=ed.dot(X, beta), sigma=tf.ones(N))
 
-qmu_mu = tf.Variable(tf.random_normal([p]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
+qmu_mu = tf.Variable(tf.random_normal([D]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
 qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
 data = {X: X_train, y: y_train}
