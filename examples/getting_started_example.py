@@ -30,11 +30,11 @@ class BayesianNN:
   """
   Bayesian neural network for regressing outputs y on inputs x.
 
-  p((x,y), z) = Normal(y | NN(x; z), lik_stddev) *
-          Normal(z | 0, 1),
+  p((x,y), z) = Normal(y | NN(x; z), lik_std) *
+                Normal(z | 0, prior_std),
 
-  where z are neural network weights, and with known likelihood
-  standard deviation.
+  where z are neural network weights, and with known likelihood and
+  prior standard deviations.
 
   Parameters
   ----------
@@ -43,50 +43,45 @@ class BayesianNN:
   nonlinearity : function, optional
     Non-linearity after each linear transformation in the neural
     network; aka activation function.
-  lik_stddev : float, optional
+  lik_std : float, optional
     Standard deviation of the normal likelihood; aka noise parameter,
-    homoscedasticity, scale parameter.
+    homoscedastic noise, scale parameter.
+  prior_std : float, optional
+    Standard deviation of the normal prior on weights; aka L2
+    regularization parameter, ridge penalty, scale parameter.
   """
   def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-               lik_stddev=0.01):
+               lik_std=0.1, prior_std=1.0):
     self.layer_sizes = layer_sizes
     self.nonlinearity = nonlinearity
-    self.lik_stddev = lik_stddev
+    self.lik_std = lik_std
+    self.prior_std = prior_std
 
     self.n_layers = len(layer_sizes)
     self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
     self.n_vars = sum((m + 1) * n for m, n in self.weight_dims)
 
-  def unpack_weights(self, z):
+  def unpack_weights(self, zs):
     """Unpack weight matrices and biases from a flattened vector."""
     for m, n in self.weight_dims:
-      yield tf.reshape(z[:m * n], [m, n]), \
-          tf.reshape(z[m * n:(m * n + n)], [1, n])
-      z = z[(m + 1) * n:]
+      yield tf.reshape(zs[:(m * n)], [m, n]), \
+          tf.reshape(zs[(m * n):(m * n + n)], [n])
+      zs = zs[(m + 1) * n:]
 
   def neural_network(self, x, zs):
-    """
-    Return a `n_samples` x `n_minibatch` matrix. Each row is
-    the output of a neural network on the input data `x` and
-    given a set of weights `z` in `zs`.
-    """
-    matrix = []
-    for z in tf.unpack(zs):
-      # Calculate neural network with weights given by `z`.
-      h = x
-      for W, b in self.unpack_weights(z):
-        # broadcasting to do (h*W) + b (e.g. 40x10 + 1x10)
-        h = self.nonlinearity(tf.matmul(h, W) + b)
+    """Forward pass of the neural net, outputting a vector of
+    `n_minibatch` elements."""
+    h = x
+    for W, b in self.unpack_weights(zs):
+      h = self.nonlinearity(tf.matmul(h, W) + b)
 
-      matrix += [tf.squeeze(h)]  # n_minibatch x 1 to n_minibatch
-
-    return tf.pack(matrix)
+    return tf.squeeze(h)  # n_minibatch x 1 to n_minibatch
 
   def log_lik(self, xs, zs):
-    """Return a vector [log p(xs | zs[1,:]), ..., log p(xs | zs[S,:])]."""
+    """Return scalar, the log-likelihood p(xs | zs)."""
     x, y = xs['x'], xs['y']
-    mus = self.neural_network(x, zs['z'])
-    log_lik = tf.reduce_sum(norm.logpdf(y, mus, self.lik_stddev), 1)
+    mu = self.neural_network(x, zs['z'])
+    log_lik = tf.reduce_sum(norm.logpdf(y, mu, self.lik_std))
     return log_lik
 
 
@@ -122,8 +117,11 @@ zs = rs.randn(10, model.n_vars) * std + mean
 zs = tf.convert_to_tensor(zs, dtype=tf.float32)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)
-mus = model.neural_network(x, zs)
-outputs = mus.eval()
+mus = []
+for z in tf.unpack(zs):
+  mus += [model.neural_network(x, z)]
+
+outputs = tf.pack(mus).eval()
 x, y = data['x'], data['y']
 
 # Plot data and functions
@@ -152,8 +150,11 @@ zs = rs.randn(10, model.n_vars) * std + mean
 zs = tf.convert_to_tensor(zs, dtype=tf.float32)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)
-mus = model.neural_network(x, zs)
-outputs = mus.eval()
+mus = []
+for z in tf.unpack(zs):
+  mus += [model.neural_network(x, z)]
+
+outputs = tf.pack(mus).eval()
 x, y = data['x'], data['y']
 
 # Plot data and functions
