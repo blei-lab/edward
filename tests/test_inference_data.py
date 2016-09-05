@@ -12,13 +12,10 @@ from edward.stats import norm
 
 
 class NormalModel:
-  """
-  p(x, mu) = Normal(x; mu, 1) Normal(mu; 0, 1)
-  """
+  """p(x, mu) = Normal(x; mu, 1) Normal(mu; 0, 1)"""
   def log_prob(self, xs, zs):
     log_prior = norm.logpdf(zs['mu'], 0.0, 1.0)
-    log_lik = tf.pack([tf.reduce_sum(norm.logpdf(xs['x'], mu, 1.0))
-                       for mu in tf.unpack(zs['mu'])])
+    log_lik = tf.reduce_sum(norm.logpdf(xs['x'], zs['mu'], 1.0))
     return log_lik + log_prior
 
 

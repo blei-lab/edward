@@ -11,14 +11,9 @@ from scipy.stats import bernoulli, beta
 
 
 def _test(model, xs, zs):
-  n_samples = zs['p'].shape[0]
-  val_true = np.zeros(n_samples, dtype=np.float32)
-  for s in range(n_samples):
-    p = np.squeeze(zs['p'][s, :])
-    val_true[s] = beta.logpdf(p, 1, 1)
-    val_true[s] += np.sum([bernoulli.logpmf(x, p)
-                           for x in xs['x']])
-
+  val_true = beta.logpdf(zs['p'], 1.0, 1.0)
+  val_true += np.sum([bernoulli.logpmf(x, zs['p'])
+                      for x in xs['x']])
   val_ed = model.log_prob(xs, zs)
   assert np.allclose(val_ed.eval(), val_true)
   zs_tf = {key: tf.cast(value, dtype=tf.float32)
@@ -47,9 +42,7 @@ class test_stanmodel_log_prob_class(tf.test.TestCase):
     with self.test_session():
       model = ed.StanModel(model_code=model_code)
       data = {'N': 10, 'x': [0, 1, 0, 1, 0, 1, 0, 1, 1, 1]}
-      zs = {'p': np.array([[0.5]])}
-      _test(model, data, zs)
-      zs = {'p': np.array([[0.4], [0.2], [0.2351], [0.6213]])}
+      zs = {'p': np.array(0.5)}
       _test(model, data, zs)
 
 if __name__ == '__main__':
