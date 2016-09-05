@@ -10,18 +10,18 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 
-from edward.models import Normal
-from edward.stats import norm, poisson
+from edward.models import Normal, PointMass
+from edward.stats import lognorm, norm, poisson
 
 
 class MatrixFactorization:
   """
   p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; \exp(s_iTt_j) ) ]
-        [ prod_{i=1}^N N(s_i; 0, var) N(t_i; 0, var) ]
+            [ prod_{i=1}^N N(s_i; 0, var) N(t_i; 0, var) ]
 
   where z = {s,t}.
   """
-  def __init__(self, K, n_rows, n_cols=None, var=0.01,
+  def __init__(self, K, n_rows, n_cols=None, prior_std=0.1,
                like='Poisson',
                prior='Lognormal',
                interaction='additive'):
@@ -31,23 +31,22 @@ class MatrixFactorization:
     self.n_rows = n_rows
     self.n_cols = n_cols
     self.K = K
-    self.prior_variance = var
+    self.prior_std = prior_std
     self.like = like
     self.prior = prior
     self.interaction = interaction
 
   def log_prob(self, xs, zs):
-    """Returns a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-    zs = zs['z']
+    """Return scalar, the log joint density log p(xs, zs)."""
     if self.prior == 'Lognormal':
-      zs = tf.exp(zs)
-    elif self.prior != 'Gaussian':
+      log_prior = tf.reduce_sum(lognorm.logpdf(zs['z'], self.prior_std))
+    elif self.prior == 'Gaussian':
+      log_prior = tf.reduce_sum(norm.logpdf(zs['z'], 0.0, self.prior_std))
+    else:
       raise NotImplementedError("prior not available.")
 
-    log_prior = -self.prior_variance * tf.reduce_sum(zs * zs)
-
-    s = tf.reshape(zs[:, :self.n_rows * self.K], [self.n_rows, self.K])
-    t = tf.reshape(zs[:, self.n_cols * self.K:], [self.n_cols, self.K])
+    s = tf.reshape(zs['z'][:self.n_rows * self.K], [self.n_rows, self.K])
+    t = tf.reshape(zs['z'][self.n_cols * self.K:], [self.n_cols, self.K])
 
     xp = tf.matmul(s, t, transpose_b=True)
     if self.interaction == 'multiplicative':
@@ -68,23 +67,17 @@ class MatrixFactorization:
     return log_lik + log_prior
 
 
-def load_celegans_brain():
-  x = np.load('data/celegans_brain.npy')
-  N = x.shape[0]
-  return x, N
-
-
 ed.set_seed(42)
-x, N = load_celegans_brain()
+x_train = np.load('data/celegans_brain.npy')
 
 K = 3
-model = MatrixFactorization(K, N,
-                            like='Poisson',
-                            prior='Lognormal',
-                            interaction='additive')
+model = MatrixFactorization(K, n_rows=x_train.shape[0])
+
+qz = PointMass(
+    params=tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars]))))
 
 data = {'x': x_train}
-inference = ed.MAP(['z'], data, model)
+inference = ed.MAP({'z': qz}, data, model)
 # Alternatively, run
 # qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 # qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))

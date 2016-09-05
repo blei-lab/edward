@@ -45,19 +45,17 @@ class MixtureDensityNetwork:
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
 
   def log_prob(self, xs, zs):
-    """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
+    """Return scalar, the log joint density log p(xs, zs)."""
     # Note there are no parameters we're being Bayesian about. The
     # parameters are baked into how we specify the neural networks.
     X, y = xs['X'], xs['y']
     self.neural_network(X)
-    result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
-    result = tf.mul(result, self.pi)
-    result = tf.reduce_sum(result, 1)
-    result = tf.log(result)
+    result = self.pi * tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = tf.log(tf.reduce_sum(result, 1))
     return tf.reduce_sum(result)
 
 
-def build_toy_dataset(N=6000):
+def build_toy_dataset(N):
   y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
   r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
@@ -67,7 +65,7 @@ def build_toy_dataset(N=6000):
 ed.set_seed(42)
 model = MixtureDensityNetwork(10)
 
-X_train, X_test, y_train, y_test = build_toy_dataset()
+X_train, X_test, y_train, y_test = build_toy_dataset(N=6000)
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
