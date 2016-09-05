@@ -12,37 +12,36 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm, poisson
+from edward.stats import lognorm, norm, poisson
 
 
 class LatentSpaceModel:
   """
   p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; 1/||z_i - z_j|| ) ]
-        [ prod_{i=1}^N N(z_i; 0, I)) ]
+            [ prod_{i=1}^N N(z_i; 0, I)) ]
   """
-  def __init__(self, N, K, var=1.0,
+  def __init__(self, N, K, prior_std=1.0,
                like='Poisson',
                prior='Lognormal',
                dist='euclidean'):
     self.n_vars = N * K
     self.N = N
     self.K = K
-    self.prior_variance = var
+    self.prior_std = prior_std
     self.like = like
     self.prior = prior
     self.dist = dist
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-    zs = zs['z']
+    """Return scalar, the log joint density log p(xs, zs)."""
     if self.prior == 'Lognormal':
-      zs = tf.exp(zs)
-    elif self.prior != 'Gaussian':
+      log_prior = tf.reduce_sum(lognorm.logpdf(zs['z'], self.prior_std))
+    elif self.prior == 'Gaussian':
+      log_prior = tf.reduce_sum(norm.logpdf(zs['z'], 0.0, self.prior_std))
+    else:
       raise NotImplementedError("prior not available.")
 
-    log_prior = -self.prior_variance * tf.reduce_sum(zs * zs)
-
-    z = tf.reshape(zs, [self.N, self.K])
+    z = tf.reshape(zs['z'], [self.N, self.K])
     if self.dist == 'euclidean':
       xp = tf.matmul(tf.ones([1, self.N]),
                      tf.reduce_sum(z * z, 1, keep_dims=True))
@@ -64,16 +63,11 @@ class LatentSpaceModel:
     return log_lik + log_prior
 
 
-def load_celegans_brain():
-  x = np.load('data/celegans_brain.npy')
-  N = x.shape[0]
-  return x, N
-
-
 ed.set_seed(42)
-x_train, N = load_celegans_brain()
+x_train = np.load('data/celegans_brain.npy')
 
-model = LatentSpaceModel(N, K=3, like='Poisson', prior='Gaussian')
+model = LatentSpaceModel(N=x_train.shape[0], K=3,
+                         like='Poisson', prior='Gaussian')
 
 data = {'x': x_train}
 inference = ed.MAP(['z'], data, model)

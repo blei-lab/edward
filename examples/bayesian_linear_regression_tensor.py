@@ -11,7 +11,7 @@ from edward.models import Normal
 from scipy.stats import norm
 
 
-def build_toy_dataset(N=40, noise_std=0.1):
+def build_toy_dataset(N, noise_std=0.1):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
   y = 5.0 * X + norm.rvs(0, noise_std, size=N)

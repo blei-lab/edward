@@ -50,7 +50,7 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
   return samples
 
 
-def build_toy_dataset(N=40000):
+def build_toy_dataset(N):
   y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
   r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
@@ -86,16 +86,14 @@ class MixtureDensityNetwork:
     # parameters are baked into how we specify the neural networks.
     X, y = xs['X'], xs['y']
     self.neural_network(X)
-    result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
-    result = tf.mul(result, self.pi)
-    result = tf.reduce_sum(result, 1)
-    result = tf.log(result)
+    result = self.pi * tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = tf.log(tf.reduce_sum(result, 1))
     return tf.reduce_sum(result)
 
 
 ed.set_seed(42)
 
-X_train, X_test, y_train, y_test = build_toy_dataset()
+X_train, X_test, y_train, y_test = build_toy_dataset(N=40000)
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))

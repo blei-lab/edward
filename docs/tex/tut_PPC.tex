@@ -58,14 +58,9 @@ model likelihood given a set of latent variables.
 \begin{lstlisting}[language=Python]
 class BetaBernoulli:
   ...
-  def sample_likelihood(self, zs, n):
+  def sample_likelihood(self, zs):
     """x | p ~ p(x | p)"""
-    out = []
-    for s in range(zs['p'].shape[0]):
-      x_new = bernoulli.rvs(zs['p'][s, :], size=n)
-      out += [{'x': x_new.reshape((n,))}]
-
-    return out
+    return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}
 \end{lstlisting}
 
 The \texttt{ed.ppc()} method provides a scaffold for studying

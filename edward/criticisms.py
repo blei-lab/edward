@@ -101,8 +101,11 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
       else:
         raise KeyError("User must specify output_key.")
 
-  # Form true data.
-  y_true = data[output_key]
+  # Form true data. (It is not required in the specific setting of the
+  # log-likelihood metric with a model wrapper.)
+  if (metrics != ['log_lik'] and metrics != ['log_likelihood']) or \
+          model_wrapper is None:
+    y_true = data[output_key]
 
   # Form predicted data (if there are any supervised metrics).
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
@@ -110,16 +113,13 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
       y_pred = output_key.mean()
     else:
       # Monte Carlo estimate the mean of the posterior predictive.
-      zrep = {key: value.value()
-              for key, value in six.iteritems(latent_vars)}
-      pred = model_wrapper.predict(data, zrep)
       y_pred = []
       for s in range(n_samples):
-        # Take a forward pass (session run) to get new samples for
-        # each sample-based prediction.
-        y_pred += [sess.run(pred, feed_dict)]
+        zrep = {key: qz.sample(())
+                for key, qz in six.iteritems(latent_vars)}
+        y_pred += [model_wrapper.predict(data, zrep)]
 
-      y_pred = tf.reduce_mean(tf.pack(y_pred), 0)
+      y_pred = tf.reduce_mean(y_pred, 0)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
@@ -169,14 +169,11 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
         evaluations += [tf.reduce_mean(output_key.log_prob(y_true))]
       else:
         # Monte Carlo estimate the log-density of the posterior predictive.
-        zrep = {key: value.value()
-                for key, value in six.iteritems(latent_vars)}
-        log_lik = model_wrapper.log_lik(data, zrep)
         log_liks = []
         for s in range(n_samples):
-          # Take a forward pass (session run) to get new samples for
-          # each sample-based prediction.
-          log_liks += [sess.run(log_lik, feed_dict)]
+          zrep = {key: qz.sample(())
+                  for key, qz in six.iteritems(latent_vars)}
+          log_liks += [model_wrapper.log_lik(data, zrep)]
 
         evaluations += [tf.reduce_mean(log_liks)]
     else:
@@ -246,12 +243,6 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     .. math::
       (T(x, z^{1}), ..., T(x, z^{size})).
 
-  Notes
-  -----
-  Each element in the returned output is obtained by taking a forward
-  pass (session run) of T. T is a function applied to the model's
-  random variables, and a forward pass provides new samples from the
-  random variables for each calculation of the discrepancy.
 
   Examples
   --------
@@ -320,6 +311,9 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   for s in range(n_samples):
     # Take a forward pass (session run) to get new samples for
     # each calculation of the discrepancy.
+    # Note that alternatively we can unroll the graph by registering
+    # this operation ``n_samples`` times, each for different parent
+    # nodes representing ``xrep`` and ``zrep``.
     Treps += [sess.run(Trep, feed_dict)]
     Ts += [sess.run(Tobs, feed_dict)]
 

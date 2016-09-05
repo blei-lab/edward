@@ -26,41 +26,36 @@ class LinearModel:
   """
   Bayesian linear regression for outputs y on inputs x.
 
-  p((x,y), z) = Normal(y | x*z, lik_variance) *
-          Normal(z | 0, prior_variance),
+  p((x,y), (w,b)) = Normal(y | x*w + b, lik_std) *
+                    Normal(w | 0, prior_std) *
+                    Normal(b | 0, prior_std),
 
-  where z are weights, and with known lik_variance and
-  prior_variance.
+  where w and b are weights and intercepts, and with known lik_std and
+  prior_std.
 
   Parameters
   ----------
-  lik_variance : float, optional
-    Variance of the normal likelihood; aka noise parameter,
-    homoscedastic variance, scale parameter.
-  prior_variance : float, optional
-    Variance of the normal prior on weights; aka L2
+  lik_std : float, optional
+    Standard deviation of the normal likelihood; aka noise parameter,
+    homoscedastic noise, scale parameter.
+  prior_std : float, optional
+    Standard deviation of the normal prior on weights; aka L2
     regularization parameter, ridge penalty, scale parameter.
   """
-  def __init__(self, lik_variance=0.01, prior_variance=0.01):
-    self.lik_variance = lik_variance
-    self.prior_variance = prior_variance
-    self.n_vars = 2
+  def __init__(self, lik_std=0.1, prior_std=0.1):
+    self.lik_std = lik_std
+    self.prior_std = prior_std
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x, y = xs['x'], xs['y']
-    log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance
-    # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
-    W = tf.expand_dims(zs['z'][:, 0], 0)
-    b = zs['z'][:, 1]
-    mus = tf.matmul(x, W) + b
-    # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
-    y = tf.expand_dims(y, 1)
-    log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
+    w, b = zs['w'], zs['b']
+    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
+    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
+    log_lik = tf.reduce_sum(norm.logpdf(y, ed.dot(x, w) + b, self.lik_std))
     return log_lik + log_prior
 
 
-def build_toy_dataset(N=40, noise_std=0.1):
+def build_toy_dataset(N, noise_std=0.1):
   x = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
   y = 0.075 * x + norm.rvs(0, noise_std, size=N)
@@ -70,13 +65,21 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 
 ed.set_seed(42)
-x_train, y_train = build_toy_dataset()
+
+N = 40  # num data points
+D = 1  # num features
+
+x_train, y_train = build_toy_dataset(N)
 
 model = LinearModel()
 
-qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
-qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
-qz = Normal(mu=qz_mu, sigma=qz_sigma)
+qw_mu = tf.Variable(tf.random_normal([D]))
+qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
+qb_mu = tf.Variable(tf.random_normal([]))
+qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+
+qw = Normal(mu=qw_mu, sigma=qw_sigma)
+qb = Normal(mu=qb_mu, sigma=qb_sigma)
 
 # Set up figure
 fig = plt.figure(figsize=(8, 8), facecolor='white')
@@ -86,7 +89,7 @@ plt.show(block=False)
 
 sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
 inference.initialize(n_samples=5, n_print=5)
 for t in range(250):
   loss = inference.update()
@@ -94,15 +97,14 @@ for t in range(250):
     print("iter {:d} loss {:.2f}".format(t, loss))
 
     # Sample functions from variational model
-    mean, std = sess.run([qz.mu, qz.sigma])
+    w_mean, w_std = sess.run([qw.mu, qb.sigma])
+    b_mean, b_std = sess.run([qb.mu, qb.sigma])
     rs = np.random.RandomState(0)
-    zs = rs.randn(10, model.n_vars) * std + mean
-    zs = tf.convert_to_tensor(zs, dtype=tf.float32)
+    ws = (rs.randn(1, 10) * w_std + w_mean).astype(np.float32)
+    bs = (rs.randn(10) * b_std + b_mean).astype(np.float32)
     inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
     x = tf.expand_dims(inputs, 1)
-    W = tf.expand_dims(zs[:, 0], 0)
-    b = zs[:, 1]
-    mus = tf.matmul(x, W) + b
+    mus = tf.matmul(x, ws) + bs
     outputs = mus.eval()
 
     # Get data

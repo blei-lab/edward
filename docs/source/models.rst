@@ -18,9 +18,7 @@ a realization.
 Here ``xs`` can be a single data
 point or a batch of data points, and analogously, ``zs`` can be a
 single set or multiple sets of latent variables.
-The method outputs a vector of the joint density
-evaluations ``[log p(xs, zs^1), log p(xs, zs^S), ...]``, with an
-evaluation for each set of latent variables. Here is an example:
+Here is an example:
 
 .. code:: python
 
@@ -31,8 +29,7 @@ evaluation for each set of latent variables. Here is an example:
     """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
     def log_prob(self, xs, zs):
       log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
-                         for p in tf.unpack(zs['p'])])
+      log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
       return log_lik + log_prior
 
   model = BetaBernoulli()
@@ -42,8 +39,7 @@ likelihood (for an unspecified number of data points) and a Beta prior
 on the Bernoulli's success probability.
 ``xs`` is a dictionary with string ``x`` binded to a vector of
 observations. ``zs`` is a dictionary with string ``z`` binded to a
-vector of latent variables, where each element is a sample from the
-one-dimensional Beta latent variable.
+sample from the one-dimensional Beta latent variable.
 
 Here is a `toy script
 <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
@@ -67,18 +63,9 @@ Here is an example:
   class BetaBernoulli(PythonModel):
     """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
     def _py_log_prob(self, xs, zs):
-      # This example is written for pedagogy. We recommend
-      # vectorizing operations in practice.
-      xs = xs['x']
-      ps = zs['p']
-      n_samples = ps.shape[0]
-      lp = np.zeros(n_samples, dtype=np.float32)
-      for b in range(n_samples):
-        lp[b] = beta.logpdf(ps[b, :], a=1.0, b=1.0)
-        for n in range(xs.shape[0]):
-          lp[b] += bernoulli.logpmf(xs[n], p=ps[b, :])
-
-      return lp
+      log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+      log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+      return log_lik + log_prior
 
     model = BetaBernoulli()
 
@@ -117,7 +104,7 @@ matches the name of the data from the data block.
 
 .. code:: python
 
-  qp = Beta()
+  qp = Beta(...)
   data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
   inference = Inference({'p': qp}, data, model)
 
@@ -156,7 +143,7 @@ variables.
 
 .. code:: python
 
-  qp = Beta()
+  qp = Beta(...)
   data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
   inference = Inference({'p': qp}, data, model)
 
@@ -208,8 +195,7 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Returns
       -------
       tf.Tensor
-        S-vector of type tf.float32,
-        [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+        Scalar, the log joint density log p(xs, zs).
       """
       pass
 
@@ -231,8 +217,7 @@ around ``_py_log_prob()`` as a TensorFlow operation.
       Returns
       -------
       tf.Tensor
-        S-vector of type tf.float32,
-        [log p(xs | zs[1,:]), .., log p(xs | zs[S,:])].
+        Scalar, the log-likelihood log p(xs | zs).
       """
 
     def predict(self, xs, zs):

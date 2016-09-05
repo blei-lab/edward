@@ -74,21 +74,21 @@ class IWVI(MFVI):
     samples to determine how many expectations (`K`).
     """
     x = self.data
-    losses = []
-    for s in range(self.n_samples):
-      z = {key: rv.sample([self.K])
-           for key, rv in six.iteritems(self.latent_vars)}
+    # Form n_samples x K matrix of log importance weights.
+    log_w = []
+    for s in range(self.n_samples * self.K):
+      z = {key: qz.sample(())
+           for key, qz in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
       q_log_prob = 0.0
-      for key, rv in six.iteritems(self.latent_vars):
-        q_log_prob += tf.reduce_sum(
-            rv.log_prob(tf.stop_gradient(z[key])),
-            list(range(1, len(rv.get_batch_shape()) + 1)))
+      for key, qz in six.iteritems(self.latent_vars):
+        q_log_prob += tf.reduce_sum(qz.log_prob(tf.stop_gradient(z[key])))
 
-      log_w = p_log_prob - q_log_prob
-      losses += [log_mean_exp(log_w)]
+      log_w += [p_log_prob - q_log_prob]
 
-    losses = tf.pack(losses)
+    log_w = tf.reshape(log_w, [self.n_samples, self.K])
+    # Take log mean exp across importance weights (columns).
+    losses = log_mean_exp(log_w, 1)
     self.loss = tf.reduce_mean(losses)
     return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
@@ -110,20 +110,21 @@ class IWVI(MFVI):
     samples to determine how many expectations (`K`).
     """
     x = self.data
-    for s in range(self.n_samples):
-      z = {key: rv.sample([self.K])
-           for key, rv in six.iteritems(self.latent_vars)}
+    # Form n_samples x K matrix of log importance weights.
+    log_w = []
+    for s in range(self.n_samples * self.K):
+      z = {key: qz.sample(())
+           for key, qz in six.iteritems(self.latent_vars)}
       p_log_prob = self.model_wrapper.log_prob(x, z)
       q_log_prob = 0.0
-      for key, rv in six.iteritems(self.latent_vars):
-        q_log_prob += tf.reduce_sum(
-            rv.log_prob(z[key]),
-            list(range(1, len(rv.get_batch_shape()) + 1)))
+      for key, qz in six.iteritems(self.latent_vars):
+        q_log_prob += tf.reduce_sum(qz.log_prob(z[key]))
 
-      log_w = p_log_prob - q_log_prob
-      losses += [log_mean_exp(log_w)]
+      log_w += [p_log_prob - q_log_prob]
 
-    losses = tf.pack(losses)
+    log_w = tf.reshape(log_w, [self.n_samples, self.K])
+    # Take log mean exp across importance weights (columns).
+    losses = log_mean_exp(log_w, 1)
     self.loss = tf.reduce_mean(losses)
     return -self.loss
 
@@ -132,8 +133,7 @@ class BetaBernoulli:
   """p(x, p) = Bernoulli(x | z) * Beta(p | 1, 1)"""
   def log_prob(self, xs, zs):
     log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
-                       for p in tf.unpack(zs['p'])])
+    log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
     return log_lik + log_prior
 
 
@@ -142,9 +142,9 @@ data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
 model = BetaBernoulli()
 
-qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp = Beta(a=qp_a, b=qp_b)
 
 inference = IWVI({'p': qp}, data, model)
-inference.run(K=10, n_iter=500)
+inference.run(K=5, n_iter=500)

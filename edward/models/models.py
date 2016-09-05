@@ -48,8 +48,7 @@ class PyMC3Model(object):
     Returns
     -------
     tf.Tensor
-      A 1-D tensor of type tf.float32,
-      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+      Scalar, the log joint density log p(xs, zs).
 
     Notes
     -----
@@ -77,15 +76,10 @@ class PyMC3Model(object):
       key.set_value(value)
 
     # Calculate model's log density using a dictionary of latent
-    # variables, one for each sample of latent variables.
-    n_samples = zs_values[0].shape[0]
-    lp = np.zeros(n_samples, dtype=np.float32)
-    for s in range(n_samples):
-      z = {key: np.squeeze(value[s, :])
-           for key, value in zip(self.zs_keys, zs_values)}
-      lp[s] = self.model.fastlogp(z)
-
-    return lp
+    # variables.
+    z = {key: value for key, value in zip(self.zs_keys, zs_values)}
+    lp = self.model.fastlogp(z)
+    return lp.astype(np.float32)
 
 
 class PythonModel(object):
@@ -110,8 +104,7 @@ class PythonModel(object):
     Returns
     -------
     tf.Tensor
-      A 1-D tensor of type tf.float32,
-      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+      Scalar, the log joint density log p(xs, zs).
 
     Notes
     -----
@@ -136,7 +129,8 @@ class PythonModel(object):
     zs_values = args[len(self.xs_keys):]
     xs = {key: value for key, value in zip(self.xs_keys, xs_values)}
     zs = {key: value for key, value in zip(self.zs_keys, zs_values)}
-    return self._py_log_prob(xs, zs)
+    lp = self._py_log_prob(xs, zs)
+    return np.asarray(lp, dtype=np.float32)
 
   def _py_log_prob(self, xs, zs):
     raise NotImplementedError()
@@ -188,8 +182,7 @@ class StanModel(object):
     Returns
     -------
     tf.Tensor
-      A 1-D tensor of type tf.float32,
-      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].
+      Scalar, the log joint density log p(xs, zs).
 
     Notes
     -----
@@ -219,16 +212,11 @@ class StanModel(object):
   def _py_log_prob_args(self, *args):
     zs_values = args
     # Calculate model's log density using a dictionary of latent
-    # variables, one for each sample of latent variables.
-    n_samples = zs_values[0].shape[0]
-    lp = np.zeros(n_samples, dtype=np.float32)
-    for s in range(n_samples):
-      z = {key: np.squeeze(value[s, :])
-           for key, value in zip(self.zs_keys, zs_values)}
-      # Convert latent variable dictionary (on constrained
-      # space) to a flattened vector (on unconstrained space).
-      # This is necessary for Stan's log_prob() method.
-      z_unconst = self.modelfit.unconstrain_pars(z)
-      lp[s] = self.modelfit.log_prob(z_unconst, adjust_transform=False)
-
-    return lp
+    # variables.
+    z = {key: value for key, value in zip(self.zs_keys, zs_values)}
+    # Convert latent variable dictionary (on constrained
+    # space) to a flattened vector (on unconstrained space).
+    # This is necessary for Stan's log_prob() method.
+    z_unconst = self.modelfit.unconstrain_pars(z)
+    lp = self.modelfit.log_prob(z_unconst, adjust_transform=False)
+    return np.asarray(lp, dtype=np.float32)

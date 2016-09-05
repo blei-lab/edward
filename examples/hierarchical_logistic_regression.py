@@ -27,7 +27,7 @@ class HierarchicalLogistic:
   Hierarchical logistic regression for outputs y on inputs x.
 
   p((x,y), z) = Bernoulli(y | link^{-1}(x*z)) *
-          Normal(z | 0, prior_variance),
+                Normal(z | 0, prior_std),
 
   where z are weights, and with known link function and
   prior_variance.
@@ -39,35 +39,25 @@ class HierarchicalLogistic:
     of output.
   inv_link : function, optional
     Inverse of link function, which is applied to the linear transformation.
-  prior_variance : float, optional
-    Variance of the normal prior on weights; aka L2
+  prior_std : float, optional
+    Standard deviation of the normal prior on weights; aka L2
     regularization parameter, ridge penalty, scale parameter.
   """
-  def __init__(self, weight_dim, inv_link=tf.sigmoid, prior_variance=10):
-    self.weight_dim = weight_dim
+  def __init__(self, inv_link=tf.sigmoid, prior_std=3.0):
     self.inv_link = inv_link
-    self.prior_variance = prior_variance
-    self.n_vars = (self.weight_dim[0] + 1) * self.weight_dim[1]
+    self.prior_std = prior_std
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x, y = xs['x'], xs['y']
-    m, n = self.weight_dim[0], self.weight_dim[1]
-    log_lik = []
-    for z in tf.unpack(zs['z']):
-      W = tf.reshape(z[:m * n], [m, n])
-      b = tf.reshape(z[m * n:], [1, n])
-      # broadcasting to do (x*W) + b (e.g. 40x10 + 1x10)
-      p = self.inv_link(tf.matmul(x, W) + b)
-      p = tf.squeeze(p)  # n_minibatch x 1 to n_minibatch
-      log_lik += [bernoulli.logpmf(y, p=p)]
-
-    log_lik = tf.pack(log_lik)
-    log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance
+    w, b = zs['w'], zs['b']
+    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
+    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
+    log_lik = tf.reduce_sum(bernoulli.logpmf(y,
+                            p=self.inv_link(ed.dot(x, w) + b)))
     return log_lik + log_prior
 
 
-def build_toy_dataset(N=40, noise_std=0.1):
+def build_toy_dataset(N, noise_std=0.1):
   D = 1
   x = np.linspace(-3, 3, num=N)
   y = np.tanh(x) + norm.rvs(0, noise_std, size=N)
@@ -79,12 +69,21 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 
 ed.set_seed(42)
-x_train, y_train = build_toy_dataset()
-model = HierarchicalLogistic(weight_dim=[1, 1])
 
-qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
-qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
-qz = Normal(mu=qz_mu, sigma=qz_sigma)
+N = 40  # num data points
+D = 1  # num features
+
+x_train, y_train = build_toy_dataset(N)
+
+model = HierarchicalLogistic()
+
+qw_mu = tf.Variable(tf.random_normal([D]))
+qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
+qb_mu = tf.Variable(tf.random_normal([]))
+qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+
+qw = Normal(mu=qw_mu, sigma=qw_sigma)
+qb = Normal(mu=qb_mu, sigma=qb_sigma)
 
 # Set up figure
 fig = plt.figure(figsize=(8, 8), facecolor='white')
@@ -93,7 +92,7 @@ plt.ion()
 plt.show(block=False)
 
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
 inference.initialize(n_print=5)
 sess = ed.get_session()
 for t in range(600):
@@ -102,22 +101,15 @@ for t in range(600):
     print("iter {:d} loss {:.2f}".format(t, loss))
 
     # Sample functions from variational model
-    mean, std = sess.run([qz.mu, qz.sigma])
+    w_mean, w_std = sess.run([qw.mu, qb.sigma])
+    b_mean, b_std = sess.run([qb.mu, qb.sigma])
     rs = np.random.RandomState(0)
-    zs = rs.randn(10, model.n_vars) * std + mean
-    zs = tf.convert_to_tensor(zs, dtype=tf.float32)
+    ws = (rs.randn(1, 10) * w_std + w_mean).astype(np.float32)
+    bs = (rs.randn(10) * b_std + b_mean).astype(np.float32)
     inputs = np.linspace(-3, 3, num=400, dtype=np.float32)
     x = tf.expand_dims(inputs, 1)
-    m, n = model.weight_dim[0], model.weight_dim[1]
-    ps = []
-    for z in tf.unpack(zs):
-      W = tf.reshape(z[:m * n], [m, n])
-      b = tf.reshape(z[m * n:], [1, n])
-      p = model.inv_link(tf.matmul(x, W) + b)
-      p = tf.squeeze(p)
-      ps += [p]
-
-    outputs = tf.pack(ps).eval()
+    ps = model.inv_link(tf.matmul(x, ws) + bs)
+    outputs = ps.eval()
 
     # Get data
     x, y = data['x'], data['y']
@@ -125,7 +117,7 @@ for t in range(600):
     # Plot data and functions
     plt.cla()
     ax.plot(x, y, 'bx')
-    ax.plot(inputs, outputs.T)
+    ax.plot(inputs, outputs)
     ax.set_xlim([-3, 3])
     ax.set_ylim([-0.5, 1.5])
     plt.draw()

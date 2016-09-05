@@ -27,8 +27,8 @@ x = Bernoulli(p=tf.ones(10) * p)
 x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 data = {x: x_data}
 
-qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp = Beta(a=qp_a, b=qp_b)
 
 inference = ed.MFVI({p: qp}, data)

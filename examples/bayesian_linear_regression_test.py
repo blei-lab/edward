@@ -25,50 +25,42 @@ class LinearModel:
   """
   Bayesian linear regression for outputs y on inputs x.
 
-  p((x,y), z) = Normal(y | x*z, lik_variance) *
-          Normal(z | 0, prior_variance),
+  p((x,y), z) = Normal(y | x*z, lik_std) *
+                Normal(z | 0, prior_std),
 
-  where z are weights, and with known lik_variance and
-  prior_variance.
+  where z are weights, and with known lik_std and prior_std.
 
   Parameters
   ----------
-  lik_variance : float, optional
-    Variance of the normal likelihood; aka noise parameter,
-    homoscedastic variance, scale parameter.
-  prior_variance : float, optional
-    Variance of the normal prior on weights; aka L2
+  lik_std : float, optional
+    Standard deviation of the normal likelihood; aka noise parameter,
+    homoscedastic noise, scale parameter.
+  prior_std : float, optional
+    Standard deviation of the normal prior on weights; aka L2
     regularization parameter, ridge penalty, scale parameter.
   """
-  def __init__(self, lik_variance=0.01, prior_variance=0.01):
-    self.lik_variance = lik_variance
-    self.prior_variance = prior_variance
-    self.n_vars = 11
+  def __init__(self, lik_std=0.1, prior_std=0.1):
+    self.lik_std = lik_std
+    self.prior_std = prior_std
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    """Return scalar, the log joint density log p(xs, zs)."""
     x, y = xs['x'], xs['y']
-    log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance
-    # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
-    b = zs['z'][:, 0]
-    W = tf.transpose(zs['z'][:, 1:])
-    mus = tf.matmul(x, W) + b
-    # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
-    y = tf.expand_dims(y, 1)
-    log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
+    w, b = zs['w'], zs['b']
+    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
+    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
+    log_lik = tf.reduce_sum(norm.logpdf(y, ed.dot(x, w) + b, self.lik_std))
     return log_lik + log_prior
 
   def predict(self, xs, zs):
     """Return a prediction for each data point, via the likelihood's
     mean."""
-    x_test = xs['x']
-    b = zs['z'][0]
-    W = tf.expand_dims(zs['z'][1:], 1)
-    y_pred = tf.reshape(tf.matmul(x_test, W) + b, [-1])
-    return y_pred
+    x = xs['x']
+    w, b = zs['w'], zs['b']
+    return ed.dot(x, w) + b
 
 
-def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
+def build_toy_dataset(N, coeff=np.random.randn(10), noise_std=0.1):
   n_dim = len(coeff)
   x = np.random.randn(N, n_dim).astype(np.float32)
   y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
@@ -76,19 +68,28 @@ def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
 
 
 ed.set_seed(42)
-coeff = np.random.randn(10)
-x_train, y_train = build_toy_dataset(coeff=coeff)
-x_test, y_test = build_toy_dataset(coeff=coeff)
+
+N = 40  # num data points
+D = 10  # num features
+
+coeff = np.random.randn(D)
+x_train, y_train = build_toy_dataset(N, coeff)
+x_test, y_test = build_toy_dataset(N, coeff)
 
 model = LinearModel()
 
-qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
-qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
-qz = Normal(mu=qz_mu, sigma=qz_sigma)
+qw_mu = tf.Variable(tf.random_normal([D]))
+qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
+qb_mu = tf.Variable(tf.random_normal([]))
+qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+
+qw = Normal(mu=qw_mu, sigma=qw_sigma)
+qb = Normal(mu=qb_mu, sigma=qb_sigma)
 
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
 inference.run(n_iter=500, n_samples=5, n_print=50)
 
+print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={'x': x_test, 'y': y_test},
-                  latent_vars={'z': qz}, model_wrapper=model))
+                  latent_vars={'w': qw, 'b': qb}, model_wrapper=model))
