@@ -32,18 +32,16 @@ distribution.
 Edward implements point-based evaluations through the
 \texttt{predict()} method in the probability model. It predicts the
 label given samples from the posterior $p(z \mid x)$, i.e., it is the
-mean of $p(x_\text{new} \mid z)$ averaged over posterior samples.
+mean of $p(x_\text{new} \mid z)$ for a posterior sample.
 \begin{lstlisting}[language=Python]
 class BayesianLinearRegression:
   ...
   def predict(self, xs, zs):
-    """Return a prediction for each data point, averaging over
-    each set of latent variables z in zs."""
-    x_test = xs['x']
-    b = zs['z'][:, 0]
-    W = tf.transpose(zs['z'][:, 1:])
-    y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
-    return y_pred
+    """Return a prediction for each data point, via the likelihood's
+    mean."""
+    x = xs['x']
+    w, b = zs['w'], zs['b']
+    return ed.dot(x, w) + b
 
 model = BayesianLinearRegression()
 \end{lstlisting}

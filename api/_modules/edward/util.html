@@ -139,7 +139,284 @@
 <span class="kn">import</span> <span class="nn">six</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">edward.models.random_variable</span> <span class="k">import</span> <span class="n">RandomVariable</span>
+<span class="kn">from</span> <span class="nn">tensorflow.core.framework</span> <span class="k">import</span> <span class="n">attr_value_pb2</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">control_flow_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework.ops</span> <span class="k">import</span> <span class="n">set_shapes_for_outputs</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">compat</span>
+
+<span class="n">distributions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">distributions</span>
+
+
+<div class="viewcode-block" id="copy"><a class="viewcode-back" href="../../edward.util.html#edward.util.copy">[docs]</a><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&quot;copied&quot;</span><span class="p">,</span>
+         <span class="n">replace_itself</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">copy_q</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Build a new node in the TensorFlow graph from `org_instance`,</span>
+<span class="sd">  where any of its ancestors existing in `dict_swap` are</span>
+<span class="sd">  replaced with `dict_swap`&#39;s corresponding value.</span>
+
+<span class="sd">  The copying is done recursively, so any `Operation` whose output</span>
+<span class="sd">  is required to evaluate `org_instance` is also copied (if it isn&#39;t</span>
+<span class="sd">  already copied within the new scope). This is with the exception of</span>
+<span class="sd">  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly copied.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  org_instance : RandomVariable, tf.Variable, tf.Tensor, or tf.Operation</span>
+<span class="sd">    Node to add in graph with replaced ancestors.</span>
+<span class="sd">  dict_swap : dict, optional</span>
+<span class="sd">    Random variables, variables, tensors, or operations to</span>
+<span class="sd">    swap with. Its keys are what `org_instance` may depend on,</span>
+<span class="sd">    and its values are the corresponding object (of the same type)</span>
+<span class="sd">    that is used in exchange.</span>
+<span class="sd">  scope : str, optional</span>
+<span class="sd">    A scope for the new node(s). This is used to avoid name</span>
+<span class="sd">    conflicts with the original node(s).</span>
+<span class="sd">  replace_itself : bool, optional</span>
+<span class="sd">    Whether to replace `org_instance` itself if it exists in</span>
+<span class="sd">    `dict_swap`. (This is used for the recursion.)</span>
+<span class="sd">  copy_q : bool, optional</span>
+<span class="sd">    Whether to copy the replaced tensors too (if not already</span>
+<span class="sd">    copied within the new scope). Otherwise will reuse them.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  RandomVariable, tf.Variable, tf.Tensor, or tf.Operation</span>
+<span class="sd">    The copied node.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">    If `org_instance` is not one of the above types.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; x = tf.constant(2.0)</span>
+<span class="sd">  &gt;&gt;&gt; y = tf.constant(3.0)</span>
+<span class="sd">  &gt;&gt;&gt; z = x * y</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; qx = tf.constant(4.0)</span>
+<span class="sd">  &gt;&gt;&gt; # The TensorFlow graph is currently</span>
+<span class="sd">  &gt;&gt;&gt; # `x` -&gt; `z` &lt;- y`, `qx`</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # This adds a subgraph with newly copied nodes,</span>
+<span class="sd">  &gt;&gt;&gt; # `copied/qx` -&gt; `copied/z` &lt;- `copied/y`</span>
+<span class="sd">  &gt;&gt;&gt; z_new = copy(z, {x: qx})</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; sess = tf.Session()</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(z)</span>
+<span class="sd">  6.0</span>
+<span class="sd">  &gt;&gt;&gt; sess.run(z_new)</span>
+<span class="sd">  12.0</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">and</span> \
+     <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">and</span> \
+     <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> \
+     <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Could not copy instance: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">org_instance</span><span class="p">))</span>
+
+  <span class="c"># Swap instance if in dictionary.</span>
+  <span class="k">if</span> <span class="n">org_instance</span> <span class="ow">in</span> <span class="n">dict_swap</span> <span class="ow">and</span> <span class="n">replace_itself</span><span class="p">:</span>
+    <span class="n">org_instance</span> <span class="o">=</span> <span class="n">dict_swap</span><span class="p">[</span><span class="n">org_instance</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">copy_q</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">org_instance</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">replace_itself</span><span class="p">:</span>
+    <span class="c"># Deal with case when `org_instance` is the associated tensor</span>
+    <span class="c"># from the RandomVariable, e.g., `z.value()`. If</span>
+    <span class="c"># `dict_swap={z: qz}`, we aim to swap it with `qz.value()`.</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">dict_swap</span><span class="p">):</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">org_instance</span> <span class="o">==</span> <span class="n">key</span><span class="o">.</span><span class="n">value</span><span class="p">():</span>
+          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
+            <span class="n">org_instance</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">org_instance</span> <span class="o">=</span> <span class="n">value</span>
+
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">copy_q</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">org_instance</span>
+          <span class="k">break</span>
+
+  <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+  <span class="n">new_name</span> <span class="o">=</span> <span class="n">scope</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="c"># If an instance of the same name exists, return appropriately.</span>
+  <span class="c"># Do this for random variables.</span>
+  <span class="n">random_variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                      <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s">&#39;_random_variable_collection_&#39;</span><span class="p">)}</span>
+  <span class="k">if</span> <span class="n">new_name</span> <span class="ow">in</span> <span class="n">random_variables</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">random_variables</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span>
+
+  <span class="c"># Do this for tensors and operations.</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">already_present</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_graph_element</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span>
+                                             <span class="n">allow_tensor</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+                                             <span class="n">allow_operation</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">already_present</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+  <span class="c"># If instance is a variable, return it; do not re-copy any.</span>
+  <span class="c"># Note we check variables via their name and not their type. This</span>
+  <span class="c"># is because if we get variables through an op&#39;s inputs, it has</span>
+  <span class="c"># type tf.Tensor: we can only tell it is a variable via its name.</span>
+  <span class="n">variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">VARIABLES</span><span class="p">)}</span>
+  <span class="k">if</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">org_instance</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="c"># Do the same for placeholders. Same logic holds.</span>
+  <span class="c"># Note this assumes that placeholders are all in this collection.</span>
+  <span class="n">placeholders</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s">&#39;PLACEHOLDERS&#39;</span><span class="p">)}</span>
+  <span class="k">if</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">placeholders</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="n">placeholders</span><span class="p">[</span><span class="n">org_instance</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
+    <span class="n">rv</span> <span class="o">=</span> <span class="n">org_instance</span>
+
+    <span class="c"># If it has copiable arguments, copy them.</span>
+    <span class="n">dist_args</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">_dist_args</span><span class="p">):</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">or</span> \
+         <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">or</span> \
+         <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> \
+         <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
+         <span class="n">value</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+
+      <span class="n">dist_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">dist_args</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_name</span> <span class="o">+</span> <span class="n">rv</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c"># Copy a new `rv` with any newly copied arguments.</span>
+    <span class="c"># We do this by creating an empty class object and setting</span>
+    <span class="c"># its attributes. (This is to avoid a throwaway tensor in the</span>
+    <span class="c"># graph, during instantiation of DistributionTensor.)</span>
+    <span class="n">new_rv</span> <span class="o">=</span> <span class="n">Empty</span><span class="p">()</span>
+    <span class="n">new_rv</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">__class__</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">__dict__</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;_name&#39;</span><span class="p">,</span> <span class="s">&#39;_dist_args&#39;</span><span class="p">,</span> <span class="s">&#39;_dist&#39;</span><span class="p">,</span> <span class="s">&#39;_value&#39;</span><span class="p">]:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_name&#39;</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_dist_args&#39;</span><span class="p">,</span> <span class="n">dist_args</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_dist&#39;</span><span class="p">,</span> <span class="n">new_rv</span><span class="o">.</span><span class="n">_dist_cls</span><span class="p">(</span><span class="o">**</span><span class="n">new_rv</span><span class="o">.</span><span class="n">_dist_args</span><span class="p">))</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_value&#39;</span><span class="p">,</span> <span class="n">new_rv</span><span class="o">.</span><span class="n">_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">new_rv</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+    <span class="n">tensor</span> <span class="o">=</span> <span class="n">org_instance</span>
+
+    <span class="c"># A tensor is one of the outputs of its underlying</span>
+    <span class="c"># op. Therefore copy the op itself.</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">op</span>
+    <span class="n">new_op</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+
+    <span class="n">output_index</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+    <span class="n">new_tensor</span> <span class="o">=</span> <span class="n">new_op</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">output_index</span><span class="p">]</span>
+
+    <span class="c"># Add copied tensor to collections that the original one is in.</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">tensor</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="n">collection</span><span class="p">:</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">new_tensor</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_tensor</span>
+  <span class="k">else</span><span class="p">:</span>  <span class="c"># tf.Operation</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">org_instance</span>
+
+    <span class="c"># If it has an original op, copy it.</span>
+    <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">_original_op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">new_original_op</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">_original_op</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">new_original_op</span> <span class="o">=</span> <span class="k">None</span>
+
+    <span class="c"># If it has control inputs, copy them.</span>
+    <span class="n">new_control_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">control_inputs</span><span class="p">:</span>
+      <span class="n">elem</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+
+      <span class="n">new_control_inputs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
+
+    <span class="c"># If it has inputs, copy them.</span>
+    <span class="n">new_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+      <span class="n">elem</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+
+      <span class="n">new_inputs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
+
+    <span class="c"># Make a copy of the node def.</span>
+    <span class="c"># As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it</span>
+    <span class="c"># stores string-based info such as name, device, and type of the op.</span>
+    <span class="c"># It is unique to every Operation instance.</span>
+    <span class="n">new_node_def</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">node_def</span><span class="p">)</span>
+    <span class="n">new_node_def</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
+
+    <span class="c"># Copy the other inputs needed for initialization.</span>
+    <span class="n">output_types</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">_output_types</span><span class="p">[:]</span>
+    <span class="n">input_types</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">_input_types</span><span class="p">[:]</span>
+
+    <span class="c"># Make a copy of the op def.</span>
+    <span class="c"># It is unique to every Operation type.</span>
+    <span class="n">op_def</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">op_def</span><span class="p">)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">(</span><span class="n">new_node_def</span><span class="p">,</span>
+                       <span class="n">graph</span><span class="p">,</span>
+                       <span class="n">new_inputs</span><span class="p">,</span>
+                       <span class="n">output_types</span><span class="p">,</span>
+                       <span class="n">new_control_inputs</span><span class="p">,</span>
+                       <span class="n">input_types</span><span class="p">,</span>
+                       <span class="n">new_original_op</span><span class="p">,</span>
+                       <span class="n">op_def</span><span class="p">)</span>
+
+    <span class="c"># Use Graph&#39;s private methods to add the op, following</span>
+    <span class="c"># implementation of `tf.Graph().create_op()`.</span>
+    <span class="n">compute_shapes</span> <span class="o">=</span> <span class="k">True</span>
+    <span class="n">compute_device</span> <span class="o">=</span> <span class="k">True</span>
+    <span class="n">op_type</span> <span class="o">=</span> <span class="n">new_name</span>
+
+    <span class="k">if</span> <span class="n">compute_shapes</span><span class="p">:</span>
+      <span class="n">set_shapes_for_outputs</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">_add_op</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">_record_op_seen_by_control_dependencies</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">compute_device</span><span class="p">:</span>
+      <span class="n">graph</span><span class="o">.</span><span class="n">_apply_device_functions</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">graph</span><span class="o">.</span><span class="n">_colocation_stack</span><span class="p">:</span>
+      <span class="n">all_colocation_groups</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">colocation_op</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">_colocation_stack</span><span class="p">:</span>
+        <span class="n">all_colocation_groups</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">colocation_op</span><span class="o">.</span><span class="n">colocation_groups</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
+          <span class="c"># Make this device match the device of the colocated op, to</span>
+          <span class="c"># provide consistency between the device and the colocation</span>
+          <span class="c"># property.</span>
+          <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">device</span> <span class="ow">and</span> <span class="n">ret</span><span class="o">.</span><span class="n">device</span> <span class="o">!=</span> <span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Tried to colocate %s with an op %s that had &quot;</span>
+                            <span class="s">&quot;a different device: %s vs %s. &quot;</span>
+                            <span class="s">&quot;Ignoring colocation property.&quot;</span><span class="p">,</span>
+                            <span class="n">name</span><span class="p">,</span> <span class="n">colocation_op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+                            <span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">_set_device</span><span class="p">(</span><span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+      <span class="n">all_colocation_groups</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_colocation_groups</span><span class="p">))</span>
+      <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s">&quot;_class&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span><span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span>
+          <span class="nb">list</span><span class="o">=</span><span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="o">.</span><span class="n">ListValue</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">all_colocation_groups</span><span class="p">)))</span>
+
+    <span class="c"># Sets &quot;container&quot; attribute if</span>
+    <span class="c"># (1) graph._container is not None</span>
+    <span class="c"># (2) &quot;is_stateful&quot; is set in OpDef</span>
+    <span class="c"># (3) &quot;container&quot; attribute is in OpDef</span>
+    <span class="c"># (4) &quot;container&quot; attribute is None</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">_container</span> <span class="ow">and</span>
+        <span class="n">op_type</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">_registered_ops</span> <span class="ow">and</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">_registered_ops</span><span class="p">[</span><span class="n">op_type</span><span class="p">]</span><span class="o">.</span><span class="n">is_stateful</span> <span class="ow">and</span>
+        <span class="s">&quot;container&quot;</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span> <span class="ow">and</span>
+            <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s">&quot;container&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
+      <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s">&quot;container&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span>
+          <span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">as_bytes</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">_container</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">ret</span></div>
 
 
 <div class="viewcode-block" id="cumprod"><a class="viewcode-back" href="../../edward.util.html#edward.util.cumprod">[docs]</a><span class="k">def</span> <span class="nf">cumprod</span><span class="p">(</span><span class="n">xs</span><span class="p">):</span>
@@ -217,6 +494,11 @@
     <span class="n">mat</span> <span class="o">=</span> <span class="n">x</span>
     <span class="n">vec</span> <span class="o">=</span> <span class="n">y</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Empty"><a class="viewcode-back" href="../../edward.util.html#edward.util.Empty">[docs]</a><span class="k">class</span> <span class="nc">Empty</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Empty class.&quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="get_dims"><a class="viewcode-back" href="../../edward.util.html#edward.util.get_dims">[docs]</a><span class="k">def</span> <span class="nf">get_dims</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -518,6 +800,14 @@
 
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> \
       <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="placeholder"><a class="viewcode-back" href="../../edward.util.html#edward.util.placeholder">[docs]</a><span class="k">def</span> <span class="nf">placeholder</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A wrapper around ``tf.placeholder``. It adds the tensor to the</span>
+<span class="sd">  ``PLACEHOLDERS`` collection.&quot;&quot;&quot;</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="s">&quot;PLACEHOLDERS&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">x</span></div>
 
 
 <div class="viewcode-block" id="rbf"><a class="viewcode-back" href="../../edward.util.html#edward.util.rbf">[docs]</a><span class="k">def</span> <span class="nf">rbf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>

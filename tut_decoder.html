@@ -136,9 +136,8 @@
     log p(x | z) = log Bernoulli(x | p = neural_network(z))
      = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
     """
-    return tf.pack([
-        tf.reduce_sum(bernoulli.logpmf(xs['x'], p=self.neural_network(z)))
-        for z in tf.unpack(zs['z'])])
+    return tf.reduce_sum(
+        bernoulli.logpmf(xs['x'], p=self.neural_network(zs['z'])))
 
 
 model = NormalBernoulli(n_vars=10)</code></pre>

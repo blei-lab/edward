@@ -244,28 +244,39 @@ that data point per row.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars</em>, <em>model_wrapper</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
+<p>A metric, or scoring rule, is a function of observed data under the
+posterior predictive distribution. For example in supervised metrics
+such as classification accuracy, the observed data (true output) is
+compared to the posterior predictive&#8217;s mean (predicted output). In
+unsupervised metrics such as log-likelihood, the probability of
+observing the data is calculated under the posterior predictive&#8217;s
+log-density.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>metrics</strong> (<em>list of str or str</em>) &#8211; List of metrics or a single metric.</li>
-<li><strong>data</strong> (<em>dict</em>) &#8211; Data dictionary to evaluate model with. For TensorFlow,
-Python, and Stan models, the key type is a string; for PyMC3,
-the key type is a Theano shared variable. For TensorFlow,
-Python, and PyMC3 models, the value type is a NumPy array or
-TensorFlow placeholder; for Stan, the value type is the type
-according to the Stan program&#8217;s data block.</li>
-<li><strong>latent_vars</strong> (<em>dict of str to RandomVariable</em>) &#8211; Collection of random variables (of type <cite>str</cite>) binded to their
-inferred posterior (of type <cite>RandomVariable</cite>).</li>
-<li><strong>model_wrapper</strong> (<em>ed.Model</em>) &#8211; Probability model. Class object that implements the
-<code class="docutils literal"><span class="pre">predict</span></code> method.</li>
+<li><strong>data</strong> (<em>dict</em>) &#8211; Data to evaluate model with. It binds observed variables (of type
+<cite>RandomVariable</cite>) to their realizations (of type <cite>tf.Tensor</cite>). It
+can also bind placeholders (of type <cite>tf.Tensor</cite>) used in the model
+to their realizations.</li>
+<li><strong>latent_vars</strong> (<em>dict of str to RandomVariable, optional</em>) &#8211; Collection of random variables binded to their inferred posterior.
+It is only used (and in fact required) if the model wrapper is
+specified.</li>
+<li><strong>model_wrapper</strong> (<em>ed.Model, optional</em>) &#8211; An optional wrapper for the probability model. It must have a
+<cite>predict</cite> method, and <cite>latent_vars</cite> must be specified. <cite>data</cite> is
+also changed. For TensorFlow, Python, and Stan models, the key
+type is a string; for PyMC3, the key type is a Theano shared
+variable. For TensorFlow, Python, and PyMC3 models, the value type
+is a NumPy array or TensorFlow placeholder; for Stan, the value
+type is the type according to the Stan program&#8217;s data block.</li>
 <li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of posterior samples for making predictions,
-using the posterior predictive distribution.</li>
-<li><strong>output_key</strong> (<em>str, optional</em>) &#8211; If using a supervised metric, it is the key in <code class="docutils literal"><span class="pre">data</span></code> which
-corresponds to the predicted output.</li>
+using the posterior predictive distribution. It is only used if
+the model wrapper is specified.</li>
+<li><strong>output_key</strong> (<em>RandomVariable or str, optional</em>) &#8211; It is the key in <code class="docutils literal"><span class="pre">data</span></code> which corresponds to the model&#8217;s output.</li>
 </ul>
 </td>
 </tr>
@@ -281,15 +292,23 @@ corresponds to the predicted output.</li>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># log-likelihood performance</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>         <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># build posterior predictive after inference: it is</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># parameterized by posterior means</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_post</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">beta</span><span class="p">:</span> <span class="n">qbeta</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># log-likelihood performance</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">x_post</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c"># classification accuracy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># here, &#39;x&#39; is any features the model is defined with respect to,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># and &#39;y&#39; is the output of the posterior predictive</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># here, `x_ph` is any features the model is defined with respect to,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># and `y_post` is the posterior predictive distribution</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;binary_accuracy&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">y_post</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_ph</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># criticism for model wrappers</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
+<span class="gp">... </span>         <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;binary_accuracy&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>         <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">... </span>         <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -405,7 +424,7 @@ corresponds to the predicted output.</li>
 
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars</em>, <em>model_wrapper</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#ppc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#ppc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Posterior predictive check.
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)</p>
 <p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior
@@ -423,33 +442,34 @@ predictive check (Box, 1980).</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>T</strong> (<em>function</em>) &#8211; Discrepancy function, which takes a dictionary of data and
 dictionary of latent variables as input and outputs a <cite>tf.Tensor</cite>.</li>
-<li><strong>data</strong> (<em>dict</em>) &#8211; Observed data to compare to. For TensorFlow, Python, and Stan
-models, the key type is a string; for PyMC3, the key type is a
-Theano shared variable. For TensorFlow, Python, and PyMC3 models,
-the value type is a NumPy array or TensorFlow placeholder; for
-Stan, the value type is the type according to the Stan program&#8217;s
-data block.</li>
-<li><strong>latent_vars</strong> (<em>dict of str to RandomVariable</em>) &#8211; Collection of latent variables, where each latent variable key (of
-type <cite>str</cite>) is binded to its inferred posterior (of type
-<cite>RandomVariable</cite>). If <code class="docutils literal"><span class="pre">latent_vars</span></code> is <code class="docutils literal"><span class="pre">None</span></code>, then samples
-are obtained from the model through the <code class="docutils literal"><span class="pre">sample_prior</span></code> method.</li>
-<li><strong>model_wrapper</strong> (<em>ed.Model</em>) &#8211; Probability model. Class object that implements the
-<code class="docutils literal"><span class="pre">sample_likelihood</span></code> method.</li>
+<li><strong>data</strong> (<em>dict</em>) &#8211; Data to compare to. It binds observed variables (of type
+<cite>RandomVariable</cite>) to their realizations (of type <cite>tf.Tensor</cite>). It
+can also bind placeholders (of type <cite>tf.Tensor</cite>) used in the model
+to their realizations.</li>
+<li><strong>latent_vars</strong> (<em>dict of str to RandomVariable, optional</em>) &#8211; Collection of random variables binded to their inferred posterior.
+It is an optional argument, necessary for when the discrepancy is
+a function of latent variables.</li>
+<li><strong>model_wrapper</strong> (<em>ed.Model, optional</em>) &#8211; An optional wrapper for the probability model. It must have a
+<code class="docutils literal"><span class="pre">sample_likelihood</span></code> method. If <cite>latent_vars</cite> is not specified,
+it must also have a <code class="docutils literal"><span class="pre">sample_prior</span></code> method, as <code class="docutils literal"><span class="pre">ppc</span></code> will
+default to a prior predictive check. <cite>data</cite> is also changed. For
+TensorFlow, Python, and Stan models, the key type is a string; for
+PyMC3, the key type is a Theano shared variable. For TensorFlow,
+Python, and PyMC3 models, the value type is a NumPy array or
+TensorFlow placeholder; for Stan, the value type is the type
+according to the Stan program&#8217;s data block.</li>
 <li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of replicated data sets.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>List containing the reference distribution, which is a NumPy
-vector of size elements,</p>
+array of size elements,</p>
 <div class="math">
 \[(T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))\]</div>
-<p>and the realized discrepancy, which is a NumPy vector of size
+<p>and the realized discrepancy, which is a NumPy array of size
 elements,</p>
 <div class="math">
 \[(T(x, z^{1}), ..., T(x, z^{size})).\]</div>
-<p>If the discrepancy function is not specified, then the list
-contains the full data distribution where each element is a
-data set (dictionary).</p>
 </p>
 </td>
 </tr>
@@ -459,17 +479,30 @@ data set (dictionary).</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># posterior predictive check</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span> <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># build posterior predictive after inference: it is</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># parameterized by posterior means</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_post</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">beta</span><span class="p">:</span> <span class="n">qbeta</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span>
 <span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># posterior predictive check (with covariates)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># posterior predictive check</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># T is a user-defined function of data, T(data)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">x_post</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># in general T is a discrepancy function of the data (both response and</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># covariates) and latent variables, T(data, latent_vars)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">y_post</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_ph</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">,</span> <span class="s">&#39;beta&#39;</span><span class="p">:</span> <span class="n">qbeta</span><span class="p">})</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c"># prior predictive check</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># running ppc on original x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># criticism for model wrappers</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span> <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span> <span class="n">latent_vars</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

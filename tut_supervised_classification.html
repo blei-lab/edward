@@ -147,13 +147,12 @@ data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
     return tf.pack(mat)
 
   def log_prob(self, xs, zs):
-    &quot;&quot;&quot;Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
+    &quot;&quot;&quot;Return scalar, the log joint density log p(xs, zs).&quot;&quot;&quot;
     x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
     log_prior = multivariate_normal.logpdf(
-        zs[&#39;z&#39;], tf.zeros([self.N]), self.kernel(x))
-    log_lik = tf.pack([tf.reduce_sum(
-                       bernoulli.logpmf(y, p=self.inverse_link(tf.mul(y, z))))
-                       for z in tf.unpack(zs[&#39;z&#39;])])
+        zs[&#39;z&#39;], tf.zeros(self.N), self.kernel(x))
+    log_lik = tf.reduce_sum(
+        bernoulli.logpmf(y, p=self.inverse_link(y * zs[&#39;z&#39;])))
     return log_prior + log_lik
 
 

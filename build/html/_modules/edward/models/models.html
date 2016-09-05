@@ -181,8 +181,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">      A 1-D tensor of type tf.float32,</span>
-<span class="sd">      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+<span class="sd">      Scalar, the log joint density log p(xs, zs).</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -210,15 +209,10 @@
       <span class="n">key</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="c"># Calculate model&#39;s log density using a dictionary of latent</span>
-    <span class="c"># variables, one for each sample of latent variables.</span>
-    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">zs_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-      <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="p">:])</span>
-           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
-      <span class="n">lp</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fastlogp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">lp</span></div>
+    <span class="c"># variables.</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
+    <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fastlogp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PythonModel"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PythonModel">[docs]</a><span class="k">class</span> <span class="nc">PythonModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -243,8 +237,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">      A 1-D tensor of type tf.float32,</span>
-<span class="sd">      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+<span class="sd">      Scalar, the log joint density log p(xs, zs).</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -269,7 +262,8 @@
     <span class="n">zs_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">):]</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">,</span> <span class="n">xs_values</span><span class="p">)}</span>
     <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
+    <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
@@ -321,8 +315,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tf.Tensor</span>
-<span class="sd">      A 1-D tensor of type tf.float32,</span>
-<span class="sd">      [log p(xs, zs[1,:]), .., log p(xs, zs[S,:])].</span>
+<span class="sd">      Scalar, the log joint density log p(xs, zs).</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -352,19 +345,14 @@
   <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="n">zs_values</span> <span class="o">=</span> <span class="n">args</span>
     <span class="c"># Calculate model&#39;s log density using a dictionary of latent</span>
-    <span class="c"># variables, one for each sample of latent variables.</span>
-    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">zs_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">lp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-      <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="p">:])</span>
-           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
-      <span class="c"># Convert latent variable dictionary (on constrained</span>
-      <span class="c"># space) to a flattened vector (on unconstrained space).</span>
-      <span class="c"># This is necessary for Stan&#39;s log_prob() method.</span>
-      <span class="n">z_unconst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">unconstrain_pars</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-      <span class="n">lp</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z_unconst</span><span class="p">,</span> <span class="n">adjust_transform</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">lp</span></div>
+    <span class="c"># variables.</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
+    <span class="c"># Convert latent variable dictionary (on constrained</span>
+    <span class="c"># space) to a flattened vector (on unconstrained space).</span>
+    <span class="c"># This is necessary for Stan&#39;s log_prob() method.</span>
+    <span class="n">z_unconst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">unconstrain_pars</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z_unconst</span><span class="p">,</span> <span class="n">adjust_transform</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

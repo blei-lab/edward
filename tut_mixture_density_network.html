@@ -92,13 +92,13 @@
 <p>If you are not familiar with MDNs have a look at the <a href="http://cbonnett.github.io/MDN.html">following blog post</a> or at original <a href="http://research.microsoft.com/en-us/um/people/cmbishop/downloads/Bishop-NCRG-94-004.pdf">paper</a> by Bishop. Note you have to manually <a href="https://keras.io/backend/">configure Keras</a> to work with TensorFlow. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network_demo.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">blog post</a> by Otoro, where he explains MDNs. This is an inverse problem: for every input <span class="math inline">\(X\)</span> there are multiple outputs <span class="math inline">\(y\)</span>.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N=6000):
+<pre class="python" language="Python"><code>def build_toy_dataset(N):
   y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
   r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42)
 
-X_train, X_test, y_train, y_test = build_toy_dataset()
+X_train, X_test, y_train, y_test = build_toy_dataset(N=6000)
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
@@ -140,15 +140,13 @@ data = {'X': X, 'y': y}</code></pre>
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
 
   def log_prob(self, xs, zs):
-    """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
+    """Return scalar, the log joint density log p(xs, zs)."""
     # Note there are no parameters we're being Bayesian about. The
     # parameters are baked into how we specify the neural networks.
     X, y = xs['X'], xs['y']
     self.neural_network(X)
-    result = tf.exp(norm.logpdf(y, self.mus, self.sigmas))
-    result = tf.mul(result, self.pi)
-    result = tf.reduce_sum(result, 1)
-    result = tf.log(result)
+    result = self.pi * tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = tf.log(tf.reduce_sum(result, 1))
     return tf.reduce_sum(result)</code></pre>
 <p>We instantiate the mixture density network with 10 mixtures.</p>
 <pre class="python" language="Python"><code>model = MixtureDensityNetwork(10)</code></pre>

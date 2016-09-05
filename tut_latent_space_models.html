@@ -95,12 +95,8 @@
 <p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">Mark Newman’s repository</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Watts and Strogatz from original experimental data by White and co-authors.</p>
 <p>The neural network consists of around <span class="math inline">\(300\)</span> neurons. Each connection is associated with a weight (positive integer) capturing the strength of the connection.</p>
 <p>In the example we load the data with</p>
-<pre class="python" language="Python"><code>def load_celegans_brain():
-  x = np.load('data/celegans_brain.npy')
-  N = x.shape[0]
-  return {'x': x}, N
-
-data, N = load_celegans_brain()</code></pre>
+<pre class="python" language="Python"><code>x_train = np.load('data/celegans_brain.npy')
+data = {'x': x_train}</code></pre>
 <h3 id="model">Model</h3>
 <p>Here we will fit a latent space model to the C. Elegans neural network. What can we learn about the neurons from how they are connected? We will learn a latent embedding for each neuron to capture the similarities between them.</p>
 <p>Each neuron <span class="math inline">\(n\)</span> is a node in the network and is associated with a latent <span class="math inline">\(K\)</span>-dimensional vector <span class="math inline">\(z_n\)</span>.</p>
@@ -112,31 +108,30 @@ Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).\end{aligned}\]</spa
 <pre class="python" language="Python"><code>class LatentSpaceModel:
   """
   p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; 1/||z_i - z_j|| ) ]
-        [ prod_{i=1}^N N(z_i; 0, I)) ]
+            [ prod_{i=1}^N N(z_i; 0, I)) ]
   """
-  def __init__(self, N, K, var=1.0,
+  def __init__(self, N, K, prior_std=1.0,
                like='Poisson',
                prior='Lognormal',
                dist='euclidean'):
     self.n_vars = N * K
     self.N = N
     self.K = K
-    self.prior_variance = var
+    self.prior_std = prior_std
     self.like = like
     self.prior = prior
     self.dist = dist
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-    zs = zs['z']
+    """Return scalar, the log joint density log p(xs, zs)."""
     if self.prior == 'Lognormal':
-      zs = tf.exp(zs)
-    elif self.prior != 'Gaussian':
+      log_prior = tf.reduce_sum(lognorm.logpdf(zs['z'], self.prior_std))
+    elif self.prior == 'Gaussian':
+      log_prior = tf.reduce_sum(norm.logpdf(zs['z'], 0.0, self.prior_std))
+    else:
       raise NotImplementedError("prior not available.")
 
-    log_prior = -self.prior_variance * tf.reduce_sum(zs * zs)
-
-    z = tf.reshape(zs, [self.N, self.K])
+    z = tf.reshape(zs['z'], [self.N, self.K])
     if self.dist == 'euclidean':
       xp = tf.matmul(tf.ones([1, self.N]),
                      tf.reduce_sum(z * z, 1, keep_dims=True))
@@ -158,14 +153,15 @@ Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).\end{aligned}\]</spa
     return log_lik + log_prior
 
 
-K = 3
-model = LatentSpaceModel(N, K=3, like='Poisson', prior='Gaussian')</code></pre>
+model = LatentSpaceModel(N=x_train.shape[0], K=3, like='Poisson', prior='Gaussian')</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are required: Instantiating inference and running it.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP(['z'], data, model)</code></pre>
 <p>See this extended tutorial about <a href="tut_MAP">MAP estimation in Edward</a>.</p>
 <p>One could instead run variational inference. This requires specifying a variational model and instantiating <code>MFVI</code>.</p>
-<pre class="python" language="Python"><code>qz = Normal(model.n_vars)
+<pre class="python" language="Python"><code>qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 inference = ed.MFVI({'z': qz}, data, model)</code></pre>
 <p>Finally, the following line runs the inference procedure for 5000 iterations and prints progress every 500 iteration.</p>
 <pre class="python" language="Python"><code>inference.run(n_iter=5000, n_print=500)</code></pre>

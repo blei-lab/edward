@@ -77,11 +77,10 @@ probability model. For example, a model with a Gaussian likelihood with latent
 mean and variance would have \texttt{n\_vars=2*N} latent variables for
 \texttt{N} observations.
 
-The method \texttt{log_prob(xs, zs)} calculates the log probability of
+The method \texttt{log_prob(xs, zs)} calculates the logarithm of
 the joint density $\log p(x,z)$. Here \texttt{xs} can be a single data
 point or a batch of data points. Analogously, \texttt{zs} can be a
-single set of latent variables, or a batch thereof. The method returns a vector
-of log density evaluations, one for each set of latent variables.
+single set of latent variables, or a batch thereof.
 
 \subsubsection{Inference}\label{inference}
 

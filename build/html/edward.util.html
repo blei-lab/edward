@@ -146,6 +146,75 @@
             
   <div class="section" id="module-edward.util">
 <span id="edward-util-module"></span><h1>edward.util module<a class="headerlink" href="#module-edward.util" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="edward.util.Empty">
+<em class="property">class </em><code class="descclassname">edward.util.</code><code class="descname">Empty</code><a class="reference internal" href="_modules/edward/util.html#Empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.Empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Empty class.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.copy">
+<code class="descclassname">edward.util.</code><code class="descname">copy</code><span class="sig-paren">(</span><em>org_instance</em>, <em>dict_swap=None</em>, <em>scope='copied'</em>, <em>replace_itself=False</em>, <em>copy_q=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a new node in the TensorFlow graph from <cite>org_instance</cite>,
+where any of its ancestors existing in <cite>dict_swap</cite> are
+replaced with <cite>dict_swap</cite>&#8216;s corresponding value.</p>
+<p>The copying is done recursively, so any <cite>Operation</cite> whose output
+is required to evaluate <cite>org_instance</cite> is also copied (if it isn&#8217;t
+already copied within the new scope). This is with the exception of
+<a href="#id1"><span class="problematic" id="id2">`</span></a>tf.Variable`s and <a href="#id3"><span class="problematic" id="id4">`</span></a>tf.placeholder`s, which are reused and not newly copied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>org_instance</strong> (<em>RandomVariable, tf.Variable, tf.Tensor, or tf.Operation</em>) &#8211; Node to add in graph with replaced ancestors.</li>
+<li><strong>dict_swap</strong> (<em>dict, optional</em>) &#8211; Random variables, variables, tensors, or operations to
+swap with. Its keys are what <cite>org_instance</cite> may depend on,
+and its values are the corresponding object (of the same type)
+that is used in exchange.</li>
+<li><strong>scope</strong> (<em>str, optional</em>) &#8211; A scope for the new node(s). This is used to avoid name
+conflicts with the original node(s).</li>
+<li><strong>replace_itself</strong> (<em>bool, optional</em>) &#8211; Whether to replace <cite>org_instance</cite> itself if it exists in
+<cite>dict_swap</cite>. (This is used for the recursion.)</li>
+<li><strong>copy_q</strong> (<em>bool, optional</em>) &#8211; Whether to copy the replaced tensors too (if not already
+copied within the new scope). Otherwise will reuse them.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The copied node.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">RandomVariable, tf.Variable, tf.Tensor, or tf.Operation</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; If <cite>org_instance</cite> is not one of the above types.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qx</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># The TensorFlow graph is currently</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># `x` -&gt; `z` &lt;- y`, `qx`</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># This adds a subgraph with newly copied nodes,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># `copied/qx` -&gt; `copied/z` &lt;- `copied/y`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z_new</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">qx</span><span class="p">})</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<span class="go">6.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">z_new</span><span class="p">)</span>
+<span class="go">12.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="function">
 <dt id="edward.util.cumprod">
 <code class="descclassname">edward.util.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>xs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#cumprod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.cumprod" title="Permalink to this definition">¶</a></dt>
@@ -413,6 +482,13 @@ and length variables are not positive.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="edward.util.placeholder">
+<code class="descclassname">edward.util.</code><code class="descname">placeholder</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/util.html#placeholder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.util.placeholder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper around <code class="docutils literal"><span class="pre">tf.placeholder</span></code>. It adds the tensor to the
+<code class="docutils literal"><span class="pre">PLACEHOLDERS</span></code> collection.</p>
 </dd></dl>
 
 <dl class="function">

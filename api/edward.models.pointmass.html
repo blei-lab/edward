@@ -30,10 +30,7 @@
   
 
   
-    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
-        <link rel="up" title="edward.models package" href="edward.models.html"/>
-        <link rel="next" title="edward.models.random_variables module" href="edward.models.random_variables.html"/>
-        <link rel="prev" title="edward.models.models module" href="edward.models.models.html"/> 
+    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,23 +79,12 @@
           
             
             
-                <ul class="current">
+                <ul>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="edward.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="edward.models.html">edward.models package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="edward.models.html#submodules">Submodules</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="edward.stats.html">edward.stats package</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="edward.html#submodules">Submodules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
 </ul>
 
             
@@ -129,10 +115,6 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-          <li><a href="edward.html">edward package</a> &raquo;</li>
-      
-          <li><a href="edward.models.html">edward.models package</a> &raquo;</li>
-      
     <li>edward.models.pointmass module</li>
       <li class="wy-breadcrumbs-aside">
         
@@ -152,7 +134,7 @@
 <p>The Point Mass distribution class.</p>
 <dl class="class">
 <dt id="edward.models.pointmass.PointMass">
-<em class="property">class </em><code class="descclassname">edward.models.pointmass.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=True</em>, <em>allow_nan_stats=False</em>, <em>name='PointMass'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.pointmass.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=True</em>, <em>allow_nan_stats=False</em>, <em>name='PointMass'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.contrib.distributions.python.ops.distribution.Distribution</span></code></p>
 <dl class="attribute">
 <dt id="edward.models.pointmass.PointMass.allow_nan_stats">
@@ -162,7 +144,7 @@
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.batch_shape">
-<code class="descname">batch_shape</code><span class="sig-paren">(</span><em>name='batch_shape'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.batch_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.batch_shape" title="Permalink to this definition">¶</a></dt>
+<code class="descname">batch_shape</code><span class="sig-paren">(</span><em>name='batch_shape'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.batch_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Batch dimensions of this instance as a 1-D int32 <cite>Tensor</cite>.</p>
 <p>The product of the dimensions of the <cite>batch_shape</cite> is the number of
 independent distributions of this kind the instance represents.</p>
@@ -180,7 +162,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.cdf">
-<code class="descname">cdf</code><span class="sig-paren">(</span><em>x</em>, <em>name='cdf'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.cdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.cdf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cdf</code><span class="sig-paren">(</span><em>x</em>, <em>name='cdf'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.cdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>CDF of observations in <cite>x</cite> under these Normal distribution(s).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -209,7 +191,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.entropy">
-<code class="descname">entropy</code><span class="sig-paren">(</span><em>name='entropy'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.entropy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>name='entropy'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.entropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>The entropy of Normal distribution(s).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -227,7 +209,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.event_shape">
-<code class="descname">event_shape</code><span class="sig-paren">(</span><em>name='event_shape'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.event_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.event_shape" title="Permalink to this definition">¶</a></dt>
+<code class="descname">event_shape</code><span class="sig-paren">(</span><em>name='event_shape'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.event_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shape of a sample from a single distribution as a 1-D int32 <cite>Tensor</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -243,7 +225,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.get_batch_shape">
-<code class="descname">get_batch_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.get_batch_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.get_batch_shape" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_batch_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.get_batch_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>TensorShape</cite> available at graph construction time.</p>
 <p>Same meaning as <cite>batch_shape</cite>. May be only partially defined.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -258,7 +240,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.get_event_shape">
-<code class="descname">get_event_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.get_event_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.get_event_shape" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_event_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.get_event_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>TensorShape</cite> available at graph construction time.</p>
 <p>Same meaning as <cite>event_shape</cite>. May be only partially defined.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -283,7 +265,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.log_cdf">
-<code class="descname">log_cdf</code><span class="sig-paren">(</span><em>x</em>, <em>name='log_cdf'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.log_cdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.log_cdf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">log_cdf</code><span class="sig-paren">(</span><em>x</em>, <em>name='log_cdf'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.log_cdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log CDF of observations <cite>x</cite> under these Normal distribution(s).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -298,7 +280,7 @@ independent distributions of this kind the instance represents.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tensor of dtype <cite>dtype</cite>, the log-CDFs of <cite>x</cite>.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="edward.models.random_variables.html#edward.models.random_variables.RandomVariable.log_cdf" title="edward.models.random_variables.RandomVariable.log_cdf">log_cdf</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#edward.models.pointmass.PointMass.log_cdf" title="edward.models.pointmass.PointMass.log_cdf">log_cdf</a></p>
 </td>
 </tr>
 </tbody>
@@ -307,7 +289,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.log_prob">
-<code class="descname">log_prob</code><span class="sig-paren">(</span><em>x</em>, <em>name='log_prob'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.log_prob" title="Permalink to this definition">¶</a></dt>
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>x</em>, <em>name='log_prob'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.log_prob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log prob of observations in <cite>x</cite> under these Normal distribution(s).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -331,13 +313,13 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.mean">
-<code class="descname">mean</code><span class="sig-paren">(</span><em>name='mean'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.mean" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mean</code><span class="sig-paren">(</span><em>name='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.mean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean of this distribution.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.mode">
-<code class="descname">mode</code><span class="sig-paren">(</span><em>name='mode'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.mode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.mode" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mode</code><span class="sig-paren">(</span><em>name='mode'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.mode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mode of this distribution.</p>
 </dd></dl>
 
@@ -354,7 +336,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.prob">
-<code class="descname">prob</code><span class="sig-paren">(</span><em>x</em>, <em>name='prob'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.prob" title="Permalink to this definition">¶</a></dt>
+<code class="descname">prob</code><span class="sig-paren">(</span><em>x</em>, <em>name='prob'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.prob" title="Permalink to this definition">¶</a></dt>
 <dd><p>The PDF of observations in <cite>x</cite> under these Normal distribution(s).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -378,7 +360,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.sample_n">
-<code class="descname">sample_n</code><span class="sig-paren">(</span><em>n</em>, <em>seed=None</em>, <em>name='sample_n'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.sample_n"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.sample_n" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sample_n</code><span class="sig-paren">(</span><em>n</em>, <em>seed=None</em>, <em>name='sample_n'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.sample_n" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sample <cite>n</cite> observations from the Normal Distributions.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -408,7 +390,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.std">
-<code class="descname">std</code><span class="sig-paren">(</span><em>name='std'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.std"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.std" title="Permalink to this definition">¶</a></dt>
+<code class="descname">std</code><span class="sig-paren">(</span><em>name='std'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.std" title="Permalink to this definition">¶</a></dt>
 <dd><p>Standard deviation of this distribution.</p>
 </dd></dl>
 
@@ -420,7 +402,7 @@ independent distributions of this kind the instance represents.</p>
 
 <dl class="method">
 <dt id="edward.models.pointmass.PointMass.variance">
-<code class="descname">variance</code><span class="sig-paren">(</span><em>name='variance'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/models/pointmass.html#PointMass.variance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.models.pointmass.PointMass.variance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">variance</code><span class="sig-paren">(</span><em>name='variance'</em><span class="sig-paren">)</span><a class="headerlink" href="#edward.models.pointmass.PointMass.variance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Variance of this distribution.</p>
 </dd></dl>
 
@@ -432,15 +414,6 @@ independent distributions of this kind the instance represents.</p>
            </div>
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="edward.models.random_variables.html" class="btn btn-neutral float-right" title="edward.models.random_variables module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="edward.models.models.html" class="btn btn-neutral" title="edward.models.models module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

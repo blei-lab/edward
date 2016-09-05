@@ -104,14 +104,9 @@
 <p>Edward implements PPCs through the <code>sample_likelihood()</code> method in the probability model. This method samples a dataset <span class="math inline">\(x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)\)</span> from the model likelihood given a set of latent variables.</p>
 <pre class="python" language="Python"><code>class BetaBernoulli:
   ...
-  def sample_likelihood(self, zs, n):
+  def sample_likelihood(self, zs):
     """x | p ~ p(x | p)"""
-    out = []
-    for s in range(zs['p'].shape[0]):
-      x_new = bernoulli.rvs(zs['p'][s, :], size=n)
-      out += [{'x': x_new.reshape((n,))}]
-
-    return out</code></pre>
+    return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}</code></pre>
 <p>The <code>ed.ppc()</code> method provides a scaffold for studying various discrepancy functions by repeatedly simulating datasets from the posterior predictive distribution</p>
 <pre class="python" language="Python"><code>def T(xs, zs):
   return tf.reduce_mean(tf.cast(xs['x'], tf.float32))

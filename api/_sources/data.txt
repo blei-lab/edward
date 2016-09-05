@@ -15,8 +15,7 @@ We detail specifics for each modeling language below.
   class BetaBernoulli:
     def log_prob(self, xs, zs):
       log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], p=p))
-                         for p in tf.unpack(zs['p'])])
+      log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
       return log_lik + log_prior
 
   model = BetaBernoulli()
@@ -30,16 +29,9 @@ We detail specifics for each modeling language below.
 
   class BetaBernoulli(PythonModel):
     def _py_log_prob(self, xs, zs):
-      xs = xs['x']
-      ps = zs['p']
-      n_samples = ps.shape[0]
-      lp = np.zeros(n_samples, dtype=np.float32)
-      for b in range(n_samples):
-        lp[b] = beta.logpdf(ps[b, :], a=1.0, b=1.0)
-        for n in range(xs.shape[0]):
-          lp[b] += bernoulli.logpmf(xs[n], p=ps[b, :])
-
-      return lp
+      log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+      log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+      return log_lik + log_prior
 
   model = BetaBernoulli()
   data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}

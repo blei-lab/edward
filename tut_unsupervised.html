@@ -106,11 +106,12 @@
     k = np.argmax(np.random.multinomial(1, pi))
     x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
 
-  return {&#39;x&#39;: x}
+  return x
 
-data = build_toy_dataset(500)</code></pre>
+x_train = build_toy_dataset(500)
+data = {&#39;x&#39;: x_train}</code></pre>
 <p>We visualize the generated data points.</p>
-<pre class="python" language="Python"><code>plt.scatter(data[&#39;x&#39;][:, 0], data[&#39;x&#39;][:, 1])
+<pre class="python" language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="images/unsupervised-fig0.png" alt="image" width="700" /></p>
@@ -122,8 +123,8 @@ plt.show()</code></pre>
   Mixture of Gaussians
 
   p(x, z) = [ prod_{n=1}^N sum_{k=1}^K pi_k N(x_n; mu_k, sigma_k) ]
-        [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-        Dirichlet(pi; alpha)
+            [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
+            Dirichlet(pi; alpha)
 
   where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
 
@@ -145,38 +146,33 @@ plt.show()</code></pre>
     self.alpha = tf.ones([K])
 
   def log_prob(self, xs, zs):
-    &quot;&quot;&quot;Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])].&quot;&quot;&quot;
+    &quot;&quot;&quot;Return scalar, the log joint density log p(xs, zs).&quot;&quot;&quot;
     x = xs[&#39;x&#39;]
     pi, mus, sigmas = zs[&#39;pi&#39;], zs[&#39;mu&#39;], zs[&#39;sigma&#39;]
     log_prior = dirichlet.logpdf(pi, self.alpha)
-    log_prior += tf.reduce_sum(norm.logpdf(mus, 0.0, self.c), 1)
-    log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b), 1)
+    log_prior += tf.reduce_sum(norm.logpdf(mus, 0.0, self.c))
+    log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
 
-    # Loop over each sample zs[s, :].
-    log_lik = []
+    # log-likelihood is
+    # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
+    # Create a K x N matrix, whose entry (k, n) is
+    # log pi_k + log N(x_n; mu_k, sigma_k).
     N = get_dims(x)[0]
-    n_samples = get_dims(pi)[0]
-    for s in range(n_samples):
-      # log-likelihood is
-      # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
-      # Create a K x N matrix, whose entry (k, n) is
-      # log pi_k + log N(x_n; mu_k, sigma_k).
-      matrix = []
-      for k in range(self.K):
-        matrix += [tf.ones(N) * tf.log(pi[s, k]) +
-                   multivariate_normal_diag.logpdf(x,
-                   mus[s, (k * self.D):((k + 1) * self.D)],
-                   sigmas[s, (k * self.D):((k + 1) * self.D)])]
+    matrix = []
+    for k in range(self.K):
+      matrix += [tf.ones(N) * tf.log(pi[k]) +
+                 multivariate_normal_diag.logpdf(x,
+                 mus[(k * self.D):((k + 1) * self.D)],
+                 sigmas[(k * self.D):((k + 1) * self.D)])]
 
-      matrix = tf.pack(matrix)
-      # log_sum_exp() along the rows is a vector, whose nth
-      # element is the log-likelihood of data point x_n.
-      vector = log_sum_exp(matrix, 0)
-      # Sum over data points to get the full log-likelihood.
-      log_lik_z = tf.reduce_sum(vector)
-      log_lik += [log_lik_z]
+    matrix = tf.pack(matrix)
+    # log_sum_exp() along the rows is a vector, whose nth
+    # element is the log-likelihood of data point x_n.
+    vector = log_sum_exp(matrix, 0)
+    # Sum over data points to get the full log-likelihood.
+    log_lik = tf.reduce_sum(vector)
 
-    return log_prior + tf.pack(log_lik)
+    return log_prior + log_lik
 
 
 model = MixtureGaussian(K=2, D=2)</code></pre>
@@ -193,7 +189,7 @@ qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
 <p>Run mean-field variational inference for 4000 iterations, using a batch of 10 datapoints and 50 latent variable samples per iteration.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model)
-inference.run(n_iter=4000, n_samples=50, n_minibatch=10)</code></pre>
+inference.run(n_iter=4000, n_samples=10, n_minibatch=10)</code></pre>
 <p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest log-likelihood for each data point. First we output a K x N matrix of log-likelihoods, per per-cluster assignment <span class="math inline">\(k\)</span> and per data-point <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
@@ -201,27 +197,31 @@ inference.run(n_iter=4000, n_samples=50, n_minibatch=10)</code></pre>
 <pre class="python" language="Python"><code>class MixtureGaussian:
   ...
   def predict(self, xs, zs):
-    &quot;&quot;&quot;Return matrix with log-likelihoods for each data point under each cluster,
-    averaging over each set of latent variables z in zs.&quot;&quot;&quot;
+    &quot;&quot;&quot;Calculate a K x N matrix of log-likelihoods, per-cluster and
+    per-data point.&quot;&quot;&quot;
     x = xs[&#39;x&#39;]
-    pi = tf.reduce_mean(zs[&#39;pi&#39;], 0)
-    mus = tf.reduce_mean(zs[&#39;mu&#39;], 0)
-    sigmas = tf.reduce_mean(zs[&#39;sigma&#39;], 0)
+    pi, mus, sigmas = zs[&#39;pi&#39;], zs[&#39;mu&#39;], zs[&#39;sigma&#39;]
 
     matrix = []
     for k in range(self.K):
-      matrix += [multivariate_normal.logpdf(x,
+      matrix += [multivariate_normal_diag.logpdf(x,
                  mus[(k * self.D):((k + 1) * self.D)],
                  sigmas[(k * self.D):((k + 1) * self.D)])]
 
     return tf.pack(matrix)</code></pre>
 <p>Then we evaluate the log-likelihood on the training data and take the <span class="math inline">\(\arg\max\)</span> along the rows.</p>
-<pre class="python" language="Python"><code>clusters = np.argmax(
-    ed.evaluate(&#39;log_likelihood&#39;, data,
-                latent_vars={&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma},
-                model_wrapper=model), axis=0)</code></pre>
+<pre class="python" language="Python"><code>log_liks = []
+for s in range(100):
+  zrep = {&#39;pi&#39;: qpi.sample(()),
+          &#39;mu&#39;: qmu.sample(()),
+          &#39;sigma&#39;: qsigma.sample(())}
+  log_liks += [model.predict(data, zrep)]
+
+log_liks = tf.reduce_mean(log_liks, 0)
+
+clusters = tf.argmax(log_liks, 0).eval()</code></pre>
 <p>Plot the data points, colored by their predicted membership.</p>
-<pre class="python" language="Python"><code>plt.scatter(data[&#39;x&#39;][:, 0], data[&#39;x&#39;][:, 1], c=clusters, cmap=cm.bwr)
+<pre class="python" language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="images/unsupervised-fig1.png" alt="image" width="700" /></p>

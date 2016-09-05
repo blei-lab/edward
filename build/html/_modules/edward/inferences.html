@@ -140,8 +140,8 @@
 <span class="kn">import</span> <span class="nn">six</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">PointMass</span>
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> \
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">PointMass</span>
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> \
     <span class="n">kl_multivariate_normal</span><span class="p">,</span> <span class="n">log_sum_exp</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -155,35 +155,40 @@
 
 <span class="sd">  Attributes</span>
 <span class="sd">  ----------</span>
-<span class="sd">  latent_vars : dict of str to RandomVariable</span>
+<span class="sd">  latent_vars : dict of RandomVariable to RandomVariable</span>
 <span class="sd">    Collection of random variables to perform inference on. Each</span>
-<span class="sd">    random variable (of type `str`) is binded to another random</span>
-<span class="sd">    variable (of type `RandomVariable`); the latter will infer the</span>
-<span class="sd">    former conditional on data.</span>
+<span class="sd">    random variable is binded to another random variable; the latter</span>
+<span class="sd">    will infer the former conditional on data.</span>
 <span class="sd">  data : dict</span>
 <span class="sd">    Data dictionary whose values may vary at each session run.</span>
-<span class="sd">  model_wrapper : ed.Model</span>
-<span class="sd">    Probability model.</span>
+<span class="sd">  model_wrapper : ed.Model or None</span>
+<span class="sd">    An optional wrapper for the probability model. If specified, the</span>
+<span class="sd">    random variables in `latent_vars`&#39; dictionary keys are strings</span>
+<span class="sd">    used accordingly by the wrapper.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    latent_vars : dict of str to RandomVariable</span>
+<span class="sd">    latent_vars : dict of RandomVariable to RandomVariable</span>
 <span class="sd">      Collection of random variables to perform inference on. Each</span>
-<span class="sd">      random variable (of type `str`) is binded to another random</span>
-<span class="sd">      variable (of type `RandomVariable`); the latter will infer the</span>
-<span class="sd">      former conditional on data.</span>
+<span class="sd">      random variable is binded to another random variable; the latter</span>
+<span class="sd">      will infer the former conditional on data.</span>
 <span class="sd">    data : dict, optional</span>
-<span class="sd">      Data dictionary. For TensorFlow, Python, and Stan models,</span>
-<span class="sd">      the key type is a string; for PyMC3, the key type is a</span>
-<span class="sd">      Theano shared variable. For TensorFlow, Python, and PyMC3</span>
-<span class="sd">      models, the value type is a NumPy array or TensorFlow</span>
-<span class="sd">      tensor; for Stan, the value type is the type</span>
-<span class="sd">      according to the Stan program&#39;s data block.</span>
-<span class="sd">    model_wrapper : ed.Model</span>
-<span class="sd">      Probability model.</span>
+<span class="sd">      Data dictionary which binds observed variables (of type</span>
+<span class="sd">      `RandomVariable`) to their realizations (of type `tf.Tensor`).</span>
+<span class="sd">      It can also bind placeholders (of type `tf.Tensor`) used in the</span>
+<span class="sd">      model to their realizations.</span>
+<span class="sd">    model_wrapper : ed.Model, optional</span>
+<span class="sd">      A wrapper for the probability model. If specified, the random</span>
+<span class="sd">      variables in `latent_vars`&#39; dictionary keys are strings</span>
+<span class="sd">      used accordingly by the wrapper. `data` is also changed. For</span>
+<span class="sd">      TensorFlow, Python, and Stan models, the key type is a string;</span>
+<span class="sd">      for PyMC3, the key type is a Theano shared variable. For</span>
+<span class="sd">      TensorFlow, Python, and PyMC3 models, the value type is a NumPy</span>
+<span class="sd">      array or TensorFlow tensor; for Stan, the value type is the</span>
+<span class="sd">      type according to the Stan program&#39;s data block.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -199,10 +204,14 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; model = LinearModel()</span>
-<span class="sd">    &gt;&gt;&gt; qz = Normal(model.n_vars)</span>
-<span class="sd">    &gt;&gt;&gt; data = {&#39;x&#39;: np.array(), &#39;y&#39;: np.array()}</span>
-<span class="sd">    &gt;&gt;&gt; Inference({&#39;z&#39;: qz}, data, model)</span>
+<span class="sd">    &gt;&gt;&gt; mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))</span>
+<span class="sd">    &gt;&gt;&gt; x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant([1.0]))</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; qmu_mu = tf.Variable(tf.random_normal([1]))</span>
+<span class="sd">    &gt;&gt;&gt; qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))</span>
+<span class="sd">    &gt;&gt;&gt; qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; Inference({mu: qmu}, {x: np.array()})</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -211,9 +220,6 @@
     <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
       <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span> <span class="o">=</span> <span class="n">latent_vars</span>
@@ -256,20 +262,24 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    latent_vars : dict of str to RandomVariable</span>
+<span class="sd">    latent_vars : dict of RandomVariable to RandomVariable</span>
 <span class="sd">      Collection of random variables to perform inference on. Each</span>
-<span class="sd">      random variable (of type `str`) is binded to another random</span>
-<span class="sd">      variable (of type `RandomVariable`); the latter will infer the</span>
-<span class="sd">      former conditional on data.</span>
+<span class="sd">      random variable is binded to another random variable; the latter</span>
+<span class="sd">      will infer the former conditional on data.</span>
 <span class="sd">    data : dict, optional</span>
-<span class="sd">      Data dictionary. For TensorFlow, Python, and Stan models,</span>
-<span class="sd">      the key type is a string; for PyMC3, the key type is a</span>
-<span class="sd">      Theano shared variable. For TensorFlow, Python, and PyMC3</span>
-<span class="sd">      models, the value type is a NumPy array or TensorFlow</span>
-<span class="sd">      placeholder; for Stan, the value type is the type</span>
-<span class="sd">      according to the Stan program&#39;s data block.</span>
-<span class="sd">    model_wrapper : ed.Model</span>
-<span class="sd">      Probability model.</span>
+<span class="sd">      Data dictionary which binds observed variables (of type</span>
+<span class="sd">      `RandomVariable`) to their realizations (of type `tf.Tensor`).</span>
+<span class="sd">      It can also bind placeholders (of type `tf.Tensor`) used in the</span>
+<span class="sd">      model to their realizations.</span>
+<span class="sd">    model_wrapper : ed.Model, optional</span>
+<span class="sd">      A wrapper for the probability model. If specified, the random</span>
+<span class="sd">      variables in `latent_vars`&#39; dictionary keys are strings used</span>
+<span class="sd">      accordingly by the wrapper. `data` is also changed. For</span>
+<span class="sd">      TensorFlow, Python, and Stan models, the key type is a string;</span>
+<span class="sd">      for PyMC3, the key type is a Theano shared variable. For</span>
+<span class="sd">      TensorFlow, Python, and PyMC3 models, the value type is a NumPy</span>
+<span class="sd">      array or TensorFlow tensor; for Stan, the value type is the</span>
+<span class="sd">      type according to the Stan program&#39;s data block.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span></div>
 
@@ -282,20 +292,24 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    latent_vars : dict of str to RandomVariable</span>
+<span class="sd">    latent_vars : dict of RandomVariable to RandomVariable</span>
 <span class="sd">      Collection of random variables to perform inference on. Each</span>
-<span class="sd">      random variable (of type `str`) is binded to another random</span>
-<span class="sd">      variable (of type `RandomVariable`); the latter will infer the</span>
-<span class="sd">      former conditional on data.</span>
+<span class="sd">      random variable is binded to another random variable; the latter</span>
+<span class="sd">      will infer the former conditional on data.</span>
 <span class="sd">    data : dict, optional</span>
-<span class="sd">      Data dictionary. For TensorFlow, Python, and Stan models,</span>
-<span class="sd">      the key type is a string; for PyMC3, the key type is a</span>
-<span class="sd">      Theano shared variable. For TensorFlow, Python, and PyMC3</span>
-<span class="sd">      models, the value type is a NumPy array or TensorFlow</span>
-<span class="sd">      placeholder; for Stan, the value type is the type</span>
+<span class="sd">      Data dictionary which binds observed variables (of type</span>
+<span class="sd">      `RandomVariable`) to their realizations (of type `tf.Tensor`).</span>
+<span class="sd">      It can also bind placeholders (of type `tf.Tensor`) used in the</span>
+<span class="sd">      model to their realizations.</span>
+<span class="sd">    model_wrapper : ed.Model, optional</span>
+<span class="sd">      A wrapper for the probability model. If specified, the random</span>
+<span class="sd">      variables in `latent_vars`&#39; dictionary keys are strings used</span>
+<span class="sd">      accordingly by the wrapper. `data` is also changed. For</span>
+<span class="sd">      TensorFlow, Python, and Stan models, the key type is a string;</span>
+<span class="sd">      for PyMC3, the key type is a Theano shared variable. For</span>
+<span class="sd">      TensorFlow, Python, and PyMC3 models, the value type is a NumPy</span>
+<span class="sd">      array or TensorFlow tensor; for Stan, the value type is the type</span>
 <span class="sd">      according to the Stan program&#39;s data block.</span>
-<span class="sd">    model_wrapper : ed.Model</span>
-<span class="sd">      Probability model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 
@@ -322,7 +336,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.VariationalInference.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-                 <span class="n">optimizer</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+                 <span class="n">optimizer</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+                 <span class="n">use_prettytensor</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize variational inference algorithm.</span>
 
 <span class="sd">    Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.</span>
@@ -342,14 +357,20 @@
 <span class="sd">    n_print : int, optional</span>
 <span class="sd">      Number of iterations for each print progress. To suppress print</span>
 <span class="sd">      progress, then specify None.</span>
-<span class="sd">    optimizer : str, optional</span>
-<span class="sd">      Whether to use TensorFlow optimizer or PrettyTensor</span>
-<span class="sd">      optimizer when using PrettyTensor. Defaults to TensorFlow.</span>
+<span class="sd">    optimizer : str or tf.train.Optimizer, optional</span>
+<span class="sd">      A TensorFlow optimizer, to use for optimizing the variational</span>
+<span class="sd">      objective. Alternatively, one can pass in the name of a</span>
+<span class="sd">      TensorFlow optimizer, and default parameters for the optimizer</span>
+<span class="sd">      will be used.</span>
 <span class="sd">    scope : str, optional</span>
 <span class="sd">      Scope of TensorFlow variable objects to optimize over.</span>
 <span class="sd">    logdir : str, optional</span>
 <span class="sd">      Directory where event file will be written. For details,</span>
 <span class="sd">      see `tf.train.SummaryWriter`. Default is to write nothing.</span>
+<span class="sd">    use_prettytensor : bool, optional</span>
+<span class="sd">      ``True`` if aim to use TensorFlow optimizer or ``False`` if aim</span>
+<span class="sd">      to use PrettyTensor optimizer (when using PrettyTensor).</span>
+<span class="sd">      Defaults to TensorFlow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">n_minibatch</span>
@@ -373,10 +394,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span>
                    <span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">batches</span><span class="p">)}</span>
 
-    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-      <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
-                                   <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">)</span>
       <span class="c"># Use ADAM with a decaying scale factor.</span>
       <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
       <span class="n">starter_learning_rate</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -384,6 +402,35 @@
                                                  <span class="n">global_step</span><span class="p">,</span>
                                                  <span class="mi">100</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">staircase</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
       <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;gradientdescent&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">GradientDescentOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adadelta&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">()</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adagrad&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdagradOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adagrad&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">MomentumOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adam&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">()</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;ftrl&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">FtrlOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;rmsprop&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">RMSPropOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Optimizer class not found:&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
+
+      <span class="n">global_step</span> <span class="o">=</span> <span class="k">None</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">):</span>
+      <span class="c"># Custom optimizers have no control over global_step.</span>
+      <span class="n">global_step</span> <span class="o">=</span> <span class="k">None</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+
+    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_prettytensor</span><span class="p">:</span>
+      <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
+                                   <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">,</span>
                                       <span class="n">var_list</span><span class="o">=</span><span class="n">var_list</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -391,7 +438,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;PrettyTensor optimizer does not accept &quot;</span>
                                   <span class="s">&quot;a variable scope.&quot;</span><span class="p">)</span>
 
-      <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+      <span class="c"># Note PrettyTensor cannot use global_step.</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">apply_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">losses</span><span class="o">=</span><span class="p">[</span><span class="n">loss</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">logdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
@@ -531,21 +578,39 @@
 <span class="sd">    result :</span>
 <span class="sd">      an appropriately selected loss function form</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">q_is_normal</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">Normal</span><span class="p">)</span> <span class="k">for</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="c"># Copy random variables in p(z), replacing conditioning on</span>
+      <span class="c"># priors with conditioning on inferred posteriors.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span> <span class="o">=</span> \
+          <span class="p">{</span><span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference&#39;</span><span class="p">):</span> <span class="n">qz</span>
+           <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+
+      <span class="c"># Copy random variables in p(x | z), replacing conditioning on</span>
+      <span class="c"># priors with conditioning on inferred posteriors.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span> <span class="o">=</span> \
+          <span class="p">{</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference&#39;</span><span class="p">):</span> <span class="n">obs</span>
+           <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)}</span>
+
+    <span class="n">qz_is_normal</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">Normal</span><span class="p">)</span> <span class="k">for</span>
                        <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
+    <span class="n">z_is_normal</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">Normal</span><span class="p">)</span> <span class="k">for</span>
+                       <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
+    <span class="n">is_analytic_kl</span> <span class="o">=</span> <span class="n">qz_is_normal</span> <span class="ow">and</span> \
+        <span class="p">(</span><span class="n">z_is_normal</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="s">&#39;log_lik&#39;</span><span class="p">))</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">q_is_normal</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="s">&#39;log_lik&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">is_analytic_kl</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_score_loss_kl</span><span class="p">()</span>
       <span class="c"># Analytic entropies may lead to problems around</span>
       <span class="c"># convergence; for now it is deactivated.</span>
-      <span class="c"># elif is_entropy:</span>
+      <span class="c"># elif is_analytic_entropy:</span>
       <span class="c">#    return self.build_score_loss_entropy()</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_score_loss</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">q_is_normal</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="s">&#39;log_lik&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">is_analytic_kl</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_reparam_loss_kl</span><span class="p">()</span>
-      <span class="c"># elif is_entropy:</span>
+      <span class="c"># elif is_analytic_entropy:</span>
       <span class="c">#    return self.build_reparam_loss_entropy()</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_reparam_loss</span><span class="p">()</span></div>
@@ -563,16 +628,29 @@
 <span class="sd">    Computed by sampling from :math:`q(z;\lambda)` and evaluating the</span>
 <span class="sd">    expectation using Monte Carlo sampling.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
 
-    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-      <span class="n">q_log_prob</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">key</span><span class="p">])),</span>
-                                  <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">get_batch_shape</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
 
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
+        <span class="n">q_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">qz</span><span class="p">)))</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">q_log_prob</span><span class="p">)</span>
     <span class="n">losses</span> <span class="o">=</span> <span class="n">p_log_prob</span> <span class="o">-</span> <span class="n">q_log_prob</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
     <span class="k">return</span> <span class="o">-</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">q_log_prob</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">losses</span><span class="p">))</span></div>
@@ -590,16 +668,29 @@
 <span class="sd">    Computed by sampling from :math:`q(z;\lambda)` and evaluating the</span>
 <span class="sd">    expectation using Monte Carlo sampling.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
 
-    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-      <span class="n">q_log_prob</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span>
-                                  <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">get_batch_shape</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
 
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
+        <span class="n">q_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">q_log_prob</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">p_log_prob</span> <span class="o">-</span> <span class="n">q_log_prob</span><span class="p">)</span>
     <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span></div>
 
@@ -616,24 +707,39 @@
 
 <span class="sd">    It assumes the KL is analytic.</span>
 
-<span class="sd">    It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`.</span>
+<span class="sd">    For model wrappers, it assumes the prior is :math:`p(z) =</span>
+<span class="sd">    \mathcal{N}(z; 0, 1)`.</span>
 
 <span class="sd">    Computed by sampling from :math:`q(z;\lambda)` and evaluating the</span>
 <span class="sd">    expectation using Monte Carlo sampling.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_lik</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_lik</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_lik</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
 
-    <span class="n">p_log_lik</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_lik</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-      <span class="n">q_log_prob</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">key</span><span class="p">])),</span>
-                                  <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">get_batch_shape</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+      <span class="n">kl</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">([</span><span class="n">kl_multivariate_normal</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">qz</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_lik</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
 
-    <span class="n">mu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">mu</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">sigma</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
-    <span class="n">kl</span> <span class="o">=</span> <span class="n">kl_multivariate_normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+      <span class="n">kl</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">([</span><span class="n">kl_multivariate_normal</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">qz</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span><span class="p">)])</span>
+
+    <span class="n">p_log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_lik</span><span class="p">)</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
+        <span class="n">q_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">qz</span><span class="p">)))</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">q_log_prob</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">p_log_lik</span><span class="p">)</span> <span class="o">-</span> <span class="n">kl</span>
     <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">q_log_prob</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">p_log_lik</span><span class="p">))</span> <span class="o">-</span> <span class="n">kl</span><span class="p">)</span></div>
 
@@ -653,17 +759,32 @@
 <span class="sd">    Computed by sampling from :math:`q(z;\lambda)` and evaluating the</span>
 <span class="sd">    expectation using Monte Carlo sampling.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
 
-    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">q_entropy</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-      <span class="n">q_log_prob</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">key</span><span class="p">])),</span>
-                                  <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">get_batch_shape</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
-      <span class="n">q_entropy</span> <span class="o">+=</span> <span class="n">rv</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
+
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
+        <span class="n">q_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">qz</span><span class="p">)))</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">q_log_prob</span><span class="p">)</span>
+
+    <span class="n">q_entropy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">([</span><span class="n">qz</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span>
+                               <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span> <span class="o">+</span> <span class="n">q_entropy</span>
     <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">q_log_prob</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">))</span> <span class="o">+</span>
@@ -682,20 +803,32 @@
 
 <span class="sd">    It assumes the KL is analytic.</span>
 
-<span class="sd">    It assumes the prior is :math:`p(z) = \mathcal{N}(z; 0, 1)`</span>
+<span class="sd">    For model wrappers, it assumes the prior is :math:`p(z) =</span>
+<span class="sd">    \mathcal{N}(z; 0, 1)`.</span>
 
 <span class="sd">    Computed by sampling from :math:`q(z;\lambda)` and evaluating the</span>
 <span class="sd">    expectation using Monte Carlo sampling.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_lik</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_lik</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_lik</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
 
-    <span class="n">p_log_lik</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_lik</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-    <span class="n">mu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">mu</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">sigma</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">p_log_lik</span><span class="p">)</span> <span class="o">-</span> \
-        <span class="n">kl_multivariate_normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+      <span class="n">kl</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">([</span><span class="n">kl_multivariate_normal</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">qz</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_lik</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
+
+      <span class="n">kl</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">([</span><span class="n">kl_multivariate_normal</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">qz</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span><span class="p">)])</span>
+
+    <span class="n">p_log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_lik</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">p_log_lik</span><span class="p">)</span> <span class="o">-</span> <span class="n">kl</span>
     <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span></div>
 
 <div class="viewcode-block" id="MFVI.build_reparam_loss_entropy"><a class="viewcode-back" href="../../edward.inferences.html#edward.inferences.MFVI.build_reparam_loss_entropy">[docs]</a>  <span class="k">def</span> <span class="nf">build_reparam_loss_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -714,14 +847,24 @@
 <span class="sd">    Computed by sampling from :math:`q(z;\lambda)` and evaluating the</span>
 <span class="sd">    expectation using Monte Carlo sampling.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_prior</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
 
-    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-    <span class="n">q_entropy</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
-      <span class="n">q_entropy</span> <span class="o">+=</span> <span class="n">rv</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
+
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span>
+    <span class="n">q_entropy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">([</span><span class="n">qz</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span>
+                               <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)])</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span> <span class="o">+</span> <span class="n">q_entropy</span>
     <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span></div></div>
@@ -783,16 +926,44 @@
 <span class="sd">      w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># Copy random variables in p(z), replacing conditioning on</span>
+      <span class="c"># priors with conditioning on inferred posteriors.</span>
+      <span class="n">copied_prior</span> <span class="o">=</span> \
+          <span class="p">{</span><span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference&#39;</span><span class="p">):</span> <span class="n">qz</span>
+           <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
 
-    <span class="c"># normalized importance weights</span>
-    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-        <span class="n">q_log_prob</span> <span class="o">+=</span> <span class="n">rv</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+      <span class="c"># Copy random variables in p(x | z), replacing conditioning on</span>
+      <span class="c"># priors with conditioning on inferred posteriors.</span>
+      <span class="n">copied_lik</span> <span class="o">=</span> \
+          <span class="p">{</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference&#39;</span><span class="p">):</span> <span class="n">obs</span>
+           <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)}</span>
 
-    <span class="n">log_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">q_log_prob</span>
+      <span class="n">p_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">copied_prior</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">copied_lik</span><span class="p">):</span>
+          <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
+
+    <span class="n">p_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">p_log_prob</span><span class="p">)</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
+        <span class="n">q_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">qz</span><span class="p">)))</span>
+
+    <span class="n">q_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">q_log_prob</span><span class="p">)</span>
+    <span class="n">log_w</span> <span class="o">=</span> <span class="n">p_log_prob</span> <span class="o">-</span> <span class="n">q_log_prob</span>
     <span class="n">log_w_norm</span> <span class="o">=</span> <span class="n">log_w</span> <span class="o">-</span> <span class="n">log_sum_exp</span><span class="p">(</span><span class="n">log_w</span><span class="p">)</span>
     <span class="n">w_norm</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_w_norm</span><span class="p">)</span>
 
@@ -814,13 +985,12 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    latent_vars : list of str or dict of str to RandomVariable</span>
+<span class="sd">    latent_vars : list of RandomVariable or</span>
+<span class="sd">                  dict of RandomVariable to RandomVariable</span>
 <span class="sd">      Collection of random variables to perform inference on. If</span>
-<span class="sd">      list, each random variable will be implictly optimized using a</span>
-<span class="sd">      ``PointMass` distribution that is defined internally (with</span>
-<span class="sd">      real-valued support). If dictionary, each random variable is</span>
-<span class="sd">      binded to a ``PointMass`` distribution that will be used to</span>
-<span class="sd">      infer the former conditional on data.</span>
+<span class="sd">      list, each random variable will be implictly optimized</span>
+<span class="sd">      using a ``PointMass`` distribution that is defined</span>
+<span class="sd">      internally (with support matching each random variable).</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -829,12 +999,16 @@
 <span class="sd">    &gt;&gt;&gt; qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))</span>
 <span class="sd">    &gt;&gt;&gt; qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))</span>
 <span class="sd">    &gt;&gt;&gt; qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))</span>
-<span class="sd">    &gt;&gt;&gt; MAP({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model_wrapper)</span>
+<span class="sd">    &gt;&gt;&gt; MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)</span>
 
 <span class="sd">    We also automate the specification of ``PointMass`` distributions</span>
-<span class="sd">    (with real-valued support), so one can pass in a list of latent</span>
-<span class="sd">    variables instead. However, for model wrappers, the list can only</span>
-<span class="sd">    have one element:</span>
+<span class="sd">    (with matching support), so one can pass in a list of latent</span>
+<span class="sd">    variables instead:</span>
+
+<span class="sd">    &gt;&gt;&gt; MAP([beta], {X: np.array(), y: np.array()})</span>
+<span class="sd">    &gt;&gt;&gt; MAP([pi, mu, sigma], {x: np.array()}</span>
+
+<span class="sd">    However, for model wrappers, the list can only have one element:</span>
 
 <span class="sd">    &gt;&gt;&gt; MAP([&#39;z&#39;], data, model_wrapper)</span>
 
@@ -849,18 +1023,20 @@
 <span class="sd">    explicitly pass in the point mass distributions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{}</span>
-      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s">&quot;variational&quot;</span><span class="p">):</span>
-          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="s">&#39;n_vars&#39;</span><span class="p">):</span>
-            <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">latent_vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">PointMass</span><span class="p">(</span>
-                <span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">n_vars</span><span class="p">])))}</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">latent_vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">PointMass</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]))}</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;A list of more than one element is &quot;</span>
-                                  <span class="s">&quot;not supported. See documentation.&quot;</span><span class="p">)</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s">&quot;variational&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+          <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">rv</span><span class="p">:</span> <span class="n">PointMass</span><span class="p">(</span>
+              <span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">())))</span>
+              <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">latent_vars</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">latent_vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">PointMass</span><span class="p">(</span>
+              <span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+                  <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">n_vars</span><span class="p">]))))}</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;A list of more than one element is &quot;</span>
+                                    <span class="s">&quot;not supported. See documentation.&quot;</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">MAP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 
@@ -871,9 +1047,33 @@
 <span class="sd">    .. math::</span>
 <span class="sd">      - \log p(x,z)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+      <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+      <span class="n">p_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># Copy random variables in p(z), replacing conditioning on</span>
+      <span class="c"># priors with conditioning on inferred posteriors.</span>
+      <span class="n">copied_prior</span> <span class="o">=</span> \
+          <span class="p">{</span><span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference&#39;</span><span class="p">):</span> <span class="n">qz</span>
+           <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+
+      <span class="c"># Copy random variables in p(x | z), replacing conditioning on</span>
+      <span class="c"># priors with conditioning on inferred posteriors.</span>
+      <span class="n">copied_lik</span> <span class="o">=</span> \
+          <span class="p">{</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference&#39;</span><span class="p">):</span> <span class="n">obs</span>
+           <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)}</span>
+
+      <span class="n">p_log_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
+      <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">copied_prior</span><span class="p">):</span>
+        <span class="n">p_log_prob</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">qz</span><span class="p">))</span>
+
+      <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">copied_lik</span><span class="p">):</span>
+        <span class="n">p_log_prob</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">p_log_prob</span>
     <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span></div></div>
 
 
@@ -898,7 +1098,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># use only a batch of data to estimate hessian</span>
     <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">value</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
     <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
                                  <span class="n">scope</span><span class="o">=</span><span class="s">&#39;variational&#39;</span><span class="p">)</span>
     <span class="n">inv_cov</span> <span class="o">=</span> <span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">var_list</span><span class="p">)</span>

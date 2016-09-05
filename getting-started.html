@@ -106,23 +106,23 @@
 from edward.stats import norm
 
 class BayesianNN:
-    &quot;&quot;&quot;Bayesian neural network for regression&quot;&quot;&quot;
-    def __init__(self, layer_sizes):
-        self.layer_sizes = layer_sizes
-        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
-        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
+  &quot;&quot;&quot;Bayesian neural network for regression&quot;&quot;&quot;
+  def __init__(self, layer_sizes):
+    self.layer_sizes = layer_sizes
+    self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
+    self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
-    def log_prob(self, xs, zs):
-        # Extract inputs/outputs from data `xs` and latent vars `zs`.
-        x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
-        zs = zs[&#39;z&#39;]
-        # Specify the prior on neural network weights `zs`.
-        log_prior = tf.reduce_sum(norm.logpdf(zs, mu=0.0, sigma=1.0), 1)
-        # Specify the likelihood. Its mean is the output of a neural
-        # network taking `x` as input with weights `zs`.
-        mus = self.neural_network(x, zs)
-        log_lik = tf.reduce_sum(norm.logpdf(y, mu=mus, sigma=1.0), 1)
-        return log_prior + log_lik</code></pre>
+  def log_prob(self, xs, zs):
+    # Extract inputs/outputs from data `xs` and latent vars `zs`.
+    x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
+    zs = zs[&#39;z&#39;]
+    # Specify the prior on neural network weights `zs`.
+    log_prior = tf.reduce_sum(norm.logpdf(zs, mu=0.0, sigma=1.0))
+    # Specify the likelihood. Its mean is the output of a neural
+    # network taking `x` as input with weights `zs`.
+    mu = self.neural_network(x, zs)
+    log_lik = tf.reduce_sum(norm.logpdf(y, mu=mu, sigma=1.0))
+    return log_lik + log_prior</code></pre>
 <p>Instantiate this model as</p>
 <pre class="python" language="Python"><code>model = BayesianNN(layer_sizes=[1, 2, 2, 1])</code></pre>
 <p>This defines a two-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>

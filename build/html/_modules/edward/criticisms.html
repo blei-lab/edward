@@ -139,36 +139,49 @@
 <span class="kn">import</span> <span class="nn">six</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">RandomVariable</span>
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">logit</span><span class="p">,</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span>
 
 
-<div class="viewcode-block" id="evaluate"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.evaluate">[docs]</a><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">,</span>
+<div class="viewcode-block" id="evaluate"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.evaluate">[docs]</a><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
              <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">output_key</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Evaluate fitted model using a set of metrics.</span>
+
+<span class="sd">  A metric, or scoring rule, is a function of observed data under the</span>
+<span class="sd">  posterior predictive distribution. For example in supervised metrics</span>
+<span class="sd">  such as classification accuracy, the observed data (true output) is</span>
+<span class="sd">  compared to the posterior predictive&#39;s mean (predicted output). In</span>
+<span class="sd">  unsupervised metrics such as log-likelihood, the probability of</span>
+<span class="sd">  observing the data is calculated under the posterior predictive&#39;s</span>
+<span class="sd">  log-density.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  metrics : list of str or str</span>
 <span class="sd">    List of metrics or a single metric.</span>
 <span class="sd">  data : dict</span>
-<span class="sd">    Data dictionary to evaluate model with. For TensorFlow,</span>
-<span class="sd">    Python, and Stan models, the key type is a string; for PyMC3,</span>
-<span class="sd">    the key type is a Theano shared variable. For TensorFlow,</span>
-<span class="sd">    Python, and PyMC3 models, the value type is a NumPy array or</span>
-<span class="sd">    TensorFlow placeholder; for Stan, the value type is the type</span>
-<span class="sd">    according to the Stan program&#39;s data block.</span>
-<span class="sd">  latent_vars : dict of str to RandomVariable</span>
-<span class="sd">    Collection of random variables (of type `str`) binded to their</span>
-<span class="sd">    inferred posterior (of type `RandomVariable`).</span>
-<span class="sd">  model_wrapper : ed.Model</span>
-<span class="sd">    Probability model. Class object that implements the</span>
-<span class="sd">    ``predict`` method.</span>
+<span class="sd">    Data to evaluate model with. It binds observed variables (of type</span>
+<span class="sd">    `RandomVariable`) to their realizations (of type `tf.Tensor`). It</span>
+<span class="sd">    can also bind placeholders (of type `tf.Tensor`) used in the model</span>
+<span class="sd">    to their realizations.</span>
+<span class="sd">  latent_vars : dict of str to RandomVariable, optional</span>
+<span class="sd">    Collection of random variables binded to their inferred posterior.</span>
+<span class="sd">    It is only used (and in fact required) if the model wrapper is</span>
+<span class="sd">    specified.</span>
+<span class="sd">  model_wrapper : ed.Model, optional</span>
+<span class="sd">    An optional wrapper for the probability model. It must have a</span>
+<span class="sd">    `predict` method, and `latent_vars` must be specified. `data` is</span>
+<span class="sd">    also changed. For TensorFlow, Python, and Stan models, the key</span>
+<span class="sd">    type is a string; for PyMC3, the key type is a Theano shared</span>
+<span class="sd">    variable. For TensorFlow, Python, and PyMC3 models, the value type</span>
+<span class="sd">    is a NumPy array or TensorFlow placeholder; for Stan, the value</span>
+<span class="sd">    type is the type according to the Stan program&#39;s data block.</span>
 <span class="sd">  n_samples : int, optional</span>
 <span class="sd">    Number of posterior samples for making predictions,</span>
-<span class="sd">    using the posterior predictive distribution.</span>
-<span class="sd">  output_key : str, optional</span>
-<span class="sd">    If using a supervised metric, it is the key in ``data`` which</span>
-<span class="sd">    corresponds to the predicted output.</span>
+<span class="sd">    using the posterior predictive distribution. It is only used if</span>
+<span class="sd">    the model wrapper is specified.</span>
+<span class="sd">  output_key : RandomVariable or str, optional</span>
+<span class="sd">    It is the key in ``data`` which corresponds to the model&#39;s output.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -182,37 +195,70 @@
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # build posterior predictive after inference: it is</span>
+<span class="sd">  &gt;&gt;&gt; # parameterized by posterior means</span>
+<span class="sd">  &gt;&gt;&gt; x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})</span>
+<span class="sd">  &gt;&gt;&gt;</span>
 <span class="sd">  &gt;&gt;&gt; # log-likelihood performance</span>
-<span class="sd">  &gt;&gt;&gt; evaluate(&#39;log_likelihood&#39;, data={&#39;x&#39;: x_train},</span>
-<span class="sd">  &gt;&gt;&gt;          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt; evaluate(&#39;log_likelihood&#39;, data={x_post: x_train})</span>
 <span class="sd">  &gt;&gt;&gt;</span>
 <span class="sd">  &gt;&gt;&gt; # classification accuracy</span>
-<span class="sd">  &gt;&gt;&gt; # here, &#39;x&#39; is any features the model is defined with respect to,</span>
-<span class="sd">  &gt;&gt;&gt; # and &#39;y&#39; is the output of the posterior predictive</span>
+<span class="sd">  &gt;&gt;&gt; # here, `x_ph` is any features the model is defined with respect to,</span>
+<span class="sd">  &gt;&gt;&gt; # and `y_post` is the posterior predictive distribution</span>
+<span class="sd">  &gt;&gt;&gt; evaluate(&#39;binary_accuracy&#39;, data={y_post: y_train, x_ph: x_train})</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # criticism for model wrappers</span>
+<span class="sd">  &gt;&gt;&gt; evaluate(&#39;log_likelihood&#39;, data={&#39;x&#39;: x_train},</span>
+<span class="sd">  ...          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
 <span class="sd">  &gt;&gt;&gt; evaluate(&#39;binary_accuracy&#39;, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},</span>
-<span class="sd">  &gt;&gt;&gt;          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
+<span class="sd">  ...          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-  <span class="c"># Monte Carlo estimate the mean of the posterior predictive:</span>
-  <span class="c"># 1. Sample a batch of latent variables from posterior</span>
-  <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="n">n_samples</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
-  <span class="c"># 2. Make predictions, averaging over each sample of latent variables</span>
-  <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zs</span><span class="p">)</span>
+  <span class="c"># Create feed_dict for data placeholders that the model conditions</span>
+  <span class="c"># on; it is necessary for all session runs.</span>
+  <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+               <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">and</span>
+               <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span>
 
-  <span class="c"># Evaluate y_pred according to y_true for all metrics.</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="c"># Get y_true (if supervised).</span>
-    <span class="n">y_true</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">output_key</span><span class="p">]</span>
-  <span class="k">except</span><span class="p">:</span>
-    <span class="k">pass</span>
-
-  <span class="n">evaluations</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
 
+  <span class="c"># Set default for output_key if not using a model wrapper.</span>
+  <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">output_key</span> <span class="o">==</span> <span class="s">&#39;y&#39;</span><span class="p">:</span>
+      <span class="c"># Try to default to the only one observed random variable.</span>
+      <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+              <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">output_key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;User must specify output_key.&quot;</span><span class="p">)</span>
+
+  <span class="c"># Form true data. (It is not required in the specific setting of the</span>
+  <span class="c"># log-likelihood metric with a model wrapper.)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_lik&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">])</span> <span class="ow">or</span> \
+          <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">output_key</span><span class="p">]</span>
+
+  <span class="c"># Form predicted data (if there are any supervised metrics).</span>
+  <span class="k">if</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_lik&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">y_pred</span> <span class="o">=</span> <span class="n">output_key</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># Monte Carlo estimate the mean of the posterior predictive.</span>
+      <span class="n">y_pred</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+        <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
+        <span class="n">y_pred</span> <span class="o">+=</span> <span class="p">[</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zrep</span><span class="p">)]</span>
+
+      <span class="n">y_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+  <span class="c"># Evaluate y_true (according to y_pred if supervised) for all metrics.</span>
+  <span class="n">evaluations</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;accuracy&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;crossentropy&#39;</span><span class="p">:</span>
-      <span class="c"># automate binary or sparse cat depending on max(y_true)</span>
+      <span class="c"># automate binary or sparse cat depending on its support</span>
       <span class="n">support</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">if</span> <span class="n">support</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="s">&#39;binary_&#39;</span> <span class="o">+</span> <span class="n">metric</span>
@@ -220,49 +266,59 @@
         <span class="n">metric</span> <span class="o">=</span> <span class="s">&#39;sparse_categorical_&#39;</span> <span class="o">+</span> <span class="n">metric</span>
 
     <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;binary_accuracy&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">binary_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">binary_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;categorical_accuracy&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">categorical_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">categorical_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;sparse_categorical_accuracy&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sparse_categorical_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sparse_categorical_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;log_loss&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;binary_crossentropy&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">binary_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">binary_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;categorical_crossentropy&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;sparse_categorical_crossentropy&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sparse_categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sparse_categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;hinge&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hinge</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">hinge</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;squared_hinge&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">squared_hinge</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">squared_hinge</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mse&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MSE&#39;</span> <span class="ow">or</span>
           <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_squared_error&#39;</span><span class="p">):</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mae&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MAE&#39;</span> <span class="ow">or</span>
           <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_absolute_error&#39;</span><span class="p">):</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mape&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MAPE&#39;</span> <span class="ow">or</span>
           <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_absolute_percentage_error&#39;</span><span class="p">):</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;msle&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MSLE&#39;</span> <span class="ow">or</span>
           <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_squared_logarithmic_error&#39;</span><span class="p">):</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mean_squared_logarithmic_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_squared_logarithmic_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;poisson&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">poisson</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">poisson</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;cosine&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;cosine_proximity&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cosine_proximity</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))]</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cosine_proximity</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;log_lik&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;log_likelihood&#39;</span><span class="p">:</span>
-      <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)]</span>
+      <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+        <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">output_key</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y_true</span><span class="p">))]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Monte Carlo estimate the log-density of the posterior predictive.</span>
+        <span class="n">log_liks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+          <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
+                  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
+          <span class="n">log_liks</span> <span class="o">+=</span> <span class="p">[</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_lik</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zrep</span><span class="p">)]</span>
+
+        <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">log_liks</span><span class="p">)]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">evaluations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">evaluations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">evaluations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">feed_dict</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">evaluations</span></div>
+    <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">evaluations</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ppc"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.ppc">[docs]</a><span class="k">def</span> <span class="nf">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="ppc"><a class="viewcode-back" href="../../edward.criticisms.html#edward.criticisms.ppc">[docs]</a><span class="k">def</span> <span class="nf">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Posterior predictive check.</span>
 <span class="sd">  (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)</span>
 
@@ -284,20 +340,24 @@
 <span class="sd">    Discrepancy function, which takes a dictionary of data and</span>
 <span class="sd">    dictionary of latent variables as input and outputs a `tf.Tensor`.</span>
 <span class="sd">  data : dict</span>
-<span class="sd">    Observed data to compare to. For TensorFlow, Python, and Stan</span>
-<span class="sd">    models, the key type is a string; for PyMC3, the key type is a</span>
-<span class="sd">    Theano shared variable. For TensorFlow, Python, and PyMC3 models,</span>
-<span class="sd">    the value type is a NumPy array or TensorFlow placeholder; for</span>
-<span class="sd">    Stan, the value type is the type according to the Stan program&#39;s</span>
-<span class="sd">    data block.</span>
-<span class="sd">  latent_vars : dict of str to RandomVariable</span>
-<span class="sd">    Collection of latent variables, where each latent variable key (of</span>
-<span class="sd">    type `str`) is binded to its inferred posterior (of type</span>
-<span class="sd">    `RandomVariable`). If ``latent_vars`` is ``None``, then samples</span>
-<span class="sd">    are obtained from the model through the ``sample_prior`` method.</span>
-<span class="sd">  model_wrapper : ed.Model</span>
-<span class="sd">    Probability model. Class object that implements the</span>
-<span class="sd">    ``sample_likelihood`` method.</span>
+<span class="sd">    Data to compare to. It binds observed variables (of type</span>
+<span class="sd">    `RandomVariable`) to their realizations (of type `tf.Tensor`). It</span>
+<span class="sd">    can also bind placeholders (of type `tf.Tensor`) used in the model</span>
+<span class="sd">    to their realizations.</span>
+<span class="sd">  latent_vars : dict of str to RandomVariable, optional</span>
+<span class="sd">    Collection of random variables binded to their inferred posterior.</span>
+<span class="sd">    It is an optional argument, necessary for when the discrepancy is</span>
+<span class="sd">    a function of latent variables.</span>
+<span class="sd">  model_wrapper : ed.Model, optional</span>
+<span class="sd">    An optional wrapper for the probability model. It must have a</span>
+<span class="sd">    ``sample_likelihood`` method. If `latent_vars` is not specified,</span>
+<span class="sd">    it must also have a ``sample_prior`` method, as ``ppc`` will</span>
+<span class="sd">    default to a prior predictive check. `data` is also changed. For</span>
+<span class="sd">    TensorFlow, Python, and Stan models, the key type is a string; for</span>
+<span class="sd">    PyMC3, the key type is a Theano shared variable. For TensorFlow,</span>
+<span class="sd">    Python, and PyMC3 models, the value type is a NumPy array or</span>
+<span class="sd">    TensorFlow placeholder; for Stan, the value type is the type</span>
+<span class="sd">    according to the Stan program&#39;s data block.</span>
 <span class="sd">  n_samples : int, optional</span>
 <span class="sd">    Number of replicated data sets.</span>
 
@@ -305,66 +365,92 @@
 <span class="sd">  -------</span>
 <span class="sd">  list of np.ndarray</span>
 <span class="sd">    List containing the reference distribution, which is a NumPy</span>
-<span class="sd">    vector of size elements,</span>
+<span class="sd">    array of size elements,</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))</span>
 
-<span class="sd">    and the realized discrepancy, which is a NumPy vector of size</span>
+<span class="sd">    and the realized discrepancy, which is a NumPy array of size</span>
 <span class="sd">    elements,</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      (T(x, z^{1}), ..., T(x, z^{size})).</span>
 
-<span class="sd">    If the discrepancy function is not specified, then the list</span>
-<span class="sd">    contains the full data distribution where each element is a</span>
-<span class="sd">    data set (dictionary).</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
-<span class="sd">  &gt;&gt;&gt; # posterior predictive check</span>
-<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;x&#39;: x_train}, latent_vars={&#39;z&#39;: qz},</span>
-<span class="sd">  &gt;&gt;&gt;     model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt; # build posterior predictive after inference: it is</span>
+<span class="sd">  &gt;&gt;&gt; # parameterized by posterior means</span>
+<span class="sd">  &gt;&gt;&gt; x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})</span>
 <span class="sd">  &gt;&gt;&gt;</span>
-<span class="sd">  &gt;&gt;&gt; # posterior predictive check (with covariates)</span>
-<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},</span>
-<span class="sd">  &gt;&gt;&gt;     latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt; # posterior predictive check</span>
+<span class="sd">  &gt;&gt;&gt; # T is a user-defined function of data, T(data)</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={x_post: x_train})</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # in general T is a discrepancy function of the data (both response and</span>
+<span class="sd">  &gt;&gt;&gt; # covariates) and latent variables, T(data, latent_vars)</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={y_post: y_train, x_ph: x_train},</span>
+<span class="sd">  ...     latent_vars={&#39;z&#39;: qz, &#39;beta&#39;: qbeta})</span>
 <span class="sd">  &gt;&gt;&gt;</span>
 <span class="sd">  &gt;&gt;&gt; # prior predictive check</span>
+<span class="sd">  &gt;&gt;&gt; # running ppc on original x</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={x: x_train})</span>
+<span class="sd">  &gt;&gt;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; # criticism for model wrappers</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;x&#39;: x_train}, latent_vars={&#39;z&#39;: qz},</span>
+<span class="sd">  ...     model_wrapper=model)</span>
+<span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},</span>
+<span class="sd">  ...     latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
 <span class="sd">  &gt;&gt;&gt; ppc(T, data={&#39;x&#39;: x_train}, latent_vars=None,</span>
-<span class="sd">  &gt;&gt;&gt;     model_wrapper=model)</span>
+<span class="sd">  ...     model_wrapper=model)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-  <span class="c"># Assume all values have the same data set size.</span>
-  <span class="n">N</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">data</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="c"># Sample to get replicated data sets and latent variables.</span>
+  <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">zrep</span> <span class="o">=</span> <span class="k">None</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+              <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
 
-  <span class="c"># 1. Sample from posterior (or prior).</span>
-  <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_prior</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+    <span class="n">xrep</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
+        <span class="c"># Replace observed data with replicated data.</span>
+        <span class="n">xrep</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">xrep</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="c"># `tf.identity()` is to avoid fetching, e.g., a placeholder x</span>
-    <span class="c"># when feeding the dictionary {x: np.array()}. TensorFlow will</span>
-    <span class="c"># raise an error.</span>
-    <span class="n">zs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="n">n_samples</span><span class="p">]))</span>
-          <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">zrep</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_prior</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+              <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
 
-  <span class="c"># 2. Sample from likelihood.</span>
-  <span class="c"># We fetch zs out of the session because sample_likelihood() may</span>
-  <span class="c"># require a SciPy-based sampler.</span>
-  <span class="n">xreps</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_likelihood</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">zs</span><span class="p">),</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">xrep</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_likelihood</span><span class="p">(</span><span class="n">zrep</span><span class="p">)</span>
 
-  <span class="c"># 3. Calculate discrepancy.</span>
-  <span class="n">Txreps</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">Txs</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">zs_unpacked</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">z_samples</span><span class="p">)</span>
-                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">z_samples</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">zs</span><span class="p">)}</span>
-  <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">xrep</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">xreps</span><span class="p">):</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">z_samples</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">z_samples</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">zs_unpacked</span><span class="p">)}</span>
-    <span class="n">Txreps</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">xrep</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
-    <span class="n">Txs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">T</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+  <span class="c"># Create feed_dict for data placeholders that the model conditions</span>
+  <span class="c"># on; it is necessary for all session runs.</span>
+  <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+               <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">and</span>
+               <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span>
 
-  <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txreps</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">Txs</span><span class="p">)])</span></div>
+  <span class="c"># Calculate discrepancy over many replicated data sets and latent</span>
+  <span class="c"># variables.</span>
+  <span class="n">Trep</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">xrep</span><span class="p">,</span> <span class="n">zrep</span><span class="p">)</span>
+  <span class="n">Tobs</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zrep</span><span class="p">)</span>
+  <span class="n">Treps</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">Ts</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+    <span class="c"># Take a forward pass (session run) to get new samples for</span>
+    <span class="c"># each calculation of the discrepancy.</span>
+    <span class="c"># Note that alternatively we can unroll the graph by registering</span>
+    <span class="c"># this operation ``n_samples`` times, each for different parent</span>
+    <span class="c"># nodes representing ``xrep`` and ``zrep``.</span>
+    <span class="n">Treps</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">Trep</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)]</span>
+    <span class="n">Ts</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">Tobs</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)]</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">Treps</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">Ts</span><span class="p">)]</span></div>
 
 
 <span class="c"># Classification metrics</span>

@@ -103,37 +103,32 @@
   """
   Bayesian linear regression for outputs y on inputs x.
 
-  p((x,y), z) = Normal(y | x*z, lik_variance) *
-          Normal(z | 0, prior_variance),
+  p((x,y), (w,b)) = Normal(y | x*w + b, lik_std) *
+                    Normal(w | 0, prior_std) *
+                    Normal(b | 0, prior_std),
 
-  where z are weights, and with known lik_variance and
-  prior_variance.
+  where w and b are weights and intercepts, and with known lik_std and
+  prior_std.
 
   Parameters
   ----------
-  lik_variance : float, optional
-    Variance of the normal likelihood; aka noise parameter,
-    homoscedastic variance, scale parameter.
-  prior_variance : float, optional
-    Variance of the normal prior on weights; aka L2
+  lik_std : float, optional
+    Standard deviation of the normal likelihood; aka noise parameter,
+    homoscedastic noise, scale parameter.
+  prior_std : float, optional
+    Standard deviation of the normal prior on weights; aka L2
     regularization parameter, ridge penalty, scale parameter.
   """
-  def __init__(self, lik_variance=0.01, prior_variance=0.01):
-    self.lik_variance = lik_variance
-    self.prior_variance = prior_variance
-    self.n_vars = 2
+  def __init__(self, lik_std=0.1, prior_std=0.1):
+    self.lik_std = lik_std
+    self.prior_std = prior_std
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
     x, y = xs['x'], xs['y']
-    log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance
-    # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
-    W = tf.expand_dims(zs['z'][:, 0], 0)
-    b = zs['z'][:, 1]
-    mus = tf.matmul(x, W) + b
-    # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
-    y = tf.expand_dims(y, 1)
-    log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
+    w, b = zs['w'], zs['b']
+    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
+    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
+    log_lik = tf.reduce_sum(norm.logpdf(y, ed.dot(x, w) + b, self.lik_std))
     return log_lik + log_prior
 
 

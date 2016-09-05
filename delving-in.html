@@ -117,7 +117,7 @@
 
 model = Model(...)</code></pre>
 <p>The field <code>n_vars</code> denotes the number of latent variables in the probability model. For example, a model with a Gaussian likelihood with latent mean and variance would have <code>n_vars=2*N</code> latent variables for <code>N</code> observations.</p>
-<p>The method <code>log_prob(xs, zs)</code> calculates the log probability of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> can be a single data point or a batch of data points. Analogously, <code>zs</code> can be a single set of latent variables, or a batch thereof. The method returns a vector of log density evaluations, one for each set of latent variables.</p>
+<p>The method <code>log_prob(xs, zs)</code> calculates the logarithm of the joint density <span class="math inline">\(\log p(x,z)\)</span>. Here <code>xs</code> can be a single data point or a batch of data points. Analogously, <code>zs</code> can be a single set of latent variables, or a batch thereof.</p>
 <h3 id="inference">Inference</h3>
 <p>Given a model and data, we aim to reason about <span class="math inline">\(z\)</span>: the model’s hidden structure. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden structure, and its variance describes the uncertainty around our best guess.</p>
 <p>Edward has many inference algorithms and makes it easy to develop new ones.</p>
