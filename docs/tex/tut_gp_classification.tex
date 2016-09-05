@@ -105,13 +105,12 @@ class GaussianProcess:
     return tf.pack(mat)
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    """Return scalar, the log joint density log p(xs, zs)."""
     x, y = xs['x'], xs['y']
     log_prior = multivariate_normal.logpdf(
-        zs['z'], tf.zeros([self.N]), self.kernel(x))
-    log_lik = tf.pack([tf.reduce_sum(
-                       bernoulli.logpmf(y, p=self.inverse_link(tf.mul(y, z))))
-                       for z in tf.unpack(zs['z'])])
+        zs['z'], tf.zeros(self.N), self.kernel(x))
+    log_lik = tf.reduce_sum(
+        bernoulli.logpmf(y, p=self.inverse_link(y * zs['z'])))
     return log_prior + log_lik
 
 

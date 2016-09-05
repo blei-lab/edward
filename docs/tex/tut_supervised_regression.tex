@@ -20,14 +20,14 @@ Simulate a data set of $40$ data points, which comprises of pairs of inputs $\ma
 $y_n\in\mathbb{R}$. They have a linear dependence with normally distributed noise.
 
 \begin{lstlisting}[language=Python]
-def build_toy_dataset(N=40, coeff=np.random.randn(10), noise_std=0.1):
+def build_toy_dataset(N, coeff=np.random.randn(10), noise_std=0.1):
   n_dim = len(coeff)
   x = np.random.randn(N, n_dim).astype(np.float32)
   y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
   return x, y
 
 coeff = np.random.randn(10)
-x_train, y_train = build_toy_dataset(coeff=coeff)
+x_train, y_train = build_toy_dataset(N=40, coeff=coeff)
 data = {'x': x_train, 'y': y_train}
 \end{lstlisting}
 
@@ -45,37 +45,31 @@ class LinearModel:
   """
   Bayesian linear regression for outputs y on inputs x.
 
-  p((x,y), z) = Normal(y | x*z, lik_variance) *
-          Normal(z | 0, prior_variance),
+  p((x,y), z) = Normal(y | x*z, lik_std) *
+                Normal(z | 0, prior_std),
 
-  where z are weights, and with known lik_variance and
-  prior_variance.
+  where z are weights, and with known lik_std and prior_std.
 
   Parameters
   ----------
-  lik_variance : float, optional
-    Variance of the normal likelihood; aka noise parameter,
-    homoscedastic variance, scale parameter.
-  prior_variance : float, optional
-    Variance of the normal prior on weights; aka L2
+  lik_std : float, optional
+    Standard deviation of the normal likelihood; aka noise parameter,
+    homoscedastic noise, scale parameter.
+  prior_std : float, optional
+    Standard deviation of the normal prior on weights; aka L2
     regularization parameter, ridge penalty, scale parameter.
   """
-  def __init__(self, lik_variance=0.01, prior_variance=0.01):
-    self.lik_variance = lik_variance
-    self.prior_variance = prior_variance
-    self.n_vars = 11
+  def __init__(self, lik_std=0.1, prior_std=0.1):
+    self.lik_std = lik_std
+    self.prior_std = prior_std
 
   def log_prob(self, xs, zs):
-    """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
+    """Return scalar, the log joint density log p(xs, zs)."""
     x, y = xs['x'], xs['y']
-    log_prior = -tf.reduce_sum(zs['z'] * zs['z'], 1) / self.prior_variance
-    # broadcasting to do (x*W) + b (n_minibatch x n_samples - n_samples)
-    b = zs['z'][:, 0]
-    W = tf.transpose(zs['z'][:, 1:])
-    mus = tf.matmul(x, W) + b
-    # broadcasting to do mus - y (n_minibatch x n_samples - n_minibatch x 1)
-    y = tf.expand_dims(y, 1)
-    log_lik = -tf.reduce_sum(tf.pow(mus - y, 2), 0) / self.lik_variance
+    w, b = zs['w'], zs['b']
+    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
+    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
+    log_lik = tf.reduce_sum(norm.logpdf(y, ed.dot(x, w) + b, self.lik_std))
     return log_lik + log_prior
 
 
@@ -117,13 +111,11 @@ probability model.
 class LinearModel:
   ...
   def predict(self, xs, zs):
-    """Return a prediction for each data point, averaging over
-    each set of latent variables z in zs."""
-    x_test = xs['x']
-    b = zs['z'][:, 0]
-    W = tf.transpose(zs['z'][:, 1:])
-    y_pred = tf.reduce_mean(tf.matmul(x_test, W) + b, 1)
-    return y_pred
+    """Return a prediction for each data point, via the likelihood's
+    mean."""
+    x = xs['x']
+    w, b = zs['w'], zs['b']
+    return ed.dot(x, w) + b
 \end{lstlisting}
 
 Here the test data is simulated from the same process.

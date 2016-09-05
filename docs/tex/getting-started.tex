@@ -34,23 +34,23 @@ import tensorflow as tf
 from edward.stats import norm
 
 class BayesianNN:
-    """Bayesian neural network for regression"""
-    def __init__(self, layer_sizes):
-        self.layer_sizes = layer_sizes
-        self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
-        self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
+  """Bayesian neural network for regression"""
+  def __init__(self, layer_sizes):
+    self.layer_sizes = layer_sizes
+    self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
+    self.n_vars = sum((m+1)*n for m, n in self.weight_dims)
 
-    def log_prob(self, xs, zs):
-        # Extract inputs/outputs from data `xs` and latent vars `zs`.
-        x, y = xs['x'], xs['y']
-        zs = zs['z']
-        # Specify the prior on neural network weights `zs`.
-        log_prior = tf.reduce_sum(norm.logpdf(zs, mu=0.0, sigma=1.0), 1)
-        # Specify the likelihood. Its mean is the output of a neural
-        # network taking `x` as input with weights `zs`.
-        mus = self.neural_network(x, zs)
-        log_lik = tf.reduce_sum(norm.logpdf(y, mu=mus, sigma=1.0), 1)
-        return log_prior + log_lik
+  def log_prob(self, xs, zs):
+    # Extract inputs/outputs from data `xs` and latent vars `zs`.
+    x, y = xs['x'], xs['y']
+    zs = zs['z']
+    # Specify the prior on neural network weights `zs`.
+    log_prior = tf.reduce_sum(norm.logpdf(zs, mu=0.0, sigma=1.0))
+    # Specify the likelihood. Its mean is the output of a neural
+    # network taking `x` as input with weights `zs`.
+    mu = self.neural_network(x, zs)
+    log_lik = tf.reduce_sum(norm.logpdf(y, mu=mu, sigma=1.0))
+    return log_lik + log_prior
 \end{lstlisting}
 
 Instantiate this model as
