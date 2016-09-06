@@ -9,7 +9,7 @@ import tensorflow as tf
 
 from edward.models import StanModel, RandomVariable, Normal, PointMass
 from edward.util import copy, get_dims, get_session, hessian, \
-    kl_multivariate_normal, log_sum_exp, placeholder
+    kl_multivariate_normal, log_sum_exp, merge_dicts, placeholder
 
 try:
   import prettytensor as pt
@@ -28,12 +28,16 @@ class Inference(object):
     will infer the former conditional on data.
   data : dict
     Data dictionary whose values may vary at each session run.
+  tie : dict of tf.Tensor to RandomVariable
+    Set of tensors tied to random variables. This enables cycles in
+    the graphical model, so that inference will infer ``latent_vars``
+    conditional on ``data`` while tying nodes in ``tie``.
   model_wrapper : ed.Model or None
     An optional wrapper for the probability model. If specified, the
     random variables in `latent_vars`' dictionary keys are strings
     used accordingly by the wrapper.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars, data=None, tie=None, model_wrapper=None):
     """Initialization.
 
     Parameters
@@ -47,6 +51,10 @@ class Inference(object):
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
       model to their realizations.
+    tie : dict of tf.Tensor to RandomVariable, optional
+      Set of tensors tied to random variables. This enables cycles in
+      the graphical model, so that inference will infer ``latent_vars``
+      conditional on ``data`` while tying nodes in ``tie``.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings
@@ -89,7 +97,13 @@ class Inference(object):
     elif not isinstance(data, dict):
       raise TypeError()
 
+    if tie is None:
+      tie = {}
+    elif not isinstance(tie, dict):
+      raise TypeError()
+
     self.latent_vars = latent_vars
+    self.tie = tie
     self.model_wrapper = model_wrapper
 
     if isinstance(model_wrapper, StanModel):
@@ -124,7 +138,7 @@ class Inference(object):
 class MonteCarlo(Inference):
   """Base class for Monte Carlo inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars, data=None, tie=None, model_wrapper=None):
     """Initialization.
 
     Parameters
@@ -138,6 +152,10 @@ class MonteCarlo(Inference):
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
       model to their realizations.
+    tie : dict of tf.Tensor to RandomVariable, optional
+      Set of tensors tied to random variables. This enables cycles in
+      the graphical model, so that inference will infer ``latent_vars``
+      conditional on ``data`` while tying nodes in ``tie``.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings used
@@ -148,13 +166,13 @@ class MonteCarlo(Inference):
       array or TensorFlow tensor; for Stan, the value type is the
       type according to the Stan program's data block.
     """
-    super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
+    super(MonteCarlo, self).__init__(latent_vars, data, tie, model_wrapper)
 
 
 class VariationalInference(Inference):
   """Base class for variational inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars, data=None, tie=None, model_wrapper=None):
     """Initialization.
 
     Parameters
@@ -168,6 +186,10 @@ class VariationalInference(Inference):
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
       model to their realizations.
+    tie : dict of tf.Tensor to RandomVariable, optional
+      Set of tensors tied to random variables. This enables cycles in
+      the graphical model, so that inference will infer ``latent_vars``
+      conditional on ``data`` while tying nodes in ``tie``.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings used
@@ -178,7 +200,8 @@ class VariationalInference(Inference):
       array or TensorFlow tensor; for Stan, the value type is the type
       according to the Stan program's data block.
     """
-    super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
+    super(VariationalInference, self).__init__(
+        latent_vars, data, tie, model_wrapper)
 
   def run(self, *args, **kwargs):
     """A simple wrapper to run variational inference.
@@ -492,18 +515,19 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
           # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -539,18 +563,19 @@ class MFVI(VariationalInference):
         z_sample[z] = qz_copy.value()
         q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_sample[z]))
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
           # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -591,12 +616,13 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -642,18 +668,19 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
           # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -696,12 +723,13 @@ class MFVI(VariationalInference):
         qz_copy = copy(qz, scope='inference_' + str(s))
         z_sample[z] = qz_copy.value()
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -744,18 +772,19 @@ class MFVI(VariationalInference):
         qz_copy = copy(qz, scope='inference_' + str(s))
         z_sample[z] = qz_copy.value()
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
           # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -837,18 +866,19 @@ class KLpq(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      dict_swap = merge_dicts(z_sample, self.tie)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
           # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
             # Copy p(x | z), replacing any conditioning on prior with
             # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -875,7 +905,7 @@ class MAP(VariationalInference):
 
     \min_{z} - \log p(x,z)
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars, data=None, tie=None, model_wrapper=None):
     """
     Parameters
     ----------
@@ -932,7 +962,7 @@ class MAP(VariationalInference):
           raise NotImplementedError("A list of more than one element is "
                                     "not supported. See documentation.")
 
-    super(MAP, self).__init__(latent_vars, data, model_wrapper)
+    super(MAP, self).__init__(latent_vars, data, tie, model_wrapper)
 
   def build_loss(self):
     """Build loss function. Its automatic differentiation
@@ -943,19 +973,20 @@ class MAP(VariationalInference):
     """
     z_mode = {z: qz.value()
               for z, qz in six.iteritems(self.latent_vars)}
+    dict_swap = merge_dicts(z_mode, self.tie)
     if self.model_wrapper is None:
       p_log_prob = 0.0
       for z in six.iterkeys(self.latent_vars):
         # Copy p(z), replacing any conditioning on prior with
         # conditioning on posterior mode.
-        z_copy = copy(z, dict_swap=z_mode, scope='inference_' + str(0))
+        z_copy = copy(z, dict_swap, scope='inference_' + str(0))
         p_log_prob += tf.reduce_sum(z_copy.log_prob(z_mode[z]))
 
       for x, obs in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
           # Copy p(x | z), replacing any conditioning on prior with
           # conditioning on posterior mode.
-          x_copy = copy(x, dict_swap=z_mode, scope='inference_' + str(0))
+          x_copy = copy(x, dict_swap, scope='inference_' + str(0))
           p_log_prob += tf.reduce_sum(x_copy.log_prob(obs))
     else:
       x = self.data
@@ -976,8 +1007,8 @@ class Laplace(MAP):
   the Hessian at the mode of the posterior. This forms the
   covariance of the normal approximation.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
-    super(Laplace, self).__init__(latent_vars, data, model_wrapper)
+  def __init__(self, *args, **kwargs):
+    super(Laplace, self).__init__(*args, **kwargs)
 
   def finalize(self):
     """Function to call after convergence.

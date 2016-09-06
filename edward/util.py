@@ -628,6 +628,21 @@ def logit(x):
   return tf.log(x) - tf.log(1.0 - x)
 
 
+def merge_dicts(*dict_args):
+  """Given any number of dicts, shallow copy and merge into a new
+  dict. Precedence goes to key value pairs in latter dicts.
+
+  References
+  ----------
+  http://stackoverflow.com/questions/38987/how-can-i-merge-two-python-dictionaries-in-a-single-expression
+  """
+  result = {}
+  for dictionary in dict_args:
+      result.update(dictionary)
+
+  return result
+
+
 def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
   """Squared-exponential kernel
 
