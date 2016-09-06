@@ -107,7 +107,7 @@ We define a TensorFlow placeholder \texttt{x_ph} for the neural network's input.
 We define a variational model which is parameterized by the neural network's
 output.
 \begin{lstlisting}[language=Python]
-x_ph = tf.placeholder(tf.float32, [28 * 28])
+x_ph = ed.placeholder(tf.float32, [28 * 28])
 mu, sigma = neural_network(x_ph)
 qz = Normal(mu=mu, sigma=sigma)
 \end{lstlisting}

@@ -71,8 +71,8 @@ print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
 print("Size of output in test data: {:s}".format(y_test.shape))
 
-X = tf.placeholder(tf.float32, shape=(None, 1))
-y = tf.placeholder(tf.float32, shape=(None, 1))
+X = ed.placeholder(tf.float32, shape=(None, 1))
+y = ed.placeholder(tf.float32, shape=(None, 1))
 data = {'X': X, 'y': y}
 
 inference = ed.MAP([], data, model)
