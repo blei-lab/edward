@@ -77,4 +77,8 @@ inference = ed.MAP(['z'], data, model)
 # qz = Normal(mu=qz_mu, sigma=qz_sigma)
 # inference = ed.MFVI({'z': qz}, data, model)
 
-inference.run(n_iter=5000, n_print=500)
+inference.initialize(n_print=500)
+for t in range(2500+1):
+  loss = inference.update()
+  if t % inference.n_print == 0:
+    print("iter {:d} loss {:.2f}".format(t, loss))

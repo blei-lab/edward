@@ -29,4 +29,4 @@ qp_p = tf.nn.sigmoid(tf.Variable(tf.random_normal([])))
 qp = Bernoulli(p=qp_p)
 
 inference = ed.MFVI({'p': qp}, model_wrapper=model)
-inference.run(n_iter=1000)
+inference.run(n_iter=100, n_samples=5, n_print=10)

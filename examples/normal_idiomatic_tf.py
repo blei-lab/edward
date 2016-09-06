@@ -34,7 +34,7 @@ qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, model_wrapper=model)
-inference.initialize()
-for t in range(1000):
+inference.initialize(n_print=50)
+for t in range(250+1):
   loss = inference.update()
   inference.print_progress(t, loss)
