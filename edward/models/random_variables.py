@@ -16,8 +16,11 @@ class Bernoulli(RandomVariable):
     super(Bernoulli, self).__init__(distributions.Bernoulli, *args, **kwargs)
 
   def __str__(self):
-    p = self.distribution.p.eval()
-    return "p: \n" + p.__str__()
+    try:
+      p = self.distribution.p.eval()
+      return "p: \n" + p.__str__()
+    except:
+      return super(Bernoulli, self).__str__()
 
 
 class Beta(RandomVariable):
@@ -25,10 +28,13 @@ class Beta(RandomVariable):
     super(Beta, self).__init__(distributions.Beta, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    a, b = sess.run([self.distribution.a, self.distribution.b])
-    return "a: \n" + a.__str__() + "\n" + \
-           "b: \n" + b.__str__()
+    try:
+      sess = get_session()
+      a, b = sess.run([self.distribution.a, self.distribution.b])
+      return "a: \n" + a.__str__() + "\n" + \
+             "b: \n" + b.__str__()
+    except:
+      return super(Beta, self).__str__()
 
 
 class Categorical(RandomVariable):
@@ -37,8 +43,11 @@ class Categorical(RandomVariable):
         distributions.Categorical, *args, **kwargs)
 
   def __str__(self):
-    logits = self.distribution.logits.eval()
-    return "logits: \n" + logits.__str__()
+    try:
+      logits = self.distribution.logits.eval()
+      return "logits: \n" + logits.__str__()
+    except:
+      return super(Categorical, self).__str__()
 
 
 class Chi2(RandomVariable):
@@ -46,8 +55,11 @@ class Chi2(RandomVariable):
     super(Chi2, self).__init__(distributions.Chi2, *args, **kwargs)
 
   def __str__(self):
-    df = self.distribution.df.eval()
-    return "df: \n" + df.__str__()
+    try:
+      df = self.distribution.df.eval()
+      return "df: \n" + df.__str__()
+    except:
+      return super(Chi2, self).__str__()
 
 
 class Dirichlet(RandomVariable):
@@ -55,8 +67,11 @@ class Dirichlet(RandomVariable):
     super(Dirichlet, self).__init__(distributions.Dirichlet, *args, **kwargs)
 
   def __str__(self):
-    alpha = self.distribution.alpha.eval()
-    return "alpha: \n" + alpha.__str__()
+    try:
+      alpha = self.distribution.alpha.eval()
+      return "alpha: \n" + alpha.__str__()
+    except:
+      return super(Dirichlet, self).__str__()
 
 
 class DirichletMultinomial(RandomVariable):
@@ -65,10 +80,13 @@ class DirichletMultinomial(RandomVariable):
         distributions.DirichletMultinomial, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    n, alpha = sess.run([self.distribution.n, self.distribution.alpha])
-    return "n: \n" + n.__str__() + "\n" + \
-           "alpha: \n" + alpha.__str__()
+    try:
+      sess = get_session()
+      n, alpha = sess.run([self.distribution.n, self.distribution.alpha])
+      return "n: \n" + n.__str__() + "\n" + \
+             "alpha: \n" + alpha.__str__()
+    except:
+      return super(DirichletMultinomial, self).__str__()
 
 
 class Exponential(RandomVariable):
@@ -77,8 +95,11 @@ class Exponential(RandomVariable):
         distributions.Exponential, *args, **kwargs)
 
   def __str__(self):
-    lam = self.distribution.lam.eval()
-    return "lam: \n" + lam.__str__()
+    try:
+      lam = self.distribution.lam.eval()
+      return "lam: \n" + lam.__str__()
+    except:
+      return super(Exponential, self).__str__()
 
 
 class Gamma(RandomVariable):
@@ -86,10 +107,13 @@ class Gamma(RandomVariable):
     super(Gamma, self).__init__(distributions.Gamma, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    alpha, beta = sess.run([self.distribution.alpha, self.distribution.beta])
-    return "alpha: \n" + alpha.__str__() + "\n" + \
-           "beta: \n" + beta.__str__()
+    try:
+      sess = get_session()
+      alpha, beta = sess.run([self.distribution.alpha, self.distribution.beta])
+      return "alpha: \n" + alpha.__str__() + "\n" + \
+             "beta: \n" + beta.__str__()
+    except:
+      return super(Gamma, self).__str__()
 
 
 class InverseGamma(RandomVariable):
@@ -98,10 +122,13 @@ class InverseGamma(RandomVariable):
         distributions.InverseGamma, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    alpha, beta = sess.run([self.distribution.alpha, self.distribution.beta])
-    return "alpha: \n" + alpha.__str__() + "\n" + \
-           "beta: \n" + beta.__str__()
+    try:
+      sess = get_session()
+      alpha, beta = sess.run([self.distribution.alpha, self.distribution.beta])
+      return "alpha: \n" + alpha.__str__() + "\n" + \
+             "beta: \n" + beta.__str__()
+    except:
+      return super(InverseGamma, self).__str__()
 
 
 class Laplace(RandomVariable):
@@ -109,10 +136,13 @@ class Laplace(RandomVariable):
     super(Laplace, self).__init__(distributions.Laplace, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    loc, scale = sess.run([self.distribution.loc, self.distribution.scale])
-    return "loc: \n" + loc.__str__() + "\n" + \
-           "scale: \n" + scale.__str__()
+    try:
+      sess = get_session()
+      loc, scale = sess.run([self.distribution.loc, self.distribution.scale])
+      return "loc: \n" + loc.__str__() + "\n" + \
+             "scale: \n" + scale.__str__()
+    except:
+      return super(Laplace, self).__str__()
 
 
 class MultivariateNormalCholesky(RandomVariable):
@@ -121,10 +151,13 @@ class MultivariateNormalCholesky(RandomVariable):
         distributions.MultivariateNormalCholesky, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    mu, chol = sess.run([self.distribution.mu, self.distribution.chol])
-    return "mu: \n" + mu.__str__() + "\n" + \
-           "chol: \n" + chol.__str__()
+    try:
+      sess = get_session()
+      mu, chol = sess.run([self.distribution.mu, self.distribution.chol])
+      return "mu: \n" + mu.__str__() + "\n" + \
+             "chol: \n" + chol.__str__()
+    except:
+      return super(MultivariateNormalCholesky, self).__str__()
 
 
 class MultivariateNormalDiag(RandomVariable):
@@ -133,11 +166,14 @@ class MultivariateNormalDiag(RandomVariable):
         distributions.MultivariateNormalDiag, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    mu, diag_stdev = sess.run([self.distribution.mu,
-                               self.distribution.diag_stdev])
-    return "mu: \n" + mu.__str__() + "\n" + \
-           "diag_stdev: \n" + diag_stdev.__str__()
+    try:
+      sess = get_session()
+      mu, diag_stdev = sess.run([self.distribution.mu,
+                                 self.distribution.diag_stdev])
+      return "mu: \n" + mu.__str__() + "\n" + \
+             "diag_stdev: \n" + diag_stdev.__str__()
+    except:
+      return super(MultivariateNormalDiag, self).__str__()
 
 
 class MultivariateNormalFull(RandomVariable):
@@ -146,10 +182,13 @@ class MultivariateNormalFull(RandomVariable):
         distributions.MultivariateNormalFull, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    mu, sigma = sess.run([self.distribution.mu, self.distribution.sigma])
-    return "mu: \n" + mu.__str__() + "\n" + \
-           "sigma: \n" + sigma.__str__()
+    try:
+      sess = get_session()
+      mu, sigma = sess.run([self.distribution.mu, self.distribution.sigma])
+      return "mu: \n" + mu.__str__() + "\n" + \
+             "sigma: \n" + sigma.__str__()
+    except:
+      return super(MultivariateNormalFull, self).__str__()
 
 
 class Normal(RandomVariable):
@@ -157,10 +196,13 @@ class Normal(RandomVariable):
     super(Normal, self).__init__(distributions.Normal, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    mu, sigma = sess.run([self.distribution.mu, self.distribution.sigma])
-    return "mu: \n" + mu.__str__() + "\n" + \
-           "sigma: \n" + sigma.__str__()
+    try:
+      sess = get_session()
+      mu, sigma = sess.run([self.distribution.mu, self.distribution.sigma])
+      return "mu: \n" + mu.__str__() + "\n" + \
+             "sigma: \n" + sigma.__str__()
+    except:
+      return super(Normal, self).__str__()
 
   @property
   def mu(self):
@@ -176,13 +218,16 @@ class StudentT(RandomVariable):
     super(StudentT, self).__init__(distributions.StudentT, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    df, mu, sigma = sess.run([self.distribution.df,
-                              self.distribution.mu,
-                              self.distribution.sigma])
-    return "df: \n" + df.__str__() + "\n" + \
-           "mu: \n" + mu.__str__() + "\n" + \
-           "sigma: \n" + sigma.__str__()
+    try:
+      sess = get_session()
+      df, mu, sigma = sess.run([self.distribution.df,
+                                self.distribution.mu,
+                                self.distribution.sigma])
+      return "df: \n" + df.__str__() + "\n" + \
+             "mu: \n" + mu.__str__() + "\n" + \
+             "sigma: \n" + sigma.__str__()
+    except:
+      return super(StudentT, self).__str__()
 
 
 class TransformedDistribution(RandomVariable):
@@ -191,7 +236,10 @@ class TransformedDistribution(RandomVariable):
         distributions.TransformedDistribution, *args, **kwargs)
 
   def __str__(self):
-    return self.distribution.base_distribution.__str__()
+    try:
+      return self.distribution.base_distribution.__str__()
+    except:
+      return super(TransformedDistribution, self).__str__()
 
 
 class Uniform(RandomVariable):
@@ -199,10 +247,13 @@ class Uniform(RandomVariable):
     super(Uniform, self).__init__(distributions.Uniform, *args, **kwargs)
 
   def __str__(self):
-    sess = get_session()
-    a, b = sess.run([self.distribution.a, self.distribution.b])
-    return "a: \n" + a.__str__() + "\n" + \
-           "b: \n" + b.__str__()
+    try:
+      sess = get_session()
+      a, b = sess.run([self.distribution.a, self.distribution.b])
+      return "a: \n" + a.__str__() + "\n" + \
+             "b: \n" + b.__str__()
+    except:
+      return super(Uniform, self).__str__()
 
 
 class PointMass(RandomVariable):
@@ -210,5 +261,8 @@ class PointMass(RandomVariable):
     super(PointMass, self).__init__(distributions_PointMass, *args, **kwargs)
 
   def __str__(self):
-    params = self.distribution.params.eval()
-    return "params: \n" + params.__str__()
+    try:
+      params = self.distribution.params.eval()
+      return "params: \n" + params.__str__()
+    except:
+      return super(PointMass, self).__str__()
