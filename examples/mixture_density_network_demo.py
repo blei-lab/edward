@@ -101,8 +101,8 @@ print("Size of output in test data: {:s}".format(y_test.shape))
 sns.regplot(X_train, y_train, fit_reg=False)
 plt.show()
 
-X = tf.placeholder(tf.float32, shape=(None, 1))
-y = tf.placeholder(tf.float32, shape=(None, 1))
+X = ed.placeholder(tf.float32, shape=(None, 1))
+y = ed.placeholder(tf.float32, shape=(None, 1))
 data = {'X': X, 'y': y}
 
 model = MixtureDensityNetwork(20)

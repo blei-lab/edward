@@ -50,8 +50,8 @@ sns.regplot(X_train, y_train, fit_reg=False)
 We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data.html}{one of many ways} to train models with data in Edward.
 
 \begin{lstlisting}[language=Python]
-X = tf.placeholder(tf.float32, shape=(None, 1))
-y = tf.placeholder(tf.float32, shape=(None, 1))
+X = ed.placeholder(tf.float32, shape=(None, 1))
+y = ed.placeholder(tf.float32, shape=(None, 1))
 data = {'X': X, 'y': y}
 \end{lstlisting}
 

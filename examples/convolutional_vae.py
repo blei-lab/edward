@@ -121,7 +121,7 @@ model = NormalBernoulli(n_vars=10)
 # to explicitly represent the variational factors for a mini-batch,
 # q(z_{batch} | x) = prod_{m=1}^{n_data}
 #                    Normal(z_m | mu, sigma = neural_network(x_m))
-x_ph = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
+x_ph = ed.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
 mu, sigma = neural_network(x_ph)
 qz = Normal(mu=mu, sigma=sigma)
 
@@ -130,7 +130,7 @@ if not os.path.exists(DATA_DIR):
   os.makedirs(DATA_DIR)
 
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
-x = tf.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
+x = ed.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
 data = {'x': x}
 
 sess = ed.get_session()

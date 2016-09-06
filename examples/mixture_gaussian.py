@@ -145,7 +145,7 @@ qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 
 data = {'x': x_train}
 inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
-inference.run(n_iter=4000, n_samples=10, n_minibatch=10)
+inference.run(n_iter=2500, n_samples=10, n_minibatch=20)
 
 # Average per-cluster and per-data point likelihood over many posterior samples.
 log_liks = []
