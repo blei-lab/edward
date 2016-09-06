@@ -34,8 +34,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
   dict_swap : dict, optional
     Random variables, variables, tensors, or operations to
     swap with. Its keys are what `org_instance` may depend on,
-    and its values are the corresponding object (of the same type)
-    that is used in exchange.
+    and its values are the corresponding object (not necessarily of
+    the same type) that is used in exchange.
   scope : str, optional
     A scope for the new node(s). This is used to avoid name
     conflicts with the original node(s).
@@ -81,6 +81,9 @@ def copy(org_instance, dict_swap=None, scope="copied",
      not isinstance(org_instance, tf.Tensor) and \
      not isinstance(org_instance, tf.Operation):
     raise TypeError("Could not copy instance: " + str(org_instance))
+
+  if dict_swap is None:
+    dict_swap = {}
 
   # Swap instance if in dictionary.
   if org_instance in dict_swap and replace_itself:

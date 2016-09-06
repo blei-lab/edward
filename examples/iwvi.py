@@ -15,7 +15,7 @@ import tensorflow as tf
 from edward.inferences import MFVI
 from edward.models import Beta
 from edward.stats import bernoulli, beta
-from edward.util import log_mean_exp
+from edward.util import copy, log_mean_exp
 
 
 class IWVI(MFVI):
@@ -77,13 +77,15 @@ class IWVI(MFVI):
     # Form n_samples x K matrix of log importance weights.
     log_w = []
     for s in range(self.n_samples * self.K):
-      z = {key: qz.sample(())
-           for key, qz in six.iteritems(self.latent_vars)}
-      p_log_prob = self.model_wrapper.log_prob(x, z)
+      z_sample = {}
       q_log_prob = 0.0
-      for key, qz in six.iteritems(self.latent_vars):
-        q_log_prob += tf.reduce_sum(qz.log_prob(tf.stop_gradient(z[key])))
+      for z, qz in six.iteritems(self.latent_vars):
+        # Copy q(z) to obtain new set of posterior samples.
+        qz_copy = copy(qz, scope='inference_' + str(s))
+        z_sample[z] = qz_copy.value()
+        q_log_prob += tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      p_log_prob = self.model_wrapper.log_prob(x, z_sample)
       log_w += [p_log_prob - q_log_prob]
 
     log_w = tf.reshape(log_w, [self.n_samples, self.K])
@@ -113,13 +115,15 @@ class IWVI(MFVI):
     # Form n_samples x K matrix of log importance weights.
     log_w = []
     for s in range(self.n_samples * self.K):
-      z = {key: qz.sample(())
-           for key, qz in six.iteritems(self.latent_vars)}
-      p_log_prob = self.model_wrapper.log_prob(x, z)
+      z_sample = {}
       q_log_prob = 0.0
-      for key, qz in six.iteritems(self.latent_vars):
-        q_log_prob += tf.reduce_sum(qz.log_prob(z[key]))
+      for z, qz in six.iteritems(self.latent_vars):
+        # Copy q(z) to obtain new set of posterior samples.
+        qz_copy = copy(qz, scope='inference_' + str(s))
+        z_sample[z] = qz_copy.value()
+        q_log_prob += tf.reduce_sum(qz.log_prob(z_sample[z]))
 
+      p_log_prob = self.model_wrapper.log_prob(x, z_sample)
       log_w += [p_log_prob - q_log_prob]
 
     log_w = tf.reshape(log_w, [self.n_samples, self.K])
