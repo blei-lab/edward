@@ -78,7 +78,7 @@ inference = ed.MAP(['z'], data, model)
 # inference = ed.MFVI({'z': qz}, data, model)
 
 inference.initialize(n_print=500)
-for t in range(2500+1):
+for t in range(2501):
   loss = inference.update()
   if t % inference.n_print == 0:
     print("iter {:d} loss {:.2f}".format(t, loss))

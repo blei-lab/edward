@@ -8,24 +8,25 @@ import tensorflow as tf
 from edward.stats import dirichlet
 from scipy import stats
 
-sess = tf.Session()
 
+class test_dirichlet_rvs_class(tf.test.TestCase):
 
-def _test(alpha, size):
-  val_est = dirichlet.rvs(alpha, size=size).shape
-  val_true = (size, ) + np.asarray(alpha).shape
-  assert val_est == val_true
+  def _test(self, alpha, size):
+    val_est = dirichlet.rvs(alpha, size=size).shape
+    val_true = (size, ) + np.asarray(alpha).shape
+    assert val_est == val_true
 
+  def test_1d(self):
+    self._test(np.array([0.2, 0.8]), 1)
+    self._test(np.array([0.2, 0.8]), 10)
+    self._test(np.array([0.2, 1.1, 0.8]), 1)
+    self._test(np.array([0.2, 1.1, 0.8]), 10)
 
-def test_1d():
-  _test(np.array([0.2, 0.8]), 1)
-  _test(np.array([0.2, 0.8]), 10)
-  _test(np.array([0.2, 1.1, 0.8]), 1)
-  _test(np.array([0.2, 1.1, 0.8]), 10)
+  # def test_2d(self):
+  #    self._test(np.array([[0.2, 0.8]]), 1)
+  #    self._test(np.array([[0.2, 0.8]]), 10)
+  #    self._test(np.array([[0.2, 1.1, 0.8], [0.7, 0.65, 0.6]]), 1)
+  #    self._test(np.array([[0.2, 1.1, 0.8], [0.7, 0.65, 0.6]]), 10)
 
-
-# def test_2d():
-#    _test(np.array([[0.2, 0.8]]), 1)
-#    _test(np.array([[0.2, 0.8]]), 10)
-#    _test(np.array([[0.2, 1.1, 0.8], [0.7, 0.65, 0.6]]), 1)
-#    _test(np.array([[0.2, 1.1, 0.8], [0.7, 0.65, 0.6]]), 10)
+if __name__ == '__main__':
+  tf.test.main()

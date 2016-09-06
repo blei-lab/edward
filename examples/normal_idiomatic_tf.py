@@ -35,6 +35,6 @@ qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
 inference = ed.MFVI({'z': qz}, model_wrapper=model)
 inference.initialize(n_print=50)
-for t in range(250+1):
+for t in range(251):
   loss = inference.update()
   inference.print_progress(t, loss)
