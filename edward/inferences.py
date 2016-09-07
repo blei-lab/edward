@@ -28,7 +28,7 @@ class Inference(object):
     will infer the former conditional on data.
   data : dict
     Data dictionary whose values may vary at each session run.
-  tie : dict of tf.Tensor to RandomVariable
+  tie : dict of tf.Variable to RandomVariable
     Set of tensors tied to random variables. This enables cycles in
     the graphical model, so that inference will infer ``latent_vars``
     conditional on ``data`` while tying nodes in ``tie``.
@@ -51,7 +51,7 @@ class Inference(object):
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
       model to their realizations.
-    tie : dict of tf.Tensor to RandomVariable, optional
+    tie : dict of tf.Variable to RandomVariable, optional
       Set of tensors tied to random variables. This enables cycles in
       the graphical model, so that inference will infer ``latent_vars``
       conditional on ``data`` while tying nodes in ``tie``.
@@ -152,7 +152,7 @@ class MonteCarlo(Inference):
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
       model to their realizations.
-    tie : dict of tf.Tensor to RandomVariable, optional
+    tie : dict of tf.Variable to RandomVariable, optional
       Set of tensors tied to random variables. This enables cycles in
       the graphical model, so that inference will infer ``latent_vars``
       conditional on ``data`` while tying nodes in ``tie``.
@@ -186,7 +186,7 @@ class VariationalInference(Inference):
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
       model to their realizations.
-    tie : dict of tf.Tensor to RandomVariable, optional
+    tie : dict of tf.Variable to RandomVariable, optional
       Set of tensors tied to random variables. This enables cycles in
       the graphical model, so that inference will infer ``latent_vars``
       conditional on ``data`` while tying nodes in ``tie``.
@@ -284,6 +284,10 @@ class VariationalInference(Inference):
       self.data = {key: value for key, value in
                    zip(six.iterkeys(self.data), batches)}
 
+    # Create assign ops for dealing with any cycles in the graph.
+    self.assign_ops = [tied_rv.assign(rv.value())
+                       for tied_rv, rv in six.iteritems(self.tie)]
+
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
       global_step = tf.Variable(0, trainable=False)
@@ -350,7 +354,7 @@ class VariationalInference(Inference):
       Loss function values after one iteration.
     """
     sess = get_session()
-    _, loss = sess.run([self.train, self.loss])
+    _, loss = sess.run([self.train, self.loss] + self.assign_ops)
     return loss
 
   def print_progress(self, t, loss):
@@ -515,7 +519,7 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
@@ -563,7 +567,7 @@ class MFVI(VariationalInference):
         z_sample[z] = qz_copy.value()
         q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_sample[z]))
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
@@ -616,7 +620,7 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
@@ -668,7 +672,7 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
@@ -723,7 +727,7 @@ class MFVI(VariationalInference):
         qz_copy = copy(qz, scope='inference_' + str(s))
         z_sample[z] = qz_copy.value()
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
@@ -772,7 +776,7 @@ class MFVI(VariationalInference):
         qz_copy = copy(qz, scope='inference_' + str(s))
         z_sample[z] = qz_copy.value()
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
@@ -866,7 +870,7 @@ class KLpq(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-      dict_swap = merge_dicts(z_sample, self.tie)
+      dict_swap = merge_dicts(z_sample, self.data)
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
           # Copy p(z), replacing any conditioning on prior with
@@ -973,7 +977,7 @@ class MAP(VariationalInference):
     """
     z_mode = {z: qz.value()
               for z, qz in six.iteritems(self.latent_vars)}
-    dict_swap = merge_dicts(z_mode, self.tie)
+    dict_swap = merge_dicts(z_mode, self.data)
     if self.model_wrapper is None:
       p_log_prob = 0.0
       for z in six.iterkeys(self.latent_vars):

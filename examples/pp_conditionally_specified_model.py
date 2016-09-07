@@ -15,51 +15,51 @@ from __future__ import print_function
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.util import copy
 
 
 ## MODEL SPECIFICATION
 
 
-# We define a directed model, x_ph -> x -> y. The first and last nodes
+# We define a directed model, x_tied -> x -> y. The first and last nodes
 # will be tied during inference.
 
-x_ph = tf.constant(0.0)
-y = Normal(mu=x_ph, sigma=1.0)
+x_tied = tf.Variable(0.0, trainable=False)
+y = Normal(mu=x_tied, sigma=1.0)
 x = Normal(mu=y, sigma=1.0)
 
 
 ## DATA GENERATION
 
 
-# There are two approaches.
+init = tf.initialize_all_variables()
+sess = ed.get_session()
+sess.run(init)
 
-# (1) Create the long chain of conditional samples. Then run the graph.
-x_ph = tf.constant(0.0)
-y = Normal(mu=x_ph, sigma=1.0)
-xs = []
-ys = []
-for t in range(100):  # 100 samples
-  x = Normal(mu=y, sigma=1.0)
-  y = Normal(mu=x, sigma=1.0)
-  xs += [x.value()]
-  ys += [y.value()]
+assign_op = x_tied.assign(x.value())
 
-xy_samples = sess.run(xs + ys)
+# iteration 0 |
+# x_tied's value is set to its initialization.
+# Generate y^{(0)} ~ y | x_tied = 0.0.
+# Generate x^{(0)} ~ x | y = y^{(0)}.
+#
+# iteration 1 |
+# x_tied's value is assigned to x's value at iteration 0.
+# Generate y^{(1)} ~ y | x_tied = x^{(0)}.
+# Generate x^{(1)} ~ x | y = y^{(1)}.
+#
+# [...] induction
 
-# (2) Create the undirected model. Then copy pieces of the model to
-# make conditional samples. Then run the graph.
-x_ph = tf.constant(0.0)
-y = Normal(mu=x_ph, sigma=1.0)
-x = Normal(mu=y, sigma=1.0)
-
-y_sample = sess.run(y.value())
 xy_samples = []
-for t in range(100):  # 100 samples
-  x_copy = copy(x, {y: y_sample}, deepcopy=True)
-  y_copy = copy(y, {x_ph: x_copy}, deepcopy=True)
-  x_sample, y_sample = sess.run([x_copy.value(), y_copy.value()])
+for t in range(100):
+  x_sample, y_sample, _ = sess.run([x.value(), y.value(), assign_op])
   xy_samples += [(x_sample, y_sample)]
+
+# importantly, note any function of x_tied uses the previous value of x.
+# this preserves the right ordering for the fully conditional replications.
+sess.run([x.value(), 0.0 + x_tied, assign_op])
+## [-0.68678439, -2.1759129, -0.68678439]
+sess.run([x.value(), 0.0 + x_tied, assign_op])
+## [0.37869906, -0.68678439, 0.37869906]
 
 
 ## INFERENCE
@@ -70,16 +70,21 @@ for t in range(100):  # 100 samples
 # (tf.Variables) in the model.
 
 data = {x: np.array(0.0), y: np.array(1.0)}
-inference = ed.MAP([], data, tie={x_ph: x})
+inference = ed.MAP([], data, tie={x_tied: x})
 
-# inference performs the following to calculate the loss:
+# Inference performs the following to calculate the loss:
 
-y_copy = copy(y, {x_ph: x})
-x_copy = copy(x, {x_ph: x})
+# Copy random variables, swapping their dependencies according to
+# dict_swap.
+z_mode = {}
+dict_swap = merge_dicts(z_mode, self.data)
+y_copy = copy(y, dict_swap)  # x_tied -> copied/y
+x_copy = copy(x, dict_swap)  # data[y] -> copied/x
 
+# Calculate sum of fully conditional log-likelihoods.
 p_log_prob = 0.0
-p_log_prob += y_copy.log_prob(data[y])
-p_log_prob += x_copy.log_prob(data[x])
+p_log_prob += y_copy.log_prob(data[y])  # p(Y=data[y] | X=x_tied)
+p_log_prob += x_copy.log_prob(data[x])  # p(X=data[x] | Y=data[y])
 
 
 ## CRITICISM
