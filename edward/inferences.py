@@ -492,18 +492,22 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
-          # Copy p(z), replacing any conditioning on prior with
-          # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -539,18 +543,22 @@ class MFVI(VariationalInference):
         z_sample[z] = qz_copy.value()
         q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_sample[z]))
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
-          # Copy p(z), replacing any conditioning on prior with
-          # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -591,12 +599,18 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -642,18 +656,22 @@ class MFVI(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
-          # Copy p(z), replacing any conditioning on prior with
-          # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -696,12 +714,18 @@ class MFVI(VariationalInference):
         qz_copy = copy(qz, scope='inference_' + str(s))
         z_sample[z] = qz_copy.value()
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -744,18 +768,22 @@ class MFVI(VariationalInference):
         qz_copy = copy(qz, scope='inference_' + str(s))
         z_sample[z] = qz_copy.value()
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
-          # Copy p(z), replacing any conditioning on prior with
-          # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -837,18 +865,22 @@ class KLpq(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       if self.model_wrapper is None:
         for z in six.iterkeys(self.latent_vars):
-          # Copy p(z), replacing any conditioning on prior with
-          # conditioning on posterior sample.
-          z_copy = copy(z, dict_swap=z_sample, scope='inference_' + str(s))
+          z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
 
         for x, obs in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            # Copy p(x | z), replacing any conditioning on prior with
-            # conditioning on posterior sample.
-            x_copy = copy(x, dict_swap=z_sample, scope='inference_' + str(s))
+            x_copy = copy(x, dict_swap, scope='inference_' + str(s))
             p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
       else:
         x = self.data
@@ -945,17 +977,21 @@ class MAP(VariationalInference):
               for z, qz in six.iteritems(self.latent_vars)}
     if self.model_wrapper is None:
       p_log_prob = 0.0
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_mode
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for z in six.iterkeys(self.latent_vars):
-        # Copy p(z), replacing any conditioning on prior with
-        # conditioning on posterior mode.
-        z_copy = copy(z, dict_swap=z_mode, scope='inference_' + str(0))
+        z_copy = copy(z, dict_swap, scope='inference_' + str(0))
         p_log_prob += tf.reduce_sum(z_copy.log_prob(z_mode[z]))
 
       for x, obs in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
-          # Copy p(x | z), replacing any conditioning on prior with
-          # conditioning on posterior mode.
-          x_copy = copy(x, dict_swap=z_mode, scope='inference_' + str(0))
+          x_copy = copy(x, dict_swap, scope='inference_' + str(0))
           p_log_prob += tf.reduce_sum(x_copy.log_prob(obs))
     else:
       x = self.data
@@ -976,8 +1012,8 @@ class Laplace(MAP):
   the Hessian at the mode of the posterior. This forms the
   covariance of the normal approximation.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
-    super(Laplace, self).__init__(latent_vars, data, model_wrapper)
+  def __init__(self, *args, **kwargs):
+    super(Laplace, self).__init__(*args, **kwargs)
 
   def finalize(self):
     """Function to call after convergence.
