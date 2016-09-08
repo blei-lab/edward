@@ -40,6 +40,10 @@ inference.initialize()
 
 sess = ed.get_session()
 for t in range(501):
+  # TODO we can force it to not do this, and just have X be baked in
+  # directly during the copy. alhtough i feel that's more complicated
+  # to the user
+  # before deciding this, decide on undirected design as it's related
   _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
   inference.print_progress(t, loss)
 
