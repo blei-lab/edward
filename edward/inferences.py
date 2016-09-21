@@ -276,7 +276,7 @@ class VariationalInference(Inference):
         optimizer = tf.train.AdadeltaOptimizer()
       elif optimizer == 'adagrad':
         optimizer = tf.train.AdagradOptimizer(0.01)
-      elif optimizer == 'adagrad':
+      elif optimizer == 'momentum':
         optimizer = tf.train.MomentumOptimizer(0.01, 0.9)
       elif optimizer == 'adam':
         optimizer = tf.train.AdamOptimizer()
