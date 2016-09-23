@@ -18,7 +18,7 @@ import os
 import prettytensor as pt
 import tensorflow as tf
 
-from convolutional_vae_util import deconv2d
+from tf_convolutional_vae_util import deconv2d
 from edward.models import Normal
 from edward.stats import bernoulli
 from progressbar import ETA, Bar, Percentage, ProgressBar
