@@ -24,7 +24,7 @@ to read data in TensorFlow
    copying data more than once in memory. Batch training is available
    by passing in the ``n_minibatch`` argument to inference. (As an example, see
    the `mixture of Gaussians
-   <https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py>`__.)
+   <https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py>`__.)
 
 2. **Feeding.** Manual code provides the data when running each step of
    inference.
@@ -39,9 +39,9 @@ to read data in TensorFlow
    ``tf.placeholder``'s.
    (As an example, see
    the `mixture density network
-   <https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py>`__
+   <https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network.py>`__
    or `variational auto-encoder
-   <https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py>`__.)
+   <https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py>`__.)
 
 3. **Reading from files.** An input pipeline reads the data from files
    at the beginning of a TensorFlow graph.
