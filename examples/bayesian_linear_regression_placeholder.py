@@ -19,32 +19,39 @@ def build_toy_dataset(N, noise_std=0.1):
   return X.astype(np.float32), y.astype(np.float32)
 
 
+ed.set_seed(42)
+
 N = 40  # num data points
 D = 1  # num features
 
-ed.set_seed(42)
+# DATA
 X_train, y_train = build_toy_dataset(N)
 X_test, y_test = build_toy_dataset(N)
 
+# MODEL
 X = ed.placeholder(tf.float32, [N, D])
-beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-y = Normal(mu=ed.dot(X, beta), sigma=tf.ones(N))
+w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
 
-qmu_mu = tf.Variable(tf.random_normal([D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
-qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma)
+# INFERENCE
+qw = Normal(mu=tf.Variable(tf.random_normal([D])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qb = Normal(mu=tf.Variable(tf.random_normal([1])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 data = {X: X_train, y: y_train}
-inference = ed.MFVI({beta: qbeta}, data)
+inference = ed.MFVI({w: qw, b: qb}, data)
 inference.initialize()
 
 sess = ed.get_session()
-for t in range(501):
+for t in range(1001):
   _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
   inference.print_progress(t, loss)
 
-y_post = ed.copy(y, {beta: qbeta.mean()})
+# CRITICISM
+y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
 # This is equivalent to
-# y_post = Normal(mu=ed.dot(X, qbeta.mean()), sigma=tf.ones(N))
+# y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))
 
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
