@@ -9,7 +9,7 @@ unlabeled data, comprised of training examples $\{x_n\}$.
 
 We demonstrate how to do this in Edward with an example.
 The script is available
-\href{https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py}
 {here}.
 
 
@@ -143,11 +143,11 @@ qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 \end{lstlisting}
 
-Run mean-field variational inference for 4000 iterations, using a batch
-of 10 datapoints and 50 latent variable samples per iteration.
+Run mean-field variational inference for 2500 iterations, using a batch
+of 20 datapoints and 10 latent variable samples per iteration.
 \begin{lstlisting}[language=Python]
 inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
-inference.run(n_iter=4000, n_samples=10, n_minibatch=10)
+inference.run(n_iter=2500, n_samples=10, n_minibatch=20)
 \end{lstlisting}
 In this case
 \texttt{MFVI} defaults to minimizing the

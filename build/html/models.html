@@ -84,7 +84,12 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#model-api">Model API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#random-variables">Random Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variational-models">Variational Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-wrappers">Model Wrappers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-wrapper-api">Model Wrapper API</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
@@ -140,9 +145,145 @@
 of data <code class="docutils literal"><span class="pre">x</span></code> and latent variables <code class="docutils literal"><span class="pre">z</span></code>.
 For more details, see the
 <a class="reference external" href="../tut_model">Probability Models tutorial</a>.</p>
-<p>All models in Edward are written as a class. To write a new model,
-it can be written in any of the currently supported modeling
-languages: TensorFlow, Python, Stan, and PyMC3.</p>
+<div class="section" id="random-variables">
+<h2>Random Variables<a class="headerlink" href="#random-variables" title="Permalink to this headline">¶</a></h2>
+<p>The building block of probabilistic modeling is a random variable. In
+Edward, random variables are built on top of
+<a class="reference external" href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/distributions">tf.contrib.distributions</a>.
+It has the same arguments to instantiate the object, and is equipped
+with the same methods such as <code class="docutils literal"><span class="pre">log_prob()</span></code> and <code class="docutils literal"><span class="pre">sample()</span></code>.
+See their docstrings for more details.</p>
+<p>Here are examples of univariate distributions.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># univariate normal</span>
+<span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="c"># vector of 5 univariate normals</span>
+<span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="p">))</span>
+<span class="c"># 2 x 3 matrix of Exponentials</span>
+<span class="n">Exponential</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>The dimension of the distributions are deduced from the dimension of
+its parameters.</p>
+<p>Here are examples of multivariate distributions.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># 1 K-dimensional Dirichlet</span>
+<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
+<span class="c"># vector of 5 K-dimensional multivariate normals</span>
+<span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
+<span class="c"># 2 x 5 matrix of K-dimensional multivariate normals</span>
+<span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>Multivariate distributions store their multivariate dimension in the
+inner dimension (right-most dimension) of the parameters.</p>
+<p>Formally, <code class="docutils literal"><span class="pre">RandomVariable</span></code> objects define a wrapper around tensors. That is,
+we register a <code class="docutils literal"><span class="pre">tensor_conversion_function()</span></code> which converts the object to
+samples. This enables tensor operations, placing <code class="docutils literal"><span class="pre">RandomVariable</span></code>
+objects on the TensorFlow graph.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c"># 3rd normal rv in the vector</span>
+</pre></div>
+</div>
+<p>Importantly, the graphical model is defined explicitly by its
+TensorFlow graph. This allows random variables to be used in
+conjuction with other TensorFlow ops.</p>
+<p>Parameters work with random variables in the same way they
+work with <code class="docutils literal"><span class="pre">tf.contrib.distributions</span></code>.</p>
+<ul>
+<li><p class="first">Constant parameters.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># 5-dimensional normal with constant params</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Trainable parameters.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># 5-dimensional normal</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+<span class="c"># (1 factor of a) 5-dimensional full rank normal</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">cov</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">)</span>
+
+<span class="c"># Normal parameterized by a neural network</span>
+<span class="n">W_1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">h</span><span class="p">])</span>
+<span class="n">W_2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">h</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">])</span>
+<span class="n">b_1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+<span class="n">b_2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">output_dim</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">neural_network</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">W_1</span><span class="p">)</span> <span class="o">+</span> <span class="n">b_1</span><span class="p">),</span> <span class="n">W_2</span><span class="p">)</span> <span class="o">+</span> <span class="n">b_2</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">neural_network</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Random parameters.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># 2-dimensional prior</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="c"># note scale param is fixed</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>For examples of models built in Edward, see the model
+<a class="reference external" href="../tutorials">tutorials</a>.</p>
+</div>
+<div class="section" id="variational-models">
+<h2>Variational Models<a class="headerlink" href="#variational-models" title="Permalink to this headline">¶</a></h2>
+<p>A variational model defines a distribution over latent variables. It
+is a model of the posterior distribution, specifying another
+distribution to approximate it.
+Edward implements variational models using the same language of random
+variables.</p>
+<p>We parameterize them with TensorFlow variables so that their
+parameters may be trained during inference.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">InverseGamma</span>
+
+<span class="n">qpi_alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">K</span><span class="p">])))</span>
+<span class="n">qmu_mu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">K</span> <span class="o">*</span> <span class="n">D</span><span class="p">]))</span>
+<span class="n">qmu_sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">K</span> <span class="o">*</span> <span class="n">D</span><span class="p">])))</span>
+<span class="n">qsigma_alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">K</span> <span class="o">*</span> <span class="n">D</span><span class="p">])))</span>
+<span class="n">qsigma_beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">([</span><span class="n">K</span> <span class="o">*</span> <span class="n">D</span><span class="p">])))</span>
+
+<span class="n">qpi</span> <span class="o">=</span> <span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">qpi_alpha</span><span class="p">)</span>
+<span class="n">qmu</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">qmu_mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">qmu_sigma</span><span class="p">)</span>
+<span class="n">qsigma</span> <span class="o">=</span> <span class="n">InverseGamma</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">qsigma_alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">qsigma_beta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="model-wrappers">
+<h2>Model Wrappers<a class="headerlink" href="#model-wrappers" title="Permalink to this headline">¶</a></h2>
+<p>Edward also supports specifying models using external languages. These
+model wrappers are written as a class.</p>
+<p>In general, a model wrapper is a class with the structure</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="n">log_prior</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="n">log_likelihood</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="k">return</span> <span class="n">log_prior</span> <span class="o">+</span> <span class="n">log_likelihood</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The field <code class="docutils literal"><span class="pre">n_vars</span></code> denotes the number of latent variables in the
+probability model. For example, a model with a Gaussian likelihood with latent
+mean and variance would have <code class="docutils literal"><span class="pre">n_vars=2*N</span></code> latent variables for
+<code class="docutils literal"><span class="pre">N</span></code> observations.</p>
+<p>The method <code class="docutils literal"><span class="pre">log_prob(xs,</span> <span class="pre">zs)</span></code> calculates the logarithm of
+the joint density $log p(x,z)$. Here <code class="docutils literal"><span class="pre">xs</span></code> can be a single data
+point or a batch of data points. Analogously, <code class="docutils literal"><span class="pre">zs</span></code> can be a
+single set of latent variables, or a batch thereof.</p>
 <p><strong>TensorFlow.</strong>
 Write a class with the method <code class="docutils literal"><span class="pre">log_prob(xs,</span> <span class="pre">zs)</span></code>. The method defines
 the logarithm of a joint density, where <code class="docutils literal"><span class="pre">xs</span></code> and <code class="docutils literal"><span class="pre">zs</span></code> are Python
@@ -171,7 +312,7 @@ on the Bernoulli&#8217;s success probability.
 <code class="docutils literal"><span class="pre">xs</span></code> is a dictionary with string <code class="docutils literal"><span class="pre">x</span></code> binded to a vector of
 observations. <code class="docutils literal"><span class="pre">zs</span></code> is a dictionary with string <code class="docutils literal"><span class="pre">z</span></code> binded to a
 sample from the one-dimensional Beta latent variable.</p>
-<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py">toy script</a>
+<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_beta_bernoulli.py">toy script</a>
 that uses this model. The model class can be more complicated,
 containing fields or other methods required for other functionality in
 Edward. See the section below for more details.</p>
@@ -195,7 +336,7 @@ Here is an example:</p>
   <span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_np.py">toy script</a>
+<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/np_beta_bernoulli.py">toy script</a>
 that uses this model.</p>
 <p><strong>Stan.</strong>
 Write a Stan program in the form of a file or string. Then
@@ -228,7 +369,7 @@ matches the name of the data from the data block.</p>
 <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="p">({</span><span class="s">&#39;p&#39;</span><span class="p">:</span> <span class="n">qp</span><span class="p">},</span> <span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py">toy
+<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/stan_beta_bernoulli.py">toy
 script</a>
 that uses this model. Stan programs are convenient as <a class="reference external" href="https://github.com/stan-dev/example-models/wiki">there are many
 online examples</a>,
@@ -262,7 +403,7 @@ variables.</p>
 <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="p">({</span><span class="s">&#39;p&#39;</span><span class="p">:</span> <span class="n">qp</span><span class="p">},</span> <span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py">toy
+<p>Here is a <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/pymc3_beta_bernoulli.py">toy
 script</a>
 that uses this model. PyMC3 can be used to define models with both
 differentiable latent variables and non-differentiable (e.g., discrete)
@@ -274,10 +415,8 @@ TensorFlow, as Edward uses TensorFlow as the computational backend.
 Internally, other languages are wrapped in TensorFlow so their
 computation represents a single node in the graph (making it difficult
 to tease apart and thus distribute their computation).</p>
-<p>For examples of models built in Edward, see the model
-<a class="reference external" href="../tutorials">tutorials</a>.</p>
-<div class="section" id="model-api">
-<h2>Model API<a class="headerlink" href="#model-api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="model-wrapper-api">
+<h3>Model Wrapper API<a class="headerlink" href="#model-wrapper-api" title="Permalink to this headline">¶</a></h3>
 <p>This outlines the current spec for all methods in the model object.
 It includes all modeling languages, where certain methods are
 implemented by wrapping around other methods. For example, by a Python
@@ -385,6 +524,7 @@ around <code class="docutils literal"><span class="pre">_py_log_prob()</span></c
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>

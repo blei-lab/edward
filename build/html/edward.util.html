@@ -171,8 +171,8 @@ already copied within the new scope). This is with the exception of
 <li><strong>org_instance</strong> (<em>RandomVariable, tf.Variable, tf.Tensor, or tf.Operation</em>) &#8211; Node to add in graph with replaced ancestors.</li>
 <li><strong>dict_swap</strong> (<em>dict, optional</em>) &#8211; Random variables, variables, tensors, or operations to
 swap with. Its keys are what <cite>org_instance</cite> may depend on,
-and its values are the corresponding object (of the same type)
-that is used in exchange.</li>
+and its values are the corresponding object (not necessarily of
+the same type) that is used in exchange.</li>
 <li><strong>scope</strong> (<em>str, optional</em>) &#8211; A scope for the new node(s). This is used to avoid name
 conflicts with the original node(s).</li>
 <li><strong>replace_itself</strong> (<em>bool, optional</em>) &#8211; Whether to replace <cite>org_instance</cite> itself if it exists in
@@ -273,7 +273,7 @@ copied within the new scope). Otherwise will reuse them.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tf.Tensor or np.ndarray</em>) &#8211; A n-D tensor.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>float, int, tf.Tensor, np.ndarray, or RandomVariable</em>) &#8211; A n-D tensor.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Python list containing dimensions of <code class="docutils literal"><span class="pre">x</span></code>.</td>
 </tr>

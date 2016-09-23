@@ -159,11 +159,11 @@ methods are derived from.</p>
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>It takes as input the set of latent variables to infer and a dataset. For now, it must also take as input a model wrapper <code class="docutils literal"><span class="pre">model_wrapper</span></code>.
+<p>It takes as input the set of latent variables to infer and a dataset. Optionally, it also takes as input a model wrapper <code class="docutils literal"><span class="pre">model_wrapper</span></code> if the user uses an external language to specify the model.
 For more details, see the
 <a class="reference external" href="data">Data API</a>.
 and
-<a class="reference external" href="models">Model API</a></p>
+<a class="reference external" href="models">Model API</a>.</p>
 <p>Note that <code class="docutils literal"><span class="pre">Inference</span></code> says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
 tailored to a restricted class of models available in Edward (such as
@@ -257,6 +257,9 @@ computational graph; the third sets up an optimizer to minimize the
 loss. These three snippets are applicable to all of variational
 inference, and are thus useful defaults for any derived class.</p>
 <p>For examples of inference algorithms built in Edward, see the inference
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; 3ae1bdd3a839e56d64393934d6093288d72ac17d
+<a class="reference external" href="../tutorials.html">tutorials</a>.
+=======
 <a class="reference external" href="../tutorials">tutorials</a>.</p>
 <div class="section" id="variational-models">
 <h2>Variational Models<a class="headerlink" href="#variational-models" title="Permalink to this headline">¶</a></h2>
@@ -299,6 +302,7 @@ outer dimension (right-most dimension) of their shape.</p>
 <p>The main methods in each <code class="docutils literal"><span class="pre">RandomVariable</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
 <code class="docutils literal"><span class="pre">sample()</span></code>, which mathematically are <code class="docutils literal"><span class="pre">log</span> <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> and <code class="docutils literal"><span class="pre">z</span> <span class="pre">~</span>
 <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively. See their docstrings for more details.</p>
+<p>&gt;&gt;&gt;&gt;&gt;&gt;&gt; remove &#8216;.html&#8217; in all links</p>
 </div>
 </div>
 

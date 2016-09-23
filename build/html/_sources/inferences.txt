@@ -30,11 +30,11 @@ methods are derived from.
     def __init__(self, latent_vars, data=None, model_wrapper=None):
       ...
 
-It takes as input the set of latent variables to infer and a dataset. For now, it must also take as input a model wrapper ``model_wrapper``.
+It takes as input the set of latent variables to infer and a dataset. Optionally, it also takes as input a model wrapper ``model_wrapper`` if the user uses an external language to specify the model.
 For more details, see the
 `Data API <data>`__.
 and
-`Model API <models>`__
+`Model API <models>`__.
 
 Note that ``Inference`` says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
@@ -140,6 +140,9 @@ loss. These three snippets are applicable to all of variational
 inference, and are thus useful defaults for any derived class.
 
 For examples of inference algorithms built in Edward, see the inference
+<<<<<<< 3ae1bdd3a839e56d64393934d6093288d72ac17d
+`tutorials <../tutorials.html>`__.
+=======
 `tutorials <../tutorials>`__.
 
 Variational Models
@@ -207,3 +210,4 @@ q(z; \lambda)`` respectively. See their docstrings for more details.
 
 .. explain the ``log_prob()`` nuance for multivariate vs univariate
 .. 4distributions.
+>>>>>>> remove '.html' in all links

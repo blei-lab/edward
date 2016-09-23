@@ -167,8 +167,8 @@
 <span class="sd">  dict_swap : dict, optional</span>
 <span class="sd">    Random variables, variables, tensors, or operations to</span>
 <span class="sd">    swap with. Its keys are what `org_instance` may depend on,</span>
-<span class="sd">    and its values are the corresponding object (of the same type)</span>
-<span class="sd">    that is used in exchange.</span>
+<span class="sd">    and its values are the corresponding object (not necessarily of</span>
+<span class="sd">    the same type) that is used in exchange.</span>
 <span class="sd">  scope : str, optional</span>
 <span class="sd">    A scope for the new node(s). This is used to avoid name</span>
 <span class="sd">    conflicts with the original node(s).</span>
@@ -214,6 +214,9 @@
      <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> \
      <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Could not copy instance: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">org_instance</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="n">dict_swap</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="n">dict_swap</span> <span class="o">=</span> <span class="p">{}</span>
 
   <span class="c"># Swap instance if in dictionary.</span>
   <span class="k">if</span> <span class="n">org_instance</span> <span class="ow">in</span> <span class="n">dict_swap</span> <span class="ow">and</span> <span class="n">replace_itself</span><span class="p">:</span>
@@ -506,7 +509,7 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  x : tf.Tensor or np.ndarray</span>
+<span class="sd">  x : float, int, tf.Tensor, np.ndarray, or RandomVariable</span>
 <span class="sd">    A n-D tensor.</span>
 
 <span class="sd">  Returns</span>
@@ -520,6 +523,8 @@
     <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">get_batch_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 

@@ -122,11 +122,11 @@ def neural_network(x):
     return [mu, sigma]</code></pre>
 <p>The neural network takes a 28 by 28 pixel image and outputs a <span class="math inline">\(2\cdot 10\)</span>-dimensional output, one for the mean (<code>mu</code>) and one for the standard deviation (<code>sigma</code>).</p>
 <p>We define a TensorFlow placeholder <code>x_ph</code> for the neural network’s input. We define a variational model which is parameterized by the neural network’s output.</p>
-<pre class="python" language="Python"><code>x_ph = tf.placeholder(tf.float32, [28 * 28])
+<pre class="python" language="Python"><code>x_ph = ed.placeholder(tf.float32, [28 * 28])
 mu, sigma = neural_network(x_ph)
 qz = Normal(mu=mu, sigma=sigma)</code></pre>
 <p>During each step of inference, we pass in a data point to feed the placeholder. Then we train the variational parameters (inference network’s parameters) according to gradients of the variational objective.</p>
-<p>An example script using this variational model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">here</a>.</p>
+<p>An example script using this variational model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py">here</a>.</p>
 <h3 id="footnotes">Footnotes</h3>
 <p>Inference networks are also known as recognition models, recognition networks, or inverse mappings.</p>
 <p>Variational models parameterized by inference networks are also known as probabilistic encoders, in analogy from coding theory to <a href="tut_decoder">probabilistic decoders</a>. We recommend against this terminology, in favor of making explicit the separation of model and inference. That is, variational inference with inference networks is a general technique that can be applied to models beyond probabilistic decoders.</p>

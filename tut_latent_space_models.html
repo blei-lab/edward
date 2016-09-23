@@ -90,7 +90,7 @@
 <h2 id="latent-space-models-for-neural-data">Latent space models for neural data</h2>
 <p>Many interesting data sets exhibit a network structure. For example, social networks or biological neural networks.</p>
 <p>What we can learn about the nodes of the network from its connectivity patterns? We can begin to study this using a latent space model. Latent space models embed the nodes of the network in a latent space which captures attributes of the nodes. The likelihood to form an edge between two nodes depends on their distance in the latent space.</p>
-<p>Let us study an dataset from from neuroscience. The script can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py">here</a>.</p>
+<p>Let us study an dataset from from neuroscience. The script can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_latent_space_model.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">Mark Newman’s repository</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by Watts and Strogatz from original experimental data by White and co-authors.</p>
 <p>The neural network consists of around <span class="math inline">\(300\)</span> neurons. Each connection is associated with a weight (positive integer) capturing the strength of the connection.</p>

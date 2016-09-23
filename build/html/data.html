@@ -83,8 +83,8 @@
             
                 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#reading-data-in-edward">Reading Data in Edward</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#training-models-with-data">Training Models with Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#passing-in-data-for-model-wrappers">Passing in Data for Model Wrappers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
@@ -137,10 +137,90 @@
             
   <div class="section" id="data">
 <h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
-<p>Data in Edward is stored as a Python dictionary. It is usually comprised
-of strings binded to NumPy arrays such as a key <code class="docutils literal"><span class="pre">'x'</span></code> with value
+<p>In Edward, data is represented as TensorFlow tensors or NumPy arrays.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">x_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">x_data</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>There are three ways to read data in Edward. They follow the <a class="reference external" href="https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html">three ways
+to read data in TensorFlow</a>.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Preloaded data.</strong> A constant or variable in the TensorFlow graph
+holds all the data.</p>
+<p>This setting is the fastest to work with and is recommended if the
+data fits in memory.</p>
+<p>Represent the data as NumPy arrays.
+Internally, during inference, we will store them in TensorFlow variables to prevent
+copying data more than once in memory. Batch training is available
+by passing in the <code class="docutils literal"><span class="pre">n_minibatch</span></code> argument to inference. (As an example, see
+the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py">mixture of Gaussians</a>.)</p>
+</li>
+<li><p class="first"><strong>Feeding.</strong> Manual code provides the data when running each step of
+inference.</p>
+<p>This setting provides the most fine-grained control which is useful for experimentation.</p>
+<p>Represent the data as TensorFlow placeholders. During inferenec,
+the user must manually feed the placeholders at each
+step initialize via <code class="docutils literal"><span class="pre">inference.initialize()</span></code>; then
+in a loop call <code class="docutils literal"><span class="pre">sess.run(inference.train,</span> <span class="pre">feed_dict={...})</span></code> where
+in <code class="docutils literal"><span class="pre">feed_dict</span></code> you pass in the values for the
+<code class="docutils literal"><span class="pre">tf.placeholder</span></code>&#8216;s.
+(As an example, see
+the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network.py">mixture density network</a>
+or <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py">variational auto-encoder</a>.)</p>
+</li>
+<li><p class="first"><strong>Reading from files.</strong> An input pipeline reads the data from files
+at the beginning of a TensorFlow graph.</p>
+<p>This setting is recommended if the data does not fit in memory.</p>
+<p>Represent the data as TensorFlow
+tensors, where the tensors are the output of data readers. (As an
+example, see
+the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py">data unit test</a>.)</p>
+</li>
+</ol>
+<div class="section" id="training-models-with-data">
+<h2>Training Models with Data<a class="headerlink" href="#training-models-with-data" title="Permalink to this headline">¶</a></h2>
+<p>To pass in data during inference, we form a Python dictionary. Each
+item in the dictionary has a random variable binded to the data
+values.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># assuming `x` and `y` form observed variables in the model</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">y_data</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>How do we use the data during training? In general there are three use
+cases:</p>
+<ol class="arabic">
+<li><p class="first">Train over the full data per step.</p>
+<p>Follow the setting of preloaded data.</p>
+</li>
+<li><p class="first">Train over a batch per step when the full data fits in memory. This
+scale inference in terms of computational complexity.</p>
+<p>Follow the setting of preloaded data. Specify the batch size with
+<code class="docutils literal"><span class="pre">n_minibatch</span></code> in <code class="docutils literal"><span class="pre">Inference</span></code>. By default, we will subsample by
+slicing along the first dimension of every data structure in the
+data dictionary. Alternatively, follow the setting of feeding.
+Manually deal with the batch behavior at each training step.</p>
+</li>
+<li><p class="first">Train over batches per step when the full data does not fit in
+memory. This scales inference in terms of computational complexity and
+memory complexity.</p>
+<p>Follow the setting of reading from files. Alternatively, follow the
+setting of feeding, and use a generator to create and destroy NumPy
+arrays on the fly for feeding the placeholders.</p>
+</li>
+</ol>
+<p>The three use cases are supported for all modeling languages except
+Stan, which is limited to training over the full data per step. (This
+because Stan&#8217;s data structure requires data subsampling on arbitrary
+data types, which we don&#8217;t know how to automate.)</p>
+</div>
+<div class="section" id="passing-in-data-for-model-wrappers">
+<h2>Passing in Data for Model Wrappers<a class="headerlink" href="#passing-in-data-for-model-wrappers" title="Permalink to this headline">¶</a></h2>
+<p>During inference, data is passed in differently for external
+languages which use a model wrapper. Instead of binding observed
+variables, it is usually comprised
+of strings binded to the values, such as a key <code class="docutils literal"><span class="pre">'x'</span></code> with value
 <code class="docutils literal"><span class="pre">np.array([0.23512,</span> <span class="pre">13.2])</span></code>.
-We detail specifics for each modeling language below.</p>
+We detail specifics for each external language below.</p>
 <ul class="simple">
 <li><strong>TensorFlow.</strong> The data carries whatever keys and values the user
 accesses in the user-defined model. Key is a string. Value is a NumPy
@@ -208,72 +288,6 @@ is a string. Value is whatever type is used for the data block.</li>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;N&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}</span>
 </pre></div>
 </div>
-<div class="section" id="reading-data-in-edward">
-<h2>Reading Data in Edward<a class="headerlink" href="#reading-data-in-edward" title="Permalink to this headline">¶</a></h2>
-<p>There are three ways to read data in Edward. They follow the <a class="reference external" href="https://www.tensorflow.org/versions/r0.9/how_tos/reading_data/index.html">three ways
-to read data in TensorFlow</a>.</p>
-<ol class="arabic">
-<li><p class="first"><strong>Preloaded data.</strong> A constant or variable in the TensorFlow graph
-holds all the data.</p>
-<p>This setting is the fastest to work with and is recommended if the
-data fits in memory.</p>
-<p>For inference, pass in the data as a dictionary of NumPy arrays.
-Internally, we will store them in TensorFlow variables to prevent
-copying data more than once in memory. Batch training is available
-by passing in the <code class="docutils literal"><span class="pre">n_minibatch</span></code> argument to inference. (As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py">mixture of Gaussians</a>.)</p>
-</li>
-<li><p class="first"><strong>Feeding.</strong> Manual code provides the data when running each step of
-inference.</p>
-<p>This setting provides the most fine-grained control which is useful for experimentation.</p>
-<p>For inference, pass in the data as a dictionary of TensorFlow
-placeholders. The user must manually feed the placeholders at each
-step of inference: initialize via <code class="docutils literal"><span class="pre">inference.initialize()</span></code>; then
-in a loop call <code class="docutils literal"><span class="pre">sess.run(inference.train,</span> <span class="pre">feed_dict={...})</span></code> where
-in <code class="docutils literal"><span class="pre">feed_dict</span></code> you pass in the values for the
-<code class="docutils literal"><span class="pre">tf.placeholder</span></code>&#8216;s.
-(As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py">mixture density network</a>
-or <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py">variational auto-encoder</a>.)</p>
-</li>
-<li><p class="first"><strong>Reading from files.</strong> An input pipeline reads the data from files
-at the beginning of a TensorFlow graph.</p>
-<p>This setting is recommended if the data does not fit in memory.</p>
-<p>For inference, pass in the data as a dictionary of TensorFlow
-tensors, where the tensors are the output of data readers. (As an
-example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py">data unit test</a>.)</p>
-</li>
-</ol>
-</div>
-<div class="section" id="training-models-with-data">
-<h2>Training Models with Data<a class="headerlink" href="#training-models-with-data" title="Permalink to this headline">¶</a></h2>
-<p>How do we use the data during training? In general there are three use
-cases:</p>
-<ol class="arabic">
-<li><p class="first">Train over the full data per step.</p>
-<p>Follow the setting of preloaded data.</p>
-</li>
-<li><p class="first">Train over a batch per step when the full data fits in memory. This
-scale inference in terms of computational complexity.</p>
-<p>Follow the setting of preloaded data. Specify the batch size with
-<code class="docutils literal"><span class="pre">n_minibatch</span></code> in <code class="docutils literal"><span class="pre">Inference</span></code>. By default, we will subsample by
-slicing along the first dimension of every data structure in the
-data dictionary. Alternatively, follow the setting of feeding.
-Manually deal with the batch behavior at each training step.</p>
-</li>
-<li><p class="first">Train over batches per step when the full data does not fit in
-memory. This scales inference in terms of computational complexity and
-memory complexity.</p>
-<p>Follow the setting of reading from files. Alternatively, follow the
-setting of feeding, and use a generator to create and destroy NumPy
-arrays on the fly for feeding the placeholders.</p>
-</li>
-</ol>
-<p>The three use cases are supported for all modeling languages except
-Stan, which is limited to training over the full data per step. (This
-because Stan&#8217;s data structure requires data subsampling on arbitrary
-data types, which we don&#8217;t know how to automate.)</p>
 </div>
 </div>
 

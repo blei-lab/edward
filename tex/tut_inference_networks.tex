@@ -107,7 +107,7 @@ We define a TensorFlow placeholder \texttt{x_ph} for the neural network's input.
 We define a variational model which is parameterized by the neural network's
 output.
 \begin{lstlisting}[language=Python]
-x_ph = tf.placeholder(tf.float32, [28 * 28])
+x_ph = ed.placeholder(tf.float32, [28 * 28])
 mu, sigma = neural_network(x_ph)
 qz = Normal(mu=mu, sigma=sigma)
 \end{lstlisting}
@@ -117,7 +117,7 @@ network's parameters) according to
 gradients of the variational objective.
 
 An example script using this variational model can found
-\href{https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py}
 {here}.
 %We experiment with this model in the
 %\href{variational_autoencoder.html}{variational auto-encoder} tutorial.
