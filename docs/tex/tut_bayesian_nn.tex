@@ -23,82 +23,46 @@ Define the prior on the weights and biases $\mathbf{z}$ to be the standard norma
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).
 \end{align*}
 
-Let's build the model in Edward using TensorFlow, where we
-instantiate a 2-layer Bayesian neural network with $\tanh$
+Let's build the model in Edward. We
+instantiate a 3-layer Bayesian neural network with $\tanh$
 nonlinearities.
 \begin{lstlisting}[language=Python]
-class BayesianNN:
-  """
-  Bayesian neural network for regressing outputs y on inputs x.
-
-  p((x,y), z) = Normal(y | NN(x; z), lik_std) *
-                Normal(z | 0, prior_std),
-
-  where z are neural network weights, and with known likelihood and
-  prior standard deviations.
-
-  Parameters
-  ----------
-  layer_sizes : list
-    The size of each layer, ordered from input to output.
-  nonlinearity : function, optional
-    Non-linearity after each linear transformation in the neural
-    network; aka activation function.
-  lik_std : float, optional
-    Standard deviation of the normal likelihood; aka noise parameter,
-    homoscedastic noise, scale parameter.
-  prior_std : float, optional
-    Standard deviation of the normal prior on weights; aka L2
-    regularization parameter, ridge penalty, scale parameter.
-  """
-  def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
-               lik_std=0.1, prior_std=1.0):
-    self.layer_sizes = layer_sizes
-    self.nonlinearity = nonlinearity
-    self.lik_std = lik_std
-    self.prior_std = prior_std
-
-    self.n_layers = len(layer_sizes)
-    self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
-    self.n_vars = sum((m + 1) * n for m, n in self.weight_dims)
-
-  def unpack_weights(self, zs):
-    """Unpack weight matrices and biases from a flattened vector."""
-    for m, n in self.weight_dims:
-      yield tf.reshape(zs[:(m * n)], [m, n]), \
-          tf.reshape(zs[(m * n):(m * n + n)], [n])
-      zs = zs[(m + 1) * n:]
-
-  def neural_network(self, x, zs):
-    """Forward pass of the neural net, outputting a vector of
-    `n_minibatch` elements."""
-    h = x
-    for W, b in self.unpack_weights(zs):
-      h = self.nonlinearity(tf.matmul(h, W) + b)
-
-    return tf.squeeze(h)  # n_minibatch x 1 to n_minibatch
-
-  def log_prob(self, xs, zs):
-    """Return scalar, the log joint density log p(xs, zs)."""
-    x, y = xs['x'], xs['y']
-    zs = zs['z']
-    log_prior = tf.reduce_sum(norm.logpdf(zs, 0.0, self.prior_std))
-    mu = self.neural_network(x, zs)
-    log_lik = tf.reduce_sum(norm.logpdf(y, mu, self.lik_std))
-    return log_lik + log_prior
+def neural_network(x):
+    h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
+    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
+    h = tf.matmul(h, W_2) + b_2
+    return tf.reshape(h, [-1])
 
 
-model = BayesianNN(layer_sizes=[1, 10, 10, 1])
+N = 40  # num data ponts
+D = 1   # num features
+
+W_0 = Normal(mu=tf.zeros([D, 10]), sigma=tf.ones([D, 10]))
+W_1 = Normal(mu=tf.zeros([10, 10]), sigma=tf.ones([10, 10]))
+W_2 = Normal(mu=tf.zeros([10, 1]), sigma=tf.ones([10, 1]))
+b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+x = tf.convert_to_tensor(x_train, dtype=tf.float32)
+y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))
 \end{lstlisting}
+This code builds the model assuming the features \texttt{x\_train}
+already exists in the Python environment. Alternatively, one can also
+define a TensorFlow placeholder,
+\begin{lstlisting}
+x = ed.placeholder(tf.float32, [N, D])
+\end{lstlisting}
+and feed the placeholder manually during inference.
 
 A toy demonstration is available in the \href{getting-started.html}{Getting Started} section.
-Source code including a visualization is available
+Source code is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
-{here}, as well as an example
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn_analytic_kl.py}
-{here}
-leveraging additional structure in the
-Bayesian neural network for faster inference.
+{here}.
+An example of the model implemented as a class object in TensorFlow is
+available
+\href{https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_nn.py}
+{here}.
 
 \subsubsection{References}\label{references}
 

@@ -1,14 +1,4 @@
 #!/usr/bin/env python
-"""
-Bayesian linear regression using mean-field variational inference.
-
-Probability model:
-  Bayesian linear model
-  Prior: Normal
-  Likelihood: Normal
-Variational model
-  Likelihood: Mean-field Normal
-"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -18,49 +8,15 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
-
-
-class LinearModel:
-  """
-  Bayesian linear regression for outputs y on inputs x.
-
-  p((x,y), (w,b)) = Normal(y | x*w + b, lik_std) *
-                    Normal(w | 0, prior_std) *
-                    Normal(b | 0, prior_std),
-
-  where w and b are weights and intercepts, and with known lik_std and
-  prior_std.
-
-  Parameters
-  ----------
-  lik_std : float, optional
-    Standard deviation of the normal likelihood; aka noise parameter,
-    homoscedastic noise, scale parameter.
-  prior_std : float, optional
-    Standard deviation of the normal prior on weights; aka L2
-    regularization parameter, ridge penalty, scale parameter.
-  """
-  def __init__(self, lik_std=0.1, prior_std=0.1):
-    self.lik_std = lik_std
-    self.prior_std = prior_std
-
-  def log_prob(self, xs, zs):
-    x, y = xs['x'], xs['y']
-    w, b = zs['w'], zs['b']
-    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
-    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
-    log_lik = tf.reduce_sum(norm.logpdf(y, ed.dot(x, w) + b, self.lik_std))
-    return log_lik + log_prior
+from scipy.stats import norm
 
 
 def build_toy_dataset(N, noise_std=0.1):
-  x = np.concatenate([np.linspace(0, 2, num=N / 2),
+  X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
-  y = 0.075 * x + norm.rvs(0, noise_std, size=N)
-  x = (x - 4.0) / 4.0
-  x = x.reshape((N, 1))
-  return x, y
+  y = 5.0 * X + norm.rvs(0, noise_std, size=N)
+  X = X.reshape((N, 1))
+  return X.astype(np.float32), y.astype(np.float32)
 
 
 ed.set_seed(42)
@@ -68,18 +24,34 @@ ed.set_seed(42)
 N = 40  # num data points
 D = 1  # num features
 
-x_train, y_train = build_toy_dataset(N)
+# DATA
+X_train, y_train = build_toy_dataset(N)
+X_test, y_test = build_toy_dataset(N)
 
-model = LinearModel()
+# MODEL
+X = ed.placeholder(tf.float32, [N, D])
+w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
 
-qw_mu = tf.Variable(tf.random_normal([D]))
-qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
-qb_mu = tf.Variable(tf.random_normal([]))
-qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+# INFERENCE
+qw = Normal(mu=tf.Variable(tf.random_normal([D])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qb = Normal(mu=tf.Variable(tf.random_normal([1])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
-qw = Normal(mu=qw_mu, sigma=qw_sigma)
-qb = Normal(mu=qb_mu, sigma=qb_sigma)
+data = {X: X_train, y: y_train}
+inference = ed.MFVI({w: qw, b: qb}, data)
+inference.initialize()
 
-data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
-inference.run(n_iter=250, n_samples=5, n_print=10)
+sess = ed.get_session()
+for t in range(1001):
+  _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
+  inference.print_progress(t, loss)
+
+# CRITICISM
+y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
+# This is equivalent to
+# y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))
+
+print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))

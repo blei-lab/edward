@@ -18,7 +18,6 @@ from __future__ import print_function
 import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
-import six
 import tensorflow as tf
 
 from edward.models import Normal
@@ -57,16 +56,22 @@ class BayesianNN:
     self.lik_std = lik_std
     self.prior_std = prior_std
 
-    self.n_layers = len(layer_sizes) - 1
+    self.n_layers = len(layer_sizes)
     self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
     self.n_vars = sum((m + 1) * n for m, n in self.weight_dims)
+
+  def unpack_weights(self, zs):
+    """Unpack weight matrices and biases from a flattened vector."""
+    for m, n in self.weight_dims:
+      yield tf.reshape(zs[:(m * n)], [m, n]), \
+          tf.reshape(zs[(m * n):(m * n + n)], [n])
+      zs = zs[(m + 1) * n:]
 
   def neural_network(self, x, zs):
     """Forward pass of the neural net, outputting a vector of
     `n_minibatch` elements."""
     h = x
-    for l in range(self.n_layers):
-      W, b = zs['w' + str(l)], zs['b' + str(l)]
+    for W, b in self.unpack_weights(zs):
       h = self.nonlinearity(tf.matmul(h, W) + b)
 
     return tf.squeeze(h)  # n_minibatch x 1 to n_minibatch
@@ -74,10 +79,8 @@ class BayesianNN:
   def log_prob(self, xs, zs):
     """Return scalar, the log joint density log p(xs, zs)."""
     x, y = xs['x'], xs['y']
-    log_prior = 0.0
-    for z in six.itervalues(zs):
-      log_prior += tf.reduce_sum(norm.logpdf(z, 0.0, self.prior_std))
-
+    zs = zs['z']
+    log_prior = tf.reduce_sum(norm.logpdf(zs, 0.0, self.prior_std))
     mu = self.neural_network(x, zs)
     log_lik = tf.reduce_sum(norm.logpdf(y, mu, self.lik_std))
     return log_lik + log_prior
@@ -98,24 +101,46 @@ x_train, y_train = build_toy_dataset()
 
 model = BayesianNN(layer_sizes=[1, 10, 10, 1], nonlinearity=rbf)
 
-qw = []
-qb = []
-for l in range(model.n_layers):
-  m, n = model.weight_dims[l]
-  qw_mu = tf.Variable(tf.random_normal([m, n]))
-  qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([m, n])))
-  qb_mu = tf.Variable(tf.random_normal([n]))
-  qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([n])))
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
-  qw += [Normal(mu=qw_mu, sigma=qw_sigma)]
-  qb += [Normal(mu=qb_mu, sigma=qb_sigma)]
+# Set up figure
+fig = plt.figure(figsize=(8, 8), facecolor='white')
+ax = fig.add_subplot(111, frameon=False)
+plt.ion()
+plt.show(block=False)
 
+sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'w0': qw[0], 'b0': qb[0],
-                     'w1': qw[1], 'b1': qb[1],
-                     'w2': qw[2], 'b2': qb[2]}, data, model)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=100)
 for t in range(1000):
   loss = inference.update()
   if t % inference.n_print == 0:
     print("iter {:d} loss {:.2f}".format(t, loss))
+
+    # Sample functions from variational model
+    mean, std = sess.run([qz.mu, qz.sigma])
+    rs = np.random.RandomState(0)
+    zs = rs.randn(10, model.n_vars) * std + mean
+    zs = tf.convert_to_tensor(zs, dtype=tf.float32)
+    inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
+    x = tf.expand_dims(inputs, 1)
+    mus = []
+    for z in tf.unpack(zs):
+      mus += [model.neural_network(x, z)]
+
+    outputs = tf.pack(mus).eval()
+
+    # Get data
+    x, y = data['x'], data['y']
+
+    # Plot data and functions
+    plt.cla()
+    ax.plot(x, y, 'bx')
+    ax.plot(inputs, outputs.T)
+    ax.set_xlim([-8, 8])
+    ax.set_ylim([-2, 3])
+    plt.draw()
+    plt.pause(1.0 / 60.0)
