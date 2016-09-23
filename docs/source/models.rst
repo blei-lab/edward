@@ -200,7 +200,7 @@ observations. ``zs`` is a dictionary with string ``z`` binded to a
 sample from the one-dimensional Beta latent variable.
 
 Here is a `toy script
-<https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_tf.py>`__
+<https://github.com/blei-lab/edward/blob/master/examples/tf_beta_bernoulli.py>`__
 that uses this model. The model class can be more complicated,
 containing fields or other methods required for other functionality in
 Edward. See the section below for more details.
@@ -228,7 +228,7 @@ Here is an example:
     model = BetaBernoulli()
 
 Here is a `toy script
-<https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_np.py>`__
+<https://github.com/blei-lab/edward/blob/master/examples/np_beta_bernoulli.py>`__
 that uses this model.
 
 **Stan.**
@@ -267,7 +267,7 @@ matches the name of the data from the data block.
   inference = Inference({'p': qp}, data, model)
 
 Here is a `toy
-script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_stan.py>`__
+script <https://github.com/blei-lab/edward/blob/master/examples/stan_beta_bernoulli.py>`__
 that uses this model. Stan programs are convenient as `there are many
 online examples <https://github.com/stan-dev/example-models/wiki>`__,
 although they are limited to probability models with differentiable
@@ -306,7 +306,7 @@ variables.
   inference = Inference({'p': qp}, data, model)
 
 Here is a `toy
-script <https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli_pymc3.py>`__
+script <https://github.com/blei-lab/edward/blob/master/examples/pymc3_beta_bernoulli.py>`__
 that uses this model. PyMC3 can be used to define models with both
 differentiable latent variables and non-differentiable (e.g., discrete)
 latent variables. ``PyMC3Model`` objects contain no structure about the
