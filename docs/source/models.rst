@@ -6,40 +6,105 @@ of data ``x`` and latent variables ``z``.
 For more details, see the
 `Probability Models tutorial <../tut_model.html>`__.
 
-All random variable objects, i.e., any class inheriting from
-``RandomVariable`` in ``edward.models``, takes as input a shape and
-optionally, parameter arguments. The shape denotes the shape of its
-random variable. For example:
+Random Variables
+^^^^^^^^^^^^^^^^
+
+The building block of probabilistic modeling is a random variable. In
+Edward, random variables are built on top of
+`tf.contrib.distributions <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/distributions>`__.
+It has the same arguments to instantiate the object, and is equipped
+with the same methods such as ``log_prob()`` and ``sample()``.
+See their docstrings for more details.
+
+Here are examples of univariate distributions.
 
 .. code:: python
 
-  from edward.models import Normal, InverseGamma, Beta
+  # univariate normal
+  Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+  # vector of 5 univariate normals
+  Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
+  # 2 x 3 matrix of Exponentials
+  Exponential(lam=tf.ones([2, 3]))
 
-  # a vector of 10 random variables
-  InverseGamma(alpha=tf.ones([10]), beta=tf.ones([10]))
+The dimension of the distributions are deduced from the dimension of
+its parameters.
 
-  # a 5 x 2 matrix of random variables
-  Normal(mu.zeros([5, 2]), beta=tf.ones([5, 2]))
-
-  # vector of 3 random variables with varying b param
-  eta(a=tf.ones([3]), b=tf.exp(tf.Variable(tf.ones([3]))))
-
-Multivariate distributions store their multivariate dimension in the
-outer dimension (right-most dimension) of their shape.
+Here are examples of multivariate distributions.
 
 .. code:: python
-
-  from edward.models import Dirichlet
 
   # 1 K-dimensional Dirichlet
   Dirichlet(alpha=np.array([0.1]*K)
-  # vector of 5 K-dimensional Dirichlet's
-  Dirichlet(alpha=tf.ones([5, K]))
+  # vector of 5 K-dimensional multivariate normals
+  MultivariateNormal(mu=tf.zeros([5, K]))
+  # 2 x 5 matrix of K-dimensional multivariate normals
+  MultivariateNormal(mu=tf.zeros([2, 5, K]))
 
-The main methods in each ``RandomVariable`` are ``log_prob()`` and
-``sample()``, which mathematically are ``log q(z; \lambda)`` and ``z ~
-q(z; \lambda)`` respectively. See their docstrings for more details.
+Multivariate distributions store their multivariate dimension in the
+inner dimension (right-most dimension) of the parameters.
 
+Formally, ``RandomVariable`` objects define a wrapper around tensors. That is,
+we register a ``tensor_conversion_function()`` which converts the object to
+samples. This enables tensor operations, placing ``RandomVariable``
+objects on the TensorFlow graph.
+
+.. code:: python
+
+  x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
+  y = tf.constant(5.0)
+  x + y, x - y, x * y, x / y
+  tf.nn.tanh(x * y)
+  tf.gather(x, 2) # 3rd normal rv in the vector
+
+Importantly, the graphical model is defined explicitly by its
+TensorFlow graph. This allows random variables to be used in
+conjuction with other TensorFlow ops.
+
+Parameters work with random variables in the same way they
+work with ``tf.contrib.distributions``.
+
+-  Constant parameters.
+
+   .. code:: python
+
+     # 5-dimensional normal with constant params
+     x = Normal(mu=np.array([0.0]*5), sigma=np.array([1.0]*5))
+
+-  Trainable parameters.
+
+   .. code:: python
+
+     # 5-dimensional normal
+     mu = tf.Variable(np.zeros(5))
+     sigma = tf.Variable(np.zeros(5))
+     z = Normal(mu=mu, sigma=sigma)
+
+     # (1 factor of a) 5-dimensional full rank normal
+     mu = tf.Variable(np.zeros(5))
+     cov = tf.Variable(np.identity(5))
+     z = MultivariateNormal(mu=mu, cov=cov)
+
+     # Normal parameterized by a neural network
+     W_1 = tf.Variable(np.zeros([input_dim, h])
+     W_2 = tf.Variable(np.zeros([h, output_dim])
+     b_1 = tf.Variable(np.zeros(h))
+     b_2 = tf.Variable(np.zeros(output_dim))
+
+     def neural_network(x):
+         return tf.matmul(tf.nn.tanh(tf.matmul(x, W_1) + b_1), W_2) + b_2
+
+     x = np.array(...)
+     y = Normal(mu=neural_network(x))
+
+-  Random parameters.
+
+   .. code:: python
+
+     # 2-dimensional prior
+     mu = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
+     # note scale param is fixed
+     y = Normal(mu=mu, sigma=tf.ones(2)))
 
 For examples of models built in Edward, see the model
 `tutorials <../tutorials.html>`__.
@@ -47,18 +112,11 @@ For examples of models built in Edward, see the model
 Variational Models
 ^^^^^^^^^^^^^^^^^^
 
-A variational model defines a distribution over latent
-variables. It is a model of the posterior distribution, specifying
-another distribution to approximate it. This is analogous to the way
-that probabilistic models specify distributions to approximate the
-true data distribution. After inference, the variational model is used
-as a proxy to the true posterior.
-
+A variational model defines a distribution over latent variables. It
+is a model of the posterior distribution, specifying another
+distribution to approximate it.
 Edward implements variational models using the same language of random
-variables for specifying probability models.  During inference, each
-latent variable in the model is binded to a ``RandomVariable`` object
-in the variational model. The latter aims to match the model's latent
-variable given data.
+variables.
 
 We parameterize them with TensorFlow variables so that their
 parameters may be trained during inference.
