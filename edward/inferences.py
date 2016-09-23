@@ -620,10 +620,11 @@ class MFVI(VariationalInference):
     q_log_prob = tf.pack(q_log_prob)
 
     if self.model_wrapper is None:
-      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma)
+      kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(
+                          qz.mu, qz.sigma, z.mu, z.sigma))
                           for z, qz in six.iteritems(self.latent_vars)])
     else:
-      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma)
+      kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                           for qz in six.itervalues(self.latent_vars)])
 
     self.loss = tf.reduce_mean(p_log_lik) - kl
@@ -734,10 +735,11 @@ class MFVI(VariationalInference):
     p_log_lik = tf.pack(p_log_lik)
 
     if self.model_wrapper is None:
-      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma)
+      kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(
+                          qz.mu, qz.sigma, z.mu, z.sigma))
                           for z, qz in six.iteritems(self.latent_vars)])
     else:
-      kl = tf.reduce_sum([kl_multivariate_normal(qz.mu, qz.sigma)
+      kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                           for qz in six.itervalues(self.latent_vars)])
 
     p_log_lik = tf.pack(p_log_lik)
