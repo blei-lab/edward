@@ -10,17 +10,16 @@ data sets to complex deep probabilistic models on large data sets. Edward fuses
 three fields: Bayesian statistics and machine learning, deep learning, and
 probabilistic programming.
 
-It supports __modeling languages__ including
+It supports __modeling__ with
 
-+ [TensorFlow](https://www.tensorflow.org) (with neural networks via
-    [Keras](http://keras.io), [TensorFlow
-    Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim),
-    or [Pretty Tensor](https://github.com/google/prettytensor))
-+ [Stan](http://mc-stan.org)
-+ [PyMC3](http://pymc-devs.github.io/pymc3/)
-+ Python, through [NumPy/SciPy](http://scipy.org/)
++ Directed graphical models
++ Neural networks (via libraries such as
+    [Keras](http://keras.io) and [TensorFlow
+    Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim))
++ Conditionally specified undirected models
++ Bayesian nonparametrics and probabilistic programs
 
-It supports __inference__ via
+It supports __inference__ with
 
 + Variational inference
   + Black box variational inference
@@ -34,15 +33,15 @@ It supports __inference__ via
     maximum likelihood)
   + Laplace approximation
 
-It supports __criticism__ of the model and inference via
+It supports __criticism__ of the model and inference with
 
 + Point-based evaluations
 + Posterior predictive checks
 
-Edward is built on top of [TensorFlow](https://www.tensorflow.org),
-enabling features such as computational graphs, distributed training,
-CPU/GPU integration, automatic differentiation, and visualization with
-TensorBoard.
+Edward is built on top of [TensorFlow](https://www.tensorflow.org).
+It enables features such as computational graphs, distributed
+training, CPU/GPU integration, automatic differentiation, and
+visualization with TensorBoard.
 
 ## Resources
 

@@ -11,7 +11,7 @@ setup(
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
     packages=['edward', 'edward.stats', 'edward.models'],
-    install_requires=['tensorflow>=0.10.0rc0',
+    install_requires=['tensorflow>=0.10.0',
                       'numpy>=1.7',
                       'scipy>=0.16',
                       'six>=1.10.0'],

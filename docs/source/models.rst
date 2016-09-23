@@ -6,9 +6,109 @@ of data ``x`` and latent variables ``z``.
 For more details, see the
 `Probability Models tutorial <../tut_model.html>`__.
 
-All models in Edward are written as a class. To write a new model,
-it can be written in any of the currently supported modeling
-languages: TensorFlow, Python, Stan, and PyMC3.
+All random variable objects, i.e., any class inheriting from
+``RandomVariable`` in ``edward.models``, takes as input a shape and
+optionally, parameter arguments. The shape denotes the shape of its
+random variable. For example:
+
+.. code:: python
+
+  from edward.models import Normal, InverseGamma, Beta
+
+  # a vector of 10 random variables
+  InverseGamma(alpha=tf.ones([10]), beta=tf.ones([10]))
+
+  # a 5 x 2 matrix of random variables
+  Normal(mu.zeros([5, 2]), beta=tf.ones([5, 2]))
+
+  # vector of 3 random variables with varying b param
+  eta(a=tf.ones([3]), b=tf.exp(tf.Variable(tf.ones([3]))))
+
+Multivariate distributions store their multivariate dimension in the
+outer dimension (right-most dimension) of their shape.
+
+.. code:: python
+
+  from edward.models import Dirichlet
+
+  # 1 K-dimensional Dirichlet
+  Dirichlet(alpha=np.array([0.1]*K)
+  # vector of 5 K-dimensional Dirichlet's
+  Dirichlet(alpha=tf.ones([5, K]))
+
+The main methods in each ``RandomVariable`` are ``log_prob()`` and
+``sample()``, which mathematically are ``log q(z; \lambda)`` and ``z ~
+q(z; \lambda)`` respectively. See their docstrings for more details.
+
+
+For examples of models built in Edward, see the model
+`tutorials <../tutorials.html>`__.
+
+Variational Models
+^^^^^^^^^^^^^^^^^^
+
+A variational model defines a distribution over latent
+variables. It is a model of the posterior distribution, specifying
+another distribution to approximate it. This is analogous to the way
+that probabilistic models specify distributions to approximate the
+true data distribution. After inference, the variational model is used
+as a proxy to the true posterior.
+
+Edward implements variational models using the same language of random
+variables for specifying probability models.  During inference, each
+latent variable in the model is binded to a ``RandomVariable`` object
+in the variational model. The latter aims to match the model's latent
+variable given data.
+
+We parameterize them with TensorFlow variables so that their
+parameters may be trained during inference.
+
+.. code:: python
+
+  from edward.models import Dirichlet, Normal, InverseGamma
+
+  qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
+  qmu_mu = tf.Variable(tf.random_normal([K * D]))
+  qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+  qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+  qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+
+  qpi = Dirichlet(alpha=qpi_alpha)
+  qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+  qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
+
+
+Model Wrappers
+^^^^^^^^^^^^^^
+
+Edward also supports specifying models using external languages. These
+model wrappers are written as a class.
+
+In general, a model wrapper is a class with the structure
+
+.. code:: python
+
+  class Model:
+      def __init__(...):
+          ...
+          self.n_vars = ...
+
+      def log_prob(self, xs, zs):
+          log_prior = ...
+          log_likelihood = ...
+          return log_prior + log_likelihood
+
+  model = Model(...)
+
+The field ``n_vars`` denotes the number of latent variables in the
+probability model. For example, a model with a Gaussian likelihood with latent
+mean and variance would have ``n_vars=2*N`` latent variables for
+``N`` observations.
+
+The method ``log_prob(xs, zs)`` calculates the logarithm of
+the joint density $\log p(x,z)$. Here ``xs`` can be a single data
+point or a batch of data points. Analogously, ``zs`` can be a
+single set of latent variables, or a batch thereof.
 
 **TensorFlow.**
 Write a class with the method ``log_prob(xs, zs)``. The method defines
@@ -161,11 +261,8 @@ Internally, other languages are wrapped in TensorFlow so their
 computation represents a single node in the graph (making it difficult
 to tease apart and thus distribute their computation).
 
-For examples of models built in Edward, see the model
-`tutorials <../tutorials.html>`__.
-
-Model API
-^^^^^^^^^
+Model Wrapper API
+~~~~~~~~~~~~~~~~~
 
 This outlines the current spec for all methods in the model object.
 It includes all modeling languages, where certain methods are
