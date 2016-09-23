@@ -15,63 +15,47 @@ linear relationship between these two random variables.
 For a set of $N$ data points $(\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}$,
 the model is
 \begin{align*}
-  p(\mathbf{z})
+  p(\mathbf{w})
   &=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, \sigma_z^2\mathbf{I}),
+  \mathcal{N}(\mathbf{w} \;;\; \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \\[1.5ex]
+  p(b)
+  &=
+  \mathcal{N}(b \;;\; 0, \sigma_b^2),
   \\
-  p(\mathbf{y} \mid \mathbf{z}, \mathbf{X})
+  p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
   &=
   \prod_{n=1}^N
   \mathcal{N}(y_n \;;\; \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
 \end{align*}
-The latent variables $\mathbf{z}=[\mathbf{w},b]$ form the weights $\mathbf{w}$
-and intercept $b$, also known as the bias.
-Assume $\sigma_z^2$ is a known prior variance and $\sigma_y^2$ is a
+The latent variables are the linear model's weights $\mathbf{w}$ and
+intercept $b$, also known as the bias.
+Assume $\sigma_w^2,\sigma_b^2$ are known prior variances and $\sigma_y^2$ is a
 known likelihood variance. The mean of the likelihood is given by a
-linear transformation of the inputs $\mathbf{x}_n$ and shared weights
-$\mathbf{w}$, along with the intercept $b$.
+linear transformation of the inputs $\mathbf{x}_n$.
 
-Let's build the model in Edward using TensorFlow, fixing $D=10$.
+Let's build the model in Edward, fixing $\sigma_w,\sigma_b,\sigma_y=1$.
 \begin{lstlisting}[language=Python]
-class LinearModel:
-  """
-  Bayesian linear regression for outputs y on inputs x.
+N = 40  # num data points
+D = 1  # num features
 
-  p((x,y), (w,b)) = Normal(y | x*w + b, lik_std) *
-                    Normal(w | 0, prior_std) *
-                    Normal(b | 0, prior_std),
-
-  where w and b are weights and intercepts, and with known lik_std and
-  prior_std.
-
-  Parameters
-  ----------
-  lik_std : float, optional
-    Standard deviation of the normal likelihood; aka noise parameter,
-    homoscedastic noise, scale parameter.
-  prior_std : float, optional
-    Standard deviation of the normal prior on weights; aka L2
-    regularization parameter, ridge penalty, scale parameter.
-  """
-  def __init__(self, lik_std=0.1, prior_std=0.1):
-    self.lik_std = lik_std
-    self.prior_std = prior_std
-
-  def log_prob(self, xs, zs):
-    x, y = xs['x'], xs['y']
-    w, b = zs['w'], zs['b']
-    log_prior = tf.reduce_sum(norm.logpdf(w, 0.0, self.prior_std))
-    log_prior += tf.reduce_sum(norm.logpdf(b, 0.0, self.prior_std))
-    log_lik = tf.reduce_sum(norm.logpdf(y, ed.dot(x, w) + b, self.lik_std))
-    return log_lik + log_prior
-
-
-model = LinearModel()
+X = ed.placeholder(tf.float32, [N, D])
+w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
 \end{lstlisting}
+Here, we define a placeholder \texttt{X}. During inference, we pass in
+the value for this placeholder according to data.
 
 We experiment with this model in the \href{tut_supervised_regression.html}{supervised
 learning (regression)} tutorial.
-An example script with visualization is available
+An example script is available
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_placeholder.py}
+{here}.
+An example of the model implemented as a class object in TensorFlow is
+available
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
+{here}, with visualization available
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_plot.py}
 {here}.
 
