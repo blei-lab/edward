@@ -84,10 +84,7 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Inference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#variational-models">Variational Models</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
 </ul>
@@ -256,49 +253,6 @@ loss. These three snippets are applicable to all of variational
 inference, and are thus useful defaults for any derived class.</p>
 <p>For examples of inference algorithms built in Edward, see the inference
 <a class="reference external" href="../tutorials">tutorials</a>.</p>
-<div class="section" id="variational-models">
-<h2>Variational Models<a class="headerlink" href="#variational-models" title="Permalink to this headline">¶</a></h2>
-<p>A variational model defines a distribution over latent
-variables. It is a model of the posterior distribution, specifying
-another distribution to approximate it. This is analogous to the way
-that probabilistic models specify distributions to approximate the
-true data distribution. After inference, the variational model is used
-as a proxy to the true posterior.</p>
-<p>Edward implements variational models using the <code class="docutils literal"><span class="pre">RandomVariable</span></code> class in
-<code class="docutils literal"><span class="pre">edward.models</span></code>. During inference, each latent variable in the model is binded to a <code class="docutils literal"><span class="pre">RandomVariable</span></code> object, which aims to match the latent variable given data.</p>
-<p>All random variable objects, i.e.,
-any class inheriting from <code class="docutils literal"><span class="pre">RandomVariable</span></code> in <code class="docutils literal"><span class="pre">edward.models</span></code>, takes
-as input a shape and optionally, parameter arguments. If left
-unspecified, the parameter arguments are trainable parameters during
-inference.  The shape denotes the shape of its random variable. For
-example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">InverseGamma</span><span class="p">,</span> <span class="n">Beta</span>
-
-<span class="c"># a vector of 10 random variables</span>
-<span class="n">qz1</span> <span class="o">=</span> <span class="n">InverseGamma</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">10</span><span class="p">]),</span> <span class="n">beta</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">10</span><span class="p">]))</span>
-
-<span class="c"># a 5 x 2 matrix of random variables</span>
-<span class="n">qz2</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">beta</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
-
-<span class="c"># vector of 3 random variables with varying b param</span>
-<span class="n">qz</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">3</span><span class="p">]),</span> <span class="n">b</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">3</span><span class="p">]))))</span>
-</pre></div>
-</div>
-<p>Multivariate distributions store their multivariate dimension in the
-outer dimension (right-most dimension) of their shape.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">Dirichlet</span>
-
-<span class="c"># 1 K-dimensional Dirichlet</span>
-<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
-<span class="c"># vector of 5 K-dimensional Dirichlet&#39;s</span>
-<span class="n">Dirichlet</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="n">K</span><span class="p">]))</span>
-</pre></div>
-</div>
-<p>The main methods in each <code class="docutils literal"><span class="pre">RandomVariable</span></code> are <code class="docutils literal"><span class="pre">log_prob()</span></code> and
-<code class="docutils literal"><span class="pre">sample()</span></code>, which mathematically are <code class="docutils literal"><span class="pre">log</span> <span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> and <code class="docutils literal"><span class="pre">z</span> <span class="pre">~</span>
-<span class="pre">q(z;</span> <span class="pre">\lambda)</span></code> respectively. See their docstrings for more details.</p>
-<p>&gt;&gt;&gt;&gt;&gt;&gt;&gt; remove &#8216;.html&#8217; in all links</p>
-</div>
 </div>
 
 
