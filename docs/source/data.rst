@@ -31,17 +31,15 @@ to read data in TensorFlow
 
    This setting provides the most fine-grained control which is useful for experimentation.
 
-   Represent the data as TensorFlow placeholders. During inferenec,
+   Represent the data as TensorFlow placeholders. During inference,
    the user must manually feed the placeholders at each
-   step initialize via ``inference.initialize()``; then
+   step by first initializing via ``inference.initialize()``; then
    in a loop call ``sess.run(inference.train, feed_dict={...})`` where
-   in ``feed_dict`` you pass in the values for the
+   ``feed_dict`` carries the values for the
    ``tf.placeholder``'s.
    (As an example, see
-   the `mixture density network
-   <https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network.py>`__
-   or `variational auto-encoder
-   <https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py>`__.)
+   the `bayesian linear regression
+   <https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py>`__.)
 
 3. **Reading from files.** An input pipeline reads the data from files
    at the beginning of a TensorFlow graph.
@@ -90,11 +88,6 @@ cases:
    Follow the setting of reading from files. Alternatively, follow the
    setting of feeding, and use a generator to create and destroy NumPy
    arrays on the fly for feeding the placeholders.
-
-The three use cases are supported for all modeling languages except
-Stan, which is limited to training over the full data per step. (This
-because Stan's data structure requires data subsampling on arbitrary
-data types, which we don't know how to automate.)
 
 Passing in Data for Model Wrappers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,3 +165,9 @@ We detail specifics for each external language below.
   """
   model = ed.StanModel(model_code=model_code)
   data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+
+Note that for these model wrappers,
+all 3 use cases for training models with data are supported. However,
+Stan is limited to training over the full data per step. (This
+because Stan's data structure requires data subsampling on arbitrary
+data types, which we don't know how to automate.)

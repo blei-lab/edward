@@ -11,7 +11,7 @@ hierarchy of inference methods, all of which are easily extensible.
 This enables fast experimentation and research on top of existing
 inference methods, whether it be developing new black box inference
 algorithms or developing new model-specific inference algorithms which
-are tailored to a particular model or restricted class of models.
+are tailored to specific class of models.
 We detail this below.
 
 .. image:: ../images/inference_structure.png
@@ -30,7 +30,7 @@ methods are derived from.
     def __init__(self, latent_vars, data=None, model_wrapper=None):
       ...
 
-It takes as input the set of latent variables to infer and a dataset. Optionally, it also takes as input a model wrapper ``model_wrapper`` if the user uses an external language to specify the model.
+It takes as input the set of latent variables to infer and a dataset. Optionally, if the user uses an external language to specify the model, it takes as input a model wrapper ``model_wrapper``.
 For more details, see the
 `Data API <data.html>`__
 and
@@ -39,8 +39,9 @@ and
 Note that ``Inference`` says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
 tailored to a restricted class of models available in Edward (such as
-differentiable models), or even tailor it to a single model. The
-algorithm can raise an error if the model is outside this class.
+differentiable models or conditionally conjugate models), or even
+tailor it to a single model. The algorithm can raise an error if the
+model is outside this class.
 
 We organize inference under two paradigms:
 ``VariationalInference`` and ``MonteCarlo`` (or more plainly,
@@ -62,14 +63,11 @@ have their own default methods.
     """Base class for variational inference methods.
     """
     def __init__(self, latent_vars, data=None, model_wrapper=None):
-      """Initialization.
-      ...
-      """
       super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
     ...
 
-Hybrid methods and novel paradigms outside of ``VariationalInference``
+Hybrid and paradigms outside of ``VariationalInference``
 and ``MonteCarlo`` are also possible in Edward. For example, one can
 write a class derived from ``Inference`` directly, or inherit to
 carry both ``VariationalInference`` and ``MonteCarlo`` methods.
@@ -140,4 +138,5 @@ loss. These three snippets are applicable to all of variational
 inference, and are thus useful defaults for any derived class.
 
 For examples of inference algorithms built in Edward, see the inference
-`tutorials <../tutorials.html>`__.
+`tutorials <../tutorials.html>`__. It can also be useful to simply look at
+the `source code <https://github.com/blei-lab/edward/tree/master/edward/inferences>`__.
