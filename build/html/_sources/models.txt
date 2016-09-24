@@ -103,7 +103,6 @@ work with ``tf.contrib.distributions``.
 
      # 2-dimensional prior
      mu = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
-     # note scale param is fixed
      y = Normal(mu=mu, sigma=tf.ones(2)))
 
 For examples of models built in Edward, see the model
