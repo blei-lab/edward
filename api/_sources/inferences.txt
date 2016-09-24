@@ -138,4 +138,5 @@ loss. These three snippets are applicable to all of variational
 inference, and are thus useful defaults for any derived class.
 
 For examples of inference algorithms built in Edward, see the inference
-`tutorials <../tutorials>`__.
+`tutorials <../tutorials>`__. It can also be useful to simply look at
+the `source code <https://github.com/blei-lab/edward/tree/master/edward/inferences>`__.
