@@ -80,7 +80,7 @@ work with ``tf.contrib.distributions``.
      sigma = tf.Variable(np.zeros(5))
      z = Normal(mu=mu, sigma=sigma)
 
-     # (1 factor of a) 5-dimensional full rank normal
+     # 5-dimensional full rank normal
      mu = tf.Variable(np.zeros(5))
      cov = tf.Variable(np.identity(5))
      z = MultivariateNormal(mu=mu, cov=cov)
