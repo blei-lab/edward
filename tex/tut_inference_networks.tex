@@ -83,7 +83,7 @@ It takes a 28 by 28 pixel image and outputs a $10$-dimensional
 output, one for the mean (\texttt{mu}) and one for the standard
 deviation (\texttt{sigma}).
 \begin{lstlisting}[language=Python]
-hidden = Dense(256, activation=K.relu)(x_ph)  # (M, 64)
+hidden = Dense(256, activation=K.relu)(x_ph)
 qz = Normal(mu=Dense(10)(hidden),
             sigma=Dense(10, activation=K.softplus)(hidden))
 \end{lstlisting}
