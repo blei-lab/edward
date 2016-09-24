@@ -100,47 +100,11 @@
   p(\mathbf{z})
   &amp;=
   \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
-<p>Let’s build the model in Edward using TensorFlow, and with PrettyTensor as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
-<pre class="python" language="Python"><code>class NormalBernoulli:
-  """
-  Each binarized pixel in an image is modeled by a Bernoulli
-  likelihood. The success probability for each pixel is the output
-  of a neural network that takes samples from a normal prior as
-  input.
-
-  p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
-  """
-  def __init__(self, n_vars):
-    self.n_vars = n_vars  # number of local latent variables
-
-  def neural_network(self, z):
-    """p = neural_network(z)"""
-    with pt.defaults_scope(activation_fn=tf.nn.elu,
-                           batch_normalize=True,
-                           learned_moments_update_rate=0.0003,
-                           variance_epsilon=0.001,
-                           scale_after_normalization=True):
-      return (pt.wrap(z).
-              reshape([N_MINIBATCH, 1, 1, self.n_vars]).
-              deconv2d(3, 128, edges='VALID').
-              deconv2d(5, 64, edges='VALID').
-              deconv2d(5, 32, stride=2).
-              deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
-              flatten()).tensor
-
-  def log_lik(self, xs, zs):
-    """
-    Bernoulli log-likelihood, summing over every image n and pixel i
-    in image n.
-
-    log p(x | z) = log Bernoulli(x | p = neural_network(z))
-     = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
-    """
-    return tf.reduce_sum(
-        bernoulli.logpmf(xs['x'], p=self.neural_network(zs['z'])))
-
-
-model = NormalBernoulli(n_vars=10)</code></pre>
+<p>Let’s build the model in Edward using TensorFlow, and with Keras as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
+<pre class="python" language="Python"><code>z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+hidden = Dense(256, activation=K.relu)(z.value())
+x = Bernoulli(logits=Dense(28 * 28)(hidden))</code></pre>
+<p>It starts with a <span class="math inline">\(d\)</span>-dimensional standard normal prior, one for each data point. Then it applies a layer of 256 hidden units with <code>relu</code> nonlinearity. Then it applies a layer of 256 hidden units without a nonlinearity. The output of this neural net parameterizes the Bernoulli’s logits, which is more numerically stable than parameterizing a Bernoulli according to a probability constrained from 0 and 1.</p>
 <p>An example script using this model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py">here</a>.</p>
 <h3 id="footnotes">Footnotes</h3>
 <p>The neural network which parameterizes the probabilistic decoder is also known as a generative network. It is in analogy to an <a href="tut_inference_networks">inference network</a>, which can parameterize a variational model used for inference, interpreted as a probabilistic encoder.</p>
