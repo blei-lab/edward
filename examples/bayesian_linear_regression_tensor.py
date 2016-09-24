@@ -35,11 +35,9 @@ qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
 qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
 data = {y: y_data}
-
 inference = ed.MFVI({beta: qbeta}, data)
-inference.initialize()
 
-sess = ed.get_session()
+inference.initialize()
 for t in range(501):
-  _, loss = sess.run([inference.train, inference.loss])
-  inference.print_progress(t, loss)
+  info_dict = inference.update()
+  inference.print_progress(t, info_dict)

@@ -27,5 +27,5 @@ inference.initialize(logdir='train')
 
 sess = ed.get_session()
 for t in range(1001):
-  _, loss = sess.run([inference.train, inference.loss])
-  inference.print_progress(t, loss)
+  info_dict = inference.update()
+  inference.print_progress(t, info_dict)

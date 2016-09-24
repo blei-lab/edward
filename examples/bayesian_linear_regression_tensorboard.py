@@ -36,12 +36,11 @@ qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma, name='qbeta')
 
 data = {X: X_train, y: y_train}
 inference = ed.MFVI({beta: qbeta}, data)
-inference.initialize(logdir='train')
 
-sess = ed.get_session()
+inference.initialize(logdir='train')
 for t in range(501):
-  _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
-  inference.print_progress(t, loss)
+  info_dict = inference.update()
+  inference.print_progress(t, info_dict)
 
 y_post = ed.copy(y, {beta: qbeta.mean()})
 # This is equivalent to

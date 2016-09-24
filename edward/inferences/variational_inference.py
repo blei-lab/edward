@@ -8,7 +8,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences.inference import Inference
-from edward.models import StanModel
+from edward.models import RandomVariable, StanModel
 from edward.util import get_session
 
 try:
@@ -63,8 +63,8 @@ class VariationalInference(Inference):
     """
     self.initialize(*args, **kwargs)
     for t in range(self.n_iter + 1):
-      loss = self.update()
-      self.print_progress(t, loss)
+      info_dict = self.update()
+      self.print_progress(t, info_dict)
 
     self.finalize()
 
@@ -72,8 +72,6 @@ class VariationalInference(Inference):
                  optimizer=None, scope=None, logdir=None,
                  use_prettytensor=False):
     """Initialize variational inference algorithm.
-
-    Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.
 
     Initialize all variables.
 
@@ -184,39 +182,51 @@ class VariationalInference(Inference):
     self.coord = tf.train.Coordinator()
     self.threads = tf.train.start_queue_runners(coord=self.coord)
 
-  def update(self):
+  def update(self, feed_dict=None):
     """Run one iteration of optimizer for variational inference.
+
+    Parameters
+    ----------
+    feed_dict : dict, optional
+      Feed dictionary for a TensorFlow session run. It is used to feed
+      placeholders that are not fed during initialization.
 
     Returns
     -------
-    loss : double
-      Loss function values after one iteration.
+    dict
+      Dictionary of algorithm-specific information. In this case, the
+      loss function value after one iteration.
     """
-    sess = get_session()
-    _, loss = sess.run([self.train, self.loss])
-    return loss
+    if feed_dict is None:
+      feed_dict = {}
 
-  def print_progress(self, t, loss):
+    for key, value in six.iteritems(self.data):
+      if not isinstance(key, RandomVariable) and not isinstance(key, str):
+        feed_dict[key] = value
+
+    sess = get_session()
+    _, loss = sess.run([self.train, self.loss], feed_dict)
+    return {'loss': loss}
+
+  def print_progress(self, t, info_dict):
     """Print progress to output.
 
     Parameters
     ----------
     t : int
       Iteration counter.
-    loss : double
-      Loss function value at iteration ``t``.
+    info_dict : dict
+      Dictionary of algorithm-specific information.
     """
     if self.n_print is not None:
       if t % self.n_print == 0:
+        loss = info_dict['loss']
         print("iter {:d} loss {:.2f}".format(t, loss))
         for rv in six.itervalues(self.latent_vars):
           print(rv)
 
   def finalize(self):
     """Function to call after convergence.
-
-    Any class based on ``VariationalInference`` **may**
-    overwrite this method.
     """
     # Ask threads to stop.
     self.coord.request_stop()
@@ -225,10 +235,8 @@ class VariationalInference(Inference):
   def build_loss(self):
     """Build loss function.
 
-    Empty method.
-
-    Any class based on ``VariationalInference`` **must**
-    implement this method.
+    Any derived class of ``VariationalInference`` **must** implement
+    this method.
 
     Raises
     ------

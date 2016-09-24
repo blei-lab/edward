@@ -6,7 +6,7 @@ import numpy as np
 import six
 import tensorflow as tf
 
-from edward.models import StanModel
+from edward.models import RandomVariable, StanModel
 from edward.util import get_session, placeholder
 
 
@@ -95,20 +95,24 @@ class Inference(object):
     else:
       self.data = {}
       for key, value in six.iteritems(data):
-        if isinstance(value, tf.Tensor):
-          # If ``data`` has TensorFlow placeholders, the user
-          # must manually feed them at each step of
-          # inference.
-          # If ``data`` has tensors that are the output of
-          # data readers, then batch training operates
-          # according to the reader.
-          self.data[key] = tf.cast(value, tf.float32)
-        elif isinstance(value, np.ndarray):
-          # If ``data`` has NumPy arrays, store the data
-          # in the computational graph.
-          ph = placeholder(tf.float32, value.shape)
-          var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
-          sess.run(var.initializer, {ph: value})
+        if isinstance(key, RandomVariable) or isinstance(key, str):
+          if isinstance(value, tf.Tensor):
+            # If ``data`` has TensorFlow placeholders, the user
+            # must manually feed them at each step of
+            # inference.
+            # If ``data`` has tensors that are the output of
+            # data readers, then batch training operates
+            # according to the reader.
+            self.data[key] = tf.cast(value, tf.float32)
+          elif isinstance(value, np.ndarray):
+            # If ``data`` has NumPy arrays, store the data
+            # in the computational graph.
+            ph = placeholder(tf.float32, value.shape)
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            sess.run(var.initializer, {ph: value})
+          else:
+            raise NotImplementedError()
         else:
-          raise NotImplementedError()
+          # If key is a placeholder, then don't modify its fed value.
+          self.data[key] = value

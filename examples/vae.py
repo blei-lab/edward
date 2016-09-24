@@ -53,9 +53,8 @@ for epoch in range(n_epoch):
     for t in range(n_iter_per_epoch):
         pbar.update(t)
         x_train, _ = mnist.train.next_batch(M)
-        _, loss = sess.run([inference.train, inference.loss],
-                           feed_dict={x_ph: x_train})
-        avg_loss += loss
+        info_dict = inference.update(feed_dict={x_ph: x_train})
+        avg_loss += info_dict['loss']
 
     # Take average over all ELBOs during the epoch, and over minibatch
     # of data points (images).

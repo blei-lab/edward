@@ -84,8 +84,8 @@ NEPOCH = 20
 train_loss = np.zeros(NEPOCH)
 test_loss = np.zeros(NEPOCH)
 for i in range(NEPOCH):
-  _, train_loss[i] = sess.run([inference.train, inference.loss],
-                              feed_dict={X: X_train, y: y_train})
+  info_dict = inference.update(feed_dict={X: X_train, y: y_train})
+  train_loss[i] = info_dict['loss']
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
   print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i],
                                                          test_loss[i]))
