@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>edward.inferences.inference &mdash; Edward 1.0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0.9 documentation" href="../../../index.html"/>
+        <link rel="up" title="edward.inferences" href="../inferences.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../criticisms.html">Criticism</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../edward.html">edward package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+          <li><a href="../inferences.html">edward.inferences</a> &raquo;</li>
+      
+    <li>edward.inferences.inference</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for edward.inferences.inference</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span>
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">placeholder</span>
+
+
+<div class="viewcode-block" id="Inference"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference">[docs]</a><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Base class for Edward inference methods.</span>
+
+<span class="sd">  Attributes</span>
+<span class="sd">  ----------</span>
+<span class="sd">  latent_vars : dict of RandomVariable to RandomVariable</span>
+<span class="sd">    Collection of random variables to perform inference on. Each</span>
+<span class="sd">    random variable is binded to another random variable; the latter</span>
+<span class="sd">    will infer the former conditional on data.</span>
+<span class="sd">  data : dict</span>
+<span class="sd">    Data dictionary whose values may vary at each session run.</span>
+<span class="sd">  model_wrapper : ed.Model or None</span>
+<span class="sd">    An optional wrapper for the probability model. If specified, the</span>
+<span class="sd">    random variables in `latent_vars`&#39; dictionary keys are strings</span>
+<span class="sd">    used accordingly by the wrapper.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    latent_vars : dict of RandomVariable to RandomVariable</span>
+<span class="sd">      Collection of random variables to perform inference on. Each</span>
+<span class="sd">      random variable is binded to another random variable; the latter</span>
+<span class="sd">      will infer the former conditional on data.</span>
+<span class="sd">    data : dict, optional</span>
+<span class="sd">      Data dictionary which binds observed variables (of type</span>
+<span class="sd">      `RandomVariable`) to their realizations (of type `tf.Tensor`).</span>
+<span class="sd">      It can also bind placeholders (of type `tf.Tensor`) used in the</span>
+<span class="sd">      model to their realizations.</span>
+<span class="sd">    model_wrapper : ed.Model, optional</span>
+<span class="sd">      A wrapper for the probability model. If specified, the random</span>
+<span class="sd">      variables in `latent_vars`&#39; dictionary keys are strings</span>
+<span class="sd">      used accordingly by the wrapper. `data` is also changed. For</span>
+<span class="sd">      TensorFlow, Python, and Stan models, the key type is a string;</span>
+<span class="sd">      for PyMC3, the key type is a Theano shared variable. For</span>
+<span class="sd">      TensorFlow, Python, and PyMC3 models, the value type is a NumPy</span>
+<span class="sd">      array or TensorFlow tensor; for Stan, the value type is the</span>
+<span class="sd">      type according to the Stan program&#39;s data block.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If ``data`` is not passed in, the dictionary is empty.</span>
+
+<span class="sd">    Three options are available for batch training:</span>
+<span class="sd">    1. internally if user passes in data as a dictionary of NumPy</span>
+<span class="sd">       arrays;</span>
+<span class="sd">    2. externally if user passes in data as a dictionary of</span>
+<span class="sd">       TensorFlow placeholders (and manually feeds them);</span>
+<span class="sd">    3. externally if user passes in data as TensorFlow tensors</span>
+<span class="sd">       which are the outputs of data readers.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))</span>
+<span class="sd">    &gt;&gt;&gt; x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant([1.0]))</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; qmu_mu = tf.Variable(tf.random_normal([1]))</span>
+<span class="sd">    &gt;&gt;&gt; qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))</span>
+<span class="sd">    &gt;&gt;&gt; qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; Inference({mu: qmu}, {x: np.array()})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span> <span class="o">=</span> <span class="n">latent_vars</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="o">=</span> <span class="n">model_wrapper</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
+      <span class="c"># Stan models do no support data subsampling because they</span>
+      <span class="c"># take arbitrary data structure types in the data block</span>
+      <span class="c"># and not just NumPy arrays (this makes it unamenable to</span>
+      <span class="c"># TensorFlow placeholders). Therefore fix the data</span>
+      <span class="c"># dictionary ``self.data`` at compile time to ``data``.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+          <span class="c"># If ``data`` has TensorFlow placeholders, the user</span>
+          <span class="c"># must manually feed them at each step of</span>
+          <span class="c"># inference.</span>
+          <span class="c"># If ``data`` has tensors that are the output of</span>
+          <span class="c"># data readers, then batch training operates</span>
+          <span class="c"># according to the reader.</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+          <span class="c"># If ``data`` has NumPy arrays, store the data</span>
+          <span class="c"># in the computational graph.</span>
+          <span class="n">ph</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+          <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span>
+          <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span> <span class="p">{</span><span class="n">ph</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
