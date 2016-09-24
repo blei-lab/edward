@@ -33,10 +33,9 @@ def build_toy_dataset(N=50, noise_std=0.1):
   return x, y
 
 
-def neural_network(x, W_0, W_1, W_2, b_0, b_1, b_2):
+def neural_network(x, W_0, W_1, b_0, b_1):
     h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
-    h = tf.matmul(h, W_2) + b_2
+    h = tf.matmul(h, W_1) + b_1
     return tf.reshape(h, [-1])
 
 
@@ -50,34 +49,27 @@ x_train, y_train = build_toy_dataset(N)
 
 # MODEL
 W_0 = Normal(mu=tf.zeros([D, 2]), sigma=tf.ones([D, 2]))
-W_1 = Normal(mu=tf.zeros([2, 2]), sigma=tf.ones([2, 2]))
-W_2 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
+W_1 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
 b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
-b_1 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
-b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
 x = tf.convert_to_tensor(x_train, dtype=tf.float32)
-y = Normal(mu=neural_network(x, W_0, W_1, W_2, b_0, b_1, b_2),
+y = Normal(mu=neural_network(x, W_0, W_1, b_0, b_1),
            sigma=0.1 * tf.ones(N))
 
 # INFERENCE
 qW_0 = Normal(mu=tf.Variable(tf.random_normal([D, 2])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, 2]))))
-qW_1 = Normal(mu=tf.Variable(tf.random_normal([2, 2])),
-              sigma=tf.nn.softplus(tf.Variable(tf.random_normal([2, 2]))))
-qW_2 = Normal(mu=tf.Variable(tf.random_normal([2, 1])),
+qW_1 = Normal(mu=tf.Variable(tf.random_normal([2, 1])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([2, 1]))))
 qb_0 = Normal(mu=tf.Variable(tf.random_normal([2])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([2]))))
-qb_1 = Normal(mu=tf.Variable(tf.random_normal([2])),
-              sigma=tf.nn.softplus(tf.Variable(tf.random_normal([2]))))
-qb_2 = Normal(mu=tf.Variable(tf.random_normal([1])),
+qb_1 = Normal(mu=tf.Variable(tf.random_normal([1])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 data = {y: y_train}
 inference = ed.MFVI({W_0: qW_0, b_0: qb_0,
-                     W_1: qW_1, b_1: qb_1,
-                     W_2: qW_2, b_2: qb_2}, data)
+                     W_1: qW_1, b_1: qb_1}, data)
 inference.initialize()
 
 # Sample functions from variational model to visualize fits.
@@ -86,8 +78,8 @@ inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
 x = tf.expand_dims(tf.constant(inputs), 1)
 mus = []
 for s in range(10):
-  mus += [neural_network(x, qW_0.sample(), qW_1.sample(), qW_2.sample(),
-                         qb_0.sample(), qb_1.sample(), qb_2.sample())]
+  mus += [neural_network(x, qW_0.sample(), qW_1.sample(),
+                         qb_0.sample(), qb_1.sample())]
 
 mus = tf.pack(mus)
 
@@ -109,7 +101,7 @@ plt.show()
 
 
 # RUN MEAN-FIELD VARIATIONAL INFERENCE
-inference.run(n_iter=1000, n_samples=5, n_print=100)
+inference.run(n_iter=500, n_samples=5, n_print=100)
 
 
 # SECOND VISUALIZATION (posterior)

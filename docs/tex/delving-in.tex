@@ -78,7 +78,6 @@ posterior distribution $p(z \mid x)$ captures our reasoning: its mean
 describes our best guess of the hidden structure, and its variance
 describes the uncertainty around our best guess.
 
-%The posterior distribution is typically intractable.
 Edward has many inference algorithms and makes it easy
 to develop new ones.
 
@@ -89,13 +88,10 @@ Nodes are classes in Edward and arrows represent class inheritance.}}
 Edward focuses on variational inference. It views posterior inference
 as positing a model of the latent variables $q(z \;;\; \lambda)$ and optimizing it to
 approximate the posterior $p(z \mid x)$.
-%which seeks to match the variational model  to the
-%posterior of the probability model.
 
-
-Variational models use the same language of random variables to infer
-latent variables of a probability model.
-For example, to specify a variational model (e.g.~for a Gaussian mixture)
+Variational models are defined using the same language of random
+variables. For example, to specify a variational model (e.g.~for a
+Gaussian mixture)
 \begin{align*}
   q(z \;;\; \lambda)
   &=
@@ -135,7 +131,7 @@ binds each observed variable to data that we condition on. Then
 run the inference.
 \begin{lstlisting}[language=Python]
 data = {x: x_data}
-inference = ed.KLpq({pi: qpi, mu: qmu, sigma: qsigma}, data, model)
+inference = ed.KLpq({pi: qpi, mu: qmu, sigma: qsigma}, data)
 inference.run(n_iter=500, n_minibatch=5)
 \end{lstlisting}
 This runs the \texttt{KLpq} minimization algorithm for \texttt{500} iterations,
