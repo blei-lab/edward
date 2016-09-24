@@ -38,7 +38,8 @@ x_train = np.linspace(-3, 3, num=50)
 y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)
 \end{lstlisting}
 \includegraphics[width=700px]{images/getting-started-fig0.png}
-Next, define a Bayesian neural network with one hidden layer.
+Next, define a Bayesian neural network with one hidden layer. Here, we
+define the neural network manually with \texttt{tanh} nonlinearities.
 \begin{lstlisting}[language=Python]
 import tensorflow as tf
 from edward.models import Normal
@@ -49,10 +50,9 @@ b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
 b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
 x = tf.convert_to_tensor(x_train, dtype=tf.float32)
-y = Normal(mu=neural_network(x, W_0, W_1, b_0, b_1),
+y = Normal(mu=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
            sigma=0.1)
 \end{lstlisting}
-
 Next, make inferences about the model from data.
 Edward focuses on variational inference. Specify a normal
 approximation over the weights and biases.
