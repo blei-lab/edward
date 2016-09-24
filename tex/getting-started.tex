@@ -57,8 +57,6 @@ Next, make inferences about the model from data.
 Edward focuses on variational inference. Specify a normal
 approximation over the weights and biases.
 \begin{lstlisting}[language=Python]
-from edward.models import Normal
-
 qW_0 = Normal(mu=tf.Variable(tf.random_normal([1, 2])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, 2]))))
 qW_1 = Normal(mu=tf.Variable(tf.random_normal([2, 1])),
