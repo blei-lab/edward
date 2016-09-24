@@ -130,8 +130,8 @@ if not os.path.exists(DATA_DIR):
   os.makedirs(DATA_DIR)
 
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
-x = ed.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
-data = {'x': x}
+# Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
+data = {'x': x_ph}
 
 sess = ed.get_session()
 inference = ed.MFVI({'z': qz}, data, model)
@@ -152,9 +152,8 @@ for epoch in range(n_epoch):
   for t in range(n_iter_per_epoch):
     pbar.update(t)
     x_train, _ = mnist.train.next_batch(N_MINIBATCH)
-    _, loss = sess.run([inference.train, inference.loss],
-                       feed_dict={x: x_train, x_ph: x_train})
-    avg_loss += loss
+    info_dict = inference.update(feed_dict={x_ph: x_train})
+    avg_loss += info_dict['loss']
 
   # Take average over all ELBOs during the epoch, and over minibatch
   # of data points (images).

@@ -52,12 +52,11 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
 
 data = {X: X_train, y: y_train}
 inference = ed.MFVI({w: qw, b: qb}, data)
-inference.initialize(n_samples=5, n_print=50)
 
-sess = ed.get_session()
+inference.initialize(n_samples=5, n_print=50)
 for t in range(251):
-  _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
-  inference.print_progress(t, loss)
+  info_dict = inference.update()
+  inference.print_progress(t, info_dict)
 
 # CRITICISM
 y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})

@@ -46,8 +46,8 @@ inference.initialize()
 
 sess = ed.get_session()
 for t in range(1001):
-  _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
-  inference.print_progress(t, loss)
+  info_dict = inference.update()
+  inference.print_progress(t, info_dict)
 
 # CRITICISM
 y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
