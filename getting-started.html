@@ -107,7 +107,7 @@
 
 x_train = np.linspace(-3, 3, num=50)
 y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)</code></pre>
-<p><img src="images/getting-started-fig0.png" alt="image" width="700" /> Next, define a Bayesian neural network with one hidden layer. Here, we define the neural network manually with <code>tanh</code> nonlinearities.</p>
+<p><img src="images/getting-started-fig0.png" alt="image" width="700" /> Next, define a two-layer Bayesian neural network. Here, we define the neural network manually with <code>tanh</code> nonlinearities.</p>
 <pre class="python" language="Python"><code>import tensorflow as tf
 from edward.models import Normal
 

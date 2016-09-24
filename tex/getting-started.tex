@@ -38,7 +38,7 @@ x_train = np.linspace(-3, 3, num=50)
 y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)
 \end{lstlisting}
 \includegraphics[width=700px]{images/getting-started-fig0.png}
-Next, define a Bayesian neural network with one hidden layer. Here, we
+Next, define a two-layer Bayesian neural network. Here, we
 define the neural network manually with \texttt{tanh} nonlinearities.
 \begin{lstlisting}[language=Python]
 import tensorflow as tf
