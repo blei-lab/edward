@@ -47,10 +47,10 @@ x = Bernoulli(logits=Dense(28 * 28)(hidden))
 \end{lstlisting}
 It starts with a $d$-dimensional standard normal prior, one for each
 data point. Then it applies a layer of 256 hidden units with
-\texttt{relu} nonlinearity. Then it applies a layer of 256 hidden
-units without a nonlinearity. The output of this neural net
-parameterizes the Bernoulli's logits, which is more numerically stable
-than parameterizing a Bernoulli according to a probability constrained
+\texttt{relu} nonlinearity. The output layer is $28\cdot 28$ units
+without a nonlinearity. This output
+parameterizes the Bernoulli's logits. Logits are a more numerically stable
+parameterization than probabilities constrained
 from 0 and 1.
 
 An example script using this model can found
