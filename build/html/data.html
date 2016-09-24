@@ -158,15 +158,14 @@ the <a class="reference external" href="https://github.com/blei-lab/edward/blob/
 <li><p class="first"><strong>Feeding.</strong> Manual code provides the data when running each step of
 inference.</p>
 <p>This setting provides the most fine-grained control which is useful for experimentation.</p>
-<p>Represent the data as TensorFlow placeholders. During inferenec,
+<p>Represent the data as TensorFlow placeholders. During inference,
 the user must manually feed the placeholders at each
-step initialize via <code class="docutils literal"><span class="pre">inference.initialize()</span></code>; then
+step by first initializing via <code class="docutils literal"><span class="pre">inference.initialize()</span></code>; then
 in a loop call <code class="docutils literal"><span class="pre">sess.run(inference.train,</span> <span class="pre">feed_dict={...})</span></code> where
-in <code class="docutils literal"><span class="pre">feed_dict</span></code> you pass in the values for the
+<code class="docutils literal"><span class="pre">feed_dict</span></code> carries the values for the
 <code class="docutils literal"><span class="pre">tf.placeholder</span></code>&#8216;s.
 (As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network.py">mixture density network</a>
-or <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_convolutional_vae.py">variational auto-encoder</a>.)</p>
+the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">bayesian linear regression</a>.)</p>
 </li>
 <li><p class="first"><strong>Reading from files.</strong> An input pipeline reads the data from files
 at the beginning of a TensorFlow graph.</p>
@@ -208,10 +207,6 @@ setting of feeding, and use a generator to create and destroy NumPy
 arrays on the fly for feeding the placeholders.</p>
 </li>
 </ol>
-<p>The three use cases are supported for all modeling languages except
-Stan, which is limited to training over the full data per step. (This
-because Stan&#8217;s data structure requires data subsampling on arbitrary
-data types, which we don&#8217;t know how to automate.)</p>
 </div>
 <div class="section" id="passing-in-data-for-model-wrappers">
 <h2>Passing in Data for Model Wrappers<a class="headerlink" href="#passing-in-data-for-model-wrappers" title="Permalink to this headline">¶</a></h2>
@@ -288,6 +283,11 @@ is a string. Value is whatever type is used for the data block.</li>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;N&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}</span>
 </pre></div>
 </div>
+<p>Note that for these model wrappers,
+all 3 use cases for training models with data are supported. However,
+Stan is limited to training over the full data per step. (This
+because Stan&#8217;s data structure requires data subsampling on arbitrary
+data types, which we don&#8217;t know how to automate.)</p>
 </div>
 </div>
 
