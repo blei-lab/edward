@@ -37,16 +37,14 @@ Edward has optional features that depend on external packages.
 \begin{lstlisting}[language=JSON]
 pip install pystan
 \end{lstlisting}
-  \item Neural networks are supported through
+  \item Neural networks are primarily supported through three
+  libraries:
   \href{http://keras.io}{Keras} (>=1.0)
 \begin{lstlisting}[language=JSON]
 pip install keras
 \end{lstlisting}
-You have to manually \href{https://keras.io/backend/}
-{configure Keras} to work with TensorFlow.
-\item Neural networks are also supported through
 \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
-Slim} (native in TensorFlow) and
+Slim} (native in TensorFlow), and
 \href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.5.3)
 \begin{lstlisting}[language=JSON]
 pip install prettytensor
