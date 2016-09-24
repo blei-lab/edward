@@ -162,8 +162,8 @@ inference.initialize()</code></pre>
 train_loss = np.zeros(NEPOCH)
 test_loss = np.zeros(NEPOCH)
 for i in range(NEPOCH):
-    _, train_loss[i] = sess.run([inference.train, inference.loss],
-                                feed_dict={X: X_train, y: y_train})
+    info_dict = inference.update(feed_dict={X: X_train, y: y_train})
+    train_loss[i] = info_dict['loss']
     test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})</code></pre>
 <p>After training for a number of iterations, we can get out the predictions we are interested in from the model. In this case, it is</p>
 <ul>

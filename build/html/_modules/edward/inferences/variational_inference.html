@@ -143,7 +143,7 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">from</span> <span class="nn">edward.inferences.inference</span> <span class="k">import</span> <span class="n">Inference</span>
-<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span>
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">RandomVariable</span><span class="p">,</span> <span class="n">StanModel</span>
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_session</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -198,8 +198,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+      <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
 
@@ -207,8 +207,6 @@
                  <span class="n">optimizer</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
                  <span class="n">use_prettytensor</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize variational inference algorithm.</span>
-
-<span class="sd">    Set up ``tf.train.AdamOptimizer`` with a decaying scale factor.</span>
 
 <span class="sd">    Initialize all variables.</span>
 
@@ -319,39 +317,51 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Coordinator</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">start_queue_runners</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VariationalInference.update"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="VariationalInference.update"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run one iteration of optimizer for variational inference.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    feed_dict : dict, optional</span>
+<span class="sd">      Feed dictionary for a TensorFlow session run. It is used to feed</span>
+<span class="sd">      placeholders that are not fed during initialization.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    loss : double</span>
-<span class="sd">      Loss function values after one iteration.</span>
+<span class="sd">    dict</span>
+<span class="sd">      Dictionary of algorithm-specific information. In this case, the</span>
+<span class="sd">      loss function value after one iteration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">loss</span></div>
+    <span class="k">if</span> <span class="n">feed_dict</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-<div class="viewcode-block" id="VariationalInference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">feed_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">],</span> <span class="n">feed_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="VariationalInference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Print progress to output.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    t : int</span>
 <span class="sd">      Iteration counter.</span>
-<span class="sd">    loss : double</span>
-<span class="sd">      Loss function value at iteration ``t``.</span>
+<span class="sd">    info_dict : dict</span>
+<span class="sd">      Dictionary of algorithm-specific information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">t</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s">&#39;loss&#39;</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="s">&quot;iter {:d} loss {:.2f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
           <span class="nb">print</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VariationalInference.finalize"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.finalize">[docs]</a>  <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to call after convergence.</span>
-
-<span class="sd">    Any class based on ``VariationalInference`` **may**</span>
-<span class="sd">    overwrite this method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># Ask threads to stop.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">request_stop</span><span class="p">()</span>
@@ -360,10 +370,8 @@
 <div class="viewcode-block" id="VariationalInference.build_loss"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.build_loss">[docs]</a>  <span class="k">def</span> <span class="nf">build_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Build loss function.</span>
 
-<span class="sd">    Empty method.</span>
-
-<span class="sd">    Any class based on ``VariationalInference`` **must**</span>
-<span class="sd">    implement this method.</span>
+<span class="sd">    Any derived class of ``VariationalInference`` **must** implement</span>
+<span class="sd">    this method.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>

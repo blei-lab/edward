@@ -185,9 +185,8 @@ according to the Stan program&#8217;s data block.</li>
 <dt id="edward.inferences.variational_inference.VariationalInference.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.build_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.build_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build loss function.</p>
-<p>Empty method.</p>
-<p>Any class based on <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong>
-implement this method.</p>
+<p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong> implement
+this method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -202,15 +201,12 @@ implement this method.</p>
 <dt id="edward.inferences.variational_inference.VariationalInference.finalize">
 <code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.finalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to call after convergence.</p>
-<p>Any class based on <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>may</strong>
-overwrite this method.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="edward.inferences.variational_inference.VariationalInference.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_minibatch=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em>, <em>logdir=None</em>, <em>use_prettytensor=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize variational inference algorithm.</p>
-<p>Set up <code class="docutils literal"><span class="pre">tf.train.AdamOptimizer</span></code> with a decaying scale factor.</p>
 <p>Initialize all variables.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -244,7 +240,7 @@ Defaults to TensorFlow.</li>
 
 <dl class="method">
 <dt id="edward.inferences.variational_inference.VariationalInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>t</em>, <em>loss</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.print_progress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.print_progress" title="Permalink to this definition">¶</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>t</em>, <em>info_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.print_progress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.print_progress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -252,7 +248,7 @@ Defaults to TensorFlow.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>t</strong> (<em>int</em>) &#8211; Iteration counter.</li>
-<li><strong>loss</strong> (<em>double</em>) &#8211; Loss function value at iteration <code class="docutils literal"><span class="pre">t</span></code>.</li>
+<li><strong>info_dict</strong> (<em>dict</em>) &#8211; Dictionary of algorithm-specific information.</li>
 </ul>
 </td>
 </tr>
@@ -286,15 +282,19 @@ Defaults to TensorFlow.</li>
 
 <dl class="method">
 <dt id="edward.inferences.variational_inference.VariationalInference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.update" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run one iteration of optimizer for variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>loss</strong> &#8211; Loss function values after one iteration.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feed_dict</strong> (<em>dict, optional</em>) &#8211; Feed dictionary for a TensorFlow session run. It is used to feed
+placeholders that are not fed during initialization.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary of algorithm-specific information. In this case, the
+loss function value after one iteration.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
 </tr>
 </tbody>
 </table>

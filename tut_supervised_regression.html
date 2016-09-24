@@ -125,12 +125,11 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
 <p>Run mean-field variational inference for 250 iterations, using 5 latent variable samples per iteration and printing every 10 iterations.</p>
 <pre class="python" language="Python"><code>data = {X: X_train, y: y_train}
 inference = ed.MFVI({w: qw, b: qb}, data)
-inference.initialize()
 
-sess = ed.get_session()
+inference.initialize()
 for t in range(1001):
-  _, loss = sess.run([inference.train, inference.loss], {X: data[X]})
-  inference.print_progress(t, loss)</code></pre>
+  info_dict = inference.update()
+  inference.print_progress(t, info_dict)</code></pre>
 <p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>Use point-based evaluation, and calculate the mean squared error for predictions on test data.</p>
