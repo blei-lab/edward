@@ -112,10 +112,7 @@ X_test, y_test = build_toy_dataset(N, coeff)</code></pre>
 <h3 id="model">Model</h3>
 <p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="tut_bayesian_linear_regression">Bayesian linear regression tutorial</a>.</p>
 <p>Here we build the model in Edward’s native language.</p>
-<pre class="python" language="Python"><code>N = 40  # num data points
-D = 1  # num features
-
-X = ed.placeholder(tf.float32, [N, D])
+<pre class="python" language="Python"><code>X = ed.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))</code></pre>

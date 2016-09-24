@@ -46,9 +46,6 @@ model, see the
 
 Here we build the model in Edward's native language.
 \begin{lstlisting}[language=Python]
-N = 40  # num data points
-D = 1  # num features
-
 X = ed.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
