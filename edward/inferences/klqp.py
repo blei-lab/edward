@@ -6,7 +6,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
-from edward.models import StanModel, RandomVariable, Normal
+from edward.models import RandomVariable, Normal
 from edward.util import copy, kl_multivariate_normal
 
 
@@ -27,7 +27,7 @@ class KLqp(VariationalInference):
     ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].
   """
   def __init__(self, *args, **kwargs):
-    super(MFVI, self).__init__(*args, **kwargs)
+    super(KLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, score=None, *args, **kwargs):
     """Initialization.
@@ -50,16 +50,16 @@ class KLqp(VariationalInference):
       self.score = True
 
     self.n_samples = n_samples
-    return super(MFVI, self).initialize(*args, **kwargs)
+    return super(KLqp, self).initialize(*args, **kwargs)
 
   def build_loss(self):
-    """Wrapper for the MFVI loss function.
+    """Wrapper for the KLqp loss function.
 
     .. math::
 
       -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
-    MFVI supports
+    KLqp supports
 
     1. score function gradients
     2. reparameterization gradients

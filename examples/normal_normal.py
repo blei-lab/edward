@@ -23,9 +23,8 @@ data = {x: np.array([0.0] * 50, dtype=np.float32)}
 
 # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
 inference = ed.MFVI({mu: qmu}, data)
-inference.initialize()
 
-sess = ed.get_session()
+inference.initialize()
 for t in range(1001):
   info_dict = inference.update()
   inference.print_progress(t, info_dict)

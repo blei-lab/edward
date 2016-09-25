@@ -42,9 +42,8 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
 
 data = {X: X_train, y: y_train}
 inference = ed.MFVI({w: qw, b: qb}, data)
-inference.initialize()
 
-sess = ed.get_session()
+inference.initialize()
 for t in range(1001):
   info_dict = inference.update()
   inference.print_progress(t, info_dict)
