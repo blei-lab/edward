@@ -46,48 +46,20 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
-  def run(self, *args, **kwargs):
-    """A simple wrapper to run variational inference.
-
-    1. Initialize via ``initialize``.
-    2. Run ``update`` for ``self.n_iter`` iterations.
-    3. While running, ``print_progress``.
-    4. Finalize via ``finalize``.
-
-    Parameters
-    ----------
-    *args
-      Passed into ``initialize``.
-    **kwargs
-      Passed into ``initialize``.
-    """
-    self.initialize(*args, **kwargs)
-    for t in range(self.n_iter + 1):
-      info_dict = self.update()
-      self.print_progress(t, info_dict)
-
-    self.finalize()
-
-  def initialize(self, n_iter=1000, n_minibatch=None, n_print=100,
-                 optimizer=None, scope=None, logdir=None,
-                 use_prettytensor=False):
+  def initialize(self, n_minibatch=None, optimizer=None, scope=None,
+                 use_prettytensor=False, *args, **kwargs):
     """Initialize variational inference algorithm.
 
     Initialize all variables.
 
     Parameters
     ----------
-    n_iter : int, optional
-      Number of iterations for optimization.
     n_minibatch : int, optional
       Number of samples for data subsampling. Default is to use
       all the data. Subsampling is available only if all data
       passed in are NumPy arrays and the model is not a Stan
       model. For subsampling details, see
       ``tf.train.slice_input_producer`` and ``tf.train.batch``.
-    n_print : int, optional
-      Number of iterations for each print progress. To suppress print
-      progress, then specify None.
     optimizer : str or tf.train.Optimizer, optional
       A TensorFlow optimizer, to use for optimizing the variational
       objective. Alternatively, one can pass in the name of a
@@ -95,17 +67,12 @@ class VariationalInference(Inference):
       will be used.
     scope : str, optional
       Scope of TensorFlow variable objects to optimize over.
-    logdir : str, optional
-      Directory where event file will be written. For details,
-      see `tf.train.SummaryWriter`. Default is to write nothing.
     use_prettytensor : bool, optional
       ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
       to use PrettyTensor optimizer (when using PrettyTensor).
       Defaults to TensorFlow.
     """
-    self.n_iter = n_iter
     self.n_minibatch = n_minibatch
-    self.n_print = n_print
     self.loss = tf.constant(0.0)
 
     if n_minibatch is not None and \
@@ -172,15 +139,7 @@ class VariationalInference(Inference):
       # Note PrettyTensor cannot use global_step.
       self.train = pt.apply_optimizer(optimizer, losses=[loss])
 
-    if logdir is not None:
-      train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
-
-    init = tf.initialize_all_variables()
-    init.run()
-
-    # Start input enqueue threads.
-    self.coord = tf.train.Coordinator()
-    self.threads = tf.train.start_queue_runners(coord=self.coord)
+    return super(VariationalInference, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):
     """Run one iteration of optimizer for variational inference.
@@ -210,13 +169,6 @@ class VariationalInference(Inference):
 
   def print_progress(self, t, info_dict):
     """Print progress to output.
-
-    Parameters
-    ----------
-    t : int
-      Iteration counter.
-    info_dict : dict
-      Dictionary of algorithm-specific information.
     """
     if self.n_print is not None:
       if t % self.n_print == 0:
@@ -224,13 +176,6 @@ class VariationalInference(Inference):
         print("iter {:d} loss {:.2f}".format(t, loss))
         for rv in six.itervalues(self.latent_vars):
           print(rv)
-
-  def finalize(self):
-    """Function to call after convergence.
-    """
-    # Ask threads to stop.
-    self.coord.request_stop()
-    self.coord.join(self.threads)
 
   def build_loss(self):
     """Build loss function.
