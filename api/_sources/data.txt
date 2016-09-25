@@ -89,8 +89,8 @@ cases:
    setting of feeding, and use a generator to create and destroy NumPy
    arrays on the fly for feeding the placeholders.
 
-Passing in Data for Model Wrappers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Training Model Wrappers with Data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 During inference, data is passed in differently for external
 languages which use a model wrapper. Instead of binding observed
