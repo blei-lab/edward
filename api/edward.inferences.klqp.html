@@ -165,10 +165,10 @@ techniques (Ranganath et al., 2014) that minimize</p>
 <dl class="method">
 <dt id="edward.inferences.klqp.KLqp.build_loss">
 <code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/klqp.html#KLqp.build_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.klqp.KLqp.build_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for the MFVI loss function.</p>
+<dd><p>Wrapper for the KLqp loss function.</p>
 <div class="math">
 \[-ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\]</div>
-<p>MFVI supports</p>
+<p>KLqp supports</p>
 <ol class="arabic simple">
 <li>score function gradients</li>
 <li>reparameterization gradients</li>

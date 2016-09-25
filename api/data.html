@@ -151,8 +151,8 @@ holds all the data.</p>
 data fits in memory.</p>
 <p>Represent the data as NumPy arrays.
 Internally, during inference, we will store them in TensorFlow variables to prevent
-copying data more than once in memory. Batch training is available
-by passing in the <code class="docutils literal"><span class="pre">n_minibatch</span></code> argument to inference. (As an example, see
+copying data more than once in memory.
+(As an example, see
 the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py">mixture of Gaussians</a>.)</p>
 </li>
 <li><p class="first"><strong>Feeding.</strong> Manual code provides the data when running each step of
@@ -161,18 +161,18 @@ inference.</p>
 <p>Represent the data as TensorFlow placeholders. During inference,
 the user must manually feed the placeholders at each
 step by first initializing via <code class="docutils literal"><span class="pre">inference.initialize()</span></code>; then
-in a loop call <code class="docutils literal"><span class="pre">sess.run(inference.train,</span> <span class="pre">feed_dict={...})</span></code> where
-<code class="docutils literal"><span class="pre">feed_dict</span></code> carries the values for the
-<code class="docutils literal"><span class="pre">tf.placeholder</span></code>&#8216;s.
+in a loop call <code class="docutils literal"><span class="pre">inference.update(feed_dict={...})</span></code> where
+<code class="docutils literal"><span class="pre">feed_dict</span></code> carries the values for the <code class="docutils literal"><span class="pre">tf.placeholder</span></code>&#8216;s.
 (As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">bayesian linear regression</a>.)</p>
+the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a>.)</p>
 </li>
 <li><p class="first"><strong>Reading from files.</strong> An input pipeline reads the data from files
 at the beginning of a TensorFlow graph.</p>
 <p>This setting is recommended if the data does not fit in memory.</p>
-<p>Represent the data as TensorFlow
-tensors, where the tensors are the output of data readers. (As an
-example, see
+<p>Represent the data as TensorFlow tensors, where the tensors are the
+output of data readers. During inference, each update will be
+automatically evaluated over new batch tensors represented through
+the data readers. (As an example, see
 the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py">data unit test</a>.)</p>
 </li>
 </ol>

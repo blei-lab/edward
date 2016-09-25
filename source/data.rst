@@ -21,8 +21,8 @@ to read data in TensorFlow
 
    Represent the data as NumPy arrays.
    Internally, during inference, we will store them in TensorFlow variables to prevent
-   copying data more than once in memory. Batch training is available
-   by passing in the ``n_minibatch`` argument to inference. (As an example, see
+   copying data more than once in memory.
+   (As an example, see
    the `mixture of Gaussians
    <https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py>`__.)
 
@@ -34,11 +34,10 @@ to read data in TensorFlow
    Represent the data as TensorFlow placeholders. During inference,
    the user must manually feed the placeholders at each
    step by first initializing via ``inference.initialize()``; then
-   in a loop call ``sess.run(inference.train, feed_dict={...})`` where
-   ``feed_dict`` carries the values for the
-   ``tf.placeholder``'s.
+   in a loop call ``inference.update(feed_dict={...})`` where
+   ``feed_dict`` carries the values for the ``tf.placeholder``'s.
    (As an example, see
-   the `bayesian linear regression
+   the `Bayesian linear regression
    <https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py>`__.)
 
 3. **Reading from files.** An input pipeline reads the data from files
@@ -46,9 +45,10 @@ to read data in TensorFlow
 
    This setting is recommended if the data does not fit in memory.
 
-   Represent the data as TensorFlow
-   tensors, where the tensors are the output of data readers. (As an
-   example, see
+   Represent the data as TensorFlow tensors, where the tensors are the
+   output of data readers. During inference, each update will be
+   automatically evaluated over new batch tensors represented through
+   the data readers. (As an example, see
    the `data unit test
    <https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py>`__.)
 

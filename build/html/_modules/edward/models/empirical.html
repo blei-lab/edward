@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>edward.models.empirical &mdash; Edward 1.0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Edward 1.0.9 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Edward
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../inferences.html">Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../criticisms.html">Criticism</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../edward.html">edward package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">Edward</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>edward.models.empirical</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for edward.models.empirical</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;The Empirical distribution class.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">tile</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="k">import</span> \
+    <span class="n">distribution</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">constant_op</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">tensor_shape</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">tensor_util</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">array_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">check_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">math_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">random_ops</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="Empirical"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical">[docs]</a><span class="k">class</span> <span class="nc">Empirical</span><span class="p">(</span><span class="n">distribution</span><span class="o">.</span><span class="n">Distribution</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">params</span><span class="p">,</span>
+               <span class="n">validate_args</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+               <span class="n">allow_nan_stats</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s">&quot;Empirical&quot;</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_allow_nan_stats</span> <span class="o">=</span> <span class="n">allow_nan_stats</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_args</span> <span class="o">=</span> <span class="n">validate_args</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="n">params</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;params&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ones</span><span class="p">()</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">allow_nan_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Boolean describing behavior when a stat is undefined for batch member.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_nan_stats</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">validate_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Boolean describing behavior on invalid input.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_args</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">dtype</span>
+
+<div class="viewcode-block" id="Empirical.batch_shape"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.batch_shape">[docs]</a>  <span class="k">def</span> <span class="nf">batch_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;batch_shape&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Batch dimensions of this instance as a 1-D int32 `Tensor`.</span>
+
+<span class="sd">    The product of the dimensions of the `batch_shape` is the number of</span>
+<span class="sd">    independent distributions of this kind the instance represents.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: name to give to the op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      `Tensor` `batch_shape`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ones</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Empirical.get_batch_shape"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.get_batch_shape">[docs]</a>  <span class="k">def</span> <span class="nf">get_batch_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;`TensorShape` available at graph construction time.</span>
+
+<span class="sd">    Same meaning as `batch_shape`. May be only partially defined.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      batch shape</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_shape</span></div>
+
+<div class="viewcode-block" id="Empirical.event_shape"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.event_shape">[docs]</a>  <span class="k">def</span> <span class="nf">event_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;event_shape&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shape of a sample from a single distribution as a 1-D int32 `Tensor`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: name to give to the op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      `Tensor` `event_shape`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">constant_op</span><span class="o">.</span><span class="n">constant</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Empirical.get_event_shape"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.get_event_shape">[docs]</a>  <span class="k">def</span> <span class="nf">get_event_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;`TensorShape` available at graph construction time.</span>
+
+<span class="sd">    Same meaning as `event_shape`. May be only partially defined.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      event shape</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_shape</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span>
+
+<div class="viewcode-block" id="Empirical.mean"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.mean">[docs]</a>  <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;mean&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mean of this distribution.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span></div>
+
+<div class="viewcode-block" id="Empirical.mode"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.mode">[docs]</a>  <span class="k">def</span> <span class="nf">mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;mode&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mode of this distribution.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mode&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Empirical.std"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.std">[docs]</a>  <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;std&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Standard deviation of this distribution.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Empirical.variance"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.variance">[docs]</a>  <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;variance&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Variance of this distribution.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Empirical.log_prob"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;log_prob&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Log prob of observations in `x` under the Empirical distribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
+<span class="sd">      name: The name to give this op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      log_prob: tensor of dtype `dtype`, the log-PDFs of `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Input x dtype does not match dtype: %s vs. %s&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Empirical.cdf"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.cdf">[docs]</a>  <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;cdf&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;CDF of observations in `x` under the Empirical distribution(s).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
+<span class="sd">      name: The name to give this op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      cdf: tensor of dtype `dtype`, the CDFs of `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Empirical.log_cdf"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.log_cdf">[docs]</a>  <span class="k">def</span> <span class="nf">log_cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;log_cdf&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Log CDF of observations `x` under the Empirical distribution(s).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
+<span class="sd">      name: The name to give this op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      log_cdf: tensor of dtype `dtype`, the log-CDFs of `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Empirical.prob"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.prob">[docs]</a>  <span class="k">def</span> <span class="nf">prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;prob&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The PDF of observations in `x` under the Empirical distribution(s).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
+<span class="sd">      name: The name to give this op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      prob: tensor of dtype `dtype`, the prob values of `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Empirical</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Empirical.entropy"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.entropy">[docs]</a>  <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;entropy&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The entropy of Empirical distribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: The name to give this op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      entropy: tensor of dtype `dtype`, the entropy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Empirical.sample_n"><a class="viewcode-back" href="../../../edward.models.empirical.html#edward.models.empirical.Empirical.sample_n">[docs]</a>  <span class="k">def</span> <span class="nf">sample_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;sample_n&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sample `n` observations from the Empirical distribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      n: `Scalar`, type int32, the number of observations to sample.</span>
+<span class="sd">      seed: Python integer, the random seed.</span>
+<span class="sd">      name: The name to give this op.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      samples: `[n, ...]`, a `Tensor` of `n` samples for each</span>
+<span class="sd">        of the distributions determined by broadcasting the hyperparameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                                  <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())])</span>
+        <span class="k">return</span> <span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">multiples</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">is_reparameterized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">True</span>
+
+  <span class="k">def</span> <span class="nf">_ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">is_continuous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">False</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Edward Development Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

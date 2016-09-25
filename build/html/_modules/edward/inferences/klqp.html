@@ -141,7 +141,7 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">from</span> <span class="nn">edward.inferences.variational_inference</span> <span class="k">import</span> <span class="n">VariationalInference</span>
-<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">StanModel</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">,</span> <span class="n">Normal</span>
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">RandomVariable</span><span class="p">,</span> <span class="n">Normal</span>
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">kl_multivariate_normal</span>
 
 
@@ -162,7 +162,7 @@
 <span class="sd">    ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">MFVI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">KLqp</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="KLqp.initialize"><a class="viewcode-back" href="../../../edward.inferences.klqp.html#edward.inferences.klqp.KLqp.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialization.</span>
@@ -185,16 +185,16 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="k">True</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MFVI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">KLqp</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="KLqp.build_loss"><a class="viewcode-back" href="../../../edward.inferences.klqp.html#edward.inferences.klqp.KLqp.build_loss">[docs]</a>  <span class="k">def</span> <span class="nf">build_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Wrapper for the MFVI loss function.</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper for the KLqp loss function.</span>
 
 <span class="sd">    .. math::</span>
 
 <span class="sd">      -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]</span>
 
-<span class="sd">    MFVI supports</span>
+<span class="sd">    KLqp supports</span>
 
 <span class="sd">    1. score function gradients</span>
 <span class="sd">    2. reparameterization gradients</span>
