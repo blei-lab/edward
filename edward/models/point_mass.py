@@ -23,6 +23,9 @@ import tensorflow as tf
 
 
 class PointMass(distribution.Distribution):
+  """PointMass random variable. It is analogous to an Empirical random
+  variable with one sample, but its parameter argument does not have
+  an outer dimension."""
   def __init__(self,
                params,
                validate_args=True,
@@ -35,8 +38,8 @@ class PointMass(distribution.Distribution):
       with ops.control_dependencies([]):
         self._name = name
         self._params = array_ops.identity(params, name="params")
-        self._batch_shape = self._ones().get_shape()
-        self._event_shape = tensor_shape.TensorShape([])
+        self._batch_shape = tensor_shape.TensorShape([])
+        self._event_shape = self._ones().get_shape()
 
   @property
   def allow_nan_stats(self):
@@ -133,7 +136,7 @@ class PointMass(distribution.Distribution):
         return math_ops.square(self.std())
 
   def log_prob(self, x, name="log_prob"):
-    """Log prob of observations in `x` under these Normal distribution(s).
+    """Log prob of observations in `x` under the Point Mass distribution.
 
     Args:
       x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.
@@ -144,14 +147,10 @@ class PointMass(distribution.Distribution):
     """
     with ops.name_scope(self.name):
       with ops.op_scope([self._params, x], name):
-        x = ops.convert_to_tensor(x)
-        if x.dtype != self.dtype:
-          raise TypeError("Input x dtype does not match dtype: %s vs. %s"
-                          % (x.dtype, self.dtype))
-        return tf.cast(tf.equal(x, self._params), dtype=self.dtype)
+        return math_ops.log(self.prob(x))
 
   def cdf(self, x, name="cdf"):
-    """CDF of observations in `x` under these Normal distribution(s).
+    """CDF of observations in `x` under the Point Mass distribution(s).
 
     Args:
       x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.
@@ -163,7 +162,7 @@ class PointMass(distribution.Distribution):
     raise NotImplementedError()
 
   def log_cdf(self, x, name="log_cdf"):
-    """Log CDF of observations `x` under these Normal distribution(s).
+    """Log CDF of observations `x` under the Point Mass distribution(s).
 
     Args:
       x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.
@@ -177,7 +176,7 @@ class PointMass(distribution.Distribution):
         return math_ops.log(self.cdf(x))
 
   def prob(self, x, name="prob"):
-    """The PDF of observations in `x` under these Normal distribution(s).
+    """The PDF of observations in `x` under the Point Mass distribution(s).
 
     Args:
       x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.
@@ -186,10 +185,10 @@ class PointMass(distribution.Distribution):
     Returns:
       prob: tensor of dtype `dtype`, the prob values of `x`.
     """
-    return super(Normal, self).prob(x, name=name)
+    raise NotImplementedError()
 
   def entropy(self, name="entropy"):
-    """The entropy of Normal distribution(s).
+    """The entropy of Point Mass distribution.
 
     Args:
       name: The name to give this op.
@@ -200,7 +199,7 @@ class PointMass(distribution.Distribution):
     raise NotImplementedError()
 
   def sample_n(self, n, seed=None, name="sample_n"):
-    """Sample `n` observations from the Normal Distributions.
+    """Sample `n` observations from the Point Mass distribution.
 
     Args:
       n: `Scalar`, type int32, the number of observations to sample.
@@ -214,7 +213,7 @@ class PointMass(distribution.Distribution):
     with ops.name_scope(self.name):
       with ops.op_scope([self._params, n], name):
         multiples = tf.concat(0, [tf.expand_dims(n, 0),
-                                  [1] * len(self._params.get_shape())])
+                                  [1] * len(self.get_event_shape())])
         return tile(self._params, multiples)
 
   @property

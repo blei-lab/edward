@@ -11,7 +11,7 @@ from edward.util import copy, hessian
 
 
 class MAP(VariationalInference):
-  """Maximum a posteriori inference.
+  """Maximum a posteriori.
 
   We implement this using a ``PointMass`` variational distribution to
   solve the following optimization problem
@@ -28,8 +28,10 @@ class MAP(VariationalInference):
                   dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on. If
       list, each random variable will be implictly optimized
-      using a ``PointMass`` distribution that is defined
+      using a ``PointMass`` random variable that is defined
       internally (with support matching each random variable).
+      If dictionary, each random variable must be a ``PointMass``
+      random variable.
 
     Examples
     --------
@@ -44,8 +46,8 @@ class MAP(VariationalInference):
     (with matching support), so one can pass in a list of latent
     variables instead:
 
-    >>> MAP([beta], {X: np.array(), y: np.array()})
-    >>> MAP([pi, mu, sigma], {x: np.array()}
+    >>> MAP([beta], data)
+    >>> MAP([pi, mu, sigma], data)
 
     However, for model wrappers, the list can only have one element:
 
@@ -62,7 +64,7 @@ class MAP(VariationalInference):
     explicitly pass in the point mass distributions.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("variational"):
+      with tf.variable_scope("posterior"):
         if model_wrapper is None:
           latent_vars = {rv: PointMass(
               params=tf.Variable(tf.random_normal(rv.batch_shape())))
@@ -76,6 +78,11 @@ class MAP(VariationalInference):
         else:
           raise NotImplementedError("A list of more than one element is "
                                     "not supported. See documentation.")
+    elif isinstance(latent_vars, dict):
+      for qz in six.itervalues(latent_vars):
+        if not isinstance(qz, PointMass):
+          raise TypeError("Posterior approximation must consist of only "
+                          "PointMass random variables.")
 
     super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
@@ -137,7 +144,7 @@ class Laplace(MAP):
     x = self.data
     z = {z: qz.value() for z, qz in six.iteritems(self.latent_vars)}
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                 scope='variational')
+                                 scope='posterior')
     inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
     print("Precision matrix:")
     print(inv_cov.eval())
