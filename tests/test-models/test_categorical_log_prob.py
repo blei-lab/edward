@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Categorical
-from edward.util import get_dims
 from scipy.special import gammaln
 
 

@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Beta
-from edward.util import get_dims
 from scipy import stats
 
 
