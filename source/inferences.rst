@@ -77,22 +77,22 @@ Currently, Edward has most of its inference infrastructure within the
 The ``MonteCarlo`` class is still under development. We welcome
 researchers to make significant advances here!
 
-Let's focus on ``VariationalInference``. The main method in
-``VariationalInference`` is ``run()``.
+Let's look at ``Inference``. The main method in
+``Inference`` is ``run()``.
 
 .. code:: python
 
-  class VariationalInference(Inference):
-    """Base class for variational inference methods.
+  class Inference(object):
+    """Base class for Edward inference methods.
     """
     ...
     def run(self, *args, **kwargs):
-      """A simple wrapper to run variational inference.
+      """A simple wrapper to run inference.
       """
       self.initialize(*args, **kwargs)
-      for t in range(self.n_iter+1):
-        loss = self.update()
-        self.print_progress(t, loss)
+      for t in range(self.n_iter + 1):
+        info_dict = self.update()
+        self.print_progress(t, info_dict)
 
       self.finalize()
 
@@ -105,10 +105,10 @@ setting the number of iterations. Then, within a loop it calls
 calls ``finalize()`` which runs the last steps as the inference
 algorithm terminates.
 
-Developing a new variational inference algorithm is as simple as
+For example, developing a new variational inference algorithm is as simple as
 inheriting from ``VariationalInference`` or one of its derived
 classes. ``VariationalInference`` implements many default methods such
-as ``run()`` above. Let's go through ``initialize()`` as an example.
+as ``initialize()`` above. Let's go through snippets from this method.
 
 .. code:: python
 

@@ -250,7 +250,85 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="c"># If key is a placeholder, then don&#39;t modify its fed value.</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+          <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Inference.run"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.run">[docs]</a>  <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A simple wrapper to run inference.</span>
+
+<span class="sd">    1. Initialize via ``initialize``.</span>
+<span class="sd">    2. Run ``update`` for ``self.n_iter`` iterations.</span>
+<span class="sd">    3. While running, ``print_progress``.</span>
+<span class="sd">    4. Finalize via ``finalize``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    *args</span>
+<span class="sd">      Passed into ``initialize``.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">      Passed into ``initialize``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Inference.initialize"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize inference algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_iter : int, optional</span>
+<span class="sd">      Number of iterations for algorithm.</span>
+<span class="sd">    n_print : int, optional</span>
+<span class="sd">      Number of iterations for each print progress. To suppress print</span>
+<span class="sd">      progress, then specify None.</span>
+<span class="sd">    logdir : str, optional</span>
+<span class="sd">      Directory where event file will be written. For details,</span>
+<span class="sd">      see `tf.train.SummaryWriter`. Default is to write nothing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">=</span> <span class="n">n_print</span>
+
+    <span class="k">if</span> <span class="n">logdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+      <span class="n">train_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SummaryWriter</span><span class="p">(</span><span class="n">logdir</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">())</span>
+
+    <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">initialize_all_variables</span><span class="p">()</span>
+    <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="c"># Start input enqueue threads.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Coordinator</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">start_queue_runners</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Inference.update"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run one iteration of inference.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">      Dictionary of algorithm-specific information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="Inference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print progress to output.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    t : int</span>
+<span class="sd">      Iteration counter.</span>
+<span class="sd">    info_dict : dict</span>
+<span class="sd">      Dictionary of algorithm-specific information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Inference.finalize"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.finalize">[docs]</a>  <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to call after convergence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Ask threads to stop.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">request_stop</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

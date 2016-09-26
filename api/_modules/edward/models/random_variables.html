@@ -150,10 +150,23 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">return</span> <span class="s">&quot;p: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Bernoulli</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Bernoulli</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">logits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">logits</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">p</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;1-p.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">q</span></div>
 
 
 <div class="viewcode-block" id="Beta"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Beta">[docs]</a><span class="k">class</span> <span class="nc">Beta</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -163,11 +176,50 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
+      <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;a: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;b: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Beta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Beta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shape parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">a</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shape parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">b</span></div>
+
+
+<div class="viewcode-block" id="Binomial"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Binomial">[docs]</a><span class="k">class</span> <span class="nc">Binomial</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Binomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">distributions</span><span class="o">.</span><span class="n">Binomial</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
+      <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">])</span>
+      <span class="k">return</span> <span class="s">&quot;n: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
+             <span class="s">&quot;p: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Binomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Number of trials.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">n</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">logits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Log-odds.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">logits</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Probability of success.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">p</span></div>
 
 
 <div class="viewcode-block" id="Categorical"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Categorical">[docs]</a><span class="k">class</span> <span class="nc">Categorical</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -177,10 +229,18 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">logits</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logits</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">return</span> <span class="s">&quot;logits: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">logits</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Categorical</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Categorical</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">num_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">num_classes</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">logits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">logits</span></div>
 
 
 <div class="viewcode-block" id="Chi2"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Chi2">[docs]</a><span class="k">class</span> <span class="nc">Chi2</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -189,10 +249,14 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">return</span> <span class="s">&quot;df: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Chi2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Chi2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">df</span></div>
 
 
 <div class="viewcode-block" id="Dirichlet"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Dirichlet">[docs]</a><span class="k">class</span> <span class="nc">Dirichlet</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -201,10 +265,15 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">return</span> <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Dirichlet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Dirichlet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shape parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span></div>
 
 
 <div class="viewcode-block" id="DirichletMultinomial"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.DirichletMultinomial">[docs]</a><span class="k">class</span> <span class="nc">DirichletMultinomial</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -215,11 +284,21 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">n</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span><span class="p">])</span>
+      <span class="n">n</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;n: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DirichletMultinomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DirichletMultinomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameter defining this distribution.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">n</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameter defining this distribution.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span></div>
 
 
 <div class="viewcode-block" id="Exponential"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Exponential">[docs]</a><span class="k">class</span> <span class="nc">Exponential</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -229,10 +308,14 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">return</span> <span class="s">&quot;lam: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">lam</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Exponential</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Exponential</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">lam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">lam</span></div>
 
 
 <div class="viewcode-block" id="Gamma"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Gamma">[docs]</a><span class="k">class</span> <span class="nc">Gamma</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -242,11 +325,21 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
+      <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;beta: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">beta</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shape parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inverse scale parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">beta</span></div>
 
 
 <div class="viewcode-block" id="InverseGamma"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.InverseGamma">[docs]</a><span class="k">class</span> <span class="nc">InverseGamma</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -257,11 +350,21 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
+      <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;beta: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">beta</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">InverseGamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">InverseGamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shape parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">alpha</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scale parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">beta</span></div>
 
 
 <div class="viewcode-block" id="Laplace"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Laplace">[docs]</a><span class="k">class</span> <span class="nc">Laplace</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -271,11 +374,51 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">scale</span><span class="p">])</span>
+      <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;loc: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">loc</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;scale: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">scale</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Laplace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Laplace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">loc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter for the location.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">loc</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter for scale.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">scale</span></div>
+
+
+<div class="viewcode-block" id="Multinomial"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Multinomial">[docs]</a><span class="k">class</span> <span class="nc">Multinomial</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Multinomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+        <span class="n">distributions</span><span class="o">.</span><span class="n">Multinomial</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
+      <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">])</span>
+      <span class="k">return</span> <span class="s">&quot;n: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
+             <span class="s">&quot;p: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Multinomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Number of trials.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">n</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Event probabilities.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">p</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">logits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Log-odds.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">logits</span></div>
 
 
 <div class="viewcode-block" id="MultivariateNormalCholesky"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.MultivariateNormalCholesky">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalCholesky</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -286,11 +429,20 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">mu</span><span class="p">,</span> <span class="n">chol</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">chol</span><span class="p">])</span>
+      <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;chol: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">chol</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalCholesky</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalCholesky</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">mu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dense (batch) covariance matrix, if available.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span></div>
 
 
 <div class="viewcode-block" id="MultivariateNormalDiag"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.MultivariateNormalDiag">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalDiag</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -301,12 +453,20 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">mu</span><span class="p">,</span> <span class="n">diag_stdev</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span>
-                                 <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">diag_stdev</span><span class="p">])</span>
+      <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;diag_stdev: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">diag_stdev</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalDiag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalDiag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">mu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dense (batch) covariance matrix, if available.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span></div>
 
 
 <div class="viewcode-block" id="MultivariateNormalFull"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.MultivariateNormalFull">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalFull</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -317,11 +477,20 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
+      <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalFull</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalFull</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">mu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dense (batch) covariance matrix, if available.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span></div>
 
 
 <div class="viewcode-block" id="Normal"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Normal">[docs]</a><span class="k">class</span> <span class="nc">Normal</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -331,7 +500,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
+      <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
@@ -339,10 +508,12 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">mu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter for the mean.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter for standard deviation.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span></div>
 
 
@@ -353,14 +524,27 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">df</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
+      <span class="n">df</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;df: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">StudentT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">StudentT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Degrees of freedom in these Student&#39;s t distribution(s).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">df</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">mu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Locations of these Student&#39;s t distribution(s).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mu</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scaling factors of these Student&#39;s t distribution(s).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span></div>
 
 
 <div class="viewcode-block" id="TransformedDistribution"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.TransformedDistribution">[docs]</a><span class="k">class</span> <span class="nc">TransformedDistribution</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -370,9 +554,29 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">base_distribution</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_distribution</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TransformedDistribution</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TransformedDistribution</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">base_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base distribution, p(x).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">base_distribution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function transforming x =&gt; y.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">transform</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inverse function of transform, y =&gt; x.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">inverse</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">log_det_jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function computing the log determinant of the Jacobian of transform.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">log_det_jacobian</span></div>
 
 
 <div class="viewcode-block" id="Uniform"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Uniform">[docs]</a><span class="k">class</span> <span class="nc">Uniform</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -382,11 +586,19 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-      <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
+      <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
       <span class="k">return</span> <span class="s">&quot;a: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
              <span class="s">&quot;b: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Uniform</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Uniform</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">a</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">b</span></div>
 
 
 <div class="viewcode-block" id="PointMass"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.PointMass">[docs]</a><span class="k">class</span> <span class="nc">PointMass</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
@@ -395,10 +607,15 @@
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">return</span> <span class="s">&quot;params: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PointMass</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PointMass</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">params</span></div>
 </pre></div>
 
            </div>

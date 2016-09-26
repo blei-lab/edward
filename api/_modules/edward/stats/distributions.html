@@ -138,8 +138,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_dims</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
 
 <span class="n">distributions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">distributions</span>
@@ -376,30 +374,7 @@
 
     <span class="c"># Note this doesn&#39;t work for multi-dimensional sizes.</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">x</span></div>
-
-<div class="viewcode-block" id="Binom.logpmf"><a class="viewcode-back" href="../../../edward.stats.distributions.html#edward.stats.distributions.Binom.logpmf">[docs]</a>  <span class="k">def</span> <span class="nf">logpmf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Log of the probability density function.</span>
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : tf.Tensor</span>
-<span class="sd">      A n-D tensor.</span>
-<span class="sd">    n : int</span>
-<span class="sd">      A tensor of same shape as ``x``, and with all elements</span>
-<span class="sd">      constrained to :math:`n &gt; 0`.</span>
-<span class="sd">    p : tf.Tensor</span>
-<span class="sd">      A tensor of same shape as ``x``, and with all elements</span>
-<span class="sd">      constrained to :math:`p\in(0,1)`.</span>
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    tf.Tensor</span>
-<span class="sd">      A tensor of same shape as input.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> \
-        <span class="n">x</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span></div></div>
+    <span class="k">return</span> <span class="n">x</span></div></div>
 
 
 <div class="viewcode-block" id="Categorical"><a class="viewcode-back" href="../../../edward.stats.distributions.html#edward.stats.distributions.Categorical">[docs]</a><span class="k">class</span> <span class="nc">Categorical</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
@@ -792,72 +767,7 @@
 
     <span class="c"># This only works for rank 3 tensor.</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">x</span></div>
-
-<div class="viewcode-block" id="Multinomial.logpmf"><a class="viewcode-back" href="../../../edward.stats.distributions.html#edward.stats.distributions.Multinomial.logpmf">[docs]</a>  <span class="k">def</span> <span class="nf">logpmf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Log of the probability mass function.</span>
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : tf.Tensor</span>
-<span class="sd">      A n-D tensor for n &gt; 1, where the inner (right-most)</span>
-<span class="sd">      dimension represents the multivariate dimension. Each</span>
-<span class="sd">      element is the number of outcomes in a bucket and not a</span>
-<span class="sd">      one-hot.</span>
-<span class="sd">    n : tf.Tensor</span>
-<span class="sd">      A tensor of one less dimension than ``x``,</span>
-<span class="sd">      representing the number of outcomes, equal to sum x[i]</span>
-<span class="sd">      along the inner (right-most) dimension.</span>
-<span class="sd">    p : tf.Tensor</span>
-<span class="sd">      A tensor of one less dimension than ``x``, representing</span>
-<span class="sd">      probabilities which sum to 1.</span>
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    tf.Tensor</span>
-<span class="sd">      A tensor of one dimension less than the input.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">multivariate_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_dims</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">multivariate_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> \
-          <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span> <span class="o">+</span> \
-          <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> \
-          <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">multivariate_idx</span><span class="p">)</span> <span class="o">+</span> \
-          <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">multivariate_idx</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Multinomial.entropy"><a class="viewcode-back" href="../../../edward.stats.distributions.html#edward.stats.distributions.Multinomial.entropy">[docs]</a>  <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;TODO</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c"># Note that given n and p where p is a probability vector of</span>
-    <span class="c"># length k, the entropy requires a sum over all</span>
-    <span class="c"># possible configurations of a k-vector which sums to n. It&#39;s</span>
-    <span class="c"># expensive.</span>
-    <span class="c"># http://stackoverflow.com/questions/36435754/generating-a-numpy-array-with-all-combinations-of-numbers-that-sum-to-less-than</span>
-    <span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
-    <span class="n">sess</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
-      <span class="n">k</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">p</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">max_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span>
-      <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">max_range</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">])</span>
-      <span class="n">logpmf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logpmf</span><span class="p">)</span> <span class="o">*</span> <span class="n">logpmf</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">p</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">max_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">max_range</span><span class="p">))</span>
-                      <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
-        <span class="n">logpmf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logpmf</span><span class="p">)</span> <span class="o">*</span> <span class="n">logpmf</span><span class="p">)]</span>
-
-      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div></div>
+    <span class="k">return</span> <span class="n">x</span></div></div>
 
 
 <div class="viewcode-block" id="MultivariateNormalDiag"><a class="viewcode-back" href="../../../edward.stats.distributions.html#edward.stats.distributions.MultivariateNormalDiag">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalDiag</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>

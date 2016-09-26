@@ -156,6 +156,9 @@
 
 
 <div class="viewcode-block" id="PointMass"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass">[docs]</a><span class="k">class</span> <span class="nc">PointMass</span><span class="p">(</span><span class="n">distribution</span><span class="o">.</span><span class="n">Distribution</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;PointMass random variable. It is analogous to an Empirical random</span>
+<span class="sd">  variable with one sample, but its parameter argument does not have</span>
+<span class="sd">  an outer dimension.&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                <span class="n">params</span><span class="p">,</span>
                <span class="n">validate_args</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
@@ -168,8 +171,8 @@
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;params&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ones</span><span class="p">()</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_event_shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ones</span><span class="p">()</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">allow_nan_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -266,7 +269,7 @@
         <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="PointMass.log_prob"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;log_prob&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Log prob of observations in `x` under these Normal distribution(s).</span>
+    <span class="sd">&quot;&quot;&quot;Log prob of observations in `x` under the Point Mass distribution.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
@@ -277,14 +280,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Input x dtype does not match dtype: %s vs. %s&quot;</span>
-                          <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prob</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="PointMass.cdf"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.cdf">[docs]</a>  <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;cdf&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;CDF of observations in `x` under these Normal distribution(s).</span>
+    <span class="sd">&quot;&quot;&quot;CDF of observations in `x` under the Point Mass distribution(s).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
@@ -296,7 +295,7 @@
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PointMass.log_cdf"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.log_cdf">[docs]</a>  <span class="k">def</span> <span class="nf">log_cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;log_cdf&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Log CDF of observations `x` under these Normal distribution(s).</span>
+    <span class="sd">&quot;&quot;&quot;Log CDF of observations `x` under the Point Mass distribution(s).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
@@ -310,7 +309,7 @@
         <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="PointMass.prob"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.prob">[docs]</a>  <span class="k">def</span> <span class="nf">prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;prob&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The PDF of observations in `x` under these Normal distribution(s).</span>
+    <span class="sd">&quot;&quot;&quot;The PDF of observations in `x` under the Point Mass distribution(s).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      x: tensor of dtype `dtype`, paramsst be broadcastable with `params`.</span>
@@ -319,10 +318,10 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      prob: tensor of dtype `dtype`, the prob values of `x`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PointMass.entropy"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.entropy">[docs]</a>  <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;entropy&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The entropy of Normal distribution(s).</span>
+    <span class="sd">&quot;&quot;&quot;The entropy of Point Mass distribution.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      name: The name to give this op.</span>
@@ -333,7 +332,7 @@
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PointMass.sample_n"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.sample_n">[docs]</a>  <span class="k">def</span> <span class="nf">sample_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;sample_n&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sample `n` observations from the Normal Distributions.</span>
+    <span class="sd">&quot;&quot;&quot;Sample `n` observations from the Point Mass distribution.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      n: `Scalar`, type int32, the number of observations to sample.</span>
@@ -347,7 +346,7 @@
     <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                                  <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())])</span>
+                                  <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_event_shape</span><span class="p">())])</span>
         <span class="k">return</span> <span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">multiples</span><span class="p">)</span></div>
 
   <span class="nd">@property</span>

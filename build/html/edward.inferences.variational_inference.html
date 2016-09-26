@@ -198,14 +198,8 @@ this method.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="edward.inferences.variational_inference.VariationalInference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.finalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to call after convergence.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="edward.inferences.variational_inference.VariationalInference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_minibatch=None</em>, <em>n_print=100</em>, <em>optimizer=None</em>, <em>scope=None</em>, <em>logdir=None</em>, <em>use_prettytensor=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_minibatch=None</em>, <em>optimizer=None</em>, <em>scope=None</em>, <em>use_prettytensor=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize variational inference algorithm.</p>
 <p>Initialize all variables.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -213,21 +207,16 @@ this method.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>n_iter</strong> (<em>int, optional</em>) &#8211; Number of iterations for optimization.</li>
 <li><strong>n_minibatch</strong> (<em>int, optional</em>) &#8211; Number of samples for data subsampling. Default is to use
 all the data. Subsampling is available only if all data
 passed in are NumPy arrays and the model is not a Stan
 model. For subsampling details, see
 <code class="docutils literal"><span class="pre">tf.train.slice_input_producer</span></code> and <code class="docutils literal"><span class="pre">tf.train.batch</span></code>.</li>
-<li><strong>n_print</strong> (<em>int, optional</em>) &#8211; Number of iterations for each print progress. To suppress print
-progress, then specify None.</li>
 <li><strong>optimizer</strong> (<em>str or tf.train.Optimizer, optional</em>) &#8211; A TensorFlow optimizer, to use for optimizing the variational
 objective. Alternatively, one can pass in the name of a
 TensorFlow optimizer, and default parameters for the optimizer
 will be used.</li>
 <li><strong>scope</strong> (<em>str, optional</em>) &#8211; Scope of TensorFlow variable objects to optimize over.</li>
-<li><strong>logdir</strong> (<em>str, optional</em>) &#8211; Directory where event file will be written. For details,
-see <cite>tf.train.SummaryWriter</cite>. Default is to write nothing.</li>
 <li><strong>use_prettytensor</strong> (<em>bool, optional</em>) &#8211; <code class="docutils literal"><span class="pre">True</span></code> if aim to use TensorFlow optimizer or <code class="docutils literal"><span class="pre">False</span></code> if aim
 to use PrettyTensor optimizer (when using PrettyTensor).
 Defaults to TensorFlow.</li>
@@ -242,42 +231,6 @@ Defaults to TensorFlow.</li>
 <dt id="edward.inferences.variational_inference.VariationalInference.print_progress">
 <code class="descname">print_progress</code><span class="sig-paren">(</span><em>t</em>, <em>info_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.print_progress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.print_progress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print progress to output.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>t</strong> (<em>int</em>) &#8211; Iteration counter.</li>
-<li><strong>info_dict</strong> (<em>dict</em>) &#8211; Dictionary of algorithm-specific information.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.inferences.variational_inference.VariationalInference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/variational_inference.html#VariationalInference.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.variational_inference.VariationalInference.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>A simple wrapper to run variational inference.</p>
-<ol class="arabic simple">
-<li>Initialize via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
-<li>Run <code class="docutils literal"><span class="pre">update</span></code> for <code class="docutils literal"><span class="pre">self.n_iter</span></code> iterations.</li>
-<li>While running, <code class="docutils literal"><span class="pre">print_progress</span></code>.</li>
-<li>Finalize via <code class="docutils literal"><span class="pre">finalize</span></code>.</li>
-</ol>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>*args</strong> &#8211; Passed into <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
-<li><strong>**kwargs</strong> &#8211; Passed into <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="method">

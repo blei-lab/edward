@@ -174,7 +174,7 @@ covariance of the normal approximation.</p>
 <dt id="edward.inferences.map.MAP">
 <em class="property">class </em><code class="descclassname">edward.inferences.map.</code><code class="descname">MAP</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>data=None</em>, <em>model_wrapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/inferences/map.html#MAP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.inferences.map.MAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference" title="edward.inferences.variational_inference.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.variational_inference.VariationalInference</span></code></a></p>
-<p>Maximum a posteriori inference.</p>
+<p>Maximum a posteriori.</p>
 <p>We implement this using a <code class="docutils literal"><span class="pre">PointMass</span></code> variational distribution to
 solve the following optimization problem</p>
 <div class="math">
@@ -186,8 +186,10 @@ solve the following optimization problem</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>latent_vars</strong> (<em>list of RandomVariable or</em>) &#8211; dict of RandomVariable to RandomVariable
 Collection of random variables to perform inference on. If
 list, each random variable will be implictly optimized
-using a <code class="docutils literal"><span class="pre">PointMass</span></code> distribution that is defined
-internally (with support matching each random variable).</td>
+using a <code class="docutils literal"><span class="pre">PointMass</span></code> random variable that is defined
+internally (with support matching each random variable).
+If dictionary, each random variable must be a <code class="docutils literal"><span class="pre">PointMass</span></code>
+random variable.</td>
 </tr>
 </tbody>
 </table>
@@ -202,8 +204,8 @@ internally (with support matching each random variable).</td>
 <p>We also automate the specification of <code class="docutils literal"><span class="pre">PointMass</span></code> distributions
 (with matching support), so one can pass in a list of latent
 variables instead:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">beta</span><span class="p">],</span> <span class="p">{</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(),</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">()})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">()}</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">beta</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>However, for model wrappers, the list can only have one element:</p>

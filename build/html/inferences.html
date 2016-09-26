@@ -197,19 +197,19 @@ carry both <code class="docutils literal"><span class="pre">VariationalInference
 <code class="docutils literal"><span class="pre">VariationalInference</span></code> class.
 The <code class="docutils literal"><span class="pre">MonteCarlo</span></code> class is still under development. We welcome
 researchers to make significant advances here!</p>
-<p>Let&#8217;s focus on <code class="docutils literal"><span class="pre">VariationalInference</span></code>. The main method in
-<code class="docutils literal"><span class="pre">VariationalInference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
+<p>Let&#8217;s look at <code class="docutils literal"><span class="pre">Inference</span></code>. The main method in
+<code class="docutils literal"><span class="pre">Inference</span></code> is <code class="docutils literal"><span class="pre">run()</span></code>.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Inference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Base class for Edward inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="o">...</span>
   <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A simple wrapper to run variational inference.</span>
+    <span class="sd">&quot;&quot;&quot;A simple wrapper to run inference.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
@@ -222,10 +222,10 @@ setting the number of iterations. Then, within a loop it calls
 <code class="docutils literal"><span class="pre">print_progress()</span></code> for displaying progress; finally, it
 calls <code class="docutils literal"><span class="pre">finalize()</span></code> which runs the last steps as the inference
 algorithm terminates.</p>
-<p>Developing a new variational inference algorithm is as simple as
+<p>For example, developing a new variational inference algorithm is as simple as
 inheriting from <code class="docutils literal"><span class="pre">VariationalInference</span></code> or one of its derived
 classes. <code class="docutils literal"><span class="pre">VariationalInference</span></code> implements many default methods such
-as <code class="docutils literal"><span class="pre">run()</span></code> above. Let&#8217;s go through <code class="docutils literal"><span class="pre">initialize()</span></code> as an example.</p>
+as <code class="docutils literal"><span class="pre">initialize()</span></code> above. Let&#8217;s go through snippets from this method.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
   <span class="o">...</span>
   <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>

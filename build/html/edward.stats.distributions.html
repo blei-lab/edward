@@ -234,30 +234,6 @@
 <dd><p>Bases: <a class="reference internal" href="#edward.stats.distributions.Distribution" title="edward.stats.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Distribution</span></code></a></p>
 <p>Binomial distribution.</p>
 <dl class="method">
-<dt id="edward.stats.distributions.Binom.logpmf">
-<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Binom.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Binom.logpmf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Log of the probability density function.
-:param x: A n-D tensor.
-:type x: tf.Tensor
-:param n: A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements</p>
-<blockquote>
-<div>constrained to <span class="math">\(n &gt; 0\)</span>.</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of same shape as <code class="docutils literal"><span class="pre">x</span></code>, and with all elements
-constrained to <span class="math">\(p\in(0,1)\)</span>.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A tensor of same shape as input.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Tensor</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="edward.stats.distributions.Binom.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>n</em>, <em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Binom.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Binom.rvs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Random variates.</p>
@@ -733,44 +709,6 @@ constrained to <span class="math">\(scale &gt; 0\)</span>.</li>
 <dd><p>Bases: <a class="reference internal" href="#edward.stats.distributions.Distribution" title="edward.stats.distributions.Distribution"><code class="xref py py-class docutils literal"><span class="pre">edward.stats.distributions.Distribution</span></code></a></p>
 <p>Multinomial distribution.</p>
 <p>Note: there is no equivalent version implemented in SciPy.</p>
-<dl class="method">
-<dt id="edward.stats.distributions.Multinomial.entropy">
-<code class="descname">entropy</code><span class="sig-paren">(</span><em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial.entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>TODO</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="edward.stats.distributions.Multinomial.logpmf">
-<code class="descname">logpmf</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial.logpmf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial.logpmf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Log of the probability mass function.
-:param x: A n-D tensor for n &gt; 1, where the inner (right-most)</p>
-<blockquote>
-<div>dimension represents the multivariate dimension. Each
-element is the number of outcomes in a bucket and not a
-one-hot.</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<em>tf.Tensor</em>) &#8211; A tensor of one less dimension than <code class="docutils literal"><span class="pre">x</span></code>,
-representing the number of outcomes, equal to sum x[i]
-along the inner (right-most) dimension.</li>
-<li><strong>p</strong> (<em>tf.Tensor</em>) &#8211; A tensor of one less dimension than <code class="docutils literal"><span class="pre">x</span></code>, representing
-probabilities which sum to 1.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tensor of one dimension less than the input.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="method">
 <dt id="edward.stats.distributions.Multinomial.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>n</em>, <em>p</em>, <em>size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/stats/distributions.html#Multinomial.rvs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.stats.distributions.Multinomial.rvs" title="Permalink to this definition">¶</a></dt>

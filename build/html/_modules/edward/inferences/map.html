@@ -146,7 +146,7 @@
 
 
 <div class="viewcode-block" id="MAP"><a class="viewcode-back" href="../../../edward.inferences.map.html#edward.inferences.map.MAP">[docs]</a><span class="k">class</span> <span class="nc">MAP</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Maximum a posteriori inference.</span>
+  <span class="sd">&quot;&quot;&quot;Maximum a posteriori.</span>
 
 <span class="sd">  We implement this using a ``PointMass`` variational distribution to</span>
 <span class="sd">  solve the following optimization problem</span>
@@ -163,8 +163,10 @@
 <span class="sd">                  dict of RandomVariable to RandomVariable</span>
 <span class="sd">      Collection of random variables to perform inference on. If</span>
 <span class="sd">      list, each random variable will be implictly optimized</span>
-<span class="sd">      using a ``PointMass`` distribution that is defined</span>
+<span class="sd">      using a ``PointMass`` random variable that is defined</span>
 <span class="sd">      internally (with support matching each random variable).</span>
+<span class="sd">      If dictionary, each random variable must be a ``PointMass``</span>
+<span class="sd">      random variable.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -179,8 +181,8 @@
 <span class="sd">    (with matching support), so one can pass in a list of latent</span>
 <span class="sd">    variables instead:</span>
 
-<span class="sd">    &gt;&gt;&gt; MAP([beta], {X: np.array(), y: np.array()})</span>
-<span class="sd">    &gt;&gt;&gt; MAP([pi, mu, sigma], {x: np.array()}</span>
+<span class="sd">    &gt;&gt;&gt; MAP([beta], data)</span>
+<span class="sd">    &gt;&gt;&gt; MAP([pi, mu, sigma], data)</span>
 
 <span class="sd">    However, for model wrappers, the list can only have one element:</span>
 
@@ -197,7 +199,7 @@
 <span class="sd">    explicitly pass in the point mass distributions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s">&quot;variational&quot;</span><span class="p">):</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s">&quot;posterior&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
           <span class="n">latent_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">rv</span><span class="p">:</span> <span class="n">PointMass</span><span class="p">(</span>
               <span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_normal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">())))</span>
@@ -211,6 +213,11 @@
         <span class="k">else</span><span class="p">:</span>
           <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;A list of more than one element is &quot;</span>
                                     <span class="s">&quot;not supported. See documentation.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">PointMass</span><span class="p">):</span>
+          <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Posterior approximation must consist of only &quot;</span>
+                          <span class="s">&quot;PointMass random variables.&quot;</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">MAP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 
@@ -272,7 +279,7 @@
     <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
     <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">value</span><span class="p">()</span> <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
     <span class="n">var_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">,</span>
-                                 <span class="n">scope</span><span class="o">=</span><span class="s">&#39;variational&#39;</span><span class="p">)</span>
+                                 <span class="n">scope</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">)</span>
     <span class="n">inv_cov</span> <span class="o">=</span> <span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">var_list</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s">&quot;Precision matrix:&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">inv_cov</span><span class="o">.</span><span class="n">eval</span><span class="p">())</span>
