@@ -60,35 +60,6 @@ class Beta(RandomVariable):
     return self.distribution.b
 
 
-class Binomial(RandomVariable):
-  def __init__(self, *args, **kwargs):
-    super(Binomial, self).__init__(distributions.Binomial, *args, **kwargs)
-
-  def __str__(self):
-    try:
-      sess = get_session()
-      n, p = sess.run([self.n, self.p])
-      return "n: \n" + n.__str__() + "\n" + \
-             "p: \n" + p.__str__()
-    except:
-      return super(Binomial, self).__str__()
-
-  @property
-  def n(self):
-    """Number of trials."""
-    return self.distribution.n
-
-  @property
-  def logits(self):
-    """Log-odds."""
-    return self.distribution.logits
-
-  @property
-  def p(self):
-    """Probability of success."""
-    return self.distribution.p
-
-
 class Categorical(RandomVariable):
   def __init__(self, *args, **kwargs):
     super(Categorical, self).__init__(
@@ -256,36 +227,6 @@ class Laplace(RandomVariable):
   def scale(self):
     """Distribution parameter for scale."""
     return self.distribution.scale
-
-
-class Multinomial(RandomVariable):
-  def __init__(self, *args, **kwargs):
-    super(Multinomial, self).__init__(
-        distributions.Multinomial, *args, **kwargs)
-
-  def __str__(self):
-    try:
-      sess = get_session()
-      n, p = sess.run([self.n, self.p])
-      return "n: \n" + n.__str__() + "\n" + \
-             "p: \n" + p.__str__()
-    except:
-      return super(Multinomial, self).__str__()
-
-  @property
-  def n(self):
-    """Number of trials."""
-    return self.distribution.n
-
-  @property
-  def p(self):
-    """Event probabilities."""
-    return self.distribution.p
-
-  @property
-  def logits(self):
-    """Log-odds."""
-    return self.distribution.logits
 
 
 class MultivariateNormalCholesky(RandomVariable):
