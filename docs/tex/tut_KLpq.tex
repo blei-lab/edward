@@ -148,25 +148,30 @@ methods such as an optimizer.
 
 \begin{lstlisting}[language=Python]
 class KLpq(VariationalInference):
-    def __init__(self, *args, **kwargs):
-        super(KLpq, self).__init__(*args, **kwargs)
+  def __init__(self, *args, **kwargs):
+    super(KLpq, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_samples=1, *args, **kwargs):
-        self.n_samples = n_samples
-        return super(KLpq, self).initialize(*args, **kwargs)
+  def initialize(self, n_samples=1, *args, **kwargs):
+    self.n_samples = n_samples
+    return super(KLpq, self).initialize(*args, **kwargs)
 
-    def build_loss(self):
-        x = self.data
-        z = self.variational.sample(self.n_samples)
+  def build_loss(self):
+    x = self.data
+    z = {key: rv.sample([self.n_samples])
+         for key, rv in six.iteritems(self.latent_vars)}
 
-        # normalized importance weights
-        q_log_prob = self.variational.log_prob(stop_gradient(z))
-        log_w = self.model.log_prob(x, z) - q_log_prob
-        log_w_norm = log_w - log_sum_exp(log_w)
-        w_norm = tf.exp(log_w_norm)
+    # normalized importance weights
+    q_log_prob = 0.0
+    for key, rv in six.iteritems(self.latent_vars):
+      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
 
-        self.loss = tf.reduce_mean(w_norm * log_w)
-        return -tf.reduce_mean(q_log_prob * stop_gradient(w_norm))
+    log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
+    log_w_norm = log_w - log_sum_exp(log_w)
+    w_norm = tf.exp(log_w_norm)
+
+    self.loss = tf.reduce_mean(w_norm * log_w)
+    return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
 \end{lstlisting}
 
 Two methods are added: \texttt{initialize()} and
@@ -183,7 +188,7 @@ in \texttt{self.loss}, to track progress of the inference for diagnostics.
 
 The method returns an object whose
 automatic differentiation is a stochastic gradient of $\text{KL}(p\|q)$.
-The TensorFlow function \texttt{stop_gradient()} tells the computational
+The TensorFlow function \texttt{tf.stop_gradient()} tells the computational
 graph to stop traversing nodes to propagate gradients. In this case,
 the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
 one for each sample $z_s$. We multiply it by \texttt{w_norm}
@@ -197,7 +202,7 @@ still exponentiated to compute the gradient. As with importance
 sampling in general, this inference method does not scale to high
 dimensions.
 
-See the \href{api/index.html}{API} for more details.
+See the \href{api/}{API} for more details.
 
 \subsubsection{References}\label{references}
 

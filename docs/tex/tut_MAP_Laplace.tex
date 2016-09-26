@@ -5,7 +5,7 @@
 \subsection{Laplace approximation}
 
 (This tutorial follows the
-\href{tut_MAP.html}{Maximum a posteriori estimation} tutorial.)
+\href{tut_MAP}{Maximum a posteriori estimation} tutorial.)
 
 Maximum a posteriori (MAP) estimation approximates the posterior $p(z \mid x)$
 with a point mass (delta function) by simply capturing its mode. MAP is
@@ -36,28 +36,28 @@ gradient).
 \subsubsection{Implementation}
 
 Edward implements the Laplace approximation by extending the class built for
-\href{tut_MAP.html}{MAP estimation}, as it requires an estimate of the
+\href{tut_MAP}{MAP estimation}, as it requires an estimate of the
 posterior mode, $z_\text{MAP}$.
 
 \begin{lstlisting}[language=Python]
 class Laplace(MAP):
-    def __init__(self, model, data=None, params=None):
-        super(Laplace, self).__init__(model, data, params)
+  def __init__(self, model, data=None, params=None):
+    super(Laplace, self).__init__(model, data, params)
 
-    def finalize(self):
-        """Function to call after convergence.
+  def finalize(self):
+    """Function to call after convergence.
 
-        Computes the Hessian at the mode.
-        """
-        # use only a batch of data to estimate hessian
-        x = self.data
-        z = self.variational.sample()
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                     scope='variational')
-        inv_cov = hessian(self.model.log_prob(x, z), var_list)
-        print("Precision matrix:")
-        print(inv_cov.eval())
-        super(Laplace, self).finalize()
+    Computes the Hessian at the mode.
+    """
+    # use only a batch of data to estimate hessian
+    x = self.data
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                 scope='posterior')
+    inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
+    print("Precision matrix:")
+    print(inv_cov.eval())
+    super(Laplace, self).finalize()
 \end{lstlisting}
 
 The \texttt{Laplace} class simply defines an additional method

@@ -5,14 +5,124 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.util import dot, get_dims
+from edward.util import get_dims
 from itertools import product
 from scipy import stats
 
+distributions = tf.contrib.distributions
 
-class Bernoulli(object):
+
+class Distribution(object):
+  """A light wrapper to directly call methods from
+  `tf.contrib.distributions` in SciPy style.
+
+  Examples
+  --------
+  >>> norm.logpdf(tf.constant(0.0))
+  >>> bernoulli.logpmf(tf.constant([0.0, 1.0]), p=tf.constant([0.5, 0.4]))
+  """
+  def __init__(self, dist):
+    self._dist = dist
+
+  def batch_shape(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.batch_shape()
+
+  def get_batch_shape(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.get_batch_shape()
+
+  def event_shape(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.event_shape()
+
+  def get_event_shape(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.get_event_shape()
+
+  def sample(self, sample_shape=(), seed=None, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.sample(sample_shape, seed)
+
+  def sample_n(self, n, seed=None, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.sample_n(n, seed)
+
+  def log_prob(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.log_prob(value)
+
+  def prob(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.prob(value)
+
+  def log_cdf(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.log_cdf(value)
+
+  def cdf(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.cdf(value)
+
+  def entropy(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.entropy()
+
+  def mean(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.mean()
+
+  def variance(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.variance()
+
+  def std(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.std()
+
+  def mode(self, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.mode()
+
+  def log_pdf(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.log_pdf(value)
+
+  def pdf(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.pdf(value)
+
+  def log_pmf(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.log_pmf(value)
+
+  def pmf(self, value, *args, **kwargs):
+    rv = self._dist(*args, **kwargs)
+    return rv.pmf(value)
+
+  def rvs(self, *args, **kwargs):
+    """Returns samples as a NumPy array. Unlike the other methods,
+    this method follows the arguments of SciPy.
+    """
+    raise NotImplementedError()
+
+  def logpdf(self, value, *args, **kwargs):
+    """Backwards compatibility with SciPy."""
+    rv = self._dist(*args, **kwargs)
+    return rv.log_pdf(value)
+
+  def logpmf(self, value, *args, **kwargs):
+    """Backwards compatibility with SciPy."""
+    rv = self._dist(*args, **kwargs)
+    return rv.log_pmf(value)
+
+
+class Bernoulli(Distribution):
   """Bernoulli distribution.
   """
+  def __init__(self):
+    super(Bernoulli, self).__init__(distributions.Bernoulli)
+
   def rvs(self, p, size=1):
     """Random variates.
 
@@ -53,47 +163,13 @@ class Bernoulli(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpmf(self, x, p):
-    """Log of the probability mass function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    p : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`p\in(0,1)`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    p = tf.cast(p, dtype=tf.float32)
-    return x * tf.log(p) + (1.0 - x) * tf.log(1.0 - p)
-
-  def entropy(self, p):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    p : tf.Tensor
-      A n-D tensor with all elements constrained to
-      :math:`p\in(0,1)`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    p = tf.cast(p, dtype=tf.float32)
-    return -p * tf.log(p) - (1.0 - p) * tf.log(1.0 - p)
-
-
-class Beta(object):
+class Beta(Distribution):
   """Beta distribution.
   """
+  def __init__(self):
+    super(Beta, self).__init__(distributions.Beta)
+
   def rvs(self, a, b, size=1):
     """Random variates.
 
@@ -128,66 +204,13 @@ class Beta(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpdf(self, x, a, b):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    a : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`a > 0`.
-    b : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`b > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    a = tf.cast(tf.squeeze(a), dtype=tf.float32)
-    b = tf.cast(tf.squeeze(b), dtype=tf.float32)
-    return (a - 1.0) * tf.log(x) + (b - 1.0) * tf.log(1.0 - x) - \
-        tf.lbeta(tf.pack([a, b]))
-
-  def entropy(self, a, b):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    a : tf.Tensor
-      A n-D tensor with all elements constrained to :math:`a >
-      0`.
-    b : tf.Tensor
-      A n-D tensor with all elements constrained to :math:`b >
-      0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    a = tf.cast(tf.squeeze(a), dtype=tf.float32)
-    b = tf.cast(tf.squeeze(b), dtype=tf.float32)
-    if len(a.get_shape()) == 0:
-      return tf.lbeta(tf.pack([a, b])) - \
-          (a - 1.0) * tf.digamma(a) - \
-          (b - 1.0) * tf.digamma(b) + \
-          (a + b - 2.0) * tf.digamma(a + b)
-    else:
-      return tf.lbeta(tf.concat(1, [tf.expand_dims(a, 1),
-                                    tf.expand_dims(b, 1)])) - \
-          (a - 1.0) * tf.digamma(a) - \
-          (b - 1.0) * tf.digamma(b) + \
-          (a + b - 2.0) * tf.digamma(a + b)
-
-
-class Binom(object):
+class Binom(Distribution):
   """Binomial distribution.
   """
+  def __init__(self):
+    super(Binom, self).__init__(None)
+
   def rvs(self, n, p, size=1):
     """Random variates.
 
@@ -224,7 +247,6 @@ class Binom(object):
 
   def logpmf(self, x, n, p):
     """Log of the probability density function.
-
     Parameters
     ----------
     x : tf.Tensor
@@ -235,7 +257,6 @@ class Binom(object):
     p : tf.Tensor
       A tensor of same shape as ``x``, and with all elements
       constrained to :math:`p\in(0,1)`.
-
     Returns
     -------
     tf.Tensor
@@ -247,18 +268,20 @@ class Binom(object):
     return tf.lgamma(n + 1.0) - tf.lgamma(x + 1.0) - tf.lgamma(n - x + 1.0) + \
         x * tf.log(p) + (n - x) * tf.log(1.0 - p)
 
-  def entropy(self, n, p):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
+
+class Categorical(Distribution):
+  """Categorical distribution.
+  """
+  def __init__(self):
+    super(Categorical, self).__init__(distributions.Categorical)
 
 
-class Chi2(object):
+class Chi2(Distribution):
   """:math:`\chi^2` distribution.
   """
+  def __init__(self):
+    super(Chi2, self).__init__(None)
+
   def rvs(self, df, size=1):
     """Random variates.
 
@@ -290,7 +313,6 @@ class Chi2(object):
 
   def logpdf(self, x, df):
     """Log of the probability density function.
-
     Parameters
     ----------
     x : tf.Tensor
@@ -298,7 +320,6 @@ class Chi2(object):
     df : tf.Tensor
       A tensor of same shape as ``x``, and with all elements
       constrained to :math:`df > 0`.
-
     Returns
     -------
     tf.Tensor
@@ -309,18 +330,13 @@ class Chi2(object):
     return (0.5 * df - 1) * tf.log(x) - 0.5 * x - \
         0.5 * df * tf.log(2.0) - tf.lgamma(0.5 * df)
 
-  def entropy(self, df):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
 
-
-class Dirichlet(object):
+class Dirichlet(Distribution):
   """Dirichlet distribution.
   """
+  def __init__(self):
+    super(Dirichlet, self).__init__(distributions.Dirichlet)
+
   def rvs(self, alpha, size=1):
     """Random variates.
 
@@ -350,64 +366,21 @@ class Dirichlet(object):
     x = np.rollaxis(np.asarray(x), 1)
     return x
 
-  def logpdf(self, x, alpha):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor for n > 1, where the inner (right-most)
-      dimension represents the multivariate dimension.
-    alpha : tf.Tensor
-      A tensor of same shape as ``x``, and with each
-      :math:`\\alpha` constrained to :math:`\\alpha_i > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of one dimension less than the input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    alpha = tf.cast(alpha, dtype=tf.float32)
-    multivariate_idx = len(get_dims(x)) - 1
-    if multivariate_idx == 0:
-      return -tf.lbeta(alpha) + tf.reduce_sum((alpha - 1.0) * tf.log(x))
-    else:
-      return -tf.lbeta(alpha) + \
-          tf.reduce_sum((alpha - 1.0) * tf.log(x), multivariate_idx)
-
-  def entropy(self, alpha):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    alpha : tf.Tensor
-      A n-D tensor with each :math:`\\alpha` constrained to
-      :math:`\\alpha_i > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of one dimension less than the input.
-    """
-    alpha = tf.cast(alpha, dtype=tf.float32)
-    multivariate_idx = len(get_dims(alpha)) - 1
-    K = get_dims(alpha)[multivariate_idx]
-    if multivariate_idx == 0:
-      a = tf.reduce_sum(alpha)
-      return tf.lbeta(alpha) + \
-          (a - K) * tf.digamma(a) - \
-          tf.reduce_sum((alpha - 1.0) * tf.digamma(alpha))
-    else:
-      a = tf.reduce_sum(alpha, multivariate_idx)
-      return tf.lbeta(alpha) + \
-          (a - K) * tf.digamma(a) - \
-          tf.reduce_sum((alpha - 1.0) * tf.digamma(alpha), multivariate_idx)
+class DirichletMultinomial(Distribution):
+  """Dirichlet-Multinomial distribution.
+  """
+  def __init__(self):
+    super(DirichletMultinomial, self).__init__(
+        distributions.DirichletMultinomial)
 
 
-class Expon(object):
+class Exponential(Distribution):
   """Exponential distribution.
   """
+  def __init__(self):
+    super(Exponential, self).__init__(distributions.Exponential)
+
   def rvs(self, scale=1, size=1):
     """Random variates.
 
@@ -437,40 +410,15 @@ class Expon(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpdf(self, x, scale=1):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    scale : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    return - x / scale - tf.log(scale)
-
-  def entropy(self, scale=1):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
-
-
-class Gamma(object):
+class Gamma(Distribution):
   """Gamma distribution.
 
   Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
   """
+  def __init__(self):
+    super(Gamma, self).__init__(distributions.Gamma)
+
   def rvs(self, a, scale=1, size=1):
     """Random variates.
 
@@ -505,55 +453,13 @@ class Gamma(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpdf(self, x, a, scale=1):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    a : tf.Tensor
-      **Shape** parameter. A tensor of same shape as ``x``, and with
-      all elements constrained to :math:`a > 0`.
-    scale : tf.Tensor
-      **Scale** parameter. A tensor of same shape as ``x``, and with
-      all elements constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    a = tf.cast(a, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    return (a - 1.0) * tf.log(x) - x / scale - a * tf.log(scale) - tf.lgamma(a)
-
-  def entropy(self, a, scale=1):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    a : tf.Tensor
-      **Shape** parameter. A n-D tensor with all elements
-      constrained to :math:`a > 0`.
-    scale : tf.Tensor
-      **Scale** parameter. A n-D tensor with all elements
-      constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    a = tf.cast(a, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    return a + tf.log(scale) + tf.lgamma(a) + (1.0 - a) * tf.digamma(a)
-
-
-class Geom(object):
+class Geom(Distribution):
   """Geometric distribution.
   """
+  def __init__(self):
+    super(Geom, self).__init__(None)
+
   def rvs(self, p, size=1):
     """Random variates.
 
@@ -585,7 +491,6 @@ class Geom(object):
 
   def logpmf(self, x, p):
     """Log of the probability mass function.
-
     Parameters
     ----------
     x : tf.Tensor
@@ -593,7 +498,6 @@ class Geom(object):
     p : tf.Tensor
       A tensor of same shape as ``x``, and with all elements
       constrained to :math:`p\in(0,1)`.
-
     Returns
     -------
     tf.Tensor
@@ -603,20 +507,15 @@ class Geom(object):
     p = tf.cast(p, dtype=tf.float32)
     return (x - 1) * tf.log(1.0 - p) + tf.log(p)
 
-  def entropy(self, p):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
 
-
-class InvGamma(object):
+class InverseGamma(Distribution):
   """Inverse Gamma distribution.
 
   Shape/scale parameterization (typically denoted: :math:`(k, \\theta)`)
   """
+  def __init__(self):
+    super(InverseGamma, self).__init__(distributions.InverseGamma)
+
   def rvs(self, a, scale=1, size=1):
     """Random variates.
 
@@ -656,57 +555,20 @@ class InvGamma(object):
     x[np.logical_not(np.isfinite(x))] = 1.0
     return x
 
-  def logpdf(self, x, a, scale=1):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    a : tf.Tensor
-      **Shape** parameter. A tensor of same shape as ``x``, and with
-      all elements constrained to :math:`a > 0`.
-    scale : tf.Tensor
-      **Scale** parameter. A tensor of same shape as ``x``, and with
-      all elements constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    a = tf.cast(a, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    return a * tf.log(scale) - tf.lgamma(a) + \
-        (-a - 1.0) * tf.log(x) - scale / x
-
-  def entropy(self, a, scale=1):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    a : tf.Tensor
-      **Shape** parameter. A n-D tensor with all elements
-      constrained to :math:`a > 0`.
-    scale : tf.Tensor
-      **Scale** parameter. A n-D tensor with all elements
-      constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    a = tf.cast(a, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    return a + tf.log(scale * tf.exp(tf.lgamma(a))) - \
-        (1.0 + a) * tf.digamma(a)
+class Laplace(Distribution):
+  """Laplace distribution.
+  """
+  def __init__(self):
+    super(Laplace, self).__init__(distributions.Laplace)
 
 
-class LogNorm(object):
+class LogNorm(Distribution):
   """LogNormal distribution.
   """
+  def __init__(self):
+    super(LogNorm, self).__init__(None)
+
   def rvs(self, s, size=1):
     """Random variates.
 
@@ -738,7 +600,6 @@ class LogNorm(object):
 
   def logpdf(self, x, s):
     """Log of the probability density function.
-
     Parameters
     ----------
     x : tf.Tensor
@@ -746,7 +607,6 @@ class LogNorm(object):
     s : tf.Tensor
       A tensor of same shape as ``x``, and with all elements
       constrained to :math:`s > 0`.
-
     Returns
     -------
     tf.Tensor
@@ -757,20 +617,15 @@ class LogNorm(object):
     return -0.5 * tf.log(2 * np.pi) - tf.log(s) - tf.log(x) - \
         0.5 * tf.square(tf.log(x) / s)
 
-  def entropy(self, s):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
 
-
-class Multinomial(object):
+class Multinomial(Distribution):
   """Multinomial distribution.
 
   Note: there is no equivalent version implemented in SciPy.
   """
+  def __init__(self):
+    super(Multinomial, self).__init__(None)
+
   def rvs(self, n, p, size=1):
     """Random variates.
 
@@ -808,7 +663,6 @@ class Multinomial(object):
 
   def logpmf(self, x, n, p):
     """Log of the probability mass function.
-
     Parameters
     ----------
     x : tf.Tensor
@@ -823,7 +677,6 @@ class Multinomial(object):
     p : tf.Tensor
       A tensor of one less dimension than ``x``, representing
       probabilities which sum to 1.
-
     Returns
     -------
     tf.Tensor
@@ -874,9 +727,29 @@ class Multinomial(object):
       return tf.pack(out)
 
 
-class Multivariate_Normal(object):
-  """Multivariate Normal distribution.
+class MultivariateNormalDiag(Distribution):
+  """Multivariate Normal (with diagonal covariance) distribution.
   """
+  def __init__(self):
+    super(MultivariateNormalDiag, self).__init__(
+        distributions.MultivariateNormalDiag)
+
+
+class MultivariateNormalCholesky(Distribution):
+  """Multivariate Normal (with Cholesky factorized covariance)  distribution.
+  """
+  def __init__(self):
+    super(MultivariateNormalCholesky, self).__init__(
+        distributions.MultivariateNormalCholesky)
+
+
+class MultivariateNormalFull(Distribution):
+  """Multivariate Normal (with full rank covariance) distribution.
+  """
+  def __init__(self):
+    super(MultivariateNormalFull, self).__init__(
+        distributions.MultivariateNormalFull)
+
   def rvs(self, mean=None, cov=1, size=1):
     """Random variates.
 
@@ -916,100 +789,13 @@ class Multivariate_Normal(object):
     x = np.rollaxis(np.asarray(x), 1)
     return x
 
-  def logpdf(self, x, mean=None, cov=1):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A 1-D or 2-D tensor.
-    mean : tf.Tensor, optional
-      A 1-D tensor. Defaults to zero mean.
-    cov : tf.Tensor, optional
-      A 1-D or 2-D tensor. Defaults to identity matrix.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of one dimension less than the input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    x_shape = get_dims(x)
-    if len(x_shape) == 1:
-      d = x_shape[0]
-    else:
-      d = x_shape[1]
-
-    if mean is None:
-      r = x
-    else:
-      mean = tf.cast(mean, dtype=tf.float32)
-      r = x - mean
-
-    if cov is 1:
-      L_inv = tf.diag(tf.ones([d]))
-      det_cov = tf.constant(1.0)
-    else:
-      cov = tf.cast(cov, dtype=tf.float32)
-      if len(cov.get_shape()) == 1:  # vector
-        L_inv = tf.diag(1.0 / tf.sqrt(cov))
-        det_cov = tf.reduce_prod(cov)
-      else:  # matrix
-        L = tf.cholesky(cov)
-        L_inv = tf.matrix_inverse(L)
-        det_cov = tf.pow(tf.reduce_prod(tf.diag_part(L)), 2)
-
-    lps = -0.5 * d * tf.log(2 * np.pi) - 0.5 * tf.log(det_cov)
-    if len(x_shape) == 1:  # vector
-      r = tf.reshape(r, shape=(d, 1))
-      inner = tf.matmul(L_inv, r)
-      lps -= 0.5 * tf.matmul(inner, inner, transpose_a=True)
-      return tf.squeeze(lps)
-    else:  # matrix
-      # TODO vectorize further
-      out = []
-      for r_vec in tf.unpack(r):
-        r_vec = tf.reshape(r_vec, shape=(d, 1))
-        inner = tf.matmul(L_inv, r_vec)
-        out += [tf.squeeze(lps -
-                0.5 * tf.matmul(inner, inner, transpose_a=True))]
-
-      return tf.pack(out)
-
-  def entropy(self, mean=None, cov=1):
-    """Entropy of probability distribution.
-
-    This is not vectorized with respect to any arguments.
-
-    Parameters
-    ----------
-    mean : tf.Tensor, optional
-      A 1-D tensor. Defaults to zero mean.
-    cov : tf.Tensor, optional
-      A 1-D or 2-D tensor. Defaults to identity matrix.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of one dimension less than the input.
-    """
-    if cov is 1:
-      d = 1
-      det_cov = 1.0
-    else:
-      cov = tf.cast(cov, dtype=tf.float32)
-      d = get_dims(cov)[0]
-      if len(cov.get_shape()) == 1:
-        det_cov = tf.reduce_prod(cov)
-      else:
-        det_cov = tf.matrix_determinant(cov)
-
-    return 0.5 * (d + d * tf.log(2 * np.pi) + tf.log(det_cov))
-
-
-class NBinom(object):
+class NBinom(Distribution):
   """Negative binomial distribution.
   """
+  def __init__(self):
+    super(NBinom, self).__init__(None)
+
   def rvs(self, n, p, size=1):
     """Random variates.
 
@@ -1069,18 +855,13 @@ class NBinom(object):
     return tf.lgamma(x + n) - tf.lgamma(x + 1.0) - tf.lgamma(n) + \
         n * tf.log(p) + x * tf.log(1.0 - p)
 
-  def entropy(self, n, p):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
 
-
-class Norm(object):
+class Normal(Distribution):
   """Normal (Gaussian) distribution.
   """
+  def __init__(self):
+    super(Normal, self).__init__(distributions.Normal)
+
   def rvs(self, loc=0, scale=1, size=1):
     """Random variates.
 
@@ -1114,53 +895,13 @@ class Norm(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpdf(self, x, loc=0, scale=1):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    loc : tf.Tensor
-      A tensor of same shape as ``x``.
-    scale : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    loc = tf.cast(loc, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    z = (x - loc) / scale
-    return -0.5 * tf.log(2 * np.pi) - tf.log(scale) - 0.5 * tf.square(z)
-
-  def entropy(self, loc=0, scale=1):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    loc : tf.Tensor
-      A n-D tensor.
-    scale : tf.Tensor
-      A n-D tensor with all elements constrained to :math:`scale
-      > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    scale = tf.cast(scale, dtype=tf.float32)
-    return 0.5 * (1 + tf.log(2 * np.pi)) + tf.log(scale)
-
-
-class Poisson(object):
+class Poisson(Distribution):
   """Poisson distribution.
   """
+  def __init__(self):
+    super(Poisson, self).__init__(None)
+
   def rvs(self, mu, size=1):
     """Random variates.
 
@@ -1192,7 +933,6 @@ class Poisson(object):
 
   def logpmf(self, x, mu):
     """Log of the probability mass function.
-
     Parameters
     ----------
     x : tf.Tensor
@@ -1200,7 +940,6 @@ class Poisson(object):
     mu : tf.Tensor
       A tensor of same shape as ``x``, and with all elements
       constrained to :math:`mu > 0`.
-
     Returns
     -------
     tf.Tensor
@@ -1210,18 +949,13 @@ class Poisson(object):
     mu = tf.cast(mu, dtype=tf.float32)
     return x * tf.log(mu) - mu - tf.lgamma(x + 1.0)
 
-  def entropy(self, mu):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
 
-
-class T(object):
+class StudentT(Distribution):
   """Student-t distribution.
   """
+  def __init__(self):
+    super(StudentT, self).__init__(distributions.StudentT)
+
   def rvs(self, df, loc=0, scale=1, size=1):
     """Random variates.
 
@@ -1262,48 +996,13 @@ class T(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpdf(self, x, df, loc=0, scale=1):
-    """Log of the probability density function.
 
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    df : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`df > 0`.
-    loc : tf.Tensor
-      A tensor of same shape as ``x``.
-    scale : tf.Tensor
-      A tensor of same shape as ``x``, and with all elements
-      constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    x = tf.cast(x, dtype=tf.float32)
-    df = tf.cast(df, dtype=tf.float32)
-    loc = tf.cast(loc, dtype=tf.float32)
-    scale = tf.cast(scale, dtype=tf.float32)
-    z = (x - loc) / scale
-    return tf.lgamma(0.5 * (df + 1.0)) - tf.lgamma(0.5 * df) - \
-        0.5 * (tf.log(np.pi) + tf.log(df)) - tf.log(scale) - \
-        0.5 * (df + 1.0) * tf.log(1.0 + (1.0 / df) * tf.square(z))
-
-  def entropy(self, df, loc=0, scale=1):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
-
-
-class TruncNorm(object):
+class TruncNorm(Distribution):
   """Truncated Normal (Gaussian) distribution.
   """
+  def __init__(self):
+    super(TruncNorm, self).__init__(None)
+
   def rvs(self, a, b, loc=0, scale=1, size=1):
     """Random variates.
 
@@ -1388,20 +1087,15 @@ class TruncNorm(object):
         tf.log(tf.cast(stats.norm.cdf((b - loc) / scale) -
                stats.norm.cdf((a - loc) / scale), dtype=tf.float32))
 
-  def entropy(self, a, b, loc=0, scale=1):
-    """
-    Raises
-    ------
-    NotImplementedError
-    """
-    raise NotImplementedError()
 
-
-class Uniform(object):
+class Uniform(Distribution):
   """Uniform distribution (continous)
 
-  This distribution is constant between ``loc`` and ``loc + scale``
+  This distribution is constant between [`a`, `b`], and 0 elsewhere.
   """
+  def __init__(self):
+    super(Uniform, self).__init__(distributions.Uniform)
+
   def rvs(self, loc=0, scale=1, size=1):
     """Random variates.
 
@@ -1435,63 +1129,34 @@ class Uniform(object):
     x = np.asarray(x).transpose()
     return x
 
-  def logpdf(self, x, loc=0, scale=1):
-    """Log of the probability density function.
-
-    Parameters
-    ----------
-    x : tf.Tensor
-      A n-D tensor.
-    loc : tf.Tensor
-      Left boundary. A tensor of same shape as ``x``.
-    scale : tf.Tensor
-      Width of distribution. A tensor of same shape as ``x``,
-      and with all elements constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    # Note there is no error checking if x is outside domain.
-    scale = tf.cast(scale, dtype=tf.float32)
-    return tf.ones(list(x.get_shape())) * -tf.log(scale)
-
-  def entropy(self, loc=0, scale=1):
-    """Entropy of probability distribution.
-
-    Parameters
-    ----------
-    loc : tf.Tensor
-      Left boundary. A n-D tensor.
-    scale : tf.Tensor
-      Width of distribution. A n-D tensor, with all elements
-      constrained to :math:`scale > 0`.
-
-    Returns
-    -------
-    tf.Tensor
-      A tensor of same shape as input.
-    """
-    scale = tf.cast(scale, dtype=tf.float32)
-    return tf.log(scale)
-
 
 bernoulli = Bernoulli()
 beta = Beta()
 binom = Binom()
+categorical = Categorical()
 chi2 = Chi2()
 dirichlet = Dirichlet()
-expon = Expon()
+dirichlet_multinomial = DirichletMultinomial()
+exponential = Exponential()
 gamma = Gamma()
 geom = Geom()
-invgamma = InvGamma()
+inverse_gamma = InverseGamma()
+laplace = Laplace()
 lognorm = LogNorm()
 multinomial = Multinomial()
-multivariate_normal = Multivariate_Normal()
+multivariate_normal_diag = MultivariateNormalDiag()
+multivariate_normal_cholesky = MultivariateNormalCholesky()
+multivariate_normal_full = MultivariateNormalFull()
 nbinom = NBinom()
-norm = Norm()
+normal = Normal()
 poisson = Poisson()
-t = T()
+studentt = StudentT()
 truncnorm = TruncNorm()
 uniform = Uniform()
+
+# for backwards naming compatibility with scipy.stats
+expon = exponential
+norm = normal
+invgamma = inverse_gamma
+t = studentt
+multivariate_normal = multivariate_normal_full

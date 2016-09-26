@@ -6,34 +6,49 @@ import numpy as np
 import six
 import tensorflow as tf
 
+from edward.models import RandomVariable
 from edward.util import logit, get_dims, get_session
 
 
-def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
+def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
+             n_samples=100, output_key='y'):
   """Evaluate fitted model using a set of metrics.
+
+  A metric, or scoring rule, is a function of observed data under the
+  posterior predictive distribution. For example in supervised metrics
+  such as classification accuracy, the observed data (true output) is
+  compared to the posterior predictive's mean (predicted output). In
+  unsupervised metrics such as log-likelihood, the probability of
+  observing the data is calculated under the posterior predictive's
+  log-density.
 
   Parameters
   ----------
   metrics : list of str or str
     List of metrics or a single metric.
-  model : ed.Model
-    Probability model, a class object with an implemented
-    ``predict`` method. PyMC3 and Stan models do not currently
-    support this method.
-  variational : ed.Variational
-    Variational approximation to the posterior p(z | x)
   data : dict
-    Data dictionary to evaluate model with. For TensorFlow,
-    Python, and Stan models, the key type is a string; for PyMC3,
-    the key type is a Theano shared variable. For TensorFlow,
-    Python, and PyMC3 models, the value type is a NumPy array or
-    TensorFlow placeholder; for Stan, the value type is the type
-    according to the Stan program's data block.
-  y_true : np.ndarray or tf.Tensor
-    True values to compare to in supervised learning tasks.
+    Data to evaluate model with. It binds observed variables (of type
+    `RandomVariable`) to their realizations (of type `tf.Tensor`). It
+    can also bind placeholders (of type `tf.Tensor`) used in the model
+    to their realizations.
+  latent_vars : dict of str to RandomVariable, optional
+    Collection of random variables binded to their inferred posterior.
+    It is only used (and in fact required) if the model wrapper is
+    specified.
+  model_wrapper : ed.Model, optional
+    An optional wrapper for the probability model. It must have a
+    `predict` method, and `latent_vars` must be specified. `data` is
+    also changed. For TensorFlow, Python, and Stan models, the key
+    type is a string; for PyMC3, the key type is a Theano shared
+    variable. For TensorFlow, Python, and PyMC3 models, the value type
+    is a NumPy array or TensorFlow placeholder; for Stan, the value
+    type is the type according to the Stan program's data block.
   n_samples : int, optional
     Number of posterior samples for making predictions,
-    using the posterior predictive distribution.
+    using the posterior predictive distribution. It is only used if
+    the model wrapper is specified.
+  output_key : RandomVariable or str, optional
+    It is the key in ``data`` which corresponds to the model's output.
 
   Returns
   -------
@@ -44,22 +59,73 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
   ------
   NotImplementedError
     If an input metric does not match an implemented metric in Edward.
+
+  Examples
+  --------
+  >>> # build posterior predictive after inference: it is
+  >>> # parameterized by posterior means
+  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>>
+  >>> # log-likelihood performance
+  >>> evaluate('log_likelihood', data={x_post: x_train})
+  >>>
+  >>> # classification accuracy
+  >>> # here, `x_ph` is any features the model is defined with respect to,
+  >>> # and `y_post` is the posterior predictive distribution
+  >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+  >>>
+  >>> # criticism for model wrappers
+  >>> evaluate('log_likelihood', data={'x': x_train},
+  ...          latent_vars={'z': qz}, model_wrapper=model)
+  >>> evaluate('binary_accuracy', data={'y': y_train, 'x': x_train},
+  ...          latent_vars={'z': qz}, model_wrapper=model)
   """
   sess = get_session()
-  # Monte Carlo estimate the mean of the posterior predictive:
-  # 1. Sample a batch of latent variables from posterior
-  zs = variational.sample(n_samples)
-  # 2. Make predictions, averaging over each sample of latent variables
-  y_pred = model.predict(data, zs)
+  # Create feed_dict for data placeholders that the model conditions
+  # on; it is necessary for all session runs.
+  feed_dict = {x: obs for x, obs in six.iteritems(data)
+               if not isinstance(x, RandomVariable) and
+               not isinstance(x, str)}
 
-  # Evaluate y_pred according to y_true for all metrics.
-  evaluations = []
   if isinstance(metrics, str):
     metrics = [metrics]
 
+  # Set default for output_key if not using a model wrapper.
+  if model_wrapper is None:
+    if output_key == 'y':
+      # Try to default to the only one observed random variable.
+      keys = [key for key in six.iterkeys(data)
+              if isinstance(key, RandomVariable)]
+      if len(keys) == 1:
+        output_key = keys[0]
+      else:
+        raise KeyError("User must specify output_key.")
+
+  # Form true data. (It is not required in the specific setting of the
+  # log-likelihood metric with a model wrapper.)
+  if (metrics != ['log_lik'] and metrics != ['log_likelihood']) or \
+          model_wrapper is None:
+    y_true = data[output_key]
+
+  # Form predicted data (if there are any supervised metrics).
+  if metrics != ['log_lik'] and metrics != ['log_likelihood']:
+    if model_wrapper is None:
+      y_pred = output_key.mean()
+    else:
+      # Monte Carlo estimate the mean of the posterior predictive.
+      y_pred = []
+      for s in range(n_samples):
+        zrep = {key: qz.sample(())
+                for key, qz in six.iteritems(latent_vars)}
+        y_pred += [model_wrapper.predict(data, zrep)]
+
+      y_pred = tf.reduce_mean(y_pred, 0)
+
+  # Evaluate y_true (according to y_pred if supervised) for all metrics.
+  evaluations = []
   for metric in metrics:
     if metric == 'accuracy' or metric == 'crossentropy':
-      # automate binary or sparse cat depending on max(y_true)
+      # automate binary or sparse cat depending on its support
       support = tf.reduce_max(y_true).eval()
       if support <= 1:
         metric = 'binary_' + metric
@@ -67,53 +133,64 @@ def evaluate(metrics, model, variational, data, y_true=None, n_samples=100):
         metric = 'sparse_categorical_' + metric
 
     if metric == 'binary_accuracy':
-      evaluations += [sess.run(binary_accuracy(y_true, y_pred))]
+      evaluations += [binary_accuracy(y_true, y_pred)]
     elif metric == 'categorical_accuracy':
-      evaluations += [sess.run(categorical_accuracy(y_true, y_pred))]
+      evaluations += [categorical_accuracy(y_true, y_pred)]
     elif metric == 'sparse_categorical_accuracy':
-      evaluations += [sess.run(sparse_categorical_accuracy(y_true, y_pred))]
+      evaluations += [sparse_categorical_accuracy(y_true, y_pred)]
     elif metric == 'log_loss' or metric == 'binary_crossentropy':
-      evaluations += [sess.run(binary_crossentropy(y_true, y_pred))]
+      evaluations += [binary_crossentropy(y_true, y_pred)]
     elif metric == 'categorical_crossentropy':
-      evaluations += [sess.run(categorical_crossentropy(y_true, y_pred))]
+      evaluations += [categorical_crossentropy(y_true, y_pred)]
     elif metric == 'sparse_categorical_crossentropy':
-      evaluations += [sess.run(sparse_categorical_crossentropy(y_true, y_pred))]
+      evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
     elif metric == 'hinge':
-      evaluations += [sess.run(hinge(y_true, y_pred))]
+      evaluations += [hinge(y_true, y_pred)]
     elif metric == 'squared_hinge':
-      evaluations += [sess.run(squared_hinge(y_true, y_pred))]
+      evaluations += [squared_hinge(y_true, y_pred)]
     elif (metric == 'mse' or metric == 'MSE' or
           metric == 'mean_squared_error'):
-      evaluations += [sess.run(mean_squared_error(y_true, y_pred))]
+      evaluations += [mean_squared_error(y_true, y_pred)]
     elif (metric == 'mae' or metric == 'MAE' or
           metric == 'mean_absolute_error'):
-      evaluations += [sess.run(mean_absolute_error(y_true, y_pred))]
+      evaluations += [mean_absolute_error(y_true, y_pred)]
     elif (metric == 'mape' or metric == 'MAPE' or
           metric == 'mean_absolute_percentage_error'):
-      evaluations += [sess.run(mean_absolute_percentage_error(y_true, y_pred))]
+      evaluations += [mean_absolute_percentage_error(y_true, y_pred)]
     elif (metric == 'msle' or metric == 'MSLE' or
           metric == 'mean_squared_logarithmic_error'):
-      evaluations += [sess.run(mean_squared_logarithmic_error(y_true, y_pred))]
+      evaluations += [mean_squared_logarithmic_error(y_true, y_pred)]
     elif metric == 'poisson':
-      evaluations += [sess.run(poisson(y_true, y_pred))]
+      evaluations += [poisson(y_true, y_pred)]
     elif metric == 'cosine' or metric == 'cosine_proximity':
-      evaluations += [sess.run(cosine_proximity(y_true, y_pred))]
+      evaluations += [cosine_proximity(y_true, y_pred)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
-      evaluations += [sess.run(y_pred)]
+      if model_wrapper is None:
+        evaluations += [tf.reduce_mean(output_key.log_prob(y_true))]
+      else:
+        # Monte Carlo estimate the log-density of the posterior predictive.
+        log_liks = []
+        for s in range(n_samples):
+          zrep = {key: qz.sample(())
+                  for key, qz in six.iteritems(latent_vars)}
+          log_liks += [model_wrapper.log_lik(data, zrep)]
+
+        evaluations += [tf.reduce_mean(log_liks)]
     else:
       raise NotImplementedError()
 
   if len(evaluations) == 1:
-    return evaluations[0]
+    return sess.run(evaluations[0], feed_dict)
   else:
-    return evaluations
+    return sess.run(evaluations, feed_dict)
 
 
-def ppc(model, variational=None, data=None, T=None, n_samples=100):
+def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   """Posterior predictive check.
   (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)
-  If no posterior approximation is provided through ``variational``,
-  then we default to a prior predictive check (Box, 1980).
+
+  If ``latent_vars`` is inputted as ``None``, then it is a prior
+  predictive check (Box, 1980).
 
   PPC's form an empirical distribution for the predictive discrepancy,
 
@@ -126,99 +203,121 @@ def ppc(model, variational=None, data=None, T=None, n_samples=100):
 
   Parameters
   ----------
-  model : ed.Model
-    Probability model, a class object with an implemented
-    ``sample_likelihood`` method. If ``variational`` is not
-    provided (i.e., a prior predictive check), ``model`` must also
-    have a ``sample_prior`` method. PyMC3 and Stan models do not
-    currently support either method.
-  variational : ed.Variational, optional
-    Latent variable distribution q(z) to sample from. It is an
-    approximation to the posterior, e.g., a variational
-    approximation or an empirical distribution from MCMC samples.
-  data : dict, optional
-    Observed data to compare to. If not specified, will return
-    only the reference distribution with an assumed replicated
-    data set size of 1. For TensorFlow, Python, and Stan models,
-    the key type is a string; for PyMC3, the key type is a Theano
-    shared variable. For TensorFlow, Python, and PyMC3 models, the
-    value type is a NumPy array or TensorFlow placeholder; for
-    Stan, the value type is the type according to the Stan
-    program's data block.
-  T : function, optional
-    Discrepancy function, which takes a data dictionary and list
-    of latent variables as input and outputs a tf.Tensor. Default
-    is the identity function.
+  T : function
+    Discrepancy function, which takes a dictionary of data and
+    dictionary of latent variables as input and outputs a `tf.Tensor`.
+  data : dict
+    Data to compare to. It binds observed variables (of type
+    `RandomVariable`) to their realizations (of type `tf.Tensor`). It
+    can also bind placeholders (of type `tf.Tensor`) used in the model
+    to their realizations.
+  latent_vars : dict of str to RandomVariable, optional
+    Collection of random variables binded to their inferred posterior.
+    It is an optional argument, necessary for when the discrepancy is
+    a function of latent variables.
+  model_wrapper : ed.Model, optional
+    An optional wrapper for the probability model. It must have a
+    ``sample_likelihood`` method. If `latent_vars` is not specified,
+    it must also have a ``sample_prior`` method, as ``ppc`` will
+    default to a prior predictive check. `data` is also changed. For
+    TensorFlow, Python, and Stan models, the key type is a string; for
+    PyMC3, the key type is a Theano shared variable. For TensorFlow,
+    Python, and PyMC3 models, the value type is a NumPy array or
+    TensorFlow placeholder; for Stan, the value type is the type
+    according to the Stan program's data block.
   n_samples : int, optional
     Number of replicated data sets.
 
   Returns
   -------
   list of np.ndarray
-    List containing the reference distribution, which is a Numpy
-    vector of size elements,
+    List containing the reference distribution, which is a NumPy
+    array of size elements,
 
     .. math::
       (T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))
 
-    and the realized discrepancy, which is a NumPy vector of size
+    and the realized discrepancy, which is a NumPy array of size
     elements,
 
     .. math::
       (T(x, z^{1}), ..., T(x, z^{size})).
 
-    If the discrepancy function is not specified, then the list
-    contains the full data distribution where each element is a
-    data set (dictionary).
+
+  Examples
+  --------
+  >>> # build posterior predictive after inference: it is
+  >>> # parameterized by posterior means
+  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>>
+  >>> # posterior predictive check
+  >>> # T is a user-defined function of data, T(data)
+  >>> ppc(T, data={x_post: x_train})
+  >>>
+  >>> # in general T is a discrepancy function of the data (both response and
+  >>> # covariates) and latent variables, T(data, latent_vars)
+  >>> ppc(T, data={y_post: y_train, x_ph: x_train},
+  ...     latent_vars={'z': qz, 'beta': qbeta})
+  >>>
+  >>> # prior predictive check
+  >>> # running ppc on original x
+  >>> ppc(T, data={x: x_train})
+  >>>
+  >>> # criticism for model wrappers
+  >>> ppc(T, data={'x': x_train}, latent_vars={'z': qz},
+  ...     model_wrapper=model)
+  >>> ppc(T, data={'y': y_train, 'x': x_train},
+  ...     latent_vars={'z': qz}, model_wrapper=model)
+  >>> ppc(T, data={'x': x_train}, latent_vars=None,
+  ...     model_wrapper=model)
   """
   sess = get_session()
-  if data is None:
-    N = 1
-    x = {}
-  else:
-    # Assume all values have the same data set size.
-    N = get_dims(list(six.itervalues(data))[0])[0]
-    x = data
-
-  # 1. Sample from posterior (or prior).
-  # We fetch zs out of the session because sample_likelihood() may
-  # require a SciPy-based sampler.
-  if variational is not None:
-    zs = variational.sample(n_samples)
-    # `tf.identity()` is to avoid fetching, e.g., a placeholder x
-    # when feeding the dictionary {x: np.array()}. TensorFlow will
-    # raise an error.
-    if isinstance(zs, list):
-      zs = [tf.identity(zs_elem) for zs_elem in zs]
+  # Sample to get replicated data sets and latent variables.
+  if model_wrapper is None:
+    if latent_vars is None:
+      zrep = None
     else:
-      zs = tf.identity(zs)
+      zrep = {key: value.value()
+              for key, value in six.iteritems(latent_vars)}
 
-    zs = sess.run(zs)
+    xrep = {}
+    for x, obs in six.iteritems(data):
+      if isinstance(x, RandomVariable):
+        # Replace observed data with replicated data.
+        xrep[x] = x.value()
+      else:
+        xrep[x] = obs
   else:
-    zs = model.sample_prior(n_samples)
-    zs = sess.run(zs)
-
-  # 2. Sample from likelihood.
-  xreps = model.sample_likelihood(zs, N)
-
-  # 3. Calculate discrepancy.
-  if T is None:
-    if x is None:
-      return xreps
+    if latent_vars is None:
+      zrep = model_wrapper.sample_prior()
     else:
-      return [xreps, x]
+      zrep = {key: value.value()
+              for key, value in six.iteritems(latent_vars)}
 
-  Txreps = []
-  Txs = []
-  for xrep, z in zip(xreps, tf.unpack(zs)):
-    Txreps += [T(xrep, z)]
-    if x is not None:
-      Txs += [T(x, z)]
+    xrep = model_wrapper.sample_likelihood(zrep)
 
-  if x is None:
-    return sess.run(tf.pack(Txreps))
-  else:
-    return sess.run([tf.pack(Txreps), tf.pack(Txs)])
+  # Create feed_dict for data placeholders that the model conditions
+  # on; it is necessary for all session runs.
+  feed_dict = {x: obs for x, obs in six.iteritems(data)
+               if not isinstance(x, RandomVariable) and
+               not isinstance(x, str)}
+
+  # Calculate discrepancy over many replicated data sets and latent
+  # variables.
+  Trep = T(xrep, zrep)
+  Tobs = T(data, zrep)
+  Treps = []
+  Ts = []
+  for s in range(n_samples):
+    # Take a forward pass (session run) to get new samples for
+    # each calculation of the discrepancy.
+    # Note that alternatively we can unroll the graph by registering
+    # this operation ``n_samples`` times, each for different parent
+    # nodes representing ``xrep`` and ``zrep``.
+    Treps += [sess.run(Trep, feed_dict)]
+    Ts += [sess.run(Tobs, feed_dict)]
+
+  return [np.stack(Treps), np.stack(Ts)]
 
 
 # Classification metrics

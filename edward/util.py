@@ -3,9 +3,290 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
+from copy import deepcopy
+from edward.models.random_variable import RandomVariable
+from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.framework.ops import set_shapes_for_outputs
+from tensorflow.python.util import compat
+
+distributions = tf.contrib.distributions
+
+
+def copy(org_instance, dict_swap=None, scope="copied",
+         replace_itself=False, copy_q=False):
+  """Build a new node in the TensorFlow graph from `org_instance`,
+  where any of its ancestors existing in `dict_swap` are
+  replaced with `dict_swap`'s corresponding value.
+
+  The copying is done recursively, so any `Operation` whose output
+  is required to evaluate `org_instance` is also copied (if it isn't
+  already copied within the new scope). This is with the exception of
+  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly copied.
+
+  Parameters
+  ----------
+  org_instance : RandomVariable, tf.Variable, tf.Tensor, or tf.Operation
+    Node to add in graph with replaced ancestors.
+  dict_swap : dict, optional
+    Random variables, variables, tensors, or operations to
+    swap with. Its keys are what `org_instance` may depend on,
+    and its values are the corresponding object (not necessarily of
+    the same type) that is used in exchange.
+  scope : str, optional
+    A scope for the new node(s). This is used to avoid name
+    conflicts with the original node(s).
+  replace_itself : bool, optional
+    Whether to replace `org_instance` itself if it exists in
+    `dict_swap`. (This is used for the recursion.)
+  copy_q : bool, optional
+    Whether to copy the replaced tensors too (if not already
+    copied within the new scope). Otherwise will reuse them.
+
+  Returns
+  -------
+  RandomVariable, tf.Variable, tf.Tensor, or tf.Operation
+    The copied node.
+
+  Raises
+  ------
+  TypeError
+    If `org_instance` is not one of the above types.
+
+  Examples
+  --------
+  >>> x = tf.constant(2.0)
+  >>> y = tf.constant(3.0)
+  >>> z = x * y
+  >>>
+  >>> qx = tf.constant(4.0)
+  >>> # The TensorFlow graph is currently
+  >>> # `x` -> `z` <- y`, `qx`
+  >>>
+  >>> # This adds a subgraph with newly copied nodes,
+  >>> # `copied/qx` -> `copied/z` <- `copied/y`
+  >>> z_new = copy(z, {x: qx})
+  >>>
+  >>> sess = tf.Session()
+  >>> sess.run(z)
+  6.0
+  >>> sess.run(z_new)
+  12.0
+  """
+  if not isinstance(org_instance, RandomVariable) and \
+     not isinstance(org_instance, tf.Variable) and \
+     not isinstance(org_instance, tf.Tensor) and \
+     not isinstance(org_instance, tf.Operation):
+    raise TypeError("Could not copy instance: " + str(org_instance))
+
+  if dict_swap is None:
+    dict_swap = {}
+
+  # Swap instance if in dictionary.
+  if org_instance in dict_swap and replace_itself:
+    org_instance = dict_swap[org_instance]
+    if not copy_q:
+      return org_instance
+  elif isinstance(org_instance, tf.Tensor) and replace_itself:
+    # Deal with case when `org_instance` is the associated tensor
+    # from the RandomVariable, e.g., `z.value()`. If
+    # `dict_swap={z: qz}`, we aim to swap it with `qz.value()`.
+    for key, value in six.iteritems(dict_swap):
+      if isinstance(key, RandomVariable):
+        if org_instance == key.value():
+          if isinstance(value, RandomVariable):
+            org_instance = value.value()
+          else:
+            org_instance = value
+
+          if not copy_q:
+            return org_instance
+          break
+
+  graph = tf.get_default_graph()
+  new_name = scope + '/' + org_instance.name
+
+  # If an instance of the same name exists, return appropriately.
+  # Do this for random variables.
+  random_variables = {x.name: x for x in
+                      graph.get_collection('_random_variable_collection_')}
+  if new_name in random_variables:
+    return random_variables[new_name]
+
+  # Do this for tensors and operations.
+  try:
+    already_present = graph.as_graph_element(new_name,
+                                             allow_tensor=True,
+                                             allow_operation=True)
+    return already_present
+  except:
+    pass
+
+  # If instance is a variable, return it; do not re-copy any.
+  # Note we check variables via their name and not their type. This
+  # is because if we get variables through an op's inputs, it has
+  # type tf.Tensor: we can only tell it is a variable via its name.
+  variables = {x.name: x for x in graph.get_collection(tf.GraphKeys.VARIABLES)}
+  if org_instance.name in variables:
+    return graph.get_tensor_by_name(variables[org_instance.name].name)
+
+  # Do the same for placeholders. Same logic holds.
+  # Note this assumes that placeholders are all in this collection.
+  placeholders = {x.name: x for x in graph.get_collection('PLACEHOLDERS')}
+  if org_instance.name in placeholders:
+    return graph.get_tensor_by_name(placeholders[org_instance.name].name)
+
+  if isinstance(org_instance, RandomVariable):
+    rv = org_instance
+
+    # If it has copiable arguments, copy them.
+    dist_args = {}
+    for key, value in six.iteritems(rv._dist_args):
+      if isinstance(value, RandomVariable) or \
+         isinstance(value, tf.Variable) or \
+         isinstance(value, tf.Tensor) or \
+         isinstance(value, tf.Operation):
+         value = copy(value, dict_swap, scope, True, copy_q)
+
+      dist_args[key] = value
+
+    dist_args['name'] = new_name + rv.distribution.name
+
+    # Copy a new `rv` with any newly copied arguments.
+    # We do this by creating an empty class object and setting
+    # its attributes. (This is to avoid a throwaway tensor in the
+    # graph, during instantiation of DistributionTensor.)
+    new_rv = Empty()
+    new_rv.__class__ = rv.__class__
+    for key, value in six.iteritems(rv.__dict__):
+      if key not in ['_name', '_dist_args', '_dist', '_value']:
+        setattr(new_rv, key, deepcopy(value))
+
+    setattr(new_rv, '_name', new_name)
+    setattr(new_rv, '_dist_args', dist_args)
+    setattr(new_rv, '_dist', new_rv._dist_cls(**new_rv._dist_args))
+    setattr(new_rv, '_value', new_rv._dist.sample())
+    return new_rv
+  elif isinstance(org_instance, tf.Tensor):
+    tensor = org_instance
+
+    # A tensor is one of the outputs of its underlying
+    # op. Therefore copy the op itself.
+    op = tensor.op
+    new_op = copy(op, dict_swap, scope, True, copy_q)
+
+    output_index = op.outputs.index(tensor)
+    new_tensor = new_op.outputs[output_index]
+
+    # Add copied tensor to collections that the original one is in.
+    for name, collection in tensor.graph._collections.items():
+      if tensor in collection:
+        graph.add_to_collection(name, new_tensor)
+
+    return new_tensor
+  else:  # tf.Operation
+    op = org_instance
+
+    # If it has an original op, copy it.
+    if op._original_op is not None:
+      new_original_op = copy(op._original_op, dict_swap, scope, True, copy_q)
+    else:
+      new_original_op = None
+
+    # If it has control inputs, copy them.
+    new_control_inputs = []
+    for x in op.control_inputs:
+      elem = copy(x, dict_swap, scope, True, copy_q)
+      if not isinstance(elem, tf.Operation):
+        elem = tf.convert_to_tensor(elem)
+
+      new_control_inputs += [elem]
+
+    # If it has inputs, copy them.
+    new_inputs = []
+    for x in op.inputs:
+      elem = copy(x, dict_swap, scope, True, copy_q)
+      if not isinstance(elem, tf.Operation):
+        elem = tf.convert_to_tensor(elem)
+
+      new_inputs += [elem]
+
+    # Make a copy of the node def.
+    # As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it
+    # stores string-based info such as name, device, and type of the op.
+    # It is unique to every Operation instance.
+    new_node_def = deepcopy(op.node_def)
+    new_node_def.name = new_name
+
+    # Copy the other inputs needed for initialization.
+    output_types = op._output_types[:]
+    input_types = op._input_types[:]
+
+    # Make a copy of the op def.
+    # It is unique to every Operation type.
+    op_def = deepcopy(op.op_def)
+
+    ret = tf.Operation(new_node_def,
+                       graph,
+                       new_inputs,
+                       output_types,
+                       new_control_inputs,
+                       input_types,
+                       new_original_op,
+                       op_def)
+
+    # Use Graph's private methods to add the op, following
+    # implementation of `tf.Graph().create_op()`.
+    compute_shapes = True
+    compute_device = True
+    op_type = new_name
+
+    if compute_shapes:
+      set_shapes_for_outputs(ret)
+    graph._add_op(ret)
+    graph._record_op_seen_by_control_dependencies(ret)
+
+    if compute_device:
+      graph._apply_device_functions(ret)
+
+    if graph._colocation_stack:
+      all_colocation_groups = []
+      for colocation_op in graph._colocation_stack:
+        all_colocation_groups.extend(colocation_op.colocation_groups())
+        if colocation_op.device:
+          # Make this device match the device of the colocated op, to
+          # provide consistency between the device and the colocation
+          # property.
+          if ret.device and ret.device != colocation_op.device:
+            logging.warning("Tried to colocate %s with an op %s that had "
+                            "a different device: %s vs %s. "
+                            "Ignoring colocation property.",
+                            name, colocation_op.name, ret.device,
+                            colocation_op.device)
+          else:
+            ret._set_device(colocation_op.device)
+
+      all_colocation_groups = sorted(set(all_colocation_groups))
+      ret.node_def.attr["_class"].CopyFrom(attr_value_pb2.AttrValue(
+          list=attr_value_pb2.AttrValue.ListValue(s=all_colocation_groups)))
+
+    # Sets "container" attribute if
+    # (1) graph._container is not None
+    # (2) "is_stateful" is set in OpDef
+    # (3) "container" attribute is in OpDef
+    # (4) "container" attribute is None
+    if (graph._container and
+        op_type in graph._registered_ops and
+        graph._registered_ops[op_type].is_stateful and
+        "container" in ret.node_def.attr and
+            not ret.node_def.attr["container"].s):
+      ret.node_def.attr["container"].CopyFrom(
+          attr_value_pb2.AttrValue(s=compat.as_bytes(graph._container)))
+
+    return ret
 
 
 def cumprod(xs):
@@ -28,9 +309,9 @@ def cumprod(xs):
   InvalidArgumentError
     If the input has Inf or NaN values.
   """
+  xs = tf.convert_to_tensor(xs)
   dependencies = [tf.verify_tensor_all_finite(xs, msg='')]
   xs = control_flow_ops.with_dependencies(dependencies, xs)
-  xs = tf.cast(xs, dtype=tf.float32)
 
   values = tf.unpack(xs)
   out = []
@@ -68,21 +349,26 @@ def dot(x, y):
   InvalidArgumentError
     If the inputs have Inf or NaN values.
   """
+  x = tf.convert_to_tensor(x)
+  y = tf.convert_to_tensor(y)
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
   y = control_flow_ops.with_dependencies(dependencies, y)
-  x = tf.cast(x, dtype=tf.float32)
-  y = tf.cast(y, dtype=tf.float32)
 
   if len(x.get_shape()) == 1:
     vec = x
     mat = y
-    return tf.matmul(tf.expand_dims(vec, 0), mat)
+    return tf.reshape(tf.matmul(tf.expand_dims(vec, 0), mat), [-1])
   else:
     mat = x
     vec = y
-    return tf.matmul(mat, tf.expand_dims(vec, 1))
+    return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
+
+
+class Empty(object):
+  """Empty class."""
+  pass
 
 
 def get_dims(x):
@@ -90,7 +376,7 @@ def get_dims(x):
 
   Parameters
   ----------
-  x : tf.Tensor or np.ndarray
+  x : float, int, tf.Tensor, np.ndarray, or RandomVariable
     A n-D tensor.
 
   Returns
@@ -98,14 +384,14 @@ def get_dims(x):
   list of int
     Python list containing dimensions of ``x``.
   """
-  if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    dims = x.get_shape()
-    if len(dims) == 0:  # scalar
-      return []
-    else:  # array
-      return [dim.value for dim in dims]
+  if isinstance(x, float) or isinstance(x, int):
+    return []
+  elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
+    return x.get_shape().as_list()
   elif isinstance(x, np.ndarray):
     return list(x.shape)
+  elif isinstance(x, RandomVariable):
+    return x.get_batch_shape().as_list()
   else:
     raise NotImplementedError()
 
@@ -151,6 +437,7 @@ def hessian(y, xs):
   InvalidArgumentError
     If the inputs have Inf or NaN values.
   """
+  y = tf.convert_to_tensor(y)
   dependencies = [tf.verify_tensor_all_finite(y, msg='')]
   dependencies.extend([tf.verify_tensor_all_finite(x, msg='') for x in xs])
 
@@ -221,14 +508,16 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     If the location variables have Inf or NaN values, or if the scale
     variables are not positive.
   """
+  loc_one = tf.convert_to_tensor(loc_one)
+  scale_one = tf.convert_to_tensor(scale_one)
+  loc_two = tf.convert_to_tensor(loc_two)
+  scale_two = tf.convert_to_tensor(scale_two)
   dependencies = [tf.verify_tensor_all_finite(loc_one, msg=''),
                   tf.verify_tensor_all_finite(loc_two, msg=''),
                   tf.assert_positive(scale_one),
                   tf.assert_positive(scale_two)]
   loc_one = control_flow_ops.with_dependencies(dependencies, loc_one)
   scale_one = control_flow_ops.with_dependencies(dependencies, scale_one)
-  loc_one = tf.cast(loc_one, tf.float32)
-  scale_one = tf.cast(scale_one, tf.float32)
 
   if loc_two == 0.0 and scale_two == 1.0:
     # With default arguments, we can avoid some intermediate computation.
@@ -237,8 +526,6 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
   else:
     loc_two = control_flow_ops.with_dependencies(dependencies, loc_two)
     scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
-    loc_two = tf.cast(loc_two, tf.float32)
-    scale_two = tf.cast(scale_two, tf.float32)
     out = tf.square(scale_one / scale_two) + \
         tf.square((loc_two - loc_one) / scale_two) - \
         1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one)
@@ -273,9 +560,9 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
   InvalidArgumentError
     If the input has Inf or NaN values.
   """
+  input_tensor = tf.convert_to_tensor(input_tensor)
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
-  input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
   x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
@@ -306,9 +593,9 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
   InvalidArgumentError
     If the input has Inf or NaN values.
   """
+  input_tensor = tf.convert_to_tensor(input_tensor)
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
-  input_tensor = tf.cast(input_tensor, dtype=tf.float32)
 
   x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
@@ -333,10 +620,10 @@ def logit(x):
   InvalidArgumentError
     If the input is not between :math:`(0,1)` elementwise.
   """
+  x = tf.convert_to_tensor(x)
   dependencies = [tf.assert_positive(x),
                   tf.assert_less(x, 1.0)]
   x = control_flow_ops.with_dependencies(dependencies, x)
-  x = tf.cast(x, dtype=tf.float32)
 
   return tf.log(x) - tf.log(1.0 - x)
 
@@ -370,6 +657,10 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
     If the mean variables have Inf or NaN values, or if the scale
     and length variables are not positive.
   """
+  x = tf.convert_to_tensor(x)
+  y = tf.convert_to_tensor(y)
+  sigma = tf.convert_to_tensor(sigma)
+  l = tf.convert_to_tensor(l)
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg=''),
                   tf.assert_positive(sigma),
@@ -378,13 +669,17 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
   y = control_flow_ops.with_dependencies(dependencies, y)
   sigma = control_flow_ops.with_dependencies(dependencies, sigma)
   l = control_flow_ops.with_dependencies(dependencies, l)
-  x = tf.cast(x, dtype=tf.float32)
-  y = tf.cast(y, dtype=tf.float32)
-  sigma = tf.cast(sigma, dtype=tf.float32)
-  l = tf.cast(l, dtype=tf.float32)
 
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.reduce_sum(tf.pow(x - y, 2.0)))
+
+
+def placeholder(*args, **kwargs):
+  """A wrapper around ``tf.placeholder``. It adds the tensor to the
+  ``PLACEHOLDERS`` collection."""
+  x = tf.placeholder(*args, **kwargs)
+  tf.add_to_collection("PLACEHOLDERS", x)
+  return x
 
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
@@ -416,6 +711,10 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
     If the mean variables have Inf or NaN values, or if the scale
     and length variables are not positive.
   """
+  x = tf.convert_to_tensor(x)
+  y = tf.convert_to_tensor(y)
+  sigma = tf.convert_to_tensor(sigma)
+  l = tf.convert_to_tensor(l)
   dependencies = [tf.verify_tensor_all_finite(x, msg=''),
                   tf.verify_tensor_all_finite(y, msg=''),
                   tf.assert_positive(sigma),
@@ -424,10 +723,6 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
   y = control_flow_ops.with_dependencies(dependencies, y)
   sigma = control_flow_ops.with_dependencies(dependencies, sigma)
   l = control_flow_ops.with_dependencies(dependencies, l)
-  x = tf.cast(x, dtype=tf.float32)
-  y = tf.cast(y, dtype=tf.float32)
-  sigma = tf.cast(sigma, dtype=tf.float32)
-  l = tf.cast(l, dtype=tf.float32)
 
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.pow(x - y, 2.0))
@@ -441,7 +736,8 @@ def set_seed(x):
   x : int, float
     seed
   """
-  if len(tf.get_default_graph()._nodes_by_id.keys()) > 0:
+  node_names = list(six.iterkeys(tf.get_default_graph()._nodes_by_name))
+  if len(node_names) > 0 and node_names != ['keras_learning_phase']:
     raise RuntimeError("Seeding is not supported after initializing "
                        "part of the graph. "
                        "Please move set_seed to the beginning of your code.")
@@ -450,64 +746,103 @@ def set_seed(x):
   tf.set_random_seed(x)
 
 
-def softplus(x):
-  """Elementwise Softplus function
+def tile(input, multiples, *args, **kwargs):
+  """Constructs a tensor by tiling a given tensor.
 
-  .. math:: \log(1 + \exp(x))
-
-  If input `x < -30`, returns `0.0` exactly.
-
-  If input `x > 30`, returns `x` exactly.
-
-  TensorFlow can't currently autodiff through ``tf.nn.softplus()``.
+  This extends ``tf.tile`` to features available in ``np.tile``.
+  Namely, ``inputs`` and ``multiples`` can be a 0-D tensor.  Further,
+  if 1-D, ``multiples`` can be of any length according to broadcasting
+  rules (see documentation of ``np.tile`` or examples below).
 
   Parameters
   ----------
-  x : tf.Tensor
-    A n-D tensor.
+  input : tf.Tensor
+    The input tensor.
+  multiples : tf.Tensor
+    The number of repetitions of ``input`` along each axis. Has type
+    ``tf.int32``. 0-D or 1-D.
+  *args :
+    Passed into ``tf.tile``.
+  **kwargs :
+    Passed into ``tf.tile``.
 
   Returns
   -------
   tf.Tensor
-    A tensor of same shape as input.
+      Has the same type as ``input``.
 
-  Raises
-  ------
-  InvalidArgumentError
-    If the input has Inf or NaN values.
+  Examples
+  --------
+  >>> a = tf.constant([0, 1, 2])
+  >>> sess.run(ed.tile(a, 2))
+  array([0, 1, 2, 0, 1, 2], dtype=int32)
+  >>> sess.run(ed.tile(a, (2, 2)))
+  array([[0, 1, 2, 0, 1, 2],
+         [0, 1, 2, 0, 1, 2]], dtype=int32)
+  >>> sess.run(ed.tile(a, (2, 1, 2)))
+  array([[[0, 1, 2, 0, 1, 2]],
+         [[0, 1, 2, 0, 1, 2]]], dtype=int32)
+  >>>
+  >>> b = tf.constant([[1, 2], [3, 4]])
+  >>> sess.run(ed.tile(b, 2))
+  array([[1, 2, 1, 2],
+         [3, 4, 3, 4]], dtype=int32)
+  >>> sess.run(ed.tile(b, (2, 1)))
+  array([[1, 2],
+         [3, 4],
+         [1, 2],
+         [3, 4]], dtype=int32)
+  >>>
+  >>> c = tf.constant([1, 2, 3, 4])
+  >>> sess.run(ed.tile(c, (4, 1)))
+  array([[1, 2, 3, 4],
+         [1, 2, 3, 4],
+         [1, 2, 3, 4],
+         [1, 2, 3, 4]], dtype=int32)
+
+  Notes
+  -----
+  Sometimes this can result in an unknown shape. The core reason for
+  this is the following behavior:
+
+  >>> n = tf.constant([1])
+  >>> tf.tile(tf.constant([[1.0]]),
+  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  <tf.Tensor 'Tile:0' shape=(1, 1) dtype=float32>
+  >>> n = tf.reshape(tf.constant(1), [1])
+  >>> tf.tile(tf.constant([[1.0]]),
+  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  <tf.Tensor 'Tile_1:0' shape=(?, ?) dtype=float32>
+
+  For this reason, we try to fetch ``multiples`` out of session if
+  possible. This can be slow if ``multiples`` has computationally
+  intensive dependencies in order to perform this fetch.
   """
-  dependencies = [tf.verify_tensor_all_finite(x, msg='')]
-  x = control_flow_ops.with_dependencies(dependencies, x)
-  x = tf.cast(x, dtype=tf.float32)
+  input = tf.convert_to_tensor(input)
+  multiples = tf.convert_to_tensor(multiples)
 
-  result = tf.log(1.0 + tf.exp(x))
+  # 0-d tensor
+  if len(input.get_shape()) == 0:
+    input = tf.expand_dims(input, 0)
 
-  less_than_thirty = tf.less(x, -30.0)
-  result = tf.select(less_than_thirty, tf.zeros_like(x), result)
+  # 0-d tensor
+  if len(multiples.get_shape()) == 0:
+    multiples = tf.expand_dims(multiples, 0)
 
-  greater_than_thirty = tf.greater(x, 30.0)
-  result = tf.select(greater_than_thirty, x, result)
+  try:
+    get_session()
+    multiples = tf.convert_to_tensor(multiples.eval())
+  except:
+    pass
 
-  return result
+  # broadcasting
+  diff = len(input.get_shape()) - get_dims(multiples)[0]
+  if diff < 0:
+    input = tf.reshape(input, [1] * np.abs(diff) + get_dims(input))
+  elif diff > 0:
+    multiples = tf.concat(0, [tf.ones(diff, dtype=tf.int32), multiples])
 
-
-def stop_gradient(x):
-  """Apply ``tf.stop_gradient()`` element-wise.
-
-  Parameters
-  ----------
-  x : tf.Tensor or list of tf.Tensor
-    A n-D tensor or list thereof.
-
-  Returns
-  -------
-  tf.Tensor or list of tf.Tensor
-    A object of same type and shape as input.
-  """
-  if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    return tf.stop_gradient(x)
-  else:  # list
-    return [tf.stop_gradient(i) for i in x]
+  return tf.tile(input, multiples, *args, **kwargs)
 
 
 def to_simplex(x):
@@ -534,9 +869,9 @@ def to_simplex(x):
   -----
   x as a 3-D or higher tensor is not guaranteed to be supported.
   """
+  x = tf.cast(x, dtype=tf.float32)
   dependencies = [tf.verify_tensor_all_finite(x, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
-  x = tf.cast(x, dtype=tf.float32)
 
   if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
     shape = get_dims(x)

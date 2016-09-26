@@ -10,7 +10,7 @@ Classification means the output $y$ takes discrete values.
 
 We demonstrate how to do this in Edward with an example.
 The script is available
-\href{https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/tf_gp_classification.py}
 {here}.
 
 
@@ -29,63 +29,64 @@ data = {'x': df[:, 1:], 'y': df[:, 0]}
 
 Posit the model as Gaussian process classification. For more details on the
 model, see the
-\href{tut_gp_classification.html}
+\href{tut_gp_classification}
 {Gaussian process classification tutorial}.
 
 Here we build the model in Edward using TensorFlow.
 \begin{lstlisting}[language=Python]
 class GaussianProcess:
-    """
-    Gaussian process classification
+  """
+  Gaussian process classification
 
-    p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
-                  Normal(z | 0, K),
+  p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
+                Normal(z | 0, K),
 
-    where z are weights drawn from a GP with covariance given by k(x,
-    x') for each pair of inputs (x, x'), and with squared-exponential
-    kernel and known kernel hyperparameters.
+  where z are weights drawn from a GP with covariance given by k(x,
+  x') for each pair of inputs (x, x'), and with squared-exponential
+  kernel and known kernel hyperparameters.
 
-    Parameters
-    ----------
-    N : int
-        Number of data points.
-    sigma : float, optional
-        Signal variance parameter.
-    l : float, optional
-        Length scale parameter.
-    """
-    def __init__(self, N, sigma=1.0, l=1.0):
-        self.N = N
-        self.sigma = sigma
-        self.l = l
+  Parameters
+  ----------
+  N : int
+    Number of data points.
+  sigma : float, optional
+    Signal variance parameter.
+  l : float, optional
+    Length scale parameter.
+  """
+  def __init__(self, N, sigma=1.0, l=1.0):
+    self.N = N
+    self.sigma = sigma
+    self.l = l
 
-        self.n_vars = N
-        self.inverse_link = tf.sigmoid
+    self.n_vars = N
+    self.inverse_link = tf.sigmoid
 
-    def kernel(self, x):
-        mat = []
-        for i in range(self.N):
-            mat += [[]]
-            xi = x[i, :]
-            for j in range(self.N):
-                if j == i:
-                    mat[i] += [multivariate_rbf(xi, xi, self.sigma, self.l)]
-                else:
-                    xj = x[j, :]
-                    mat[i] += [multivariate_rbf(xi, xj, self.sigma, self.l)]
+  def kernel(self, x):
+    mat = []
+    for i in range(self.N):
+      mat += [[]]
+      xi = x[i, :]
+      for j in range(self.N):
+        if j == i:
+          mat[i] += [multivariate_rbf(xi, xi, self.sigma, self.l)]
+        else:
+          xj = x[j, :]
+          mat[i] += [multivariate_rbf(xi, xj, self.sigma, self.l)]
 
-            mat[i] = tf.pack(mat[i])
+      mat[i] = tf.pack(mat[i])
 
-        return tf.pack(mat)
+    return tf.pack(mat)
 
-    def log_prob(self, xs, zs):
-        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        x, y = xs['x'], xs['y']
-        log_prior = multivariate_normal.logpdf(zs, cov=self.kernel(x))
-        log_lik = tf.pack([tf.reduce_sum(
-            bernoulli.logpmf(y, self.inverse_link(tf.mul(y, z)))
-            ) for z in tf.unpack(zs)])
-        return log_prior + log_lik
+  def log_prob(self, xs, zs):
+    """Return scalar, the log joint density log p(xs, zs)."""
+    x, y = xs['x'], xs['y']
+    log_prior = multivariate_normal.logpdf(
+        zs['z'], tf.zeros(self.N), self.kernel(x))
+    log_lik = tf.reduce_sum(
+        bernoulli.logpmf(y, p=self.inverse_link(y * zs['z'])))
+    return log_prior + log_lik
+
 
 model = GaussianProcess(N=len(df))
 \end{lstlisting}
@@ -96,20 +97,21 @@ model = GaussianProcess(N=len(df))
 Perform variational inference.
 Define the variational model to be a fully factorized normal
 \begin{lstlisting}[language=Python]
-variational = Variational()
-variational.add(Normal(model.n_vars))
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
 \end{lstlisting}
 
 Run mean-field variational inference for 500 iterations.
 \begin{lstlisting}[language=Python]
-inference = ed.MFVI(model, variational, data)
+inference = ed.MFVI({'z': qz}, data, model)
 inference.run(n_iter=500)
 \end{lstlisting}
 In this case
 \texttt{MFVI} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the reparameterization
 gradient.
-For more details on inference, see the \href{tut_KLqp.html}{$\text{KL}(q\|p)$ tutorial}.
+For more details on inference, see the \href{tut_KLqp}{$\text{KL}(q\|p)$ tutorial}.
 (This example happens to be slow because evaluating and inverting full
 covariances in Gaussian processes happens to be slow.)
 

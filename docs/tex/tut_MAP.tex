@@ -95,7 +95,7 @@ efficient to distribute.
 \subsubsection{Implementation}
 
 In Edward, we view MAP estimation as a special case of
-\href{tut_KLqp.html}{$KL(q\|p)$ minimization}, where the variational
+\href{tut_KLqp}{$KL(q\|p)$ minimization}, where the variational
 distribution is a point mass (delta function) distribution. This makes
 explicit the additional assumptions underlying MAP estimation from the
 viewpoint of variational inference: namely, it approximates the
@@ -103,22 +103,15 @@ posterior using a point to summarize the full distribution.
 
 \begin{lstlisting}[language=Python]
 class MAP(VariationalInference):
-    def __init__(self, model, data=None, params=None):
-        with tf.variable_scope("variational"):
-            if hasattr(model, 'n_vars'):
-                variational = Variational()
-                variational.add(PointMass(model.n_vars, params))
-            else:
-                variational = Variational()
-                variational.add(PointMass(0))
+  def __init__(self, latent_vars, data=None, model_wrapper=None):
+    ...
+    super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
-        super(MAP, self).__init__(model, variational, data)
-
-    def build_loss(self):
-        x = self.data
-        z = self.variational.sample()
-        self.loss = tf.squeeze(self.model.log_prob(x, z))
-        return -self.loss
+  def build_loss(self):
+    x = self.data
+    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
+    self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
+    return -self.loss
 \end{lstlisting}
 
 The \texttt{MAP} class inherits from \texttt{VariationalInference} and

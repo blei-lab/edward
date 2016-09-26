@@ -55,3 +55,6 @@ class test_dirichlet_logpdf_class(tf.test.TestCase):
 
     self._test(np.array([[0.3, 0.7], [0.2, 0.8]]), alpha=np.array([5.0, 0.5]))
     self._test(np.array([[0.2, 0.8], [0.3, 0.7]]), alpha=np.array([5.0, 0.5]))
+
+if __name__ == '__main__':
+  tf.test.main()

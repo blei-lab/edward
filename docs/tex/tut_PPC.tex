@@ -51,30 +51,36 @@ point, in reference to an overall distribution.
 
 \subsubsection{Implementation}
 
-Edward implements PPCs through the \texttt{sample_likelihood()}
-method in the probability model. This method samples a dataset
-$x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)$ from the
-model likelihood given a set of latent variables.
+To evaluate inferred models, we first form the posterior
+predictive distribution. A helpful utility function for this is
+\texttt{copy}. For example,
+assume the model defines a likelihood \texttt{x} connected to a prior
+\texttt{z}. The posterior predictive distribution is
 \begin{lstlisting}[language=Python]
-class BetaBernoulli:
-    ...
-    def sample_likelihood(self, zs, n):
-        """x | z ~ p(x | z)"""
-        out = []
-        for s in range(zs.shape[0]):
-            out += [{'x': bernoulli.rvs(zs[s, :], size=n).reshape((n,))}]
-        return out
+x_post = ed.copy(x, {z: qz})
 \end{lstlisting}
+Here, we copy the likelihood node \texttt{x} in the graph and replace dependence
+on the prior \texttt{z} with dependence on the inferred posterior \texttt{qz}.
 
 The \texttt{ed.ppc()} method provides a scaffold for studying
-various discrepancy functions by repeatedly simulating datasets from the
-posterior predictive distribution
+various discrepancy functions.
 \begin{lstlisting}[language=Python]
-T = lambda y, z=None: tf.reduce_mean(y['x'])
-print(ed.ppc(model, variational, data, T))
+def T(xs, zs):
+  return tf.reduce_mean(xs[x_post])
+
+ed.ppc(T, data={x_post: x_train})
+\end{lstlisting}
+The discrepancy can also take latent variables as input, which we pass
+into the PPC.
+\begin{lstlisting}[language=Python]
+def T(xs, zs):
+  return tf.reduce_mean(tf.cast(zs['z'], tf.float32))
+
+ppc(T, data={y_post: y_train, x_ph: x_train},
+    latent_vars={'z': qz, 'beta': qbeta})
 \end{lstlisting}
 
-See the \href{api/criticisms.html}{criticism API} for further details.
+See the \href{api/criticisms}{criticism API} for further details.
 
 PPCs are an excellent tool for revising models, simplifying or
 expanding the current model as one examines how well it fits the data.
@@ -90,6 +96,31 @@ testing, hypothesis testing is generally not recommended: binary
 decision making from a single test is not as common a use case as one
 might believe. We recommend performing many PPCs to get a holistic
 understanding of the model fit.
+
+\subsubsection{Implementation (model wrappers)}
+
+For model wrappers, Edward implements PPCs through the
+\texttt{sample_likelihood()} method in the class object. This method
+samples a dataset
+$x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)$ from the
+model likelihood given a set of latent variables.
+\begin{lstlisting}[language=Python]
+class BetaBernoulli:
+  ...
+  def sample_likelihood(self, zs):
+    """x | p ~ p(x | p)"""
+    return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}
+\end{lstlisting}
+
+An examples of a PPC for model wrappers is
+\begin{lstlisting}[language=Python]
+def T(xs, zs):
+  return tf.reduce_mean(xs['x'])
+
+ed.ppc(T, data={'x': x_train}, latent_vars={'z': qz}, model_wrapper=model)
+\end{lstlisting}
+For model wrappers, the latent variables must always be
+passed in regardless of whether \texttt{T} is a function of them.
 
 \subsubsection{References}\label{references}
 

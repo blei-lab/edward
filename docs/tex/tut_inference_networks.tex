@@ -71,54 +71,32 @@ and adaptation over time" (Stuhlmuller et al., 2013).
 Inference networks are easy to build in Edward.
 In the example below, a data point \texttt{x} is a 28 by 28 pixel
 image (from MNIST).
-We model each \texttt{x} with 10 normally distributed latent
-variables.
-We build a convolutional neural network using PrettyTensor.
+
+We define a TensorFlow placeholder \texttt{x_ph} for the neural
+network's input, which is a batch of data points.
 \begin{lstlisting}[language=Python]
-N_VARS = 10 # number of local latent variables
-
-def neural_network(x):
-    with pt.defaults_scope(activation_fn=tf.nn.elu,
-                           batch_normalize=True,
-                           learned_moments_update_rate=0.0003,
-                           variance_epsilon=0.001,
-                           scale_after_normalization=True):
-        params = (pt.wrap(x).
-                reshape([28, 28, 1]).
-                conv2d(5, 32, stride=2).
-                conv2d(5, 64, stride=2).
-                conv2d(5, 128, edges='VALID').
-                dropout(0.9).
-                flatten().
-                fully_connected(N_VARS * 2, activation_fn=None)).tensor
-
-    # Return list of vectors where mean[i], stddev[i] are the
-    # parameters of the local variational factor for data point i.
-    loc = tf.reshape(params[:, :N_VARS], [-1])
-    scale = tf.reshape(tf.sqrt(tf.exp(params[:, N_VARS:])), [-1])
-    return [loc, scale]
+x_ph = ed.placeholder(tf.float32, [M, 28 * 28])
 \end{lstlisting}
-The neural network
-takes a 28 by 28 pixel image and outputs a $2\cdot 10$-dimensional
-output, one for the mean (\texttt{loc}) and one for the standard
-deviation (\texttt{scale}).
 
-We define a TensorFlow placeholder \texttt{x_ph} for the neural network's input.
-We define a variational model which is parameterized by the neural network's
+We build a neural network using Keras.
+It takes a 28 by 28 pixel image and outputs a $10$-dimensional
+output, one for the mean (\texttt{mu}) and one for the standard
+deviation (\texttt{sigma}).
+\begin{lstlisting}[language=Python]
+hidden = Dense(256, activation=K.relu)(x_ph)
+qz = Normal(mu=Dense(10)(hidden),
+            sigma=Dense(10, activation=K.softplus)(hidden))
+\end{lstlisting}
+The variational model is parameterized by the neural network's
 output.
-\begin{lstlisting}[language=Python]
-x_ph = tf.placeholder(tf.float32, [28 * 28])
-loc, scale = neural_network(x_ph)
-variational = Variational()
-variational.add(Normal(N_VARS, loc=loc, scale=scale))
-\end{lstlisting}
-During each step of inference, we pass in a data point to feed the
+
+During each step of inference, we pass in a batch of data points to feed the
 placeholder. Then we train the variational parameters (inference
 network's parameters) according to
 gradients of the variational objective.
 
 An example script using this variational model can found
-\href{https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
 {here}.
 %We experiment with this model in the
 %\href{variational_autoencoder.html}{variational auto-encoder} tutorial.
@@ -131,7 +109,7 @@ networks, or inverse mappings.
 Variational models parameterized by
 inference networks are also known as probabilistic encoders, in
 analogy from coding theory to
-\href{tut_decoder.html}{probabilistic decoders}.
+\href{tut_decoder}{probabilistic decoders}.
 We recommend against this terminology,
 in favor of making explicit the separation of model and inference.
 That is,

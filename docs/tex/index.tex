@@ -11,19 +11,18 @@ sets. Edward fuses three fields: Bayesian statistics and machine
 learning, deep learning, and probabilistic programming.
 
 
-It supports \textbf{modeling languages} including
+It supports \textbf{modeling} with
 \begin{itemize}
-\item \href{https://www.tensorflow.org}{TensorFlow} (with neural
-  networks via \href{http://keras.io}{Keras},
+\item Directed graphical models
+\item Neural networks (via libraries such as
+  \href{http://keras.io}{Keras} and
   \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
-  Slim}, or
-  \href{https://github.com/google/prettytensor}{Pretty Tensor})
-\item \href{http://mc-stan.org}{Stan}
-\item \href{http://pymc-devs.github.io/pymc3/}{PyMC3}
-\item Python, through \href{http://scipy.org/}{NumPy/SciPy}
+  Slim})
+\item Conditionally specified undirected models
+\item Bayesian nonparametrics and probabilistic programs
 \end{itemize}
 
-It supports \textbf{inference} via
+It supports \textbf{inference} with
 \begin{itemize}
 \item Variational inference
   \begin{itemize}
@@ -43,14 +42,14 @@ likelihood)
   \end{itemize}
 \end{itemize}
 
-It supports \textbf{criticism} of the model and inference via
+It supports \textbf{criticism} of the model and inference with
 \begin{itemize}
 \item Point-based evaluations
 \item Posterior predictive checks
 \end{itemize}
 
 Edward is built on top of
-\href{https://www.tensorflow.org}{TensorFlow}, enabling features such
+\href{https://www.tensorflow.org}{TensorFlow}. It enables features such
 as computational graphs, distributed training, CPU/GPU integration,
 automatic differentiation, and visualization with TensorBoard.
 
@@ -67,7 +66,7 @@ are
 \end{itemize}
 We are open to collaboration, and welcome
 researchers and developers to contribute. Check out the
-\href{contributing.html}{contributing page} for how to improve Edward's software.
+\href{contributing}{contributing page} for how to improve Edward's software.
 For broader research challenges, shoot one of us an e-mail.
 
 Edward has benefited enormously from the helpful feedback and advice

@@ -41,47 +41,34 @@ analysis.
 
 \subsubsection{Data}
 
-Data defines a set of observations. Edward represents
-data as a Python dictionary, typically comprised of strings naming a
-data object and NumPy arrays representing its values. For example,
+Data defines a set of observations. In Edward, data is represented as
+TensorFlow tensors or NumPy arrays.
 
 \begin{lstlisting}[language=Python]
-data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 \end{lstlisting}
 
-Data can also store TensorFlow tensors to contend with situations where the
-observations do not fit in memory.
+Edward can also work with batch tensors for settings when the full
+data does not fit in memory.
 
 \subsubsection{Models}\label{models}
 
 A probabilistic model is a joint distribution $p(x, z)$ of data $x$ and latent
-variables $z$.
-Edward supports several languages for specifying probability models:
-TensorFlow, Python, PyMC3, and Stan. In general, a probability
-model is a class with structure
+variables $z$. In Edward, we specify it using a simple language of
+random variables.
+
 \begin{lstlisting}[language=Python]
-class Model:
-    def __init__(...):
-        ...
-        self.n_vars = ...
-
-    def log_prob(self, xs, zs):
-        log_prior = ...
-        log_likelihood = ...
-        return log_prior + log_likelihood
-
-model = Model(...)
+p = Beta(a=1.0, b=1.0)
+x = Bernoulli(p=tf.ones(10) * p)
 \end{lstlisting}
-The field \texttt{n\_vars} denotes the number of latent variables in the
-probability model. For example, a model with a Gaussian likelihood with latent
-mean and variance would have \texttt{n\_vars=2*N} latent variables for
-\texttt{N} observations.
 
-The method \texttt{log_prob(xs, zs)} calculates the log probability of
-the joint density $\log p(x,z)$. Here \texttt{xs} can be a single data
-point or a batch of data points. Analogously, \texttt{zs} can be a
-single set of latent variables, or a batch thereof. The method returns a vector
-of log density evaluations, one for each set of latent variables.
+Here, we define \texttt{p} as a scalar random variable. It is a latent
+probability to a Bernoulli likelihood, and this probability is shared
+across data points.
+
+Edward also supports other languages for specifying probability models:
+TensorFlow, Python, PyMC3, and Stan. More details are available in the
+\href{api/models}{model API}.
 
 \subsubsection{Inference}\label{inference}
 
@@ -91,7 +78,6 @@ posterior distribution $p(z \mid x)$ captures our reasoning: its mean
 describes our best guess of the hidden structure, and its variance
 describes the uncertainty around our best guess.
 
-%The posterior distribution is typically intractable.
 Edward has many inference algorithms and makes it easy
 to develop new ones.
 
@@ -102,14 +88,10 @@ Nodes are classes in Edward and arrows represent class inheritance.}}
 Edward focuses on variational inference. It views posterior inference
 as positing a model of the latent variables $q(z \;;\; \lambda)$ and optimizing it to
 approximate the posterior $p(z \mid x)$.
-%which seeks to match the variational model  to the
-%posterior of the probability model.
 
-
-Edward provides a \texttt{Variational} class and a library of
-\texttt{RandomVariable} objects. Variational models combine these using
-the \texttt{add()} syntax.
-For example, to specify this variational model (e.g.~for a Gaussian mixture)
+Variational models are defined using the same language of random
+variables. For example, to specify a variational model (e.g.~for a
+Gaussian mixture)
 \begin{align*}
   q(z \;;\; \lambda)
   &=
@@ -117,32 +99,39 @@ For example, to specify this variational model (e.g.~for a Gaussian mixture)
   \times
   \mathcal{N}(z_\mu)
   \times
-  \text{InvGamma}(z_\sigma)
+  \text{InverseGamma}(z_\sigma)
 \end{align*}
 we would write
 \begin{lstlisting}[language=Python]
-from edward.models import Variational, Dirichlet, Normal, InvGamma
+from edward.models import Dirichlet, Normal, InverseGamma
 
-variational = Variational()
-variational.add(Dirichlet(K))
-variational.add(Normal(K*D))
-variational.add(InvGamma(K*D))
+qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
+qmu_mu = tf.Variable(tf.random_normal([K * D]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+
+qpi = Dirichlet(alpha=qpi_alpha)
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 \end{lstlisting}
-%Ordering matters: variational models must match the same ordering as latent
-%variables accessed in \texttt{Model.log_prob(xs, zs)}.
 
 Each algorithm derived from \texttt{VariationalInference} minimizes a
 different loss function between the variational model and the
 posterior.
 %They take as input a probability model \texttt{model}, a
 %variational model \texttt{variational}, and data \texttt{data}.
-For example, to minimize the Kullback-Leibler divergence
+For example, suppose we aim to minimize the Kullback-Leibler divergence
 \begin{align*}
   \text{KL}(p(z \mid x) \;\|\; q(z \;;\; \lambda))
 \end{align*}
-we first instantiate the inference class and then run it.
+Instantiate the inference class: bind each latent variable to
+its corresponding variational distribution; then pass in data, which
+binds each observed variable to data that we condition on. Then
+run the inference.
 \begin{lstlisting}[language=Python]
-inference = ed.KLpq(model, variational, data)
+data = {x: x_data}
+inference = ed.KLpq({pi: qpi, mu: qmu, sigma: qsigma}, data)
 inference.run(n_iter=500, n_minibatch=5)
 \end{lstlisting}
 This runs the \texttt{KLpq} minimization algorithm for \texttt{500} iterations,
@@ -161,21 +150,21 @@ Edward explores model and inference criticism using
   classification accuracy
 \end{itemize}
 \begin{lstlisting}[language=Python]
-ed.evaluate('mean_squared_error', model, variational, data)
+ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
 \end{lstlisting}
 \begin{itemize}
   \item posterior predictive checks, for making probabilistic
   assessments of the model fit using discrepancy functions
 \end{itemize}
 \begin{lstlisting}[language=Python]
-T = lambda data, z=None: tf.reduce_mean(data['x'])
-print(ed.ppc(model, variational, data, T))
+T = lambda xs, zs: tf.reduce_mean(xs[x])
+ed.ppc(T, data={x: x_data})
 \end{lstlisting}
 
-See the \href{tutorials.html}{tutorials} for examples of models,
+See the \href{tutorials}{tutorials} for examples of models,
 inference, and criticism in Edward.
 
-See the \href{api/index.html}{API} for details of how Edward implements these
+See the \href{api/}{API} for details of how Edward implements these
 objects.
 
 \subsubsection{References}\label{references}

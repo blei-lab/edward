@@ -27,3 +27,6 @@ class test_chi2_logpdf_class(tf.test.TestCase):
 
   def test_2d(self):
     self._test(np.array([[0.1, 1.0, 0.58, 2.3], [0.3, 1.1, 0.68, 1.2]]), df=3)
+
+if __name__ == '__main__':
+  tf.test.main()

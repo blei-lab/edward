@@ -1,14 +1,17 @@
 from setuptools import setup
 
+# import `__version__` from code base
+exec(open('edward/version.py').read())
+
 setup(
     name='edward',
-    version='1.1.0',
+    version=__version__,
     description='A library for probabilistic modeling, inference, and '
                 'criticism',
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
-    packages=['edward', 'edward.stats', 'edward.models'],
-    install_requires=['tensorflow>=0.9.0',
+    packages=['edward', 'edward.inferences', 'edward.models', 'edward.stats'],
+    install_requires=['tensorflow>=0.10.0',
                       'numpy>=1.7',
                       'scipy>=0.16',
                       'six>=1.10.0'],

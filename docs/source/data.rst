@@ -1,12 +1,103 @@
 Data
 ----
 
-Data in Edward is stored as a Python dictionary. It is usually comprised
-of strings binded to NumPy arrays such as a key ``'x'`` with value
-``np.array([0.23512, 13.2])``.
+In Edward, data is represented as TensorFlow tensors or NumPy arrays.
 
-Some modeling languages require the data
-to have a different key or value type. We detail each below.
+.. code:: python
+
+    x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+    x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+
+There are three ways to read data in Edward. They follow the `three ways
+to read data in TensorFlow
+<https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html>`__.
+
+1. **Preloaded data.** A constant or variable in the TensorFlow graph
+   holds all the data.
+
+   This setting is the fastest to work with and is recommended if the
+   data fits in memory.
+
+   Represent the data as NumPy arrays.
+   Internally, during inference, we will store them in TensorFlow variables to prevent
+   copying data more than once in memory.
+   (As an example, see
+   the `mixture of Gaussians
+   <https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py>`__.)
+
+2. **Feeding.** Manual code provides the data when running each step of
+   inference.
+
+   This setting provides the most fine-grained control which is useful for experimentation.
+
+   Represent the data as TensorFlow placeholders. During inference,
+   the user must manually feed the placeholders at each
+   step by first initializing via ``inference.initialize()``; then
+   in a loop call ``inference.update(feed_dict={...})`` where
+   ``feed_dict`` carries the values for the ``tf.placeholder``'s.
+   (As an example, see
+   the `Bayesian linear regression
+   <https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py>`__.)
+
+3. **Reading from files.** An input pipeline reads the data from files
+   at the beginning of a TensorFlow graph.
+
+   This setting is recommended if the data does not fit in memory.
+
+   Represent the data as TensorFlow tensors, where the tensors are the
+   output of data readers. During inference, each update will be
+   automatically evaluated over new batch tensors represented through
+   the data readers. (As an example, see
+   the `data unit test
+   <https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py>`__.)
+
+Training Models with Data
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To pass in data during inference, we form a Python dictionary. Each
+item in the dictionary has a random variable binded to the data
+values.
+
+.. code:: python
+
+    # assuming `x` and `y` form observed variables in the model
+    data = {x: x_data, y: y_data}
+
+
+How do we use the data during training? In general there are three use
+cases:
+
+1. Train over the full data per step.
+
+   Follow the setting of preloaded data.
+
+2. Train over a batch per step when the full data fits in memory. This
+   scale inference in terms of computational complexity.
+
+   Follow the setting of preloaded data. Specify the batch size with
+   ``n_minibatch`` in ``Inference``. By default, we will subsample by
+   slicing along the first dimension of every data structure in the
+   data dictionary. Alternatively, follow the setting of feeding.
+   Manually deal with the batch behavior at each training step.
+
+3. Train over batches per step when the full data does not fit in
+   memory. This scales inference in terms of computational complexity and
+   memory complexity.
+
+   Follow the setting of reading from files. Alternatively, follow the
+   setting of feeding, and use a generator to create and destroy NumPy
+   arrays on the fly for feeding the placeholders.
+
+Training Model Wrappers with Data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+During inference, data is passed in differently for external
+languages which use a model wrapper. Instead of binding observed
+variables, it is usually comprised
+of strings binded to the values, such as a key ``'x'`` with value
+``np.array([0.23512, 13.2])``.
+We detail specifics for each external language below.
 
 -  **TensorFlow.** The data carries whatever keys and values the user
    accesses in the user-defined model. Key is a string. Value is a NumPy
@@ -16,9 +107,8 @@ to have a different key or value type. We detail each below.
 
   class BetaBernoulli:
     def log_prob(self, xs, zs):
-      log_prior = beta.logpdf(zs, a=1.0, b=1.0)
-      log_lik = tf.pack([tf.reduce_sum(bernoulli.logpmf(xs['x'], z))
-                         for z in tf.unpack(zs)])
+      log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+      log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
       return log_lik + log_prior
 
   model = BetaBernoulli()
@@ -32,14 +122,9 @@ to have a different key or value type. We detail each below.
 
   class BetaBernoulli(PythonModel):
     def _py_log_prob(self, xs, zs):
-        n_minibatch = zs.shape[0]
-        lp = np.zeros(n_minibatch, dtype=np.float32)
-        for b in range(n_minibatch):
-          lp[b] = beta.logpdf(zs[b, :], a=1.0, b=1.0)
-          for n in range(len(xs['x'])):
-            lp[b] += bernoulli.logpmf(xs['x'][n], p=zs[b, :])
-
-        return lp
+      log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+      log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+      return log_lik + log_prior
 
   model = BetaBernoulli()
   data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
@@ -53,8 +138,8 @@ to have a different key or value type. We detail each below.
 
   x_obs = theano.shared(np.zeros(1))
   with pm.Model() as pm_model:
-    beta = pm.Beta('beta', 1, 1, transform=None)
-    x = pm.Bernoulli('x', beta, observed=x_obs)
+    p = pm.Beta('p', 1, 1, transform=None)
+    x = pm.Bernoulli('x', p, observed=x_obs)
 
   model = PyMC3Model(pm_model)
   data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
@@ -67,95 +152,22 @@ to have a different key or value type. We detail each below.
   model_code = """
     data {
       int<lower=0> N;
-      int<lower=0,upper=1> y[N];
+      int<lower=0,upper=1> x[N];
     }
     parameters {
-      real<lower=0,upper=1> theta;
+      real<lower=0,upper=1> p;
     }
     model {
-      theta ~ beta(1.0, 1.0);
+      p ~ beta(1.0, 1.0);
       for (n in 1:N)
-        y[n] ~ bernoulli(theta);
+      x[n] ~ bernoulli(p);
     }
   """
   model = ed.StanModel(model_code=model_code)
-  data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+  data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
-Reading Data in Edward
-^^^^^^^^^^^^^^^^^^^^^^
-
-There are three ways to read data in Edward, following the `three ways
-to read data in TensorFlow
-<https://www.tensorflow.org/versions/r0.9/how_tos/reading_data/index.html>`__.
-
-1. **Preloaded data.** A constant or variable in the TensorFlow graph
-   holds all the data.
-
-   This setting is the fastest to work with and is recommended if the
-   data fits in memory.
-
-   For inference, pass in the data as a dictionary of NumPy arrays.
-   Internally, we will store them in TensorFlow variables to prevent
-   copying data more than once in memory. Batch training is available
-   internally via calling ``tf.train.slice_input_producer`` and
-   ``tf.train.batch``. (As an example, see
-   the `mixture of Gaussians
-   <https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian.py>`__.)
-
-2. **Feeding.** Manual code provides the data when running each step of
-   inference.
-
-   This setting provides the most fine-grained control which is useful for experimentation.
-
-   For inference, pass in the data as a dictionary of TensorFlow
-   placeholders. The user must manually feed the placeholders at each
-   step of inference: initialize via ``inference.initialize()``; then
-   in a loop call ``sess.run(inference.train, feed_dict={...})`` where
-   in ``feed_dict`` you pass in the values for the
-   ``tf.placeholder``'s.
-   (As an example, see
-   the `mixture of Gaussians
-   <https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py>`__
-   or `variational auto-encoder
-   <https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py>`__.)
-
-3. **Reading from files.** An input pipeline reads the data from files
-   at the beginning of a TensorFlow graph.
-
-   This setting is recommended if the data does not fit in memory.
-
-   For inference, pass in the data as a dictionary of TensorFlow
-   tensors, where the tensors are the output of data readers. (As an
-   example, see
-   the `data unit test
-   <https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py>`__.)
-
-Training Models with Data
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-How do we use the data during training? In general there are three use
-cases:
-
-1. Train over the full data per step. (It is supported for all
-   modeling languages.)
-
-   Follow the setting of preloaded data.
-
-2. Train over a batch per step when the full data fits in memory. This
-   scale inference in terms of computational complexity. (It is
-   supported for all modeling languages except Stan.)
-
-   Follow the setting of preloaded data. Specify the batch size with
-   ``n_minibatch`` in ``Inference``. By default, we will subsample by
-   slicing along the first dimension of every data structure in the
-   data dictionary. Alternatively, follow the setting of feeding.
-   Manually deal with the batch behavior at each training step.
-
-3. Train over batches per step when the full data does not fit in
-   memory. This scales inference in terms of computational complexity and
-   memory complexity. (It is supported for all modeling languages except
-   Stan.)
-
-   Follow the setting of reading from files. Alternatively, follow the
-   setting of feeding, and use a generator to create and destroy NumPy
-   arrays on the fly for feeding the placeholders.
+Note that for these model wrappers,
+all 3 use cases for training models with data are supported. However,
+Stan is limited to training over the full data per step. (This
+because Stan's data structure requires data subsampling on arbitrary
+data types, which we don't know how to automate.)

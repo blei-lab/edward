@@ -5,7 +5,7 @@
 \subsection{Reparameterization gradient}
 
 (This tutorial follows the
-\href{tut_KLqp.html}{$\text{KL}(q\|p)$ minimization} tutorial.)
+\href{tut_KLqp}{$\text{KL}(q\|p)$ minimization} tutorial.)
 
 We seek to maximize the ELBO,
 \begin{align*}
@@ -113,7 +113,7 @@ A Monte Carlo estimate of the gradient is then
 \end{align*}
 This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it
 exhibits lower variance than the
-\href{tut_KLqp_score.html}{score function gradient}, leading to
+\href{tut_KLqp_score}{score function gradient}, leading to
 faster convergence in a large set of problems.
 
 \subsubsection{Implementation}
@@ -127,21 +127,27 @@ such as an optimizer.
 
 \begin{lstlisting}[language=Python]
 class MFVI(VariationalInference):
-    def __init__(self, *args, **kwargs):
-        super(MFVI, self).__init__(*args, **kwargs)
+  def __init__(self, *args, **kwargs):
+    super(MFVI, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_samples=1, ...):
-        ...
-        self.n_samples = n_samples
-        return super(MFVI, self).initialize(*args, **kwargs)
+  def initialize(self, n_samples=1, ...):
+    ...
+    self.n_samples = n_samples
+    return super(MFVI, self).initialize(*args, **kwargs)
 
-    def build_reparam_loss(self):
-        x = self.data
-        z = self.variational.sample(self.n_samples)
+  def build_reparam_loss(self):
+    x = self.data
+    z = {key: rv.sample([self.n_samples])
+         for key, rv in six.iteritems(self.latent_vars)}
 
-        self.loss = tf.reduce_mean(self.model.log_prob(x, z) -
-                                   self.variational.log_prob(z))
-        return -self.loss
+    p_log_prob = self.model_wrapper.log_prob(x, z)
+    q_log_prob = 0.0
+    for key, rv in six.iteritems(self.latent_vars):
+      q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
+                                  list(range(1, len(rv.get_batch_shape()) + 1)))
+
+    self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
+    return -self.loss
 \end{lstlisting}
 
 Two methods are added: \texttt{initialize()} and
@@ -159,15 +165,15 @@ in \texttt{self.loss}, to track progress of the inference for diagnostics.
 The method returns an object whose automatic differentiation is the
 reparameterization gradient of the ELBO. The computational graph will
 simply traverse the nodes during backpropagation; unlike the
-\href{tut_KLqp_score.html}{score function gradient}, the
+\href{tut_KLqp_score}{score function gradient}, the
 reparameterization gradient does not need TensorFlow's
-\texttt{stop_gradient()} function.
+\texttt{tf.stop_gradient()} function.
 
 There is a nuance here. TensorFlow's optimizers are configured to
 \emph{minimize} an objective function. So the gradient is set to be
 the negative of the ELBO's gradient.
 
-See the \href{api/index.html}{API} for more details.
+See the \href{api/}{API} for more details.
 
 \subsubsection{References}\label{references}
 

@@ -80,3 +80,6 @@ class test_multinomial_entropy_class(tf.test.TestCase):
   def test_2d(self):
     self._test(np.array([1, 3]), np.array([[0.5, 0.5], [0.75, 0.25]]))
     self._test(np.array([5, 2]), np.array([[0.5, 0.5], [0.75, 0.25]]))
+
+if __name__ == '__main__':
+  tf.test.main()

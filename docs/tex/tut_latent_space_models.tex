@@ -13,7 +13,7 @@ nodes depends on their distance in the latent space.
 
 Let us study an dataset from from neuroscience.
 The script can be found
-\href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}{here}.
+\href{https://github.com/blei-lab/edward/blob/master/examples/tf_latent_space_model.py}{here}.
 
 \subsubsection{Data}
 
@@ -30,7 +30,8 @@ of the connection.
 
 In the example we load the data with
 \begin{lstlisting}[language=Python]
-data, N = load_celegans_brain()
+x_train = np.load('data/celegans_brain.npy')
+data = {'x': x_train}
 \end{lstlisting}
 
 \subsubsection{Model}
@@ -62,24 +63,54 @@ Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).
 Here we build the model in Edward using TensorFlow.
 \begin{lstlisting}[language=Python]
 class LatentSpaceModel:
-    def __init__(self, N, K):
-        self.n_vars = N * K
-        self.N = N
-        self.K = K
+  """
+  p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; 1/||z_i - z_j|| ) ]
+            [ prod_{i=1}^N N(z_i; 0, I)) ]
+  """
+  def __init__(self, N, K, prior_std=1.0,
+               like='Poisson',
+               prior='Lognormal',
+               dist='euclidean'):
+    self.n_vars = N * K
+    self.N = N
+    self.K = K
+    self.prior_std = prior_std
+    self.like = like
+    self.prior = prior
+    self.dist = dist
 
-    def log_prob(self, xs, zs):
-        """Return a vector [log p(xs, zs[1,:]), ..., log p(xs, zs[S,:])]."""
-        log_prior = - tf.reduce_sum(zs*zs)
-        z = tf.reshape(zs, [self.N,self.K])
-        # compute reciprocal of euclidean distance
-        xp = tf.matmul(tf.ones([1,self.N]), tf.reduce_sum(z*z,1,keep_dims=True))
-        xp = xp + tf.transpose(xp) - 2*tf.matmul(z, z, transpose_b = True)
-        xp = 1.0/xp
-        log_lik = tf.reduce_sum(poisson.logpmf(xs,xp))
-        return log_lik + log_prior
+  def log_prob(self, xs, zs):
+    """Return scalar, the log joint density log p(xs, zs)."""
+    if self.prior == 'Lognormal':
+      log_prior = tf.reduce_sum(lognorm.logpdf(zs['z'], self.prior_std))
+    elif self.prior == 'Gaussian':
+      log_prior = tf.reduce_sum(norm.logpdf(zs['z'], 0.0, self.prior_std))
+    else:
+      raise NotImplementedError("prior not available.")
 
-K = 3
-model = LatentSpaceModel(N, K)
+    z = tf.reshape(zs['z'], [self.N, self.K])
+    if self.dist == 'euclidean':
+      xp = tf.matmul(tf.ones([1, self.N]),
+                     tf.reduce_sum(z * z, 1, keep_dims=True))
+      xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
+      xp = 1.0 / xp
+    elif self.dist == 'cosine':
+      xp = tf.matmul(z, z, transpose_b=True)
+
+    if self.like == 'Gaussian':
+      log_lik = tf.reduce_sum(norm.logpdf(xs['x'], xp, 1.0))
+    elif self.like == 'Poisson':
+      if not (self.dist == 'euclidean' or self.prior == "Lognormal"):
+        raise NotImplementedError("Rate of Poisson has to be nonnegatve.")
+
+      log_lik = tf.reduce_sum(poisson.logpmf(xs['x'], xp))
+    else:
+      raise NotImplementedError("likelihood not available.")
+
+    return log_lik + log_prior
+
+
+model = LatentSpaceModel(N=x_train.shape[0], K=3, like='Poisson', prior='Gaussian')
 \end{lstlisting}
 
 \subsubsection{Inference}
@@ -87,26 +118,27 @@ model = LatentSpaceModel(N, K)
 Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are
 required: Instantiating inference and running it.
 \begin{lstlisting}[language=Python]
-inference = ed.MAP(model, data)
-inference.run(n_iter=5000, n_print=500)
+inference = ed.MAP(['z'], data, model)
 \end{lstlisting}
 
 See this extended tutorial about
-\href{tut_MAP.html}{MAP estimation in Edward}.
+\href{tut_MAP}{MAP estimation in Edward}.
 
 One could instead run variational inference. This requires specifying
 a variational model and instantiating \texttt{MFVI}.
 \begin{lstlisting}[language=Python]
-variational = Variational()
-variational.add(Normal(model.n_vars))
-inference = ed.MFVI(model, variational, data)
+qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
+qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
+qz = Normal(mu=qz_mu, sigma=qz_sigma)
+inference = ed.MFVI({'z': qz}, data, model)
 \end{lstlisting}
-Finally, the following line runs the inference procedure:
+Finally, the following line runs the inference procedure for 5000
+iterations and prints progress every 500 iteration.
 \begin{lstlisting}[language=Python]
 inference.run(n_iter=5000, n_print=500)
 \end{lstlisting}
 See this extended tutorial about
-\href{tut_variational_inference.html}{variational inference in Edward}.
+\href{tut_variational_inference}{variational inference in Edward}.
 
 \subsubsection{References}
 
