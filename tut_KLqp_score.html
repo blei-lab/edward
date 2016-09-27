@@ -126,7 +126,8 @@
   -
   \log q(z\;;\;\lambda)
   \big)
-  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the variational model <span class="math inline">\(q(z\;;\;\lambda)\)</span>; the only new ingredient it requires is the <em>score function</em> <span class="math inline">\(\nabla_\lambda \log q(z\;;\;\lambda)\)</span>. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
+  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the variational model <span class="math inline">\(q(z\;;\;\lambda)\)</span>; the only new ingredient it requires is the <em>score function</em> <span class="math inline">\(\nabla_\lambda \log q(z\;;\;\lambda)\)</span> <span class="citation">(Paisley, Blei, &amp; Jordan, 2012; Ranganath, Gerrish, &amp; Blei, 2014)</span>.</p>
+<p>Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
 <h3 id="noisy-estimates-using-monte-carlo-integration">Noisy estimates using Monte Carlo integration</h3>
 <p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
 <ol>
@@ -179,11 +180,15 @@
 <p>The method returns an object whose automatic differentiation is the score function gradient of the ELBO. The TensorFlow function <code>tf.stop_gradient()</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, one for each sample <span class="math inline">\(z_s\)</span>. We multiply it by <code>losses</code> element-wise and return the mean.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
 <p>See the <a href="api/">API</a> for more details.</p>
-<h3 id="references">References</h3>
-<ul>
-<li>Paisley, J., Blei, D. M., &amp; Jordan, M. (2012). Variational Bayesian Inference with Stochastic Search. In International Conference on Machine Learning.</li>
-<li>Ranganath, R., Gerrish, S., &amp; Blei, D. M. (2014). Black Box Variational Inference. In Artificial Intelligence and Statistics.</li>
-</ul>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-paisley2012variational">
+<p>Paisley, J., Blei, D. M., &amp; Jordan, M. I. (2012). Variational bayesian inference with stochastic search. In <em>International conference on machine learning</em> (pp. 1367–1374).</p>
+</div>
+<div id="ref-ranganath2014black">
+<p>Ranganath, R., Gerrish, S., &amp; Blei, D. (2014). Black box variational inference. In <em>Artificial intelligence and statistics</em>.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

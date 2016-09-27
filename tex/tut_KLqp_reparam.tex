@@ -80,7 +80,10 @@ variational distribution to write the gradient as
 \end{align*}
 The gradient of the ELBO is an expectation over the base
 distribution $q(\epsilon)$, and the gradient can be applied directly
-to the inner expression.
+to the inner expression
+\citep{rezende2014stochastic,kingma2014auto}.
+
+
 Edward uses automatic differentiation, specifically with TensorFlow's
 computational graphs, making this gradient computation both simple and
 efficient to distribute.
@@ -177,12 +180,3 @@ See the \href{api/}{API} for more details.
 
 \subsubsection{References}\label{references}
 
-\begin{itemize}
-\item
-  Rezende, D. J., Mohamed, S., & Wierstra, D. (2014). Stochastic
-  Backpropagation and Approximate Inference in Deep Generative Models.
-  In International Conference on Machine Learning.
-\item
-  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational
-  Bayes. In International Conference on Learning Representations.
-\end{itemize}

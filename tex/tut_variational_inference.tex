@@ -5,7 +5,10 @@
 \subsection{Variational inference}
 
 Variational inference is an umbrella term for algorithms which cast
-posterior inference as optimization. The core idea involves two steps:
+posterior inference as optimization
+\citep{hinton1993keeping,waterhouse1996bayesian,jordan1999introduction}.
+
+The core idea involves two steps:
 \begin{enumerate}
    \item posit a family of distributions $q(z\;;\;\lambda)$ over the
    latent variables;
@@ -41,16 +44,3 @@ Edward, see the other inference \href{tutorials}{tutorials}.
 
 \subsubsection{References}\label{references}
 
-\begin{itemize}
-\item
-  Hinton, G. and Van Camp, D (1993). Keeping the neural networks
-  simple by minimizing the description length of the weights. In
-  Computational Learning Theory, pp. 5–13. ACM.
-\item
-  Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., & Saul, L. K.
-  (1999). An introduction to variational methods for graphical models.
-  Machine Learning, 37(2), 183-233.
-\item
-  Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods
-  for mixtures of experts. In Neural Information Processing Systems.
-\end{itemize}

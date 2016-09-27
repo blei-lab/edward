@@ -103,7 +103,7 @@
   \log q(z\;;\;\lambda)
   -
   \log p(z \mid x)
-  \big].\end{aligned}\]</span> The KL divergence is a non-symmetric, information theoretic measure of similarity between two probability distributions.</p>
+  \big].\end{aligned}\]</span> The KL divergence is a non-symmetric, information theoretic measure of similarity between two probability distributions <span class="citation">(Hinton &amp; Van Camp, 1993; Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999; Waterhouse, MacKay, &amp; Robinson, 1996)</span>.</p>
 <h3 id="the-evidence-lower-bound">The Evidence Lower Bound</h3>
 <p>The above optimization problem is intractable because it directly depends on the posterior <span class="math inline">\(p(z \mid x)\)</span>. To tackle this, consider the property <span class="math display">\[\begin{aligned}
   \log p(x)
@@ -141,12 +141,18 @@
 <li><a href="tut_KLqp_score">Score function gradient</a></li>
 <li><a href="tut_KLqp_reparam">Reparameterization gradient</a></li>
 </ul>
-<h3 id="references">References</h3>
-<ul>
-<li>Hinton, G. and Van Camp, D (1993). Keeping the neural networks simple by minimizing the description length of the weights. In Computational Learning Theory, pp. 5–13. ACM.</li>
-<li>Waterhouse, S., MacKay, D., and Robinson, T (1996). Bayesian methods for mixtures of experts. In Neural Information Processing Systems.</li>
-<li>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. Machine Learning, 37(2), 183-233.</li>
-</ul>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-hinton1993keeping">
+<p>Hinton, G. E., &amp; Van Camp, D. (1993). Keeping the neural networks simple by minimizing the description length of the weights. In <em>Proceedings of the sixth annual conference on computational learning theory</em> (pp. 5–13). ACM.</p>
+</div>
+<div id="ref-jordan1999introduction">
+<p>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. <em>Machine Learning</em>, <em>37</em>(2), 183–233.</p>
+</div>
+<div id="ref-waterhouse1996bayesian">
+<p>Waterhouse, S., MacKay, D., &amp; Robinson, T. (1996). Bayesian methods for mixtures of experts. <em>Advances in Neural Information Processing Systems</em>, 351–357.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

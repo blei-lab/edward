@@ -89,8 +89,8 @@
 <div class="nine columns">
 <h2 id="delving-in">Delving In</h2>
 <p>Edward’s design reflects the building blocks for probabilistic modeling. It defines interchangeable components, enabling rapid experimentation and research with probabilistic models. Here we provide an overview of the design.</p>
-<p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning.</p>
-<p>First gather data from some real-world phenomena. Then cycle through <a href="http://www.annualreviews.org/eprint/7xbyci3nwAg5kEttvvjk/full/10.1146/annurev-statistics-022513-115657">Box’s loop</a>:</p>
+<p>Edward is named after the innovative statistician <a href="https://en.wikipedia.org/wiki/George_E._P._Box">George Edward Pelham Box</a>. Edward follows Box’s philosophy of statistics and machine learning <span class="citation">(Box, 1976)</span>.</p>
+<p>First gather data from some real-world phenomena. Then cycle through <a href="http://www.annualreviews.org/eprint/7xbyci3nwAg5kEttvvjk/full/10.1146/annurev-statistics-022513-115657">Box’s loop</a> <span class="citation">(Blei, 2014)</span>.</p>
 <ol>
 <li>Build a probabilistic model of the phenomena.</li>
 <li>Reason about the phenomena given model and data.</li>
@@ -153,11 +153,15 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 ed.ppc(T, data={x: x_data})</code></pre>
 <p>See the <a class="uri" href="tutorials">tutorials</a> for examples of models, inference, and criticism in Edward.</p>
 <p>See the <a href="api/">API</a> for details of how Edward implements these objects.</p>
-<h3 id="references">References</h3>
-<ul>
-<li>Box, G.E.P. (1976). Science and Statistics. Journal of the American Statistical Association, 71(356), 791–799</li>
-<li>David M Blei. (2014). Build, compute, critique, repeat: Data analysis with latent variable models. Annual Review of Statistics, 1:203-232</li>
-</ul>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-blei2014build">
+<p>Blei, D. M. (2014). Build, compute, critique, repeat: Data analysis with latent variable models. <em>Annual Review of Statistics and Its Application</em>, <em>1</em>, 203–232.</p>
+</div>
+<div id="ref-box1976science">
+<p>Box, G. E. (1976). Science and statistics. <em>Journal of the American Statistical Association</em>, <em>71</em>(356), 791–799.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

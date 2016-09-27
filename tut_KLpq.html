@@ -118,7 +118,7 @@
   \big[
   \nabla_\lambda\;
   \log q(z\;;\;\lambda)
-  \big].\end{aligned}\]</span> Both <span class="math inline">\(\text{KL}(p\|q)\)</span> and its gradient are intractable because of the posterior expectation. We can use importance sampling to both estimate the objective and calculate stochastic gradients.</p>
+  \big].\end{aligned}\]</span> Both <span class="math inline">\(\text{KL}(p\|q)\)</span> and its gradient are intractable because of the posterior expectation. We can use importance sampling to both estimate the objective and calculate stochastic gradients <span class="citation">(Oh &amp; Berger, 1992)</span>.</p>
 <h3 id="adaptive-importance-sampling">Adaptive Importance sampling</h3>
 <p>First rewrite the expectation to be with respect to the variational distribution, <span class="math display">\[\begin{aligned}
   -
@@ -212,10 +212,12 @@
 <p>The method returns an object whose automatic differentiation is a stochastic gradient of <span class="math inline">\(\text{KL}(p\|q)\)</span>. The TensorFlow function <code>tf.stop_gradient()</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, one for each sample <span class="math inline">\(z_s\)</span>. We multiply it by <code>w_norm</code> element-wise and return the mean.</p>
 <p>Computing the normalized importance weights is a numerically challenging task. Underflow is a common issue. Here we use the <code>log_sum_exp</code> trick to compute weights in the log space, available in <code>edward.util</code>. However, the normalized weights are still exponentiated to compute the gradient. As with importance sampling in general, this inference method does not scale to high dimensions.</p>
 <p>See the <a href="api/">API</a> for more details.</p>
-<h3 id="references">References</h3>
-<ul>
-<li>Oh, M. S., &amp; Berger, J. O. (1992). Adaptive importance sampling in Monte Carlo integration. Journal of Statistical Computation and Simulation, 41(3-4), 143-168.</li>
-</ul>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-oh1992adaptive">
+<p>Oh, M.-S., &amp; Berger, J. O. (1992). Adaptive importance sampling in monte carlo integration. <em>Journal of Statistical Computation and Simulation</em>, <em>41</em>(3-4), 143–168.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

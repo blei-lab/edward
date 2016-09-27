@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="Edward 1.0.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="edward.inferences" href="../inferences.html"/> 
+        <link rel="up" title="Module code" href="../../index.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -118,8 +118,6 @@
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
-          <li><a href="../inferences.html">edward.inferences</a> &raquo;</li>
-      
     <li>edward.inferences.monte_carlo</li>
       <li class="wy-breadcrumbs-aside">
         
@@ -133,17 +131,17 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.inferences.monte_carlo</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
-<span class="kn">from</span> <span class="nn">edward.inferences.inference</span> <span class="k">import</span> <span class="n">Inference</span>
+<span class="kn">from</span> <span class="nn">edward.inferences.inference</span> <span class="kn">import</span> <span class="n">Inference</span>
 
 
 <div class="viewcode-block" id="MonteCarlo"><a class="viewcode-back" href="../../../edward.inferences.monte_carlo.html#edward.inferences.monte_carlo.MonteCarlo">[docs]</a><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Base class for Monte Carlo inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">    Parameters</span>

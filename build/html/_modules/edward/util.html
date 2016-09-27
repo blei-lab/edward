@@ -131,26 +131,26 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.util</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">six</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">edward.models.random_variable</span> <span class="k">import</span> <span class="n">RandomVariable</span>
-<span class="kn">from</span> <span class="nn">tensorflow.core.framework</span> <span class="k">import</span> <span class="n">attr_value_pb2</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">control_flow_ops</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.framework.ops</span> <span class="k">import</span> <span class="n">set_shapes_for_outputs</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">edward.models.random_variable</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
+<span class="kn">from</span> <span class="nn">tensorflow.core.framework</span> <span class="kn">import</span> <span class="n">attr_value_pb2</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">control_flow_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework.ops</span> <span class="kn">import</span> <span class="n">set_shapes_for_outputs</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="kn">import</span> <span class="n">compat</span>
 
 <span class="n">distributions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">distributions</span>
 
 
-<div class="viewcode-block" id="copy"><a class="viewcode-back" href="../../edward.util.html#edward.util.copy">[docs]</a><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&quot;copied&quot;</span><span class="p">,</span>
-         <span class="n">replace_itself</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">copy_q</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+<div class="viewcode-block" id="copy"><a class="viewcode-back" href="../../edward.util.html#edward.util.copy">[docs]</a><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">dict_swap</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;copied&quot;</span><span class="p">,</span>
+         <span class="n">replace_itself</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">copy_q</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Build a new node in the TensorFlow graph from `org_instance`,</span>
 <span class="sd">  where any of its ancestors existing in `dict_swap` are</span>
 <span class="sd">  replaced with `dict_swap`&#39;s corresponding value.</span>
@@ -213,20 +213,20 @@
      <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">and</span> \
      <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> \
      <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Could not copy instance: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">org_instance</span><span class="p">))</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Could not copy instance: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">org_instance</span><span class="p">))</span>
 
-  <span class="k">if</span> <span class="n">dict_swap</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">dict_swap</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">dict_swap</span> <span class="o">=</span> <span class="p">{}</span>
 
-  <span class="c"># Swap instance if in dictionary.</span>
+  <span class="c1"># Swap instance if in dictionary.</span>
   <span class="k">if</span> <span class="n">org_instance</span> <span class="ow">in</span> <span class="n">dict_swap</span> <span class="ow">and</span> <span class="n">replace_itself</span><span class="p">:</span>
     <span class="n">org_instance</span> <span class="o">=</span> <span class="n">dict_swap</span><span class="p">[</span><span class="n">org_instance</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">copy_q</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">org_instance</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">replace_itself</span><span class="p">:</span>
-    <span class="c"># Deal with case when `org_instance` is the associated tensor</span>
-    <span class="c"># from the RandomVariable, e.g., `z.value()`. If</span>
-    <span class="c"># `dict_swap={z: qz}`, we aim to swap it with `qz.value()`.</span>
+    <span class="c1"># Deal with case when `org_instance` is the associated tensor</span>
+    <span class="c1"># from the RandomVariable, e.g., `z.value()`. If</span>
+    <span class="c1"># `dict_swap={z: qz}`, we aim to swap it with `qz.value()`.</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">dict_swap</span><span class="p">):</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">org_instance</span> <span class="o">==</span> <span class="n">key</span><span class="o">.</span><span class="n">value</span><span class="p">():</span>
@@ -240,126 +240,126 @@
           <span class="k">break</span>
 
   <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
-  <span class="n">new_name</span> <span class="o">=</span> <span class="n">scope</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">new_name</span> <span class="o">=</span> <span class="n">scope</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span>
 
-  <span class="c"># If an instance of the same name exists, return appropriately.</span>
-  <span class="c"># Do this for random variables.</span>
+  <span class="c1"># If an instance of the same name exists, return appropriately.</span>
+  <span class="c1"># Do this for random variables.</span>
   <span class="n">random_variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
-                      <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s">&#39;_random_variable_collection_&#39;</span><span class="p">)}</span>
+                      <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s1">&#39;_random_variable_collection_&#39;</span><span class="p">)}</span>
   <span class="k">if</span> <span class="n">new_name</span> <span class="ow">in</span> <span class="n">random_variables</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">random_variables</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span>
 
-  <span class="c"># Do this for tensors and operations.</span>
+  <span class="c1"># Do this for tensors and operations.</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">already_present</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_graph_element</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span>
-                                             <span class="n">allow_tensor</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
-                                             <span class="n">allow_operation</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+                                             <span class="n">allow_tensor</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">allow_operation</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">already_present</span>
   <span class="k">except</span><span class="p">:</span>
     <span class="k">pass</span>
 
-  <span class="c"># If instance is a variable, return it; do not re-copy any.</span>
-  <span class="c"># Note we check variables via their name and not their type. This</span>
-  <span class="c"># is because if we get variables through an op&#39;s inputs, it has</span>
-  <span class="c"># type tf.Tensor: we can only tell it is a variable via its name.</span>
+  <span class="c1"># If instance is a variable, return it; do not re-copy any.</span>
+  <span class="c1"># Note we check variables via their name and not their type. This</span>
+  <span class="c1"># is because if we get variables through an op&#39;s inputs, it has</span>
+  <span class="c1"># type tf.Tensor: we can only tell it is a variable via its name.</span>
   <span class="n">variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">VARIABLES</span><span class="p">)}</span>
   <span class="k">if</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">org_instance</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-  <span class="c"># Do the same for placeholders. Same logic holds.</span>
-  <span class="c"># Note this assumes that placeholders are all in this collection.</span>
-  <span class="n">placeholders</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s">&#39;PLACEHOLDERS&#39;</span><span class="p">)}</span>
+  <span class="c1"># Do the same for placeholders. Same logic holds.</span>
+  <span class="c1"># Note this assumes that placeholders are all in this collection.</span>
+  <span class="n">placeholders</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s1">&#39;PLACEHOLDERS&#39;</span><span class="p">)}</span>
   <span class="k">if</span> <span class="n">org_instance</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">placeholders</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="n">placeholders</span><span class="p">[</span><span class="n">org_instance</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
     <span class="n">rv</span> <span class="o">=</span> <span class="n">org_instance</span>
 
-    <span class="c"># If it has copiable arguments, copy them.</span>
+    <span class="c1"># If it has copiable arguments, copy them.</span>
     <span class="n">dist_args</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">_dist_args</span><span class="p">):</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">or</span> \
          <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">or</span> \
          <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> \
          <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
-         <span class="n">value</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+         <span class="n">value</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
 
       <span class="n">dist_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="n">dist_args</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_name</span> <span class="o">+</span> <span class="n">rv</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">dist_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_name</span> <span class="o">+</span> <span class="n">rv</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">name</span>
 
-    <span class="c"># Copy a new `rv` with any newly copied arguments.</span>
-    <span class="c"># We do this by creating an empty class object and setting</span>
-    <span class="c"># its attributes. (This is to avoid a throwaway tensor in the</span>
-    <span class="c"># graph, during instantiation of DistributionTensor.)</span>
+    <span class="c1"># Copy a new `rv` with any newly copied arguments.</span>
+    <span class="c1"># We do this by creating an empty class object and setting</span>
+    <span class="c1"># its attributes. (This is to avoid a throwaway tensor in the</span>
+    <span class="c1"># graph, during instantiation of DistributionTensor.)</span>
     <span class="n">new_rv</span> <span class="o">=</span> <span class="n">Empty</span><span class="p">()</span>
     <span class="n">new_rv</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">__class__</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">__dict__</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;_name&#39;</span><span class="p">,</span> <span class="s">&#39;_dist_args&#39;</span><span class="p">,</span> <span class="s">&#39;_dist&#39;</span><span class="p">,</span> <span class="s">&#39;_value&#39;</span><span class="p">]:</span>
+      <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;_name&#39;</span><span class="p">,</span> <span class="s1">&#39;_dist_args&#39;</span><span class="p">,</span> <span class="s1">&#39;_dist&#39;</span><span class="p">,</span> <span class="s1">&#39;_value&#39;</span><span class="p">]:</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_name&#39;</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_dist_args&#39;</span><span class="p">,</span> <span class="n">dist_args</span><span class="p">)</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_dist&#39;</span><span class="p">,</span> <span class="n">new_rv</span><span class="o">.</span><span class="n">_dist_cls</span><span class="p">(</span><span class="o">**</span><span class="n">new_rv</span><span class="o">.</span><span class="n">_dist_args</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s">&#39;_value&#39;</span><span class="p">,</span> <span class="n">new_rv</span><span class="o">.</span><span class="n">_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s1">&#39;_dist_args&#39;</span><span class="p">,</span> <span class="n">dist_args</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s1">&#39;_dist&#39;</span><span class="p">,</span> <span class="n">new_rv</span><span class="o">.</span><span class="n">_dist_cls</span><span class="p">(</span><span class="o">**</span><span class="n">new_rv</span><span class="o">.</span><span class="n">_dist_args</span><span class="p">))</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="s1">&#39;_value&#39;</span><span class="p">,</span> <span class="n">new_rv</span><span class="o">.</span><span class="n">_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">new_rv</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_instance</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
     <span class="n">tensor</span> <span class="o">=</span> <span class="n">org_instance</span>
 
-    <span class="c"># A tensor is one of the outputs of its underlying</span>
-    <span class="c"># op. Therefore copy the op itself.</span>
+    <span class="c1"># A tensor is one of the outputs of its underlying</span>
+    <span class="c1"># op. Therefore copy the op itself.</span>
     <span class="n">op</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">op</span>
-    <span class="n">new_op</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+    <span class="n">new_op</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
 
     <span class="n">output_index</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
     <span class="n">new_tensor</span> <span class="o">=</span> <span class="n">new_op</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">output_index</span><span class="p">]</span>
 
-    <span class="c"># Add copied tensor to collections that the original one is in.</span>
+    <span class="c1"># Add copied tensor to collections that the original one is in.</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">tensor</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="k">if</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="n">collection</span><span class="p">:</span>
         <span class="n">graph</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">new_tensor</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">new_tensor</span>
-  <span class="k">else</span><span class="p">:</span>  <span class="c"># tf.Operation</span>
+  <span class="k">else</span><span class="p">:</span>  <span class="c1"># tf.Operation</span>
     <span class="n">op</span> <span class="o">=</span> <span class="n">org_instance</span>
 
-    <span class="c"># If it has an original op, copy it.</span>
-    <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">_original_op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
-      <span class="n">new_original_op</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">_original_op</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+    <span class="c1"># If it has an original op, copy it.</span>
+    <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">_original_op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">new_original_op</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">_original_op</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">new_original_op</span> <span class="o">=</span> <span class="k">None</span>
+      <span class="n">new_original_op</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="c"># If it has control inputs, copy them.</span>
+    <span class="c1"># If it has control inputs, copy them.</span>
     <span class="n">new_control_inputs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">control_inputs</span><span class="p">:</span>
-      <span class="n">elem</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+      <span class="n">elem</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
 
       <span class="n">new_control_inputs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
 
-    <span class="c"># If it has inputs, copy them.</span>
+    <span class="c1"># If it has inputs, copy them.</span>
     <span class="n">new_inputs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
-      <span class="n">elem</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
+      <span class="n">elem</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">copy_q</span><span class="p">)</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">):</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
 
       <span class="n">new_inputs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
 
-    <span class="c"># Make a copy of the node def.</span>
-    <span class="c"># As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it</span>
-    <span class="c"># stores string-based info such as name, device, and type of the op.</span>
-    <span class="c"># It is unique to every Operation instance.</span>
+    <span class="c1"># Make a copy of the node def.</span>
+    <span class="c1"># As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it</span>
+    <span class="c1"># stores string-based info such as name, device, and type of the op.</span>
+    <span class="c1"># It is unique to every Operation instance.</span>
     <span class="n">new_node_def</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">node_def</span><span class="p">)</span>
     <span class="n">new_node_def</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
 
-    <span class="c"># Copy the other inputs needed for initialization.</span>
+    <span class="c1"># Copy the other inputs needed for initialization.</span>
     <span class="n">output_types</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">_output_types</span><span class="p">[:]</span>
     <span class="n">input_types</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">_input_types</span><span class="p">[:]</span>
 
-    <span class="c"># Make a copy of the op def.</span>
-    <span class="c"># It is unique to every Operation type.</span>
+    <span class="c1"># Make a copy of the op def.</span>
+    <span class="c1"># It is unique to every Operation type.</span>
     <span class="n">op_def</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">op_def</span><span class="p">)</span>
 
     <span class="n">ret</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">(</span><span class="n">new_node_def</span><span class="p">,</span>
@@ -371,10 +371,10 @@
                        <span class="n">new_original_op</span><span class="p">,</span>
                        <span class="n">op_def</span><span class="p">)</span>
 
-    <span class="c"># Use Graph&#39;s private methods to add the op, following</span>
-    <span class="c"># implementation of `tf.Graph().create_op()`.</span>
-    <span class="n">compute_shapes</span> <span class="o">=</span> <span class="k">True</span>
-    <span class="n">compute_device</span> <span class="o">=</span> <span class="k">True</span>
+    <span class="c1"># Use Graph&#39;s private methods to add the op, following</span>
+    <span class="c1"># implementation of `tf.Graph().create_op()`.</span>
+    <span class="n">compute_shapes</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">compute_device</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="n">op_type</span> <span class="o">=</span> <span class="n">new_name</span>
 
     <span class="k">if</span> <span class="n">compute_shapes</span><span class="p">:</span>
@@ -390,33 +390,33 @@
       <span class="k">for</span> <span class="n">colocation_op</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">_colocation_stack</span><span class="p">:</span>
         <span class="n">all_colocation_groups</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">colocation_op</span><span class="o">.</span><span class="n">colocation_groups</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
-          <span class="c"># Make this device match the device of the colocated op, to</span>
-          <span class="c"># provide consistency between the device and the colocation</span>
-          <span class="c"># property.</span>
+          <span class="c1"># Make this device match the device of the colocated op, to</span>
+          <span class="c1"># provide consistency between the device and the colocation</span>
+          <span class="c1"># property.</span>
           <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">device</span> <span class="ow">and</span> <span class="n">ret</span><span class="o">.</span><span class="n">device</span> <span class="o">!=</span> <span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Tried to colocate %s with an op %s that had &quot;</span>
-                            <span class="s">&quot;a different device: %s vs %s. &quot;</span>
-                            <span class="s">&quot;Ignoring colocation property.&quot;</span><span class="p">,</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Tried to colocate </span><span class="si">%s</span><span class="s2"> with an op </span><span class="si">%s</span><span class="s2"> that had &quot;</span>
+                            <span class="s2">&quot;a different device: </span><span class="si">%s</span><span class="s2"> vs </span><span class="si">%s</span><span class="s2">. &quot;</span>
+                            <span class="s2">&quot;Ignoring colocation property.&quot;</span><span class="p">,</span>
                             <span class="n">name</span><span class="p">,</span> <span class="n">colocation_op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
                             <span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">_set_device</span><span class="p">(</span><span class="n">colocation_op</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
       <span class="n">all_colocation_groups</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_colocation_groups</span><span class="p">))</span>
-      <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s">&quot;_class&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span><span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span>
+      <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s2">&quot;_class&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span><span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span>
           <span class="nb">list</span><span class="o">=</span><span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="o">.</span><span class="n">ListValue</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">all_colocation_groups</span><span class="p">)))</span>
 
-    <span class="c"># Sets &quot;container&quot; attribute if</span>
-    <span class="c"># (1) graph._container is not None</span>
-    <span class="c"># (2) &quot;is_stateful&quot; is set in OpDef</span>
-    <span class="c"># (3) &quot;container&quot; attribute is in OpDef</span>
-    <span class="c"># (4) &quot;container&quot; attribute is None</span>
+    <span class="c1"># Sets &quot;container&quot; attribute if</span>
+    <span class="c1"># (1) graph._container is not None</span>
+    <span class="c1"># (2) &quot;is_stateful&quot; is set in OpDef</span>
+    <span class="c1"># (3) &quot;container&quot; attribute is in OpDef</span>
+    <span class="c1"># (4) &quot;container&quot; attribute is None</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">_container</span> <span class="ow">and</span>
         <span class="n">op_type</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">_registered_ops</span> <span class="ow">and</span>
         <span class="n">graph</span><span class="o">.</span><span class="n">_registered_ops</span><span class="p">[</span><span class="n">op_type</span><span class="p">]</span><span class="o">.</span><span class="n">is_stateful</span> <span class="ow">and</span>
-        <span class="s">&quot;container&quot;</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span> <span class="ow">and</span>
-            <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s">&quot;container&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
-      <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s">&quot;container&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span>
+        <span class="s2">&quot;container&quot;</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span> <span class="ow">and</span>
+            <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s2">&quot;container&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
+      <span class="n">ret</span><span class="o">.</span><span class="n">node_def</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="s2">&quot;container&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span>
           <span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">as_bytes</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">_container</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">ret</span></div>
@@ -443,7 +443,7 @@
 <span class="sd">    If the input has Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">xs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">xs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
 
   <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
@@ -484,8 +484,8 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
   <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
-                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
   <span class="n">y</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
@@ -540,7 +540,7 @@
 <span class="sd">  _ED_SESSION : tf.InteractiveSession</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">global</span> <span class="n">_ED_SESSION</span>
-  <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">_ED_SESSION</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">InteractiveSession</span><span class="p">()</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">_ED_SESSION</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span>
@@ -571,29 +571,29 @@
 <span class="sd">    If the inputs have Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
-  <span class="n">dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">])</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
+  <span class="n">dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">])</span>
 
   <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">):</span>
-    <span class="c"># Calculate flattened vector grad_{xs} y.</span>
+    <span class="c1"># Calculate flattened vector grad_{xs} y.</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">grad</span> <span class="ow">in</span> <span class="n">grads</span><span class="p">]</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
-    <span class="c"># Loop over each element in the vector.</span>
+    <span class="c1"># Loop over each element in the vector.</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
       <span class="n">d</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-      <span class="c"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
+      <span class="c1"># Calculate grad_{xs} ( [ grad_{xs} y ]_j ).</span>
       <span class="n">gradjgrads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">xs</span><span class="p">)</span>
-      <span class="c"># Flatten into vector.</span>
+      <span class="c1"># Flatten into vector.</span>
       <span class="n">hi</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)):</span>
         <span class="n">hij</span> <span class="o">=</span> <span class="n">gradjgrads</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-        <span class="c"># return 0 if gradient doesn&#39;t exist; TensorFlow returns None</span>
-        <span class="k">if</span> <span class="n">hij</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+        <span class="c1"># return 0 if gradient doesn&#39;t exist; TensorFlow returns None</span>
+        <span class="k">if</span> <span class="n">hij</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
           <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="n">hij</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">hij</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -602,7 +602,7 @@
       <span class="n">hi</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
       <span class="n">mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
 
-    <span class="c"># Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).</span>
+    <span class="c1"># Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
 
 
@@ -645,15 +645,15 @@
   <span class="n">scale_one</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
   <span class="n">loc_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">loc_two</span><span class="p">)</span>
   <span class="n">scale_two</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
-                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_two</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_one</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">loc_two</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">scale_one</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)]</span>
   <span class="n">loc_one</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">loc_one</span><span class="p">)</span>
   <span class="n">scale_one</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">scale_one</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">loc_two</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">scale_two</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
-    <span class="c"># With default arguments, we can avoid some intermediate computation.</span>
+    <span class="c1"># With default arguments, we can avoid some intermediate computation.</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">loc_one</span><span class="p">)</span> <span class="o">-</span> \
         <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
@@ -663,13 +663,13 @@
         <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">loc_two</span> <span class="o">-</span> <span class="n">loc_one</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> \
         <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_two</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale_one</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c"># scalar or vector</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># scalar or vector</span>
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>  <span class="c"># matrix</span>
+  <span class="k">else</span><span class="p">:</span>  <span class="c1"># matrix</span>
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="log_mean_exp"><a class="viewcode-back" href="../../edward.util.html#edward.util.log_mean_exp">[docs]</a><span class="k">def</span> <span class="nf">log_mean_exp</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+<div class="viewcode-block" id="log_mean_exp"><a class="viewcode-back" href="../../edward.util.html#edward.util.log_mean_exp">[docs]</a><span class="k">def</span> <span class="nf">log_mean_exp</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Compute the ``log_mean_exp`` of elements in a tensor, taking</span>
 <span class="sd">  the mean across axes given by ``reduction_indices``.</span>
 
@@ -694,15 +694,15 @@
 <span class="sd">    If the input has Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">input_tensor</span><span class="p">)</span>
 
-  <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+  <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x_max</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span>
       <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">input_tensor</span> <span class="o">-</span> <span class="n">x_max</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="log_sum_exp"><a class="viewcode-back" href="../../edward.util.html#edward.util.log_sum_exp">[docs]</a><span class="k">def</span> <span class="nf">log_sum_exp</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+<div class="viewcode-block" id="log_sum_exp"><a class="viewcode-back" href="../../edward.util.html#edward.util.log_sum_exp">[docs]</a><span class="k">def</span> <span class="nf">log_sum_exp</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Compute the ``log_sum_exp`` of elements in a tensor, taking</span>
 <span class="sd">  the sum across axes given by ``reduction_indices``.</span>
 
@@ -727,10 +727,10 @@
 <span class="sd">    If the input has Inf or NaN values.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">input_tensor</span><span class="p">)</span>
 
-  <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+  <span class="n">x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x_max</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span>
       <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">input_tensor</span> <span class="o">-</span> <span class="n">x_max</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="p">,</span> <span class="n">keep_dims</span><span class="p">))</span></div>
 
@@ -794,8 +794,8 @@
   <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
   <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
   <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
-                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
@@ -811,7 +811,7 @@
   <span class="sd">&quot;&quot;&quot;A wrapper around ``tf.placeholder``. It adds the tensor to the</span>
 <span class="sd">  ``PLACEHOLDERS`` collection.&quot;&quot;&quot;</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-  <span class="n">tf</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="s">&quot;PLACEHOLDERS&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="s2">&quot;PLACEHOLDERS&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">x</span></div>
 
 
@@ -848,8 +848,8 @@
   <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
   <span class="n">sigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
   <span class="n">l</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
-                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+                  <span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span>
                   <span class="n">tf</span><span class="o">.</span><span class="n">assert_positive</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
@@ -870,10 +870,10 @@
 <span class="sd">    seed</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">node_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span><span class="o">.</span><span class="n">_nodes_by_name</span><span class="p">))</span>
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">node_names</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;keras_learning_phase&#39;</span><span class="p">]:</span>
-    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Seeding is not supported after initializing &quot;</span>
-                       <span class="s">&quot;part of the graph. &quot;</span>
-                       <span class="s">&quot;Please move set_seed to the beginning of your code.&quot;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">node_names</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;keras_learning_phase&#39;</span><span class="p">]:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Seeding is not supported after initializing &quot;</span>
+                       <span class="s2">&quot;part of the graph. &quot;</span>
+                       <span class="s2">&quot;Please move set_seed to the beginning of your code.&quot;</span><span class="p">)</span>
 
   <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
   <span class="n">tf</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
@@ -954,11 +954,11 @@
   <span class="nb">input</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
   <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">multiples</span><span class="p">)</span>
 
-  <span class="c"># 0-d tensor</span>
+  <span class="c1"># 0-d tensor</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="nb">input</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-  <span class="c"># 0-d tensor</span>
+  <span class="c1"># 0-d tensor</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">multiples</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">multiples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">multiples</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -968,7 +968,7 @@
   <span class="k">except</span><span class="p">:</span>
     <span class="k">pass</span>
 
-  <span class="c"># broadcasting</span>
+  <span class="c1"># broadcasting</span>
   <span class="n">diff</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">-</span> <span class="n">get_dims</span><span class="p">(</span><span class="n">multiples</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
   <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
     <span class="nb">input</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">+</span> <span class="n">get_dims</span><span class="p">(</span><span class="nb">input</span><span class="p">))</span>
@@ -1003,7 +1003,7 @@
 <span class="sd">  x as a 3-D or higher tensor is not guaranteed to be supported.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+  <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">verify_tensor_all_finite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
   <span class="n">x</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">with_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
@@ -1027,7 +1027,7 @@
     <span class="n">z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">eq</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
     <span class="n">pil</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">n_rows</span><span class="p">,</span> <span class="mi">1</span><span class="p">])])</span>
     <span class="n">piu</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">n_rows</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">z</span><span class="p">])</span>
-    <span class="c"># cumulative product along 1st axis</span>
+    <span class="c1"># cumulative product along 1st axis</span>
     <span class="n">S</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span><span class="n">cumprod</span><span class="p">(</span><span class="n">piu_x</span><span class="p">)</span> <span class="k">for</span> <span class="n">piu_x</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">piu</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">S</span> <span class="o">*</span> <span class="n">pil</span></div>
 </pre></div>

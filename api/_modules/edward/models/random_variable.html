@@ -131,13 +131,13 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.models.random_variable</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 
-<span class="n">RANDOM_VARIABLE_COLLECTION</span> <span class="o">=</span> <span class="s">&quot;_random_variable_collection_&quot;</span>
+<span class="n">RANDOM_VARIABLE_COLLECTION</span> <span class="o">=</span> <span class="s2">&quot;_random_variable_collection_&quot;</span>
 
 
 <div class="viewcode-block" id="RandomVariable"><a class="viewcode-back" href="../../../edward.models.random_variable.html#edward.models.random_variable.RandomVariable">[docs]</a><span class="k">class</span> <span class="nc">RandomVariable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -166,34 +166,30 @@
 <span class="sd">  removed, and the distribution&#39;s methods populate the namespace for</span>
 <span class="sd">  class methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_cls</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="o">**</span><span class="n">dist_args</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_cls</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">dist_args</span><span class="p">):</span>
     <span class="n">tf</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="n">RANDOM_VARIABLE_COLLECTION</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_dist_cls</span> <span class="o">=</span> <span class="n">dist_cls</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_dist_args</span> <span class="o">=</span> <span class="n">dist_args</span>
-    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">op_scope</span><span class="p">(</span><span class="n">dist_args</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="s">&quot;RandomVariable&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">op_scope</span><span class="p">(</span><span class="n">dist_args</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;RandomVariable&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">scope</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span> <span class="o">=</span> <span class="n">dist_cls</span><span class="p">(</span><span class="o">**</span><span class="n">dist_args</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">allow_nan_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">allow_nan_stats</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">validate_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">validate_args</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">dtype</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">parameters</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">is_continuous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -202,6 +198,14 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">is_reparameterized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">is_reparameterized</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">allow_nan_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">allow_nan_stats</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">validate_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">validate_args</span>
 
 <div class="viewcode-block" id="RandomVariable.value"><a class="viewcode-back" href="../../../edward.models.random_variable.html#edward.models.random_variable.RandomVariable.value">[docs]</a>  <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span></div>
@@ -263,14 +267,14 @@
 <div class="viewcode-block" id="RandomVariable.pmf"><a class="viewcode-back" href="../../../edward.models.random_variable.html#edward.models.random_variable.RandomVariable.pmf">[docs]</a>  <span class="k">def</span> <span class="nf">pmf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">pmf</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-  <span class="k">def</span> <span class="nf">_tensor_conversion_function</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">as_ref</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_tensor_conversion_function</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">as_ref</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">name</span>
     <span class="k">if</span> <span class="n">dtype</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dtype</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s">&quot;Incompatible type conversion requested to type &#39;%s&#39; for variable &quot;</span>
-          <span class="s">&quot;of type &#39;%s&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+          <span class="s2">&quot;Incompatible type conversion requested to type &#39;</span><span class="si">%s</span><span class="s2">&#39; for variable &quot;</span>
+          <span class="s2">&quot;of type &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">as_ref</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;%s: Ref type is not supported.&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Ref type is not supported.&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">()</span></div>
 
 

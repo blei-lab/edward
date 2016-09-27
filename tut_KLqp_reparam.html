@@ -129,7 +129,8 @@
   -
   \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
-  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>, and the gradient can be applied directly to the inner expression. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
+  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>, and the gradient can be applied directly to the inner expression <span class="citation">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
+<p>Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
 <h3 id="noisy-estimates-using-monte-carlo-integration">Noisy estimates using Monte Carlo integration</h3>
 <p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
 <ol>
@@ -180,11 +181,15 @@
 <p>The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="tut_KLqp_score">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>tf.stop_gradient()</code> function.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
 <p>See the <a href="api/">API</a> for more details.</p>
-<h3 id="references">References</h3>
-<ul>
-<li>Rezende, D. J., Mohamed, S., &amp; Wierstra, D. (2014). Stochastic Backpropagation and Approximate Inference in Deep Generative Models. In International Conference on Machine Learning.</li>
-<li>Kingma, D. P., &amp; Welling, M. (2014). Auto-Encoding Variational Bayes. In International Conference on Learning Representations.</li>
-</ul>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-kingma2014auto">
+<p>Kingma, D., &amp; Welling, M. (2014). Auto-encoding variational Bayes. In <em>International conference on learning representations</em>.</p>
+</div>
+<div id="ref-rezende2014stochastic">
+<p>Rezende, D. J., Mohamed, S., &amp; Wierstra, D. (2014). Stochastic backpropagation and approximate inference in deep generative models. In <em>ICML</em> (pp. 1278–1286).</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

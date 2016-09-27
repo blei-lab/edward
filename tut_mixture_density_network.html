@@ -88,7 +88,7 @@
 </div>
 <div class="nine columns">
 <h2 id="mixture-density-networks">Mixture density networks</h2>
-<p>We explore mixture density networks (MDN; Bishop, 1994). We demonstrate their implementation in Edward, leveraging Keras and TensorFlow.</p>
+<p>We explore mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span>. We demonstrate their implementation in Edward, leveraging Keras and TensorFlow.</p>
 <p>If you are not familiar with MDNs have a look at the <a href="http://cbonnett.github.io/MDN.html">following blog post</a> or at original <a href="http://research.microsoft.com/en-us/um/people/cmbishop/downloads/Bishop-NCRG-94-004.pdf">paper</a> by Bishop. Note you have to manually <a href="https://keras.io/backend/">configure Keras</a> to work with TensorFlow. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">blog post</a> by Otoro, where he explains MDNs. This is an inverse problem: for every input <span class="math inline">\(X\)</span> there are multiple outputs <span class="math inline">\(y\)</span>.</p>
@@ -204,10 +204,12 @@ sns.jointplot(a[:,0], a[:,1], kind="hex", color="#4CB391", ylim=(-10,10), xlim=(
 <p><img alt="image" src="images/mdn-fig3.png" width="700"/></p>
 <h3 id="acknowledgments">Acknowledgments</h3>
 <p>We are grateful to Christopher Bonnett for writing this tutorial, and more generally for pushing forward momentum to have Edward tutorials be accessible and easy-to-learn.</p>
-<h3 id="references">References</h3>
-<ul>
-<li>Bishop, C. M. (1994). Mixture density networks. Technical report.</li>
-</ul>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-bishop1994mixture">
+<p>Bishop, C. M. (1994). Mixture density networks.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
