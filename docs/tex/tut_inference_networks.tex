@@ -6,10 +6,9 @@
 
 An inference network is a flexible construction for parameterizing
 approximating distributions during inference.
-They are used in Helmholtz machines (Dayan et al., 1995), deep
-Boltzmann machines (Salakhutdinov and Larochelle, 2010), and
-variational auto-encoders (Kingma & Welling, 2014; Rezende et al.,
-2014).
+They are used in Helmholtz machines \citep{dayan1995helmholtz}, deep
+Boltzmann machines \citep{salakhutdinov2010efficient}, and
+variational auto-encoders \citep{kingma2014auto,rezende2014stochastic}.
 
 Recall that probabilistic models often have \emph{local} latent
 variables, that is, latent variables associated with a data point; for
@@ -57,14 +56,14 @@ There are often good reasons beyond computational reasons
 for wanting to use an inference network, depending on the problem
 setting.
 Originating from
-Helmholtz machines (Dayan et al., 1995), they are motivated by the hypothesis
+Helmholtz machines, they are motivated by the hypothesis
 that "the human perceptual system is a statistical inference engine
 whose function is to infer the probable causes of sensory input." The
 inference network is this function.
 In cognition, "humans and robots are in the setting of amortized
 inference: they have to solve many similar inference problems, and can
 thus offload part of the computational work to shared precomputation
-and adaptation over time" (Stuhlmuller et al., 2013).
+and adaptation over time" \citep{stuhlmuller2013learning}.
 
 \subsubsection{Implementation}
 
@@ -117,31 +116,9 @@ variational inference with inference networks is a
 general technique that can be applied to models beyond
 probabilistic decoders.
 
-This tutorial is taken from text originating in Tran et al. (2016).
+This tutorial is taken from text originating in \citet{tran2015variational}.
 We thank Kevin Murphy for motivating the tutorial as it is based
 on our discussions, and also related discussion with Jaan Altosaar.
 
 \subsubsection{References}\label{references}
 
-\begin{itemize}
-\item
-  Dayan, P., Hinton, G. E., Neal, R. M., & Zemel, R. S. (1995). The
-  Helmholtz Machine. Neural Computation, 7(5), 889–904.
-\item
-  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational
-  Bayes. In International Conference on Learning Representations.
-\item
-  Rezende, D. J., Mohamed, S., & Wierstra, D. (2014). Stochastic
-  Backpropagation and Approximate Inference in Deep Generative Models.
-  In International Conference on Machine Learning.
-\item
-  Salakhutdinov, R., \& and Larochelle, H. (2010). Efficient learning of
-  deep Boltzmann machines. In Artificial Intelligence and Statistics.
-\item
-  Stuhlmüller, A., Taylor, J., & Goodman, N. (2013). Learning
-  Stochastic Inverses. In Neural Information Processing Systems.
-\item
-  Tran, D., Ranganath, R., & Blei, D. M. (2016). The Variational
-  Gaussian Process. In International Conference on Learning
-  Representations.
-\end{itemize}

@@ -9,7 +9,8 @@ based on coding theory. It is a distribution $p(\mathbf{x}_n\mid \mathbf{z}_n)$ 
 $\mathbf{x}_n\in\mathbb{R}^D$ given a code $\mathbf{z}_n$. The latent
 variables $\mathbf{z}_n$ are interpreted as the hidden representation, or code, of the value
 $\mathbf{x}_n$. The decoder is probabilistic because its generated
-values (decoding) for any given code is random.
+values (decoding) for any given code is random
+\citep{dayan1995helmholtz}.
 
 For real-valued data,
 the randomness in the decoder is given by a multivariate Gaussian
@@ -70,7 +71,7 @@ interpreted as a probabilistic encoder.
 Traditionally, a probabilistic encoder is the most common
 choice of inference. This lead to the coinage of the model-inference
 combination known as the variational auto-encoder
-(Kingma and Welling, 2014), which is a probabilistic extension of
+\citep{kingma2014auto}, which is a probabilistic extension of
 auto-encoders.
 We recommend against this terminology,
 in favor of making explicit the separation of model and inference.
@@ -82,9 +83,3 @@ variational inference can also be done without an inference network.
 
 \subsubsection{References}\label{references}
 
-\begin{itemize}
-\item
-  Dayan, P., Hinton, G. E., Neal, R. M., & Zemel, R. S. (1995). The Helmholtz Machine. Neural Computation, 7(5), 889–904.
-\item
-  Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational Bayes. In International Conference on Learning Representations.
-\end{itemize}

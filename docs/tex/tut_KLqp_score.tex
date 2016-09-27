@@ -61,7 +61,9 @@ logarithms to write the gradient as
 \end{align*}
 The gradient of the ELBO is an expectation over the variational
 model $q(z\;;\;\lambda)$; the only new ingredient it requires is the
-\emph{score function} $\nabla_\lambda \log q(z\;;\;\lambda)$.
+\emph{score function} $\nabla_\lambda \log q(z\;;\;\lambda)$
+\citep{paisley2012variational,ranganath2014black}.
+
 Edward uses automatic differentiation, specifically with TensorFlow's
 computational graphs, making this gradient computation both simple and
 efficient to distribute.
@@ -156,13 +158,3 @@ the negative of the ELBO's gradient.
 See the \href{api/}{API} for more details.
 
 \subsubsection{References}\label{references}
-
-\begin{itemize}
-\item
-  Paisley, J., Blei, D. M., & Jordan, M. (2012). Variational Bayesian
-  Inference with Stochastic Search. In International Conference on
-  Machine Learning.
-\item
-  Ranganath, R., Gerrish, S., & Blei, D. M. (2014). Black Box
-  Variational Inference. In Artificial Intelligence and Statistics.
-\end{itemize}

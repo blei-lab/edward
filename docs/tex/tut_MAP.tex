@@ -17,7 +17,7 @@ posterior distribution,
   \log p(z \mid x).
 \end{align*}
 In practice, we work with logarithms of densities to avoid numerical underflow
-issues.
+issues \citep{murphy2012machine}.
 
 The MAP estimate is the most likely configuration of the hidden patterns $z$
 under the model. However, we cannot directly solve this optimization problem
@@ -127,8 +127,3 @@ There is a nuance here. TensorFlow's optimizers are configured to
 the negative of the log density's gradient.
 
 \subsubsection{References}\label{references}
-
-\begin{itemize}
-\item
-  Murphy, K. (2012). Machine Learning: A Probabilistic Perspective. MIT Press.
-\end{itemize}
