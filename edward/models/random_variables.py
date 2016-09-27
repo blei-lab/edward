@@ -17,10 +17,23 @@ class Bernoulli(RandomVariable):
 
   def __str__(self):
     try:
-      p = self.distribution.p.eval()
+      p = self.p.eval()
       return "p: \n" + p.__str__()
     except:
       return super(Bernoulli, self).__str__()
+
+  @property
+  def logits(self):
+    return self.distribution.logits
+
+  @property
+  def p(self):
+    return self.distribution.p
+
+  @property
+  def q(self):
+    """1-p."""
+    return self.distribution.q
 
 
 class Beta(RandomVariable):
@@ -30,11 +43,21 @@ class Beta(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      a, b = sess.run([self.distribution.a, self.distribution.b])
+      a, b = sess.run([self.a, self.b])
       return "a: \n" + a.__str__() + "\n" + \
              "b: \n" + b.__str__()
     except:
       return super(Beta, self).__str__()
+
+  @property
+  def a(self):
+    """Shape parameter."""
+    return self.distribution.a
+
+  @property
+  def b(self):
+    """Shape parameter."""
+    return self.distribution.b
 
 
 class Categorical(RandomVariable):
@@ -44,10 +67,18 @@ class Categorical(RandomVariable):
 
   def __str__(self):
     try:
-      logits = self.distribution.logits.eval()
+      logits = self.logits.eval()
       return "logits: \n" + logits.__str__()
     except:
       return super(Categorical, self).__str__()
+
+  @property
+  def num_classes(self):
+    return self.distribution.num_classes
+
+  @property
+  def logits(self):
+    return self.distribution.logits
 
 
 class Chi2(RandomVariable):
@@ -56,10 +87,14 @@ class Chi2(RandomVariable):
 
   def __str__(self):
     try:
-      df = self.distribution.df.eval()
+      df = self.df.eval()
       return "df: \n" + df.__str__()
     except:
       return super(Chi2, self).__str__()
+
+  @property
+  def df(self):
+    return self.distribution.df
 
 
 class Dirichlet(RandomVariable):
@@ -68,10 +103,15 @@ class Dirichlet(RandomVariable):
 
   def __str__(self):
     try:
-      alpha = self.distribution.alpha.eval()
+      alpha = self.alpha.eval()
       return "alpha: \n" + alpha.__str__()
     except:
       return super(Dirichlet, self).__str__()
+
+  @property
+  def alpha(self):
+    """Shape parameter."""
+    return self.distribution.alpha
 
 
 class DirichletMultinomial(RandomVariable):
@@ -82,11 +122,21 @@ class DirichletMultinomial(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      n, alpha = sess.run([self.distribution.n, self.distribution.alpha])
+      n, alpha = sess.run([self.n, self.alpha])
       return "n: \n" + n.__str__() + "\n" + \
              "alpha: \n" + alpha.__str__()
     except:
       return super(DirichletMultinomial, self).__str__()
+
+  @property
+  def n(self):
+    """Parameter defining this distribution."""
+    return self.distribution.n
+
+  @property
+  def alpha(self):
+    """Parameter defining this distribution."""
+    return self.distribution.alpha
 
 
 class Exponential(RandomVariable):
@@ -96,10 +146,14 @@ class Exponential(RandomVariable):
 
   def __str__(self):
     try:
-      lam = self.distribution.lam.eval()
+      lam = self.lam.eval()
       return "lam: \n" + lam.__str__()
     except:
       return super(Exponential, self).__str__()
+
+  @property
+  def lam(self):
+    return self.distribution.lam
 
 
 class Gamma(RandomVariable):
@@ -109,11 +163,21 @@ class Gamma(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      alpha, beta = sess.run([self.distribution.alpha, self.distribution.beta])
+      alpha, beta = sess.run([self.alpha, self.beta])
       return "alpha: \n" + alpha.__str__() + "\n" + \
              "beta: \n" + beta.__str__()
     except:
       return super(Gamma, self).__str__()
+
+  @property
+  def alpha(self):
+    """Shape parameter."""
+    return self.distribution.alpha
+
+  @property
+  def beta(self):
+    """Inverse scale parameter."""
+    return self.distribution.beta
 
 
 class InverseGamma(RandomVariable):
@@ -124,11 +188,21 @@ class InverseGamma(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      alpha, beta = sess.run([self.distribution.alpha, self.distribution.beta])
+      alpha, beta = sess.run([self.alpha, self.beta])
       return "alpha: \n" + alpha.__str__() + "\n" + \
              "beta: \n" + beta.__str__()
     except:
       return super(InverseGamma, self).__str__()
+
+  @property
+  def alpha(self):
+    """Shape parameter."""
+    return self.distribution.alpha
+
+  @property
+  def beta(self):
+    """Scale parameter."""
+    return self.distribution.beta
 
 
 class Laplace(RandomVariable):
@@ -138,11 +212,21 @@ class Laplace(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      loc, scale = sess.run([self.distribution.loc, self.distribution.scale])
+      loc, scale = sess.run([self.loc, self.scale])
       return "loc: \n" + loc.__str__() + "\n" + \
              "scale: \n" + scale.__str__()
     except:
       return super(Laplace, self).__str__()
+
+  @property
+  def loc(self):
+    """Distribution parameter for the location."""
+    return self.distribution.loc
+
+  @property
+  def scale(self):
+    """Distribution parameter for scale."""
+    return self.distribution.scale
 
 
 class MultivariateNormalCholesky(RandomVariable):
@@ -153,11 +237,20 @@ class MultivariateNormalCholesky(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      mu, chol = sess.run([self.distribution.mu, self.distribution.chol])
+      mu, sigma = sess.run([self.mu, self.sigma])
       return "mu: \n" + mu.__str__() + "\n" + \
-             "chol: \n" + chol.__str__()
+             "sigma: \n" + sigma.__str__()
     except:
       return super(MultivariateNormalCholesky, self).__str__()
+
+  @property
+  def mu(self):
+    return self.distribution.mu
+
+  @property
+  def sigma(self):
+    """Dense (batch) covariance matrix, if available."""
+    return self.distribution.sigma
 
 
 class MultivariateNormalDiag(RandomVariable):
@@ -168,12 +261,20 @@ class MultivariateNormalDiag(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      mu, diag_stdev = sess.run([self.distribution.mu,
-                                 self.distribution.diag_stdev])
+      mu, sigma = sess.run([self.mu, self.sigma])
       return "mu: \n" + mu.__str__() + "\n" + \
-             "diag_stdev: \n" + diag_stdev.__str__()
+             "sigma: \n" + sigma.__str__()
     except:
       return super(MultivariateNormalDiag, self).__str__()
+
+  @property
+  def mu(self):
+    return self.distribution.mu
+
+  @property
+  def sigma(self):
+    """Dense (batch) covariance matrix, if available."""
+    return self.distribution.sigma
 
 
 class MultivariateNormalFull(RandomVariable):
@@ -184,11 +285,20 @@ class MultivariateNormalFull(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      mu, sigma = sess.run([self.distribution.mu, self.distribution.sigma])
+      mu, sigma = sess.run([self.mu, self.sigma])
       return "mu: \n" + mu.__str__() + "\n" + \
              "sigma: \n" + sigma.__str__()
     except:
       return super(MultivariateNormalFull, self).__str__()
+
+  @property
+  def mu(self):
+    return self.distribution.mu
+
+  @property
+  def sigma(self):
+    """Dense (batch) covariance matrix, if available."""
+    return self.distribution.sigma
 
 
 class Normal(RandomVariable):
@@ -198,7 +308,7 @@ class Normal(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      mu, sigma = sess.run([self.distribution.mu, self.distribution.sigma])
+      mu, sigma = sess.run([self.mu, self.sigma])
       return "mu: \n" + mu.__str__() + "\n" + \
              "sigma: \n" + sigma.__str__()
     except:
@@ -206,10 +316,12 @@ class Normal(RandomVariable):
 
   @property
   def mu(self):
+    """Distribution parameter for the mean."""
     return self.distribution.mu
 
   @property
   def sigma(self):
+    """Distribution parameter for standard deviation."""
     return self.distribution.sigma
 
 
@@ -220,14 +332,27 @@ class StudentT(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      df, mu, sigma = sess.run([self.distribution.df,
-                                self.distribution.mu,
-                                self.distribution.sigma])
+      df, mu, sigma = sess.run([self.df, self.mu, self.sigma])
       return "df: \n" + df.__str__() + "\n" + \
              "mu: \n" + mu.__str__() + "\n" + \
              "sigma: \n" + sigma.__str__()
     except:
       return super(StudentT, self).__str__()
+
+  @property
+  def df(self):
+    """Degrees of freedom in these Student's t distribution(s)."""
+    return self.distribution.df
+
+  @property
+  def mu(self):
+    """Locations of these Student's t distribution(s)."""
+    return self.distribution.mu
+
+  @property
+  def sigma(self):
+    """Scaling factors of these Student's t distribution(s)."""
+    return self.distribution.sigma
 
 
 class TransformedDistribution(RandomVariable):
@@ -237,9 +362,29 @@ class TransformedDistribution(RandomVariable):
 
   def __str__(self):
     try:
-      return self.distribution.base_distribution.__str__()
+      return self.base_distribution.__str__()
     except:
       return super(TransformedDistribution, self).__str__()
+
+  @property
+  def base_distribution(self):
+    """Base distribution, p(x)."""
+    return self.distribution.base_distribution
+
+  @property
+  def transform(self):
+    """Function transforming x => y."""
+    return self.distribution.transform
+
+  @property
+  def inverse(self):
+    """Inverse function of transform, y => x."""
+    return self.distribution.inverse
+
+  @property
+  def log_det_jacobian(self):
+    """Function computing the log determinant of the Jacobian of transform."""
+    return self.distribution.log_det_jacobian
 
 
 class Uniform(RandomVariable):
@@ -249,11 +394,19 @@ class Uniform(RandomVariable):
   def __str__(self):
     try:
       sess = get_session()
-      a, b = sess.run([self.distribution.a, self.distribution.b])
+      a, b = sess.run([self.a, self.b])
       return "a: \n" + a.__str__() + "\n" + \
              "b: \n" + b.__str__()
     except:
       return super(Uniform, self).__str__()
+
+  @property
+  def a(self):
+    return self.distribution.a
+
+  @property
+  def b(self):
+    return self.distribution.b
 
 
 class PointMass(RandomVariable):
@@ -262,7 +415,12 @@ class PointMass(RandomVariable):
 
   def __str__(self):
     try:
-      params = self.distribution.params.eval()
+      params = self.params.eval()
       return "params: \n" + params.__str__()
     except:
       return super(PointMass, self).__str__()
+
+  @property
+  def params(self):
+    """Distribution parameter."""
+    return self.distribution.params

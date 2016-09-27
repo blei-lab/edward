@@ -43,28 +43,12 @@ class RandomVariable(object):
       self._value = self._dist.sample()
 
   @property
-  def distribution(self):
-    return self._dist
-
-  @property
   def name(self):
     return self._name
 
   @property
-  def dtype(self):
-    return self.distribution.dtype
-
-  @property
-  def parameters(self):
-    return self.distribution.parameters
-
-  @property
-  def is_continuous(self):
-    return self.distribution.is_continuous
-
-  @property
-  def is_reparameterized(self):
-    return self.distribution.is_reparameterized
+  def distribution(self):
+    return self._dist
 
   @property
   def allow_nan_stats(self):
@@ -73,6 +57,18 @@ class RandomVariable(object):
   @property
   def validate_args(self):
     return self.distribution.validate_args
+
+  @property
+  def dtype(self):
+    return self.distribution.dtype
+
+  @property
+  def is_continuous(self):
+    return self.distribution.is_continuous
+
+  @property
+  def is_reparameterized(self):
+    return self.distribution.is_reparameterized
 
   def value(self):
     return self._value
