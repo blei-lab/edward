@@ -49,7 +49,8 @@ gradient
 Both $\text{KL}(p\|q)$ and its gradient are intractable
 because of the posterior expectation.
 We can use importance sampling to both
-estimate the objective and calculate stochastic gradients.
+estimate the objective and calculate stochastic gradients
+\citep{oh1992adaptive}.
 
 \subsubsection{Adaptive Importance sampling}
 
@@ -205,10 +206,3 @@ dimensions.
 See the \href{api/}{API} for more details.
 
 \subsubsection{References}\label{references}
-
-\begin{itemize}
-\item
-  Oh, M. S., & Berger, J. O. (1992). Adaptive importance sampling in
-  Monte Carlo integration. Journal of Statistical Computation and
-  Simulation, 41(3-4), 143-168.
-\end{itemize}

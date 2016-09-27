@@ -5,7 +5,8 @@
 \subsection{Point-based evaluations}
 
 A point-based evaluation is a scalar-valued metric for assessing
-trained models. For example, we can assess models for classification
+trained models \citep{gneiting2007strictly}.
+For example, we can assess models for classification
 by predicting the label for each observation in the data and comparing
 it to their true labels. Edward implements a variety of metrics, such
 as classification error and mean absolute error.
@@ -96,10 +97,3 @@ ed.evaluate('mean_absolute_error', data={'y': y_train, 'x': x_train},
 \end{lstlisting}
 
 \subsubsection{References}\label{references}
-
-\begin{itemize}
-\item
-  Gneiting, T., & Raftery, A. E. (2007). Strictly Proper Scoring
-  Rules, Prediction, and Estimation. Journal of the American
-  Statistical Association, 102(477), 359–378.
-\end{itemize}
