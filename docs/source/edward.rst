@@ -11,6 +11,7 @@ Subpackages
 
 .. toctree::
 
+    edward.criticisms
     edward.inferences
     edward.models
     edward.stats
@@ -20,7 +21,6 @@ Submodules
 
 .. toctree::
 
-   edward.criticisms
    edward.util
    edward.version
 

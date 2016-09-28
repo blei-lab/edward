@@ -93,4 +93,5 @@ img/
 
 # Web development
 docs/api/
+docs/tutorials/
 docs/*.html

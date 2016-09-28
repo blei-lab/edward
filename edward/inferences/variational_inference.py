@@ -164,14 +164,15 @@ class VariationalInference(Inference):
         feed_dict[key] = value
 
     sess = get_session()
-    _, loss = sess.run([self.train, self.loss], feed_dict)
-    return {'loss': loss}
+    _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
+    return {'t': t, 'loss': loss}
 
-  def print_progress(self, t, info_dict):
+  def print_progress(self, info_dict):
     """Print progress to output.
     """
     if self.n_print is not None:
-      if t % self.n_print == 0:
+      t = info_dict['t']
+      if t == 1 or t % self.n_print == 0:
         loss = info_dict['loss']
         print("iter {:d} loss {:.2f}".format(t, loss))
         for rv in six.itervalues(self.latent_vars):
