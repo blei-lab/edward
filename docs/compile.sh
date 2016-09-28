@@ -1,10 +1,12 @@
 #!/bin/bash
 rm -f *.html
+rm -rf tutorials
 rm -rf api
 
 # Compile all the tex files into html
+mkdir -p tutorials
 cd tex
-for filename in *.tex; do
+for filename in {./,tutorials/}*.tex; do
   pandoc ${filename%.*}.tex \
          --from=latex+link_attributes \
          --to=html \
