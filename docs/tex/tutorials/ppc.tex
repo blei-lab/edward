@@ -34,7 +34,7 @@ $T(x_\text{new}) = \max(x_\text{new})$.  Applying $T(x_\text{new})$ to
 new data over many data replications induces a distribution. We compare
 this distribution to the test statistic applied to the real data $T(x)$.
 
-\includegraphics{images/ppc.png}
+\includegraphics{/images/ppc.png}
 
 In the figure, $T(x)$ falls in a low probability region of this
 reference distribution. This indicates that the model fits the data
@@ -81,7 +81,7 @@ ppc(T, data={y_post: y_train, x_ph: x_train},
     latent_vars={'z': qz, 'beta': qbeta})
 \end{lstlisting}
 
-See the \href{../api/criticisms.html}{criticism API} for further details.
+See the \href{/api/criticisms}{criticism API} for further details.
 
 PPCs are an excellent tool for revising models, simplifying or
 expanding the current model as one examines how well it fits the data.
