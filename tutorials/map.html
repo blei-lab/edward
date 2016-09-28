@@ -139,7 +139,7 @@
   \nabla_z
   \log p(x, z)\end{aligned}\]</span> and follow it to a (local) optima. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
 <h3 id="implementation">Implementation</h3>
-<p>In Edward, we view MAP estimation as a special case of <a href="tut_KLqp"><span class="math inline">\(KL(q\|p)\)</span> minimization</a>, where the variational distribution is a point mass (delta function) distribution. This makes explicit the additional assumptions underlying MAP estimation from the viewpoint of variational inference: namely, it approximates the posterior using a point to summarize the full distribution.</p>
+<p>In Edward, we view MAP estimation as a special case of <a href="klqp"><span class="math inline">\(KL(q\|p)\)</span> minimization</a>, where the variational distribution is a point mass (delta function) distribution. This makes explicit the additional assumptions underlying MAP estimation from the viewpoint of variational inference: namely, it approximates the posterior using a point to summarize the full distribution.</p>
 <pre class="python" language="Python"><code>class MAP(VariationalInference):
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     ...

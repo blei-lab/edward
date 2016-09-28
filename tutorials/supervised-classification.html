@@ -100,7 +100,7 @@
 <pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)[:25, :]
 data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
 <h3 id="model">Model</h3>
-<p>Posit the model as Gaussian process classification. For more details on the model, see the <a href="tut_gp_classification">Gaussian process classification tutorial</a>.</p>
+<p>Posit the model as Gaussian process classification. For more details on the model, see the <a href="gp-classification">Gaussian process classification tutorial</a>.</p>
 <p>Here we build the model in Edward using TensorFlow.</p>
 <pre class="python" language="Python"><code>class GaussianProcess:
   &quot;&quot;&quot;
@@ -165,7 +165,7 @@ qz = Normal(mu=qz_mu, sigma=qz_sigma)</code></pre>
 <p>Run mean-field variational inference for 500 iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.MFVI({&#39;z&#39;: qz}, data, model)
 inference.run(n_iter=500)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

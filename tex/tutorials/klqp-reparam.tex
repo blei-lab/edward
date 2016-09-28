@@ -5,7 +5,7 @@
 \subsection{Reparameterization gradient}
 
 (This tutorial follows the
-\href{tut_KLqp}{$\text{KL}(q\|p)$ minimization} tutorial.)
+\href{klqp}{$\text{KL}(q\|p)$ minimization} tutorial.)
 
 We seek to maximize the ELBO,
 \begin{align*}
@@ -116,7 +116,7 @@ A Monte Carlo estimate of the gradient is then
 \end{align*}
 This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it
 exhibits lower variance than the
-\href{tut_KLqp_score}{score function gradient}, leading to
+\href{klqp-score}{score function gradient}, leading to
 faster convergence in a large set of problems.
 
 \subsubsection{Implementation}
@@ -168,7 +168,7 @@ in \texttt{self.loss}, to track progress of the inference for diagnostics.
 The method returns an object whose automatic differentiation is the
 reparameterization gradient of the ELBO. The computational graph will
 simply traverse the nodes during backpropagation; unlike the
-\href{tut_KLqp_score}{score function gradient}, the
+\href{klqp-score}{score function gradient}, the
 reparameterization gradient does not need TensorFlow's
 \texttt{tf.stop_gradient()} function.
 
@@ -176,7 +176,7 @@ There is a nuance here. TensorFlow's optimizers are configured to
 \emph{minimize} an objective function. So the gradient is set to be
 the negative of the ELBO's gradient.
 
-See the \href{api/}{API} for more details.
+See the \href{../api/index.html}{API} for more details.
 
 \subsubsection{References}\label{references}
 

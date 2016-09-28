@@ -138,8 +138,8 @@
   - \mathbb{E}_{q(z \;;\; \lambda)}[\log q(z\;;\;\lambda)],\end{aligned}\]</span> where the first term represents an energy and the second term (including the minus sign) represents the entropy of <span class="math inline">\(q\)</span>. The energy encourages <span class="math inline">\(q\)</span> to focus probability mass where the model puts high probability, <span class="math inline">\(p(x, z)\)</span>. The entropy encourages <span class="math inline">\(q\)</span> to spread probability mass to avoid concentrating to one location.</p>
 <p>Edward uses two generic strategies to obtain gradients for optimization.</p>
 <ul>
-<li><a href="tut_KLqp_score">Score function gradient</a></li>
-<li><a href="tut_KLqp_reparam">Reparameterization gradient</a></li>
+<li><a href="klqp-score">Score function gradient</a></li>
+<li><a href="klqp-reparam">Reparameterization gradient</a></li>
 </ul>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">

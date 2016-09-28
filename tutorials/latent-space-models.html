@@ -162,7 +162,7 @@ model = LatentSpaceModel(N=x_train.shape[0], K=3, like=&#39;Poisson&#39;, prior=
 <h3 id="inference">Inference</h3>
 <p>Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are required: Instantiating inference and running it.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP([&#39;z&#39;], data, model)</code></pre>
-<p>See this extended tutorial about <a href="tut_MAP">MAP estimation in Edward</a>.</p>
+<p>See this extended tutorial about <a href="map">MAP estimation in Edward</a>.</p>
 <p>One could instead run variational inference. This requires specifying a variational model and instantiating <code>MFVI</code>.</p>
 <pre class="python" language="Python"><code>qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
@@ -170,7 +170,7 @@ qz = Normal(mu=qz_mu, sigma=qz_sigma)
 inference = ed.MFVI({&#39;z&#39;: qz}, data, model)</code></pre>
 <p>Finally, the following line runs the inference procedure for 5000 iterations and prints progress every 500 iteration.</p>
 <pre class="python" language="Python"><code>inference.run(n_iter=5000, n_print=500)</code></pre>
-<p>See this extended tutorial about <a href="tut_variational_inference">variational inference in Edward</a>.</p>
+<p>See this extended tutorial about <a href="variational-inference">variational inference in Edward</a>.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-hoff2002latent">

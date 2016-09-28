@@ -151,7 +151,7 @@ data = {'X': X, 'y': y}</code></pre>
 <p>We instantiate the mixture density network with 10 mixtures.</p>
 <pre class="python" language="Python"><code>model = MixtureDensityNetwork(10)</code></pre>
 <h3 id="inference">Inference</h3>
-<p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="tut_MAP">MAP estimation in Edward</a>.</p>
+<p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="map">MAP estimation in Edward</a>.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP([], data, model)</code></pre>
 <p>Here, we will manually control the inference and how data is passed into it at each step. First, start a TensorFlow session and pass it into Keras so that it shares the same TensorFlow session as Edward. Then initialize the algorithm.</p>
 <pre class="python" language="Python"><code>sess = ed.get_session()

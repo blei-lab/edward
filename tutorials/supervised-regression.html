@@ -110,7 +110,7 @@ coeff = np.random.randn(D)
 X_train, y_train = build_toy_dataset(N, coeff)
 X_test, y_test = build_toy_dataset(N, coeff)</code></pre>
 <h3 id="model">Model</h3>
-<p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="tut_bayesian_linear_regression">Bayesian linear regression tutorial</a>.</p>
+<p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="bayesian-linear-regression">Bayesian linear regression tutorial</a>.</p>
 <p>Here we build the model in Edward’s native language.</p>
 <pre class="python" language="Python"><code>X = ed.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
@@ -126,7 +126,7 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
 <pre class="python" language="Python"><code>data = {X: X_train, y: y_train}
 inference = ed.MFVI({w: qw, b: qb}, data)
 inference.run()</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="tut_KLqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>Use point-based evaluation, and calculate the mean squared error for predictions on test data.</p>
 <p>We do this first by forming the posterior predictive distribution.</p>
@@ -135,7 +135,7 @@ inference.run()</code></pre>
 <pre class="python" language="Python"><code>print(ed.evaluate(&#39;mean_squared_error&#39;, data={X: X_test, y_post: y_test}))
 ## 0.0399784</code></pre>
 <p>The trained model makes predictions with low mean squared error (relative to the magnitude of the output).</p>
-<p>For more details on criticism, see the <a href="tut_point_eval">point-based evaluation tutorial</a>.</p>
+<p>For more details on criticism, see the <a href="point-evaluation">point-based evaluation tutorial</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
