@@ -28,8 +28,21 @@ done
 cd ..
 python strip_p_in_li.py
 
-# Run sphinx to generate the API
-sphinx-apidoc -f -e -M -T -o source/ ../edward
-make html
+# Generate docstrings
+python autogen.py
+
+# Compile all the API tex files (with generated docstrings) into html
 mkdir -p api
-cp -r build/html/* api
+cd build
+for filename in *.tex; do
+  pandoc ${filename%.*}.tex \
+         --from=latex+link_attributes \
+         --to=html \
+         --mathjax \
+         --no-highlight \
+         --bibliography=../tex/bib.bib \
+         --csl=../tex/apa.csl \
+         --title-prefix="Edward API" \
+         --template=../tex/api/template.pandoc \
+         --output=../api/${filename%.*}.html
+done
