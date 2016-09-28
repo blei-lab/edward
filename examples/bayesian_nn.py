@@ -80,7 +80,8 @@ inference = ed.MFVI({W_0: qW_0, b_0: qb_0,
                      W_2: qW_2, b_2: qb_2}, data)
 
 inference.initialize(n_print=100)
-for t in range(1000):
-  loss = inference.update()
+for _ in range(1000):
+  info_dict = inference.update()
+  t, loss = info_dict['t'], info_dict['loss']
   if t % inference.n_print == 0:
     print("iter {:d} loss {:.2f}".format(t, loss))

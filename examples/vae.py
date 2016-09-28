@@ -23,12 +23,12 @@ ed.set_seed(42)
 
 # Probability model (subgraph)
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
-hidden = Dense(256, activation=K.relu)(z.value())  # (M, 64)
-x = Bernoulli(logits=Dense(28 * 28)(hidden))  # (M, 784)
+hidden = Dense(256, activation=K.relu)(z.value())
+x = Bernoulli(logits=Dense(28 * 28)(hidden))
 
 # Variational model (subgraph)
 x_ph = ed.placeholder(tf.float32, [M, 28 * 28])
-hidden = Dense(256, activation=K.relu)(x_ph)  # (M, 64)
+hidden = Dense(256, activation=K.relu)(x_ph)
 qz = Normal(mu=Dense(d)(hidden),
             sigma=Dense(d, activation=K.softplus)(hidden))
 

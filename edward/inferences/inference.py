@@ -133,9 +133,9 @@ class Inference(object):
       Passed into ``initialize``.
     """
     self.initialize(*args, **kwargs)
-    for t in range(self.n_iter + 1):
+    for _ in range(self.n_iter):
       info_dict = self.update()
-      self.print_progress(t, info_dict)
+      self.print_progress(info_dict)
 
     self.finalize()
 
@@ -156,6 +156,9 @@ class Inference(object):
     self.n_iter = n_iter
     self.n_print = n_print
 
+    self.t = tf.Variable(0, trainable=False)
+    self.increment_t = self.t.assign_add(1)
+
     if logdir is not None:
       train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
 
@@ -174,15 +177,14 @@ class Inference(object):
     dict
       Dictionary of algorithm-specific information.
     """
-    return {}
+    t = self.increment_t.eval()
+    return {'t': t}
 
-  def print_progress(self, t, info_dict):
+  def print_progress(self, info_dict):
     """Print progress to output.
 
     Parameters
     ----------
-    t : int
-      Iteration counter.
     info_dict : dict
       Dictionary of algorithm-specific information.
     """

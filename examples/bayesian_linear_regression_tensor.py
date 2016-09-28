@@ -36,8 +36,4 @@ qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
 data = {y: y_data}
 inference = ed.MFVI({beta: qbeta}, data)
-
-inference.initialize()
-for t in range(501):
-  info_dict = inference.update()
-  inference.print_progress(t, info_dict)
+inference.run(n_iter=500)
