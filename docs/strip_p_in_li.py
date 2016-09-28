@@ -1,7 +1,15 @@
 from bs4 import BeautifulSoup
 import glob
-path = "*.html"
-for filename in glob.glob(path):
+
+print "Running `strip_p_in_li.py`"
+
+paths = ("*.html", "tutorials/*.html")
+filenames = [];
+
+for path in paths:
+  filenames.extend(glob.glob(path))
+
+for filename in filenames:
   soup = BeautifulSoup(open(filename), 'html.parser')
   all_li = soup.find_all('li')
   if all_li:
