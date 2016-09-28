@@ -72,6 +72,7 @@ class VariationalInference(Inference):
       to use PrettyTensor optimizer (when using PrettyTensor).
       Defaults to TensorFlow.
     """
+    super(VariationalInference, self).initialize(*args, **kwargs)
     self.n_minibatch = n_minibatch
     self.loss = tf.constant(0.0)
 
@@ -138,8 +139,6 @@ class VariationalInference(Inference):
 
       # Note PrettyTensor cannot use global_step.
       self.train = pt.apply_optimizer(optimizer, losses=[loss])
-
-    return super(VariationalInference, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):
     """Run one iteration of optimizer for variational inference.

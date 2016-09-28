@@ -22,6 +22,10 @@ qz = Normal(mu=tf.Variable(tf.random_normal([])),
 
 inference = ed.MFVI({z: qz})
 inference.initialize(n_print=50)
+
+init = tf.initialize_all_variables()
+init.run()
+
 for _ in range(250):
   info_dict = inference.update()
   inference.print_progress(info_dict)
