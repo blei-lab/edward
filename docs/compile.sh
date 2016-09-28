@@ -10,10 +10,10 @@ for filename in *.tex; do
          --to=html \
          --mathjax \
          --no-highlight \
-         --bibliography=bib_edward.bib \
+         --bibliography=bib.bib \
          --csl=apa.csl \
          --title-prefix=Edward \
-         --template=edward_template.pandoc \
+         --template=template.pandoc \
          --output=../${filename%.*}.html
 done
 
