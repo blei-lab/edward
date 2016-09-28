@@ -4,7 +4,7 @@ import glob
 print "Running `strip_p_in_li.py`"
 
 paths = ("*.html", "tutorials/*.html")
-filenames = [];
+filenames = []
 
 for path in paths:
   filenames.extend(glob.glob(path))
