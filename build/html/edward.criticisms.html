@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>edward.criticisms module &mdash; Edward 1.0.9 documentation</title>
+  <title>edward.criticisms package &mdash; Edward 1.0.9 documentation</title>
   
 
   
@@ -32,8 +32,8 @@
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
         <link rel="up" title="edward package" href="edward.html"/>
-        <link rel="next" title="edward.util module" href="edward.util.html"/>
-        <link rel="prev" title="edward.stats.distributions module" href="edward.stats.distributions.html"/> 
+        <link rel="next" title="edward.criticisms.evaluate module" href="edward.criticisms.evaluate.html"/>
+        <link rel="prev" title="edward package" href="edward.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -88,13 +88,17 @@
 <li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="edward.html">edward package</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="edward.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="edward.html#submodules">Submodules</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">edward.criticisms module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="edward.util.html">edward.util module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="edward.version.html">edward.version module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="edward.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">edward.criticisms package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="edward.inferences.html">edward.inferences package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="edward.models.html">edward.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="edward.stats.html">edward.stats package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="edward.html#submodules">Submodules</a></li>
 </ul>
 </li>
 </ul>
@@ -129,7 +133,7 @@
       
           <li><a href="edward.html">edward package</a> &raquo;</li>
       
-    <li>edward.criticisms module</li>
+    <li>edward.criticisms package</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -144,428 +148,16 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-edward.criticisms">
-<span id="edward-criticisms-module"></span><h1>edward.criticisms module<a class="headerlink" href="#module-edward.criticisms" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="edward.criticisms.binary_accuracy">
-<code class="descclassname">edward.criticisms.</code><code class="descname">binary_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#binary_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.binary_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Binary prediction accuracy, also known as 0/1-loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities.</li>
+<span id="edward-criticisms-package"></span><h1>edward.criticisms package<a class="headerlink" href="#module-edward.criticisms" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="edward.criticisms.evaluate.html">edward.criticisms.evaluate module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edward.criticisms.ppc.html">edward.criticisms.ppc module</a></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.binary_crossentropy">
-<code class="descclassname">edward.criticisms.</code><code class="descname">binary_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#binary_crossentropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.binary_crossentropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Binary cross-entropy.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.categorical_accuracy">
-<code class="descclassname">edward.criticisms.</code><code class="descname">categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#categorical_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.categorical_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi-class prediction accuracy. One-hot representation for <code class="docutils literal"><span class="pre">y_true</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s, where the outermost dimension of size <code class="docutils literal"><span class="pre">K</span></code>
-has only one 1 per row.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with same shape as <code class="docutils literal"><span class="pre">y_true</span></code>.
-The outermost dimension denote the categorical probabilities for
-that data point per row.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.categorical_crossentropy">
-<code class="descclassname">edward.criticisms.</code><code class="descname">categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#categorical_crossentropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi-class cross entropy. One-hot representation for <code class="docutils literal"><span class="pre">y_true</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s, where the outermost dimension of size K
-has only one 1 per row.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with same shape as y_true.
-The outermost dimension denote the categorical probabilities for
-that data point per row.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.cosine_proximity">
-<code class="descclassname">edward.criticisms.</code><code class="descname">cosine_proximity</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#cosine_proximity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.cosine_proximity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cosine similarity of two vectors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.evaluate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate fitted model using a set of metrics.</p>
-<p>A metric, or scoring rule, is a function of observed data under the
-posterior predictive distribution. For example in supervised metrics
-such as classification accuracy, the observed data (true output) is
-compared to the posterior predictive&#8217;s mean (predicted output). In
-unsupervised metrics such as log-likelihood, the probability of
-observing the data is calculated under the posterior predictive&#8217;s
-log-density.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>metrics</strong> (<em>list of str or str</em>) &#8211; List of metrics or a single metric.</li>
-<li><strong>data</strong> (<em>dict</em>) &#8211; Data to evaluate model with. It binds observed variables (of type
-<cite>RandomVariable</cite>) to their realizations (of type <cite>tf.Tensor</cite>). It
-can also bind placeholders (of type <cite>tf.Tensor</cite>) used in the model
-to their realizations.</li>
-<li><strong>latent_vars</strong> (<em>dict of str to RandomVariable, optional</em>) &#8211; Collection of random variables binded to their inferred posterior.
-It is only used (and in fact required) if the model wrapper is
-specified.</li>
-<li><strong>model_wrapper</strong> (<em>ed.Model, optional</em>) &#8211; An optional wrapper for the probability model. It must have a
-<cite>predict</cite> method, and <cite>latent_vars</cite> must be specified. <cite>data</cite> is
-also changed. For TensorFlow, Python, and Stan models, the key
-type is a string; for PyMC3, the key type is a Theano shared
-variable. For TensorFlow, Python, and PyMC3 models, the value type
-is a NumPy array or TensorFlow placeholder; for Stan, the value
-type is the type according to the Stan program&#8217;s data block.</li>
-<li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of posterior samples for making predictions,
-using the posterior predictive distribution. It is only used if
-the model wrapper is specified.</li>
-<li><strong>output_key</strong> (<em>RandomVariable or str, optional</em>) &#8211; It is the key in <code class="docutils literal"><span class="pre">data</span></code> which corresponds to the model&#8217;s output.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of evaluations or a single evaluation.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list of float or float</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">NotImplementedError</span></code> &#8211; If an input metric does not match an implemented metric in Edward.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># build posterior predictive after inference: it is</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># parameterized by posterior means</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x_post</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">beta</span><span class="p">:</span> <span class="n">qbeta</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># log-likelihood performance</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s1">&#39;log_likelihood&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">x_post</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># classification accuracy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># here, `x_ph` is any features the model is defined with respect to,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># and `y_post` is the posterior predictive distribution</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s1">&#39;binary_accuracy&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">y_post</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_ph</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># criticism for model wrappers</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s1">&#39;log_likelihood&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">... </span>         <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="s1">&#39;binary_accuracy&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">... </span>         <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
 </div>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.hinge">
-<code class="descclassname">edward.criticisms.</code><code class="descname">hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#hinge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.hinge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hinge loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of real value.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.mean_absolute_error">
-<code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#mean_absolute_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.mean_absolute_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean absolute error loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.mean_absolute_percentage_error">
-<code class="descclassname">edward.criticisms.</code><code class="descname">mean_absolute_percentage_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#mean_absolute_percentage_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.mean_absolute_percentage_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean absolute percentage error loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.mean_squared_error">
-<code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#mean_squared_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.mean_squared_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean squared error loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.mean_squared_logarithmic_error">
-<code class="descclassname">edward.criticisms.</code><code class="descname">mean_squared_logarithmic_error</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#mean_squared_logarithmic_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.mean_squared_logarithmic_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean squared logarithmic error loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.poisson">
-<code class="descclassname">edward.criticisms.</code><code class="descname">poisson</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#poisson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.poisson" title="Permalink to this definition">¶</a></dt>
-<dd><p>Negative Poisson log-likelihood of data <code class="docutils literal"><span class="pre">y_true</span></code> given predictions
-<code class="docutils literal"><span class="pre">y_pred</span></code> (up to proportion).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; </li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensors of same shape and type.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#ppc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.ppc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Posterior predictive check.
-(Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)</p>
-<p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior
-predictive check (Box, 1980).</p>
-<p>PPC&#8217;s form an empirical distribution for the predictive discrepancy,</p>
-<div class="math">
-\[p(T) = \int p(T(xrep) | z) p(z | x) dz\]</div>
-<p>by drawing replicated data sets xrep and calculating
-<span class="math">\(T(xrep)\)</span> for each data set. Then it compares it to
-<span class="math">\(T(x)\)</span>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>T</strong> (<em>function</em>) &#8211; Discrepancy function, which takes a dictionary of data and
-dictionary of latent variables as input and outputs a <cite>tf.Tensor</cite>.</li>
-<li><strong>data</strong> (<em>dict</em>) &#8211; Data to compare to. It binds observed variables (of type
-<cite>RandomVariable</cite>) to their realizations (of type <cite>tf.Tensor</cite>). It
-can also bind placeholders (of type <cite>tf.Tensor</cite>) used in the model
-to their realizations.</li>
-<li><strong>latent_vars</strong> (<em>dict of str to RandomVariable, optional</em>) &#8211; Collection of random variables binded to their inferred posterior.
-It is an optional argument, necessary for when the discrepancy is
-a function of latent variables.</li>
-<li><strong>model_wrapper</strong> (<em>ed.Model, optional</em>) &#8211; An optional wrapper for the probability model. It must have a
-<code class="docutils literal"><span class="pre">sample_likelihood</span></code> method. If <cite>latent_vars</cite> is not specified,
-it must also have a <code class="docutils literal"><span class="pre">sample_prior</span></code> method, as <code class="docutils literal"><span class="pre">ppc</span></code> will
-default to a prior predictive check. <cite>data</cite> is also changed. For
-TensorFlow, Python, and Stan models, the key type is a string; for
-PyMC3, the key type is a Theano shared variable. For TensorFlow,
-Python, and PyMC3 models, the value type is a NumPy array or
-TensorFlow placeholder; for Stan, the value type is the type
-according to the Stan program&#8217;s data block.</li>
-<li><strong>n_samples</strong> (<em>int, optional</em>) &#8211; Number of replicated data sets.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>List containing the reference distribution, which is a NumPy
-array of size elements,</p>
-<div class="math">
-\[(T(xrep^{1}, z^{1}), ..., T(xrep^{size}, z^{size}))\]</div>
-<p>and the realized discrepancy, which is a NumPy array of size
-elements,</p>
-<div class="math">
-\[(T(x, z^{1}), ..., T(x, z^{size})).\]</div>
-</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of np.ndarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># build posterior predictive after inference: it is</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># parameterized by posterior means</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x_post</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">beta</span><span class="p">:</span> <span class="n">qbeta</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># posterior predictive check</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># T is a user-defined function of data, T(data)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">x_post</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># in general T is a discrepancy function of the data (both response and</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># covariates) and latent variables, T(data, latent_vars)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">y_post</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_ph</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">,</span> <span class="s1">&#39;beta&#39;</span><span class="p">:</span> <span class="n">qbeta</span><span class="p">})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># prior predictive check</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># running ppc on original x</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">x_train</span><span class="p">})</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># criticism for model wrappers</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span> <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">latent_vars</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">qz</span><span class="p">},</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_train</span><span class="p">},</span> <span class="n">latent_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">model_wrapper</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
 </div>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.sparse_categorical_accuracy">
-<code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_accuracy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#sparse_categorical_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.sparse_categorical_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi-class prediction accuracy. Label {0, 1, .., K-1}
-representation for <code class="docutils literal"><span class="pre">y_true</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of integers {0, 1, ..., K-1}.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape <code class="docutils literal"><span class="pre">(y_true.get_shape(),</span> <span class="pre">K)</span></code>.
-The outermost dimension are the categorical probabilities for
-that data point.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.sparse_categorical_crossentropy">
-<code class="descclassname">edward.criticisms.</code><code class="descname">sparse_categorical_crossentropy</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#sparse_categorical_crossentropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.sparse_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi-class cross entropy. Label {0, 1, .., K-1} representation
-for <code class="docutils literal"><span class="pre">y_true.</span></code></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of integers {0, 1, ..., K-1}.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of probabilities, with shape <code class="docutils literal"><span class="pre">(y_true.get_shape(),</span> <span class="pre">K)</span></code>.
-The outermost dimension are the categorical probabilities for
-that data point.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="edward.criticisms.squared_hinge">
-<code class="descclassname">edward.criticisms.</code><code class="descname">squared_hinge</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edward/criticisms.html#squared_hinge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edward.criticisms.squared_hinge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Squared hinge loss.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>y_true</strong> (<em>tf.Tensor</em>) &#8211; Tensor of 0s and 1s.</li>
-<li><strong>y_pred</strong> (<em>tf.Tensor</em>) &#8211; Tensor of real value.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </div>
 
 
@@ -575,10 +167,10 @@ that data point.</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="edward.util.html" class="btn btn-neutral float-right" title="edward.util module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="edward.criticisms.evaluate.html" class="btn btn-neutral float-right" title="edward.criticisms.evaluate module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="edward.stats.distributions.html" class="btn btn-neutral" title="edward.stats.distributions module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="edward.html" class="btn btn-neutral" title="edward package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

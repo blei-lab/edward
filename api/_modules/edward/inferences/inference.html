@@ -266,9 +266,9 @@
 <span class="sd">      Passed into ``initialize``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">):</span>
       <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">info_dict</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
 
@@ -289,6 +289,9 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">=</span> <span class="n">n_print</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">increment_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">logdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">train_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SummaryWriter</span><span class="p">(</span><span class="n">logdir</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">())</span>
 
@@ -307,15 +310,14 @@
 <span class="sd">    dict</span>
 <span class="sd">      Dictionary of algorithm-specific information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">{}</span></div>
+    <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">increment_t</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span></div>
 
-<div class="viewcode-block" id="Inference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
+<div class="viewcode-block" id="Inference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Print progress to output.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    t : int</span>
-<span class="sd">      Iteration counter.</span>
 <span class="sd">    info_dict : dict</span>
 <span class="sd">      Dictionary of algorithm-specific information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>

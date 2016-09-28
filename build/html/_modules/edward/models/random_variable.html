@@ -176,28 +176,12 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span>
-
-  <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">dtype</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">parameters</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">is_continuous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">is_continuous</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">is_reparameterized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">is_reparameterized</span>
+  <span class="k">def</span> <span class="nf">distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">allow_nan_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -206,6 +190,18 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">validate_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">validate_args</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">dtype</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">is_continuous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">is_continuous</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">is_reparameterized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">is_reparameterized</span>
 
 <div class="viewcode-block" id="RandomVariable.value"><a class="viewcode-back" href="../../../edward.models.random_variable.html#edward.models.random_variable.RandomVariable.value">[docs]</a>  <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span></div>

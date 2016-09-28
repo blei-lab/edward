@@ -1,19 +1,26 @@
 #!/bin/bash
+echo "Compiling website."
+
+echo "Clearing all html files."
 rm -f *.html
+rm -rf tutorials
 rm -rf api
 
 # Compile all the tex files into html
+echo "Begin pandoc compilation."
+mkdir -p tutorials
 cd tex
-for filename in *.tex; do
+for filename in {./,tutorials/}*.tex; do
+  echo $filename
   pandoc ${filename%.*}.tex \
          --from=latex+link_attributes \
          --to=html \
          --mathjax \
          --no-highlight \
-         --bibliography=bib_edward.bib \
+         --bibliography=bib.bib \
          --csl=apa.csl \
          --title-prefix=Edward \
-         --template=edward_template.pandoc \
+         --template=template.pandoc \
          --output=../${filename%.*}.html
 done
 
