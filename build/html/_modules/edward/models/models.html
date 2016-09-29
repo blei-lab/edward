@@ -131,19 +131,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.models.models</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">six</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="kn">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span>
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_dims</span><span class="p">,</span> <span class="n">get_session</span>
 
 <span class="k">try</span><span class="p">:</span>
   <span class="kn">import</span> <span class="nn">pystan</span>
-  <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+  <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
   <span class="k">pass</span>
 
@@ -163,7 +163,7 @@
 <span class="sd">      variables live on their original (constrained) space.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="k">None</span>
 
 <div class="viewcode-block" id="PyMC3Model.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PyMC3Model.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -188,12 +188,12 @@
 <span class="sd">    It wraps around a Python function. The Python function takes</span>
 <span class="sd">    inputs of type np.ndarray and outputs a np.ndarray.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Store keys so that ``_py_log_prob_args`` knows how each</span>
-    <span class="c1"># value corresponds to a key.</span>
+    <span class="c"># Store keys so that ``_py_log_prob_args`` knows how each</span>
+    <span class="c"># value corresponds to a key.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>
 
-    <span class="c1"># Pass in all tensors as a flattened list for tf.py_func().</span>
+    <span class="c"># Pass in all tensors as a flattened list for tf.py_func().</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">)]</span>
     <span class="n">inputs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">zs</span><span class="p">)]</span>
 
@@ -203,13 +203,13 @@
     <span class="n">xs_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">)]</span>
     <span class="n">zs_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">):]</span>
 
-    <span class="c1"># Set data placeholders in PyMC3 model (Theano shared</span>
-    <span class="c1"># variable) to their realizations (NumPy array).</span>
+    <span class="c"># Set data placeholders in PyMC3 model (Theano shared</span>
+    <span class="c"># variable) to their realizations (NumPy array).</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">,</span> <span class="n">xs_values</span><span class="p">):</span>
       <span class="n">key</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="c1"># Calculate model&#39;s log density using a dictionary of latent</span>
-    <span class="c1"># variables.</span>
+    <span class="c"># Calculate model&#39;s log density using a dictionary of latent</span>
+    <span class="c"># variables.</span>
     <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
     <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fastlogp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">lp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
@@ -219,7 +219,7 @@
   <span class="sd">&quot;&quot;&quot;Model wrapper for models written in NumPy/SciPy.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="k">None</span>
 
 <div class="viewcode-block" id="PythonModel.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.PythonModel.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -244,20 +244,20 @@
 <span class="sd">    It wraps around a Python function. The Python function takes</span>
 <span class="sd">    inputs of type np.ndarray and outputs a np.ndarray.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Store keys so that ``_py_log_prob_args`` knows how each</span>
-    <span class="c1"># value corresponds to a key.</span>
+    <span class="c"># Store keys so that ``_py_log_prob_args`` knows how each</span>
+    <span class="c"># value corresponds to a key.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>
 
-    <span class="c1"># Pass in all tensors as a flattened list for tf.py_func().</span>
+    <span class="c"># Pass in all tensors as a flattened list for tf.py_func().</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">xs</span><span class="p">)]</span>
     <span class="n">inputs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">zs</span><span class="p">)]</span>
 
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob_args</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
 
   <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-    <span class="c1"># Convert from flattened list to dictionaries for use in a</span>
-    <span class="c1"># Python function which works with Numpy arrays.</span>
+    <span class="c"># Convert from flattened list to dictionaries for use in a</span>
+    <span class="c"># Python function which works with Numpy arrays.</span>
     <span class="n">xs_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">)]</span>
     <span class="n">zs_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">):]</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_keys</span><span class="p">,</span> <span class="n">xs_values</span><span class="p">)}</span>
@@ -272,7 +272,7 @@
 <div class="viewcode-block" id="StanModel"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.StanModel">[docs]</a><span class="k">class</span> <span class="nc">StanModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Model wrapper for models written in Stan.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -288,14 +288,14 @@
 <span class="sd">    **kwargs</span>
 <span class="sd">      Passed into pystan.StanModel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pystan</span><span class="o">.</span><span class="n">StanModel</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span> <span class="o">=</span> <span class="k">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="k">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="k">None</span>
 
 <div class="viewcode-block" id="StanModel.log_prob"><a class="viewcode-back" href="../../../edward.models.models.html#edward.models.models.StanModel.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -322,36 +322,36 @@
 <span class="sd">    It wraps around a Python function. The Python function takes</span>
 <span class="sd">    inputs of type np.ndarray and outputs a np.ndarray.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The empty sampling message exists for accessing &quot;</span>
-          <span class="s2">&quot;Stan&#39;s log_prob method.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s">&quot;The empty sampling message exists for accessing &quot;</span>
+          <span class="s">&quot;Stan&#39;s log_prob method.&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sampling</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span>
 
-    <span class="c1"># Store keys so that ``_py_log_prob_args`` knows how each</span>
-    <span class="c1"># value corresponds to a key.</span>
+    <span class="c"># Store keys so that ``_py_log_prob_args`` knows how each</span>
+    <span class="c"># value corresponds to a key.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">zs</span><span class="p">))</span>
 
-    <span class="c1"># Pass in all tensors as a flattened list for tf.py_func().</span>
+    <span class="c"># Pass in all tensors as a flattened list for tf.py_func().</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="n">zs</span><span class="p">)]</span>
 
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_log_prob_args</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
 
   <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="k">True</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_vars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
                        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">par_dims</span><span class="p">])</span>
 
   <span class="k">def</span> <span class="nf">_py_log_prob_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="n">zs_values</span> <span class="o">=</span> <span class="n">args</span>
-    <span class="c1"># Calculate model&#39;s log density using a dictionary of latent</span>
-    <span class="c1"># variables.</span>
+    <span class="c"># Calculate model&#39;s log density using a dictionary of latent</span>
+    <span class="c"># variables.</span>
     <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zs_keys</span><span class="p">,</span> <span class="n">zs_values</span><span class="p">)}</span>
-    <span class="c1"># Convert latent variable dictionary (on constrained</span>
-    <span class="c1"># space) to a flattened vector (on unconstrained space).</span>
-    <span class="c1"># This is necessary for Stan&#39;s log_prob() method.</span>
+    <span class="c"># Convert latent variable dictionary (on constrained</span>
+    <span class="c"># space) to a flattened vector (on unconstrained space).</span>
+    <span class="c"># This is necessary for Stan&#39;s log_prob() method.</span>
     <span class="n">z_unconst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">unconstrain_pars</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-    <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z_unconst</span><span class="p">,</span> <span class="n">adjust_transform</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z_unconst</span><span class="p">,</span> <span class="n">adjust_transform</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 </pre></div>
 

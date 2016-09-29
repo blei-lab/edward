@@ -131,28 +131,28 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.models.point_mass</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The Point Mass distribution class.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;The Point Mass distribution class.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
 
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="kn">import</span> <span class="n">tile</span>
-<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="kn">import</span> \
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">tile</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="k">import</span> \
     <span class="n">distribution</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">constant_op</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">dtypes</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">ops</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">tensor_shape</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">tensor_util</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">array_ops</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">check_ops</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">math_ops</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">random_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">constant_op</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">tensor_shape</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">tensor_util</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">array_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">check_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">math_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">random_ops</span>
 
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
 <div class="viewcode-block" id="PointMass"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass">[docs]</a><span class="k">class</span> <span class="nc">PointMass</span><span class="p">(</span><span class="n">distribution</span><span class="o">.</span><span class="n">Distribution</span><span class="p">):</span>
@@ -161,16 +161,16 @@
 <span class="sd">  an outer dimension.&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                <span class="n">params</span><span class="p">,</span>
-               <span class="n">validate_args</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-               <span class="n">allow_nan_stats</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;PointMass&quot;</span><span class="p">):</span>
+               <span class="n">validate_args</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+               <span class="n">allow_nan_stats</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s">&quot;PointMass&quot;</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_allow_nan_stats</span> <span class="o">=</span> <span class="n">allow_nan_stats</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_validate_args</span> <span class="o">=</span> <span class="n">validate_args</span>
     <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="n">params</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
       <span class="n">params</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;params&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;params&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch_shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_event_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ones</span><span class="p">()</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
 
@@ -192,7 +192,7 @@
   <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">dtype</span>
 
-<div class="viewcode-block" id="PointMass.batch_shape"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.batch_shape">[docs]</a>  <span class="k">def</span> <span class="nf">batch_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_shape&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.batch_shape"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.batch_shape">[docs]</a>  <span class="k">def</span> <span class="nf">batch_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;batch_shape&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Batch dimensions of this instance as a 1-D int32 `Tensor`.</span>
 
 <span class="sd">    The product of the dimensions of the `batch_shape` is the number of</span>
@@ -218,7 +218,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_shape</span></div>
 
-<div class="viewcode-block" id="PointMass.event_shape"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.event_shape">[docs]</a>  <span class="k">def</span> <span class="nf">event_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;event_shape&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.event_shape"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.event_shape">[docs]</a>  <span class="k">def</span> <span class="nf">event_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;event_shape&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Shape of a sample from a single distribution as a 1-D int32 `Tensor`.</span>
 
 <span class="sd">    Args:</span>
@@ -246,29 +246,29 @@
     <span class="sd">&quot;&quot;&quot;Distribution parameter.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span>
 
-<div class="viewcode-block" id="PointMass.mean"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.mean">[docs]</a>  <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.mean"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.mean">[docs]</a>  <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;mean&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Mean of this distribution.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span></div>
 
-<div class="viewcode-block" id="PointMass.mode"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.mode">[docs]</a>  <span class="k">def</span> <span class="nf">mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mode&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.mode"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.mode">[docs]</a>  <span class="k">def</span> <span class="nf">mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;mode&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Mode of this distribution.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;mode&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mode&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PointMass.std"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.std">[docs]</a>  <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;std&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.std"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.std">[docs]</a>  <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;std&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Standard deviation of this distribution.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PointMass.variance"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.variance">[docs]</a>  <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;variance&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.variance"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.variance">[docs]</a>  <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;variance&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Variance of this distribution.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([],</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="PointMass.log_prob"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;log_prob&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.log_prob"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.log_prob">[docs]</a>  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;log_prob&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Log prob of observations in `x` under the Point Mass distribution.</span>
 
 <span class="sd">    Args:</span>
@@ -282,7 +282,7 @@
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prob</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PointMass.cdf"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.cdf">[docs]</a>  <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;cdf&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.cdf"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.cdf">[docs]</a>  <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;cdf&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;CDF of observations in `x` under the Point Mass distribution(s).</span>
 
 <span class="sd">    Args:</span>
@@ -294,7 +294,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PointMass.log_cdf"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.log_cdf">[docs]</a>  <span class="k">def</span> <span class="nf">log_cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;log_cdf&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.log_cdf"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.log_cdf">[docs]</a>  <span class="k">def</span> <span class="nf">log_cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;log_cdf&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Log CDF of observations `x` under the Point Mass distribution(s).</span>
 
 <span class="sd">    Args:</span>
@@ -308,7 +308,7 @@
       <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">op_scope</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PointMass.prob"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.prob">[docs]</a>  <span class="k">def</span> <span class="nf">prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;prob&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.prob"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.prob">[docs]</a>  <span class="k">def</span> <span class="nf">prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;prob&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The PDF of observations in `x` under the Point Mass distribution(s).</span>
 
 <span class="sd">    Args:</span>
@@ -320,7 +320,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PointMass.entropy"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.entropy">[docs]</a>  <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;entropy&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.entropy"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.entropy">[docs]</a>  <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;entropy&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The entropy of Point Mass distribution.</span>
 
 <span class="sd">    Args:</span>
@@ -331,7 +331,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PointMass.sample_n"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.sample_n">[docs]</a>  <span class="k">def</span> <span class="nf">sample_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sample_n&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PointMass.sample_n"><a class="viewcode-back" href="../../../edward.models.point_mass.html#edward.models.point_mass.PointMass.sample_n">[docs]</a>  <span class="k">def</span> <span class="nf">sample_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;sample_n&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sample `n` observations from the Point Mass distribution.</span>
 
 <span class="sd">    Args:</span>
@@ -351,7 +351,7 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">is_reparameterized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="k">True</span>
 
   <span class="k">def</span> <span class="nf">_ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
@@ -361,7 +361,7 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">is_continuous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="k">False</span></div>
 </pre></div>
 
            </div>

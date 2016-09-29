@@ -19,4 +19,4 @@ the current techniques or built as a standalone function.
 
 For examples of criticism techniques built in Edward, see the
 criticism
-`tutorials <../tutorials>`__.
+`tutorials <../tutorials/>`__.

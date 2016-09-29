@@ -109,7 +109,7 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 ## Size of output in training data: (4000, 1)
 ## Size of features in test data: (36000, 1)
 ## Size of output in test data: (36000, 1)</code></pre>
-<p><img alt="image" src="images/mdn-fig0.png" width="700"/></p>
+<p><img alt="image" src="/images/mdn-fig0.png" width="700"/></p>
 <p>We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is <a href="http://edwardlib.org/api/data">one of many ways</a> to train models with data in Edward.</p>
 <pre class="python" language="Python"><code>X = ed.placeholder(tf.float32, shape=(None, 1))
 y = ed.placeholder(tf.float32, shape=(None, 1))
@@ -151,7 +151,7 @@ data = {'X': X, 'y': y}</code></pre>
 <p>We instantiate the mixture density network with 10 mixtures.</p>
 <pre class="python" language="Python"><code>model = MixtureDensityNetwork(10)</code></pre>
 <h3 id="inference">Inference</h3>
-<p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="map">MAP estimation in Edward</a>.</p>
+<p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="/tutorials/map">MAP estimation in Edward</a>.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP([], data, model)</code></pre>
 <p>Here, we will manually control the inference and how data is passed into it at each step. First, start a TensorFlow session and pass it into Keras so that it shares the same TensorFlow session as Edward. Then initialize the algorithm.</p>
 <pre class="python" language="Python"><code>sess = ed.get_session()
@@ -181,7 +181,7 @@ plt.plot(np.arange(NEPOCH), train_loss/len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)</code></pre>
-<p><img alt="image" src="images/mdn-fig1.png" width="700"/></p>
+<p><img alt="image" src="/images/mdn-fig1.png" width="700"/></p>
 <p>We see that it converges after 400 iterations.</p>
 <h3 id="criticism">Criticism</h3>
 <p>Let’s look at how a few individual examples perform. Note that as this is an inverse problem we can’t get the answer correct, but we can hope that the truth lies in area where the model has high probability.</p>
@@ -197,11 +197,11 @@ axes[1].axvline(x=y_test[obj][2], color='black', alpha=0.5)
 
 plot_normal_mix(pred_weights[obj][1], pred_means[obj][1], pred_std[obj][1], axes[2], comp=False)
 axes[2].axvline(x=y_test[obj][1], color='black', alpha=0.5)</code></pre>
-<p><img alt="image" src="images/mdn-fig2.png" width="700"/></p>
+<p><img alt="image" src="/images/mdn-fig2.png" width="700"/></p>
 <p>We can check the ensemble by drawing samples of the prediction and plotting the density of those. The MDN has learned what we’d like it to learn.</p>
 <pre class="python" language="Python"><code>a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X_test))
 sns.jointplot(a[:,0], a[:,1], kind="hex", color="#4CB391", ylim=(-10,10), xlim=(-14,14))</code></pre>
-<p><img alt="image" src="images/mdn-fig3.png" width="700"/></p>
+<p><img alt="image" src="/images/mdn-fig3.png" width="700"/></p>
 <h3 id="acknowledgments">Acknowledgments</h3>
 <p>We are grateful to Christopher Bonnett for writing this tutorial, and more generally for pushing forward momentum to have Edward tutorials be accessible and easy-to-learn.</p>
 <h3 class="unnumbered" id="references">References</h3>

@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="Edward 1.0.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="edward.criticisms" href="../criticisms.html"/> 
+        <link rel="up" title="Module code" href="../../index.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -118,8 +118,6 @@
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
-          <li><a href="../criticisms.html">edward.criticisms</a> &raquo;</li>
-      
     <li>edward.criticisms.evaluate</li>
       <li class="wy-breadcrumbs-aside">
         
@@ -133,20 +131,20 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.criticisms.evaluate</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">six</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">edward.models</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
-<span class="kn">from</span> <span class="nn">edward.util</span> <span class="kn">import</span> <span class="n">logit</span><span class="p">,</span> <span class="n">get_session</span>
+<span class="kn">from</span> <span class="nn">edward.models</span> <span class="k">import</span> <span class="n">RandomVariable</span>
+<span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">logit</span><span class="p">,</span> <span class="n">get_session</span>
 
 
-<div class="viewcode-block" id="evaluate"><a class="viewcode-back" href="../../../edward.criticisms.evaluate.html#edward.criticisms.evaluate.evaluate">[docs]</a><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">output_key</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluate"><a class="viewcode-back" href="../../../edward.criticisms.evaluate.html#edward.criticisms.evaluate.evaluate">[docs]</a><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+             <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">output_key</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Evaluate fitted model using a set of metrics.</span>
 
 <span class="sd">  A metric, or scoring rule, is a function of observed data under the</span>
@@ -216,8 +214,8 @@
 <span class="sd">  ...          latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-  <span class="c1"># Create feed_dict for data placeholders that the model conditions</span>
-  <span class="c1"># on; it is necessary for all session runs.</span>
+  <span class="c"># Create feed_dict for data placeholders that the model conditions</span>
+  <span class="c"># on; it is necessary for all session runs.</span>
   <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">and</span>
                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span>
@@ -225,29 +223,29 @@
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
 
-  <span class="c1"># Set default for output_key if not using a model wrapper.</span>
-  <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">output_key</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
-      <span class="c1"># Try to default to the only one observed random variable.</span>
+  <span class="c"># Set default for output_key if not using a model wrapper.</span>
+  <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">output_key</span> <span class="o">==</span> <span class="s">&#39;y&#39;</span><span class="p">:</span>
+      <span class="c"># Try to default to the only one observed random variable.</span>
       <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
               <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)]</span>
       <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">output_key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;User must specify output_key.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;User must specify output_key.&quot;</span><span class="p">)</span>
 
-  <span class="c1"># Form true data. (It is not required in the specific setting of the</span>
-  <span class="c1"># log-likelihood metric with a model wrapper.)</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;log_lik&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;log_likelihood&#39;</span><span class="p">])</span> <span class="ow">or</span> \
-          <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="c"># Form true data. (It is not required in the specific setting of the</span>
+  <span class="c"># log-likelihood metric with a model wrapper.)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_lik&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">])</span> <span class="ow">or</span> \
+          <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
     <span class="n">y_true</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">output_key</span><span class="p">]</span>
 
-  <span class="c1"># Form predicted data (if there are any supervised metrics).</span>
-  <span class="k">if</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;log_lik&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;log_likelihood&#39;</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="c"># Form predicted data (if there are any supervised metrics).</span>
+  <span class="k">if</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_lik&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">metrics</span> <span class="o">!=</span> <span class="p">[</span><span class="s">&#39;log_likelihood&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
       <span class="n">y_pred</span> <span class="o">=</span> <span class="n">output_key</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># Monte Carlo estimate the mean of the posterior predictive.</span>
+      <span class="c"># Monte Carlo estimate the mean of the posterior predictive.</span>
       <span class="n">y_pred</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
         <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
@@ -256,54 +254,54 @@
 
       <span class="n">y_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-  <span class="c1"># Evaluate y_true (according to y_pred if supervised) for all metrics.</span>
+  <span class="c"># Evaluate y_true (according to y_pred if supervised) for all metrics.</span>
   <span class="n">evaluations</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;accuracy&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;crossentropy&#39;</span><span class="p">:</span>
-      <span class="c1"># automate binary or sparse cat depending on its support</span>
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;accuracy&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;crossentropy&#39;</span><span class="p">:</span>
+      <span class="c"># automate binary or sparse cat depending on its support</span>
       <span class="n">support</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
       <span class="k">if</span> <span class="n">support</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;binary_&#39;</span> <span class="o">+</span> <span class="n">metric</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="s">&#39;binary_&#39;</span> <span class="o">+</span> <span class="n">metric</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;sparse_categorical_&#39;</span> <span class="o">+</span> <span class="n">metric</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="s">&#39;sparse_categorical_&#39;</span> <span class="o">+</span> <span class="n">metric</span>
 
-    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;binary_accuracy&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;binary_accuracy&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">binary_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;categorical_accuracy&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;categorical_accuracy&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">categorical_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;sparse_categorical_accuracy&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;sparse_categorical_accuracy&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sparse_categorical_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;log_loss&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;binary_crossentropy&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;log_loss&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;binary_crossentropy&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">binary_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;categorical_crossentropy&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;categorical_crossentropy&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;sparse_categorical_crossentropy&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;sparse_categorical_crossentropy&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sparse_categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;hinge&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;hinge&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">hinge</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;squared_hinge&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;squared_hinge&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">squared_hinge</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mse&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;MSE&#39;</span> <span class="ow">or</span>
-          <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mse&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MSE&#39;</span> <span class="ow">or</span>
+          <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_squared_error&#39;</span><span class="p">):</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mae&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;MAE&#39;</span> <span class="ow">or</span>
-          <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mae&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MAE&#39;</span> <span class="ow">or</span>
+          <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_absolute_error&#39;</span><span class="p">):</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mape&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;MAPE&#39;</span> <span class="ow">or</span>
-          <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mape&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MAPE&#39;</span> <span class="ow">or</span>
+          <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_absolute_percentage_error&#39;</span><span class="p">):</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;msle&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;MSLE&#39;</span> <span class="ow">or</span>
-          <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;mean_squared_logarithmic_error&#39;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;msle&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;MSLE&#39;</span> <span class="ow">or</span>
+          <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;mean_squared_logarithmic_error&#39;</span><span class="p">):</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mean_squared_logarithmic_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;poisson&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;poisson&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">poisson</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;cosine&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;cosine_proximity&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;cosine&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;cosine_proximity&#39;</span><span class="p">:</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cosine_proximity</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;log_lik&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;log_likelihood&#39;</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;log_lik&#39;</span> <span class="ow">or</span> <span class="n">metric</span> <span class="o">==</span> <span class="s">&#39;log_likelihood&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
         <span class="n">evaluations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">output_key</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y_true</span><span class="p">))]</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Monte Carlo estimate the log-density of the posterior predictive.</span>
+        <span class="c"># Monte Carlo estimate the log-density of the posterior predictive.</span>
         <span class="n">log_liks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
           <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">qz</span><span class="o">.</span><span class="n">sample</span><span class="p">(())</span>
@@ -320,7 +318,7 @@
     <span class="k">return</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">evaluations</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)</span></div>
 
 
-<span class="c1"># Classification metrics</span>
+<span class="c"># Classification metrics</span>
 
 
 <div class="viewcode-block" id="binary_accuracy"><a class="viewcode-back" href="../../../edward.criticisms.evaluate.html#edward.criticisms.evaluate.binary_accuracy">[docs]</a><span class="k">def</span> <span class="nf">binary_accuracy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
@@ -334,6 +332,9 @@
 <span class="sd">    Tensor of probabilities.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">y_true</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+  <span class="c"># TODO for a bernoulli mean, the output is 0.5</span>
+  <span class="c"># this is okay sans maja&#39;s nuance</span>
+  <span class="c"># but what about the other classification metrics?</span>
   <span class="n">y_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">y_pred</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span></div>
 
@@ -456,7 +457,7 @@
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">y_true</span> <span class="o">*</span> <span class="n">y_pred</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)))</span></div>
 
 
-<span class="c1"># Regression metrics</span>
+<span class="c"># Regression metrics</span>
 
 
 <div class="viewcode-block" id="mean_squared_error"><a class="viewcode-back" href="../../../edward.criticisms.evaluate.html#edward.criticisms.evaluate.mean_squared_error">[docs]</a><span class="k">def</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
@@ -493,7 +494,7 @@
 <span class="sd">    Tensors of same shape and type.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">diff</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y_true</span><span class="p">),</span>
-                                                     <span class="mf">1e-8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+                                                     <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
   <span class="k">return</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span></div>
 
 
@@ -506,8 +507,8 @@
 <span class="sd">  y_pred : tf.Tensor</span>
 <span class="sd">    Tensors of same shape and type.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">first_log</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
-  <span class="n">second_log</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+  <span class="n">first_log</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+  <span class="n">second_log</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">first_log</span> <span class="o">-</span> <span class="n">second_log</span><span class="p">))</span></div>
 
 
@@ -521,7 +522,7 @@
 <span class="sd">  y_pred : tf.Tensor</span>
 <span class="sd">    Tensors of same shape and type.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">-</span> <span class="n">y_true</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">))</span></div>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">-</span> <span class="n">y_true</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">+</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="cosine_proximity"><a class="viewcode-back" href="../../../edward.criticisms.evaluate.html#edward.criticisms.evaluate.cosine_proximity">[docs]</a><span class="k">def</span> <span class="nf">cosine_proximity</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>

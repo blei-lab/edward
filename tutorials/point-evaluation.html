@@ -112,7 +112,7 @@ ed.evaluate(&#39;mean_absolute_error&#39;, data={y_post: y_train, x: x_train})</
 <p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
 <pre class="python" language="Python"><code>ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_train})</code></pre>
 <p>Point-based evaluations are formally known as scoring rules in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>
-<p>See the <a href="../api/criticisms.html">criticism API</a> for further details. An example of point-based evaluation is in the <a href="supervised-regression">supervised learning (regression)</a> tutorial.</p>
+<p>See the <a href="/api/criticisms">criticism API</a> for further details. An example of point-based evaluation is in the <a href="/tutorial/supervised-regression">supervised learning (regression)</a> tutorial.</p>
 <h3 id="implementation-model-wrappers">Implementation (model wrappers)</h3>
 <p>For model wrappers, Edward implements point-based evaluations through the <code>predict()</code> method in the class object. It predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span>, i.e., it is the mean of <span class="math inline">\(p(x_\text{new} \mid z)\)</span> for a posterior sample.</p>
 <pre class="python" language="Python"><code>class BayesianLinearRegression:

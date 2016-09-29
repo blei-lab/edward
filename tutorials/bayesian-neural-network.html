@@ -125,7 +125,7 @@ y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))</code></pre>
 <p>This code builds the model assuming the features <code>x_train</code> already exists in the Python environment. Alternatively, one can also define a TensorFlow placeholder,</p>
 <pre><code>x = ed.placeholder(tf.float32, [N, D])</code></pre>
 <p>and feed the placeholder manually during inference.</p>
-<p>A toy demonstration is available in the <a href="../getting-started">Getting Started</a> section. Source code is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">here</a>. An example of the model implemented as a class object in TensorFlow is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_nn.py">here</a>.</p>
+<p>A toy demonstration is available in the <a href="/getting-started">Getting Started</a> section. Source code is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">here</a>. An example of the model implemented as a class object in TensorFlow is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_nn.py">here</a>.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-neal2012bayesian">

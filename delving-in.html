@@ -108,7 +108,7 @@
 <pre class="python" language="Python"><code>p = Beta(a=1.0, b=1.0)
 x = Bernoulli(p=tf.ones(10) * p)</code></pre>
 <p>Here, we define <code>p</code> as a scalar random variable. It is a latent probability to a Bernoulli likelihood, and this probability is shared across data points.</p>
-<p>Edward also supports other languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan. More details are available in the <a href="api/models">model API</a>.</p>
+<p>Edward also supports other languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan. More details are available in the <a href="/api/models">model API</a>.</p>
 <h3 id="inference">Inference</h3>
 <p>Given a model and data, we aim to reason about <span class="math inline">\(z\)</span>: the model’s hidden structure. The posterior distribution <span class="math inline">\(p(z \mid x)\)</span> captures our reasoning: its mean describes our best guess of the hidden structure, and its variance describes the uncertainty around our best guess.</p>
 <p>Edward has many inference algorithms and makes it easy to develop new ones.</p>
@@ -151,8 +151,8 @@ inference.run(n_iter=500, n_minibatch=5)</code></pre>
 </ul>
 <pre class="python" language="Python"><code>T = lambda xs, zs: tf.reduce_mean(xs[x])
 ed.ppc(T, data={x: x_data})</code></pre>
-<p>See the <a class="uri" href="tutorials">tutorials</a> for examples of models, inference, and criticism in Edward.</p>
-<p>See the <a href="api/">API</a> for details of how Edward implements these objects.</p>
+<p>See the <a href="/tutorials/">tutorials</a> for examples of models, inference, and criticism in Edward.</p>
+<p>See the <a href="/api/">API</a> for details of how Edward implements these objects.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-blei2014build">

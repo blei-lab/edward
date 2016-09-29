@@ -88,7 +88,7 @@
 </div>
 <div class="nine columns">
 <h2 id="score-function-gradient">Score function gradient</h2>
-<p>(This tutorial follows the <a href="klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a> tutorial.)</p>
+<p>(This tutorial follows the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a> tutorial.)</p>
 <p>We seek to maximize the ELBO, <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
@@ -179,7 +179,7 @@
 <p>The method <code>build_score_loss()</code> implements the ELBO and its gradient. It draws <code>self.n_samples</code> samples from the variational model. It registers the Monte Carlo estimate of the ELBO in TensorFlow’s computational graph, and stores it in <code>self.loss</code>, to track progress of the inference for diagnostics.</p>
 <p>The method returns an object whose automatic differentiation is the score function gradient of the ELBO. The TensorFlow function <code>tf.stop_gradient()</code> tells the computational graph to stop traversing nodes to propagate gradients. In this case, the only gradients taken are <span class="math inline">\(\nabla_\lambda \log q(z_s\;;\;\lambda)\)</span>, one for each sample <span class="math inline">\(z_s\)</span>. We multiply it by <code>losses</code> element-wise and return the mean.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
-<p>See the <a href="../api/index.html">API</a> for more details.</p>
+<p>See the <a href="/api/">API</a> for more details.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-paisley2012variational">
