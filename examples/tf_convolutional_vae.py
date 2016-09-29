@@ -141,6 +141,9 @@ with tf.variable_scope("model") as scope:
 with tf.variable_scope("model", reuse=True) as scope:
   p_rep = model.sample_prior(N_MINIBATCH)
 
+init = tf.initialize_all_variables()
+init.run()
+
 n_epoch = 100
 n_iter_per_epoch = 1000
 for epoch in range(n_epoch):
