@@ -121,6 +121,15 @@ class MonteCarlo(Inference):
     others op run with the t before incrementing or after incrementing
     depends on which is run faster in the TensorFlow graph. Running it
     separately forces a consistent behavior.
+
+    Initialization is assumed from params[0, :]. This generalizes
+    initializing randomly and initializing from user input. Updates
+    are along this outer dimension, where iteration t updates
+    params[t, :] in each Empirical random variable.
+
+    No warm-up is implemented. Users must run MCMC for a long period
+    of time, then manually burn in the Empirical random variable.
+
     """
     if feed_dict is None:
       feed_dict = {}

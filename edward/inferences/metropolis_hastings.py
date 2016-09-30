@@ -33,14 +33,6 @@ class MetropolisHastings(MonteCarlo):
 
     Notes
     -----
-    Initialization is assumed from params[0, :]. This generalizes
-    initializing randomly and initializing from user input. Updates
-    are along this outer dimension, where iteration t updates
-    params[t, :] in each Empirical random variable.
-
-    No warm-up is implemented. Users must run MCMC for a long period
-    of time, then manually burn in the Empirical random variable.
-
     The updates assume each Empirical random variable is directly
     parameterized by tf.Variables().
     """
@@ -61,7 +53,7 @@ class MetropolisHastings(MonteCarlo):
             sum_z [ log p(znew) - log g(zold | znew) ] +
             sum_x [ log p(x | znew) - sum_x log p(x | zold) ]
     """
-    old_sample = {z: tf.gather(qz.params, self.t)
+    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
 
     # Draw proposed sample and calculate acceptance ratio.

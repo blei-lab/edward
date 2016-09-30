@@ -20,7 +20,7 @@ setup(
                     'pymc3': ['pymc3>=3.0'],
                     'neural networks': ['keras>=1.0.0', 'prettytensor>=0.5.3'],
                     'visualization': ['progressbar>=2.0']},
-    url='https://github.com/blei-lab/edward',
+    url='http://edwardlib.org',
     license='Apache License 2.0',
     classifiers=['License :: OSI Approved :: Apache Software License',
                  'Programming Language :: Python :: 2.7',

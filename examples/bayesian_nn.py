@@ -85,6 +85,7 @@ init.run()
 
 for _ in range(1000):
   info_dict = inference.update()
-  t, loss = info_dict['t'], info_dict['loss']
+  t = info_dict['t']
   if t % inference.n_print == 0:
+    loss = info_dict['loss']
     print("iter {:d} loss {:.2f}".format(t, loss))
