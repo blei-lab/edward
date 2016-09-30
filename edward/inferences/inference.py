@@ -117,27 +117,69 @@ class Inference(object):
           # If key is a placeholder, then don't modify its fed value.
           self.data[key] = value
 
-  def run(self, *args, **kwargs):
+  def run(self, logdir=None, variables=None, use_coordinator=True,
+          *args, **kwargs):
     """A simple wrapper to run inference.
 
-    1. Initialize via ``initialize``.
-    2. Run ``update`` for ``self.n_iter`` iterations.
-    3. While running, ``print_progress``.
-    4. Finalize via ``finalize``.
+    1. Initialize algorithm via ``initialize``.
+    2. (Optional) Build a ``tf.train.SummaryWriter`` for TensorBoard.
+    3. (Optional) Initialize TensorFlow variables.
+    4. (Optional) Start queue runners.
+    5. Run ``update`` for ``self.n_iter`` iterations.
+    6. While running, ``print_progress``.
+    7. Finalize algorithm via ``finalize``.
+    8. (Optional) Stop queue runners.
+
+    To customize the way inference is run, run these steps
+    individually.
 
     Parameters
     ----------
+    logdir : str, optional
+      Directory where event file will be written. For details,
+      see `tf.train.SummaryWriter`. Default is to write nothing.
+    variables : list, optional
+      A list of TensorFlow variables to initialize during inference.
+      Default is to initialize all variables (this includes
+      reinitializing variables that were already initialized). To
+      avoid initializing any variables, pass in an empty list.
+    use_coordinator : bool, optional
+      Whether to start and stop queue runners during inference using a
+      TensorFlow coordinator. For example, queue runners are necessary
+      for batch training with the ``n_minibatch`` argument or with
+      file readers.
     *args
       Passed into ``initialize``.
     **kwargs
       Passed into ``initialize``.
     """
     self.initialize(*args, **kwargs)
+
+    if logdir is not None:
+      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
+
+    if variables is None:
+      init = tf.initialize_all_variables()
+    else:
+      init = tf.initialize_variables(variables)
+
+    init.run()
+
+    if use_coordinator:
+      # Start input enqueue threads.
+      self.coord = tf.train.Coordinator()
+      self.threads = tf.train.start_queue_runners(coord=self.coord)
+
     for _ in range(self.n_iter):
       info_dict = self.update()
       self.print_progress(info_dict)
 
     self.finalize()
+
+    if use_coordinator:
+      # Ask threads to stop.
+      self.coord.request_stop()
+      self.coord.join(self.threads)
 
   def initialize(self, n_iter=1000, n_print=100, logdir=None):
     """Initialize inference algorithm.
@@ -149,25 +191,12 @@ class Inference(object):
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
       progress, then specify None.
-    logdir : str, optional
-      Directory where event file will be written. For details,
-      see `tf.train.SummaryWriter`. Default is to write nothing.
     """
     self.n_iter = n_iter
     self.n_print = n_print
 
     self.t = tf.Variable(0, trainable=False)
     self.increment_t = self.t.assign_add(1)
-
-    if logdir is not None:
-      train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
-
-    init = tf.initialize_all_variables()
-    init.run()
-
-    # Start input enqueue threads.
-    self.coord = tf.train.Coordinator()
-    self.threads = tf.train.start_queue_runners(coord=self.coord)
 
   def update(self):
     """Run one iteration of inference.
@@ -193,6 +222,4 @@ class Inference(object):
   def finalize(self):
     """Function to call after convergence.
     """
-    # Ask threads to stop.
-    self.coord.request_stop()
-    self.coord.join(self.threads)
+    pass

@@ -4,7 +4,7 @@ Models
 A probabilistic model specifies a joint distribution ``p(x, z)``
 of data ``x`` and latent variables ``z``.
 For more details, see the
-`Probability Models tutorial <../tut_model>`__.
+`Probability Models tutorial <../tutorials/model>`__.
 
 Random Variables
 ^^^^^^^^^^^^^^^^
@@ -106,7 +106,7 @@ work with ``tf.contrib.distributions``.
      y = Normal(mu=mu, sigma=tf.ones(2)))
 
 For examples of models built in Edward, see the model
-`tutorials <../tutorials>`__.
+`tutorials <../tutorials/>`__.
 
 Variational Models
 ^^^^^^^^^^^^^^^^^^

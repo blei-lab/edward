@@ -39,13 +39,13 @@ plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.axis([-3, 3, -3, 3])
 plt.show()
 \end{lstlisting}
-\includegraphics[width=700px]{images/unsupervised-fig0.png}
+\includegraphics[width=700px]{/images/unsupervised-fig0.png}
 
 \subsubsection{Model}
 
 Posit the model as a mixture of Gaussians. For more details on the
 model, see the
-\href{tut_mixture_gaussian}
+\href{/tutorials/mixture-gaussian}
 {Mixture of Gaussians tutorial}.
 
 Here we build the model in Edward using TensorFlow, and set the number
@@ -153,7 +153,7 @@ In this case
 \texttt{MFVI} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the score function
 gradient.
-For more details on inference, see the \href{tut_KLqp}{$\text{KL}(q\|p)$ tutorial}.
+For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ tutorial}.
 
 
 \subsubsection{Criticism}
@@ -205,4 +205,4 @@ plt.axis([-3, 3, -3, 3])
 plt.show()
 \end{lstlisting}
 
-\includegraphics[width=700px]{images/unsupervised-fig1.png}
+\includegraphics[width=700px]{/images/unsupervised-fig1.png}

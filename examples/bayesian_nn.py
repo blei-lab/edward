@@ -78,8 +78,11 @@ data = {y: y_train}
 inference = ed.MFVI({W_0: qW_0, b_0: qb_0,
                      W_1: qW_1, b_1: qb_1,
                      W_2: qW_2, b_2: qb_2}, data)
-
 inference.initialize(n_print=100)
+
+init = tf.initialize_all_variables()
+init.run()
+
 for _ in range(1000):
   info_dict = inference.update()
   t, loss = info_dict['t'], info_dict['loss']
