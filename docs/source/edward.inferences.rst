@@ -15,6 +15,7 @@ Submodules
    edward.inferences.klpq
    edward.inferences.klqp
    edward.inferences.map
+   edward.inferences.metropolis_hastings
    edward.inferences.monte_carlo
    edward.inferences.variational_inference
 
