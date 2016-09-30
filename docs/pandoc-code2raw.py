@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-r"""Pandoc filter to insert arbitrary raw output markup 
+"""Pandoc filter to insert arbitrary raw output markup
 as Code/CodeBlocks with an attribute raw=<outputformat>.
 
 Especially useful for inserting LaTeX code which pandoc will
@@ -13,11 +13,11 @@ otherwise mangle:
 or for making HTML opaque to pandoc, which will otherwise
 show the text between tags in other output formats,
 
-or for allowing Markdown in the arguments of LaTeX commands 
+or for allowing Markdown in the arguments of LaTeX commands
 or the contents of LaTeX environments
 
     `\textsf{`{raw=latex}<span class=sans>San Seriffe</span>`}`{raw=latex}
-    
+
     ````{raw=latex}
     \begin{center}
     ````
@@ -42,10 +42,11 @@ See <https://github.com/jgm/pandoc/issues/2139>
 from pandocfilters import RawInline, RawBlock, toJSONFilter
 from pandocattributes import PandocAttributes
 
-raw4code = { 'Code': RawInline, 'CodeBlock': RawBlock }
+raw4code = {'Code': RawInline, 'CodeBlock': RawBlock}
+
 
 def code2raw(key, val, format, meta):
-    if not key in raw4code:
+    if key not in raw4code:
         return None
     attrs = PandocAttributes(val[0], format='pandoc')
     raw = attrs.kvs.get('raw', None)

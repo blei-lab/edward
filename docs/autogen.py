@@ -18,11 +18,9 @@ import shutil
 # is denoted only for convenience.
 PAGES = [
     {
-        'page': 'criticism.tex',
-        'title': 'Criticism',
-        'source_pages': [
-            'criticisms/',
-        ],
+        'page': 'index.tex',
+        'title': 'Home',
+        'source_pages': [],
         'parent_pages': [],
         'child_pages': [],
     },
@@ -34,9 +32,11 @@ PAGES = [
         'child_pages': [],
     },
     {
-        'page': 'index.tex',
-        'title': 'Home',
-        'source_pages': [],
+        'page': 'model.tex',
+        'title': 'Model',
+        'source_pages': [
+            'models/',
+        ],
         'parent_pages': [],
         'child_pages': [],
     },
@@ -47,29 +47,44 @@ PAGES = [
             'inferences/inference.py',
         ],
         'parent_pages': [],
-        'child_pages': [
-            'monte-carlo.tex',
-            'variational-inference.tex',
-        ],
+        'child_pages': [],
+        # 'child_pages': [
+        #    'monte-carlo.tex',
+        #    'variational-inference.tex',
+        # ],
     },
+    # {
+    #     'page': 'monte-carlo.tex',
+    #     'title': 'Monte Carlo',
+    #     'source_pages': [
+    #         'inferences/monte_carlo.py',
+    #     ],
+    #     'parent_pages': [
+    #         'inference.tex'
+    #     ],
+    #     'child_pages': [],
+    # },
+    # {
+    #     'page': 'variational-inference.tex',
+    #     'title': 'Variational Inference',
+    #     'source_pages': [
+    #         'inferences/klpq.py',
+    #         'inferences/klqp.py',
+    #         'inferences/map.py',
+    #         'inferences/variational_inference.py',
+    #     ],
+    #     'parent_pages': [
+    #         'inference.tex'
+    #     ],
+    #     'child_pages': [],
+    # },
     {
-        'page': 'model.tex',
-        'title': 'Model',
+        'page': 'criticism.tex',
+        'title': 'Criticism',
         'source_pages': [
-            'models/',
+            'criticisms/',
         ],
         'parent_pages': [],
-        'child_pages': [],
-    },
-    {
-        'page': 'monte-carlo.tex',
-        'title': 'Monte Carlo',
-        'source_pages': [
-            'inferences/monte_carlo.py',
-        ],
-        'parent_pages': [
-            'inference.tex'
-        ],
         'child_pages': [],
     },
     {
@@ -81,29 +96,15 @@ PAGES = [
         'parent_pages': [],
         'child_pages': [],
     },
-    {
-        'page': 'util.tex',
-        'title': 'Utilities',
-        'source_pages': [
-            'util.py',
-        ],
-        'parent_pages': [],
-        'child_pages': [],
-    },
-    {
-        'page': 'variational-inference.tex',
-        'title': 'Variational Inference',
-        'source_pages': [
-            'inferences/klpq.py',
-            'inferences/klqp.py',
-            'inferences/map.py',
-            'inferences/variational_inference.py',
-        ],
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
-    },
+    # {
+    #     'page': 'util.tex',
+    #     'title': 'Utilities',
+    #     'source_pages': [
+    #         'util.py',
+    #     ],
+    #     'parent_pages': [],
+    #     'child_pages': [],
+    # },
 ]
 
 
