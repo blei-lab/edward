@@ -167,10 +167,11 @@ already copied within the new scope). This is with the exception of
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>org_instance</strong> (<em>RandomVariable, tf.Variable, tf.Tensor, or tf.Operation</em>) &#8211; Node to add in graph with replaced ancestors.</li>
-<li><strong>dict_swap</strong> (<em>dict, optional</em>) &#8211; Random variables, variables, tensors, or operations to
-swap with. Its keys are what <cite>org_instance</cite> may depend on,
-and its values are the corresponding object (not necessarily of
-the same type) that is used in exchange.</li>
+<li><strong>dict_swap</strong> (<em>dict, optional</em>) &#8211; Random variables, variables, tensors, or operations to swap with.
+Its keys are what <cite>org_instance</cite> may depend on, and its values are
+the corresponding object (not necessarily of the same class
+instance, but must have the same type, e.g., float32) that is used
+in exchange.</li>
 <li><strong>scope</strong> (<em>str, optional</em>) &#8211; A scope for the new node(s). This is used to avoid name
 conflicts with the original node(s).</li>
 <li><strong>replace_itself</strong> (<em>bool, optional</em>) &#8211; Whether to replace <cite>org_instance</cite> itself if it exists in
@@ -192,16 +193,16 @@ copied within the new scope). Otherwise will reuse them.</li>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qx</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># The TensorFlow graph is currently</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># `x` -&gt; `z` &lt;- y`, `qx`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The TensorFlow graph is currently</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `x` -&gt; `z` &lt;- y`, `qx`</span>
 <span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># This adds a subgraph with newly copied nodes,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c"># `copied/qx` -&gt; `copied/z` &lt;- `copied/y`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># This adds a subgraph with newly copied nodes,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `copied/qx` -&gt; `copied/z` &lt;- `copied/y`</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">z_new</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">qx</span><span class="p">})</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
@@ -567,7 +568,7 @@ rules (see documentation of <code class="docutils literal"><span class="pre">np.
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="go">array([0, 1, 2, 0, 1, 2], dtype=int32)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ed</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
@@ -598,7 +599,7 @@ rules (see documentation of <code class="docutils literal"><span class="pre">np.
 <p class="rubric">Notes</p>
 <p>Sometimes this can result in an unknown shape. The core reason for
 this is the following behavior:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">]]),</span>
 <span class="gp">... </span>        <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mf">1.0</span><span class="p">])</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()]))</span>
 <span class="go">&lt;tf.Tensor &#39;Tile:0&#39; shape=(1, 1) dtype=float32&gt;</span>

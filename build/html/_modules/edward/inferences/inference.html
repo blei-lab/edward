@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.inferences.inference</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
@@ -159,7 +159,7 @@
 <span class="sd">    random variables in `latent_vars`&#39; dictionary keys are strings</span>
 <span class="sd">    used accordingly by the wrapper.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">    Parameters</span>
@@ -210,7 +210,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
@@ -219,60 +219,102 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="o">=</span> <span class="n">model_wrapper</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
-      <span class="c"># Stan models do no support data subsampling because they</span>
-      <span class="c"># take arbitrary data structure types in the data block</span>
-      <span class="c"># and not just NumPy arrays (this makes it unamenable to</span>
-      <span class="c"># TensorFlow placeholders). Therefore fix the data</span>
-      <span class="c"># dictionary ``self.data`` at compile time to ``data``.</span>
+      <span class="c1"># Stan models do no support data subsampling because they</span>
+      <span class="c1"># take arbitrary data structure types in the data block</span>
+      <span class="c1"># and not just NumPy arrays (this makes it unamenable to</span>
+      <span class="c1"># TensorFlow placeholders). Therefore fix the data</span>
+      <span class="c1"># dictionary ``self.data`` at compile time to ``data``.</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
       <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-            <span class="c"># If ``data`` has TensorFlow placeholders, the user</span>
-            <span class="c"># must manually feed them at each step of</span>
-            <span class="c"># inference.</span>
-            <span class="c"># If ``data`` has tensors that are the output of</span>
-            <span class="c"># data readers, then batch training operates</span>
-            <span class="c"># according to the reader.</span>
+            <span class="c1"># If ``data`` has TensorFlow placeholders, the user</span>
+            <span class="c1"># must manually feed them at each step of</span>
+            <span class="c1"># inference.</span>
+            <span class="c1"># If ``data`` has tensors that are the output of</span>
+            <span class="c1"># data readers, then batch training operates</span>
+            <span class="c1"># according to the reader.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
           <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="c"># If ``data`` has NumPy arrays, store the data</span>
-            <span class="c"># in the computational graph.</span>
+            <span class="c1"># If ``data`` has NumPy arrays, store the data</span>
+            <span class="c1"># in the computational graph.</span>
             <span class="n">ph</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">[])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span>
             <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span> <span class="p">{</span><span class="n">ph</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="c"># If key is a placeholder, then don&#39;t modify its fed value.</span>
+          <span class="c1"># If key is a placeholder, then don&#39;t modify its fed value.</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="Inference.run"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.run">[docs]</a>  <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Inference.run"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.run">[docs]</a>  <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_coordinator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+          <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A simple wrapper to run inference.</span>
 
-<span class="sd">    1. Initialize via ``initialize``.</span>
-<span class="sd">    2. Run ``update`` for ``self.n_iter`` iterations.</span>
-<span class="sd">    3. While running, ``print_progress``.</span>
-<span class="sd">    4. Finalize via ``finalize``.</span>
+<span class="sd">    1. Initialize algorithm via ``initialize``.</span>
+<span class="sd">    2. (Optional) Build a ``tf.train.SummaryWriter`` for TensorBoard.</span>
+<span class="sd">    3. (Optional) Initialize TensorFlow variables.</span>
+<span class="sd">    4. (Optional) Start queue runners.</span>
+<span class="sd">    5. Run ``update`` for ``self.n_iter`` iterations.</span>
+<span class="sd">    6. While running, ``print_progress``.</span>
+<span class="sd">    7. Finalize algorithm via ``finalize``.</span>
+<span class="sd">    8. (Optional) Stop queue runners.</span>
+
+<span class="sd">    To customize the way inference is run, run these steps</span>
+<span class="sd">    individually.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    logdir : str, optional</span>
+<span class="sd">      Directory where event file will be written. For details,</span>
+<span class="sd">      see `tf.train.SummaryWriter`. Default is to write nothing.</span>
+<span class="sd">    variables : list, optional</span>
+<span class="sd">      A list of TensorFlow variables to initialize during inference.</span>
+<span class="sd">      Default is to initialize all variables (this includes</span>
+<span class="sd">      reinitializing variables that were already initialized). To</span>
+<span class="sd">      avoid initializing any variables, pass in an empty list.</span>
+<span class="sd">    use_coordinator : bool, optional</span>
+<span class="sd">      Whether to start and stop queue runners during inference using a</span>
+<span class="sd">      TensorFlow coordinator. For example, queue runners are necessary</span>
+<span class="sd">      for batch training with the ``n_minibatch`` argument or with</span>
+<span class="sd">      file readers.</span>
 <span class="sd">    *args</span>
 <span class="sd">      Passed into ``initialize``.</span>
 <span class="sd">    **kwargs</span>
 <span class="sd">      Passed into ``initialize``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">logdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">train_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SummaryWriter</span><span class="p">(</span><span class="n">logdir</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">initialize_all_variables</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">initialize_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+
+    <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">use_coordinator</span><span class="p">:</span>
+      <span class="c1"># Start input enqueue threads.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Coordinator</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">start_queue_runners</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">):</span>
       <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">print_progress</span><span class="p">(</span><span class="n">info_dict</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Inference.initialize"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">use_coordinator</span><span class="p">:</span>
+      <span class="c1"># Ask threads to stop.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">request_stop</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Inference.initialize"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_print</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize inference algorithm.</span>
 
 <span class="sd">    Parameters</span>
@@ -282,25 +324,12 @@
 <span class="sd">    n_print : int, optional</span>
 <span class="sd">      Number of iterations for each print progress. To suppress print</span>
 <span class="sd">      progress, then specify None.</span>
-<span class="sd">    logdir : str, optional</span>
-<span class="sd">      Directory where event file will be written. For details,</span>
-<span class="sd">      see `tf.train.SummaryWriter`. Default is to write nothing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">=</span> <span class="n">n_print</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">increment_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">logdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
-      <span class="n">train_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SummaryWriter</span><span class="p">(</span><span class="n">logdir</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">())</span>
-
-    <span class="n">init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">initialize_all_variables</span><span class="p">()</span>
-    <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
-    <span class="c"># Start input enqueue threads.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Coordinator</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">start_queue_runners</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">increment_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Inference.update"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run one iteration of inference.</span>
@@ -311,7 +340,7 @@
 <span class="sd">      Dictionary of algorithm-specific information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">increment_t</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">}</span></div>
 
 <div class="viewcode-block" id="Inference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Print progress to output.</span>
@@ -326,9 +355,7 @@
 <div class="viewcode-block" id="Inference.finalize"><a class="viewcode-back" href="../../../edward.inferences.inference.html#edward.inferences.inference.Inference.finalize">[docs]</a>  <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to call after convergence.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c"># Ask threads to stop.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">request_stop</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span></div></div>
+    <span class="k">pass</span></div></div>
 </pre></div>
 
            </div>

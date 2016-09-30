@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.criticisms.ppc</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
@@ -142,7 +142,7 @@
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_session</span>
 
 
-<div class="viewcode-block" id="ppc"><a class="viewcode-back" href="../../../edward.criticisms.ppc.html#edward.criticisms.ppc.ppc">[docs]</a><span class="k">def</span> <span class="nf">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="ppc"><a class="viewcode-back" href="../../../edward.criticisms.ppc.html#edward.criticisms.ppc.ppc">[docs]</a><span class="k">def</span> <span class="nf">ppc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">latent_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Posterior predictive check.</span>
 <span class="sd">  (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996)</span>
 
@@ -229,10 +229,10 @@
 <span class="sd">  ...     model_wrapper=model)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
-  <span class="c"># Sample to get replicated data sets and latent variables.</span>
-  <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-      <span class="n">zrep</span> <span class="o">=</span> <span class="k">None</span>
+  <span class="c1"># Sample to get replicated data sets and latent variables.</span>
+  <span class="k">if</span> <span class="n">model_wrapper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">zrep</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
               <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">)}</span>
@@ -240,12 +240,12 @@
     <span class="n">xrep</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
-        <span class="c"># Replace observed data with replicated data.</span>
+        <span class="c1"># Replace observed data with replicated data.</span>
         <span class="n">xrep</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">xrep</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">latent_vars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">zrep</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_prior</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">zrep</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
@@ -253,24 +253,24 @@
 
     <span class="n">xrep</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="o">.</span><span class="n">sample_likelihood</span><span class="p">(</span><span class="n">zrep</span><span class="p">)</span>
 
-  <span class="c"># Create feed_dict for data placeholders that the model conditions</span>
-  <span class="c"># on; it is necessary for all session runs.</span>
+  <span class="c1"># Create feed_dict for data placeholders that the model conditions</span>
+  <span class="c1"># on; it is necessary for all session runs.</span>
   <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">)</span> <span class="ow">and</span>
                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span>
 
-  <span class="c"># Calculate discrepancy over many replicated data sets and latent</span>
-  <span class="c"># variables.</span>
+  <span class="c1"># Calculate discrepancy over many replicated data sets and latent</span>
+  <span class="c1"># variables.</span>
   <span class="n">Trep</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">xrep</span><span class="p">,</span> <span class="n">zrep</span><span class="p">)</span>
   <span class="n">Tobs</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zrep</span><span class="p">)</span>
   <span class="n">Treps</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">Ts</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
-    <span class="c"># Take a forward pass (session run) to get new samples for</span>
-    <span class="c"># each calculation of the discrepancy.</span>
-    <span class="c"># Note that alternatively we can unroll the graph by registering</span>
-    <span class="c"># this operation ``n_samples`` times, each for different parent</span>
-    <span class="c"># nodes representing ``xrep`` and ``zrep``.</span>
+    <span class="c1"># Take a forward pass (session run) to get new samples for</span>
+    <span class="c1"># each calculation of the discrepancy.</span>
+    <span class="c1"># Note that alternatively we can unroll the graph by registering</span>
+    <span class="c1"># this operation ``n_samples`` times, each for different parent</span>
+    <span class="c1"># nodes representing ``xrep`` and ``zrep``.</span>
     <span class="n">Treps</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">Trep</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)]</span>
     <span class="n">Ts</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">Tobs</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)]</span>
 

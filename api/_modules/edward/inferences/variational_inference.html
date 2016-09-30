@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.inferences.variational_inference</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
@@ -153,7 +153,7 @@
 <div class="viewcode-block" id="VariationalInference"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference">[docs]</a><span class="k">class</span> <span class="nc">VariationalInference</span><span class="p">(</span><span class="n">Inference</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Base class for variational inference methods.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialization.</span>
 
 <span class="sd">    Parameters</span>
@@ -179,8 +179,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">latent_vars</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
-                 <span class="n">use_prettytensor</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="VariationalInference.initialize"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">use_prettytensor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize variational inference algorithm.</span>
 
 <span class="sd">    Initialize all variables.</span>
@@ -205,56 +205,57 @@
 <span class="sd">      to use PrettyTensor optimizer (when using PrettyTensor).</span>
 <span class="sd">      Defaults to TensorFlow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_minibatch</span> <span class="o">=</span> <span class="n">n_minibatch</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="ow">and</span> \
+    <span class="k">if</span> <span class="n">n_minibatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="n">StanModel</span><span class="p">):</span>
-      <span class="c"># Re-assign data to batch tensors, with size given by</span>
-      <span class="c"># ``n_minibatch``.</span>
+      <span class="c1"># Re-assign data to batch tensors, with size given by</span>
+      <span class="c1"># ``n_minibatch``.</span>
       <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
       <span class="n">slices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">slice_input_producer</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
-      <span class="c"># By default use as many threads as CPUs.</span>
+      <span class="c1"># By default use as many threads as CPUs.</span>
       <span class="n">batches</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="n">n_minibatch</span><span class="p">,</span>
                                <span class="n">num_threads</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="c"># ``tf.train.batch`` returns tf.Tensor if ``slices`` is a</span>
-        <span class="c"># list of size 1.</span>
+        <span class="c1"># ``tf.train.batch`` returns tf.Tensor if ``slices`` is a</span>
+        <span class="c1"># list of size 1.</span>
         <span class="n">batches</span> <span class="o">=</span> <span class="p">[</span><span class="n">batches</span><span class="p">]</span>
 
       <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span>
                    <span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">batches</span><span class="p">)}</span>
 
-    <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
-      <span class="c"># Use ADAM with a decaying scale factor.</span>
-      <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="c1"># Use ADAM with a decaying scale factor.</span>
+      <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
       <span class="n">starter_learning_rate</span> <span class="o">=</span> <span class="mf">0.1</span>
       <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">exponential_decay</span><span class="p">(</span><span class="n">starter_learning_rate</span><span class="p">,</span>
                                                  <span class="n">global_step</span><span class="p">,</span>
-                                                 <span class="mi">100</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">staircase</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+                                                 <span class="mi">100</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">staircase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
       <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;gradientdescent&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;gradientdescent&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">GradientDescentOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adadelta&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;adadelta&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">()</span>
-      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adagrad&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;adagrad&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdagradOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;momentum&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;momentum&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">MomentumOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;adam&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;adam&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">()</span>
-      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;ftrl&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;ftrl&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">FtrlOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s">&#39;rmsprop&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;rmsprop&#39;</span><span class="p">:</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">RMSPropOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Optimizer class not found:&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Optimizer class not found:&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
 
-      <span class="n">global_step</span> <span class="o">=</span> <span class="k">None</span>
+      <span class="n">global_step</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">):</span>
-      <span class="c"># Custom optimizers have no control over global_step.</span>
-      <span class="n">global_step</span> <span class="o">=</span> <span class="k">None</span>
+      <span class="c1"># Custom optimizers have no control over global_step.</span>
+      <span class="n">global_step</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 
@@ -265,16 +266,14 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">,</span>
                                       <span class="n">var_list</span><span class="o">=</span><span class="n">var_list</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;PrettyTensor optimizer does not accept &quot;</span>
-                                  <span class="s">&quot;a variable scope.&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;PrettyTensor optimizer does not accept &quot;</span>
+                                  <span class="s2">&quot;a variable scope.&quot;</span><span class="p">)</span>
 
-      <span class="c"># Note PrettyTensor cannot use global_step.</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">apply_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">losses</span><span class="o">=</span><span class="p">[</span><span class="n">loss</span><span class="p">])</span>
+      <span class="c1"># Note PrettyTensor cannot use global_step.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">apply_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">losses</span><span class="o">=</span><span class="p">[</span><span class="n">loss</span><span class="p">])</span></div>
 
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">VariationalInference</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="VariationalInference.update"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+<div class="viewcode-block" id="VariationalInference.update"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run one iteration of optimizer for variational inference.</span>
 
 <span class="sd">    Parameters</span>
@@ -289,7 +288,7 @@
 <span class="sd">      Dictionary of algorithm-specific information. In this case, the</span>
 <span class="sd">      loss function value after one iteration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">feed_dict</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">feed_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
@@ -298,16 +297,16 @@
 
     <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">increment_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">],</span> <span class="n">feed_dict</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span> <span class="s">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">}</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span> <span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">}</span></div>
 
 <div class="viewcode-block" id="VariationalInference.print_progress"><a class="viewcode-back" href="../../../edward.inferences.variational_inference.html#edward.inferences.variational_inference.VariationalInference.print_progress">[docs]</a>  <span class="k">def</span> <span class="nf">print_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Print progress to output.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
-      <span class="n">t</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">t</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span>
       <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">t</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_print</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s">&#39;loss&#39;</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s">&quot;iter {:d} loss {:.2f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;iter </span><span class="si">{:d}</span><span class="s2"> loss </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
           <span class="nb">print</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span></div>
 

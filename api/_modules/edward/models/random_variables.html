@@ -131,12 +131,13 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.models.random_variables</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
+<span class="kn">from</span> <span class="nn">edward.models.empirical</span> <span class="k">import</span> <span class="n">Empirical</span> <span class="k">as</span> <span class="n">distributions_Empirical</span>
 <span class="kn">from</span> <span class="nn">edward.models.point_mass</span> <span class="k">import</span> <span class="n">PointMass</span> <span class="k">as</span> <span class="n">distributions_PointMass</span>
 <span class="kn">from</span> <span class="nn">edward.models.random_variable</span> <span class="k">import</span> <span class="n">RandomVariable</span>
 <span class="kn">from</span> <span class="nn">edward.util</span> <span class="k">import</span> <span class="n">get_session</span>
@@ -151,7 +152,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-      <span class="k">return</span> <span class="s">&quot;p: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;p: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Bernoulli</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -177,8 +178,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;a: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;b: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;a: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;b: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Beta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -201,7 +202,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logits</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-      <span class="k">return</span> <span class="s">&quot;logits: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">logits</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;logits: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">logits</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Categorical</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -221,7 +222,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-      <span class="k">return</span> <span class="s">&quot;df: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;df: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Chi2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -237,7 +238,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-      <span class="k">return</span> <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;alpha: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Dirichlet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -256,8 +257,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">n</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;n: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;n: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;alpha: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">DirichletMultinomial</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -280,7 +281,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-      <span class="k">return</span> <span class="s">&quot;lam: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">lam</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;lam: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">lam</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Exponential</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -297,8 +298,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;beta: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">beta</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;alpha: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;beta: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">beta</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -322,8 +323,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;alpha: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;beta: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">beta</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;alpha: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;beta: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">beta</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">InverseGamma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -346,8 +347,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">loc</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;loc: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">loc</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;scale: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">scale</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;loc: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">loc</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;scale: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">scale</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Laplace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -371,8 +372,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;mu: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;sigma: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalCholesky</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -395,8 +396,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;mu: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;sigma: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalDiag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -419,8 +420,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;mu: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;sigma: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultivariateNormalFull</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -442,8 +443,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;mu: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;sigma: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -466,9 +467,9 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">df</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;df: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;mu: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;sigma: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;df: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;mu: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mu</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;sigma: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">StudentT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -528,8 +529,8 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="n">sess</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">()</span>
       <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
-      <span class="k">return</span> <span class="s">&quot;a: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> \
-             <span class="s">&quot;b: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;a: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+             <span class="s2">&quot;b: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Uniform</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 
@@ -542,6 +543,23 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">b</span></div>
 
 
+<div class="viewcode-block" id="Empirical"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.Empirical">[docs]</a><span class="k">class</span> <span class="nc">Empirical</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Empirical</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">distributions_Empirical</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;mean: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mean</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Empirical</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Distribution parameter.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">params</span></div>
+
+
 <div class="viewcode-block" id="PointMass"><a class="viewcode-back" href="../../../edward.models.random_variables.html#edward.models.random_variables.PointMass">[docs]</a><span class="k">class</span> <span class="nc">PointMass</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">PointMass</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">distributions_PointMass</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -549,7 +567,7 @@
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-      <span class="k">return</span> <span class="s">&quot;params: </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+      <span class="k">return</span> <span class="s2">&quot;params: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PointMass</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
 

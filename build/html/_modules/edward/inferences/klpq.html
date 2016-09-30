@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for edward.inferences.klpq</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
@@ -204,28 +204,28 @@
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">):</span>
       <span class="n">z_sample</span> <span class="o">=</span> <span class="p">{}</span>
       <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-        <span class="c"># Copy q(z) to obtain new set of posterior samples.</span>
-        <span class="n">qz_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="c1"># Copy q(z) to obtain new set of posterior samples.</span>
+        <span class="n">qz_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;inference_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
         <span class="n">z_sample</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">qz_copy</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         <span class="n">q_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span>
             <span class="n">qz</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">z_sample</span><span class="p">[</span><span class="n">z</span><span class="p">])))</span>
 
-      <span class="c"># Form dictionary in order to replace conditioning on prior or</span>
-      <span class="c"># observed variable with conditioning on posterior sample or</span>
-      <span class="c"># observed data.</span>
+      <span class="c1"># Form dictionary in order to replace conditioning on prior or</span>
+      <span class="c1"># observed variable with conditioning on posterior sample or</span>
+      <span class="c1"># observed data.</span>
       <span class="n">dict_swap</span> <span class="o">=</span> <span class="n">z_sample</span>
       <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
           <span class="n">dict_swap</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs</span>
 
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-          <span class="n">z_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+          <span class="n">z_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;inference_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
           <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">z_copy</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">z_sample</span><span class="p">[</span><span class="n">z</span><span class="p">]))</span>
 
         <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">RandomVariable</span><span class="p">):</span>
-            <span class="n">x_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s">&#39;inference_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="n">x_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dict_swap</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;inference_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
             <span class="n">p_log_prob</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x_copy</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>

@@ -32,7 +32,7 @@
   
     <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
         <link rel="up" title="edward.inferences package" href="edward.inferences.html"/>
-        <link rel="next" title="edward.inferences.monte_carlo module" href="edward.inferences.monte_carlo.html"/>
+        <link rel="next" title="edward.inferences.metropolis_hastings module" href="edward.inferences.metropolis_hastings.html"/>
         <link rel="prev" title="edward.inferences.klqp module" href="edward.inferences.klqp.html"/> 
 
   
@@ -196,7 +196,7 @@ random variable.</td>
 </table>
 <p class="rubric">Examples</p>
 <p>Most explicitly, MAP is specified via a dictionary:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">qpi</span> <span class="o">=</span> <span class="n">PointMass</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">ed</span><span class="o">.</span><span class="n">to_simplex</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="o">-</span><span class="mi">1</span><span class="p">))))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qpi</span> <span class="o">=</span> <span class="n">PointMass</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">ed</span><span class="o">.</span><span class="n">to_simplex</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="o">-</span><span class="mi">1</span><span class="p">))))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qmu</span> <span class="o">=</span> <span class="n">PointMass</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="o">*</span><span class="n">D</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qsigma</span> <span class="o">=</span> <span class="n">PointMass</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="o">*</span><span class="n">D</span><span class="p">))))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">({</span><span class="n">pi</span><span class="p">:</span> <span class="n">qpi</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="n">qmu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">qsigma</span><span class="p">},</span> <span class="n">data</span><span class="p">)</span>
@@ -205,16 +205,16 @@ random variable.</td>
 <p>We also automate the specification of <code class="docutils literal"><span class="pre">PointMass</span></code> distributions
 (with matching support), so one can pass in a list of latent
 variables instead:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">beta</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">beta</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>However, for model wrappers, the list can only have one element:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="s">&#39;z&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For example, the following is not supported:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="s">&#39;pi&#39;</span><span class="p">,</span> <span class="s">&#39;mu&#39;</span><span class="p">,</span> <span class="s">&#39;sigma&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">MAP</span><span class="p">([</span><span class="s1">&#39;pi&#39;</span><span class="p">,</span> <span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_wrapper</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This is because internally with model wrappers, we have no way
@@ -242,7 +242,7 @@ is the gradient of</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="edward.inferences.monte_carlo.html" class="btn btn-neutral float-right" title="edward.inferences.monte_carlo module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="edward.inferences.metropolis_hastings.html" class="btn btn-neutral float-right" title="edward.inferences.metropolis_hastings module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="edward.inferences.klqp.html" class="btn btn-neutral" title="edward.inferences.klqp module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
