@@ -12,7 +12,7 @@ All stand-alone pages are in `docs/tex`. These compile to root level HTML pages.
 
 + Install the dependencies
 ```{bash}
-pip install pandoc beautifulsoup4 sphinx sphinx-autobuild sphinx_rtd_theme ghp-import
+pip install pandoc beautifulsoup4 sphinx sphinx-autobuild sphinx_rtd_theme ghp-import pandoc-attributes pandocfilters
 ```
 + You can build the website locally. Go to this `docs/` directory and run
 ```{bash}

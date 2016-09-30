@@ -118,6 +118,7 @@ $endfor$
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
+$abstract$
 $body$
     </div>
   </div>
