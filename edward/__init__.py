@@ -11,7 +11,7 @@ from edward import util
 # Direct imports for convenience
 from edward.criticisms import evaluate, ppc
 from edward.inferences import Inference, MonteCarlo, VariationalInference, \
-    MetropolisHastings, \
+    HMC, MetropolisHastings, \
     KLpq, KLqp, MFVI, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
     MAP, Laplace
