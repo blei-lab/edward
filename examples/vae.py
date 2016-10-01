@@ -42,6 +42,9 @@ inference = ed.MFVI({z: qz}, data)
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)
 
+init = tf.initialize_all_variables()
+init.run()
+
 n_epoch = 100
 n_iter_per_epoch = 1000
 for epoch in range(n_epoch):

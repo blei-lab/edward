@@ -70,7 +70,7 @@ qb_1 = Normal(mu=tf.Variable(tf.random_normal([1])),
 data = {y: y_train}
 inference = ed.MFVI({W_0: qW_0, b_0: qb_0,
                      W_1: qW_1, b_1: qb_1}, data)
-inference.initialize()
+
 
 # Sample functions from variational model to visualize fits.
 rs = np.random.RandomState(0)
@@ -82,6 +82,10 @@ for s in range(10):
                          qb_0.sample(), qb_1.sample())]
 
 mus = tf.pack(mus)
+
+sess = ed.get_session()
+init = tf.initialize_all_variables()
+init.run()
 
 
 # FIRST VISUALIZATION (prior)

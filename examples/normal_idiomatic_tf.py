@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
-This demonstrates a more idiomatic TensorFlow example. Instead of
-running inference.run(), we may want direct access to the TensorFlow
-session and to manipulate various objects during inference.
+This demonstrates a more idiomatic TensorFlow example, which provides
+more fine-grained experimentation. We do not call inference.run().
+Alternatively, we directly access the TensorFlow session and
+manipulate various objects during inference.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -22,6 +23,10 @@ qz = Normal(mu=tf.Variable(tf.random_normal([])),
 
 inference = ed.MFVI({z: qz})
 inference.initialize(n_print=50)
+
+init = tf.initialize_all_variables()
+init.run()
+
 for _ in range(250):
   info_dict = inference.update()
   inference.print_progress(info_dict)

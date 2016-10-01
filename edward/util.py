@@ -32,10 +32,11 @@ def copy(org_instance, dict_swap=None, scope="copied",
   org_instance : RandomVariable, tf.Variable, tf.Tensor, or tf.Operation
     Node to add in graph with replaced ancestors.
   dict_swap : dict, optional
-    Random variables, variables, tensors, or operations to
-    swap with. Its keys are what `org_instance` may depend on,
-    and its values are the corresponding object (not necessarily of
-    the same type) that is used in exchange.
+    Random variables, variables, tensors, or operations to swap with.
+    Its keys are what `org_instance` may depend on, and its values are
+    the corresponding object (not necessarily of the same class
+    instance, but must have the same type, e.g., float32) that is used
+    in exchange.
   scope : str, optional
     A scope for the new node(s). This is used to avoid name
     conflicts with the original node(s).
