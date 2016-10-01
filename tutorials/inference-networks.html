@@ -74,7 +74,6 @@
     </a>
     <a class="button u-full-width" href="/">Home</a>
     <a class="button u-full-width" href="/getting-started">Getting Started</a>
-    <a class="button u-full-width" href="/delving-in">Delving In</a>
     <a class="button u-full-width" href="/tutorials/">Tutorials</a>
     <a class="button u-full-width" href="/api/">API</a>
     <a class="button u-full-width" href="#">Advanced</a>
@@ -92,6 +91,7 @@
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
+
 <h2 id="inference-networks">Inference networks</h2>
 <p>An inference network is a flexible construction for parameterizing approximating distributions during inference. They are used in Helmholtz machines <span class="citation">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>, deep Boltzmann machines <span class="citation">(Salakhutdinov &amp; Larochelle, 2010)</span>, and variational auto-encoders <span class="citation">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
 <p>Recall that probabilistic models often have <em>local</em> latent variables, that is, latent variables associated with a data point; for example, the latent cluster assignment of a data point or the hidden representation of a text or image. Variational inference on models with local latent variables requires optimizing over each variational factor, <span class="math display">\[q(\mathbf{z}; \mathbf{\lambda}) = \prod_{n=1}^N q(z_n; \lambda_n),\]</span> where <span class="math inline">\(z_n\)</span> are the latent variables associated to a data point <span class="math inline">\(x_n\)</span>. The set of parameters <span class="math inline">\(\mathbf{\lambda}=\{\lambda_n\}\)</span> grows with the size of data. This makes computation difficult when the data does not fit in memory. Further, a new set of parameters <span class="math inline">\(\mathbf{\lambda}&#39;=\{\lambda_n&#39;\}\)</span> must be optimized at test time, where there may be a new set of data points <span class="math inline">\(\{x_n&#39;\}\)</span>.</p>

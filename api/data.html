@@ -1,363 +1,183 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Data &mdash; Edward 1.0.9 documentation</title>
-  
-
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="Edward 1.0.9 documentation" href="index.html"/>
-        <link rel="next" title="Models" href="models.html"/>
-        <link rel="prev" title="Edward" href="index.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
-</head>
-
-<body class="wy-body-for-nav" role="document">
-
-  <div class="wy-grid-for-nav">
-
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> Edward
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                1.0
-              </div>
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Data</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-                <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#training-models-with-data">Training Models with Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#training-model-wrappers-with-data">Training Model Wrappers with Data</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="inferences.html">Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="criticisms.html">Criticism</a></li>
-<li class="toctree-l1"><a class="reference internal" href="edward.html">edward package</a></li>
-</ul>
-
-            
-          
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Edward</a>
-      </nav>
-
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          
-
- 
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Data</li>
-      <li class="wy-breadcrumbs-aside">
-        
-          
-            <a href="_sources/data.txt" rel="nofollow"> View page source</a>
-          
-        
-      </li>
-  </ul>
-  <hr/>
+<div class="nine columns">
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3 button-primary" href="/api/data">Data</a>
+<a class="button3" href="/api/model">Model</a>
+<a class="button3" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+<a class="button3" href="/api/stats">Statistics</a>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-            
-  <div class="section" id="data">
-<h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+</div>
+<h3 id="data">Data</h3>
 <p>In Edward, data is represented as TensorFlow tensors or NumPy arrays.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">x_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">x_data</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-</pre></div>
-</div>
-<p>There are three ways to read data in Edward. They follow the <a class="reference external" href="https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html">three ways
-to read data in TensorFlow</a>.</p>
-<ol class="arabic">
-<li><p class="first"><strong>Preloaded data.</strong> A constant or variable in the TensorFlow graph
-holds all the data.</p>
-<p>This setting is the fastest to work with and is recommended if the
-data fits in memory.</p>
-<p>Represent the data as NumPy arrays.
-Internally, during inference, we will store them in TensorFlow variables to prevent
-copying data more than once in memory.
-(As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py">mixture of Gaussians</a>.)</p>
-</li>
-<li><p class="first"><strong>Feeding.</strong> Manual code provides the data when running each step of
-inference.</p>
+<pre class="python" language="Python"><code>x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</code></pre>
+<p>There are three ways to read data in Edward. They follow the <a href="https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html">three ways to read data in TensorFlow</a>.</p>
+<ol>
+<li><strong>Preloaded data.</strong> A constant or variable in the TensorFlow graph holds all the data.
+<p>This setting is the fastest to work with and is recommended if the data fits in memory.</p>
+<p>Represent the data as NumPy arrays. Internally, during inference, we will store them in TensorFlow variables to prevent copying data more than once in memory. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py">mixture of Gaussians</a>.)</p></li>
+<li><strong>Feeding.</strong> Manual code provides the data when running each step of inference.
 <p>This setting provides the most fine-grained control which is useful for experimentation.</p>
-<p>Represent the data as TensorFlow placeholders. During inference,
-the user must manually feed the placeholders at each
-step by first initializing via <code class="docutils literal"><span class="pre">inference.initialize()</span></code>; then
-in a loop call <code class="docutils literal"><span class="pre">inference.update(feed_dict={...})</span></code> where
-<code class="docutils literal"><span class="pre">feed_dict</span></code> carries the values for the <code class="docutils literal"><span class="pre">tf.placeholder</span></code>&#8216;s.
-(As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a>.)</p>
-</li>
-<li><p class="first"><strong>Reading from files.</strong> An input pipeline reads the data from files
-at the beginning of a TensorFlow graph.</p>
+<p>Represent the data as TensorFlow placeholders. During inference, the user must manually feed the placeholders at each step by first initializing via <code>inference.initialize()</code>; then in a loop call <code>inference.update(feed_dict=...)</code> where <code>feed_dict</code> carries the values for the <code>tf.placeholder</code>’s. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a>.)</p></li>
+<li><strong>Reading from files.</strong> An input pipeline reads the data from files at the beginning of a TensorFlow graph.
 <p>This setting is recommended if the data does not fit in memory.</p>
-<p>Represent the data as TensorFlow tensors, where the tensors are the
-output of data readers. During inference, each update will be
-automatically evaluated over new batch tensors represented through
-the data readers. (As an example, see
-the <a class="reference external" href="https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py">data unit test</a>.)</p>
-</li>
+<p>Represent the data as TensorFlow tensors, where the tensors are the output of data readers. During inference, each update will be automatically evaluated over new batch tensors represented through the data readers. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py">data unit test</a>.)</p></li>
 </ol>
-<div class="section" id="training-models-with-data">
-<h2>Training Models with Data<a class="headerlink" href="#training-models-with-data" title="Permalink to this headline">¶</a></h2>
-<p>To pass in data during inference, we form a Python dictionary. Each
-item in the dictionary has a random variable binded to the data
-values.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># assuming `x` and `y` form observed variables in the model</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">y_data</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>How do we use the data during training? In general there are three use
-cases:</p>
-<ol class="arabic">
-<li><p class="first">Train over the full data per step.</p>
-<p>Follow the setting of preloaded data.</p>
-</li>
-<li><p class="first">Train over a batch per step when the full data fits in memory. This
-scale inference in terms of computational complexity.</p>
-<p>Follow the setting of preloaded data. Specify the batch size with
-<code class="docutils literal"><span class="pre">n_minibatch</span></code> in <code class="docutils literal"><span class="pre">Inference</span></code>. By default, we will subsample by
-slicing along the first dimension of every data structure in the
-data dictionary. Alternatively, follow the setting of feeding.
-Manually deal with the batch behavior at each training step.</p>
-</li>
-<li><p class="first">Train over batches per step when the full data does not fit in
-memory. This scales inference in terms of computational complexity and
-memory complexity.</p>
-<p>Follow the setting of reading from files. Alternatively, follow the
-setting of feeding, and use a generator to create and destroy NumPy
-arrays on the fly for feeding the placeholders.</p>
-</li>
+<h3 id="training-models-with-data">Training Models with Data</h3>
+<p>To pass in data during inference, we form a Python dictionary. Each item in the dictionary has a random variable binded to the data values.</p>
+<pre class="python" language="Python"><code># assuming `x` and `y` form observed variables in the model
+data = {x: x_data, y: y_data}</code></pre>
+<p>How do we use the data during training? In general there are three use cases:</p>
+<ol>
+<li>Train over the full data per step.
+<p>Follow the setting of preloaded data.</p></li>
+<li>Train over a batch per step when the full data fits in memory. This scale inference in terms of computational complexity.
+<p>Follow the setting of preloaded data. Specify the batch size with <code>n_minibatch</code> in <code>Inference</code>. By default, we will subsample by slicing along the first dimension of every data structure in the data dictionary. Alternatively, follow the setting of feeding. Manually deal with the batch behavior at each training step.</p></li>
+<li>Train over batches per step when the full data does not fit in memory. This scales inference in terms of computational complexity and memory complexity.
+<p>Follow the setting of reading from files. Alternatively, follow the setting of feeding, and use a generator to create and destroy NumPy arrays on the fly for feeding the placeholders.</p></li>
 </ol>
-</div>
-<div class="section" id="training-model-wrappers-with-data">
-<h2>Training Model Wrappers with Data<a class="headerlink" href="#training-model-wrappers-with-data" title="Permalink to this headline">¶</a></h2>
-<p>During inference, data is passed in differently for external
-languages which use a model wrapper. Instead of binding observed
-variables, it is usually comprised
-of strings binded to the values, such as a key <code class="docutils literal"><span class="pre">'x'</span></code> with value
-<code class="docutils literal"><span class="pre">np.array([0.23512,</span> <span class="pre">13.2])</span></code>.
-We detail specifics for each external language below.</p>
-<ul class="simple">
-<li><strong>TensorFlow.</strong> The data carries whatever keys and values the user
-accesses in the user-defined model. Key is a string. Value is a NumPy
-array or TensorFlow tensor.</li>
+<h3 id="training-model-wrappers-with-data">Training Model Wrappers with Data</h3>
+<p>During inference, data is passed in differently for external languages which use a model wrapper. Instead of binding observed variables, it is usually comprised of strings binded to the values, such as a key <code>’x’</code> with value <code>np.array([0.23512, 13.2])</code>. We detail specifics for each external language below.</p>
+<ul>
+<li><strong>TensorFlow.</strong> The data carries whatever keys and values the user accesses in the user-defined model. Key is a string. Value is a NumPy array or TensorFlow tensor.
+<pre class="python" language="Python"><code>class BetaBernoulli:
+  def log_prob(self, xs, zs):
+    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+    log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+    return log_lik + log_prior</code></pre>
+<p>model = BetaBernoulli() data = <span>’x’: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</span></p></li>
+<li><strong>Python.</strong> The data carries whatever keys and values the user accesses in the user-defined model. Key is a string. Value is a NumPy array or TensorFlow tensor.
+<pre class="python" language="Python"><code>class BetaBernoulli(PythonModel):
+  def _py_log_prob(self, xs, zs):
+    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+    log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+    return log_lik + log_prior
+
+model = BetaBernoulli()
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre></li>
+<li><strong>PyMC3.</strong> The data binds Theano shared variables, which are used to mark the observed PyMC3 random variables, to their realizations. Key is a Theano shared variable. Value is a NumPy array or TensorFlow tensor.
+<pre class="python" language="Python"><code>x_obs = theano.shared(np.zeros(1))
+with pm.Model() as pm_model:
+  p = pm.Beta('p', 1, 1, transform=None)
+  x = pm.Bernoulli('x', p, observed=x_obs)
+
+model = PyMC3Model(pm_model)
+data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre></li>
+<li><strong>Stan.</strong> The data is according to the Stan program’s data block. Key is a string. Value is whatever type is used for the data block.
+<pre class="python" language="Python"><code>model_code = """
+  data {
+    int&lt;lower=0&gt; N;
+    int&lt;lower=0,upper=1&gt; x[N];
+  }
+  parameters {
+    real&lt;lower=0,upper=1&gt; p;
+  }
+  model {
+    p ~ beta(1.0, 1.0);
+    for (n in 1:N)
+    x[n] ~ bernoulli(p);
+  }
+"""
+model = ed.StanModel(model_code=model_code)
+data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}</code></pre></li>
 </ul>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">:</span>
-  <span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-    <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><strong>Python.</strong> The data carries whatever keys and values the user
-accesses in the user-defined model. Key is a string. Value is a NumPy
-array or TensorFlow tensor.</li>
-</ul>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BetaBernoulli</span><span class="p">(</span><span class="n">PythonModel</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">_py_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
-    <span class="n">log_prior</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bernoulli</span><span class="o">.</span><span class="n">logpmf</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">zs</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_prior</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">BetaBernoulli</span><span class="p">()</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><strong>PyMC3.</strong> The data binds Theano shared variables, which are used to
-mark the observed PyMC3 random variables, to their realizations. Key
-is a Theano shared variable. Value is a NumPy array or TensorFlow
-tensor.</li>
-</ul>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">x_obs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pm_model</span><span class="p">:</span>
-  <span class="n">p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-  <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">x_obs</span><span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">PyMC3Model</span><span class="p">(</span><span class="n">pm_model</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">x_obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><strong>Stan.</strong> The data is according to the Stan program&#8217;s data block. Key
-is a string. Value is whatever type is used for the data block.</li>
-</ul>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">model_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">  data {</span>
-<span class="s2">    int&lt;lower=0&gt; N;</span>
-<span class="s2">    int&lt;lower=0,upper=1&gt; x[N];</span>
-<span class="s2">  }</span>
-<span class="s2">  parameters {</span>
-<span class="s2">    real&lt;lower=0,upper=1&gt; p;</span>
-<span class="s2">  }</span>
-<span class="s2">  model {</span>
-<span class="s2">    p ~ beta(1.0, 1.0);</span>
-<span class="s2">    for (n in 1:N)</span>
-<span class="s2">    x[n] ~ bernoulli(p);</span>
-<span class="s2">  }</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">ed</span><span class="o">.</span><span class="n">StanModel</span><span class="p">(</span><span class="n">model_code</span><span class="o">=</span><span class="n">model_code</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}</span>
-</pre></div>
-</div>
-<p>Note that for these model wrappers,
-all 3 use cases for training models with data are supported. However,
-Stan is limited to training over the full data per step. (This
-because Stan&#8217;s data structure requires data subsampling on arbitrary
-data types, which we don&#8217;t know how to automate.)</p>
+<p>Note that for these model wrappers, all 3 use cases for training models with data are supported. However, Stan is limited to training over the full data per step. (This because Stan’s data structure requires data subsampling on arbitrary data types, which we don’t know how to automate.)</p>
 </div>
 </div>
-
-
-           </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="models.html" class="btn btn-neutral float-right" title="Models" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral" title="Edward" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
-  
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &copy; Copyright 2016, Edward Development Team.
-
-    </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
-
-</footer>
-
-        </div>
-      </div>
-
-    </section>
-
-  </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.0.9',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
-      });
-  </script>
-   
-
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
 </body>
 </html>

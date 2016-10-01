@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Bayesian neural network</title>
+  <title>Edward – Statistics</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -91,47 +91,70 @@
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
-
-<h2 id="bayesian-neural-network">Bayesian neural network</h2>
-<p>A Bayesian neural network is a neural network with a prior distribution on its weights <span class="citation">(Neal, 2012)</span>.</p>
-<p>Define the likelihood of an observation <span class="math inline">\((\mathbf{x}_n, y_n)\)</span> <span class="math display">\[\begin{aligned}
-  p(y_n \mid \mathbf{z} \;;\; \mathbf{x}_n, \sigma^2)
-  &amp;=
-  \mathcal{N}(y_n \;;\; \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),\end{aligned}\]</span> where <span class="math inline">\(\mathrm{NN}\)</span> is a neural network whose weights and biases form the latent variables <span class="math inline">\(\mathbf{z}\)</span>. Assume <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
-<p>Define the prior on the weights and biases <span class="math inline">\(\mathbf{z}\)</span> to be the standard normal <span class="math display">\[\begin{aligned}
-  p(\mathbf{z})
-  &amp;=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
-<p>Let’s build the model in Edward. We instantiate a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
-<pre class="python" language="Python"><code>def neural_network(x):
-    h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
-    h = tf.matmul(h, W_2) + b_2
-    return tf.reshape(h, [-1])
-
-
-N = 40  # num data ponts
-D = 1   # num features
-
-W_0 = Normal(mu=tf.zeros([D, 10]), sigma=tf.ones([D, 10]))
-W_1 = Normal(mu=tf.zeros([10, 10]), sigma=tf.ones([10, 10]))
-W_2 = Normal(mu=tf.zeros([10, 1]), sigma=tf.ones([10, 1]))
-b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
-b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
-b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
-
-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
-y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))</code></pre>
-<p>This code builds the model assuming the features <code>x_train</code> already exists in the Python environment. Alternatively, one can also define a TensorFlow placeholder,</p>
-<pre><code>x = ed.placeholder(tf.float32, [N, D])</code></pre>
-<p>and feed the placeholder manually during inference.</p>
-<p>A toy demonstration is available in the <a href="/getting-started">Getting Started</a> section. Source code is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">here</a>. An example of the model implemented as a class object in TensorFlow is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_nn.py">here</a>.</p>
-<h3 id="references" class="unnumbered">References</h3>
-<div id="refs" class="references">
-<div id="ref-neal2012bayesian">
-<p>Neal, R. M. (2012). <em>Bayesian learning for neural networks</em> (Vol. 118). Springer Science &amp; Business Media.</p>
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3" href="/api/data">Data</a>
+<a class="button3" href="/api/model">Model</a>
+<a class="button3" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+<a class="button3 button-primary" href="/api/stats">Statistics</a>
 </div>
 </div>
+<h3 id="statistics">Statistics</h3>
+<p>The <code>edward.stats</code> library provides a collection of primitive distribution methods for use in TensorFlow.</p>
+<pre class="python" language="Python"><code>class Distribution(object):
+  &quot;&quot;&quot;Template for all distributions.&quot;&quot;&quot;
+  def rvs(self, size=1):
+    &quot;&quot;&quot;
+    Parameters
+    ----------
+    size : int, list of int, or tuple of int, optional
+        Number of samples, in a particular shape if specified in a
+        list or tuple with more than one element.
+
+    params : float or np.ndarray
+
+    Returns
+    -------
+    np.ndarray
+        np.ndarray of dimension (size x shape), where shape is the
+        shape of its parameter argument. For multivariate
+        distributions, shape may correspond to only one of the
+        parameter arguments, e.g., alpha in Dirichlet, p in
+        Multinomial, mean in Multivariate_Normal.
+
+    Notes
+    -----
+    This is written in NumPy/SciPy, as TensorFlow does not support
+    many distributions for random number generation. It follows
+    SciPy&#39;s naming and argument conventions. It does not support
+    taking in tf.Tensors as input.
+
+    The equivalent method in SciPy is not guaranteed to be
+    supported with a batch of parameter inputs, e.g., a vector of
+    location parameters in a normal distribution, or a matrix of
+    concentration parameters in a Dirichlet. This is.
+
+    This does not follow SciPy&#39;s behavior, e.g., the number (or
+    shape) of the draws will always be denoted by its outer
+    dimension(s).
+
+    params as a 2-D or higher tensor is not guaranteed to be
+    supported (for either univariate or multivariate
+    distribution).
+
+    size as a list or tuple of more than one element is not
+    guaranteed to be supported.
+
+    For most distributions, the parameters must be of the same
+    shape and type, e.g., n and p in Binomial must be np.arrays()
+    of same shape or both floats. For some, they may differ by one
+    dimension, e.g., n and p in Multinomial can be float and
+    np.array(), or both np.arrays, and n always has one less
+    dimension.
+    &quot;&quot;&quot;
+    raise NotImplementedError()</code></pre>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
