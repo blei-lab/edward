@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import multiprocessing
 import numpy as np
 import six
 import tensorflow as tf
@@ -46,20 +45,14 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
-  def initialize(self, n_minibatch=None, optimizer=None, scope=None,
-                 use_prettytensor=False, *args, **kwargs):
+  def initialize(self, optimizer=None, scope=None, use_prettytensor=False,
+                 *args, **kwargs):
     """Initialize variational inference algorithm.
 
     Initialize all variables.
 
     Parameters
     ----------
-    n_minibatch : int, optional
-      Number of samples for data subsampling. Default is to use
-      all the data. Subsampling is available only if all data
-      passed in are NumPy arrays and the model is not a Stan
-      model. For subsampling details, see
-      ``tf.train.slice_input_producer`` and ``tf.train.batch``.
     optimizer : str or tf.train.Optimizer, optional
       A TensorFlow optimizer, to use for optimizing the variational
       objective. Alternatively, one can pass in the name of a
@@ -73,25 +66,7 @@ class VariationalInference(Inference):
       Defaults to TensorFlow.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
-    self.n_minibatch = n_minibatch
     self.loss = tf.constant(0.0)
-
-    if n_minibatch is not None and \
-       not isinstance(self.model_wrapper, StanModel):
-      # Re-assign data to batch tensors, with size given by
-      # ``n_minibatch``.
-      values = list(six.itervalues(self.data))
-      slices = tf.train.slice_input_producer(values)
-      # By default use as many threads as CPUs.
-      batches = tf.train.batch(slices, n_minibatch,
-                               num_threads=multiprocessing.cpu_count())
-      if not isinstance(batches, list):
-        # ``tf.train.batch`` returns tf.Tensor if ``slices`` is a
-        # list of size 1.
-        batches = [batches]
-
-      self.data = {key: value for key, value in
-                   zip(six.iterkeys(self.data), batches)}
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
