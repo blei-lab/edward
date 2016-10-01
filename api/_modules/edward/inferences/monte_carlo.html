@@ -254,6 +254,15 @@
 <span class="sd">    others op run with the t before incrementing or after incrementing</span>
 <span class="sd">    depends on which is run faster in the TensorFlow graph. Running it</span>
 <span class="sd">    separately forces a consistent behavior.</span>
+
+<span class="sd">    Initialization is assumed from params[0, :]. This generalizes</span>
+<span class="sd">    initializing randomly and initializing from user input. Updates</span>
+<span class="sd">    are along this outer dimension, where iteration t updates</span>
+<span class="sd">    params[t, :] in each Empirical random variable.</span>
+
+<span class="sd">    No warm-up is implemented. Users must run MCMC for a long period</span>
+<span class="sd">    of time, then manually burn in the Empirical random variable.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">feed_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -276,8 +285,10 @@
         <span class="n">accept_rate</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s1">&#39;accept_rate&#39;</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;iter </span><span class="si">{:d}</span><span class="s2"> accept rate </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">accept_rate</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">):</span>
-          <span class="nb">print</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+          <span class="c1"># TODO running mean and std, up to that number</span>
+          <span class="n">mean</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
           <span class="n">std</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mean: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">mean</span><span class="o">.</span><span class="n">__str__</span><span class="p">())</span>
           <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;std: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">std</span><span class="o">.</span><span class="n">__str__</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="MonteCarlo.build_update"><a class="viewcode-back" href="../../../edward.inferences.monte_carlo.html#edward.inferences.monte_carlo.MonteCarlo.build_update">[docs]</a>  <span class="k">def</span> <span class="nf">build_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

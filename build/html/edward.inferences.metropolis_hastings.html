@@ -176,12 +176,6 @@ binded to a proposal distribution p(z&#8217; | z).</td>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
-<p>Initialization is assumed from params[0, :]. This generalizes
-initializing randomly and initializing from user input. Updates
-are along this outer dimension, where iteration t updates
-params[t, :] in each Empirical random variable.</p>
-<p>No warm-up is implemented. Users must run MCMC for a long period
-of time, then manually burn in the Empirical random variable.</p>
 <p>The updates assume each Empirical random variable is directly
 parameterized by tf.Variables().</p>
 <dl class="method">

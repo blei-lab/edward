@@ -166,14 +166,6 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    Initialization is assumed from params[0, :]. This generalizes</span>
-<span class="sd">    initializing randomly and initializing from user input. Updates</span>
-<span class="sd">    are along this outer dimension, where iteration t updates</span>
-<span class="sd">    params[t, :] in each Empirical random variable.</span>
-
-<span class="sd">    No warm-up is implemented. Users must run MCMC for a long period</span>
-<span class="sd">    of time, then manually burn in the Empirical random variable.</span>
-
 <span class="sd">    The updates assume each Empirical random variable is directly</span>
 <span class="sd">    parameterized by tf.Variables().</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -194,7 +186,7 @@
 <span class="sd">            sum_z [ log p(znew) - log g(zold | znew) ] +</span>
 <span class="sd">            sum_x [ log p(x | znew) - sum_x log p(x | zold) ]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">old_sample</span> <span class="o">=</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">old_sample</span> <span class="o">=</span> <span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">qz</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                   <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">qz</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_vars</span><span class="p">)}</span>
 
     <span class="c1"># Draw proposed sample and calculate acceptance ratio.</span>

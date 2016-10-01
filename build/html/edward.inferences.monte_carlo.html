@@ -265,6 +265,12 @@ acceptance rate of samples since (and including) this iteration.</td>
 others op run with the t before incrementing or after incrementing
 depends on which is run faster in the TensorFlow graph. Running it
 separately forces a consistent behavior.</p>
+<p>Initialization is assumed from params[0, :]. This generalizes
+initializing randomly and initializing from user input. Updates
+are along this outer dimension, where iteration t updates
+params[t, :] in each Empirical random variable.</p>
+<p>No warm-up is implemented. Users must run MCMC for a long period
+of time, then manually burn in the Empirical random variable.</p>
 </dd></dl>
 
 </dd></dl>
