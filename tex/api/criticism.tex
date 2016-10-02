@@ -6,9 +6,27 @@
 % Begin the content of the page
 \subsubsection{Criticism}
 
-Criticism is about understanding the
-assumptions made in one's analysis. For example, model criticism
-measures the degree to which our model falsely describes the data.
+Criticizing models and their inference is a crucial step in analysis.
+Following falsificationists such as Popper and Box, no model will exactly
+describe the natural phenomena we seek to analyze; in other words, ``all models
+are wrong''. Thus we would like to uncover where and how the model goes wrong.
+
+Edward explores model and inference criticism using
+\begin{itemize}
+  \item point-based evaluations, such as mean squared error or
+  classification accuracy
+\end{itemize}
+\begin{lstlisting}[language=Python]
+ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
+\end{lstlisting}
+\begin{itemize}
+  \item posterior predictive checks, for making probabilistic
+  assessments of the model fit using discrepancy functions
+\end{itemize}
+\begin{lstlisting}[language=Python]
+T = lambda xs, zs: tf.reduce_mean(xs[x])
+ed.ppc(T, data={x: x_data})
+\end{lstlisting}
 
 Criticism techniques are simply functions which take as input data,
 the probability model and variational model (binded through a latent

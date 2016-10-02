@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="text/css" http-equiv="Content-Style-Type"/>
-<meta content="pandoc" name="generator"/>
-<title>Edward – Model</title>
-<!-- Mobile Specific Metas -->
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<!-- FONT -->
-<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-<!-- CSS -->
-<link href="/css/normalize.css" rel="stylesheet">
-<link href="/css/skeleton.css" rel="stylesheet">
-<!-- Dynamically resize logo for mobile -->
-<style type="text/css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Model</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
   .logo-width {
     width: 100%;
     box-sizing: border-box;
@@ -29,63 +30,67 @@
     }
   }
   </style>
-<!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-<!-- highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
-<!-- Favicon -->
-<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
-<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-<link href="/icons/manifest.json" rel="manifest">
-<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
-<link href="/icons/favicon.ico" rel="shortcut icon">
-<meta content="#da532c" name="msapplication-TileColor">
-<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
-<meta content="/icons/browserconfig.xml" name="msapplication-config">
-<meta content="#ffffff" name="theme-color">
-</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
 <body>
 <div class="container">
-<div class="row" style="margin-top: 5%">
-<div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
-<center>
-<img alt="Edward" class="logo-width" src="/images/edward.png"/>
-</center>
-</a>
-<a class="button u-full-width" href="/">Home</a>
-<a class="button u-full-width" href="/getting-started">Getting Started</a>
-<a class="button u-full-width" href="/tutorials/">Tutorials</a>
-<a class="button u-full-width" href="/api/">API</a>
-<a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
-<a class="button2 u-full-width" href="/contributing">Contributing</a>
-<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
-<a class="button2 u-full-width" href="/license">License</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-<a href="https://github.com/blei-lab/edward">
-<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
-<!-- </object> -->
-</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-</div>
-<div class="nine columns">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/">Home</a>
+    <a class="button u-full-width" href="/getting-started">Getting Started</a>
+    <a class="button u-full-width" href="/tutorials/">Tutorials</a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <a class="button u-full-width" href="#">Advanced</a>
+    <a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+    <a class="button2 u-full-width" href="/contributing">Contributing</a>
+    <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+    <a class="button2 u-full-width" href="/license">License</a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a href="https://github.com/blei-lab/edward">
+    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="/images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
+    alt="Edward on Github" />
+    <!-- </object> -->
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
 <h2 id="api-and-documentation">API and Documentation</h2>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
@@ -97,68 +102,39 @@
 </div>
 </div>
 <h3 id="model">Model</h3>
-<p>A probabilistic model specifies a joint distribution <code>p(x, z)</code> of data <code>x</code> and latent variables <code>z</code>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>.</p>
+<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>. In Edward, we specify models using a simple language of random variables.</p>
 <h3 id="random-variables">Random Variables</h3>
-<p>The building block of probabilistic modeling is a random variable. In Edward, random variables are built on top of <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/distributions">tf.contrib.distributions</a>. It has the same arguments to instantiate the object, and is equipped with the same methods such as <code>log_prob()</code> and <code>sample()</code>. See their docstrings for more details.</p>
-<p>Here are examples of univariate distributions.</p>
-<pre class="python" language="Python"><code># univariate normal
+<p>A random variable <span class="math inline">\(\mathbf{x}\)</span> is an object parameterized by tensors <span class="math inline">\(\theta^*\)</span>. The number of random variables in one object is determined by the dimension of its parameters.</p>
+<pre class="python" language="Python"><code>from edward.models import Normal, Exponential
+
+# univariate normal
 Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
 # vector of 5 univariate normals
 Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
 # 2 x 3 matrix of Exponentials
 Exponential(lam=tf.ones([2, 3]))</code></pre>
-<p>The dimension of the distributions are deduced from the dimension of its parameters.</p>
-<p>Here are examples of multivariate distributions.</p>
-<pre class="python" language="Python"><code># 1 K-dimensional Dirichlet
+<p>For multivariate distributions, the multivariate dimension is the innermost (right-most) dimension of the parameters.</p>
+<pre class="python" language="Python"><code>from edward.models import Dirichlet, MultivariateNormalFull
+
+# K-dimensional Dirichlet
 Dirichlet(alpha=np.array([0.1]*K)
 # vector of 5 K-dimensional multivariate normals
-MultivariateNormal(mu=tf.zeros([5, K]))
+MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormal(mu=tf.zeros([2, 5, K]))</code></pre>
-<p>Multivariate distributions store their multivariate dimension in the inner dimension (right-most dimension) of the parameters.</p>
-<p>Formally, <code>RandomVariable</code> objects define a wrapper around tensors. That is, we register a <code>tensor_conversion_function()</code> which converts the object to samples. This enables tensor operations, placing <code>RandomVariable</code> objects on the TensorFlow graph.</p>
-<pre class="python" language="Python"><code>x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
+MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
+<p>Random variable objects are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>.</p>
+<p>Each object wraps a tensors <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
+<p><img src="/images/random_variable.png" alt="image" width="225" /></p>
+<p>This enables operations on the TensorFlow graph, allowing random variables to be used in conjunction with other TensorFlow ops. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
+<p><img src="/images/random_variable_ops.png" alt="image" width="400" /></p>
+<pre class="python" language="Python"><code>from edward.models import Normal
+
+x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
 tf.nn.tanh(x * y)
 tf.gather(x, 2) # 3rd normal rv in the vector</code></pre>
-<p>Importantly, the graphical model is defined explicitly by its TensorFlow graph. This allows random variables to be used in conjuction with other TensorFlow ops.</p>
-<p>Parameters work with random variables in the same way they work with <code>tf.contrib.distributions</code>.</p>
-<ul>
-<li>Constant parameters.
-<pre class="python" language="Python"><code>   # 5-dimensional normal with constant params
-   x = Normal(mu=np.array([0.0]*5), sigma=np.array([1.0]*5))
-  </code></pre></li>
-<li>Trainable parameters.
-<pre class="python" language="Python"><code>   # 5-dimensional normal
-   mu = tf.Variable(np.zeros(5))
-   sigma = tf.Variable(np.zeros(5))
-   z = Normal(mu=mu, sigma=sigma)
-
-   # 5-dimensional full rank normal
-   mu = tf.Variable(np.zeros(5))
-   cov = tf.Variable(np.identity(5))
-   z = MultivariateNormal(mu=mu, cov=cov)
-
-   # Normal parameterized by a neural network
-   W_1 = tf.Variable(np.zeros([input_dim, h])
-   W_2 = tf.Variable(np.zeros([h, output_dim])
-   b_1 = tf.Variable(np.zeros(h))
-   b_2 = tf.Variable(np.zeros(output_dim))
-
-   def neural_network(x):
-       return tf.matmul(tf.nn.tanh(tf.matmul(x, W_1) + b_1), W_2) + b_2
-
-   x = np.array(...)
-   y = Normal(mu=neural_network(x))
-  </code></pre></li>
-<li>Random parameters.
-<pre class="python" language="Python"><code>   # 2-dimensional prior
-   mu = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
-   y = Normal(mu=mu, sigma=tf.ones(2)))
-  </code></pre></li>
-</ul>
-<p>For examples of models built in Edward, see the model <a href="/tutorials/">tutorials</a>.</p>
+<p>We can leverage this construction of random variables to define models. For examples of models built in Edward, see the model <a href="/tutorials/">tutorials</a>.</p>
 <h3 id="variational-models">Variational Models</h3>
 <p>A variational model defines a distribution over latent variables. It is a model of the posterior distribution, specifying another distribution to approximate it. Edward implements variational models using the same language of random variables.</p>
 <p>We parameterize them with TensorFlow variables so that their parameters may be trained during inference.</p>
@@ -174,7 +150,7 @@ qpi = Dirichlet(alpha=qpi_alpha)
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
 <h3 id="model-wrappers">Model Wrappers</h3>
-<p>Edward also supports specifying models using external languages. These model wrappers are written as a class.</p>
+<p>Edward also supports other languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan. In each language, a model wrapper is written as a class.</p>
 <p>In general, a model wrapper is a class with the structure</p>
 <pre class="python" language="Python"><code>class Model:
     def __init__(...):
@@ -194,10 +170,10 @@ model = Model(...)</code></pre>
 from edward.stats import bernoulli, beta
 
 class BetaBernoulli:
-  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
+  &quot;&quot;&quot;p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)&quot;&quot;&quot;
   def log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+    log_prior = beta.logpdf(zs[&#39;p&#39;], a=1.0, b=1.0)
+    log_lik = tf.reduce_sum(bernoulli.logpmf(xs[&#39;x&#39;], p=zs[&#39;p&#39;]))
     return log_lik + log_prior
 
 model = BetaBernoulli()</code></pre>
@@ -209,10 +185,10 @@ from edward.models import PythonModel
 from scipy.stats import bernoulli, beta
 
 class BetaBernoulli(PythonModel):
-  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
+  &quot;&quot;&quot;p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)&quot;&quot;&quot;
   def _py_log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
+    log_prior = beta.logpdf(zs[&#39;p&#39;], a=1.0, b=1.0)
+    log_lik = np.sum(bernoulli.logpmf(xs[&#39;x&#39;], p=zs[&#39;p&#39;]))
     return log_lik + log_prior
 
   model = BetaBernoulli()</code></pre>
@@ -220,7 +196,7 @@ class BetaBernoulli(PythonModel):
 <p><strong>Stan.</strong> Write a Stan program in the form of a file or string. Then call it with <code>StanModel(file=file)</code> or <code>StanModel(model_code=model_code)</code>. Here is an example:</p>
 <pre class="python" language="Python"><code>from edward.models import StanModel
 
-model_code = """
+model_code = &quot;&quot;&quot;
   data {
     int&lt;lower=0&gt; N;
     int&lt;lower=0,upper=1&gt; x[N];
@@ -233,12 +209,12 @@ model_code = """
     for (n in 1:N)
     x[n] ~ bernoulli(p);
   }
-"""
+&quot;&quot;&quot;
 model = StanModel(model_code=model_code)</code></pre>
 <p>During inference the latent variable string matches the name of the parameters from the parameter block. Analogously, the data’s string matches the name of the data from the data block.</p>
 <pre class="python" language="Python"><code>qp = Beta(...)
-data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
-inference = Inference({'p': qp}, data, model)</code></pre>
+data = {&#39;N&#39;: 10, &#39;x&#39;: [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/stan_beta_bernoulli.py">toy script</a> that uses this model. Stan programs are convenient as <a href="https://github.com/stan-dev/example-models/wiki">there are many online examples</a>, although they are limited to probability models with differentiable latent variables. <code>StanModel</code> objects also contain no structure about the model besides how to calculate its joint density.</p>
 <p><strong>PyMC3.</strong> Write a PyMC3 model whose observed values are Theano shared variables, and whose latent variables use <code>transform=None</code> to keep them on their original (constrained) domain. The values in the Theano shared variables can be plugged at a later time. Here is an example:</p>
 <pre class="python" language="Python"><code>import numpy as np
@@ -248,21 +224,21 @@ from edward.models import PyMC3Model
 
 x_obs = theano.shared(np.zeros(1))
 with pm.Model() as pm_model:
-  p = pm.Beta('p', 1, 1, transform=None)
-  x = pm.Bernoulli('x', p, observed=x_obs)
+  p = pm.Beta(&#39;p&#39;, 1, 1, transform=None)
+  x = pm.Bernoulli(&#39;x&#39;, p, observed=x_obs)
 
 model = PyMC3Model(pm_model)</code></pre>
 <p>During inference the latent variable string matches the name of the model’s latent variables; the data’s string matches the Theano shared variables.</p>
 <pre class="python" language="Python"><code>qp = Beta(...)
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-inference = Inference({'p': qp}, data, model)</code></pre>
+inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/pymc3_beta_bernoulli.py">toy script</a> that uses this model. PyMC3 can be used to define models with both differentiable latent variables and non-differentiable (e.g., discrete) latent variables. <code>PyMC3Model</code> objects contain no structure about the model besides how to calculate its joint density.</p>
 <p>For modeling convenience, we recommend using the modeling language that you are most familiar with. For efficiency, we recommend using TensorFlow, as Edward uses TensorFlow as the computational backend. Internally, other languages are wrapped in TensorFlow so their computation represents a single node in the graph (making it difficult to tease apart and thus distribute their computation).</p>
 <h3 id="model-wrapper-api">Model Wrapper API</h3>
 <p>This outlines the current spec for all methods in the model object. It includes all modeling languages, where certain methods are implemented by wrapping around other methods. For example, by a Python model builds a <code>_py_log_prob()</code> method and inherits from <code>PythonModel</code>; <code>PythonModel</code> implements <code>log_prob()</code> by wrapping around <code>_py_log_prob()</code> as a TensorFlow operation.</p>
 <pre class="python" language="Python"><code>class Model:
   def log_prob(self, xs, zs):
-    """
+    &quot;&quot;&quot;
     Used in: (most) inference.
 
     Parameters
@@ -280,11 +256,11 @@ inference = Inference({'p': qp}, data, model)</code></pre>
     -------
     tf.Tensor
       Scalar, the log joint density log p(xs, zs).
-    """
+    &quot;&quot;&quot;
     pass
 
   def log_lik(self, xs, zs):
-    """
+    &quot;&quot;&quot;
     Used in: inference with analytic KL.
 
     Parameters
@@ -302,10 +278,10 @@ inference = Inference({'p': qp}, data, model)</code></pre>
     -------
     tf.Tensor
       Scalar, the log-likelihood log p(xs | zs).
-    """
+    &quot;&quot;&quot;
 
   def predict(self, xs, zs):
-    """
+    &quot;&quot;&quot;
     Used in: ed.evaluate().
 
     Parameters
@@ -323,13 +299,13 @@ inference = Inference({'p': qp}, data, model)</code></pre>
     -------
     tf.Tensor
       Tensor of predictions, one for each data point. The prediction
-      is the likelihood's mean. For example, in supervised learning
+      is the likelihood&#39;s mean. For example, in supervised learning
       of i.i.d. categorical data, it is a vector of labels.
-    """
+    &quot;&quot;&quot;
     pass
 
   def sample_prior(self):
-    """
+    &quot;&quot;&quot;
     Used in: ed.ppc().
 
     Returns
@@ -338,11 +314,11 @@ inference = Inference({'p': qp}, data, model)</code></pre>
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding
       realization (tf.Tensor).
-    """
+    &quot;&quot;&quot;
     pass
 
   def sample_likelihood(self, zs):
-    """
+    &quot;&quot;&quot;
     Used in: ed.ppc().
 
     Parameters
@@ -358,11 +334,11 @@ inference = Inference({'p': qp}, data, model)</code></pre>
       Data dictionary. It is a replicated data set, where each key
       and value matches the same type as any observed data set that
       the model aims to capture.
-    """
+    &quot;&quot;&quot;
     pass</code></pre>
-</div>
-</div>
-<div class="row" style="padding-bottom: 25%"> </div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();

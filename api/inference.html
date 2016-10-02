@@ -102,8 +102,8 @@
 </div>
 </div>
 <h3 id="inference">Inference</h3>
-<p>An inference algorithm infers the posterior for a particular model <code>p(x, z)</code> and data set <code>x</code>. It is the distribution of the latent variables given data, <code>p(z | x)</code>. For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.</p>
-<p>Edward uses classes and class inheritance to provide a hierarchy of inference methods, all of which are easily extensible. This enables fast experimentation and research on top of existing inference methods, whether it be developing new black box inference algorithms or developing new model-specific inference algorithms which are tailored to specific class of models. We detail this below.</p>
+<p>Given a model <span class="math inline">\(p(x, z)\)</span> and data set <span class="math inline">\(x\)</span>, An inference algorithm infers the posterior distribution <span class="math inline">\(p(z\mid x)\)</span> of the latent variables given data. For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.</p>
+<p>Edward uses class inheritance to provide a hierarchy of inference methods. This enables fast experimentation on top of existing algorithms, whether it be developing new black box algorithms or developing new model-specific algorithms. We detail this below.</p>
 <p><img src="/images/inference_structure.png" alt="image" width="700" /> <span><em>Dependency graph of inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
 <p>There is a base class <code>Inference</code>, from which all inference methods are derived from.</p>
 <pre class="python" language="Python"><code>class Inference(object):
@@ -111,7 +111,7 @@
   &quot;&quot;&quot;
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     ...</code></pre>
-<p>It takes as input the set of latent variables to infer and a dataset. Optionally, if the user uses an external language to specify the model, it takes as input a model wrapper <code>model_wrapper</code>. For more details, see the <a href="/api/data">Data API</a> and <a href="/api/model">Model API</a>.</p>
+<p>It takes as input the set of latent variables to infer and a dataset. Optionally, if the user uses an external language to specify the model, it takes as input a model wrapper <code>model_wrapper</code>.</p>
 <p>Note that <code>Inference</code> says nothing about the class of models that an algorithm must work with. One can build inference algorithms which are tailored to a restricted class of models available in Edward (such as differentiable models or conditionally conjugate models), or even tailor it to a single model. The algorithm can raise an error if the model is outside this class.</p>
 <p>We organize inference under two paradigms: <code>VariationalInference</code> and <code>MonteCarlo</code> (or more plainly, optimization and sampling). These inherit from <code>Inference</code> and each have their own default methods.</p>
 <pre class="python" language="Python"><code>class MonteCarlo(Inference):
@@ -130,8 +130,6 @@ class VariationalInference(Inference):
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
   ...</code></pre>
-<p>Hybrid and paradigms outside of <code>VariationalInference</code> and <code>MonteCarlo</code> are also possible in Edward. For example, one can write a class derived from <code>Inference</code> directly, or inherit to carry both <code>VariationalInference</code> and <code>MonteCarlo</code> methods.</p>
-<p>Currently, Edward has most of its inference infrastructure within the <code>VariationalInference</code> class. The <code>MonteCarlo</code> class is still under development. We welcome researchers to make significant advances here!</p>
 <p>Let’s look at <code>Inference</code>. The main method in <code>Inference</code> is <code>run()</code>.</p>
 <pre class="python" language="Python"><code>class Inference(object):
   &quot;&quot;&quot;Base class for Edward inference methods.

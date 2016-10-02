@@ -97,10 +97,11 @@
 </div>
 </div>
 <h3 id="data">Data</h3>
-<p>In Edward, data is represented as TensorFlow tensors or NumPy arrays.</p>
+<p>Data defines a set of observations. In Edward, data is represented as TensorFlow tensors or NumPy arrays.</p>
 <pre class="python" language="Python"><code>x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</code></pre>
-<p>There are three ways to read data in Edward. They follow the <a href="https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html">three ways to read data in TensorFlow</a>.</p>
+<p>Edward can also work with batch tensors for settings when the full data does not fit in memory.</p>
+<p>In general, there are three ways to read data in Edward. (They follow the <a href="https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html">three ways to read data in TensorFlow</a>.)</p>
 <ol>
 <li><strong>Preloaded data.</strong> A constant or variable in the TensorFlow graph holds all the data.
 <p>This setting is the fastest to work with and is recommended if the data fits in memory.</p>
@@ -118,15 +119,15 @@ x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</code></pre>
 data = {x: x_data, y: y_data}</code></pre>
 <p>How do we use the data during training? In general there are three use cases:</p>
 <ol>
-<li>Train over the full data per step.
+<li><strong>Train over the full data per step.</strong>
 <p>Follow the setting of preloaded data.</p></li>
-<li>Train over a batch per step when the full data fits in memory. This scale inference in terms of computational complexity.
+<li><strong>Train over a batch per step when the full data fits in memory.</strong> This scales inference in terms of computational complexity.
 <p>Follow the setting of preloaded data. Specify the batch size with <code>n_minibatch</code> in <code>Inference</code>. By default, we will subsample by slicing along the first dimension of every data structure in the data dictionary. Alternatively, follow the setting of feeding. Manually deal with the batch behavior at each training step.</p></li>
-<li>Train over batches per step when the full data does not fit in memory. This scales inference in terms of computational complexity and memory complexity.
+<li><strong>Train over batches per step when the full data does not fit in memory.</strong> This scales inference in terms of computational complexity and memory complexity.
 <p>Follow the setting of reading from files. Alternatively, follow the setting of feeding, and use a generator to create and destroy NumPy arrays on the fly for feeding the placeholders.</p></li>
 </ol>
 <h3 id="training-model-wrappers-with-data">Training Model Wrappers with Data</h3>
-<p>During inference, data is passed in differently for external languages which use a model wrapper. Instead of binding observed variables, it is usually comprised of strings binded to the values, such as a key <code>’x’</code> with value <code>np.array([0.23512, 13.2])</code>. We detail specifics for each external language below.</p>
+<p>During inference, data is passed in differently for external languages which use a model wrapper. Instead of binding observed variables, it is usually comprised of strings binded to the values, such as a key <code>’x’</code> with value <code>np.array([0.23512, 13.2])</code>. We detail specifics for each wrapper below.</p>
 <ul>
 <li><strong>TensorFlow.</strong> The data carries whatever keys and values the user accesses in the user-defined model. Key is a string. Value is a NumPy array or TensorFlow tensor.
 <pre class="python" language="Python"><code>class BetaBernoulli:

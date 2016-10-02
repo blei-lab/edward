@@ -6,18 +6,16 @@
 % Begin the content of the page
 \subsubsection{Inference}
 
-An inference algorithm infers the posterior for a particular model
-\texttt{p(x, z)} and data set \texttt{x}. It is the distribution of the latent
-variables given data, \texttt{p(z | x)}. For more details, see the
+Given a model $p(x, z)$ and data set $x$,
+An inference algorithm infers the posterior distribution $p(z\mid x)$
+of the latent variables given data. For more details, see the
 \href{/tutorials/inference}
 {Inference of Probability Models tutorial}.
 
-Edward uses classes and class inheritance to provide a
-hierarchy of inference methods, all of which are easily extensible.
-This enables fast experimentation and research on top of existing
-inference methods, whether it be developing new black box inference
-algorithms or developing new model-specific inference algorithms which
-are tailored to specific class of models.
+Edward uses class inheritance to provide a hierarchy of inference
+methods. This enables fast experimentation on top of existing
+algorithms, whether it be developing new black box algorithms or developing new
+model-specific algorithms.
 We detail this below.
 
 \includegraphics[width=700px]{/images/inference_structure.png}
@@ -36,12 +34,6 @@ class Inference(object):
 \end{lstlisting}
 
 It takes as input the set of latent variables to infer and a dataset. Optionally, if the user uses an external language to specify the model, it takes as input a model wrapper \texttt{model_wrapper}.
-For more details, see the
-\href{/api/data}
-{Data API}
-and
-\href{/api/model}
-{Model API}.
 
 Note that \texttt{Inference} says nothing about the class of models that an
 algorithm must work with. One can build inference algorithms which are
@@ -73,16 +65,6 @@ class VariationalInference(Inference):
 
   ...
 \end{lstlisting}
-
-Hybrid and paradigms outside of \texttt{VariationalInference}
-and \texttt{MonteCarlo} are also possible in Edward. For example, one can
-write a class derived from \texttt{Inference} directly, or inherit to
-carry both \texttt{VariationalInference} and \texttt{MonteCarlo} methods.
-
-Currently, Edward has most of its inference infrastructure within the
-\texttt{VariationalInference} class.
-The \texttt{MonteCarlo} class is still under development. We welcome
-researchers to make significant advances here!
 
 Let's look at \texttt{Inference}. The main method in
 \texttt{Inference} is \texttt{run()}.
