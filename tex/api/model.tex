@@ -1,9 +1,7 @@
-% Define the subtitle of the page
 \title{Model}
 
 {{navbar}}
 
-% Begin the content of the page
 \subsubsection{Model}
 
 A probabilistic model is a joint distribution $p(x, z)$ of data $x$
@@ -46,7 +44,7 @@ Random variable objects are equipped with methods such as
 \texttt{log_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
 and \texttt{sample()}, $\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$.
 
-Each object wraps a tensors $\mathbf{x}^*$, where
+Each object wraps a tensor $\mathbf{x}^*$, where
 $\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$ is a sample from the
 object.
 

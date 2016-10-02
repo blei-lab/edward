@@ -123,7 +123,7 @@ MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
 <p>Random variable objects are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>.</p>
-<p>Each object wraps a tensors <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
+<p>Each object wraps a tensor <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
 <p><img src="/images/random_variable.png" alt="image" width="225" /></p>
 <p>This enables operations on the TensorFlow graph, allowing random variables to be used in conjunction with other TensorFlow ops. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
 <p><img src="/images/random_variable_ops.png" alt="image" width="400" /></p>
