@@ -23,9 +23,6 @@ class test_empirical_sample_class(tf.test.TestCase):
       _test(0.5, [1])
       _test(np.array(0.5), [1])
       _test(tf.constant(0.5), [1])
-
-  def test_1d(self):
-    with self.test_session():
       _test(np.array([0.5]), [1])
       _test(np.array([0.5]), [5])
       _test(np.array([0.2, 0.8]), [1])
