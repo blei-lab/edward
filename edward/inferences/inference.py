@@ -118,7 +118,7 @@ class Inference(object):
           self.data[key] = value
 
   def run(self, logdir=None, variables=None, use_coordinator=True,
-          *args, **kwargs):
+          feed_dict=None, *args, **kwargs):
     """A simple wrapper to run inference.
 
     1. Initialize algorithm via ``initialize``.
@@ -163,7 +163,12 @@ class Inference(object):
     else:
       init = tf.initialize_variables(variables)
 
-    init.run()
+    if feed_dict is None:                                         
+      init.run()                                                  
+    elif isinstance(feed_dict, dict):                             
+      init.run(feed_dict=feed_dict)                               
+    else:                                                         
+      raise NotImplementedError("feed_dict must be a dictionary") 
 
     if use_coordinator:
       # Start input enqueue threads.
