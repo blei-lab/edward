@@ -61,6 +61,35 @@ class Beta(RandomVariable):
     return self.distribution.b
 
 
+# class Binomial(RandomVariable):
+#   def __init__(self, *args, **kwargs):
+#     super(Binomial, self).__init__(distributions.Binomial, *args, **kwargs)
+
+#   def __str__(self):
+#     try:
+#       sess = get_session()
+#       n, p = sess.run([self.n, self.p])
+#       return "n: \n" + n.__str__() + "\n" + \
+#              "p: \n" + p.__str__()
+#     except:
+#       return super(Binomial, self).__str__()
+
+#   @property
+#   def n(self):
+#     """Number of trials."""
+#     return self.distribution.n
+
+#   @property
+#   def logits(self):
+#     """Log-odds."""
+#     return self.distribution.logits
+
+#   @property
+#   def p(self):
+#     """Probability of success."""
+#     return self.distribution.p
+
+
 class Categorical(RandomVariable):
   def __init__(self, *args, **kwargs):
     super(Categorical, self).__init__(
@@ -230,6 +259,63 @@ class Laplace(RandomVariable):
     return self.distribution.scale
 
 
+class Mixture(RandomVariable):
+  def __init__(self, *args, **kwargs):
+    super(Mixture, self).__init__(
+        distributions.Mixture, *args, **kwargs)
+
+  def __str__(self):
+    try:
+      sess = get_session()
+      cat, components = sess.run([self.cat, self.components])
+      return "cat: \n" + n.__str__() + "\n" + \
+             "components: \n" + p.__str__()
+    except:
+      return super(Mixture, self).__str__()
+
+  @property
+  def cat(self):
+    return self.mixture.cat
+
+  @property
+  def components(self):
+    return self.mixture.components
+
+  @property
+  def num_components(self):
+    return self.mixture.num_components
+
+
+# class Multinomial(RandomVariable):
+#   def __init__(self, *args, **kwargs):
+#     super(Multinomial, self).__init__(
+#         distributions.Multinomial, *args, **kwargs)
+
+#   def __str__(self):
+#     try:
+#       sess = get_session()
+#       n, p = sess.run([self.n, self.p])
+#       return "n: \n" + n.__str__() + "\n" + \
+#              "p: \n" + p.__str__()
+#     except:
+#       return super(Multinomial, self).__str__()
+
+#   @property
+#   def n(self):
+#     """Number of trials."""
+#     return self.distribution.n
+
+#   @property
+#   def p(self):
+#     """Event probabilities."""
+#     return self.distribution.p
+
+#   @property
+#   def logits(self):
+#     """Log-odds."""
+#     return self.distribution.logits
+
+
 class MultivariateNormalCholesky(RandomVariable):
   def __init__(self, *args, **kwargs):
     super(MultivariateNormalCholesky, self).__init__(
@@ -326,6 +412,41 @@ class Normal(RandomVariable):
     return self.distribution.sigma
 
 
+# class Poisson(RandomVariable):
+#   def __init__(self, *args, **kwargs):
+#     super(Poisson, self).__init__(distributions.Poisson, *args, **kwargs)
+
+#   def __str__(self):
+#     try:
+#       sess = get_session()
+#       lam = self.lam.eval()
+#       return "lam: \n" + lam.__str__()
+#     except:
+#       return super(Poisson, self).__str__()
+
+#   @property
+#   def lam(self):
+#     """Rate parameter."""
+#     return self.distribution.lam
+
+
+class QuantizedDistribution(RandomVariable):
+  def __init__(self, *args, **kwargs):
+    super(QuantizedDistribution, self).__init__(
+        distributions.QuantizedDistribution, *args, **kwargs)
+
+  def __str__(self):
+    try:
+      return self.base_distribution.__str__()
+    except:
+      return super(QuantizedDistribution, self).__str__()
+
+  @property
+  def base_distribution(self):
+    """Base distribution, p(x)."""
+    return self.distribution.base_distribution
+
+
 class StudentT(RandomVariable):
   def __init__(self, *args, **kwargs):
     super(StudentT, self).__init__(distributions.StudentT, *args, **kwargs)
@@ -408,6 +529,84 @@ class Uniform(RandomVariable):
   @property
   def b(self):
     return self.distribution.b
+
+
+class WishartCholesky(RandomVariable):
+  def __init__(self, *args, **kwargs):
+    super(WishartCholesky, self).__init__(
+        distributions.WishartCholesky, *args, **kwargs)
+
+  def __str__(self):
+    try:
+      sess = get_session()
+      a, b = sess.run([self.a, self.b])
+      return "a: \n" + a.__str__() + "\n" + \
+             "b: \n" + b.__str__()
+    except:
+      return super(WishartCholesky, self).__str__()
+
+  @property
+  def df(self):
+    """Wishart distribution degree(s) of freedom."""
+    return self.distribution.df
+
+  def scale(self):
+    """Wishart distribution scale matrix."""
+    return self.distribution.scale()
+
+  @property
+  def scale_operator_pd(self):
+    """Wishart distribution scale matrix as an OperatorPD."""
+    return self.distribution.scale_operator_pd
+
+  @property
+  def cholesky_input_output_matrices(self):
+    """Boolean indicating if `Tensor` input/outputs are Cholesky factorized."""
+    return self.distribution.cholesky_input_output_matrices
+
+  @property
+  def dimension(self):
+    """Dimension of underlying vector space. The `p` in `R^(p*p)`."""
+    return self.distribution.dimension
+
+
+class WishartFull(RandomVariable):
+  def __init__(self, *args, **kwargs):
+    super(WishartFull, self).__init__(
+        distributions.WishartFull, *args, **kwargs)
+
+  def __str__(self):
+    try:
+      sess = get_session()
+      a, b = sess.run([self.a, self.b])
+      return "a: \n" + a.__str__() + "\n" + \
+             "b: \n" + b.__str__()
+    except:
+      return super(WishartFull, self).__str__()
+
+  @property
+  def df(self):
+    """Wishart distribution degree(s) of freedom."""
+    return self.distribution.df
+
+  def scale(self):
+    """Wishart distribution scale matrix."""
+    return self.distribution.scale()
+
+  @property
+  def scale_operator_pd(self):
+    """Wishart distribution scale matrix as an OperatorPD."""
+    return self.distribution.scale_operator_pd
+
+  @property
+  def cholesky_input_output_matrices(self):
+    """Boolean indicating if `Tensor` input/outputs are Cholesky factorized."""
+    return self.distribution.cholesky_input_output_matrices
+
+  @property
+  def dimension(self):
+    """Dimension of underlying vector space. The `p` in `R^(p*p)`."""
+    return self.distribution.dimension
 
 
 class Empirical(RandomVariable):

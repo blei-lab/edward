@@ -28,16 +28,14 @@ class RandomVariable(object):
 
   Notes
   -----
-  This is a simplified version of StochasticTensor in BayesFlow.
-  The value type is fixed to SampleAndReshapeValue(), several methods are
-  removed, and the distribution's methods populate the namespace for
-  class methods.
+  RandomVariable wraps a distribution class from tf.contrib.distributions.
+  The distribution's class methods populate this class' namespace.
   """
   def __init__(self, dist_cls, name=None, **dist_args):
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
     self._dist_cls = dist_cls
     self._dist_args = dist_args
-    with tf.op_scope(dist_args.values(), name, "RandomVariable") as scope:
+    with tf.name_scope(name, "RandomVariable", dist_args.values()) as scope:
       self._name = scope
       self._dist = dist_cls(**dist_args)
       self._value = self._dist.sample()
@@ -51,16 +49,12 @@ class RandomVariable(object):
     return self._dist
 
   @property
-  def allow_nan_stats(self):
-    return self.distribution.allow_nan_stats
-
-  @property
-  def validate_args(self):
-    return self.distribution.validate_args
-
-  @property
   def dtype(self):
     return self.distribution.dtype
+
+  @property
+  def parameters(self):
+    return self.distribution.parameters
 
   @property
   def is_continuous(self):
@@ -69,6 +63,14 @@ class RandomVariable(object):
   @property
   def is_reparameterized(self):
     return self.distribution.is_reparameterized
+
+  @property
+  def allow_nan_stats(self):
+    return self.distribution.allow_nan_stats
+
+  @property
+  def validate_args(self):
+    return self.distribution.validate_args
 
   def value(self):
     return self._value
@@ -102,6 +104,12 @@ class RandomVariable(object):
 
   def cdf(self, *args, **kwargs):
     return self.distribution.cdf(*args, **kwargs)
+
+  def log_survival_function(self, *args, **kwargs):
+    return self.distribution.log_survival_function(*args, **kwargs)
+
+  def survival_function(self, *args, **kwargs):
+    return self.distribution.survival_function(*args, **kwargs)
 
   def entropy(self, *args, **kwargs):
     return self.distribution.entropy(*args, **kwargs)
