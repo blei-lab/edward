@@ -27,6 +27,7 @@ It supports __inference__ with
   + Variational auto-encoders
   + Inclusive KL divergence: KL(p||q)
 + Monte Carlo
+  + Hamiltonian Monte Carlo
   + Metropolis-Hastings
 + Marginal optimization (empirical Bayes, marginal maximum likelihood)
   + Variational EM
