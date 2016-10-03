@@ -174,8 +174,14 @@ class VariationalInference(Inference):
       if t == 1 or t % self.n_print == 0:
         loss = info_dict['loss']
         print("iter {:d} loss {:.2f}".format(t, loss))
+        sess = get_session()
         for rv in six.itervalues(self.latent_vars):
-          print(rv)
+          try:
+            parameters = sess.run(rv.parameters)
+            parameters['name'] = rv.name
+            print(parameters)
+          except:
+            pass
 
   def build_loss(self):
     """Build loss function.

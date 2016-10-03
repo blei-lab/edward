@@ -144,32 +144,29 @@ def copy(org_instance, dict_swap=None, scope="copied",
     rv = org_instance
 
     # If it has copiable arguments, copy them.
-    dist_args = {}
-    for key, value in six.iteritems(rv._dist_args):
+    args = []
+    for arg in rv._args:
+      if isinstance(arg, RandomVariable) or \
+         isinstance(arg, tf.Variable) or \
+         isinstance(arg, tf.Tensor) or \
+         isinstance(arg, tf.Operation):
+         arg = copy(arg, dict_swap, scope, True, copy_q)
+
+      args.append(arg)
+
+    kwargs = {}
+    for key, value in six.iteritems(rv._kwargs):
       if isinstance(value, RandomVariable) or \
          isinstance(value, tf.Variable) or \
          isinstance(value, tf.Tensor) or \
          isinstance(value, tf.Operation):
          value = copy(value, dict_swap, scope, True, copy_q)
 
-      dist_args[key] = value
+      kwargs[key] = value
 
-    dist_args['name'] = new_name + rv.distribution.name
-
-    # Copy a new `rv` with any newly copied arguments.
-    # We do this by creating an empty class object and setting
-    # its attributes. (This is to avoid a throwaway tensor in the
-    # graph, during instantiation of DistributionTensor.)
-    new_rv = Empty()
-    new_rv.__class__ = rv.__class__
-    for key, value in six.iteritems(rv.__dict__):
-      if key not in ['_name', '_dist_args', '_dist', '_value']:
-        setattr(new_rv, key, deepcopy(value))
-
-    setattr(new_rv, '_name', new_name)
-    setattr(new_rv, '_dist_args', dist_args)
-    setattr(new_rv, '_dist', new_rv._dist_cls(**new_rv._dist_args))
-    setattr(new_rv, '_value', new_rv._dist.sample())
+    kwargs['name'] = new_name
+    # Create new random variable with copied arguments.
+    new_rv = rv.__class__(*args, **kwargs)
     return new_rv
   elif isinstance(org_instance, tf.Tensor):
     tensor = org_instance
