@@ -74,8 +74,8 @@ class MixtureDensityNetwork:
   def neural_network(self, X):
     """pi, mu, sigma = NN(x; theta)"""
     # fully-connected layer with 15 hidden units
-    hidden1 = Dense(15, activation='relu')(X)
-    hidden2 = Dense(15, activation='relu')(hidden1)
+    hidden1 = Dense(15, activation=K.relu)(X)
+    hidden2 = Dense(15, activation=K.relu)(hidden1)
     self.mus = Dense(self.K)(hidden2)
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
@@ -111,6 +111,9 @@ inference = ed.MAP([], data, model)
 sess = ed.get_session()  # Start TF session
 K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
+
+init = tf.initialize_all_variables()
+init.run()
 
 NEPOCH = 1000
 train_loss = np.zeros(NEPOCH)
