@@ -150,10 +150,17 @@ class MonteCarlo(Inference):
       if t == 1 or t % self.n_print == 0:
         accept_rate = info_dict['accept_rate']
         print("iter {:d} accept rate {:.2f}".format(t, accept_rate))
+        # Print running mean and standard deviations.
+        sess = get_session()
         for rv in six.itervalues(self.latent_vars):
-          print(rv)
-          std = rv.std().eval()
-          print("std: \n" + std.__str__())
+          try:
+            params = rv.params[:t]
+            mean = tf.reduce_mean(params, 0)
+            std = tf.sqrt(tf.reduce_mean(tf.square(params - mean), 0))
+            mean, std = sess.run([mean, std])
+            print({'mean': mean, 'std': std, 'name': rv.name})
+          except:
+            pass
 
   def build_update(self):
     """Build update, which returns an assign op for parameters in

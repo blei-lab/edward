@@ -31,22 +31,29 @@ class RandomVariable(object):
   RandomVariable wraps a distribution class from tf.contrib.distributions.
   The distribution's class methods populate this class' namespace.
   """
-  def __init__(self, dist_cls, name=None, **dist_args):
+  def __init__(self, dist_cls, **dist_args):
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
     self._dist_cls = dist_cls
     self._dist_args = dist_args
-    with tf.name_scope(name, "RandomVariable", dist_args.values()) as scope:
-      self._name = scope
-      self._dist = dist_cls(**dist_args)
-      self._value = self._dist.sample()
+    self._dist = dist_cls(**dist_args)
+    self._value = self._dist.sample()
 
-  @property
-  def name(self):
-    return self._name
+  def __str__(self):
+    return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
+           'shape=' + self._value.get_shape().__str__() + ' ' \
+           'dtype=' + self.dtype.__repr__() + \
+           '>'
+
+  def __repr__(self):
+    return self.__str__()
 
   @property
   def distribution(self):
     return self._dist
+
+  @property
+  def name(self):
+    return self.distribution.name
 
   @property
   def dtype(self):
