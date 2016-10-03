@@ -8,11 +8,15 @@ RANDOM_VARIABLE_COLLECTION = "_random_variable_collection_"
 
 
 class RandomVariable(object):
-  """
-  A random variable is a light wrapper around a tensor. The tensor
-  corresponds to samples from the random variable, and the wrapping
-  carries properties of the random variable such as its density, mean,
-  variance, and sampling.
+  """Base class for random variables.
+
+  A random variable is an object parameterized by tensors. It is
+  equipped with methods such as the log-density, mean, and sample.
+
+  It also wraps a tensor, where the tensor corresponds to a sample
+  from the random variable. This enables operations on the TensorFlow
+  graph, allowing random variables to be used in conjunction with
+  other TensorFlow ops.
 
   Examples
   --------
@@ -28,15 +32,32 @@ class RandomVariable(object):
 
   Notes
   -----
-  RandomVariable wraps a distribution class from tf.contrib.distributions.
-  The distribution's class methods populate this class' namespace.
+  RandomVariable assumes use in a multiple inheritance setting. The
+  child class must first inherit RandomVariable, then second inherit a
+  class in tf.contrib.distributions. With Python's method resolution
+  order, this implies the following during initialization (using
+  distributions.Bernoulli as an example):
+
+  1. Start the __init__() of the child class, which passes all *args,
+     **kwargs to RandomVariable.
+  2. This in turn passes all *args, **kwargs to
+     distributions.Bernoulli, completing the __init__() of
+     distributions.Bernoulli.
+  3. Complete the __init__() of RandomVariable, which calls
+     self.sample(), relying on the method from distributions.Bernoulli.
+  4. Complete the __init__() of the child class.
+
+  Methods from both RandomVariable and distributions.Bernoulli
+  populate the namespace of the child class. Methods from
+  RandomVariable will take higher priority if there are conflicts.
   """
-  def __init__(self, dist_cls, **dist_args):
+  def __init__(self, *args, **kwargs):
+    # storing args, kwargs for easy graph copying
+    self._args = args
+    self._kwargs = kwargs
+    super(RandomVariable, self).__init__(*args, **kwargs)
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
-    self._dist_cls = dist_cls
-    self._dist_args = dist_args
-    self._dist = dist_cls(**dist_args)
-    self._value = self._dist.sample()
+    self._value = self.sample()
 
   def __str__(self):
     return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
@@ -47,103 +68,8 @@ class RandomVariable(object):
   def __repr__(self):
     return self.__str__()
 
-  @property
-  def distribution(self):
-    return self._dist
-
-  @property
-  def name(self):
-    return self.distribution.name
-
-  @property
-  def dtype(self):
-    return self.distribution.dtype
-
-  @property
-  def parameters(self):
-    return self.distribution.parameters
-
-  @property
-  def is_continuous(self):
-    return self.distribution.is_continuous
-
-  @property
-  def is_reparameterized(self):
-    return self.distribution.is_reparameterized
-
-  @property
-  def allow_nan_stats(self):
-    return self.distribution.allow_nan_stats
-
-  @property
-  def validate_args(self):
-    return self.distribution.validate_args
-
   def value(self):
     return self._value
-
-  def batch_shape(self, *args, **kwargs):
-    return self.distribution.batch_shape(*args, **kwargs)
-
-  def get_batch_shape(self, *args, **kwargs):
-    return self.distribution.get_batch_shape(*args, **kwargs)
-
-  def event_shape(self, *args, **kwargs):
-    return self.distribution.event_shape(*args, **kwargs)
-
-  def get_event_shape(self, *args, **kwargs):
-    return self.distribution.get_event_shape(*args, **kwargs)
-
-  def sample(self, *args, **kwargs):
-    return self.distribution.sample(*args, **kwargs)
-
-  def sample_n(self, *args, **kwargs):
-    return self.distribution.sample_n(*args, **kwargs)
-
-  def log_prob(self, *args, **kwargs):
-    return self.distribution.log_prob(*args, **kwargs)
-
-  def prob(self, *args, **kwargs):
-    return self.distribution.prob(*args, **kwargs)
-
-  def log_cdf(self, *args, **kwargs):
-    return self.distribution.log_cdf(*args, **kwargs)
-
-  def cdf(self, *args, **kwargs):
-    return self.distribution.cdf(*args, **kwargs)
-
-  def log_survival_function(self, *args, **kwargs):
-    return self.distribution.log_survival_function(*args, **kwargs)
-
-  def survival_function(self, *args, **kwargs):
-    return self.distribution.survival_function(*args, **kwargs)
-
-  def entropy(self, *args, **kwargs):
-    return self.distribution.entropy(*args, **kwargs)
-
-  def mean(self, *args, **kwargs):
-    return self.distribution.mean(*args, **kwargs)
-
-  def variance(self, *args, **kwargs):
-    return self.distribution.variance(*args, **kwargs)
-
-  def std(self, *args, **kwargs):
-    return self.distribution.std(*args, **kwargs)
-
-  def mode(self, *args, **kwargs):
-    return self.distribution.mode(*args, **kwargs)
-
-  def log_pdf(self, *args, **kwargs):
-    return self.distribution.log_pdf(*args, **kwargs)
-
-  def pdf(self, *args, **kwargs):
-    return self.distribution.pdf(*args, **kwargs)
-
-  def log_pmf(self, *args, **kwargs):
-    return self.distribution.log_pmf(*args, **kwargs)
-
-  def pmf(self, *args, **kwargs):
-    return self.distribution.pmf(*args, **kwargs)
 
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
     _ = name

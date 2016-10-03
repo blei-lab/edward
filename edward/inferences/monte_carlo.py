@@ -100,8 +100,7 @@ class MonteCarlo(Inference):
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
   def initialize(self, *args, **kwargs):
-    min_t = np.amin([
-        qz.distribution.n for qz in six.itervalues(self.latent_vars)])
+    min_t = np.amin([qz.n for qz in six.itervalues(self.latent_vars)])
     kwargs['n_iter'] = min_t
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
