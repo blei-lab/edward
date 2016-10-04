@@ -144,7 +144,7 @@ class MonteCarlo(Inference):
   def print_progress(self, info_dict):
     """Print progress to output.
     """
-    if self.n_print is not None:
+    if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
         accept_rate = info_dict['accept_rate']
