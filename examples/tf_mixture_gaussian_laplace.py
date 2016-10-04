@@ -111,4 +111,4 @@ with tf.variable_scope("variational"):
 
 data = {'x': x_train}
 inference = ed.Laplace({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
-inference.run(n_iter=500, n_minibatch=10, n_print=50)
+inference.run(n_iter=500, n_minibatch=10)

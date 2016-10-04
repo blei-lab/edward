@@ -91,15 +91,19 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
+sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
-inference.initialize(n_print=5)
-sess = ed.get_session()
-for t in range(600):
-  loss = inference.update()
-  if t % inference.n_print == 0:
-    print("iter {:d} loss {:.2f}".format(t, loss))
+inference.initialize(n_print=5, n_iter=600)
 
+init = tf.initialize_all_variables()
+init.run()
+
+for t in range(inference.n_iter):
+  info_dict = inference.update()
+  inference.print_progress(info_dict)
+
+  if t % inference.n_print == 0:
     # Sample functions from variational model
     w_mean, w_std = sess.run([qw.mu, qb.sigma])
     b_mean, b_std = sess.run([qb.mu, qb.sigma])

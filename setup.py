@@ -12,7 +12,7 @@ setup(
     author_email="dustin@cs.columbia.edu",
     packages=['edward', 'edward.criticisms', 'edward.inferences',
               'edward.models', 'edward.stats'],
-    install_requires=['tensorflow>=0.10.0',
+    install_requires=['tensorflow>=0.11.0rc0',
                       'numpy>=1.7',
                       'scipy>=0.16',
                       'six>=1.10.0'],

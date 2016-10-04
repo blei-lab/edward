@@ -110,4 +110,4 @@ qsigma = PointMass(params=tf.exp(tf.Variable(tf.random_normal([K * D]))))
 
 data = {'x': x_train}
 inference = ed.MAP({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
-inference.run(n_iter=500, n_minibatch=10, n_print=50)
+inference.run(n_iter=500, n_minibatch=10)

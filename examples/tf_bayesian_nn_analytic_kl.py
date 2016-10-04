@@ -116,11 +116,15 @@ sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'z': qz}, data, model)
 inference.initialize(n_print=10)
-for t in range(1000):
-  loss = inference.update()
-  if t % inference.n_print == 0:
-    print("iter {:d} loss {:.2f}".format(t, np.mean(loss)))
 
+init = tf.initialize_all_variables()
+init.run()
+
+for t in range(inference.n_iter):
+  info_dict = inference.update()
+  inference.print_progress(info_dict)
+
+  if t % inference.n_print == 0:
     # Sample functions from variational model
     mean, std = sess.run([qz.mu, qz.sigma])
     rs = np.random.RandomState(0)

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import multiprocessing
 import numpy as np
 import six
 import tensorflow as tf
@@ -181,7 +182,7 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
-  def initialize(self, n_iter=1000, n_print=100, logdir=None):
+  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None):
     """Initialize inference algorithm.
 
     Parameters
@@ -190,13 +191,40 @@ class Inference(object):
       Number of iterations for algorithm.
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
-      progress, then specify None.
+      progress, then specify 0. Default is int(n_iter / 10).
+    n_minibatch : int, optional
+      Number of samples for data subsampling. Default is to use
+      all the data. Subsampling is available only if all data
+      passed in are NumPy arrays and the model is not a Stan
+      model. For subsampling details, see
+      ``tf.train.slice_input_producer`` and ``tf.train.batch``.
     """
     self.n_iter = n_iter
-    self.n_print = n_print
+    if n_print is None:
+      self.n_print = int(n_iter / 10)
+    else:
+      self.n_print = n_print
 
     self.t = tf.Variable(0, trainable=False)
     self.increment_t = self.t.assign_add(1)
+
+    self.n_minibatch = n_minibatch
+    if n_minibatch is not None and \
+       not isinstance(self.model_wrapper, StanModel):
+      # Re-assign data to batch tensors, with size given by
+      # ``n_minibatch``.
+      values = list(six.itervalues(self.data))
+      slices = tf.train.slice_input_producer(values)
+      # By default use as many threads as CPUs.
+      batches = tf.train.batch(slices, n_minibatch,
+                               num_threads=multiprocessing.cpu_count())
+      if not isinstance(batches, list):
+        # ``tf.train.batch`` returns tf.Tensor if ``slices`` is a
+        # list of size 1.
+        batches = [batches]
+
+      self.data = {key: value for key, value in
+                   zip(six.iterkeys(self.data), batches)}
 
   def update(self):
     """Run one iteration of inference.
@@ -217,7 +245,12 @@ class Inference(object):
     info_dict : dict
       Dictionary of algorithm-specific information.
     """
-    pass
+    if self.n_print != 0:
+      t = info_dict['t']
+      if t == 1 or t % self.n_print == 0:
+        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
+        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
+        print(string)
 
   def finalize(self):
     """Function to call after convergence.

@@ -1,7 +1,5 @@
-% Define the subtitle of the page
 \title{Reparameterization gradient}
 
-% Begin the content of the page
 \subsection{Reparameterization gradient}
 
 (This tutorial follows the
@@ -149,8 +147,8 @@ class MFVI(VariationalInference):
       q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
                                   list(range(1, len(rv.get_batch_shape()) + 1)))
 
-    self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
-    return -self.loss
+    self.loss = -tf.reduce_mean(p_log_prob - q_log_prob)
+    return self.loss
 \end{lstlisting}
 
 Two methods are added: \texttt{initialize()} and
@@ -162,8 +160,8 @@ the variational model.
 The method \texttt{build_reparam_loss()} implements the ELBO and its
 gradient. It draws \texttt{self.n_samples} samples from the
 variational model. It registers the Monte Carlo
-estimate of the ELBO in TensorFlow's computational graph, and stores it
-in \texttt{self.loss}, to track progress of the inference for diagnostics.
+estimate of the ELBO in TensorFlow's computational graph, and stores
+its negative in \texttt{self.loss}, to track progress of the inference for diagnostics.
 
 The method returns an object whose automatic differentiation is the
 reparameterization gradient of the ELBO. The computational graph will

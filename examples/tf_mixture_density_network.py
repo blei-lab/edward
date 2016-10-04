@@ -38,8 +38,8 @@ class MixtureDensityNetwork:
   def neural_network(self, X):
     """pi, mu, sigma = NN(x; theta)"""
     # fully-connected layer with 25 hidden units
-    hidden1 = Dense(25, activation='relu')(X)
-    hidden2 = Dense(25, activation='relu')(hidden1)
+    hidden1 = Dense(25, activation=K.relu)(X)
+    hidden2 = Dense(25, activation=K.relu)(hidden1)
     self.mus = Dense(self.K)(hidden2)
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
@@ -79,6 +79,9 @@ inference = ed.MAP([], data, model)
 sess = ed.get_session()
 K.set_session(sess)
 inference.initialize()
+
+init = tf.initialize_all_variables()
+init.run()
 
 NEPOCH = 20
 train_loss = np.zeros(NEPOCH)

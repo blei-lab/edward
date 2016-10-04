@@ -1,30 +1,23 @@
-% Define the subtitle of the page
 \title{Model}
 
 {{navbar}}
 
-% Begin the content of the page
 \subsubsection{Model}
 
-A probabilistic model specifies a joint distribution \texttt{p(x, z)}
-of data \texttt{x} and latent variables \texttt{z}.
-For more details, see the
-\href{/tutorials/model}
-{Probability Models tutorial}.
+A probabilistic model is a joint distribution $p(x, z)$ of data $x$
+and latent variables $z$.
+For more details, see the \href{/tutorials/model}{Probability Models tutorial}.
+In Edward, we specify models using a simple language of random variables.
 
 \subsubsection{Random Variables}
 
-The building block of probabilistic modeling is a random variable. In
-Edward, random variables are built on top of
-\href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/distributions}
-{tf.contrib.distributions}.
-It has the same arguments to instantiate the object, and is equipped
-with the same methods such as \texttt{log_prob()} and \texttt{sample()}.
-See their docstrings for more details.
-
-Here are examples of univariate distributions.
+A random variable $\mathbf{x}$ is an object parameterized by tensors $\theta^*$.
+The number of random variables in one object is determined by
+the dimension of its parameters.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Normal, Exponential
+
 # univariate normal
 Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
 # vector of 5 univariate normals
@@ -33,29 +26,39 @@ Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
 Exponential(lam=tf.ones([2, 3]))
 \end{lstlisting}
 
-The dimension of the distributions are deduced from the dimension of
-its parameters.
-
-Here are examples of multivariate distributions.
+For multivariate distributions, the multivariate dimension is the
+innermost (right-most) dimension of the parameters.
 
 \begin{lstlisting}[language=Python]
-# 1 K-dimensional Dirichlet
+from edward.models import Dirichlet, MultivariateNormalFull
+
+# K-dimensional Dirichlet
 Dirichlet(alpha=np.array([0.1]*K)
 # vector of 5 K-dimensional multivariate normals
-MultivariateNormal(mu=tf.zeros([5, K]))
+MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormal(mu=tf.zeros([2, 5, K]))
+MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)
 \end{lstlisting}
 
-Multivariate distributions store their multivariate dimension in the
-inner dimension (right-most dimension) of the parameters.
+Random variable objects are equipped with methods such as
+\texttt{log_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
+and \texttt{sample()}, $\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$.
 
-Formally, \texttt{RandomVariable} objects define a wrapper around tensors. That is,
-we register a \texttt{tensor_conversion_function()} which converts the object to
-samples. This enables tensor operations, placing \texttt{RandomVariable}
-objects on the TensorFlow graph.
+Each object wraps a tensor $\mathbf{x}^*$, where
+$\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$ is a sample from the
+object.
+
+\includegraphics[width=225px]{/images/random_variable.png}
+
+This enables operations on the TensorFlow graph, allowing random
+variables to be used in conjunction with other TensorFlow ops. They
+operate on $\mathbf{x}^*$.
+
+\includegraphics[width=400px]{/images/random_variable_ops.png}
 
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
@@ -63,57 +66,8 @@ tf.nn.tanh(x * y)
 tf.gather(x, 2) # 3rd normal rv in the vector
 \end{lstlisting}
 
-Importantly, the graphical model is defined explicitly by its
-TensorFlow graph. This allows random variables to be used in
-conjuction with other TensorFlow ops.
-
-Parameters work with random variables in the same way they
-work with \texttt{tf.contrib.distributions}.
-
-\begin{itemize}
-\item
-   Constant parameters.
-
-  \begin{lstlisting}[language=Python]
-   # 5-dimensional normal with constant params
-   x = Normal(mu=np.array([0.0]*5), sigma=np.array([1.0]*5))
-  \end{lstlisting}
-\item
-   Trainable parameters.
-
-  \begin{lstlisting}[language=Python]
-   # 5-dimensional normal
-   mu = tf.Variable(np.zeros(5))
-   sigma = tf.Variable(np.zeros(5))
-   z = Normal(mu=mu, sigma=sigma)
-
-   # 5-dimensional full rank normal
-   mu = tf.Variable(np.zeros(5))
-   cov = tf.Variable(np.identity(5))
-   z = MultivariateNormal(mu=mu, cov=cov)
-
-   # Normal parameterized by a neural network
-   W_1 = tf.Variable(np.zeros([input_dim, h])
-   W_2 = tf.Variable(np.zeros([h, output_dim])
-   b_1 = tf.Variable(np.zeros(h))
-   b_2 = tf.Variable(np.zeros(output_dim))
-
-   def neural_network(x):
-       return tf.matmul(tf.nn.tanh(tf.matmul(x, W_1) + b_1), W_2) + b_2
-
-   x = np.array(...)
-   y = Normal(mu=neural_network(x))
-  \end{lstlisting}
-\item
-   Random parameters.
-
-  \begin{lstlisting}[language=Python]
-   # 2-dimensional prior
-   mu = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
-   y = Normal(mu=mu, sigma=tf.ones(2)))
-  \end{lstlisting}
-\end{itemize}
-
+We can leverage this construction of random variables to define
+models.
 For examples of models built in Edward, see the model
 \href{/tutorials/}{tutorials}.
 
@@ -142,11 +96,11 @@ qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 \end{lstlisting}
 
-
 \subsubsection{Model Wrappers}
 
-Edward also supports specifying models using external languages. These
-model wrappers are written as a class.
+Edward also supports other languages for specifying probability models:
+TensorFlow, Python, PyMC3, and Stan.
+In each language, a model wrapper is written as a class.
 
 In general, a model wrapper is a class with the structure
 

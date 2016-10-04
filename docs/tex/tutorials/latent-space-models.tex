@@ -134,9 +134,9 @@ qz = Normal(mu=qz_mu, sigma=qz_sigma)
 inference = ed.MFVI({'z': qz}, data, model)
 \end{lstlisting}
 Finally, the following line runs the inference procedure for 5000
-iterations and prints progress every 500 iteration.
+iterations.
 \begin{lstlisting}[language=Python]
-inference.run(n_iter=5000, n_print=500)
+inference.run(n_iter=5000)
 \end{lstlisting}
 See this extended tutorial about
 \href{/tutorials/variational-inference}{variational inference in Edward}.

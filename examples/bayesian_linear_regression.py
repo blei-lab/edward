@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Bayesian linear regression using mean-field variational inference."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -49,4 +50,5 @@ y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
 # This is equivalent to
 # y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))
 
+print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))

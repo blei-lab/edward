@@ -37,4 +37,4 @@ data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 model = BetaBernoulli()
 
 inference = ed.MAP(['p'], data, model)
-inference.run(n_iter=100, n_print=10)
+inference.run(n_iter=100)

@@ -1,7 +1,5 @@
-% Define the subtitle of the page
 \title{Mixture density networks}
 
-% Begin the content of the page
 \subsection{Mixture density networks}
 
 We explore mixture density networks (MDN) \citep{bishop1994mixture}. We
@@ -82,8 +80,8 @@ class MixtureDensityNetwork:
   def neural_network(self, X):
     """pi, mu, sigma = NN(x; theta)"""
     # fully-connected layer with 25 hidden units
-    hidden1 = Dense(25, activation='relu')(X)
-    hidden2 = Dense(25, activation='relu')(hidden1)
+    hidden1 = Dense(25, activation=K.relu)(X)
+    hidden2 = Dense(25, activation=K.relu)(hidden1)
     self.mus = Dense(self.K)(hidden2)
     self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
     self.pi = Dense(self.K, activation=K.softmax)(hidden2)
@@ -119,12 +117,15 @@ inference = ed.MAP([], data, model)
 Here, we will manually control the inference and how data is passed
 into it at each step. First, start a TensorFlow session and pass it
 into Keras so that it shares the same TensorFlow session as Edward.
-Then initialize the algorithm.
+Then initialize the algorithm and the TensorFlow variables.
 
 \begin{lstlisting}[language=Python]
 sess = ed.get_session()
 K.set_session(sess)
 inference.initialize()
+
+init = tf.initialize_all_variables()
+init.run()
 \end{lstlisting}
 
 Now we train the MDN by calling \texttt{inference.train}, which runs

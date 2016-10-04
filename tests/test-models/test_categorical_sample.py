@@ -18,7 +18,7 @@ def _test(logits, n):
 
 class test_categorical_sample_class(tf.test.TestCase):
 
-  def test_1d(self):
+  def test_0d(self):
     with self.test_session():
       _test(np.array([0.4, 0.6]), [1])
       _test(np.array([0.4, 0.6]), [5])

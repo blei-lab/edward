@@ -73,6 +73,14 @@ class MonteCarlo(Inference):
     -----
     The number of Monte Carlo iterations is set according to the
     minimum of all Empirical sizes.
+
+    Initialization is assumed from params[0, :]. This generalizes
+    initializing randomly and initializing from user input. Updates
+    are along this outer dimension, where iteration t updates
+    params[t, :] in each Empirical random variable.
+
+    No warm-up is implemented. Users must run MCMC for a long period
+    of time, then manually burn in the Empirical random variable.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
@@ -92,8 +100,7 @@ class MonteCarlo(Inference):
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
   def initialize(self, *args, **kwargs):
-    min_t = np.amin([
-        qz.distribution.n for qz in six.itervalues(self.latent_vars)])
+    min_t = np.amin([qz.n for qz in six.itervalues(self.latent_vars)])
     kwargs['n_iter'] = min_t
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
@@ -121,21 +128,12 @@ class MonteCarlo(Inference):
     others op run with the t before incrementing or after incrementing
     depends on which is run faster in the TensorFlow graph. Running it
     separately forces a consistent behavior.
-
-    Initialization is assumed from params[0, :]. This generalizes
-    initializing randomly and initializing from user input. Updates
-    are along this outer dimension, where iteration t updates
-    params[t, :] in each Empirical random variable.
-
-    No warm-up is implemented. Users must run MCMC for a long period
-    of time, then manually burn in the Empirical random variable.
-
     """
     if feed_dict is None:
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if not isinstance(key, RandomVariable) and not isinstance(key, str):
+      if isinstance(key, tf.Tensor):
         feed_dict[key] = value
 
     sess = get_session()
@@ -146,15 +144,14 @@ class MonteCarlo(Inference):
   def print_progress(self, info_dict):
     """Print progress to output.
     """
-    if self.n_print is not None:
+    if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
         accept_rate = info_dict['accept_rate']
-        print("iter {:d} accept rate {:.2f}".format(t, accept_rate))
-        for rv in six.itervalues(self.latent_vars):
-          print(rv)
-          std = rv.std().eval()
-          print("std: \n" + std.__str__())
+        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
+        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
+        string += ': Acceptance Rate = {0:.2f}'.format(accept_rate)
+        print(string)
 
   def build_update(self):
     """Build update, which returns an assign op for parameters in

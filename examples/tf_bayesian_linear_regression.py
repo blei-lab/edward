@@ -82,4 +82,4 @@ qb = Normal(mu=qb_mu, sigma=qb_sigma)
 
 data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
-inference.run(n_iter=250, n_samples=5, n_print=10)
+inference.run(n_iter=250, n_samples=5)
