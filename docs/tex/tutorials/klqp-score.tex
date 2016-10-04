@@ -125,7 +125,7 @@ class MFVI(VariationalInference):
                                   list(range(1, len(rv.get_batch_shape()) + 1)))
 
     losses = p_log_prob - q_log_prob
-    self.loss = tf.reduce_mean(losses)
+    self.loss = -tf.reduce_mean(losses)
     return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 \end{lstlisting}
 
@@ -139,7 +139,7 @@ The method \texttt{build_score_loss()} implements the ELBO and its
 gradient. It draws \texttt{self.n_samples} samples from the
 variational model. It registers the Monte Carlo
 estimate of the ELBO in TensorFlow's computational graph, and stores it
-in \texttt{self.loss}, to track progress of the inference for diagnostics.
+negative in \texttt{self.loss}, to track progress of the inference for diagnostics.
 
 The method returns an object whose automatic differentiation is the
 score function gradient of the ELBO. The TensorFlow function
