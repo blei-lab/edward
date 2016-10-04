@@ -91,6 +91,7 @@ sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
 inference.initialize(n_samples=5, n_print=5)
+tf.initialize_all_variables().run()
 for t in range(250):
   loss = inference.update()
   if t % inference.n_print == 0:
