@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Correlated normal posterior. Inference with Hamiltonian Monte Carlo.
+"""Correlated normal posterior. Inference with Hamiltonian Monte Carlo.
 """
 from __future__ import absolute_import
 from __future__ import division

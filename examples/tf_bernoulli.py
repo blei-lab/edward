@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-"""
-Probability model
-  Posterior: (1-dimensional) Bernoulli
-Variational model
-  Likelihood: Mean-field Bernoulli
+"""Bernoulli posterior.
 """
 from __future__ import absolute_import
 from __future__ import division

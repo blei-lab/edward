@@ -1,26 +1,7 @@
 #!/usr/bin/env python
-"""
-Mixture model using mean-field variational inference.
+"""Mixture model using mean-field variational inference.
 
-Probability model
-  Mixture of Gaussians
-  pi ~ Dirichlet(alpha)
-  for k = 1, ..., K
-    mu_k ~ N(0, cI)
-    sigma_k ~ Inv-Gamma(a, b)
-  for n = 1, ..., N
-    c_n ~ Multinomial(pi)
-    x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
-Variational model
-  Likelihood:
-    q(pi) prod_{k=1}^K q(mu_k) q(sigma_k)
-    q(pi) = Dirichlet(alpha')
-    q(mu_k) = N(mu'_k, Sigma'_k)
-    q(sigma_k) = Inv-Gamma(a'_k, b'_k)
-  (We collapse the c_n latent variables in the probability model's
-  joint density.)
-
-Data: x = {x_1, ..., x_N}, where each x_i is in R^2
+We posit a collapsed mixture of Gaussians.
 """
 from __future__ import absolute_import
 from __future__ import division

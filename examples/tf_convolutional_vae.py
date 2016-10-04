@@ -1,13 +1,8 @@
 #!/usr/bin/env python
-"""
-Convolutional variational auto-encoder for MNIST data. The model is
-written in TensorFlow, with neural networks using Pretty Tensor.
+"""Convolutional variational auto-encoder for MNIST data.
 
-Probability model
-  Prior: Normal
-  Likelihood: Bernoulli parameterized by convolutional NN
-Variational model
-  Likelihood: Mean-field Normal parameterized by convolutional NN
+The model is written in TensorFlow, with neural networks using Pretty
+Tensor.
 """
 from __future__ import absolute_import
 from __future__ import division

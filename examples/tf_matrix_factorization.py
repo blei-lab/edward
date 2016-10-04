@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Probabilistic matrix factorization.
+"""Probabilistic matrix factorization.
 """
 from __future__ import absolute_import
 from __future__ import division

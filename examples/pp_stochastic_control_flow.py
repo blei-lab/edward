@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Stochastic control flow.
+"""Stochastic control flow.
 
 We sample from a geometric random variable by using samples from
 Bernoulli random variable. It requires a while loop whose condition is

@@ -1,19 +1,7 @@
 #!/usr/bin/env python
-"""
-Mixture model using maximum a posteriori.
+"""Mixture model using the Laplace approximation.
 
-Probability model
-  Mixture of Gaussians
-  pi ~ Dirichlet(alpha)
-  for k = 1, ..., K
-    mu_k ~ N(0, cI)
-    sigma_k ~ Inv-Gamma(a, b)
-  for n = 1, ..., N
-    c_n ~ Multinomial(pi)
-    x_n|c_n ~ N(mu_{c_n}, sigma_{c_n})
-Inference: Laplace approximation
-
-Data: x = {x_1, ..., x_N}, where each x_i is in R^2
+We posit a collapsed mixture of Gaussians.
 """
 from __future__ import absolute_import
 from __future__ import division

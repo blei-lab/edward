@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Stochastic recursion.
+"""Stochastic recursion.
 
 We sample from a geometric random variable by using samples from
 Bernoulli random variable. It uses a recursive function and requires

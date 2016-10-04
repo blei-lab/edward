@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Correlated normal posterior. Inference with stochastic gradient
+"""Correlated normal posterior. Inference with stochastic gradient
 Langevin dynamics.
 """
 from __future__ import absolute_import

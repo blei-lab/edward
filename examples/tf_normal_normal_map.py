@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-"""
-Probability model
-  Posterior: (1-dimensional) Normal
-Inference: Maximum a posteriori
+"""Normal-normal model using MAP estimation.
 """
 from __future__ import absolute_import
 from __future__ import division

@@ -1,13 +1,5 @@
 #!/usr/bin/env python
-"""
-Gaussian process classification using mean-field variational inference.
-
-Probability model:
-  Gaussian process classification
-  Prior: Gaussian process
-  Likelihood: Bernoulli-Logit
-Variational model
-  Likelihood: Mean-field Normal
+"""Gaussian process classification using mean-field variational inference.
 """
 from __future__ import absolute_import
 from __future__ import division

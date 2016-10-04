@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-"""
-Mixture density network using maximum likelihood.
-
-Probability model:
-  Prior: None ("flat prior")
-  Likelihood: Mixture sum of normals parameterized by a NN
-Inference: Maximum a posteriori
+"""Mixture density network using maximum likelihood.
 """
 from __future__ import absolute_import
 from __future__ import division
