@@ -1,21 +1,25 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using mean-field variational inference."""
+"""Bayesian linear regression using mean-field variational inference.
+
+This version visualizes additional fits of the model.
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from scipy.stats import norm
+from edward.stats import norm
 
 
-def build_toy_dataset(N, noise_std=0.1):
+def build_toy_dataset(N, noise_std=0.5):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
-  y = 5.0 * X + norm.rvs(0, noise_std, size=N)
+  y = 2.0 * X + 10 * norm.rvs(0, noise_std, size=N)
   X = X.reshape((N, 1))
   return X.astype(np.float32), y.astype(np.float32)
 
@@ -52,3 +56,33 @@ y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
 
 print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
+
+print("Displaying prior predictive samples.")
+n_prior_samples = 10
+
+w_prior = w.sample(n_prior_samples).eval()
+b_prior = b.sample(n_prior_samples).eval()
+
+plt.scatter(X_train, y_train)
+
+inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+for ns in range(n_prior_samples):
+    output = inputs * w_prior[ns] + b_prior[ns]
+    plt.plot(inputs, output)
+
+plt.show()
+
+print("Displaying posterior predictive samples.")
+n_posterior_samples = 10
+
+w_post = qw.sample(n_posterior_samples).eval()
+b_post = qb.sample(n_posterior_samples).eval()
+
+plt.scatter(X_train, y_train)
+
+inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+for ns in range(n_posterior_samples):
+    output = inputs * w_post[ns] + b_post[ns]
+    plt.plot(inputs, output)
+
+plt.show()

@@ -1,13 +1,7 @@
 #!/usr/bin/env python
-"""
-Bayesian linear regression using mean-field variational inference.
+"""Bayesian linear regression using mean-field variational inference.
 
-Probability model:
-  Bayesian linear model
-  Prior: Normal
-  Likelihood: Normal
-Variational model
-  Likelihood: Mean-field Normal
+This version uses 10 features per data point.
 """
 from __future__ import absolute_import
 from __future__ import division
