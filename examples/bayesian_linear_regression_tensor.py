@@ -19,17 +19,20 @@ def build_toy_dataset(N, noise_std=0.1):
   return X.astype(np.float32), y.astype(np.float32)
 
 
+ed.set_seed(42)
+
 N = 40  # num data points
 p = 1  # num features
 
-ed.set_seed(42)
-
+# DATA
 X_data, y_data = build_toy_dataset(N)
 
+# MODEL
 X = X_data
 beta = Normal(mu=tf.zeros(p), sigma=tf.ones(p))
 y = Normal(mu=ed.dot(X, beta), sigma=tf.ones(N))
 
+# INFERENCE
 qmu_mu = tf.Variable(tf.random_normal([p]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([p])))
 qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma)

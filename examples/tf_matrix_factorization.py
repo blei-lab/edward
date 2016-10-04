@@ -84,4 +84,4 @@ inference = ed.MAP({'z': qz}, data, model)
 # qz = Normal(mu=qz_mu, sigma=qz_sigma)
 # inference = ed.MFVI({'z': qz}, data, model)
 
-inference.run(n_iter=2500, n_print=500)
+inference.run(n_iter=2500)

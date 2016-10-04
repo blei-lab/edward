@@ -20,13 +20,17 @@ from edward.models import Bernoulli, Beta, PointMass
 
 ed.set_seed(42)
 
+# DATA
+x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+# MODEL
 p = Beta(a=1.0, b=1.0)
 x = Bernoulli(p=tf.ones(10) * p)
 
-data = {x: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-
+# INFERENCE
 qp_params = tf.nn.sigmoid(tf.Variable(tf.random_normal([])))
 qp = PointMass(params=qp_params)
 
+data = {x: x_data}
 inference = ed.MAP({p: qp}, data)
-inference.run(n_iter=50, n_print=10)
+inference.run(n_iter=50)

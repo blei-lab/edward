@@ -29,6 +29,7 @@ data = {x: x_data}
 inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu}, data)
 inference.run()
 
+# CRITICISM
 # Check convergence with visual diagnostics.
 sess = ed.get_session()
 samples = sess.run(qmu.params)

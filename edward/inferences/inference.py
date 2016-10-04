@@ -182,7 +182,7 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
-  def initialize(self, n_iter=1000, n_print=100, n_minibatch=None):
+  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None):
     """Initialize inference algorithm.
 
     Parameters
@@ -191,7 +191,7 @@ class Inference(object):
       Number of iterations for algorithm.
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
-      progress, then specify None.
+      progress, then specify 0. Default is int(n_iter / 10).
     n_minibatch : int, optional
       Number of samples for data subsampling. Default is to use
       all the data. Subsampling is available only if all data
@@ -200,7 +200,10 @@ class Inference(object):
       ``tf.train.slice_input_producer`` and ``tf.train.batch``.
     """
     self.n_iter = n_iter
-    self.n_print = n_print
+    if n_print is None:
+      self.n_print = int(n_iter / 10)
+    else:
+      self.n_print = n_print
 
     self.t = tf.Variable(0, trainable=False)
     self.increment_t = self.t.assign_add(1)
@@ -242,7 +245,12 @@ class Inference(object):
     info_dict : dict
       Dictionary of algorithm-specific information.
     """
-    pass
+    if self.n_print != 0:
+      t = info_dict['t']
+      if t == 1 or t % self.n_print == 0:
+        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
+        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
+        print(string)
 
   def finalize(self):
     """Function to call after convergence.

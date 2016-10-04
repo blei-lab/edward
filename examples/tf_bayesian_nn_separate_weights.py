@@ -113,8 +113,4 @@ data = {'x': x_train, 'y': y_train}
 inference = ed.MFVI({'w0': qw[0], 'b0': qb[0],
                      'w1': qw[1], 'b1': qb[1],
                      'w2': qw[2], 'b2': qb[2]}, data, model)
-inference.initialize(n_print=100)
-for t in range(1000):
-  loss = inference.update()
-  if t % inference.n_print == 0:
-    print("iter {:d} loss {:.2f}".format(t, loss))
+inference.run()

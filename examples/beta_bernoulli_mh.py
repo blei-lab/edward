@@ -26,7 +26,15 @@ qp = Empirical(params=tf.Variable(tf.zeros([1000]) + 0.5))
 
 proposal_p = Beta(a=3.0, b=9.0)
 
-# exact posterior has mean 0.25 and std 0.12
 data = {x: x_data}
 inference = ed.MetropolisHastings({p: qp}, {p: proposal_p}, data)
 inference.run()
+
+# CRITICISM
+# exact posterior has mean 0.25 and std 0.12
+sess = ed.get_session()
+mean, std = sess.run([qp.mean(), qp.std()])
+print("Inferred posterior mean:")
+print(mean)
+print("Inferred posterior std:")
+print(std)
