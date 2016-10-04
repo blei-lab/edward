@@ -40,7 +40,7 @@ def geometric(p):
     return tf.cond(cond, fn1, fn2)
 
 
-p = tf.constant([0.9])
+p = tf.constant(0.9)
 geom = geometric(p)
 
 sess = tf.Session()

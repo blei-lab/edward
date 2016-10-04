@@ -105,7 +105,7 @@ plt.show()
 
 
 # RUN MEAN-FIELD VARIATIONAL INFERENCE
-inference.run(n_iter=500, n_samples=5, n_print=100)
+inference.run(n_iter=500, n_samples=5)
 
 
 # SECOND VISUALIZATION (posterior)
