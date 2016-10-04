@@ -242,7 +242,12 @@ class Inference(object):
     info_dict : dict
       Dictionary of algorithm-specific information.
     """
-    pass
+    if self.n_print is not None:
+      t = info_dict['t']
+      if t == 1 or t % self.n_print == 0:
+        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
+        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
+        print(string)
 
   def finalize(self):
     """Function to call after convergence.

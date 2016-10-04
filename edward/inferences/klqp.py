@@ -308,8 +308,8 @@ def build_reparam_loss(inference):
 
   p_log_prob = tf.pack(p_log_prob)
   q_log_prob = tf.pack(q_log_prob)
-  inference.loss = tf.reduce_mean(p_log_prob - q_log_prob)
-  return -inference.loss
+  inference.loss = -tf.reduce_mean(p_log_prob - q_log_prob)
+  return inference.loss
 
 
 def build_reparam_loss_kl(inference):
@@ -367,8 +367,8 @@ def build_reparam_loss_kl(inference):
                         for qz in six.itervalues(inference.latent_vars)])
 
   p_log_lik = tf.pack(p_log_lik)
-  inference.loss = tf.reduce_mean(p_log_lik) - kl
-  return -inference.loss
+  inference.loss = -(tf.reduce_mean(p_log_lik) - kl)
+  return inference.loss
 
 
 def build_reparam_loss_entropy(inference):
@@ -421,8 +421,8 @@ def build_reparam_loss_entropy(inference):
   q_entropy = tf.reduce_sum([qz.entropy()
                              for qz in six.itervalues(inference.latent_vars)])
 
-  inference.loss = tf.reduce_mean(p_log_prob) + q_entropy
-  return -inference.loss
+  inference.loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
+  return inference.loss
 
 
 def build_score_loss(inference):
@@ -474,7 +474,7 @@ def build_score_loss(inference):
   q_log_prob = tf.pack(q_log_prob)
 
   losses = p_log_prob - q_log_prob
-  inference.loss = tf.reduce_mean(losses)
+  inference.loss = -tf.reduce_mean(losses)
   return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
 
 
@@ -536,7 +536,7 @@ def build_score_loss_kl(inference):
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
 
-  inference.loss = tf.reduce_mean(p_log_lik) - kl
+  inference.loss = -(tf.reduce_mean(p_log_lik) - kl)
   return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl)
 
 
@@ -594,6 +594,6 @@ def build_score_loss_entropy(inference):
   q_entropy = tf.reduce_sum([qz.entropy()
                              for qz in six.itervalues(inference.latent_vars)])
 
-  inference.loss = tf.reduce_mean(p_log_prob) + q_entropy
+  inference.loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
   return -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
            q_entropy)
