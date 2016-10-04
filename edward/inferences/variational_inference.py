@@ -134,7 +134,7 @@ class VariationalInference(Inference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if not isinstance(key, RandomVariable) and not isinstance(key, str):
+      if isinstance(key, tf.Tensor):
         feed_dict[key] = value
 
     sess = get_session()
@@ -144,19 +144,14 @@ class VariationalInference(Inference):
   def print_progress(self, info_dict):
     """Print progress to output.
     """
-    if self.n_print is not None:
+    if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
         loss = info_dict['loss']
-        print("iter {:d} loss {:.2f}".format(t, loss))
-        sess = get_session()
-        for rv in six.itervalues(self.latent_vars):
-          try:
-            parameters = sess.run(rv.parameters)
-            parameters['name'] = rv.name
-            print(parameters)
-          except:
-            pass
+        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
+        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
+        string += ': Loss = {0:.3f}'.format(loss)
+        print(string)
 
   def build_loss(self):
     """Build loss function.

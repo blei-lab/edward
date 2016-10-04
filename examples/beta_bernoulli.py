@@ -20,14 +20,18 @@ from edward.models import Bernoulli, Beta
 
 ed.set_seed(42)
 
+# DATA
+x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+# MODEL
 p = Beta(a=1.0, b=1.0)
 x = Bernoulli(p=tf.ones(10) * p)
 
-data = {x: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-
+# INFERENCE
 qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp = Beta(a=qp_a, b=qp_b)
 
+data = {x: x_data}
 inference = ed.MFVI({p: qp}, data)
-inference.run(n_iter=500, n_print=50)
+inference.run(n_iter=500)

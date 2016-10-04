@@ -37,4 +37,4 @@ sigma = tf.constant(0.1)
 model = NormalModel(mu, sigma)
 
 inference = ed.MAP(['z'], data, model)
-inference.run(n_iter=200, n_print=50)
+inference.run(n_iter=200)

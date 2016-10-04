@@ -19,17 +19,21 @@ def build_toy_dataset(N, noise_std=0.1):
   return X.astype(np.float32), y.astype(np.float32)
 
 
+ed.set_seed(42)
+
 N = 40  # num data points
 D = 1  # num features
 
-ed.set_seed(42)
+# DATA
 X_train, y_train = build_toy_dataset(N)
 X_test, y_test = build_toy_dataset(N)
 
+# MODEL
 X = ed.placeholder(tf.float32, [N, D], name='X')
 beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D), name='beta')
 y = Normal(mu=ed.dot(X, beta), sigma=tf.ones(N), name='y')
 
+# INFERENCE
 qmu_mu = tf.Variable(tf.random_normal([D]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
 qbeta = Normal(mu=qmu_mu, sigma=qmu_sigma, name='qbeta')
@@ -38,8 +42,10 @@ data = {X: X_train, y: y_train}
 inference = ed.MFVI({beta: qbeta}, data)
 inference.run(n_iter=500, logdir='train')
 
+# CRITICISM
 y_post = ed.copy(y, {beta: qbeta.mean()})
 # This is equivalent to
 # y_post = Normal(mu=ed.dot(X, qbeta.mean()), sigma=tf.ones(N))
 
+print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
