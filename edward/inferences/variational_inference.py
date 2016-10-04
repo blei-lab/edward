@@ -134,7 +134,7 @@ class VariationalInference(Inference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if not isinstance(key, RandomVariable) and not isinstance(key, str):
+      if isinstance(key, tf.Tensor):
         feed_dict[key] = value
 
     sess = get_session()
