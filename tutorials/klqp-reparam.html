@@ -173,10 +173,10 @@
       q_log_prob += tf.reduce_sum(rv.log_prob(z[key]),
                                   list(range(1, len(rv.get_batch_shape()) + 1)))
 
-    self.loss = tf.reduce_mean(p_log_prob - q_log_prob)
-    return -self.loss</code></pre>
+    self.loss = -tf.reduce_mean(p_log_prob - q_log_prob)
+    return self.loss</code></pre>
 <p>Two methods are added: <code>initialize()</code> and <code>build_reparam_loss()</code>. The method <code>initialize()</code> follows the same initialization as <code>VariationalInference</code>, and adds an argument: <code>n_samples</code> for the number of samples from the variational model.</p>
-<p>The method <code>build_reparam_loss()</code> implements the ELBO and its gradient. It draws <code>self.n_samples</code> samples from the variational model. It registers the Monte Carlo estimate of the ELBO in TensorFlow’s computational graph, and stores it in <code>self.loss</code>, to track progress of the inference for diagnostics.</p>
+<p>The method <code>build_reparam_loss()</code> implements the ELBO and its gradient. It draws <code>self.n_samples</code> samples from the variational model. It registers the Monte Carlo estimate of the ELBO in TensorFlow’s computational graph, and stores its negative in <code>self.loss</code>, to track progress of the inference for diagnostics.</p>
 <p>The method returns an object whose automatic differentiation is the reparameterization gradient of the ELBO. The computational graph will simply traverse the nodes during backpropagation; unlike the <a href="/tutorials/klqp-score">score function gradient</a>, the reparameterization gradient does not need TensorFlow’s <code>tf.stop_gradient()</code> function.</p>
 <p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the ELBO’s gradient.</p>
 <p>See the <a href="/api/">API</a> for more details.</p>
