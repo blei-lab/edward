@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""Convolutional variational auto-encoder for MNIST data.
+"""Convolutional variational auto-encoder for binarized MNIST.
 
-The model is written in TensorFlow, with neural networks using Pretty
-Tensor.
+The model is written in TensorFlow. The neural networks are written
+with Pretty Tensor.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -20,25 +20,24 @@ from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 
-N_MINIBATCH = 128
-DATA_DIR = "data/mnist"
-IMG_DIR = "img"
-
 
 class NormalBernoulli:
-  """
-  Each binarized pixel in an image is modeled by a Bernoulli
+  """Each binarized pixel in an image is modeled by a Bernoulli
   likelihood. The success probability for each pixel is the output
   of a neural network that takes samples from a normal prior as
   input.
 
-  p(x, z) = Bernoulli(x | p = neural_network(z)) Normal(z; 0, I)
+  p(x, z) = Bernoulli(x | logits = neural_network(z)) Normal(z; 0, I)
   """
   def __init__(self, n_vars):
     self.n_vars = n_vars  # number of local latent variables
 
-  def neural_network(self, z):
-    """p = neural_network(z)"""
+  def generative_network(self, z):
+    """Generative network to parameterize generative model. It takes
+    latent variables as input and outputs the likelihood parameters.
+
+    logits = neural_network(z)
+    """
     with pt.defaults_scope(activation_fn=tf.nn.elu,
                            batch_normalize=True,
                            learned_moments_update_rate=0.0003,
@@ -49,19 +48,18 @@ class NormalBernoulli:
               deconv2d(3, 128, edges='VALID').
               deconv2d(5, 64, edges='VALID').
               deconv2d(5, 32, stride=2).
-              deconv2d(5, 1, stride=2, activation_fn=tf.nn.sigmoid).
+              deconv2d(5, 1, stride=2, activation_fn=None).
               flatten()).tensor
 
   def log_lik(self, xs, zs):
-    """
-    Bernoulli log-likelihood, summing over every image n and pixel i
+    """Bernoulli log-likelihood, summing over every image n and pixel i
     in image n.
 
-    log p(x | z) = log Bernoulli(x | p = neural_network(z))
-     = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | p_{n,i})
+    log p(x | z) = log Bernoulli(x | logits = neural_network(z))
+     = sum_{n=1}^N sum_{i=1}^{28*28} log Bernoulli (x_{n,i} | logits_{n,i})
     """
     return tf.reduce_sum(
-        bernoulli.logpmf(xs['x'], p=self.neural_network(zs['z'])))
+        bernoulli.logpmf(xs['x'], logits=self.generative_network(zs['z'])))
 
   def sample_prior(self, n):
     """
@@ -72,12 +70,11 @@ class NormalBernoulli:
     # Note the output of this is not prior samples, but just the
     # success probability, i.e., the hidden representation learned
     # by the neural network.
-    return self.neural_network(z)
+    return self.generative_network(z)
 
 
-def neural_network(x):
-  """
-  Inference network to parameterize variational family. It takes
+def inference_network(x):
+  """Inference network to parameterize variational family. It takes
   data as input and outputs the variational parameters.
 
   mu, sigma = neural_network(x)
@@ -100,41 +97,42 @@ def neural_network(x):
   # Return list of vectors where mean[i], stddev[i] are the
   # parameters of the local variational factor for data point i.
   mu = tf.reshape(params[:, :n_vars], [-1])
-  sigma = tf.reshape(tf.sqrt(tf.exp(params[:, n_vars:])), [-1])
-  return [mu, sigma]
+  sigma = tf.reshape(tf.nn.softplus(params[:, n_vars:]), [-1])
+  return mu, sigma
 
 
 ed.set_seed(42)
-model = NormalBernoulli(n_vars=10)
 
-# Use the variational model
-# q(z | x) = prod_{n=1}^n Normal(z_n | mu, sigma = neural_network(x_n))
-# It is a distribution of the latent variables z_n for each data
-# point x_n. We use neural_network() to globally parameterize the local
-# variational factors q(z_n | x).
-# We also do data subsampling during inference. Therefore we only need
-# to explicitly represent the variational factors for a mini-batch,
-# q(z_{batch} | x) = prod_{m=1}^{n_data}
-#                    Normal(z_m | mu, sigma = neural_network(x_m))
-x_ph = ed.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
-mu, sigma = neural_network(x_ph)
-qz = Normal(mu=mu, sigma=sigma)
+N_MINIBATCH = 128
+n_vars = 10
+DATA_DIR = "data/mnist"
+IMG_DIR = "img"
 
-# MNIST batches are fed at training time.
 if not os.path.exists(DATA_DIR):
   os.makedirs(DATA_DIR)
+if not os.path.exists(IMG_DIR):
+  os.makedirs(IMG_DIR)
 
+# DATA. MNIST batches are fed at training time.
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
-# Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
-data = {'x': x_ph}
 
-sess = ed.get_session()
+# MODEL
+model = NormalBernoulli(n_vars)
+
+# INFERENCE
+x_ph = ed.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
+mu, sigma = inference_network(x_ph)
+qz = Normal(mu=mu, sigma=sigma)
+
+# Bind p(x, z) and q(z | x) to the same placeholder for x.
+data = {'x': x_ph}
 inference = ed.MFVI({'z': qz}, data, model)
 with tf.variable_scope("model") as scope:
   optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
   inference.initialize(optimizer=optimizer, use_prettytensor=True)
+
 with tf.variable_scope("model", reuse=True) as scope:
-  p_rep = model.sample_prior(N_MINIBATCH)
+  p_rep = tf.sigmoid(model.sample_prior(N_MINIBATCH))
 
 init = tf.initialize_all_variables()
 init.run()
@@ -162,10 +160,8 @@ for epoch in range(n_epoch):
   # image.
   print("log p(x) >= {:0.3f}".format(avg_loss))
 
+  # Visualize hidden representations.
   imgs = p_rep.eval()
   for b in range(N_MINIBATCH):
-    if not os.path.exists(IMG_DIR):
-      os.makedirs(IMG_DIR)
-
     imsave(os.path.join(IMG_DIR, '%d.png') % b,
            imgs[b].reshape(28, 28))

@@ -17,9 +17,10 @@ from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 
+ed.set_seed(42)
+
 M = 100  # batch size during training
 d = 2  # latent variable dimension
-ed.set_seed(42)
 
 # Probability model (subgraph)
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))

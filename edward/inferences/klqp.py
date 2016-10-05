@@ -285,15 +285,15 @@ def build_reparam_loss(inference):
       z_sample[z] = qz_copy.value()
       q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_sample[z]))
 
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on posterior sample or
-    # observed data.
-    dict_swap = z_sample
-    for x, obs in six.iteritems(inference.data):
-      if isinstance(x, RandomVariable):
-        dict_swap[x] = obs
-
     if inference.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(inference.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope='inference_' + str(s))
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
@@ -339,15 +339,15 @@ def build_reparam_loss_kl(inference):
       qz_copy = copy(qz, scope='inference_' + str(s))
       z_sample[z] = qz_copy.value()
 
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on posterior sample or
-    # observed data.
-    dict_swap = z_sample
-    for x, obs in six.iteritems(inference.data):
-      if isinstance(x, RandomVariable):
-        dict_swap[x] = obs
-
     if inference.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(inference.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for x, obs in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope='inference_' + str(s))
@@ -366,7 +366,6 @@ def build_reparam_loss_kl(inference):
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
 
-  p_log_lik = tf.pack(p_log_lik)
   inference.loss = -(tf.reduce_mean(p_log_lik) - kl)
   return inference.loss
 
@@ -395,15 +394,15 @@ def build_reparam_loss_entropy(inference):
       qz_copy = copy(qz, scope='inference_' + str(s))
       z_sample[z] = qz_copy.value()
 
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on posterior sample or
-    # observed data.
-    dict_swap = z_sample
-    for x, obs in six.iteritems(inference.data):
-      if isinstance(x, RandomVariable):
-        dict_swap[x] = obs
-
     if inference.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(inference.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope='inference_' + str(s))
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
@@ -449,15 +448,15 @@ def build_score_loss(inference):
       q_log_prob[s] += tf.reduce_sum(
           qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on posterior sample or
-    # observed data.
-    dict_swap = z_sample
-    for x, obs in six.iteritems(inference.data):
-      if isinstance(x, RandomVariable):
-        dict_swap[x] = obs
-
     if inference.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(inference.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope='inference_' + str(s))
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
@@ -508,15 +507,15 @@ def build_score_loss_kl(inference):
       q_log_prob[s] += tf.reduce_sum(
           qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on posterior sample or
-    # observed data.
-    dict_swap = z_sample
-    for x, obs in six.iteritems(inference.data):
-      if isinstance(x, RandomVariable):
-        dict_swap[x] = obs
-
     if inference.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(inference.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for x, obs in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope='inference_' + str(s))
@@ -567,15 +566,15 @@ def build_score_loss_entropy(inference):
       q_log_prob[s] += tf.reduce_sum(
           qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on posterior sample or
-    # observed data.
-    dict_swap = z_sample
-    for x, obs in six.iteritems(inference.data):
-      if isinstance(x, RandomVariable):
-        dict_swap[x] = obs
-
     if inference.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample
+      for x, obs in six.iteritems(inference.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope='inference_' + str(s))
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))

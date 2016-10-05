@@ -77,15 +77,15 @@ class KLpq(VariationalInference):
         q_log_prob[s] += tf.reduce_sum(
             qz.log_prob(tf.stop_gradient(z_sample[z])))
 
-      # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
-      dict_swap = z_sample
-      for x, obs in six.iteritems(self.data):
-        if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
-
       if self.model_wrapper is None:
+        # Form dictionary in order to replace conditioning on prior or
+        # observed variable with conditioning on posterior sample or
+        # observed data.
+        dict_swap = z_sample
+        for x, obs in six.iteritems(self.data):
+          if isinstance(x, RandomVariable):
+            dict_swap[x] = obs
+
         for z in six.iterkeys(self.latent_vars):
           z_copy = copy(z, dict_swap, scope='inference_' + str(s))
           p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))

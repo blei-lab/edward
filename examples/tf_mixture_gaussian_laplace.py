@@ -92,7 +92,7 @@ K = 2
 D = 2
 model = MixtureGaussian(K, D)
 
-with tf.variable_scope("variational"):
+with tf.variable_scope("posterior"):
   qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.random_normal([K - 1]))))
   qmu = PointMass(params=tf.Variable(tf.random_normal([K * D])))
   qsigma = PointMass(params=tf.exp(tf.Variable(tf.random_normal([K * D]))))
