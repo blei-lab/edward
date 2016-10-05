@@ -111,7 +111,7 @@ qz = Normal(mu=Dense(10)(hidden),
             sigma=Dense(10, activation=K.softplus)(hidden))</code></pre>
 <p>The variational model is parameterized by the neural network’s output.</p>
 <p>During each step of inference, we pass in a batch of data points to feed the placeholder. Then we train the variational parameters (inference network’s parameters) according to gradients of the variational objective.</p>
-<p>An example script using this variational model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/vae.py">here</a>. An example with a convolutional architecture can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae_prettytensor.py">here</a>.</p>
+<p>An example script using this variational model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/vae.py">here</a>. An example with a convolutional architecture can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/vae_convolutional_prettytensor.py">here</a>.</p>
 <h3 id="footnotes">Footnotes</h3>
 <p>Inference networks are also known as recognition models, recognition networks, or inverse mappings.</p>
 <p>Variational models parameterized by inference networks are also known as probabilistic encoders, in analogy from coding theory to <a href="/tutorials/decoder">probabilistic decoders</a>. We recommend against this terminology, in favor of making explicit the separation of model and inference. That is, variational inference with inference networks is a general technique that can be applied to models beyond probabilistic decoders.</p>
