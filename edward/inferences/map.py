@@ -117,8 +117,8 @@ class MAP(VariationalInference):
       x = self.data
       p_log_prob = self.model_wrapper.log_prob(x, z_mode)
 
-    self.loss = p_log_prob
-    return -self.loss
+    self.loss = -p_log_prob
+    return self.loss
 
 
 class Laplace(MAP):

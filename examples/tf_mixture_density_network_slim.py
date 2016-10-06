@@ -8,35 +8,24 @@ from __future__ import print_function
 import edward as ed
 import numpy as np
 import tensorflow as tf
+import tensorflow.contrib.slim as slim
 
 from edward.stats import norm
-from keras import backend as K
-from keras.layers import Dense
 from sklearn.cross_validation import train_test_split
 
 
 class MixtureDensityNetwork:
-  """
-  Mixture density network for outputs y on inputs x.
-
-  p((x,y), (z,theta))
-  = sum_{k=1}^K pi_k(x; theta) Normal(y; mu_k(x; theta), sigma_k(x; theta))
-
-  where pi, mu, sigma are the output of a neural network taking x
-  as input and with parameters theta. There are no latent variables
-  z, which are hidden variables we aim to be Bayesian about.
-  """
   def __init__(self, K):
     self.K = K
 
   def neural_network(self, X):
     """pi, mu, sigma = NN(x; theta)"""
-    # fully-connected layer with 25 hidden units
-    hidden1 = Dense(25, activation=K.relu)(X)
-    hidden2 = Dense(25, activation=K.relu)(hidden1)
-    self.mus = Dense(self.K)(hidden2)
-    self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
-    self.pi = Dense(self.K, activation=K.softmax)(hidden2)
+    hidden1 = slim.fully_connected(X, 25)
+    hidden2 = slim.fully_connected(hidden1, 25)
+    self.pi = slim.fully_connected(hidden2, self.K, activation_fn=tf.nn.softmax)
+    self.mus = slim.fully_connected(hidden2, self.K, activation_fn=None)
+    self.sigmas = slim.fully_connected(hidden2, self.K,
+                                       activation_fn=tf.nn.softplus)
 
   def log_prob(self, xs, zs):
     """Return scalar, the log joint density log p(xs, zs)."""
@@ -78,7 +67,6 @@ model = MixtureDensityNetwork(10)
 # INFERENCE
 inference = ed.MAP([], data, model)
 sess = ed.get_session()
-K.set_session(sess)
 inference.initialize()
 
 init = tf.initialize_all_variables()
