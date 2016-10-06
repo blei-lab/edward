@@ -4,6 +4,11 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+#from edward.util import random_variables as util
+# TODO these require RandomVariable, making this circular
+#from edward.util import get_ancestors, get_children, get_descendants, \
+#    get_parents, get_siblings, get_variables
+
 RANDOM_VARIABLE_COLLECTION = "_random_variable_collection_"
 
 
@@ -69,7 +74,32 @@ class RandomVariable(object):
     return self.__str__()
 
   def value(self):
+    """Get tensor that the random variable correspond to."""
     return self._value
+
+  def get_ancestors(self, collection=None):
+    """Get ancestor random variables."""
+    return util.get_ancestors(self, collection)
+
+  def get_children(self, collection=None):
+    """Get child random variables."""
+    return util.get_children(self, collection)
+
+  def get_descendants(self, collection=None):
+    """Get descendant random variables."""
+    return util.get_descendants(self, collection)
+
+  def get_parents(self, collection=None):
+    """Get parent random variables."""
+    return util.get_parents(self, collection)
+
+  def get_siblings(self, collection=None):
+    """Get sibling random variables."""
+    return util.get_siblings(self, collection)
+
+  def get_variables(self, collection=None):
+    """Get TensorFlow variables that the random variable depends on."""
+    return util.get_variables(self, collection)
 
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
     _ = name

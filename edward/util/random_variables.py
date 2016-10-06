@@ -8,6 +8,7 @@ import tensorflow as tf
 
 from copy import deepcopy
 from edward.models.random_variable import RandomVariable
+from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
@@ -284,6 +285,149 @@ def copy(org_instance, dict_swap=None, scope="copied",
     return ret
 
 
+def get_ancestors(x, collection=None):
+  """Get ancestor random variables of input.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find ancestors of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Ancestor random variables of x.
+
+  Examples
+  --------
+  >>> a = Normal(mu=0.0, sigma=1.0)
+  >>> b = Normal(mu=a, sigma=1.0)
+  >>> c = Normal(mu=0.0, sigma=1.0)
+  >>> d = Normal(mu=tf.mul(b, c), sigma=1.0)
+  >>> set(ed.get_ancestors(d)) == set([a, b, c])
+  True
+  """
+  if collection is None:
+    collection = random_variables()
+
+  node_dict = {node.value(): node for node in collection}
+
+  # Traverse the graph. Add each node to the set if it's in the collection.
+  output = set([])
+  nodes = set([x])
+  while nodes:
+    node = nodes.pop()
+    if isinstance(node, RandomVariable):
+      node = node.value()
+
+    candidate_node = node_dict.get(node, None)
+    if candidate_node and candidate_node != x:
+      output.add(candidate_node)
+
+    nodes.update(node.op.inputs)
+
+  return list(output)
+
+
+def get_children(x, collection=None):
+  """Get child random variables of input.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find children of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Child random variables of x.
+
+  Examples
+  --------
+  >>> a = Normal(mu=0.0, sigma=1.0)
+  >>> b = Normal(mu=a, sigma=1.0)
+  >>> c = Normal(mu=a, sigma=1.0)
+  >>> d = Normal(mu=c, sigma=1.0)
+  >>> set(ed.get_children(a)) == set([b, c])
+  True
+  """
+  if collection is None:
+    collection = random_variables()
+
+  node_dict = {node.value(): node for node in collection}
+
+  # Traverse the graph. Add each node to the set if it's in the collection.
+  output = set([])
+  nodes = set([x])
+  while nodes:
+    node = nodes.pop()
+    if isinstance(node, RandomVariable):
+      node = node.value()
+
+    candidate_node = node_dict.get(node, None)
+    if candidate_node and candidate_node != x:
+      output.add(candidate_node)
+    else:
+      for op in node.consumers():
+        nodes.update(op.outputs)
+
+  return list(output)
+
+
+def get_descendants(x, collection=None):
+  """Get descendant random variables of input.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find descendants of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Descendant random variables of x.
+
+  Examples
+  --------
+  >>> a = Normal(mu=0.0, sigma=1.0)
+  >>> b = Normal(mu=a, sigma=1.0)
+  >>> c = Normal(mu=a, sigma=1.0)
+  >>> d = Normal(mu=c, sigma=1.0)
+  >>> set(ed.get_descendants(a)) == set([b, c, d])
+  True
+  """
+  if collection is None:
+    collection = random_variables()
+
+  node_dict = {node.value(): node for node in collection}
+
+  # Traverse the graph. Add each node to the set if it's in the collection.
+  output = set([])
+  nodes = set([x])
+  while nodes:
+    node = nodes.pop()
+    if isinstance(node, RandomVariable):
+      node = node.value()
+
+    candidate_node = node_dict.get(node, None)
+    if candidate_node and candidate_node != x:
+      output.add(candidate_node)
+
+    for op in node.consumers():
+      nodes.update(op.outputs)
+
+  return list(output)
+
+
 def get_dims(x):
   """Get values of each dimension.
 
@@ -307,3 +451,129 @@ def get_dims(x):
     return x.get_batch_shape().as_list()
   else:
     raise NotImplementedError()
+
+
+def get_parents(x, collection=None):
+  """Get parent random variables of input.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find parents of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Parent random variables of x.
+
+  Examples
+  --------
+  >>> a = Normal(mu=0.0, sigma=1.0)
+  >>> b = Normal(mu=a, sigma=1.0)
+  >>> c = Normal(mu=0.0, sigma=1.0)
+  >>> d = Normal(mu=tf.mul(b, c), sigma=1.0)
+  >>> set(ed.get_parents(d)) == set([b, c])
+  True
+  """
+  if collection is None:
+    collection = random_variables()
+
+  node_dict = {node.value(): node for node in collection}
+
+  # Traverse the graph. Add each node to the set if it's in the collection.
+  output = set([])
+  nodes = set([x])
+  while nodes:
+    node = nodes.pop()
+    if isinstance(node, RandomVariable):
+      node = node.value()
+
+    candidate_node = node_dict.get(node, None)
+    if candidate_node and candidate_node != x:
+      output.add(candidate_node)
+    else:
+      nodes.update(node.op.inputs)
+
+  return list(output)
+
+
+def get_siblings(x, collection=None):
+  """Get sibling random variables of input.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find siblings of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Sibling random variables of x.
+
+  Examples
+  --------
+  >>> a = Normal(mu=0.0, sigma=1.0)
+  >>> b = Normal(mu=a, sigma=1.0)
+  >>> c = Normal(mu=a, sigma=1.0)
+  >>> ed.get_siblings(b) == [c]
+  True
+  """
+  parents = get_parents(x, collection)
+  siblings = set([])
+  for parent in parents:
+    siblings.update(get_children(parent, collection))
+
+  siblings.discard(x)
+  return list(siblings)
+
+
+def get_variables(x, collection=None):
+  """Get parent TensorFlow variables of input.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find parents of.
+  collection : list of tf.Variable, optional
+    The collection of variables to check with respect to; defaults to
+    all variables in the graph.
+
+  Returns
+  -------
+  list of tf.Variable
+    TensorFlow variables that x depends on.
+
+  Examples
+  --------
+  >>> a = tf.Variable(0.0)
+  >>> b = tf.Variable(0.0)
+  >>> c = Normal(mu=tf.mul(a, b), sigma=1.0)
+  >>> set(ed.get_variables(c)) == set([a, b])
+  True
+  """
+  if collection is None:
+    collection = tf.all_variables()
+
+  node_dict = {node.name: node for node in collection}
+
+  # Traverse the graph. Add each node to the set if it's in the collection.
+  output = set([])
+  nodes = set([x])
+  while nodes:
+    node = nodes.pop()
+    if isinstance(node, RandomVariable):
+      node = node.value()
+
+    candidate_node = node_dict.get(node.name, None)
+    if candidate_node and candidate_node != x:
+      output.add(candidate_node)
+
+    nodes.update(node.op.inputs)
+
+  return list(output)
