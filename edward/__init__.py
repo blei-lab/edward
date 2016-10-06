@@ -17,7 +17,7 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     MAP, Laplace
 from edward.models import PyMC3Model, PythonModel, StanModel, \
     RandomVariable
-from edward.util import copy, cumprod, dot, Empty, get_dims, \
-    get_session, hessian, kl_multivariate_normal, log_sum_exp, logit, \
+from edward.util import copy, dot, get_dims, get_session, hessian, \
+    kl_multivariate_normal, log_sum_exp, logit, \
     multivariate_rbf, placeholder, rbf, set_seed, tile, to_simplex
 from edward.version import __version__

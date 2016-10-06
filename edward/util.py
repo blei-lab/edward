@@ -13,8 +13,6 @@ from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
 
-distributions = tf.contrib.distributions
-
 
 def copy(org_instance, dict_swap=None, scope="copied",
          replace_itself=False, copy_q=False):
@@ -287,42 +285,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
     return ret
 
 
-def cumprod(xs):
-  """Cumulative product of a tensor along its outer dimension.
-
-  https://github.com/tensorflow/tensorflow/issues/813
-
-  Parameters
-  ----------
-  xs : tf.Tensor
-    A 1-D or higher tensor.
-
-  Returns
-  -------
-  tf.Tensor
-    A tensor with `cumprod` applied along its outer dimension.
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the input has Inf or NaN values.
-  """
-  xs = tf.convert_to_tensor(xs)
-  dependencies = [tf.verify_tensor_all_finite(xs, msg='')]
-  xs = control_flow_ops.with_dependencies(dependencies, xs)
-
-  values = tf.unpack(xs)
-  out = []
-  prev = tf.ones_like(values[0])
-  for val in values:
-    s = prev * val
-    out.append(s)
-    prev = s
-
-  result = tf.pack(out)
-  return result
-
-
 def dot(x, y):
   """Compute dot product between a 2-D tensor and a 1-D tensor.
 
@@ -362,11 +324,6 @@ def dot(x, y):
     mat = x
     vec = y
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
-
-
-class Empty(object):
-  """Empty class."""
-  pass
 
 
 def get_dims(x):
@@ -883,7 +840,7 @@ def to_simplex(x):
     z = tf.sigmoid(eq + x)
     pil = tf.concat(0, [z, tf.constant([1.0])])
     piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
-    S = cumprod(piu)
+    S = tf.cumprod(piu)
     return S * pil
   else:
     n_rows = shape[0]
@@ -892,6 +849,5 @@ def to_simplex(x):
     z = tf.sigmoid(eq + x)
     pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
     piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
-    # cumulative product along 1st axis
-    S = tf.pack([cumprod(piu_x) for piu_x in tf.unpack(piu)])
+    S = tf.cumprod(piu, axis=1)
     return S * pil
