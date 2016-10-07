@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import poisson, multivariate_normal
+from edward.stats import poisson, multivariate_normal_cholesky
 from edward.util import multivariate_rbf
 from scipy.stats import multivariate_normal as mvn, poisson as poi
 
@@ -102,16 +102,13 @@ class CoxProcess:
     zs: latent variables
     	size NxV
     Returns: log joint log p(xs, zs), scalar	
-
-    TODO: take care of cases where K is ill-conditioned
-    		for now hack on toy data is to add a small constant
     """
     x = xs['x']
     z = zs['z']
     z = tf.reshape(z, [self.N, self.V])
 
-    log_prior = multivariate_normal.logpdf(
-			z, tf.zeros([self.N, self.V]), 1e-2+self.kernel(x))
+    log_prior = multivariate_normal_cholesky.logpdf(
+			z, tf.zeros([self.N, self.V]), self.kernel(x))
 
     log_lik = poisson.logpmf(x, mu=self.inverse_link(z))
     log_lik = tf.reduce_sum(log_lik, 1)
@@ -136,7 +133,7 @@ def build_toy_dataset(N, V):
 
 ed.set_seed(42)
 sess = ed.get_session()
-df = build_toy_dataset(N=5, V=2)
+df = build_toy_dataset(N=10, V=2)
 data = {'x': df}
 N = len(df)
 V = len(df[0, :])
