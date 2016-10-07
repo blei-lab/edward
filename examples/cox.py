@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""Cox process regression using mean-field variational inference
-	Miller et al, 2014.
+"""Cox process model using mean-field variational inference.
+   Ref: Miller et al, 2014.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -17,7 +17,7 @@ from scipy.stats import multivariate_normal as mvn, poisson as poi
 
 class CoxProcess:
   """
-  Cox process regression
+  Cox process model
   x = (x_1, ..., x_N)...each x_i is a set of counts
   z = (z_1, ..., z_N)...each z_i is the intensity function for x_i
 
