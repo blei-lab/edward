@@ -1048,3 +1048,9 @@ for _name in sorted(dir(distributions)):
       del _WrapperDistribution
       del _object_name
       del _candidate
+
+# Display only the objects and not their classes in this module.
+_globals_keys = list(six.iterkeys(_globals))
+_globals_values = list(six.itervalues(_globals))
+__all__ = [name for name, method in zip(_globals_keys, _globals_values)
+           if not inspect.isclass(method)]
