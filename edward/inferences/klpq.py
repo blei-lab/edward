@@ -11,12 +11,14 @@ from edward.util import copy, log_sum_exp
 
 
 class KLpq(VariationalInference):
-  """A variational inference method that minimizes the Kullback-Leibler
-  divergence from the posterior to the variational model (Cappe et al., 2008)
+  """Variational inference with the KL divergence
 
   .. math::
 
     KL( p(z |x) || q(z) ).
+
+  To perform the optimization, this class uses a technique from
+  adaptive importance sampling (Cappe et al., 2008).
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
@@ -34,36 +36,35 @@ class KLpq(VariationalInference):
     return super(KLpq, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
-    """Build loss function. Its automatic differentiation
-    is a stochastic gradient of
+    """Build loss function
 
     .. math::
       KL( p(z |x) || q(z) )
       =
       E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]
 
-    based on importance sampling.
+    and stochastic gradients based on importance sampling.
 
-    Computed as
+    The loss function can be estimated as
 
     .. math::
       1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
-                (\log p(x, z^b) - \log q(z^b; \lambda) ]
+                         (\log p(x, z^b) - \log q(z^b; \lambda) ],
 
     where
 
     .. math::
-      z^b \sim q(z^b; \lambda)
+      z^b \sim q(z^b; \lambda),
 
-      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda))
+      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda)),
 
-      w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)
+      w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda).
 
-    which gives a gradient
+    This provides a gradient,
 
     .. math::
-      - 1/B \sum_{b=1}^B
-      w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
+      - 1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
+                           \partial_{\lambda} \log q(z^b; \lambda) ].
 
     """
     p_log_prob = [0.0] * self.n_samples

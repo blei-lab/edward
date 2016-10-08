@@ -11,20 +11,14 @@ from edward.util import copy, kl_multivariate_normal
 
 
 class KLqp(VariationalInference):
-  """Variational inference with the KL divergence.
-
-  This class implements a variety of "black-box" variational inference
-  techniques (Ranganath et al., 2014) that minimize
+  """Variational inference with the KL divergence
 
   .. math::
 
     KL( q(z; \lambda) || p(z | x) ).
 
-  This is equivalent to maximizing the objective function (Jordan et al., 1999)
-
-  .. math::
-
-    ELBO =  E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ].
+  This class minimizes the objective by automatically selecting from a
+  variety of black box inference techniques.
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
@@ -61,28 +55,20 @@ class KLqp(VariationalInference):
 
     KLqp supports
 
-    1. score function gradients
-    2. reparameterization gradients
+    1. score function gradients (Paisley et al., 2012)
+    2. reparameterization gradients (Kingma and Welling, 2014)
 
     of the loss function.
 
-    If the variational model is a Gaussian distribution, then part of the
-    loss function can be computed analytically.
-
     If the variational model is a normal distribution and the prior is
-    standard normal, then part of the loss function can be computed
-    analytically following Kingma and Welling (2014),
+    standard normal, then loss function can be written as
 
     .. math::
 
-      E[\log p(x | z) + KL],
+      -E_{[\log p(x | z)] + KL( q(z; \lambda) || p(z) ),
 
-    where the KL term is computed analytically.
-
-    Returns
-    -------
-    result :
-      an appropriately selected loss function form
+    where the KL term is computed analytically (Kingma and Welling,
+    2014).
     """
     qz_is_normal = all([isinstance(rv, Normal) for
                        rv in six.itervalues(self.latent_vars)])
@@ -116,9 +102,13 @@ MFVI = KLqp  # deprecated synonym
 
 
 class ReparameterizationKLqp(VariationalInference):
-  """Variational inference with the KL divergence.
+  """Variational inference with the KL divergence
 
-  This class minimizes the KL divergence using the reparameterization
+  .. math::
+
+    KL( q(z; \lambda) || p(z | x) ).
+
+  This class minimizes the objective using the reparameterization
   gradient.
   """
   def __init__(self, *args, **kwargs):
@@ -141,9 +131,13 @@ class ReparameterizationKLqp(VariationalInference):
 
 
 class ReparameterizationKLKLqp(VariationalInference):
-  """Variational inference with the KL divergence.
+  """Variational inference with the KL divergence
 
-  This class minimizes the KL divergence using the reparameterization
+  .. math::
+
+    KL( q(z; \lambda) || p(z | x) ).
+
+  This class minimizes the objective using the reparameterization
   gradient and an analytic KL term.
   """
   def __init__(self, *args, **kwargs):
@@ -166,9 +160,13 @@ class ReparameterizationKLKLqp(VariationalInference):
 
 
 class ReparameterizationEntropyKLqp(VariationalInference):
-  """Variational inference with the KL divergence.
+  """Variational inference with the KL divergence
 
-  This class minimizes the KL divergence using the reparameterization
+  .. math::
+
+    KL( q(z; \lambda) || p(z | x) ).
+
+  This class minimizes the objective using the reparameterization
   gradient and an analytic entropy term.
   """
   def __init__(self, *args, **kwargs):
@@ -192,9 +190,13 @@ class ReparameterizationEntropyKLqp(VariationalInference):
 
 
 class ScoreKLqp(VariationalInference):
-  """Variational inference with the KL divergence.
+  """Variational inference with the KL divergence
 
-  This class minimizes the KL divergence using the score function
+  .. math::
+
+    KL( q(z; \lambda) || p(z | x) ).
+
+  This class minimizes the objective using the score function
   gradient.
   """
   def __init__(self, *args, **kwargs):
@@ -217,10 +219,14 @@ class ScoreKLqp(VariationalInference):
 
 
 class ScoreKLKLqp(VariationalInference):
-  """Variational inference with the KL divergence.
+  """Variational inference with the KL divergence
 
-  This class minimizes the KL divergence using the score function
-  gradient and an analytic KL term.
+  .. math::
+
+    KL( q(z; \lambda) || p(z | x) ).
+
+  This class minimizes the objective using the score function gradient
+  and an analytic KL term.
   """
   def __init__(self, *args, **kwargs):
     super(ScoreKLKLqp, self).__init__(*args, **kwargs)
@@ -242,10 +248,14 @@ class ScoreKLKLqp(VariationalInference):
 
 
 class ScoreEntropyKLqp(VariationalInference):
-  """Variational inference with the KL divergence.
+  """Variational inference with the KL divergence
 
-  This class minimizes the KL divergence using the score function
-  gradient and an analytic entropy term.
+  .. math::
+
+    KL( q(z; \lambda) || p(z | x) ).
+
+  This class minimizes the objective using the score function gradient
+  and an analytic entropy term.
   """
   def __init__(self, *args, **kwargs):
     super(ScoreEntropyKLqp, self).__init__(*args, **kwargs)
@@ -274,7 +284,7 @@ def build_reparam_loss(inference):
 
     -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
-  based on the reparameterization trick. (Kingma and Welling, 2014)
+  based on the reparameterization trick (Kingma and Welling, 2014).
 
   Computed by sampling from :math:`q(z;\lambda)` and evaluating the
   expectation using Monte Carlo sampling.
@@ -325,7 +335,7 @@ def build_reparam_kl_loss(inference):
     -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
           + KL(q(z; \lambda) || p(z)) )
 
-  based on the reparameterization trick. (Kingma and Welling, 2014)
+  based on the reparameterization trick (Kingma and Welling, 2014).
 
   It assumes the KL is analytic.
 
@@ -383,7 +393,7 @@ def build_reparam_entropy_loss(inference):
     -ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
           + H(q(z; \lambda)) )
 
-  based on the reparameterization trick. (Kingma and Welling, 2014)
+  based on the reparameterization trick (Kingma and Welling, 2014).
 
   It assumes the entropy is analytic.
 
@@ -429,14 +439,8 @@ def build_reparam_entropy_loss(inference):
 
 
 def build_score_loss_and_gradients(inference, var_list):
-  """Build loss function. Its automatic differentiation
-  is a stochastic gradient of
-
-  .. math::
-
-    -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
-
-  based on the score function estimator. (Paisley et al., 2012)
+  """Build loss function and gradients based on the score function
+  estimator (Paisley et al., 2012).
 
   Computed by sampling from :math:`q(z;\lambda)` and evaluating the
   expectation using Monte Carlo sampling.
@@ -486,15 +490,8 @@ def build_score_loss_and_gradients(inference, var_list):
 
 
 def build_score_kl_loss_and_gradients(inference, var_list):
-  """Build loss function. Its automatic differentiation
-  is a stochastic gradient of
-
-  .. math::
-
-    -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
-           + KL(q(z; \lambda) || p(z)) )
-
-  based on the score function estimator. (Paisley et al., 2012)
+  """Build loss function and gradients based on the score function
+  estimator (Paisley et al., 2012).
 
   It assumes the KL is analytic.
 
@@ -552,15 +549,8 @@ def build_score_kl_loss_and_gradients(inference, var_list):
 
 
 def build_score_entropy_loss_and_gradients(inference, var_list):
-  """Build loss function. Its automatic differentiation
-  is a stochastic gradient of
-
-  .. math::
-
-    -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x, z) ]
-          + H(q(z; \lambda)) )
-
-  based on the score function estimator. (Paisley et al., 2012)
+  """Build loss function and gradients based on the score function
+  estimator (Paisley et al., 2012).
 
   It assumes the entropy is analytic.
 
