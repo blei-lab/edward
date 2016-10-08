@@ -2,7 +2,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import inspect
 import numpy as np
+import six
 import tensorflow as tf
 
 from scipy import stats
@@ -251,13 +253,6 @@ class Binom(Distribution):
     return x
 
 
-class Categorical(Distribution):
-  """Categorical distribution.
-  """
-  def __init__(self):
-    super(Categorical, self).__init__(distributions.Categorical)
-
-
 class Chi2(Distribution):
   """:math:`\chi^2` distribution.
   """
@@ -347,14 +342,6 @@ class Dirichlet(Distribution):
     # This only works for rank 3 tensor.
     x = np.rollaxis(np.asarray(x), 1)
     return x
-
-
-class DirichletMultinomial(Distribution):
-  """Dirichlet-Multinomial distribution.
-  """
-  def __init__(self):
-    super(DirichletMultinomial, self).__init__(
-        distributions.DirichletMultinomial)
 
 
 class Exponential(Distribution):
@@ -538,13 +525,6 @@ class InverseGamma(Distribution):
     return x
 
 
-class Laplace(Distribution):
-  """Laplace distribution.
-  """
-  def __init__(self):
-    super(Laplace, self).__init__(distributions.Laplace)
-
-
 class LogNorm(Distribution):
   """LogNormal distribution.
   """
@@ -642,22 +622,6 @@ class Multinomial(Distribution):
     # This only works for rank 3 tensor.
     x = np.rollaxis(np.asarray(x), 1)
     return x
-
-
-class MultivariateNormalDiag(Distribution):
-  """Multivariate Normal (with diagonal covariance) distribution.
-  """
-  def __init__(self):
-    super(MultivariateNormalDiag, self).__init__(
-        distributions.MultivariateNormalDiag)
-
-
-class MultivariateNormalCholesky(Distribution):
-  """Multivariate Normal (with Cholesky factorized covariance)  distribution.
-  """
-  def __init__(self):
-    super(MultivariateNormalCholesky, self).__init__(
-        distributions.MultivariateNormalCholesky)
 
 
 class MultivariateNormalFull(Distribution):
@@ -1032,19 +996,14 @@ class Uniform(Distribution):
 bernoulli = Bernoulli()
 beta = Beta()
 binom = Binom()
-categorical = Categorical()
 chi2 = Chi2()
 dirichlet = Dirichlet()
-dirichlet_multinomial = DirichletMultinomial()
 exponential = Exponential()
 gamma = Gamma()
 geom = Geom()
 inverse_gamma = InverseGamma()
-laplace = Laplace()
 lognorm = LogNorm()
 multinomial = Multinomial()
-multivariate_normal_diag = MultivariateNormalDiag()
-multivariate_normal_cholesky = MultivariateNormalCholesky()
 multivariate_normal_full = MultivariateNormalFull()
 nbinom = NBinom()
 normal = Normal()
@@ -1059,3 +1018,33 @@ norm = normal
 invgamma = inverse_gamma
 t = studentt
 multivariate_normal = multivariate_normal_full
+
+# For distributions that we add no manual methods to: automatically
+# generate from classes in tf.contrib.distributions.
+_globals = globals()
+for _name in sorted(dir(distributions)):
+  if _name not in dir():
+    _candidate = getattr(distributions, _name)
+    if (inspect.isclass(_candidate) and
+            _candidate != distributions.Distribution and
+            issubclass(_candidate, distributions.Distribution)):
+
+      class _WrapperDistribution(Distribution):
+        def __init__(self):
+          Distribution.__init__(self, _candidate)
+
+      _WrapperDistribution.__name__ = _name
+
+      # Convert from CamelCase to snake_case.
+      _object_name = _name[0].lower()
+      for character in _name[1:]:
+          if character.isupper():
+              _object_name += '_'
+
+          _object_name += character.lower()
+
+      _globals[_object_name] = _WrapperDistribution()
+
+      del _WrapperDistribution
+      del _object_name
+      del _candidate
