@@ -14,7 +14,7 @@ class MAP(VariationalInference):
   """Maximum a posteriori.
 
   We implement this using a ``PointMass`` variational distribution to
-  solve the following optimization problem
+  solve the optimization problem
 
   .. math::
 
@@ -117,8 +117,7 @@ class MAP(VariationalInference):
       x = self.data
       p_log_prob = self.model_wrapper.log_prob(x, z_mode)
 
-    self.loss = -p_log_prob
-    return self.loss
+    return -p_log_prob
 
 
 class Laplace(MAP):

@@ -33,7 +33,7 @@ class KLpq(VariationalInference):
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
-  def build_loss(self):
+  def build_loss_and_gradients(self, var_list):
     """Build loss function. Its automatic differentiation
     is a stochastic gradient of
 
@@ -105,5 +105,9 @@ class KLpq(VariationalInference):
     log_w_norm = log_w - log_sum_exp(log_w)
     w_norm = tf.exp(log_w_norm)
 
-    self.loss = tf.reduce_mean(w_norm * log_w)
-    return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
+    loss = tf.reduce_mean(w_norm * log_w)
+    gradients = tf.gradients(
+        -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
+        var_list)
+    grads_and_vars = [(grad, var) for grad, var in zip(gradients, var_list)]
+    return loss, grads_and_vars
