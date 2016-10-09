@@ -29,15 +29,13 @@ for _name in sorted(dir(distributions)):
   if (inspect.isclass(_candidate) and
           _candidate != distributions.Distribution and
           issubclass(_candidate, distributions.Distribution)):
-    _local_name = _name
 
     class _WrapperRandomVariable(RandomVariable, _candidate):
       def __init__(self, *args, **kwargs):
         RandomVariable.__init__(self, *args, **kwargs)
 
-    _WrapperRandomVariable.__name__ = _local_name
-    _globals[_local_name] = _WrapperRandomVariable
+    _WrapperRandomVariable.__name__ = _name
+    _globals[_name] = _WrapperRandomVariable
 
     del _WrapperRandomVariable
     del _candidate
-    del _local_name

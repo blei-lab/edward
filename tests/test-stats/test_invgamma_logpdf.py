@@ -12,12 +12,10 @@ from scipy import stats
 class test_invgamma_logpdf_class(tf.test.TestCase):
 
   def _test(self, x, alpha, beta):
-    xtf = tf.constant(x)
     val_true = stats.invgamma.logpdf(x, alpha, scale=beta)
     with self.test_session():
-      self.assertAllClose(invgamma.logpdf(xtf, alpha, beta).eval(), val_true)
-      self.assertAllClose(invgamma.logpdf(xtf, tf.constant(alpha),
-                                          tf.constant(beta)).eval(), val_true)
+      self.assertAllClose(invgamma.logpdf(x, alpha=alpha, beta=beta).eval(),
+                          val_true)
 
   def test_0d(self):
     self._test(0.3, alpha=0.5, beta=1.0)

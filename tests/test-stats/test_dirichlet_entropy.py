@@ -24,9 +24,7 @@ class test_dirichlet_entropy_class(tf.test.TestCase):
   def _test(self, alpha):
     val_true = dirichlet_entropy_vec(alpha)
     with self.test_session():
-      self.assertAllClose(dirichlet.entropy(alpha).eval(), val_true)
-      self.assertAllClose(dirichlet.entropy(tf.convert_to_tensor(alpha)).eval(),
-                          val_true)
+      self.assertAllClose(dirichlet.entropy(alpha=alpha).eval(), val_true)
 
   def test_1d(self):
     self._test(alpha=np.array([0.5, 0.5]))

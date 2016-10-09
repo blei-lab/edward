@@ -38,36 +38,28 @@ def multinomial_logpmf_vec(x, n, p):
                      for i in range(size)])
 
 
-class test_gamma_logpdf_class(tf.test.TestCase):
+class test_multinomial_logpmf_class(tf.test.TestCase):
 
   def _test(self, x, n, p):
-    xtf = tf.constant(x)
     val_true = multinomial_logpmf_vec(x, n, p)
     with self.test_session():
-      self.assertAllClose(multinomial.logpmf(xtf, n, p).eval(), val_true)
-      self.assertAllClose(
-          multinomial.logpmf(xtf, n, tf.constant(p, dtype=tf.float32)).eval(),
-          val_true)
-      self.assertAllClose(multinomial.logpmf(xtf, n, p).eval(), val_true)
-      self.assertAllClose(
-          multinomial.logpmf(xtf, n, tf.constant(p, dtype=tf.float32)).eval(),
-          val_true)
+      self.assertAllClose(multinomial.logpmf(x, n=n, p=p).eval(), val_true)
 
-  def test_int_1d(self):
-    self._test(np.array([0, 1]), 1, np.array([0.5, 0.5]))
-    self._test(np.array([1, 0]), 1, np.array([0.75, 0.25]))
+  def test_1d(self):
+    self._test(np.array([0, 1], dtype=np.float32),
+               np.array(1, dtype=np.float32),
+               np.array([0.5, 0.5], dtype=np.float32))
+    self._test(np.array([1, 0], dtype=np.float32),
+               np.array(1, dtype=np.float32),
+               np.array([0.75, 0.25], dtype=np.float32))
 
-  def test_float_1d(self):
-    self._test(np.array([0.0, 1.0]), 1, np.array([0.5, 0.5]))
-    self._test(np.array([1.0, 0.0]), 1, np.array([0.75, 0.25]))
-
-  def test_int_2d(self):
-    self._test(np.array([[0, 1], [1, 0]]), 1, np.array([0.5, 0.5]))
-    self._test(np.array([[1, 0], [0, 1]]), 1, np.array([0.75, 0.25]))
-
-  def test_float_2d(self):
-    self._test(np.array([[0.0, 1.0], [1.0, 0.0]]), 1, np.array([0.5, 0.5]))
-    self._test(np.array([[1.0, 0.0], [0.0, 1.0]]), 1, np.array([0.75, 0.25]))
+  def test_2d(self):
+    self._test(np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.float32),
+               np.array(1, dtype=np.float32),
+               np.array([0.5, 0.5], dtype=np.float32))
+    self._test(np.array([[1.0, 0.0], [0.0, 1.0]], dtype=np.float32),
+               np.array(1, dtype=np.float32),
+               np.array([0.75, 0.25], dtype=np.float32))
 
 if __name__ == '__main__':
   tf.test.main()
