@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Convolutional variational auto-encoder for binarized MNIST.
 
-The neural networks are written with Pretty Tensor.
+The neural networks are written with TensorFlow Slim.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -9,13 +9,12 @@ from __future__ import print_function
 
 import edward as ed
 import os
-import prettytensor as pt
 import tensorflow as tf
 
-from tf_convolutional_vae_util import deconv2d
 from edward.models import Bernoulli, Normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
+from tensorflow.contrib import slim
 from tensorflow.examples.tutorials.mnist import input_data
 
 
@@ -25,16 +24,17 @@ def generative_network(z):
 
   logits = neural_network(z)
   """
-  with pt.defaults_scope(activation_fn=tf.nn.elu,
-                         batch_normalize=True,
-                         scale_after_normalization=True):
-    return (pt.wrap(z).
-            reshape([N_MINIBATCH, 1, 1, d]).
-            deconv2d(3, 128, edges='VALID').
-            deconv2d(5, 64, edges='VALID').
-            deconv2d(5, 32, stride=2).
-            deconv2d(5, 1, stride=2, activation_fn=None).
-            flatten()).tensor
+  with slim.arg_scope([slim.conv2d_transpose],
+                      activation_fn=tf.nn.elu,
+                      normalizer_fn=slim.batch_norm,
+                      normalizer_params={'scale': True}):
+    net = tf.reshape(z, [N_MINIBATCH, 1, 1, d])
+    net = slim.conv2d_transpose(net, 128, 3, padding='VALID')
+    net = slim.conv2d_transpose(net, 64, 5, padding='VALID')
+    net = slim.conv2d_transpose(net, 32, 5, stride=2)
+    net = slim.conv2d_transpose(net, 1, 5, stride=2, activation_fn=None)
+    net = slim.flatten(net)
+    return net
 
 
 def inference_network(x):
@@ -43,17 +43,17 @@ def inference_network(x):
 
   mu, sigma = neural_network(x)
   """
-  with pt.defaults_scope(activation_fn=tf.nn.elu,
-                         batch_normalize=True,
-                         scale_after_normalization=True):
-    params = (pt.wrap(x).
-              reshape([N_MINIBATCH, 28, 28, 1]).
-              conv2d(5, 32, stride=2).
-              conv2d(5, 64, stride=2).
-              conv2d(5, 128, edges='VALID').
-              dropout(0.9).
-              flatten().
-              fully_connected(d * 2, activation_fn=None)).tensor
+  with slim.arg_scope([slim.conv2d, slim.fully_connected],
+                      activation_fn=tf.nn.elu,
+                      normalizer_fn=slim.batch_norm,
+                      normalizer_params={'scale': True}):
+    net = tf.reshape(x, [N_MINIBATCH, 28, 28, 1])
+    net = slim.conv2d(net, 32, 5, stride=2)
+    net = slim.conv2d(net, 64, 5, stride=2)
+    net = slim.conv2d(net, 128, 5, padding='VALID')
+    net = slim.dropout(net, 0.9)
+    net = slim.flatten(net)
+    params = slim.fully_connected(net, d * 2, activation_fn=None)
 
   mu = params[:, :d]
   sigma = tf.nn.softplus(params[:, d:])
@@ -89,7 +89,7 @@ qz = Normal(mu=mu, sigma=sigma)
 data = {x: x_ph}
 inference = ed.MFVI({z: qz}, data)
 optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
-inference.initialize(optimizer=optimizer, use_prettytensor=True)
+inference.initialize(optimizer=optimizer)
 
 init = tf.initialize_all_variables()
 init.run()

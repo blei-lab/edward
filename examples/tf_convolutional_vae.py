@@ -40,8 +40,6 @@ class NormalBernoulli:
     """
     with pt.defaults_scope(activation_fn=tf.nn.elu,
                            batch_normalize=True,
-                           learned_moments_update_rate=0.0003,
-                           variance_epsilon=0.001,
                            scale_after_normalization=True):
       return (pt.wrap(z).
               reshape([N_MINIBATCH, 1, 1, self.n_vars]).
@@ -82,8 +80,6 @@ def inference_network(x):
   n_vars = 10
   with pt.defaults_scope(activation_fn=tf.nn.elu,
                          batch_normalize=True,
-                         learned_moments_update_rate=0.0003,
-                         variance_epsilon=0.001,
                          scale_after_normalization=True):
     params = (pt.wrap(x).
               reshape([N_MINIBATCH, 28, 28, 1]).
@@ -94,8 +90,6 @@ def inference_network(x):
               flatten().
               fully_connected(n_vars * 2, activation_fn=None)).tensor
 
-  # Return list of vectors where mean[i], stddev[i] are the
-  # parameters of the local variational factor for data point i.
   mu = tf.reshape(params[:, :n_vars], [-1])
   sigma = tf.reshape(tf.nn.softplus(params[:, n_vars:]), [-1])
   return mu, sigma
