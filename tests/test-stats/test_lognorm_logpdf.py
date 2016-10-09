@@ -12,11 +12,9 @@ from scipy import stats
 class test_lognorm_logpdf_class(tf.test.TestCase):
 
   def _test(self, x, s):
-    xtf = tf.constant(x)
     val_true = stats.lognorm.logpdf(x, s)
     with self.test_session():
-      self.assertAllClose(lognorm.logpdf(xtf, s).eval(), val_true)
-      self.assertAllClose(lognorm.logpdf(xtf, tf.constant(s)).eval(), val_true)
+      self.assertAllClose(lognorm.logpdf(x, s=s).eval(), val_true)
 
   def test_0d(self):
     self._test(2.0, s=1)

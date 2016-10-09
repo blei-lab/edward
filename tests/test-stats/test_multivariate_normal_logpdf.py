@@ -12,19 +12,10 @@ from scipy import stats
 class test_multivariate_normal_logpdf_class(tf.test.TestCase):
 
   def _test(self, x, mu, sigma):
-    xtf = tf.constant(x)
-    mu_tf = tf.convert_to_tensor(mu)
-    sigma_tf = tf.convert_to_tensor(sigma)
     val_true = stats.multivariate_normal.logpdf(x, mu, sigma)
     with self.test_session():
       self.assertAllClose(
-          multivariate_normal.logpdf(xtf, mu, sigma).eval(), val_true)
-      self.assertAllClose(
-          multivariate_normal.logpdf(xtf, mu_tf, sigma).eval(), val_true)
-      self.assertAllClose(
-          multivariate_normal.logpdf(xtf, mu, sigma_tf).eval(), val_true)
-      self.assertAllClose(
-          multivariate_normal.logpdf(xtf, mu_tf, sigma_tf).eval(), val_true)
+          multivariate_normal.logpdf(x, mu=mu, sigma=sigma).eval(), val_true)
 
   def test_1d(self):
     x = np.array([0.0, 0.0])

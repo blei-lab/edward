@@ -23,10 +23,7 @@ class test_gamma_entropy_class(tf.test.TestCase):
   def _test(self, alpha, beta):
     val_true = gamma_entropy_vec(alpha, scale=1.0 / beta)
     with self.test_session():
-      self.assertAllClose(gamma.entropy(alpha, beta).eval(), val_true,
-                          atol=1e-4)
-      self.assertAllClose(gamma.entropy(tf.constant(alpha),
-                                        tf.constant(beta)).eval(),
+      self.assertAllClose(gamma.entropy(alpha=alpha, beta=beta).eval(),
                           val_true, atol=1e-4)
 
   def test_0d(self):

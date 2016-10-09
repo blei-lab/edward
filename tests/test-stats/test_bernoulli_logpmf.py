@@ -12,12 +12,9 @@ from scipy import stats
 class test_bernoulli_logpmf_class(tf.test.TestCase):
 
   def _test(self, x, p):
-    xtf = tf.constant(x)
     val_true = stats.bernoulli.logpmf(x, p=p)
     with self.test_session():
-      self.assertAllClose(bernoulli.logpmf(xtf, p=p).eval(), val_true)
-      self.assertAllClose(bernoulli.logpmf(xtf, p=tf.constant(p)).eval(),
-                          val_true)
+      self.assertAllClose(bernoulli.logpmf(x, p=p).eval(), val_true)
 
   def test_int_0d(self):
     self._test(0, 0.5)

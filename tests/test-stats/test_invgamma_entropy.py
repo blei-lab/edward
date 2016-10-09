@@ -22,11 +22,8 @@ class test_invgamma_entropy_class(tf.test.TestCase):
   def _test(self, alpha, beta):
     val_true = invgamma_entropy_vec(alpha, scale=beta)
     with self.test_session():
-      self.assertAllClose(invgamma.entropy(alpha, beta).eval(), val_true,
-                          atol=1e-4)
-      self.assertAllClose(invgamma.entropy(tf.constant(alpha),
-                                           tf.constant(beta)).eval(), val_true,
-                          atol=1e-4)
+      self.assertAllClose(invgamma.entropy(alpha=alpha, beta=beta).eval(),
+                          val_true, atol=1e-4)
 
   def test_0d(self):
     self._test(alpha=1.0, beta=1.0)

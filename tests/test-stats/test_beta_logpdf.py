@@ -12,12 +12,9 @@ from scipy import stats
 class test_beta_logpdf_class(tf.test.TestCase):
 
   def _test(self, x, a, b):
-    xtf = tf.constant(x)
     val_true = stats.beta.logpdf(x, a, b)
     with self.test_session():
-      self.assertAllClose(beta.logpdf(xtf, a, b).eval(), val_true)
-      self.assertAllClose(beta.logpdf(xtf, tf.constant(a),
-                                      tf.constant(b)).eval(), val_true)
+      self.assertAllClose(beta.logpdf(x, a=a, b=b).eval(), val_true)
 
   def test_0d(self):
     self._test(0.3, a=0.5, b=0.5)

@@ -16,7 +16,7 @@ class test_multivariate_normal_entropy_class(tf.test.TestCase):
     mu = tf.constant([0.0, 0.0])
     with self.test_session():
       self.assertAllClose(
-          multivariate_normal_diag.entropy(mu, tf.constant(diag)).eval(),
+          multivariate_normal_diag.entropy(mu=mu, diag_stdev=diag).eval(),
           stats.multivariate_normal.entropy(cov=np.diag(diag)))
 
   def test_2d_diag(self):
@@ -24,7 +24,7 @@ class test_multivariate_normal_entropy_class(tf.test.TestCase):
     mu = tf.constant([0.0, 0.0])
     with self.test_session():
       self.assertAllClose(
-          multivariate_normal_full.entropy(mu, tf.constant(cm)).eval(),
+          multivariate_normal_full.entropy(mu=mu, sigma=cm).eval(),
           stats.multivariate_normal.entropy(cov=np.array(cm)))
 
   def test_2d_full(self):
@@ -32,7 +32,7 @@ class test_multivariate_normal_entropy_class(tf.test.TestCase):
     mu = tf.constant([0.0, 0.0])
     with self.test_session():
       self.assertAllClose(
-          multivariate_normal_full.entropy(mu, tf.constant(cm)).eval(),
+          multivariate_normal_full.entropy(mu=mu, sigma=cm).eval(),
           stats.multivariate_normal.entropy(cov=np.array(cm)))
 
 if __name__ == '__main__':
