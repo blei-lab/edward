@@ -3,63 +3,54 @@
 \subsection{Tutorials}
 
 Edward provides a testbed for rapid experimentation and research with
-probabilistic models. Here we demonstrate examples from each of the
-three components defining Edward: \textbf{Models}, \textbf{Inference},
-and \textbf{Criticism}.
-In the \textbf{End-to-End} section, we demonstrate examples that
-sweep through the whole process.
-
-\subsubsection{Models}
+probabilistic models. Here we show how this process is applied to
+capture complex machine learning tasks.
 
 \begin{itemize}
-\item \href{model}{Probability models}
-%\item \href{posteriors}{Tractable posteriors}
-%\item \href{conjugate}{Conjugate models}
-\item \href{bayesian-linear-regression}{Bayesian linear regression}
-%\item \href{hierarchical-logistic}{Hierarchical logistic regression}
-\item \href{mixture-gaussian}{Mixture of Gaussians}
-\item \href{gp-classification}{Gaussian process classification}
-\item \href{bayesian-neural-network}{Bayesian neural network}
-%\item \href{mixture-density}{Mixture density network}
-\item \href{decoder}{Probabilistic decoder}
-\end{itemize}
-
-\subsubsection{Inference}
-
-\begin{itemize}
-  \item \href{inference}{Inference of probability models}
-  \item \href{variational-inference}{Variational inference}
-  \item \href{klqp}{$\text{KL}(q\|p)$ minimization}
-  \begin{itemize}
-    \item \href{klqp-score}{Score function gradient}
-    \item \href{klqp-reparam}{Reparameterization gradient}
-  \end{itemize}
-  \item \href{klpq}{$\text{KL}(p\|q)$ minimization}
-  \item \href{map}{Maximum a posteriori estimation}
-  \begin{itemize}
-    \item \href{map-laplace}{Laplace approximation}
-  \end{itemize}
-  \item \href{inference-networks}{Inference networks}
-  %\item \href{iwvi}{Importance-weighted variational inference}
-  %\item \href{#}{Variational expectation maximization}
-\end{itemize}
-
-\subsubsection{Criticism}
-
-\begin{itemize}
-  \item \href{point-evaluation}{Point-based evaluations}
-  %\item \href{prior-pc}{Prior predictive checks}
-  \item \href{ppc}{Posterior predictive checks}
-\end{itemize}
-
-\subsubsection{End-to-end}
-
-\begin{itemize}
-  \item \href{supervised-regression}{Supervised learning (Regression)}
-  \item \href{supervised-classification}{Supervised learning (Classification)}
-  \item \href{unsupervised}{Unsupervised learning}
-  \item \href{gan}{Generative adversarial networks}
+  %\item \href{conjugate}{Conjugate models}
+  \item \href{supervised-regression}{Supervised learning with Bayesian linear regression}
+  %\item \href{hierarchical-logistic}{Hierarchical logistic regression}
+  \item \href{supervised-classification}{Supervised learning with Gaussian process classification}
+  \item \href{unsupervised}{Unsupervised learning with mixture models}
   \item \href{latent-space-models}{Latent space models for neural data}
   \item \href{mixture-density-network}{Mixture density networks}
-  %\item \href{vae}{Variational auto-encoder}
+  \item \href{vae}{Variational auto-encoder} [todo]
+  \item \href{gan}{Generative adversarial networks}
+  \item \href{decoder}{Probabilistic decoder} [todo]
+  \item \href{inference-networks}{Inference networks} [todo]
+  \item \href{bayesian-neural-network}{Bayesian neural network} [todo]
 \end{itemize}
+
+For background, see
+\begin{itemize}
+  \item \href{model}{Probabilistic models}
+  \item \href{inference}{Bayesian inference}
+  \begin{itemize}
+   \item \href{variational-inference}{Variational inference}
+   \item \href{klqp}{$\text{KL}(q\|p)$ minimization}
+   \begin{itemize}
+     \item \href{klqp-score}{Score function gradient} [todo: remove implementation; otherwise expand on it and move it above]
+     \item \href{klqp-reparam}{Reparameterization gradient} [todo: remove implementation; otherwise expand on it and move it above]
+   \end{itemize}
+   \item \href{klpq}{$\text{KL}(p\|q)$ minimization} [todo: remove implementation; otherwise expand on it and move it above]
+   \item \href{map}{Maximum a posteriori estimation} [todo: remove implementation; otherwise expand on it and move it above]
+   \begin{itemize}
+     \item \href{map-laplace}{Laplace approximation} [todo: remove implementation; otherwise expand on it and move it above]
+   \end{itemize}
+   %\item \href{iwvi}{Importance-weighted variational inference}
+   %\item \href{#}{Variational expectation maximization}
+  \end{itemize}
+  \item \href{criticism}{Model criticism}
+\end{itemize}
+
+% Here we show how this process is applied to solve real-world applications.
+% \begin{itemize}
+%   \item \href{c-elegans}{Analyzing connectivity patterns in neural data}
+%   \item \href{new-york-times}{Discovering topics in New York Times articles}
+%   \item \href{genome}{Ancestral populations from human genomes}
+%   \item \href{taxi}{Analyzing taxi rides from the city of Porto}
+%   \item \href{basketball}{A spatial analysis of professional basketball}
+%   \item \href{mnist}{Building a generative model of MNIST digits}
+%   \item \href{text8}{Building a language model for text from Wikipedia}
+%   \item \href{eight-schools}{Meta-analysis of parallel experiments in 8 schools}
+% \end{itemize}
