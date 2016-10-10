@@ -118,7 +118,7 @@ class Inference(object):
           # If key is a placeholder, then don't modify its fed value.
           self.data[key] = value
 
-  def run(self, logdir=None, variables=None, use_coordinator=True,
+  def run(self, logdir=None, variables=None, use_coordinator=True, print_progress=True,
           *args, **kwargs):
     """A simple wrapper to run inference.
 
@@ -149,6 +149,8 @@ class Inference(object):
       TensorFlow coordinator. For example, queue runners are necessary
       for batch training with the ``n_minibatch`` argument or with
       file readers.
+    print_progress: bool, optional
+      Whether to print the print the progress report or not. Default is true.
     *args
       Passed into ``initialize``.
     **kwargs
@@ -179,7 +181,8 @@ class Inference(object):
 
     for _ in range(self.n_iter):
       info_dict = self.update()
-      self.print_progress(info_dict)
+      if print_progress:
+        self.print_progress(info_dict)
 
     self.finalize()
 
