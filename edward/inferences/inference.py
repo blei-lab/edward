@@ -118,8 +118,8 @@ class Inference(object):
           # If key is a placeholder, then don't modify its fed value.
           self.data[key] = value
 
-  def run(self, logdir=None, variables=None, use_coordinator=True, print_progress=True,
-          *args, **kwargs):
+  def run(self, logdir=None, variables=None, use_coordinator=True,
+          print_progress=True, *args, **kwargs):
     """A simple wrapper to run inference.
 
     1. Initialize algorithm via ``initialize``.
