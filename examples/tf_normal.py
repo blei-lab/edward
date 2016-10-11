@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-"""
-Probability model
-  Posterior: (1-dimensional) Normal
-Variational model
-  Likelihood: Mean-field Normal
+"""Normal posterior.
 """
 from __future__ import absolute_import
 from __future__ import division

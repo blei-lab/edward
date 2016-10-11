@@ -12,12 +12,9 @@ from scipy import stats
 class test_nbinom_logpmf_class(tf.test.TestCase):
 
   def _test(self, x, n, p):
-    xtf = tf.constant(x)
     val_true = stats.nbinom.logpmf(x, n, p)
     with self.test_session():
-      self.assertAllClose(nbinom.logpmf(xtf, n, p).eval(), val_true)
-      self.assertAllClose(nbinom.logpmf(xtf, tf.constant(n),
-                                        tf.constant(p)).eval(), val_true)
+      self.assertAllClose(nbinom.logpmf(x, n=n, p=p).eval(), val_true)
 
   def test_int_0d(self):
     self._test(1, 5, 0.5)

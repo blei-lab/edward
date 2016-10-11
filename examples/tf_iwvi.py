@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""
-A simple demonstration of how to implement new inference algorithms in
-Edward. Here we implement importance-weighted variational inference.
+"""A simple demonstration of how to implement new inference algorithms
+in Edward. Here we implement importance-weighted variational
+inference.
 """
 from __future__ import absolute_import
 from __future__ import division

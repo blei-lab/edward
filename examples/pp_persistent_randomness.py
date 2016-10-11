@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Persistent randomness.
+"""Persistent randomness.
 
 Our language defines random variables. They enable memoization in the
 sense that the generative process of any values which depend on the

@@ -12,11 +12,9 @@ from scipy import stats
 class test_chi2_logpdf_class(tf.test.TestCase):
 
   def _test(self, x, df):
-    xtf = tf.constant(x)
     val_true = stats.chi2.logpdf(x, df)
     with self.test_session():
-      self.assertAllClose(chi2.logpdf(xtf, df).eval(), val_true)
-      self.assertAllClose(chi2.logpdf(xtf, tf.constant(df)).eval(), val_true)
+      self.assertAllClose(chi2.logpdf(x, df=df).eval(), val_true)
 
   def test_0d(self):
     self._test(0.2, df=2)

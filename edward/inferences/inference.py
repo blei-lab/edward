@@ -164,7 +164,13 @@ class Inference(object):
     else:
       init = tf.initialize_variables(variables)
 
-    init.run()
+    # Feed placeholders in case initialization depends on them.
+    feed_dict = {}
+    for key, value in six.iteritems(self.data):
+      if isinstance(key, tf.Tensor):
+        feed_dict[key] = value
+
+    init.run(feed_dict)
 
     if use_coordinator:
       # Start input enqueue threads.

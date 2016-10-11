@@ -102,9 +102,9 @@ class VariationalInference(Inference):
       raise TypeError()
 
     loss = self.build_loss()
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                 scope=scope)
     if not use_prettytensor:
-      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                   scope=scope)
       self.train = optimizer.minimize(loss, global_step=global_step,
                                       var_list=var_list)
     else:
@@ -112,8 +112,9 @@ class VariationalInference(Inference):
         raise NotImplementedError("PrettyTensor optimizer does not accept "
                                   "a variable scope.")
 
-      # Note PrettyTensor cannot use global_step.
-      self.train = pt.apply_optimizer(optimizer, losses=[loss])
+      self.train = pt.apply_optimizer(optimizer, losses=[loss],
+                                      global_step=global_step,
+                                      var_list=var_list)
 
   def update(self, feed_dict=None):
     """Run one iteration of optimizer for variational inference.

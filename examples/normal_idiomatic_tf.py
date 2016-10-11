@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-"""
-This demonstrates a more idiomatic TensorFlow example, which provides
-more fine-grained experimentation. We do not call inference.run().
-Alternatively, we directly access the TensorFlow session and
-manipulate various objects during inference.
+"""This demonstrates a more idiomatic TensorFlow example, which
+provides more fine-grained experimentation. We do not call
+inference.run().  Alternatively, we directly access the TensorFlow
+session and manipulate various objects during inference.
 """
 from __future__ import absolute_import
 from __future__ import division

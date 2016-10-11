@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-A simple coin flipping example. Inspired by Stan's toy example.
+"""A simple coin flipping example. Inspired by Stan's toy example.
 """
 from __future__ import absolute_import
 from __future__ import division

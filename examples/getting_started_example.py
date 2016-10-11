@@ -1,15 +1,8 @@
 #!/usr/bin/env python
-"""
-Bayesian neural network using mean-field variational inference.
-(see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016))
-Inspired by autograd's Bayesian neural network example.
+"""Bayesian neural network using mean-field variational inference
+(see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016)).
 
-Probability model:
-  Bayesian neural network
-  Prior: Normal
-  Likelihood: Normal with mean parameterized by fully connected NN
-Variational model
-  Likelihood: Mean-field Normal
+Inspired by autograd's Bayesian neural network example.
 """
 from __future__ import absolute_import
 from __future__ import division

@@ -1,13 +1,7 @@
 #!/usr/bin/env python
-"""
-A simple coin flipping example. The model is written in PyMC3.
-Inspired by Stan's toy example.
+"""A simple coin flipping example. Inspired by Stan's toy example.
 
-Probability model
-  Prior: Beta
-  Likelihood: Bernoulli
-Variational model
-  Likelihood: Mean-field Beta
+The model is written in PyMC3.
 """
 from __future__ import absolute_import
 from __future__ import division

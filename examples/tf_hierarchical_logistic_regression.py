@@ -1,13 +1,5 @@
 #!/usr/bin/env python
-"""
-Hierarchical logistic regression using mean-field variational inference.
-
-Probability model:
-  Hierarchical logistic regression
-  Prior: Normal
-  Likelihood: Bernoulli-Logit
-Variational model
-  Likelihood: Mean-field Normal
+"""Hierarchical logistic regression using mean-field variational inference.
 """
 from __future__ import absolute_import
 from __future__ import division

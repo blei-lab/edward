@@ -12,11 +12,9 @@ from scipy import stats
 class test_geom_logpmf_class(tf.test.TestCase):
 
   def _test(self, x, p):
-    xtf = tf.constant(x)
     val_true = stats.geom.logpmf(x, p)
     with self.test_session():
-      self.assertAllClose(geom.logpmf(xtf, p).eval(), val_true)
-      self.assertAllClose(geom.logpmf(xtf, tf.constant(p)).eval(), val_true)
+      self.assertAllClose(geom.logpmf(x, p=p).eval(), val_true)
 
   def test_int_0d(self):
     self._test(1, 0.5)

@@ -23,9 +23,7 @@ class test_uniform_entropy_class(tf.test.TestCase):
   def _test(self, a, b):
     val_true = uniform_entropy_vec(a, b - a)
     with self.test_session():
-      self.assertAllClose(uniform.entropy(a, b).eval(), val_true)
-      self.assertAllClose(uniform.entropy(tf.constant(a),
-                                          tf.constant(b)).eval(), val_true)
+      self.assertAllClose(uniform.entropy(a=a, b=b).eval(), val_true)
 
   def test_0d(self):
     self._test(a=1.0, b=2.0)

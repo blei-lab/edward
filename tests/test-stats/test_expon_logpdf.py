@@ -12,11 +12,9 @@ from scipy import stats
 class test_expon_logpdf_class(tf.test.TestCase):
 
   def _test(self, x, lam):
-    xtf = tf.constant(x)
     val_true = stats.expon.logpdf(x, scale=1.0 / lam)
     with self.test_session():
-      self.assertAllClose(expon.logpdf(xtf, lam=tf.constant(lam)).eval(),
-                          val_true)
+      self.assertAllClose(expon.logpdf(x, lam=lam).eval(), val_true)
 
   def test_0d(self):
     self._test(0.3, lam=1.0)

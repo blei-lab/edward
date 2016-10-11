@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Latent space model for network data.
-(Hoff et al., 2002)
+"""Latent space model for network data (Hoff et al., 2002).
 """
 from __future__ import absolute_import
 from __future__ import division

@@ -17,9 +17,8 @@ from sklearn.cross_validation import train_test_split
 
 
 def plot_normal_mix(pis, mus, sigmas, ax, label='', comp=True):
-  """
-  Plots the mixture of Normal models to axis=ax
-  comp=True plots all components of mixture model
+  """Plots the mixture of Normal models to axis=ax comp=True plots all
+  components of mixture model
   """
   x = np.linspace(-10.5, 10.5, 250)
   final = np.zeros_like(x)
@@ -33,9 +32,9 @@ def plot_normal_mix(pis, mus, sigmas, ax, label='', comp=True):
 
 
 def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
-  """
-  Draws samples from mixture model.
-  Returns 2 d array with input X and sample from prediction of Mixture Model
+  """Draws samples from mixture model.
+
+  Returns 2 d array with input X and sample from prediction of mixture model.
   """
   samples = np.zeros((amount, 2))
   n_mix = len(pred_weights[0])
@@ -86,14 +85,18 @@ class MixtureDensityNetwork:
     # parameters are baked into how we specify the neural networks.
     X, y = xs['X'], xs['y']
     self.neural_network(X)
-    result = self.pi * tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = self.pi * norm.prob(y, self.mus, self.sigmas)
     result = tf.log(tf.reduce_sum(result, 1))
     return tf.reduce_sum(result)
 
 
 ed.set_seed(42)
 
-X_train, X_test, y_train, y_test = build_toy_dataset(N=40000)
+N = 40000  # num data points
+D = 1  # num features
+
+# DATA
+X_train, X_test, y_train, y_test = build_toy_dataset(N)
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
@@ -101,12 +104,14 @@ print("Size of output in test data: {:s}".format(y_test.shape))
 sns.regplot(X_train, y_train, fit_reg=False)
 plt.show()
 
-X = ed.placeholder(tf.float32, shape=(None, 1))
-y = ed.placeholder(tf.float32, shape=(None, 1))
+X = ed.placeholder(tf.float32, [None, D])
+y = ed.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}
 
+# MODEL
 model = MixtureDensityNetwork(20)
 
+# INFERENCE
 inference = ed.MAP([], data, model)
 sess = ed.get_session()  # Start TF session
 K.set_session(sess)  # Pass session info to Keras
@@ -123,12 +128,13 @@ for i in range(NEPOCH):
   train_loss[i] = info_dict['loss']
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
 
+# CRITICISM
 pred_weights, pred_means, pred_std = \
     sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
 
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), test_loss / len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), train_loss / len(X_train), label='Train')
+plt.plot(np.arange(NEPOCH), -test_loss / len(X_test), label='Test')
+plt.plot(np.arange(NEPOCH), -train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)

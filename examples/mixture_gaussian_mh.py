@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Mixture of Gaussians.
+"""Mixture of Gaussians.
 
 Perform inference with Metropolis-Hastings. It utterly fails. This is
 because we are proposing a sample in a high-dimensional space. The
