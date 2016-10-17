@@ -152,6 +152,7 @@
   \big)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="/tutorials/klqp-score">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
 <h3 id="implementation">Implementation</h3>
+<p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
 <p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the reparameterization gradient in the class <code>MFVI</code> (mean-field variational inference). It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
   def __init__(self, *args, **kwargs):

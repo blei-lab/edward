@@ -103,6 +103,7 @@
   &amp;=
   \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
 <h3 id="implementation">Implementation</h3>
+<p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
 <p>Edward implements the Laplace approximation by extending the class built for <a href="/tutorials/map">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
 <pre class="python" language="Python"><code>class Laplace(MAP):
   def __init__(self, model, data=None, params=None):

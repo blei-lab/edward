@@ -87,7 +87,7 @@
 </div>
 <div class="nine columns">
 <h2 id="mixture-density-networks">Mixture density networks</h2>
-<p>We explore mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span>. We demonstrate their implementation in Edward, leveraging Keras and TensorFlow.</p>
+<p>We explore mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span>. We demonstrate their implementation in Edward, leveraging Keras to construct neural networks.</p>
 <p>If you are not familiar with MDNs have a look at the <a href="http://cbonnett.github.io/MDN.html">following blog post</a> or at original <a href="http://research.microsoft.com/en-us/um/people/cmbishop/downloads/Bishop-NCRG-94-004.pdf">paper</a> by Bishop. Note you have to manually <a href="https://keras.io/backend/">configure Keras</a> to work with TensorFlow. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">blog post</a> by Otoro, where he explains MDNs. This is an inverse problem: for every input <span class="math inline">\(X\)</span> there are multiple outputs <span class="math inline">\(y\)</span>.</p>
@@ -97,7 +97,10 @@
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42)
 
-X_train, X_test, y_train, y_test = build_toy_dataset(N=6000)
+N = 40000  # num data points
+D = 1  # num features
+
+X_train, X_test, y_train, y_test = build_toy_dataset(N)
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
@@ -110,8 +113,8 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 ## Size of output in test data: (36000, 1)</code></pre>
 <p><img alt="image" src="/images/mdn-fig0.png" width="700"/></p>
 <p>We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is <a href="http://edwardlib.org/api/data">one of many ways</a> to train models with data in Edward.</p>
-<pre class="python" language="Python"><code>X = ed.placeholder(tf.float32, shape=(None, 1))
-y = ed.placeholder(tf.float32, shape=(None, 1))
+<pre class="python" language="Python"><code>X = ed.placeholder(tf.float32, [None, D])
+y = ed.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}</code></pre>
 <h3 id="model">Model</h3>
 <p>We define a class that can be used to construct MDNs. Here we use a mixture of normal distributions parameterized by a feedforward network. In other words, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network.</p>
@@ -144,11 +147,11 @@ data = {'X': X, 'y': y}</code></pre>
     # parameters are baked into how we specify the neural networks.
     X, y = xs['X'], xs['y']
     self.neural_network(X)
-    result = self.pi * tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = self.pi * norm.prob(y, self.mus, self.sigmas)
     result = tf.log(tf.reduce_sum(result, 1))
     return tf.reduce_sum(result)</code></pre>
-<p>We instantiate the mixture density network with 10 mixtures.</p>
-<pre class="python" language="Python"><code>model = MixtureDensityNetwork(10)</code></pre>
+<p>We instantiate the mixture density network with 20 mixtures.</p>
+<pre class="python" language="Python"><code>model = MixtureDensityNetwork(20)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="/tutorials/map">MAP estimation in Edward</a>.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP([], data, model)</code></pre>
@@ -159,7 +162,7 @@ inference.initialize()
 
 init = tf.initialize_all_variables()
 init.run()</code></pre>
-<p>Now we train the MDN by calling <code>inference.train</code>, which runs one step of inference. The quantity <code>inference.loss</code> is the loss function (negative log-likelihood) at that step of inference. We also report the loss function on test data by calling <code>inference.loss</code> and where we feed test data to the TensorFlow placeholders instead of training data. We keep track of the losses under <code>train_loss</code> and <code>test_loss</code>.</p>
+<p>Now we train the MDN by calling <code>inference.update()</code>, passing in the data. The quantity <code>inference.loss</code> is the loss function (negative log-likelihood) at that step of inference. We also report the loss function on test data by calling <code>inference.loss</code> and where we feed test data to the TensorFlow placeholders instead of training data. We keep track of the losses under <code>train_loss</code> and <code>test_loss</code>.</p>
 <pre class="python" language="Python"><code>NEPOCH = 1000
 train_loss = np.zeros(NEPOCH)
 test_loss = np.zeros(NEPOCH)
@@ -178,8 +181,8 @@ for i in range(NEPOCH):
                                               feed_dict={X: X_test})</code></pre>
 <p>Let’s plot the log-likelihood of the training and test data as functions of the training epoch. The quantity <code>inference.loss</code> is the total log-likelihood, not the loss per data point. In the plotting routine we get the latter by dividing by the size of the train and test data respectively.</p>
 <pre class="python" language="Python"><code>fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), test_loss/len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), train_loss/len(X_train), label='Train')
+plt.plot(np.arange(NEPOCH), -test_loss / len(X_test), label='Test')
+plt.plot(np.arange(NEPOCH), -train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)</code></pre>

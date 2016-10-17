@@ -290,7 +290,7 @@ to tease apart and thus distribute their computation).
 
 This outlines the current spec for all methods in the model object.
 It includes all modeling languages, where certain methods are
-implemented by wrapping around other methods. For example, by a Python
+implemented by wrapping around other methods. For example, a Python
 model builds a \texttt{_py_log_prob()} method and inherits from
 \texttt{PythonModel}; \texttt{PythonModel} implements \texttt{log_prob()} by wrapping
 around \texttt{_py_log_prob()} as a TensorFlow operation.
@@ -305,8 +305,8 @@ class Model:
     ----------
     xs : dict of str to tf.Tensor
       Data dictionary. Each key names a data structure used in the
-      model (str), and its value is the corresponding corresponding
-      realization (tf.Tensor).
+      model (str), and its value is the corresponding realization
+      (tf.Tensor).
     zs : dict of str to tf.Tensor
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding
@@ -327,8 +327,8 @@ class Model:
     ----------
     xs : dict of str to tf.Tensor
       Data dictionary. Each key names a data structure used in the
-      model (str), and its value is the corresponding corresponding
-      realization (tf.Tensor).
+      model (str), and its value is the corresponding realization
+      (tf.Tensor).
     zs : dict of str to tf.Tensor
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding
@@ -348,8 +348,8 @@ class Model:
     ----------
     xs : dict of str to tf.Tensor
       Data dictionary. Each key names a data structure used in the
-      model (str), and its value is the corresponding corresponding
-      realization (tf.Tensor).
+      model (str), and its value is the corresponding realization
+      (tf.Tensor).
     zs : dict of str to tf.Tensor
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding

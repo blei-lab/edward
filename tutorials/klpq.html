@@ -180,6 +180,7 @@
   \nabla_\lambda\; \log q(z_s\;;\;\lambda).\end{aligned}\]</span> The objective <span class="math inline">\(\text{KL}(p\|q)\)</span> can be calculated in a similar fashion. The only new ingredient for its gradient is the score function <span class="math inline">\(\nabla_\lambda \log q(z\;;\;\lambda)\)</span>. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
 <p>Adaptive importance sampling follows this gradient to a local optimum using stochastic optimization. It is adaptive because the variational distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> iteratively gets closer to the posterior <span class="math inline">\(p(z \mid x)\)</span>.</p>
 <h3 id="implementation">Implementation</h3>
+<p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
 <p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the importance sampling gradient in the class <code>KLpq</code>. It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
 <pre class="python" language="Python"><code>class KLpq(VariationalInference):
   def __init__(self, *args, **kwargs):

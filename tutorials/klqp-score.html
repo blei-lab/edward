@@ -150,6 +150,7 @@
   \nabla_\lambda \log q(z_s\;;\;\lambda)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO.</p>
 <h3 id="implementation">Implementation</h3>
+<p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
 <p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the score function gradient in the class <code>MFVI</code> (mean-field variational inference). It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
 <pre class="python" language="Python"><code>class MFVI(VariationalInference):
   def __init__(self, *args, **kwargs):

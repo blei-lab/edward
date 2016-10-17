@@ -235,7 +235,7 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/pymc3_beta_bernoulli.py">toy script</a> that uses this model. PyMC3 can be used to define models with both differentiable latent variables and non-differentiable (e.g., discrete) latent variables. <code>PyMC3Model</code> objects contain no structure about the model besides how to calculate its joint density.</p>
 <p>For modeling convenience, we recommend using the modeling language that you are most familiar with. For efficiency, we recommend using TensorFlow, as Edward uses TensorFlow as the computational backend. Internally, other languages are wrapped in TensorFlow so their computation represents a single node in the graph (making it difficult to tease apart and thus distribute their computation).</p>
 <h3 id="model-wrapper-api">Model Wrapper API</h3>
-<p>This outlines the current spec for all methods in the model object. It includes all modeling languages, where certain methods are implemented by wrapping around other methods. For example, by a Python model builds a <code>_py_log_prob()</code> method and inherits from <code>PythonModel</code>; <code>PythonModel</code> implements <code>log_prob()</code> by wrapping around <code>_py_log_prob()</code> as a TensorFlow operation.</p>
+<p>This outlines the current spec for all methods in the model object. It includes all modeling languages, where certain methods are implemented by wrapping around other methods. For example, a Python model builds a <code>_py_log_prob()</code> method and inherits from <code>PythonModel</code>; <code>PythonModel</code> implements <code>log_prob()</code> by wrapping around <code>_py_log_prob()</code> as a TensorFlow operation.</p>
 <pre class="python" language="Python"><code>class Model:
   def log_prob(self, xs, zs):
     &quot;&quot;&quot;
@@ -245,8 +245,8 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
     ----------
     xs : dict of str to tf.Tensor
       Data dictionary. Each key names a data structure used in the
-      model (str), and its value is the corresponding corresponding
-      realization (tf.Tensor).
+      model (str), and its value is the corresponding realization
+      (tf.Tensor).
     zs : dict of str to tf.Tensor
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding
@@ -267,8 +267,8 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
     ----------
     xs : dict of str to tf.Tensor
       Data dictionary. Each key names a data structure used in the
-      model (str), and its value is the corresponding corresponding
-      realization (tf.Tensor).
+      model (str), and its value is the corresponding realization
+      (tf.Tensor).
     zs : dict of str to tf.Tensor
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding
@@ -288,8 +288,8 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
     ----------
     xs : dict of str to tf.Tensor
       Data dictionary. Each key names a data structure used in the
-      model (str), and its value is the corresponding corresponding
-      realization (tf.Tensor).
+      model (str), and its value is the corresponding realization
+      (tf.Tensor).
     zs : dict of str to tf.Tensor
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding

@@ -3,8 +3,8 @@
 \subsection{Mixture density networks}
 
 We explore mixture density networks (MDN) \citep{bishop1994mixture}. We
-demonstrate their implementation in Edward, leveraging Keras and
-TensorFlow.
+demonstrate their implementation in Edward, leveraging Keras to
+construct neural networks.
 
 If you are not familiar with MDNs have a look at the
 \href{http://cbonnett.github.io/MDN.html}{following blog post} or at
@@ -28,7 +28,10 @@ def build_toy_dataset(N):
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42)
 
-X_train, X_test, y_train, y_test = build_toy_dataset(N=6000)
+N = 40000  # num data points
+D = 1  # num features
+
+X_train, X_test, y_train, y_test = build_toy_dataset(N)
 print("Size of features in training data: {:s}".format(X_train.shape))
 print("Size of output in training data: {:s}".format(y_train.shape))
 print("Size of features in test data: {:s}".format(X_test.shape))
@@ -48,8 +51,8 @@ sns.regplot(X_train, y_train, fit_reg=False)
 We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
 
 \begin{lstlisting}[language=Python]
-X = ed.placeholder(tf.float32, shape=(None, 1))
-y = ed.placeholder(tf.float32, shape=(None, 1))
+X = ed.placeholder(tf.float32, [None, D])
+y = ed.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}
 \end{lstlisting}
 
@@ -92,15 +95,15 @@ class MixtureDensityNetwork:
     # parameters are baked into how we specify the neural networks.
     X, y = xs['X'], xs['y']
     self.neural_network(X)
-    result = self.pi * tf.exp(norm.logpdf(y, self.mus, self.sigmas))
+    result = self.pi * norm.prob(y, self.mus, self.sigmas)
     result = tf.log(tf.reduce_sum(result, 1))
     return tf.reduce_sum(result)
 \end{lstlisting}
 
-We instantiate the mixture density network with 10 mixtures.
+We instantiate the mixture density network with 20 mixtures.
 
 \begin{lstlisting}[language=Python]
-model = MixtureDensityNetwork(10)
+model = MixtureDensityNetwork(20)
 \end{lstlisting}
 
 \subsubsection{Inference}
@@ -128,9 +131,9 @@ init = tf.initialize_all_variables()
 init.run()
 \end{lstlisting}
 
-Now we train the MDN by calling \texttt{inference.train}, which runs
-one step of inference. The quantity \texttt{inference.loss} is the
-loss function (negative log-likelihood) at that step of inference.  We
+Now we train the MDN by calling \texttt{inference.update()}, passing
+in the data. The quantity \texttt{inference.loss} is the
+loss function (negative log-likelihood) at that step of inference. We
 also report the loss function on test data by calling
 \texttt{inference.loss} and where we feed test data to the TensorFlow
 placeholders instead of training data.
@@ -173,8 +176,8 @@ train and test data respectively.
 
 \begin{lstlisting}[language=Python]
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), test_loss/len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), train_loss/len(X_train), label='Train')
+plt.plot(np.arange(NEPOCH), -test_loss / len(X_test), label='Test')
+plt.plot(np.arange(NEPOCH), -train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)
