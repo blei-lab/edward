@@ -13,12 +13,30 @@ from edward.util import copy, hessian
 class MAP(VariationalInference):
   """Maximum a posteriori.
 
-  We implement this using a ``PointMass`` variational distribution to
-  solve the optimization problem
+  This class implements gradient-based optimization to solve the
+  optimization problem,
 
   .. math::
 
-    \min_{z} - \log p(x,z)
+    \min_{z} - p(z | x).
+
+  This is equivalent to using a ``PointMass`` variational distribution
+  and minimizing the unnormalized objective,
+
+  .. math::
+
+    - E_{q(z; \lambda)} [ \log p(x, z) ].
+
+  This class also minimizes the loss with respect to any model
+  parameters p(z | x; \theta). These parameters are defined via
+  TensorFlow variables, which the probability model depends on in the
+  computational graph.
+
+  Notes
+  -----
+  This class is currently restricted to optimization over
+  differentiable latent variables. For example, it does not solve
+  discrete optimization.
   """
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     """

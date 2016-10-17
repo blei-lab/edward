@@ -121,11 +121,11 @@ qz = Normal(mu=mu, sigma=sigma)
 # Bind p(x, z) and q(z | x) to the same placeholder for x.
 data = {'x': x_ph}
 inference = ed.ReparameterizationKLKLqp({'z': qz}, data, model)
-with tf.variable_scope("model") as scope:
+with tf.variable_scope("model"):
   optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
   inference.initialize(optimizer=optimizer, use_prettytensor=True)
 
-with tf.variable_scope("model", reuse=True) as scope:
+with tf.variable_scope("model", reuse=True):
   p_rep = tf.sigmoid(model.sample_prior(N_MINIBATCH))
 
 init = tf.initialize_all_variables()

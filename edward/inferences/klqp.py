@@ -19,6 +19,11 @@ class KLqp(VariationalInference):
 
   This class minimizes the objective by automatically selecting from a
   variety of black box inference techniques.
+
+  This class also minimizes the loss with respect to any model
+  parameters p(z | x; \theta). These parameters are defined via
+  TensorFlow variables, which the probability model depends on in the
+  computational graph.
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
@@ -93,8 +98,8 @@ class KLqp(VariationalInference):
       else:
         loss = build_reparam_loss(self)
 
-      gradients = tf.gradients(loss, var_list)
-      grads_and_vars = [(grad, var) for grad, var in zip(gradients, var_list)]
+      gradients = tf.gradients(loss, [v.ref() for v in var_list])
+      grads_and_vars = list(zip(gradients, var_list))
       return loss, grads_and_vars
 
 
@@ -484,8 +489,8 @@ def build_score_loss_and_gradients(inference, var_list):
   loss = -tf.reduce_mean(losses)
   gradients = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
-      var_list)
-  grads_and_vars = [(grad, var) for grad, var in zip(gradients, var_list)]
+      [v.ref() for v in var_list])
+  grads_and_vars = list(zip(gradients, var_list))
   return loss, grads_and_vars
 
 
@@ -543,8 +548,8 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   loss = -(tf.reduce_mean(p_log_lik) - kl)
   gradients = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
-      var_list)
-  grads_and_vars = [(grad, var) for grad, var in zip(gradients, var_list)]
+      [v.ref() for v in var_list])
+  grads_and_vars = list(zip(gradients, var_list))
   return loss, grads_and_vars
 
 
@@ -599,6 +604,6 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   gradients = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),
-      var_list)
-  grads_and_vars = [(grad, var) for grad, var in zip(gradients, var_list)]
+      [v.ref() for v in var_list])
+  grads_and_vars = list(zip(gradients, var_list))
   return loss, grads_and_vars

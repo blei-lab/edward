@@ -18,11 +18,12 @@ pip install pandoc pandoc-attributes pandocfilters beautifulsoup4 ghp-import
 ```{bash}
 ./compile.sh
 ```
-
-This will
-  1. run `autogen.py` to auto-generate the navigation bar and docstring API
-  2. run pandoc on all LaTeX files in `tex/`
-  3. run beautifulsoup4 on all output html files to clean up artifacts
+  The output of the compile script is a set of static HTML pages. The
+  HTML pages use absolute filepaths. In order to view them locally, use
+  a HTTP server such as Python's built-in
+  [`SimpleHTTPServer`](https://docs.python.org/2/library/simplehttpserver.html)
+  or Node.js'
+  [`http-server`](https://www.npmjs.com/package/http-server).
 
 ## Deploying the website
 
