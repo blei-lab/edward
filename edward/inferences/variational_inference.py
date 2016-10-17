@@ -59,7 +59,8 @@ class VariationalInference(Inference):
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
     scope : str, optional
-      Scope of TensorFlow variable objects to optimize over.
+      Scope of TensorFlow variables to optimize over. Default is all
+      trainable variables.
     use_prettytensor : bool, optional
       ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
       to use PrettyTensor optimizer (when using PrettyTensor).
@@ -101,12 +102,12 @@ class VariationalInference(Inference):
     else:
       raise TypeError()
 
-    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                 scope=scope)
     if getattr(self, 'build_loss_and_gradients', None) is not None:
-      self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
+      self.loss, grads_and_vars = self.build_loss_and_gradients(scope=scope)
     else:
       self.loss = self.build_loss()
+      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                   scope=scope)
       grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
     if not use_prettytensor:

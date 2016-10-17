@@ -51,7 +51,7 @@ class KLqp(VariationalInference):
     self.n_samples = n_samples
     return super(KLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
+  def build_loss_and_gradients(self, scope=None):
     """Wrapper for the KLqp loss function.
 
     .. math::
@@ -83,13 +83,13 @@ class KLqp(VariationalInference):
         (z_is_normal or hasattr(self.model_wrapper, 'log_lik'))
     if self.score:
       if is_analytic_kl:
-        return build_score_kl_loss_and_gradients(self, var_list)
+        return build_score_kl_loss_and_gradients(self, scope)
       # Analytic entropies may lead to problems around
       # convergence; for now it is deactivated.
       # elif is_analytic_entropy:
-      #    return build_score_entropy_loss_and_gradients(self, var_list)
+      #    return build_score_entropy_loss_and_gradients(self, scope)
       else:
-        return build_score_loss_and_gradients(self, var_list)
+        return build_score_loss_and_gradients(self, scope)
     else:
       if is_analytic_kl:
         loss = build_reparam_kl_loss(self)
@@ -98,8 +98,10 @@ class KLqp(VariationalInference):
       else:
         loss = build_reparam_loss(self)
 
-      gradients = tf.gradients(loss, [v.ref() for v in var_list])
-      grads_and_vars = list(zip(gradients, var_list))
+      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                   scope=scope)
+      grads = tf.gradients(loss, [v.ref() for v in var_list])
+      grads_and_vars = list(zip(grads, var_list))
       return loss, grads_and_vars
 
 
@@ -219,8 +221,8 @@ class ScoreKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_score_loss_and_gradients(self, var_list)
+  def build_loss_and_gradients(self, scope=None):
+    return build_score_loss_and_gradients(self, scope)
 
 
 class ScoreKLKLqp(VariationalInference):
@@ -248,8 +250,8 @@ class ScoreKLKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_score_kl_loss_and_gradients(self, var_list)
+  def build_loss_and_gradients(self, scope=None):
+    return build_score_kl_loss_and_gradients(self, scope)
 
 
 class ScoreEntropyKLqp(VariationalInference):
@@ -277,8 +279,8 @@ class ScoreEntropyKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreEntropyKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_score_entropy_loss_and_gradients(self, var_list)
+  def build_loss_and_gradients(self, scope=None):
+    return build_score_entropy_loss_and_gradients(self, scope)
 
 
 def build_reparam_loss(inference):
@@ -443,7 +445,7 @@ def build_reparam_entropy_loss(inference):
   return loss
 
 
-def build_score_loss_and_gradients(inference, var_list):
+def build_score_loss_and_gradients(inference, scope=None):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
@@ -487,14 +489,16 @@ def build_score_loss_and_gradients(inference, var_list):
 
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
-  gradients = tf.gradients(
+  var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                               scope=scope)
+  grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
       [v.ref() for v in var_list])
-  grads_and_vars = list(zip(gradients, var_list))
+  grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
 
-def build_score_kl_loss_and_gradients(inference, var_list):
+def build_score_kl_loss_and_gradients(inference, scope=None):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
@@ -546,14 +550,16 @@ def build_score_kl_loss_and_gradients(inference, var_list):
                         for qz in six.itervalues(inference.latent_vars)])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl)
-  gradients = tf.gradients(
+  var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                               scope=scope)
+  grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
       [v.ref() for v in var_list])
-  grads_and_vars = list(zip(gradients, var_list))
+  grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
 
-def build_score_entropy_loss_and_gradients(inference, var_list):
+def build_score_entropy_loss_and_gradients(inference, scope=None):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
@@ -601,9 +607,11 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
                              for qz in six.itervalues(inference.latent_vars)])
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
-  gradients = tf.gradients(
+  var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                               scope=scope)
+  grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),
       [v.ref() for v in var_list])
-  grads_and_vars = list(zip(gradients, var_list))
+  grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars

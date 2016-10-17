@@ -40,7 +40,7 @@ class KLpq(VariationalInference):
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
+  def build_loss_and_gradients(self, scope=None):
     """Build loss function
 
     .. math::
@@ -112,8 +112,10 @@ class KLpq(VariationalInference):
     w_norm = tf.exp(log_w_norm)
 
     loss = tf.reduce_mean(w_norm * log_w)
-    gradients = tf.gradients(
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                 scope=scope)
+    grads = tf.gradients(
         -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
         [v.ref() for v in var_list])
-    grads_and_vars = list(zip(gradients, var_list))
+    grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
