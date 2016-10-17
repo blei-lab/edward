@@ -28,7 +28,7 @@ class KLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, score=None, *args, **kwargs):
+  def initialize(self, n_samples=1, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -36,18 +36,7 @@ class KLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
-    score : bool, optional
-      Whether to force inference to use the score function
-      gradient estimator. Otherwise default is to use the
-      reparameterization gradient if available.
     """
-    if score is None and \
-       all([rv.is_reparameterized and rv.is_continuous
-            for rv in six.itervalues(self.latent_vars)]):
-      self.score = False
-    else:
-      self.score = True
-
     self.n_samples = n_samples
     return super(KLqp, self).initialize(*args, **kwargs)
 
@@ -75,22 +64,15 @@ class KLqp(VariationalInference):
     where the KL term is computed analytically (Kingma and Welling,
     2014).
     """
+    is_reparameterizable = all([rv.is_reparameterized and rv.is_continuous
+                                for rv in six.itervalues(self.latent_vars)])
     qz_is_normal = all([isinstance(rv, Normal) for
                        rv in six.itervalues(self.latent_vars)])
     z_is_normal = all([isinstance(rv, Normal) for
                        rv in six.iterkeys(self.latent_vars)])
     is_analytic_kl = qz_is_normal and \
         (z_is_normal or hasattr(self.model_wrapper, 'log_lik'))
-    if self.score:
-      if is_analytic_kl:
-        return build_score_kl_loss_and_gradients(self, scope)
-      # Analytic entropies may lead to problems around
-      # convergence; for now it is deactivated.
-      # elif is_analytic_entropy:
-      #    return build_score_entropy_loss_and_gradients(self, scope)
-      else:
-        return build_score_loss_and_gradients(self, scope)
-    else:
+    if is_reparameterizable:
       if is_analytic_kl:
         loss = build_reparam_kl_loss(self)
       # elif is_analytic_entropy:
@@ -103,6 +85,15 @@ class KLqp(VariationalInference):
       grads = tf.gradients(loss, [v.ref() for v in var_list])
       grads_and_vars = list(zip(grads, var_list))
       return loss, grads_and_vars
+    else:
+      if is_analytic_kl:
+        return build_score_kl_loss_and_gradients(self, scope)
+      # Analytic entropies may lead to problems around
+      # convergence; for now it is deactivated.
+      # elif is_analytic_entropy:
+      #    return build_score_entropy_loss_and_gradients(self, scope)
+      else:
+        return build_score_loss_and_gradients(self, scope)
 
 
 MFVI = KLqp  # deprecated synonym
