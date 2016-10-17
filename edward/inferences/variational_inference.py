@@ -101,18 +101,23 @@ class VariationalInference(Inference):
     else:
       raise TypeError()
 
-    loss = self.build_loss()
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                  scope=scope)
-    if not use_prettytensor:
-      self.train = optimizer.minimize(loss, global_step=global_step,
-                                      var_list=var_list)
+    if getattr(self, 'build_loss_and_gradients', None) is not None:
+      self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
     else:
-      if scope is not None:
-        raise NotImplementedError("PrettyTensor optimizer does not accept "
-                                  "a variable scope.")
+      self.loss = self.build_loss()
+      grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
-      self.train = pt.apply_optimizer(optimizer, losses=[loss],
+    if not use_prettytensor:
+      self.train = optimizer.apply_gradients(grads_and_vars,
+                                             global_step=global_step)
+    else:
+      if getattr(self, 'build_loss_and_gradients', None) is not None:
+        raise NotImplementedError("PrettyTensor optimizer does not accept "
+                                  "manual gradients.")
+
+      self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
                                       global_step=global_step,
                                       var_list=var_list)
 
@@ -157,8 +162,8 @@ class VariationalInference(Inference):
   def build_loss(self):
     """Build loss function.
 
-    Any derived class of ``VariationalInference`` **must** implement
-    this method.
+    Any derived class of ``VariationalInference`` must implement
+    this method or ``build_loss_and_gradients``.
 
     Raises
     ------
