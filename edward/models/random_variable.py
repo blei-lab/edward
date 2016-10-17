@@ -69,7 +69,38 @@ class RandomVariable(object):
     return self.__str__()
 
   def value(self):
+    """Get tensor that the random variable correspond to."""
     return self._value
+
+  def get_ancestors(self, collection=None):
+    """Get ancestor random variables."""
+    from edward.util.random_variables import get_ancestors
+    return get_ancestors(self, collection)
+
+  def get_children(self, collection=None):
+    """Get child random variables."""
+    from edward.util.random_variables import get_children
+    return get_children(self, collection)
+
+  def get_descendants(self, collection=None):
+    """Get descendant random variables."""
+    from edward.util.random_variables import get_descendants
+    return get_descendants(self, collection)
+
+  def get_parents(self, collection=None):
+    """Get parent random variables."""
+    from edward.util.random_variables import get_parents
+    return get_parents(self, collection)
+
+  def get_siblings(self, collection=None):
+    """Get sibling random variables."""
+    from edward.util.random_variables import get_siblings
+    return get_siblings(self, collection)
+
+  def get_variables(self, collection=None):
+    """Get TensorFlow variables that the random variable depends on."""
+    from edward.util.random_variables import get_variables
+    return get_variables(self, collection)
 
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
     _ = name
