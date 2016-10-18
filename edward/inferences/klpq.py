@@ -11,12 +11,19 @@ from edward.util import copy, log_sum_exp
 
 
 class KLpq(VariationalInference):
-  """A variational inference method that minimizes the Kullback-Leibler
-  divergence from the posterior to the variational model (Cappe et al., 2008)
+  """Variational inference with the KL divergence
 
   .. math::
 
     KL( p(z |x) || q(z) ).
+
+  To perform the optimization, this class uses a technique from
+  adaptive importance sampling (Cappe et al., 2008).
+
+  This class also minimizes the loss with respect to any model
+  parameters p(z | x; \theta). These parameters are defined via
+  TensorFlow variables, which the probability model depends on in the
+  computational graph.
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
@@ -33,37 +40,36 @@ class KLpq(VariationalInference):
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
-  def build_loss(self):
-    """Build loss function. Its automatic differentiation
-    is a stochastic gradient of
+  def build_loss_and_gradients(self, scope=None):
+    """Build loss function
 
     .. math::
       KL( p(z |x) || q(z) )
       =
       E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]
 
-    based on importance sampling.
+    and stochastic gradients based on importance sampling.
 
-    Computed as
+    The loss function can be estimated as
 
     .. math::
       1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
-                (\log p(x, z^b) - \log q(z^b; \lambda) ]
+                         (\log p(x, z^b) - \log q(z^b; \lambda) ],
 
     where
 
     .. math::
-      z^b \sim q(z^b; \lambda)
+      z^b \sim q(z^b; \lambda),
 
-      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda))
+      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda)),
 
-      w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda)
+      w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda).
 
-    which gives a gradient
+    This provides a gradient,
 
     .. math::
-      - 1/B \sum_{b=1}^B
-      w_{norm}(z^b; \lambda) \partial_{\lambda} \log q(z^b; \lambda)
+      - 1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
+                           \partial_{\lambda} \log q(z^b; \lambda) ].
 
     """
     p_log_prob = [0.0] * self.n_samples
@@ -105,5 +111,11 @@ class KLpq(VariationalInference):
     log_w_norm = log_w - log_sum_exp(log_w)
     w_norm = tf.exp(log_w_norm)
 
-    self.loss = tf.reduce_mean(w_norm * log_w)
-    return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
+    loss = tf.reduce_mean(w_norm * log_w)
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                 scope=scope)
+    grads = tf.gradients(
+        -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
+        [v.ref() for v in var_list])
+    grads_and_vars = list(zip(grads, var_list))
+    return loss, grads_and_vars

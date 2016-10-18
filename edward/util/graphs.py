@@ -6,6 +6,8 @@ import numpy as np
 import six
 import tensorflow as tf
 
+from edward.models.random_variable import RANDOM_VARIABLE_COLLECTION
+
 
 def get_session():
   """Get the globally defined TensorFlow session.
@@ -24,6 +26,16 @@ def get_session():
     _ED_SESSION = tf.get_default_session()
 
   return _ED_SESSION
+
+
+def random_variables():
+  """Return all random variables in the TensorFlow graph.
+
+  Returns
+  -------
+  list of RandomVariable
+  """
+  return tf.get_collection(RANDOM_VARIABLE_COLLECTION)
 
 
 def set_seed(x):

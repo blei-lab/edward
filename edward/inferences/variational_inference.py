@@ -59,7 +59,8 @@ class VariationalInference(Inference):
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
     scope : str, optional
-      Scope of TensorFlow variable objects to optimize over.
+      Scope of TensorFlow variables to optimize over. Default is all
+      trainable variables.
     use_prettytensor : bool, optional
       ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
       to use PrettyTensor optimizer (when using PrettyTensor).
@@ -101,18 +102,23 @@ class VariationalInference(Inference):
     else:
       raise TypeError()
 
-    loss = self.build_loss()
-    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                 scope=scope)
-    if not use_prettytensor:
-      self.train = optimizer.minimize(loss, global_step=global_step,
-                                      var_list=var_list)
+    if getattr(self, 'build_loss_and_gradients', None) is not None:
+      self.loss, grads_and_vars = self.build_loss_and_gradients(scope=scope)
     else:
-      if scope is not None:
-        raise NotImplementedError("PrettyTensor optimizer does not accept "
-                                  "a variable scope.")
+      self.loss = self.build_loss()
+      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                   scope=scope)
+      grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
-      self.train = pt.apply_optimizer(optimizer, losses=[loss],
+    if not use_prettytensor:
+      self.train = optimizer.apply_gradients(grads_and_vars,
+                                             global_step=global_step)
+    else:
+      if getattr(self, 'build_loss_and_gradients', None) is not None:
+        raise NotImplementedError("PrettyTensor optimizer does not accept "
+                                  "manual gradients.")
+
+      self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
                                       global_step=global_step,
                                       var_list=var_list)
 
@@ -157,8 +163,8 @@ class VariationalInference(Inference):
   def build_loss(self):
     """Build loss function.
 
-    Any derived class of ``VariationalInference`` **must** implement
-    this method.
+    Any derived class of ``VariationalInference`` must implement
+    this method or ``build_loss_and_gradients``.
 
     Raises
     ------
