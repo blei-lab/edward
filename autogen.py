@@ -38,6 +38,17 @@ PAGES = [
             'models/',
         ],
         'parent_pages': [],
+        'child_pages': [
+           'model-wrappers.tex',
+        ],
+    },
+    {
+        'page': 'model-wrappers.tex',
+        'title': 'Wrappers',
+        'source_pages': [],
+        'parent_pages': [
+            'model.tex'
+        ],
         'child_pages': [],
     },
     {
@@ -47,37 +58,19 @@ PAGES = [
             'inferences/inference.py',
         ],
         'parent_pages': [],
-        'child_pages': [],
-        # 'child_pages': [
-        #    'monte-carlo.tex',
-        #    'variational-inference.tex',
-        # ],
+        'child_pages': [
+           'inference-development.tex',
+        ],
     },
-    # {
-    #     'page': 'monte-carlo.tex',
-    #     'title': 'Monte Carlo',
-    #     'source_pages': [
-    #         'inferences/monte_carlo.py',
-    #     ],
-    #     'parent_pages': [
-    #         'inference.tex'
-    #     ],
-    #     'child_pages': [],
-    # },
-    # {
-    #     'page': 'variational-inference.tex',
-    #     'title': 'Variational Inference',
-    #     'source_pages': [
-    #         'inferences/klpq.py',
-    #         'inferences/klqp.py',
-    #         'inferences/map.py',
-    #         'inferences/variational_inference.py',
-    #     ],
-    #     'parent_pages': [
-    #         'inference.tex'
-    #     ],
-    #     'child_pages': [],
-    # },
+    {
+        'page': 'inference-development.tex',
+        'title': 'Development',
+        'source_pages': [],
+        'parent_pages': [
+            'inference.tex'
+        ],
+        'child_pages': [],
+    },
     {
         'page': 'criticism.tex',
         'title': 'Criticism',
@@ -87,20 +80,20 @@ PAGES = [
         'parent_pages': [],
         'child_pages': [],
     },
-    {
-        'page': 'stats.tex',
-        'title': 'Statistics',
-        'source_pages': [
-            'stats/',
-        ],
-        'parent_pages': [],
-        'child_pages': [],
-    },
+    # {
+    #     'page': 'stats.tex',
+    #     'title': 'Statistics',
+    #     'source_pages': [
+    #         'stats/',
+    #     ],
+    #     'parent_pages': [],
+    #     'child_pages': [],
+    # },
     # {
     #     'page': 'util.tex',
     #     'title': 'Utilities',
     #     'source_pages': [
-    #         'util.py',
+    #         'util/',
     #     ],
     #     'parent_pages': [],
     #     'child_pages': [],
