@@ -40,7 +40,7 @@ PAGES = [
         ],
         'parent_pages': [],
         'child_pages': [
-           'model-wrappers.tex',
+            'model-wrappers.tex',
         ],
     },
     {
@@ -60,7 +60,7 @@ PAGES = [
         ],
         'parent_pages': [],
         'child_pages': [
-           'inference-development.tex',
+            'inference-development.tex',
         ],
     },
     {
