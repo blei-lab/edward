@@ -1,21 +1,20 @@
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title>Edward – Model</title>
-  <!-- Mobile Specific Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- FONT -->
-  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="/css/normalize.css">
-  <link rel="stylesheet" href="/css/skeleton.css">
-  <!-- Dynamically resize logo for mobile -->
-  <style type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Model</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
   .logo-width {
     width: 100%;
     box-sizing: border-box;
@@ -30,67 +29,63 @@
     }
   }
   </style>
-
-  <!-- KaTeX -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-
-  <!-- highlight.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
-
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
-  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
-  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
-  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
-  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
-  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
-  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
-  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
-  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
-  <link rel="manifest" href="/icons/manifest.json">
-  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
-  <link rel="shortcut icon" href="/icons/favicon.ico">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
-  <meta name="msapplication-config" content="/icons/browserconfig.xml">
-  <meta name="theme-color" content="#ffffff">
-</head>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
 <body>
 <div class="container">
-  <div class="row" style="margin-top: 5%">
-    <div class="three columns">
-    <h1><a href="/">Edward</a></h1>
-    <a href="/">
-    <center>
-      <img src="/images/edward.png" class="logo-width" alt="Edward" />
-    </center>
-    </a>
-    <a class="button u-full-width" href="/">Home</a>
-    <a class="button u-full-width" href="/getting-started">Getting Started</a>
-    <a class="button u-full-width" href="/tutorials/">Tutorials</a>
-    <a class="button u-full-width" href="/api/">API</a>
-    <a class="button u-full-width" href="#">Advanced</a>
-    <a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
-    <a class="button2 u-full-width" href="/contributing">Contributing</a>
-    <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
-    <a class="button2 u-full-width" href="/license">License</a>
-    <div class="row" style="padding-bottom: 5%"> </div>
-    <a href="https://github.com/blei-lab/edward">
-    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-      <img src="/images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
-    alt="Edward on Github" />
-    <!-- </object> -->
-    </a>
-    <div class="row" style="padding-bottom: 5%"> </div>
-    </div>
-    <div class="nine columns">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
 <h2 id="api-and-documentation">API and Documentation</h2>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
@@ -126,9 +121,9 @@ MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
 <p>Random variable objects are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>.</p>
 <p>Each object wraps a tensor <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
-<p><img src="/images/random_variable.png" alt="image" width="225" /></p>
+<p><img alt="image" src="/images/random_variable.png" width="225"/></p>
 <p>This enables operations on the TensorFlow graph, allowing random variables to be used in conjunction with other TensorFlow ops. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
-<p><img src="/images/random_variable_ops.png" alt="image" width="400" /></p>
+<p><img alt="image" src="/images/random_variable_ops.png" width="400"/></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
 x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
@@ -151,9 +146,10 @@ qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
 qpi = Dirichlet(alpha=qpi_alpha)
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
-    </div>
-  </div>
-  <div class="row" style="padding-bottom: 25%"> </div>
+<p><span><span>autogenerated</span></span></p>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();

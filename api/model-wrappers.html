@@ -1,21 +1,20 @@
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title>Edward – Model Wrappers</title>
-  <!-- Mobile Specific Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- FONT -->
-  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="/css/normalize.css">
-  <link rel="stylesheet" href="/css/skeleton.css">
-  <!-- Dynamically resize logo for mobile -->
-  <style type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Model Wrappers</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
   .logo-width {
     width: 100%;
     box-sizing: border-box;
@@ -30,67 +29,63 @@
     }
   }
   </style>
-
-  <!-- KaTeX -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-
-  <!-- highlight.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
-
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
-  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
-  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
-  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
-  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
-  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
-  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
-  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
-  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
-  <link rel="manifest" href="/icons/manifest.json">
-  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
-  <link rel="shortcut icon" href="/icons/favicon.ico">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
-  <meta name="msapplication-config" content="/icons/browserconfig.xml">
-  <meta name="theme-color" content="#ffffff">
-</head>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
 <body>
 <div class="container">
-  <div class="row" style="margin-top: 5%">
-    <div class="three columns">
-    <h1><a href="/">Edward</a></h1>
-    <a href="/">
-    <center>
-      <img src="/images/edward.png" class="logo-width" alt="Edward" />
-    </center>
-    </a>
-    <a class="button u-full-width" href="/">Home</a>
-    <a class="button u-full-width" href="/getting-started">Getting Started</a>
-    <a class="button u-full-width" href="/tutorials/">Tutorials</a>
-    <a class="button u-full-width" href="/api/">API</a>
-    <a class="button u-full-width" href="#">Advanced</a>
-    <a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
-    <a class="button2 u-full-width" href="/contributing">Contributing</a>
-    <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
-    <a class="button2 u-full-width" href="/license">License</a>
-    <div class="row" style="padding-bottom: 5%"> </div>
-    <a href="https://github.com/blei-lab/edward">
-    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-      <img src="/images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
-    alt="Edward on Github" />
-    <!-- </object> -->
-    </a>
-    <div class="row" style="padding-bottom: 5%"> </div>
-    </div>
-    <div class="nine columns">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
 <h2 id="api-and-documentation">API and Documentation</h2>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
@@ -124,10 +119,10 @@ model = Model(...)</code></pre>
 from edward.stats import bernoulli, beta
 
 class BetaBernoulli:
-  &quot;&quot;&quot;p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)&quot;&quot;&quot;
+  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
   def log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs[&#39;p&#39;], a=1.0, b=1.0)
-    log_lik = tf.reduce_sum(bernoulli.logpmf(xs[&#39;x&#39;], p=zs[&#39;p&#39;]))
+    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+    log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
     return log_lik + log_prior
 
 model = BetaBernoulli()</code></pre>
@@ -139,10 +134,10 @@ from edward.models import PythonModel
 from scipy.stats import bernoulli, beta
 
 class BetaBernoulli(PythonModel):
-  &quot;&quot;&quot;p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)&quot;&quot;&quot;
+  """p(x, p) = Bernoulli(x | p) * Beta(p | 1, 1)"""
   def _py_log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs[&#39;p&#39;], a=1.0, b=1.0)
-    log_lik = np.sum(bernoulli.logpmf(xs[&#39;x&#39;], p=zs[&#39;p&#39;]))
+    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
+    log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
     return log_lik + log_prior
 
   model = BetaBernoulli()</code></pre>
@@ -150,7 +145,7 @@ class BetaBernoulli(PythonModel):
 <p><strong>Stan.</strong> Write a Stan program in the form of a file or string. Then call it with <code>StanModel(file=file)</code> or <code>StanModel(model_code=model_code)</code>. Here is an example:</p>
 <pre class="python" language="Python"><code>from edward.models import StanModel
 
-model_code = &quot;&quot;&quot;
+model_code = """
   data {
     int&lt;lower=0&gt; N;
     int&lt;lower=0,upper=1&gt; x[N];
@@ -163,12 +158,12 @@ model_code = &quot;&quot;&quot;
     for (n in 1:N)
     x[n] ~ bernoulli(p);
   }
-&quot;&quot;&quot;
+"""
 model = StanModel(model_code=model_code)</code></pre>
 <p>During inference the latent variable string matches the name of the parameters from the parameter block. Analogously, the data’s string matches the name of the data from the data block.</p>
 <pre class="python" language="Python"><code>qp = Beta(...)
-data = {&#39;N&#39;: 10, &#39;x&#39;: [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
-inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
+data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+inference = Inference({'p': qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/stan_beta_bernoulli.py">toy script</a> that uses this model. Stan programs are convenient as <a href="https://github.com/stan-dev/example-models/wiki">there are many online examples</a>, although they are limited to probability models with differentiable latent variables. <code>StanModel</code> objects also contain no structure about the model besides how to calculate its joint density.</p>
 <p><strong>PyMC3.</strong> Write a PyMC3 model whose observed values are Theano shared variables, and whose latent variables use <code>transform=None</code> to keep them on their original (constrained) domain. The values in the Theano shared variables can be plugged at a later time. Here is an example:</p>
 <pre class="python" language="Python"><code>import numpy as np
@@ -178,21 +173,22 @@ from edward.models import PyMC3Model
 
 x_obs = theano.shared(np.zeros(1))
 with pm.Model() as pm_model:
-  p = pm.Beta(&#39;p&#39;, 1, 1, transform=None)
-  x = pm.Bernoulli(&#39;x&#39;, p, observed=x_obs)
+  p = pm.Beta('p', 1, 1, transform=None)
+  x = pm.Bernoulli('x', p, observed=x_obs)
 
 model = PyMC3Model(pm_model)</code></pre>
 <p>During inference the latent variable string matches the name of the model’s latent variables; the data’s string matches the Theano shared variables.</p>
 <pre class="python" language="Python"><code>qp = Beta(...)
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
+inference = Inference({'p': qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/pymc3_beta_bernoulli.py">toy script</a> that uses this model. PyMC3 can be used to define models with both differentiable latent variables and non-differentiable (e.g., discrete) latent variables. <code>PyMC3Model</code> objects contain no structure about the model besides how to calculate its joint density.</p>
 <p>For modeling convenience, we recommend using the modeling language that you are most familiar with. For efficiency, we recommend using TensorFlow, as Edward uses TensorFlow as the computational backend. Internally, other languages are wrapped in TensorFlow so their computation represents a single node in the graph (making it difficult to tease apart and thus distribute their computation).</p>
+<p><span><span>autogenerated</span></span></p>
 <h3 id="model-wrapper-api">Model Wrapper API</h3>
 <p>This outlines the current spec for all methods in the model object. It includes all modeling languages, where certain methods are implemented by wrapping around other methods. For example, a Python model builds a <code>_py_log_prob()</code> method and inherits from <code>PythonModel</code>; <code>PythonModel</code> implements <code>log_prob()</code> by wrapping around <code>_py_log_prob()</code> as a TensorFlow operation.</p>
 <pre class="python" language="Python"><code>class Model:
   def log_prob(self, xs, zs):
-    &quot;&quot;&quot;
+    """
     Used in: (most) inference.
 
     Parameters
@@ -210,11 +206,11 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
     -------
     tf.Tensor
       Scalar, the log joint density log p(xs, zs).
-    &quot;&quot;&quot;
+    """
     pass
 
   def log_lik(self, xs, zs):
-    &quot;&quot;&quot;
+    """
     Used in: inference with analytic KL.
 
     Parameters
@@ -232,10 +228,10 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
     -------
     tf.Tensor
       Scalar, the log-likelihood log p(xs | zs).
-    &quot;&quot;&quot;
+    """
 
   def predict(self, xs, zs):
-    &quot;&quot;&quot;
+    """
     Used in: ed.evaluate().
 
     Parameters
@@ -253,13 +249,13 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
     -------
     tf.Tensor
       Tensor of predictions, one for each data point. The prediction
-      is the likelihood&#39;s mean. For example, in supervised learning
+      is the likelihood's mean. For example, in supervised learning
       of i.i.d. categorical data, it is a vector of labels.
-    &quot;&quot;&quot;
+    """
     pass
 
   def sample_prior(self):
-    &quot;&quot;&quot;
+    """
     Used in: ed.ppc().
 
     Returns
@@ -268,11 +264,11 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
       Latent variable dictionary. Each key names a latent variable
       used in the model (str), and its value is the corresponding
       realization (tf.Tensor).
-    &quot;&quot;&quot;
+    """
     pass
 
   def sample_likelihood(self, zs):
-    &quot;&quot;&quot;
+    """
     Used in: ed.ppc().
 
     Parameters
@@ -288,11 +284,11 @@ inference = Inference({&#39;p&#39;: qp}, data, model)</code></pre>
       Data dictionary. It is a replicated data set, where each key
       and value matches the same type as any observed data set that
       the model aims to capture.
-    &quot;&quot;&quot;
+    """
     pass</code></pre>
-    </div>
-  </div>
-  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();
