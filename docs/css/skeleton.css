@@ -154,6 +154,7 @@ h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
 p { margin-top: 0; }
 
 
+
 /* Links
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 a {
@@ -525,7 +526,8 @@ pre > code {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 th,
 td {
-  padding: 12px 15px;
+  padding: 0 15px;
+  /*padding: 0 15px 0 0;*/
   text-align: left;
   border-bottom: 1px solid #E1E1E1; }
 th:first-child,
@@ -581,6 +583,41 @@ hr {
   border-top: 1px solid #E1E1E1; }
 
 
+dd, dl, dt {
+  font-size: 1.4rem;
+  margin-bottom: 1.0rem;
+}
+dd > p, dl > p, dt > p, td > p {
+  margin-bottom: 1.0rem;
+}
+td > blockquote {
+  margin-bottom: 0;
+}
+code.descclassname {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  white-space: nowrap;
+  background: #FFF;
+  border: none;
+  border-radius: 0;
+}
+code.descname {
+  font-weight: 600;
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  white-space: nowrap;
+  background: #FFF;
+  border: none;
+  border-radius: 0;
+}
+.sig-paren {
+  font-family: monospace;
+  font-size: 160%;
+}
+
+
 /* Clearing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
@@ -617,3 +654,4 @@ there.
 
 /* Larger than Desktop HD */
 @media (min-width: 1200px) {}
+

@@ -1,18 +1,18 @@
 # Edward website
 
-The backend of our website depends on [pandoc](http://pandoc.org), [pandoc-citeproc](http://pandoc.org), and [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/). This lets us write stand-alone pages for documentation using LaTeX. It also lets us auto-generate API documentation from the source code's docstrings.
+The back end of our website depends on [pandoc](http://pandoc.org), [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/), and [sphinx](http://www.sphinx-doc.org). This lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. It also lets us auto-generate API documentation from the source code's docstrings. (We use NumPy's [docstring convention](https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt).)
 
-The frontend of our website depends on [skeleton.css](http://getskeleton.com/), [Google Fonts](https://www.google.com/fonts), [highlight.js](https://highlightjs.org/), and [KaTeX](https://khan.github.io/KaTeX/).
+The front end of our website depends on [skeleton.css](http://getskeleton.com/), [Google Fonts](https://www.google.com/fonts), [highlight.js](https://highlightjs.org/), and [KaTeX](https://khan.github.io/KaTeX/).
 
 ## Editing the website
 
-All stand-alone pages are in `docs/tex`. These compile to root level HTML pages. Our custom pandoc HTML template is `docs/tex/template.pandoc`.
+All stand-alone pages are under `docs/tex`. These compile to HTML pages in `docs`. Our custom pandoc html template is `docs/tex/template.pandoc`. Our APA styling for citations is in `docs/text/apa.csl`.
 
 ## Building the website
 
 + Install the dependencies
 ```{bash}
-pip install pandoc pandoc-attributes pandocfilters beautifulsoup4 ghp-import
+pip install pandoc pandoc-attributes pandocfilters beautifulsoup4 sphinx numpydoc ghp-import
 ```
 + You can build the website locally. Go to this `docs/` directory and run
 ```{bash}
