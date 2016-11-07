@@ -33,6 +33,7 @@
 *.xdy
 *.tdo
 *.pyc
+*.swp
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
