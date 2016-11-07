@@ -22,7 +22,7 @@ z = Normal(mu=1.0, sigma=1.0)
 qz = Normal(mu=tf.Variable(tf.random_normal([])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
 
-inference = ed.MFVI({z: qz})
+inference = ed.KLqp({z: qz})
 inference.initialize(n_iter=250)
 
 init = tf.initialize_all_variables()

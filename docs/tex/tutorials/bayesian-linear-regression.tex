@@ -34,8 +34,8 @@ linear transformation of the inputs $\mathbf{x}_n$.
 
 Let's build the model in Edward, fixing $\sigma_w,\sigma_b,\sigma_y=1$.
 \begin{lstlisting}[language=Python]
-N = 40  # num data points
-D = 1  # num features
+N = 40  # number of data points
+D = 1  # number of features
 
 X = ed.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))

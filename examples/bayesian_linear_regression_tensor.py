@@ -46,5 +46,5 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 data = {X: X_train, y: y_train}
-inference = ed.MFVI({w: qw, b: qb}, data)
+inference = ed.KLqp({w: qw, b: qb}, data)
 inference.run()

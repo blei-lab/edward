@@ -33,8 +33,8 @@ def build_toy_dataset(N):
   return x
 
 
-N = 500  # num data points
-K = 2  # num components
+N = 500  # number of data points
+K = 2  # number of components
 D = 2  # dimensionality of data
 ed.set_seed(42)
 

@@ -126,12 +126,12 @@ See this extended tutorial about
 \href{/tutorials/map}{MAP estimation in Edward}.
 
 One could instead run variational inference. This requires specifying
-a variational model and instantiating \texttt{MFVI}.
+a variational model and instantiating \texttt{KLqp}.
 \begin{lstlisting}[language=Python]
 qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
 qz = Normal(mu=qz_mu, sigma=qz_sigma)
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.KLqp({'z': qz}, data, model)
 \end{lstlisting}
 Finally, the following line runs the inference procedure for 5000
 iterations.

@@ -12,13 +12,13 @@ import numpy as np
 import six
 import tensorflow as tf
 
-from edward.inferences import MFVI
+from edward.inferences import KLqp
 from edward.models import Beta
 from edward.stats import bernoulli, beta
 from edward.util import copy, log_mean_exp
 
 
-class IWVI(MFVI):
+class IWVI(KLqp):
   """
   Importance-weighted variational inference. Uses importance
   sampling to produce an improved lower bound on the log marginal
@@ -31,8 +31,8 @@ class IWVI(MFVI):
 
   Notes
   -----
-  `IWVI` is implemented by inheriting from mean-field (black box)
-  variational inference (`MFVI`). The loss function to optimize is
+  `IWVI` is implemented by inheriting from Kullback-Leibler (black box)
+  variational inference (`KLqp`). The loss function to optimize is
   modified to include importance weights. It is only implemented to
   work on model wrappers and not Edward's native modeling language.
   """

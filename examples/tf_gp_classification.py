@@ -69,14 +69,19 @@ class GaussianProcess:
 
 
 ed.set_seed(42)
-df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')[:25, :]
-data = {'x': df[:, 1:], 'y': df[:, 0]}
 
-model = GaussianProcess(N=len(df))
+df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
+N = 25  # number of data points
+subset = np.random.choice(df.shape[0], N, replace=False)
+X_train = df[subset, 1:]
+y_train = df[subset, 0]
+
+model = GaussianProcess(N)
 
 qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
 qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
-inference = ed.MFVI({'z': qz}, data, model)
+data = {'x': X_train, 'y': y_train}
+inference = ed.KLqp({'z': qz}, data, model)
 inference.run(n_iter=500)

@@ -103,12 +103,12 @@ ax = fig.add_subplot(111, frameon=False)
 plt.ion()
 plt.show(block=False)
 
-# model.log_lik() is defined so MFVI will do variational inference
+# model.log_lik() is defined so KLqp will do variational inference
 # assuming a standard normal prior on the weights; this enables VI
 # with an analytic KL term which provides faster inference.
 sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.KLqp({'z': qz}, data, model)
 inference.initialize(n_print=10)
 
 init = tf.initialize_all_variables()

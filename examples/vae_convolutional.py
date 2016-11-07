@@ -87,7 +87,7 @@ qz = Normal(mu=mu, sigma=sigma)
 
 # Bind p(x, z) and q(z | x) to the same placeholder for x.
 data = {x: x_ph}
-inference = ed.MFVI({z: qz}, data)
+inference = ed.KLqp({z: qz}, data)
 optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)
 

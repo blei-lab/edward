@@ -106,7 +106,7 @@ plt.show(block=False)
 
 sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'z': qz}, data, model)
+inference = ed.KLqp({'z': qz}, data, model)
 inference.initialize()
 
 init = tf.initialize_all_variables()

@@ -28,8 +28,8 @@ def build_toy_dataset(N):
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42)
 
-N = 40000  # num data points
-D = 1  # num features
+N = 40000  # number of data points
+D = 1  # number of features
 
 X_train, X_test, y_train, y_test = build_toy_dataset(N)
 print("Size of features in training data: {:s}".format(X_train.shape))

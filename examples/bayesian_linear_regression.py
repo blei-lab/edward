@@ -22,8 +22,8 @@ def build_toy_dataset(N, noise_std=0.1):
 
 ed.set_seed(42)
 
-N = 40  # num data points
-D = 1  # num features
+N = 40  # number of data points
+D = 1  # number of features
 
 # DATA
 X_train, y_train = build_toy_dataset(N)
@@ -42,7 +42,7 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 data = {X: X_train, y: y_train}
-inference = ed.MFVI({w: qw, b: qb}, data)
+inference = ed.KLqp({w: qw, b: qb}, data)
 inference.run()
 
 # CRITICISM
