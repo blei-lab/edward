@@ -23,8 +23,9 @@ installation instructions.
 \subsubsection{Your first Edward program}
 
 Probabilistic modeling in Edward uses a simple language of
-random variables. Here we will show a Bayesian neural network: a neural
-network with a prior distribution on its weights.
+random variables.
+Here we will show a Bayesian neural network. It is a neural network
+with a prior distribution on its weights.
 (This example is abridged; full source
 \href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
 {here}.)
@@ -52,9 +53,8 @@ x = tf.convert_to_tensor(x_train, dtype=tf.float32)
 y = Normal(mu=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
            sigma=0.1)
 \end{lstlisting}
-Next, make inferences about the model from data.
-Edward focuses on variational inference. Specify a normal
-approximation over the weights and biases.
+Next, make inferences about the model from data. We will use variational
+inference. Specify a normal approximation over the weights and biases.
 \begin{lstlisting}[language=Python]
 qW_0 = Normal(mu=tf.Variable(tf.random_normal([1, 2])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, 2]))))
@@ -86,14 +86,14 @@ inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
 inference.run(n_iter=1000)
 \end{lstlisting}
 
-Finally, criticize the model fit. Bayesian neural networks define a
-distribution over neural networks, so let's do a graphical check. Draw
-neural networks from the inferred model and visualize how well it
-fits the data.
+Finally, criticize the model fit. Bayesian neural networks define a distribution
+over neural networks, so we can perform a graphical check. Draw neural networks
+from the inferred model and visualize how well it fits the data.
 
 \includegraphics[width=700px]{images/getting-started-fig1.png}
 
-The model has learned the cosine relationship between $x$ and $y$.
+The model has captured the cosine relationship between $x$ and $y$
+in the observed domain.
 
 To learn more about Edward, \href{/api}{delve in}!
 
