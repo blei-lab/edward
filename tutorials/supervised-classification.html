@@ -97,75 +97,47 @@
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_gp_classification.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>Use 25 data points from the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>.</p>
-<pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)[:25, :]
-data = {&#39;x&#39;: df[:, 1:], &#39;y&#39;: df[:, 0]}</code></pre>
+<pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)
+df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
+
+N = 25  # number of data points
+D = df.shape[1] - 1  # number of features
+
+subset = np.random.choice(df.shape[0], N, replace=False)
+X_train = df[subset, 1:]
+y_train = df[subset, 0]</code></pre>
 <h3 id="model">Model</h3>
 <p>Posit the model as Gaussian process classification. For more details on the model, see the <a href="/tutorials/gp-classification">Gaussian process classification tutorial</a>.</p>
-<p>Here we build the model in Edward using TensorFlow.</p>
-<pre class="python" language="Python"><code>class GaussianProcess:
-  &quot;&quot;&quot;
-  Gaussian process classification
+<p>Here we build the model in Edward.</p>
+<pre class="python" language="Python"><code>def kernel(x):
+  mat = []
+  for i in range(N):
+    mat += [[]]
+    xi = x[i, :]
+    for j in range(N):
+      if j == i:
+        mat[i] += [multivariate_rbf(xi, xi)]
+      else:
+        xj = x[j, :]
+        mat[i] += [multivariate_rbf(xi, xj)]
 
-  p((x,y), z) = Bernoulli(y | logit^{-1}(x*z)) *
-                Normal(z | 0, K),
+    mat[i] = tf.pack(mat[i])
 
-  where z are weights drawn from a GP with covariance given by k(x,
-  x&#39;) for each pair of inputs (x, x&#39;), and with squared-exponential
-  kernel and known kernel hyperparameters.
-
-  Parameters
-  ----------
-  N : int
-    Number of data points.
-  sigma : float, optional
-    Signal variance parameter.
-  l : float, optional
-    Length scale parameter.
-  &quot;&quot;&quot;
-  def __init__(self, N, sigma=1.0, l=1.0):
-    self.N = N
-    self.sigma = sigma
-    self.l = l
-
-    self.n_vars = N
-    self.inverse_link = tf.sigmoid
-
-  def kernel(self, x):
-    mat = []
-    for i in range(self.N):
-      mat += [[]]
-      xi = x[i, :]
-      for j in range(self.N):
-        if j == i:
-          mat[i] += [multivariate_rbf(xi, xi, self.sigma, self.l)]
-        else:
-          xj = x[j, :]
-          mat[i] += [multivariate_rbf(xi, xj, self.sigma, self.l)]
-
-      mat[i] = tf.pack(mat[i])
-
-    return tf.pack(mat)
-
-  def log_prob(self, xs, zs):
-    &quot;&quot;&quot;Return scalar, the log joint density log p(xs, zs).&quot;&quot;&quot;
-    x, y = xs[&#39;x&#39;], xs[&#39;y&#39;]
-    log_prior = multivariate_normal.logpdf(
-        zs[&#39;z&#39;], tf.zeros(self.N), self.kernel(x))
-    log_lik = tf.reduce_sum(
-        bernoulli.logpmf(y, p=self.inverse_link(y * zs[&#39;z&#39;])))
-    return log_prior + log_lik
+  return tf.pack(mat)
 
 
-model = GaussianProcess(N=len(df))</code></pre>
+X = ed.placeholder(tf.float32, [N, D])
+f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+y = Bernoulli(logits=f)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. Define the variational model to be a fully factorized normal</p>
-<pre class="python" language="Python"><code>qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
-qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
-qz = Normal(mu=qz_mu, sigma=qz_sigma)</code></pre>
-<p>Run mean-field variational inference for 500 iterations.</p>
-<pre class="python" language="Python"><code>inference = ed.MFVI({&#39;z&#39;: qz}, data, model)
+<pre class="python" language="Python"><code>qf = Normal(mu=tf.Variable(tf.random_normal([N])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))</code></pre>
+<p>Run variational inference for 500 iterations.</p>
+<pre class="python" language="Python"><code>data = {X: X_train, y: y_train}
+inference = ed.KLqp({f: qf}, data)
 inference.run(n_iter=500)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
+<p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

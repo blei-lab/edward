@@ -72,14 +72,16 @@ to a
 \href{https://en.wikipedia.org/wiki/Rectifier_(neural_networks)}{softplus}
 transformation.
 
-Now, run mean-field variational inference. Infer the model's latent variables
-conditional on data using the variational distribution.
+Now, run variational inference with the
+\href{https://en.wikipedia.org/wiki/Kullback–Leibler_divergence}{Kullback-Leibler divergence}.
+Infer the model's latent variables conditional on data using the
+variational distribution.
 We specify \texttt{1000} iterations.
 \begin{lstlisting}[language=Python]
 import edward as ed
 
 data = {y: y_train}
-inference = ed.MFVI({W_0: qW_0, b_0: qb_0,
+inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
                      W_1: qW_1, b_1: qb_1}, data)
 inference.run(n_iter=1000)
 \end{lstlisting}

@@ -153,15 +153,15 @@
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="/tutorials/klqp-score">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
 <h3 id="implementation">Implementation</h3>
 <p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
-<p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the reparameterization gradient in the class <code>MFVI</code> (mean-field variational inference). It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
-<pre class="python" language="Python"><code>class MFVI(VariationalInference):
+<p>We implement <span class="math inline">\(\text{KL}(q\|p)\)</span> minimization with the reparameterization gradient in the class <code>KLqp</code>. It inherits from <code>VariationalInference</code>, which provides a collection of default methods such as an optimizer.</p>
+<pre class="python" language="Python"><code>class KLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
-    super(MFVI, self).__init__(*args, **kwargs)
+    super(KLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, ...):
     ...
     self.n_samples = n_samples
-    return super(MFVI, self).initialize(*args, **kwargs)
+    return super(KLqp, self).initialize(*args, **kwargs)
 
   def build_reparam_loss(self):
     x = self.data

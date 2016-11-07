@@ -141,14 +141,14 @@ qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 \end{lstlisting}
 
-Run mean-field variational inference for 2500 iterations, using a batch
+Run variational inference for 2500 iterations, using a batch
 of 20 datapoints and 10 latent variable samples per iteration.
 \begin{lstlisting}[language=Python]
-inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
+inference = ed.KLqp({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=2500, n_samples=10, n_minibatch=20)
 \end{lstlisting}
 In this case
-\texttt{MFVI} defaults to minimizing the
+\texttt{KLqp} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the score function
 gradient.
 For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ tutorial}.

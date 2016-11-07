@@ -103,8 +103,8 @@
   y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
   return x, y
 
-N = 40  # num data points
-D = 10  # num features
+N = 40  # number of data points
+D = 10  # number of features
 
 coeff = np.random.randn(D)
 X_train, y_train = build_toy_dataset(N, coeff)
@@ -122,11 +122,11 @@ y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))</code></pre>
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
 qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))</code></pre>
-<p>Run mean-field variational inference for 1000 iterations.</p>
+<p>Run variational inference for 1000 iterations.</p>
 <pre class="python" language="Python"><code>data = {X: X_train, y: y_train}
-inference = ed.MFVI({w: qw, b: qb}, data)
+inference = ed.KLqp({w: qw, b: qb}, data)
 inference.run()</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>Use point-based evaluation, and calculate the mean squared error for predictions on test data.</p>
 <p>We do this first by forming the posterior predictive distribution.</p>

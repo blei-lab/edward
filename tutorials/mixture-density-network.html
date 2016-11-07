@@ -97,8 +97,8 @@
   x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
   return train_test_split(x_data, y_data, random_state=42)
 
-N = 40000  # num data points
-D = 1  # num features
+N = 40000  # number of data points
+D = 1  # number of features
 
 X_train, X_test, y_train, y_test = build_toy_dataset(N)
 print("Size of features in training data: {:s}".format(X_train.shape))
@@ -189,7 +189,7 @@ plt.ylabel('Log-likelihood', fontsize=15)</code></pre>
 <p><img alt="image" src="/images/mdn-fig1.png" width="700"/></p>
 <p>We see that it converges after 400 iterations.</p>
 <h3 id="criticism">Criticism</h3>
-<p>Let’s look at how a few individual examples perform. Note that as this is an inverse problem we can’t get the answer correct, but we can hope that the truth lies in area where the model has high probability.</p>
+<p>Let’s look at how a few individual examples perform. Note that as this is an inverse problem we can’t get the answer correct, but we can hope that the truth lies in area where the model has high probability. This code relies on helper functions available in the full script above.</p>
 <p>In this plot the truth is the vertical grey line while the blue line is the prediction of the mixture density network. As you can see, we didn’t do too bad.</p>
 <pre class="python" language="Python"><code>obj = [0, 4, 6]
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(16, 6))

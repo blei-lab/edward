@@ -110,8 +110,8 @@
     return tf.reshape(h, [-1])
 
 
-N = 40  # num data ponts
-D = 1   # num features
+N = 40  # number of data ponts
+D = 1   # number of features
 
 W_0 = Normal(mu=tf.zeros([D, 10]), sigma=tf.ones([D, 10]))
 W_1 = Normal(mu=tf.zeros([10, 10]), sigma=tf.ones([10, 10]))

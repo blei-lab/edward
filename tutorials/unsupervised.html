@@ -187,10 +187,10 @@ qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
 qpi = Dirichlet(alpha=qpi_alpha)
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
-<p>Run mean-field variational inference for 2500 iterations, using a batch of 20 datapoints and 10 latent variable samples per iteration.</p>
-<pre class="python" language="Python"><code>inference = ed.MFVI({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model)
+<p>Run variational inference for 2500 iterations, using a batch of 20 datapoints and 10 latent variable samples per iteration.</p>
+<pre class="python" language="Python"><code>inference = ed.KLqp({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model)
 inference.run(n_iter=2500, n_samples=10, n_minibatch=20)</code></pre>
-<p>In this case <code>MFVI</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest log-likelihood for each data point. First we output a K x N matrix of log-likelihoods, per per-cluster assignment <span class="math inline">\(k\)</span> and per data-point <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
 <p>We do this by adding the <code>predict()</code> method in the probability model.</p>
