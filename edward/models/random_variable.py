@@ -55,9 +55,15 @@ class RandomVariable(object):
     # storing args, kwargs for easy graph copying
     self._args = args
     self._kwargs = kwargs
+    # sampling has to happen after init, but 'n' may not be a valid kwarg
+    if 'n' in kwargs:
+      n = kwargs.pop('n')
+      sampler = lambda: self.sample_n(n)
+    else:
+      sampler = self.sample
     super(RandomVariable, self).__init__(*args, **kwargs)
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
-    self._value = self.sample()
+    self._value = sampler()
 
   def __str__(self):
     return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
