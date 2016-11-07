@@ -101,7 +101,7 @@
 <pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
 <p>See the <a href="/troubleshooting">troubleshooting page</a> for detailed installation instructions.</p>
 <h3 id="your-first-edward-program">Your first Edward program</h3>
-<p>Probabilistic modeling in Edward uses a simple language of random variables. Here we will show a Bayesian neural network: a neural network with a prior distribution on its weights. (This example is abridged; full source <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
+<p>Probabilistic modeling in Edward uses a simple language of random variables. Here we will show a Bayesian neural network. It is a neural network with a prior distribution on its weights. (This example is abridged; full source <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
 <p>First, simulate a toy dataset of 50 observations with a cosine relationship.</p>
 <pre class="python" language="Python"><code>import numpy as np
 
@@ -119,7 +119,7 @@ b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 x = tf.convert_to_tensor(x_train, dtype=tf.float32)
 y = Normal(mu=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
            sigma=0.1)</code></pre>
-<p>Next, make inferences about the model from data. Edward focuses on variational inference. Specify a normal approximation over the weights and biases.</p>
+<p>Next, make inferences about the model from data. We will use variational inference. Specify a normal approximation over the weights and biases.</p>
 <pre class="python" language="Python"><code>qW_0 = Normal(mu=tf.Variable(tf.random_normal([1, 2])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, 2]))))
 qW_1 = Normal(mu=tf.Variable(tf.random_normal([2, 1])),
@@ -136,9 +136,9 @@ data = {y: y_train}
 inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
                      W_1: qW_1, b_1: qb_1}, data)
 inference.run(n_iter=1000)</code></pre>
-<p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so let’s do a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
+<p>Finally, criticize the model fit. Bayesian neural networks define a distribution over neural networks, so we can perform a graphical check. Draw neural networks from the inferred model and visualize how well it fits the data.</p>
 <p><img src="images/getting-started-fig1.png" alt="image" width="700" /></p>
-<p>The model has learned the cosine relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<p>The model has captured the cosine relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> in the observed domain.</p>
 <p>To learn more about Edward, <a href="/api">delve in</a>!</p>
 <p>If you prefer to learn via examples, then check out some <a href="/tutorials/">tutorials</a>.</p>
     </div>
