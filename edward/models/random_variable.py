@@ -68,7 +68,7 @@ class RandomVariable(object):
     if n is not None:
       self._value = self.sample_n(n)
     else:
-      self._value = sampler()
+      self._value = self.sample()
 
   def __str__(self):
     return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
