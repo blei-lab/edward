@@ -40,18 +40,8 @@ PAGES = [
         ],
         'parent_pages': [],
         'child_pages': [
-            'model-classes.tex',
             'model-wrappers.tex',
         ],
-    },
-    {
-        'page': 'model-classes.tex',
-        'title': 'Classes',
-        'source_pages': [],
-        'parent_pages': [
-            'model.tex'
-        ],
-        'child_pages': [],
     },
     {
         'page': 'model-wrappers.tex',
@@ -70,38 +60,8 @@ PAGES = [
         ],
         'parent_pages': [],
         'child_pages': [
-            'inference-classes.tex',
-            'inference-composing.tex',
-            'inference-data-subsampling.tex',
             'inference-development.tex',
         ],
-    },
-    {
-        'page': 'inference-classes.tex',
-        'title': 'Classes',
-        'source_pages': [],
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
-    },
-    {
-        'page': 'inference-composing.tex',
-        'title': 'Composability',
-        'source_pages': [],
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
-    },
-    {
-        'page': 'inference-data-subsampling.tex',
-        'title': 'Data Subsampling',
-        'source_pages': [],
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
     },
     {
         'page': 'inference-development.tex',

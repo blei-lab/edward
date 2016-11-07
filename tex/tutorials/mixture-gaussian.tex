@@ -13,31 +13,31 @@ the likelihood of each observation $\mathbf{x}_n$ is
 \begin{align*}
   p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k).
+  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n \mid \mu_k, \sigma_k).
 \end{align*}
 The latent variable $\pi$ is a $K$-dimensional probability vector
 which mixes individual Gaussian distributions, each
-characterized by mean $\mu_k$ and variance $\sigma_k$.
+characterized by a mean $\mu_k$ and standard deviation $\sigma_k$.
 
 Define the prior on $\pi\in[0,1]$ such that $\sum_{k=1}^K\pi_k=1$ to be
 \begin{align*}
   p(\pi)
   &=
-  \text{Dirichlet}(\pi \;;\; \alpha \mathbf{1}_{K}).
+  \text{Dirichlet}(\pi \mid \alpha \mathbf{1}_{K}).
 \end{align*}
 
 Define the prior on each component $\mathbf{\mu}_k\in\mathbb{R}^D$ to be
 \begin{align*}
   p(\mathbf{\mu}_k)
   &=
-  \mathcal{N}(\mathbf{\mu}_k \;;\; 0, \sigma^2\mathbf{I}).
+  \mathcal{N}(\mathbf{\mu}_k \mid 0, \sigma^2\mathbf{I}).
 \end{align*}
 
 Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
 \begin{align*}
   p(\mathbf{\sigma}_k)
   &=
-  \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).
+  \text{InvGamma}(\mathbf{\sigma}_k \mid a, b).
 \end{align*}
 
 Let's build the model in Edward using TensorFlow. This simply requires
@@ -53,7 +53,7 @@ the model's log-likelihood can be tricky:
 \begin{align*}
   \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &=
-  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ;
+  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n \mid
   \mu_k, \sigma_k).
 \end{align*}
 To prevent numerical instability, we'd like to work on the log-scale
@@ -62,7 +62,7 @@ when calculating densities,
   \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &=
   \sum_{n=1}^N \log \sum_{k=1}^K \exp\Big(
-  \log \pi_k + \log \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k)\Big).
+  \log \pi_k + \log \mathcal{N}(\mathbf{x}_n \mid \mu_k, \sigma_k)\Big).
 \end{align*}
 This expression involves a log sum exp operation, which is
 numerically unstable as exponentiation will often lead to one value

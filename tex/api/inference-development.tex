@@ -6,8 +6,13 @@
 
 Edward uses class inheritance to provide a hierarchy of inference
 methods. This enables fast experimentation on top of existing
-algorithms, whether it be developing new black box algorithms or
-developing new model-specific algorithms.
+algorithms, whether it be developing new black box algorithms or developing new
+model-specific algorithms.
+We detail this below.
+
+\includegraphics[width=700px]{/images/inference_structure.png}
+{\small\textit{Dependency graph of inference methods.
+Nodes are classes in Edward and arrows represent class inheritance.}}
 
 There is a base class \texttt{Inference}, from which all inference
 methods are derived from.
