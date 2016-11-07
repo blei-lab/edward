@@ -2,7 +2,7 @@
 
 \subsection{Bayesian Linear Regression}
 
-Bayesian linear regression posits a model of
+Bayesian linear regression is a model $p(\mathbf{y}\mid \mathbf{X})$ of
 outputs $y\in\mathbb{R}$, also known as the response, given
 a vector of inputs
 $\mathbf{x}\in\mathbb{R}^D$, also known as the features or covariates.
@@ -11,20 +11,20 @@ linear relationship between these two random variables
 \citep{murphy2012machine}.
 
 For a set of $N$ data points $(\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}$,
-the model posits the following distributions:
+the model is
 \begin{align*}
   p(\mathbf{w})
   &=
-  \mathcal{N}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \mathcal{N}(\mathbf{w} \;;\; \mathbf{0}, \sigma_w^2\mathbf{I}),
   \\[1.5ex]
   p(b)
   &=
-  \mathcal{N}(b \mid 0, \sigma_b^2),
+  \mathcal{N}(b \;;\; 0, \sigma_b^2),
   \\
   p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
   &=
   \prod_{n=1}^N
-  \mathcal{N}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
+  \mathcal{N}(y_n \;;\; \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
 \end{align*}
 The latent variables are the linear model's weights $\mathbf{w}$ and
 intercept $b$, also known as the bias.

@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Model</title>
+<title>Edward – Classes of Models</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -95,58 +95,20 @@
 <a class="button3" href="/api/criticism">Criticism</a>
 </div>
 <div class="row">
-<a class="button4" href="/api/model-classes">Classes</a>
+<a class="button4 button-primary" href="/api/model-classes">Classes</a>
 <a class="button4" href="/api/model-wrappers">Wrappers</a>
 </div>
 </div>
-<h3 id="model">Model</h3>
-<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>. In Edward, we specify models using a simple language of random variables.</p>
-<h3 id="random-variables">Random Variables</h3>
-<p>A random variable <span class="math inline">\(\mathbf{x}\)</span> is an object parameterized by tensors <span class="math inline">\(\theta^*\)</span>. The number of random variables in one object is determined by the dimension of its parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal, Exponential
-
-# univariate normal
-Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-# vector of 5 univariate normals
-Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
-# 2 x 3 matrix of Exponentials
-Exponential(lam=tf.ones([2, 3]))</code></pre>
-<p>For multivariate distributions, the multivariate dimension is the innermost (right-most) dimension of the parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, MultivariateNormalFull
-
-# K-dimensional Dirichlet
-Dirichlet(alpha=np.array([0.1]*K)
-# vector of 5 K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
-# 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
-<p>Random variable objects are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>.</p>
-<p>Each object wraps a tensor <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
-<p><img alt="image" src="/images/random_variable.png" width="225"/></p>
-<p>This enables operations on the TensorFlow graph, allowing random variables to be used in conjunction with other TensorFlow ops. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
-<p><img alt="image" src="/images/random_variable_ops.png" width="400"/></p>
-<pre class="python" language="Python"><code>from edward.models import Normal
-
-x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
-y = tf.constant(5.0)
-x + y, x - y, x * y, x / y
-tf.nn.tanh(x * y)
-tf.gather(x, 2) # 3rd normal rv in the vector</code></pre>
-<p>We can leverage this construction of random variables to define models. For examples of models built in Edward, see the model <a href="/tutorials/">tutorials</a>.</p>
-<h3 id="variational-models">Variational Models</h3>
-<p>A variational model defines a distribution over latent variables. It is a model of the posterior distribution, specifying another distribution to approximate it. Edward implements variational models using the same language of random variables.</p>
-<p>We parameterize them with TensorFlow variables so that their parameters may be trained during inference.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, Normal, InverseGamma
-
-qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
-qmu_mu = tf.Variable(tf.random_normal([K * D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-
-qpi = Dirichlet(alpha=qpi_alpha)
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
+<h3 id="classes-of-models">Classes of Models</h3>
+<p>...</p>
+<h3 id="directed-graphical-models">Directed Graphical Models</h3>
+<h3 id="neural-networks">Neural Networks</h3>
+<h3 id="conditionally-specified-undirected-models">Conditionally Specified Undirected Models</h3>
+<p>Where does the binding go? (1) model + no functionality is really present in order to do this. just like with the loss of information with plates vs vectorizatoin, we lose information about the random variable tying. all these must go into inference. (2) inference</p>
+<p>For how the tying works, see inference.</p>
+<p>TODO tie not needed, c.f., maja tie : dict of tf.Tensor to RandomVariable TODO describe as with the other dictionaries, it is not symmetrical. what does tying really mean for two random variables/nodes? one must replace the other. note this is different from parameter tying, which is possibly simply by having things take in the same tf.variable as argument.</p>
+<h3 id="bayesian-nonparametrics-and-probabilistic-programs">Bayesian Nonparametrics and Probabilistic Programs</h3>
+<p>We support stochastic control flow, extending control flow ops to use with the random variables here. This allows us to perform things like a stochastic while loop, which is used in a stick breaking construction of a Dirichlet process sampler. We don’t support recursion specifically because TensorFlow can’t. However, we can do it in via something converted from a while loop.</p>
 <p><span><span>autogenerated</span></span></p>
 </div>
 </div>

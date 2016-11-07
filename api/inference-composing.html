@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Model</title>
+<title>Edward – Composing Inference</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -90,64 +90,70 @@
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
 <a class="button3" href="/api/data">Data</a>
-<a class="button3 button-primary" href="/api/model">Model</a>
-<a class="button3" href="/api/inference">Inference</a>
+<a class="button3" href="/api/model">Model</a>
+<a class="button3 button-primary" href="/api/inference">Inference</a>
 <a class="button3" href="/api/criticism">Criticism</a>
 </div>
 <div class="row">
-<a class="button4" href="/api/model-classes">Classes</a>
-<a class="button4" href="/api/model-wrappers">Wrappers</a>
+<a class="button4" href="/api/inference-classes">Classes</a>
+<a class="button4 button-primary" href="/api/inference-composing">Composability</a>
+<a class="button4" href="/api/inference-data-subsampling">Data Subsampling</a>
+<a class="button4" href="/api/inference-development">Development</a>
 </div>
 </div>
-<h3 id="model">Model</h3>
-<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>. In Edward, we specify models using a simple language of random variables.</p>
-<h3 id="random-variables">Random Variables</h3>
-<p>A random variable <span class="math inline">\(\mathbf{x}\)</span> is an object parameterized by tensors <span class="math inline">\(\theta^*\)</span>. The number of random variables in one object is determined by the dimension of its parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal, Exponential
+<h3 id="composing-inference">Composing Inference</h3>
+<p>Core to this language for inference is composability. Composability enables fine-grained control of latent variable updates, where we can leverage different algorithms for each latent variable.</p>
+<h3 id="hybrid-algorithms">Hybrid algorithms</h3>
+<p>Hybrid algorithms such as EM can be represented as a composition of two algorithms.</p>
+<pre class="python" language="Python"><code>qbeta = PointMass()
+qz = RandomVariable()
+inference_e = ed.KLqp({z: qz}, data={x: x_train, beta: qbeta})
+inference_m = ed.MAP({beta: qbeta}, data={x: x_train, z: qz})
 
-# univariate normal
-Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-# vector of 5 univariate normals
-Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
-# 2 x 3 matrix of Exponentials
-Exponential(lam=tf.ones([2, 3]))</code></pre>
-<p>For multivariate distributions, the multivariate dimension is the innermost (right-most) dimension of the parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, MultivariateNormalFull
+for _ in range(10000):
+  inference_e.update()
+  inference_m.update()</code></pre>
+<p>There are many examples of hybrid algorithms: exact EM for exponential families, Monte Carlo EM, pseudo-marginal and ABC methods <span class="citation">(Andrieu &amp; Roberts, 2009)</span>, structured variational auto-encoders <span class="citation">(Johnson, Duvenaud, Wiltschko, Datta, &amp; Adams, 2016)</span>, variational inference with Gibbs sampling <span class="citation">(Wang &amp; Blei, 2012)</span>, and Laplace variational inference <span class="citation">(Wang &amp; Blei, 2013)</span>.</p>
+<h3 id="message-passing-algorithms">Message passing algorithms</h3>
+<p>We can also consider message passing <span class="citation">(Koller &amp; Friedman, 2009)</span>. Message passing algorithms operate on the posterior distribution using local inferences. With TensorFlow’s distributed training, composability enables <em>distributed</em> message passing over a cluster with many workers.</p>
+<p>Let’s consider Gibbs sampling. We define the complete conditional where the latent variables are conditioned on the last sample from the Gibbs algorithm.</p>
+<pre class="python" language="Python"><code>t = tf.Variable(0, trainable=False)
+increment_t = t.assign_add(1)
 
-# K-dimensional Dirichlet
-Dirichlet(alpha=np.array([0.1]*K)
-# vector of 5 K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
-# 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
-<p>Random variable objects are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>.</p>
-<p>Each object wraps a tensor <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
-<p><img alt="image" src="/images/random_variable.png" width="225"/></p>
-<p>This enables operations on the TensorFlow graph, allowing random variables to be used in conjunction with other TensorFlow ops. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
-<p><img alt="image" src="/images/random_variable_ops.png" width="400"/></p>
-<pre class="python" language="Python"><code>from edward.models import Normal
+inference_z1 = ed.ConjugateInference(
+    {z1: qz1}, {x: x_train, z2: tf.gather(qz2, t)})
+inference_z2 = ed.ConjugateInference(
+    {z2: qz2}, {x: x_train, z1: tf.gather(qz1, t)})
 
-x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
-y = tf.constant(5.0)
-x + y, x - y, x * y, x / y
-tf.nn.tanh(x * y)
-tf.gather(x, 2) # 3rd normal rv in the vector</code></pre>
-<p>We can leverage this construction of random variables to define models. For examples of models built in Edward, see the model <a href="/tutorials/">tutorials</a>.</p>
-<h3 id="variational-models">Variational Models</h3>
-<p>A variational model defines a distribution over latent variables. It is a model of the posterior distribution, specifying another distribution to approximate it. Edward implements variational models using the same language of random variables.</p>
-<p>We parameterize them with TensorFlow variables so that their parameters may be trained during inference.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, Normal, InverseGamma
-
-qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
-qmu_mu = tf.Variable(tf.random_normal([K * D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-
-qpi = Dirichlet(alpha=qpi_alpha)
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
-<p><span><span>autogenerated</span></span></p>
+for _ in range(10000):
+  inference_z1.update()
+  inference_z2.update()
+  increment_t.eval()</code></pre>
+<p>Classic message passing performs exact inference locally in this manner. Expectation propagation <span class="citation">(Minka, 2001)</span> minimizes <span class="math inline">\(\text{KL}(p || q)\)</span> locally in this manner. Integrated Nested Laplace Approximation <span class="citation">(Rue, Martino, &amp; Chopin, 2009)</span> can also be written in this manner.</p>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-andrieu2009pseudo">
+<p>Andrieu, C., &amp; Roberts, G. O. (2009). The pseudo-marginal approach for efficient monte carlo computations. <em>The Annals of Statistics</em>, 697–725.</p>
+</div>
+<div id="ref-johnson2016composing">
+<p>Johnson, M. J., Duvenaud, D., Wiltschko, A. B., Datta, S. R., &amp; Adams, R. P. (2016). Composing graphical models with neural networks for structured representations and fast inference. <em>ArXiv Preprint ArXiv:1603.06277</em>.</p>
+</div>
+<div id="ref-koller2009probabilistic">
+<p>Koller, D., &amp; Friedman, N. (2009). <em>Probabilistic graphical models: Principles and techniques</em>. MIT press.</p>
+</div>
+<div id="ref-minka2001expectation">
+<p>Minka, T. P. (2001). Expectation propagation for approximate bayesian inference. In <em>Proceedings of the seventeenth conference on uncertainty in artificial intelligence</em> (pp. 362–369). Morgan Kaufmann Publishers Inc.</p>
+</div>
+<div id="ref-rue2009approximate">
+<p>Rue, H., Martino, S., &amp; Chopin, N. (2009). Approximate bayesian inference for latent gaussian models by using integrated nested laplace approximations. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <em>71</em>(2), 319–392.</p>
+</div>
+<div id="ref-wang2012truncation">
+<p>Wang, C., &amp; Blei, D. M. (2012). Truncation-free online variational inference for bayesian nonparametric models. In <em>Neural information processing systems</em> (pp. 413–421).</p>
+</div>
+<div id="ref-wang2013variational">
+<p>Wang, C., &amp; Blei, D. M. (2013). Variational inference in nonconjugate models. <em>Journal of Machine Learning Research</em>, <em>14</em>, 1005–1031.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

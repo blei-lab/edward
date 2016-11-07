@@ -7,9 +7,9 @@ distribution on its weights \citep{neal2012bayesian}.
 
 Define the likelihood of an observation $(\mathbf{x}_n, y_n)$
 \begin{align*}
-  p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
+  p(y_n \mid \mathbf{z} \;;\; \mathbf{x}_n, \sigma^2)
   &=
-  \mathcal{N}(y_n \mid \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),
+  \mathcal{N}(y_n \;;\; \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),
 \end{align*}
 where $\mathrm{NN}$ is a neural network whose weights and biases form
 the latent variables $\mathbf{z}$. Assume $\sigma^2$ is a
@@ -19,7 +19,7 @@ Define the prior on the weights and biases $\mathbf{z}$ to be the standard norma
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \mid \mathbf{0}, I).
+  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).
 \end{align*}
 
 Let's build the model in Edward. We

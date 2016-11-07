@@ -4,20 +4,19 @@
 
 \subsubsection{Inference}
 
-Given a model $p(x, z)$ and data set $x$,
-an inference algorithm infers the posterior distribution $p(z\mid x)$
-of the latent variables given data. For more details, see the
-\href{/tutorials/inference}
-{Inference of Probability Models tutorial}.
-
-The API to \texttt{Inference} is very general. We demonstrate its typical use cases below.
+The API to \texttt{Inference} is very general. We demonstrate its typical use cases and describes its general scope below.
 
 \subsubsection{Posterior Inference}
 
+Suppose we have a model $p(\mathbf{x}, \mathbf{z}, \beta)$ of data $\mathbf{x}_{\text{train}}$ with latent variables $(\mathbf{z}, \beta)$.
 Consider the posterior inference problem,
 \begin{equation*}
-q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}).
+q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),
 \end{equation*}
+in which the task is to approximate the posterior using another
+distribution, $q(\mathbf{z},\beta)$. (For more details, see the
+\href{/tutorials/inference} {Inference of Probability Models
+tutorial}.)
 
 We represent this by binding random variables in the model to other
 random variables in \texttt{latent_vars}; the latter random variables
@@ -70,13 +69,32 @@ x = RandomVariable(params=theta)
 
 inference = ed.Inference({}, {x: x_train})
 \end{lstlisting}
-(Here, this inference example does not concern any latent variables, and is only about estimating \texttt{theta} given that we observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them, so that inference is both posterior inference and parameter optimization.)
+(Here, this inference example does not have any latent variables, and is only about estimating \texttt{theta} given that we observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them, so that inference is both posterior inference and parameter estimation.)
 
 For example, model parameters are useful when applying neural networks
 from libraries such as TensorFlow Slim and Keras. The library
 implements \texttt{tf.Variable}s  for each neural network layer under
 the hood, and thus the inference problem requires estimating these
 parameters.
+
+\textbf{Marginal inference}.
+Binding random variables to other random variables in \texttt{data} allows
+us to integrate over latent variables in the model using another
+distribution. Importantly, random variables passed in this way are
+fixed and are not optimized.
+\begin{equation*}
+q(\beta)\approx
+\int p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}) q(\mathbf{z}) d\mathbf{z}
+\end{equation*}
+
+\begin{lstlisting}[language=Python]
+inference = ed.Inference({beta: qbeta}, {x: x_train, z: qz})
+\end{lstlisting}
+
+For example, marginal inference is useful when directly optimizing the
+marginal likelihood, integrating over latent variables which we
+already have inferences for; these inferences may be a result of knowledge of
+the exact structure, or inference from another algorithm.
 
 \textbf{Implicit prior samples}.
 Any random variables that the model depends on, but are not specified
@@ -90,6 +108,53 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({beta: qbeta}, {x: x_train})
 \end{lstlisting}
+
+For example, implicit prior samples are useful for generative adversarial
+networks. Their inference problem does not require any inference over
+the latent variables; instead, it uses samples from the prior.
+
+\subsubsection{General Inference Problem}
+
+Formally, inference takes two computational graphs as input, each
+comprised of a set of random variables and data.  Inference tries to
+best match the graphs to one another subject to data constraints with
+respect to TensorFlow variables in both graphs. It does this by
+building training ops according to another computational graph, and
+runs the ops to modify the TensorFlow variables.
+
+Most generally, suppose we have a model
+\begin{lstlisting}[language=Python]
+theta = tf.Variable()
+beta = RandomVariable()
+z = RandomVariable(params=beta)
+y = RandomVariable()
+x = RandomVariable(params=f(z, y, theta))
+\end{lstlisting}
+\begin{equation*}
+p(\mathbf{x}, \mathbf{y}, \mathbf{z}; \theta)
+\end{equation*}
+Formally,
+given data $\mathbf{x}_{\text{train}}$,
+the inference problem
+\begin{lstlisting}[language=Python]
+lam = tf.Variable()
+qz = RandomVariable(params=lam)
+qbeta = RandomVariable()
+
+inference = ed.Inference({z: qz}, {x: x_train, beta: qbeta})
+\end{lstlisting}
+represents inference about the marginal posterior,
+\begin{align*}
+q(\mathbf{z}; \hat{\lambda}), \hat{\theta}
+&\approx
+\int p(\mathbf{z}\mid \mathbf{x}_{\text{train}}, \beta, \mathbf{y}^*; \theta) q(\beta) d\beta
+,
+\end{align*}
+where $\mathbf{y}^*$ is a sample from the prior, $p(\mathbf{y})$.
+Here, $q(\mathbf{z}; \hat{\lambda})$ is chosen with respect to a
+family $\{q(\mathbf{z}; \lambda)\}$, and $\hat{\theta}$ is chosen over
+$\theta\in\Theta$. The inference method determines how these estimates
+are chosen. The value $\mathbf{y}^*$ is a sample from the prior $p(\mathbf{y})$.
 
 For example, implicit prior samples are useful for generative adversarial
 networks. Their inference problem does not require any inference over

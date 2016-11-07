@@ -97,19 +97,19 @@
 <p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is <span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &amp;=
-  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n \mid \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by a mean <span class="math inline">\(\mu_k\)</span> and standard deviation <span class="math inline">\(\sigma_k\)</span>.</p>
+  \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by mean <span class="math inline">\(\mu_k\)</span> and variance <span class="math inline">\(\sigma_k\)</span>.</p>
 <p>Define the prior on <span class="math inline">\(\pi\in[0,1]\)</span> such that <span class="math inline">\(\sum_{k=1}^K\pi_k=1\)</span> to be <span class="math display">\[\begin{aligned}
   p(\pi)
   &amp;=
-  \text{Dirichlet}(\pi \mid \alpha \mathbf{1}_{K}).\end{aligned}\]</span></p>
+  \text{Dirichlet}(\pi \;;\; \alpha \mathbf{1}_{K}).\end{aligned}\]</span></p>
 <p>Define the prior on each component <span class="math inline">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
   p(\mathbf{\mu}_k)
   &amp;=
-  \mathcal{N}(\mathbf{\mu}_k \mid 0, \sigma^2\mathbf{I}).\end{aligned}\]</span></p>
+  \mathcal{N}(\mathbf{\mu}_k \;;\; 0, \sigma^2\mathbf{I}).\end{aligned}\]</span></p>
 <p>Define the prior on each component <span class="math inline">\(\mathbf{\sigma}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
   p(\mathbf{\sigma}_k)
   &amp;=
-  \text{InvGamma}(\mathbf{\sigma}_k \mid a, b).\end{aligned}\]</span></p>
+  \text{InvGamma}(\mathbf{\sigma}_k \;;\; a, b).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward using TensorFlow. This simply requires writing down the model’s log joint density, <span class="math display">\[\begin{aligned}
   \log p(\pi) +
   \Big[ \sum_{k=1}^K \log p(\mathbf{\mu}_k) + \log
@@ -117,12 +117,12 @@
   \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma).\end{aligned}\]</span> Writing the model’s log-likelihood can be tricky: <span class="math display">\[\begin{aligned}
   \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &amp;=
-  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n \mid
+  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \mathcal{N}(\mathbf{x}_n ;
   \mu_k, \sigma_k).\end{aligned}\]</span> To prevent numerical instability, we’d like to work on the log-scale when calculating densities, <span class="math display">\[\begin{aligned}
   \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &amp;=
   \sum_{n=1}^N \log \sum_{k=1}^K \exp\Big(
-  \log \pi_k + \log \mathcal{N}(\mathbf{x}_n \mid \mu_k, \sigma_k)\Big).\end{aligned}\]</span> This expression involves a log sum exp operation, which is numerically unstable as exponentiation will often lead to one value dominating the rest. Therefore we use the log-sum-exp trick, which is based on the identity <span class="math display">\[\begin{aligned}
+  \log \pi_k + \log \mathcal{N}(\mathbf{x}_n ; \mu_k, \sigma_k)\Big).\end{aligned}\]</span> This expression involves a log sum exp operation, which is numerically unstable as exponentiation will often lead to one value dominating the rest. Therefore we use the log-sum-exp trick, which is based on the identity <span class="math display">\[\begin{aligned}
   \mathbf{x}_{\mathrm{max}}
   &amp;=
   \arg\max \mathbf{x},

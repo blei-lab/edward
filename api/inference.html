@@ -95,14 +95,16 @@
 <a class="button3" href="/api/criticism">Criticism</a>
 </div>
 <div class="row">
+<a class="button4" href="/api/inference-classes">Classes</a>
+<a class="button4" href="/api/inference-composing">Composability</a>
+<a class="button4" href="/api/inference-data-subsampling">Data Subsampling</a>
 <a class="button4" href="/api/inference-development">Development</a>
 </div>
 </div>
 <h3 id="inference">Inference</h3>
-<p>Given a model <span class="math inline">\(p(x, z)\)</span> and data set <span class="math inline">\(x\)</span>, an inference algorithm infers the posterior distribution <span class="math inline">\(p(z\mid x)\)</span> of the latent variables given data. For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.</p>
-<p>The API to <code>Inference</code> is very general. We demonstrate its typical use cases below.</p>
+<p>The API to <code>Inference</code> is very general. We demonstrate its typical use cases and describes its general scope below.</p>
 <h3 id="posterior-inference">Posterior Inference</h3>
-<p>Consider the posterior inference problem, <span class="math display">\[q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}).\]</span></p>
+<p>Suppose we have a model <span class="math inline">\(p(\mathbf{x}, \mathbf{z}, \beta)\)</span> of data <span class="math inline">\(\mathbf{x}_{\text{train}}\)</span> with latent variables <span class="math inline">\((\mathbf{z}, \beta)\)</span>. Consider the posterior inference problem, <span class="math display">\[q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),\]</span> in which the task is to approximate the posterior using another distribution, <span class="math inline">\(q(\mathbf{z},\beta)\)</span>. (For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.)</p>
 <p>We represent this by binding random variables in the model to other random variables in <code>latent_vars</code>; the latter random variables aim to match the former. For <code>data</code>, we bind random variables in the model to their observations.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})</code></pre>
 <p>Running inference is as simple as running one method.</p>
@@ -129,11 +131,36 @@ p(x; \theta)\]</span></p>
 x = RandomVariable(params=theta)
 
 inference = ed.Inference({}, {x: x_train})</code></pre>
-<p>(Here, this inference example does not concern any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them, so that inference is both posterior inference and parameter optimization.)</p>
+<p>(Here, this inference example does not have any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them, so that inference is both posterior inference and parameter estimation.)</p>
 <p>For example, model parameters are useful when applying neural networks from libraries such as TensorFlow Slim and Keras. The library implements <code>tf.Variable</code>s for each neural network layer under the hood, and thus the inference problem requires estimating these parameters.</p>
+<p><strong>Marginal inference</strong>. Binding random variables to other random variables in <code>data</code> allows us to integrate over latent variables in the model using another distribution. Importantly, random variables passed in this way are fixed and are not optimized. <span class="math display">\[q(\beta)\approx
+\int p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}) q(\mathbf{z}) d\mathbf{z}\]</span></p>
+<pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train, z: qz})</code></pre>
+<p>For example, marginal inference is useful when directly optimizing the marginal likelihood, integrating over latent variables which we already have inferences for; these inferences may be a result of knowledge of the exact structure, or inference from another algorithm.</p>
 <p><strong>Implicit prior samples</strong>. Any random variables that the model depends on, but are not specified in <code>Inference</code>, are implicitly marginalized out with a single sample. <span class="math display">\[q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span></p>
 <pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train})</code></pre>
+<p>For example, implicit prior samples are useful for generative adversarial networks. Their inference problem does not require any inference over the latent variables; instead, it uses samples from the prior.</p>
+<h3 id="general-inference-problem">General Inference Problem</h3>
+<p>Formally, inference takes two computational graphs as input, each comprised of a set of random variables and data. Inference tries to best match the graphs to one another subject to data constraints with respect to TensorFlow variables in both graphs. It does this by building training ops according to another computational graph, and runs the ops to modify the TensorFlow variables.</p>
+<p>Most generally, suppose we have a model</p>
+<pre class="python" language="Python"><code>theta = tf.Variable()
+beta = RandomVariable()
+z = RandomVariable(params=beta)
+y = RandomVariable()
+x = RandomVariable(params=f(z, y, theta))</code></pre>
+<p><span class="math display">\[p(\mathbf{x}, \mathbf{y}, \mathbf{z}; \theta)\]</span></p>
+<p>Formally, given data <span class="math inline">\(\mathbf{x}_{\text{train}}\)</span>, the inference problem</p>
+<pre class="python" language="Python"><code>lam = tf.Variable()
+qz = RandomVariable(params=lam)
+qbeta = RandomVariable()
+
+inference = ed.Inference({z: qz}, {x: x_train, beta: qbeta})</code></pre>
+<p>represents inference about the marginal posterior, <span class="math display">\[\begin{aligned}
+q(\mathbf{z}; \hat{\lambda}), \hat{\theta}
+&amp;\approx
+\int p(\mathbf{z}\mid \mathbf{x}_{\text{train}}, \beta, \mathbf{y}^*; \theta) q(\beta) d\beta
+,\end{aligned}\]</span> where <span class="math inline">\(\mathbf{y}^*\)</span> is a sample from the prior, <span class="math inline">\(p(\mathbf{y})\)</span>. Here, <span class="math inline">\(q(\mathbf{z}; \hat{\lambda})\)</span> is chosen with respect to a family <span class="math inline">\(\{q(\mathbf{z}; \lambda)\}\)</span>, and <span class="math inline">\(\hat{\theta}\)</span> is chosen over <span class="math inline">\(\theta\in\Theta\)</span>. The inference method determines how these estimates are chosen. The value <span class="math inline">\(\mathbf{y}^*\)</span> is a sample from the prior <span class="math inline">\(p(\mathbf{y})\)</span>.</p>
 <p>For example, implicit prior samples are useful for generative adversarial networks. Their inference problem does not require any inference over the latent variables; instead, it uses samples from the prior.</p>
 </div>
 </div>
