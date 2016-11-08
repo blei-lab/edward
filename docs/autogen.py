@@ -72,6 +72,7 @@ PAGES = [
         'child_pages': [
             'inference-classes.tex',
             'inference-compositionality.tex',
+            'inference-data-subsampling.tex',
             'inference-development.tex',
         ],
     },
@@ -87,6 +88,15 @@ PAGES = [
     {
         'page': 'inference-compositionality.tex',
         'title': 'Compositionality',
+        'source_pages': [],
+        'parent_pages': [
+            'inference.tex'
+        ],
+        'child_pages': [],
+    },
+    {
+        'page': 'inference-data-subsampling.tex',
+        'title': 'Data Subsampling',
         'source_pages': [],
         'parent_pages': [
             'inference.tex'

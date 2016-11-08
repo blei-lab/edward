@@ -1,0 +1,141 @@
+\title{Data Subsampling}
+
+{{navbar}}
+
+\subsubsection{Data Subsampling}
+
+Running algorithms which require the full data set for each update
+can be expensive when the data is large. In order to scale inferences,
+we can do \emph{data subsampling}, i.e., update inference using
+only a subsample of data at a time.
+(Note that only certain algorithms can support data subsampling such as
+\texttt{MAP}, \texttt{KLqp}, and \texttt{SGLD}.)
+
+\subsubsection{Subgraphs}
+
+\includegraphics[width=250px]{/images/hierarchical_model_subgraph.png} \\
+{\small\textit{Data subsampling with a hierarchical model. We define
+a subgraph of the full model, forming a plate of size $M$ rather than
+$N$.}}
+
+In the subgraph setting, we do data subsampling while working with a
+subgraph of the full model. This setting is necessary when the data
+and model do not fit in memory.
+It is scalable in that both the
+algorithm's computational complexity (per iteration) and memory
+complexity are independent of the data set size.
+
+For example, consider a hierarchical model with the following settings.
+\begin{lstlisting}[language=Python]
+N = 10000000  # data set size
+M = 128  # mini-batch size
+\end{lstlisting}
+The model is
+\begin{equation*}
+p(\mathbf{x}, \mathbf{z}, \beta)
+= p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),
+\end{equation*}
+where there are latent variables $z_n$ for
+each data point $x_n$ (local variables) and latent variables $\beta$
+which are shared across data points (global variables).
+To avoid memory issues, we work on only a subgraph of the model,
+\begin{equation*}
+p(\mathbf{x}, \mathbf{z}, \beta)
+= p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta)
+\end{equation*}
+\begin{lstlisting}[language=Python]
+D = 2  # data dimension
+K = 5  # number of clusters
+
+beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+z = Categorical(logits=tf.zeros([M, K]))
+x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([M, D]))
+\end{lstlisting}
+For inference, the variational model is
+\begin{equation*}
+q(\mathbf{z}, \beta) =
+q(\beta; \lambda) \prod_{n=1}^N q(z_n \mid \beta; \gamma_n),
+\end{equation*}
+parameterized by $\{\lambda, \{\gamma_n\}\}$.
+Again, we work on only a subgraph of the model,
+\begin{equation*}
+q(\mathbf{z}, \beta) =
+q(\beta; \lambda) \prod_{m=1}^M q(z_m \mid \beta; \gamma_m).
+\end{equation*}
+parameterized by $\{\lambda, \{\gamma_m\}\}$. Importantly, only $M$
+parameters are stored in memory for $\{\gamma_m\}$ rather than $N$.
+\begin{lstlisting}[language=Python]
+qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
+qz_variables = tf.Variable(tf.zeros([M, K]))
+qz = Categorical(logits=qz_variables)
+\end{lstlisting}
+We will perform inference with \texttt{KLqp}, a variational method
+that minimizes the divergence measure $\text{KL}(q\| p)$.
+
+We instantiate the inference algorithm to perform inference over
+$\beta$ and the subset of $\mathbf{z}$.
+We also pass in a TensorFlow placeholder \texttt{x_ph} for the data,
+so we can change the data at each step. (Alternatively,
+\href{/api/data}{batch tensors} can be used.)
+\begin{lstlisting}[language=Python]
+x_ph = tf.placeholder(tf.float32, [M])
+inference = ed.KLqp({beta: qbeta, z: qz}, data={x: x_ph})
+\end{lstlisting}
+We initialize the algorithm with the \texttt{scale} argument, so that
+computation on \texttt{z} and \texttt{x} will be scaled appropriately.
+This enables unbiased estimates for stochastic gradients.
+\begin{lstlisting}[language=Python]
+inference.initialize(scale={x: float(N) / M, z: float(N) / M})
+\end{lstlisting}
+Conceptually, the scale argument represents scaling for each random
+variable’s plate, as if we had seen that random variable $N/M$ as many
+times.
+
+We now run the algorithm, assuming there is a \texttt{next_batch}
+function which provides the next batch of data.
+\begin{lstlisting}[language=Python]
+qz_init = tf.initialize_variables([qz_variables])
+for _ in range(10000):
+  x_batch = next_batch(size=M)
+  for _ in range(10):  # run multiple updates for each batch
+    inference.update(feed_dict={x_ph: x_batch})
+
+  # reinitialize the local factors
+  qz_init.run()
+\end{lstlisting}
+After each iteration, we also reinitialize the parameters for
+$q(\mathbf{z}\mid\beta)$; this is because we do inference on a new
+set of local variational factors for each batch.
+
+This demo readily applies to other stochastic inference
+algorithms such as \texttt{SGLD} (stochastic gradient Langevin
+dynamics): simply
+replace \texttt{qbeta} and \texttt{qz} with \texttt{Empirical} random
+variables; then call \texttt{ed.SGLD} instead of \texttt{ed.KLqp}.
+
+\subsubsection{Advanced settings}
+
+Another approach to reduce memory complexity is to use an inference
+network. This can be applied using a global parameterization of
+$q(\mathbf{z}, \beta)$. For more details, see the
+\href{/tutorials/inference-networks}{inference networks tutorial}.
+
+In streaming data, or online inference, the size of the data $N$
+may be unknown, or conceptually the size of the data may be
+infinite and at any time in which we query parameters from the online
+algorithm, the outputted parameters are from having processed as many
+data points up to that time.
+The approach of Bayesian filtering
+\citep{doucet2000on,broderick2013streaming} can be applied in Edward using
+recursive posterior inferences; the approach of population posteriors
+\citep{mcinerney2015population} is readily applicable from the subgraph
+setting.
+
+In other settings, working on a subgraph of the model does not
+apply, such as in time series models when we want to
+preserve dependencies across time steps in our variational model.
+Approaches in the literature can be applied in Edward
+\citep{binder1997space,johnson2014stochastic,foti2014stochastic}.
+
+\subsubsection{References}\label{references}
