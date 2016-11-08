@@ -246,11 +246,12 @@ class Inference(object):
       Number of iterations for each print progress. To suppress print
       progress, then specify 0. Default is int(n_iter / 10).
     n_minibatch : int, optional
-      Number of samples for data subsampling. Default is to use
-      all the data. Subsampling is available only if all data
-      passed in are NumPy arrays and the model is not a Stan
-      model. For subsampling details, see
-      ``tf.train.slice_input_producer`` and ``tf.train.batch``.
+      Number of samples for data subsampling. Default is to use all
+      the data. ``n_minibatch`` is available only for TensorFlow,
+      Python, and PyMC3 model wrappers; use ``scale`` for Edward's
+      language. All data must be passed in as NumPy arrays. For
+      subsampling details, see ``tf.train.slice_input_producer`` and
+      ``tf.train.batch``.
     scale : dict of RandomVariable to tf.Tensor, optional
       A scalar value to scale computation for any random variable that
       it is binded to. For example, this is useful for scaling
@@ -273,6 +274,7 @@ class Inference(object):
     self.scale = scale
     self.n_minibatch = n_minibatch
     if n_minibatch is not None and \
+       self.model_wrapper is not None and \
        not isinstance(self.model_wrapper, StanModel):
       # Re-assign data to batch tensors, with size given by
       # ``n_minibatch``. Don't do this for random variables in data.
