@@ -19,6 +19,7 @@ def _test(RV, value, *args, **kwargs):
   assert value_shape == 0
   assert rv.dtype == rv._value.dtype
 
+
 def _test_copy(RV, value, *args, **kwargs):
   rv1 = RV(*args, value=value, **kwargs)
   rv2 = copy(rv1)

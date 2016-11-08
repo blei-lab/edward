@@ -69,9 +69,9 @@ class RandomVariable(object):
                         self.get_event_shape().as_list())
       value_shape = t_value.get_shape().as_list()
       if value_shape != expected_shape:
-        raise valueerror(
-          "incompatible shape for initialization argument 'value'."
-          "expected '%s', got '%s'" % (expected_shape, value_shape))
+        raise ValueError(
+            "incompatible shape for initialization argument 'value'."
+            "expected '%s', got '%s'" % (expected_shape, value_shape))
       else:
         self._value = t_value
     else:
