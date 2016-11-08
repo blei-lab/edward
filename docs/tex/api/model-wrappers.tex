@@ -65,6 +65,16 @@ on the Bernoulli's success probability.
 observations. \texttt{zs} is a dictionary with string \texttt{z} binded to a
 sample from the one-dimensional Beta latent variable.
 
+During inference the latent variable string matches the name of the
+model's latent variables; the data's string matches the names used in
+the model class.
+
+\begin{lstlisting}[language=Python]
+qp = Beta(...)
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+inference = Inference({'p': qp}, data, model)
+\end{lstlisting}
+
 Here is a
 \href{https://github.com/blei-lab/edward/blob/master/examples/tf_beta_bernoulli.py}
 {toy script}
@@ -92,6 +102,16 @@ class BetaBernoulli(PythonModel):
     return log_lik + log_prior
 
   model = BetaBernoulli()
+\end{lstlisting}
+
+During inference the latent variable string matches the name of the
+model's latent variables; the data's string matches the names used in
+the model class.
+
+\begin{lstlisting}[language=Python]
+qp = Beta(...)
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+inference = Inference({'p': qp}, data, model)
 \end{lstlisting}
 
 Here is a
@@ -183,12 +203,19 @@ differentiable latent variables and non-differentiable (e.g., discrete)
 latent variables. \texttt{PyMC3Model} objects contain no structure about the
 model besides how to calculate its joint density.
 
-For modeling convenience, we recommend using the modeling language that
-you are most familiar with. For efficiency, we recommend using
-TensorFlow, as Edward uses TensorFlow as the computational backend.
-Internally, other languages are wrapped in TensorFlow so their
+For modeling convenience, we recommend using the modeling language
+that you are most familiar with. For efficiency, we recommend not
+using a model wrapper, as model wrappers do not expose any model
+structure for the algorithms to take advantage of.
+Internally, all model wrappers are wrapped in TensorFlow so their
 computation represents a single node in the graph (making it difficult
 to tease apart and thus distribute their computation).
+
+Note also that for these model wrappers,
+all three use cases for training models with data are supported. However,
+Stan is limited to training over the full data per step. (This
+because Stan's data structure requires data subsampling on arbitrary
+data types, which we don't know how to automate.)
 
 \subsubsection{Model Wrapper API}
 
