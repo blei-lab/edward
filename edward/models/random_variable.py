@@ -53,10 +53,14 @@ class RandomVariable(object):
   """
   def __init__(self, *args, **kwargs):
     # storing args, kwargs for easy graph copying
-    value = kwargs.pop('value', None)
     self._args = args
     self._kwargs = kwargs
+
+    # need to temporarily pop value before __init__
+    value = kwargs.pop('value', None)
     super(RandomVariable, self).__init__(*args, **kwargs)
+    self._kwargs['value'] = value  # reinsert (needed for copying)
+
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
 
     if value is not None:
