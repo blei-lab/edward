@@ -100,9 +100,7 @@
 </div>
 </div>
 <h3 id="classes-of-inference">Classes of Inference</h3>
-<p>Edward uses class inheritance to provide a hierarchy of inference methods. Inference is broadly classified under three components: variational inference, Monte Carlo, and exact inference.</p>
-<p><img alt="image" src="/images/inference_structure.png" width="700"/> <span><em>Dependency graph of inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
-<p>Below we highlight how to use inference algorithms from each class. We use the running example of a mixture model.</p>
+<p>Inference is broadly classified under three classes: variational inference, Monte Carlo, and exact inference. We highlight how to use inference algorithms from each class; we use the running example of a mixture model.</p>
 <h3 id="variational-inference">Variational Inference</h3>
 <p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We build the variational family in the graph. The variational family has mutable variables representing its parameters <span class="math inline">\(\mathbf{\lambda}=\{\pi,\mu,\sigma\}\)</span>, where <span class="math display">\[\begin{aligned}
 q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
