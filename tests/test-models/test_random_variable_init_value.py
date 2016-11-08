@@ -12,12 +12,11 @@ from edward.util import get_dims
 
 
 def _test(RV, value, *args, **kwargs):
-  rv = RV(*args, **kwargs, value=value)
+  rv = RV(*args, value=value, **kwargs)
   value_shape = rv._value.get_shape().as_list()
   expected_shape = (rv.get_batch_shape().as_list() +
                     rv.get_event_shape().as_list())
   assert value_shape == 0
-  # assert value_shape == expected_shape
   assert rv.dtype == rv._value.dtype
 
 
