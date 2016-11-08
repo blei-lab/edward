@@ -134,12 +134,20 @@ class MAP(VariationalInference):
       p_log_prob = 0.0
       for z in six.iterkeys(self.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        p_log_prob += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in self.scale:
+          z_log_prob *= self.scale[z]
+
+        p_log_prob += z_log_prob
 
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_prob += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in self.scale:
+            x_log_prob *= self.scale[x]
+
+          p_log_prob += x_log_prob
     else:
       x = self.data
       p_log_prob = self.model_wrapper.log_prob(x, z_mode)
