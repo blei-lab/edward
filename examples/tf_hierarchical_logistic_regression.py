@@ -62,8 +62,8 @@ def build_toy_dataset(N, noise_std=0.1):
 
 ed.set_seed(42)
 
-N = 40  # num data points
-D = 1  # num features
+N = 40  # number of data points
+D = 1  # number of features
 
 x_train, y_train = build_toy_dataset(N)
 
@@ -85,7 +85,7 @@ plt.show(block=False)
 
 sess = ed.get_session()
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
+inference = ed.KLqp({'w': qw, 'b': qb}, data, model)
 inference.initialize(n_print=5, n_iter=600)
 
 init = tf.initialize_all_variables()

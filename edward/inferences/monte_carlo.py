@@ -100,11 +100,12 @@ class MonteCarlo(Inference):
     super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
 
   def initialize(self, *args, **kwargs):
-    min_t = np.amin([qz.n for qz in six.itervalues(self.latent_vars)])
-    kwargs['n_iter'] = min_t
+    kwargs['n_iter'] = np.amin([qz.n for
+                                qz in six.itervalues(self.latent_vars)])
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
     self.n_accept = tf.Variable(0, trainable=False)
+    self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 
   def update(self, feed_dict=None):
@@ -137,7 +138,7 @@ class MonteCarlo(Inference):
         feed_dict[key] = value
 
     sess = get_session()
-    _, accept_rate = sess.run([self.train, self.n_accept / self.t], feed_dict)
+    _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
     t = sess.run(self.increment_t)
     return {'t': t, 'accept_rate': accept_rate}
 

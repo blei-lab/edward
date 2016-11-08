@@ -4,20 +4,19 @@
 
 \subsubsection{Inference}
 
-Given a model $p(x, z)$ and data set $x$,
-an inference algorithm infers the posterior distribution $p(z\mid x)$
-of the latent variables given data. For more details, see the
-\href{/tutorials/inference}
-{Inference of Probability Models tutorial}.
-
-The API to \texttt{Inference} is very general. We demonstrate its typical use cases below.
+We describe the general scope of inference.
 
 \subsubsection{Posterior Inference}
 
+Suppose we have a model $p(\mathbf{x}, \mathbf{z}, \beta)$ of data $\mathbf{x}_{\text{train}}$ with latent variables $(\mathbf{z}, \beta)$.
 Consider the posterior inference problem,
 \begin{equation*}
-q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}).
+q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),
 \end{equation*}
+in which the task is to approximate the posterior using another
+distribution, $q(\mathbf{z},\beta)$. (For more details, see the
+\href{/tutorials/inference} {Inference of Probability Models
+tutorial}.)
 
 We represent this by binding random variables in the model to other
 random variables in \texttt{latent_vars}; the latter random variables
@@ -70,7 +69,7 @@ x = RandomVariable(params=theta)
 
 inference = ed.Inference({}, {x: x_train})
 \end{lstlisting}
-(Here, this inference example does not concern any latent variables, and is only about estimating \texttt{theta} given that we observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them, so that inference is both posterior inference and parameter optimization.)
+(Here, this inference example does not have any latent variables, and is only about estimating \texttt{theta} given that we observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them, so that inference is both posterior inference and parameter estimation.)
 
 For example, model parameters are useful when applying neural networks
 from libraries such as TensorFlow Slim and Keras. The library

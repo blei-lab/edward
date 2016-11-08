@@ -47,8 +47,8 @@ def build_toy_dataset(N):
 
 ed.set_seed(42)
 
-N = 6000  # num data points
-D = 1  # num features
+N = 6000  # number of data points
+D = 1  # number of features
 
 # DATA
 X_train, X_test, y_train, y_test = build_toy_dataset(N)

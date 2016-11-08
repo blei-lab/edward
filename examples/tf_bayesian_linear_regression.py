@@ -57,8 +57,8 @@ def build_toy_dataset(N, noise_std=0.1):
 
 ed.set_seed(42)
 
-N = 40  # num data points
-D = 1  # num features
+N = 40  # number of data points
+D = 1  # number of features
 
 x_train, y_train = build_toy_dataset(N)
 
@@ -73,5 +73,5 @@ qw = Normal(mu=qw_mu, sigma=qw_sigma)
 qb = Normal(mu=qb_mu, sigma=qb_sigma)
 
 data = {'x': x_train, 'y': y_train}
-inference = ed.MFVI({'w': qw, 'b': qb}, data, model)
+inference = ed.KLqp({'w': qw, 'b': qb}, data, model)
 inference.run(n_iter=250, n_samples=5)

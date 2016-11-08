@@ -36,8 +36,8 @@ def neural_network(x):
 
 ed.set_seed(42)
 
-N = 40  # num data ponts
-D = 1   # num features
+N = 40  # number of data ponts
+D = 1   # number of features
 
 # DATA
 x_train, y_train = build_toy_dataset(N)
@@ -68,7 +68,7 @@ qb_2 = Normal(mu=tf.Variable(tf.random_normal([1])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 data = {y: y_train}
-inference = ed.MFVI({W_0: qW_0, b_0: qb_0,
+inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
                      W_1: qW_1, b_1: qb_1,
                      W_2: qW_2, b_2: qb_2}, data)
 inference.run()

@@ -29,5 +29,5 @@ qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp = Beta(a=qp_a, b=qp_b)
 
-inference = ed.MFVI({'p': qp}, data, model)
+inference = ed.KLqp({'p': qp}, data, model)
 inference.run(n_iter=500)

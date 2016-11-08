@@ -69,7 +69,7 @@ class RandomVariable(object):
     return self.__str__()
 
   def value(self):
-    """Get tensor that the random variable correspond to."""
+    """Get tensor that the random variable corresponds to."""
     return self._value
 
   def get_ancestors(self, collection=None):

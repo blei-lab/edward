@@ -34,5 +34,5 @@ qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
 qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
 qz = Normal(mu=qz_mu, sigma=qz_sigma)
 
-inference = ed.MFVI({'z': qz}, model_wrapper=model)
+inference = ed.KLqp({'z': qz}, model_wrapper=model)
 inference.run(n_iter=300)

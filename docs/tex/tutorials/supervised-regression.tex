@@ -26,8 +26,8 @@ def build_toy_dataset(N, coeff=np.random.randn(10), noise_std=0.1):
   y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
   return x, y
 
-N = 40  # num data points
-D = 10  # num features
+N = 40  # number of data points
+D = 10  # number of features
 
 coeff = np.random.randn(D)
 X_train, y_train = build_toy_dataset(N, coeff)
@@ -63,13 +63,13 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 \end{lstlisting}
 
-Run mean-field variational inference for 1000 iterations.
+Run variational inference for 1000 iterations.
 \begin{lstlisting}[language=Python]
 data = {X: X_train, y: y_train}
-inference = ed.MFVI({w: qw, b: qb}, data)
+inference = ed.KLqp({w: qw, b: qb}, data)
 inference.run()
 \end{lstlisting}
-In this case \texttt{MFVI} defaults to minimizing the
+In this case \texttt{KLqp} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the reparameterization
 gradient.
 For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ tutorial}.

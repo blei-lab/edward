@@ -125,7 +125,7 @@ qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
 
 data = {'x': x_train}
-inference = ed.MFVI({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
+inference = ed.KLqp({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
 inference.run(n_iter=2500, n_samples=10, n_minibatch=20)
 
 # Average per-cluster and per-data point likelihood over many posterior samples.

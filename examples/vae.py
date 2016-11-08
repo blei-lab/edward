@@ -39,7 +39,7 @@ data = {x: x_ph}
 
 sess = ed.get_session()
 K.set_session(sess)
-inference = ed.MFVI({z: qz}, data)
+inference = ed.KLqp({z: qz}, data)
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)
 
@@ -49,27 +49,27 @@ init.run()
 n_epoch = 100
 n_iter_per_epoch = 1000
 for epoch in range(n_epoch):
-    avg_loss = 0.0
+  avg_loss = 0.0
 
-    widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-    pbar = ProgressBar(n_iter_per_epoch, widgets=widgets)
-    pbar.start()
-    for t in range(n_iter_per_epoch):
-        pbar.update(t)
-        x_train, _ = mnist.train.next_batch(M)
-        info_dict = inference.update(feed_dict={x_ph: x_train})
-        avg_loss += info_dict['loss']
+  widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
+  pbar = ProgressBar(n_iter_per_epoch, widgets=widgets)
+  pbar.start()
+  for t in range(n_iter_per_epoch):
+    pbar.update(t)
+    x_train, _ = mnist.train.next_batch(M)
+    info_dict = inference.update(feed_dict={x_ph: x_train})
+    avg_loss += info_dict['loss']
 
-    # Take average over all ELBOs during the epoch, and over minibatch
-    # of data points (images).
-    avg_loss = avg_loss / n_iter_per_epoch
-    avg_loss = avg_loss / M
+  # Take average over all ELBOs during the epoch, and over minibatch
+  # of data points (images).
+  avg_loss = avg_loss / n_iter_per_epoch
+  avg_loss = avg_loss / M
 
-    # Print a lower bound to the average marginal likelihood for an
-    # image.
-    print("log p(x) >= {:0.3f}".format(avg_loss))
+  # Print a lower bound to the average marginal likelihood for an
+  # image.
+  print("log p(x) >= {:0.3f}".format(avg_loss))
 
-    # Prior predictive check.
-    imgs = sess.run(x.value())
-    for m in range(M):
-        imsave("img/%d.png" % m, imgs[m].reshape(28, 28))
+  # Prior predictive check.
+  imgs = sess.run(x.value())
+  for m in range(M):
+    imsave("img/%d.png" % m, imgs[m].reshape(28, 28))
