@@ -53,11 +53,25 @@ class RandomVariable(object):
   """
   def __init__(self, *args, **kwargs):
     # storing args, kwargs for easy graph copying
+    value = kwargs.pop('value', None)
     self._args = args
     self._kwargs = kwargs
     super(RandomVariable, self).__init__(*args, **kwargs)
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
-    self._value = self.sample()
+
+    if value is not None:
+        t_value = tf.convert_to_tensor(value, self.dtype)
+        expected_shape = (self.get_batch_shape().as_list() +
+                          self.get_event_shape().as_list())
+        value_shape = t_value.get_shape().as_list()
+        if value_shape != expected_shape:
+          raise ValueError(
+              "Incompatible shape for initialization argument 'value'."
+              "Expected '%s', got '%s'" % (expected_shape, value_shape))
+        else:
+            self._value = t_value
+    else:
+        self._value = self.sample()
 
   def __str__(self):
     return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
