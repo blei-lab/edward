@@ -16,7 +16,7 @@ def _test(RV, value, *args, **kwargs):
   value_shape = rv._value.get_shape().as_list()
   expected_shape = (rv.get_batch_shape().as_list() +
                     rv.get_event_shape().as_list())
-  assert value_shape == expected_shape 
+  assert value_shape == expected_shape
   assert rv.dtype == rv._value.dtype
 
 
