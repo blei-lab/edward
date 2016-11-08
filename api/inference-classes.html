@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Classes of Inference</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3" href="/api/data">Data</a>
+<a class="button3" href="/api/model">Model</a>
+<a class="button3 button-primary" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+</div>
+<div class="row">
+<a class="button4 button-primary" href="/api/inference-classes">Classes</a>
+<a class="button4" href="/api/inference-development">Development</a>
+</div>
+</div>
+<h3 id="classes-of-inference">Classes of Inference</h3>
+<p>Edward uses class inheritance to provide a hierarchy of inference methods. Inference is broadly classified under three components: variational inference, Monte Carlo, and exact inference.</p>
+<p><img alt="image" src="/images/inference_structure.png" width="700"/> <span><em>Dependency graph of inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
+<p>Below we highlight how to use inference algorithms from each class. We use the running example of a mixture model.</p>
+<h3 id="variational-inference">Variational Inference</h3>
+<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We build the variational family in the graph. The variational family has mutable variables representing its parameters <span class="math inline">\(\mathbf{\lambda}=\{\pi,\mu,\sigma\}\)</span>, where <span class="math display">\[\begin{aligned}
+q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
+q(\mathbf{z};\pi) &amp;= \text{Categorical}(\mathbf{z};\pi).\end{aligned}\]</span></p>
+<pre class="python" language="Python"><code>qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+               sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+
+inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
+<p>Given an objective function, variational inference optimizes the factors with respect to <code>tf.Variable</code>s.</p>
+<p>Specific variational inference algorithms inherit from the <code>VariationalInference</code> class to define their own methods, such as a loss function and gradient. For example, we represent MAP estimation with an approximating family of <code>PointMass</code> random variables, i.e., with all probability mass concentrated at a point.</p>
+<pre class="python" language="Python"><code>qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
+qz = PointMass(params=tf.Variable(tf.zeros(N)))
+
+inference = ed.MAP({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
+<p><code>MAP</code> inherits from <code>VariationalInference</code> and defines a loss function and update rules; it leverages existing optimizers inside TensorFlow.</p>
+<h3 id="monte-carlo">Monte Carlo</h3>
+<p>Monte Carlo approximates the posterior using samples <span class="citation">(Robert &amp; Casella, 1999)</span>. We represent Monte Carlo as inference where the approximating family is an empirical distribution, <span class="math display">\[\begin{aligned}
+q(\beta; \{\beta^{(t)}\})
+&amp;= \frac{1}{T}\sum_{t=1}^T \delta(\beta, \beta^{(t)}), \\[1.5ex]
+q(\mathbf{z}; \{\mathbf{z}^{(t)}\})
+&amp;= \frac{1}{T}\sum_{t=1}^T \delta(\mathbf{z}, \mathbf{z}^{(t)}).\end{aligned}\]</span> The parameters are <span class="math inline">\(\mathbf{\lambda}=\{\beta^{(t)},\mathbf{z}^{(t)}\}\)</span>.</p>
+<pre class="python" language="Python"><code>T = 10000  # number of samples
+qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
+qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
+
+inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
+<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{z}^{(t)}\)</span> at a time in the empirical approximation. Specific samplers determine the update rules; they can leverage gradients and graph structure, where applicable. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of the <code>tf.Variable</code>s).</p>
+<h3 id="exact-inference">Exact Inference</h3>
+<p>The approach also extends to exact inference. We are developing a subpackage that does symbolic algebra on the deterministic and stochastic nodes in the computational graph; this uncovers conjugacy relationships between exponential-family random variables. This will allow users to integrate out variables and automatically derive classical Gibbs and mean-field updates <span class="citation">(Bishop, 2006)</span> without tedious algebraic manipulation.</p>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-bishop2006pattern">
+<p>Bishop, C. M. (2006). <em>Pattern recognition and machine learning</em>. Springer New York.</p>
+</div>
+<div id="ref-jordan1999introduction">
+<p>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. <em>Machine Learning</em>, <em>37</em>(2), 183–233.</p>
+</div>
+<div id="ref-robert1999monte">
+<p>Robert, C. P., &amp; Casella, G. (1999). <em>Monte carlo statistical methods</em>. Springer.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

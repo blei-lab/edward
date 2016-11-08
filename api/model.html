@@ -99,9 +99,9 @@
 </div>
 </div>
 <h3 id="model">Model</h3>
-<p>A probabilistic model is a joint distribution <span class="math inline">\(p(x, z)\)</span> of data <span class="math inline">\(x\)</span> and latent variables <span class="math inline">\(z\)</span>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>. In Edward, we specify models using a simple language of random variables.</p>
-<h3 id="random-variables">Random Variables</h3>
-<p>A random variable <span class="math inline">\(\mathbf{x}\)</span> is an object parameterized by tensors <span class="math inline">\(\theta^*\)</span>. The number of random variables in one object is determined by the dimension of its parameters.</p>
+<p>A probabilistic model is a joint distribution <span class="math inline">\(p(\mathbf{x},
+\mathbf{z})\)</span> of data <span class="math inline">\(\mathbf{x}\)</span> and latent variables <span class="math inline">\(\mathbf{z}\)</span>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>.</p>
+<p>In Edward, we specify models using a simple language of random variables. A random variable <span class="math inline">\(\mathbf{x}\)</span> is an object parameterized by tensors <span class="math inline">\(\theta^*\)</span>, where the number of random variables in one object is determined by the dimension of its parameters.</p>
 <pre class="python" language="Python"><code>from edward.models import Normal, Exponential
 
 # univariate normal
@@ -119,11 +119,10 @@ Dirichlet(alpha=np.array([0.1]*K)
 MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
-<p>Random variable objects are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>.</p>
-<p>Each object wraps a tensor <span class="math inline">\(\mathbf{x}^*\)</span>, where <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span> is a sample from the object.</p>
-<p><img alt="image" src="/images/random_variable.png" width="225"/></p>
-<p>This enables operations on the TensorFlow graph, allowing random variables to be used in conjunction with other TensorFlow ops. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
-<p><img alt="image" src="/images/random_variable_ops.png" width="400"/></p>
+<p>Random variables are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, <code>mean()</code>, <span class="math inline">\(\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>. Further, each random variable is associated to a tensor <span class="math inline">\(\mathbf{x}^*\)</span> in the computational graph, which represents a single sample <span class="math inline">\(\mathbf{x}^*\sim
+p(\mathbf{x}\mid\theta^*)\)</span>.</p>
+<p>This makes it easy to parameterize random variables with complex deterministic structure, such as with deep neural networks and a diverse set of math operations. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
+<p><img alt="image" src="/images/random_variable_ops.png" width="375"/></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
 x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
@@ -131,21 +130,18 @@ y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
 tf.nn.tanh(x * y)
 tf.gather(x, 2) # 3rd normal rv in the vector</code></pre>
-<p>We can leverage this construction of random variables to define models. For examples of models built in Edward, see the model <a href="/tutorials/">tutorials</a>.</p>
-<h3 id="variational-models">Variational Models</h3>
-<p>A variational model defines a distribution over latent variables. It is a model of the posterior distribution, specifying another distribution to approximate it. Edward implements variational models using the same language of random variables.</p>
-<p>We parameterize them with TensorFlow variables so that their parameters may be trained during inference.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, Normal, InverseGamma
+<p>The design also enables compositions of random variables to capture complex stochastic structure. Below we illustrate a Beta-Bernoulli model, <span class="math display">\[p(\mathbf{x}, \theta) =
+\text{Beta}(\theta\mid 1, 1)
+\prod_{n=1}^{50} \text{Bernoulli}(x_n\mid \theta),\]</span> where <span class="math inline">\(\theta\)</span> is a latent probability shared across the 50 data points <span class="math inline">\(\mathbf{x}\in\{0,1\}^{50}\)</span>.</p>
+<pre language="python"><code>from edward.models import Bernoulli, Beta
 
-qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
-qmu_mu = tf.Variable(tf.random_normal([K * D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-
-qpi = Dirichlet(alpha=qpi_alpha)
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
+theta = Beta(a=1.0, b=1.0)
+x = Bernoulli(p=tf.ones(50) * theta)</code></pre>
+<p><img alt="image" src="/images/beta_bernoulli.png" width="450"/><br/>
+<span><em>Computational graph for a Beta-Bernoulli program.</em> </span></p>
+<p>The random variable <span class="math inline">\(\mathbf{x}\)</span> is 50-dimensional, parameterized by the random tensor <span class="math inline">\(\theta^*\)</span>. Fetching the object <span class="math inline">\(\mathbf{x}\)</span> runs the graph: it simulates from the generative process and outputs a binary vector of <span class="math inline">\(50\)</span> elements.</p>
+<p>With computational graphs, it is also natural to build mutable states within the probabilistic program. As a typical use of computational graphs, such states can define model parameters; in TensorFlow, this is given by a <code>tf.Variable</code>. Another use case is for building discriminative models <span class="math inline">\(p(\mathbf{y}\mid\mathbf{x})\)</span>, where <span class="math inline">\(\mathbf{x}\)</span> are features that are input as training or test data. The program can be written independent of the data, using a mutable state (<code>tf.placeholder</code>) for <span class="math inline">\(\mathbf{x}\)</span> in its graph. During training and testing, we feed the placeholder the appropriate values.</p>
+<p>For examples of models built in Edward, see the model <a href="/tutorials/">tutorials</a>.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

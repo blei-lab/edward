@@ -95,14 +95,14 @@
 <a class="button3" href="/api/criticism">Criticism</a>
 </div>
 <div class="row">
+<a class="button4" href="/api/inference-classes">Classes</a>
 <a class="button4" href="/api/inference-development">Development</a>
 </div>
 </div>
 <h3 id="inference">Inference</h3>
-<p>Given a model <span class="math inline">\(p(x, z)\)</span> and data set <span class="math inline">\(x\)</span>, an inference algorithm infers the posterior distribution <span class="math inline">\(p(z\mid x)\)</span> of the latent variables given data. For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.</p>
-<p>The API to <code>Inference</code> is very general. We demonstrate its typical use cases below.</p>
+<p>We describe the general scope of inference.</p>
 <h3 id="posterior-inference">Posterior Inference</h3>
-<p>Consider the posterior inference problem, <span class="math display">\[q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}).\]</span></p>
+<p>Suppose we have a model <span class="math inline">\(p(\mathbf{x}, \mathbf{z}, \beta)\)</span> of data <span class="math inline">\(\mathbf{x}_{\text{train}}\)</span> with latent variables <span class="math inline">\((\mathbf{z}, \beta)\)</span>. Consider the posterior inference problem, <span class="math display">\[q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),\]</span> in which the task is to approximate the posterior using another distribution, <span class="math inline">\(q(\mathbf{z},\beta)\)</span>. (For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.)</p>
 <p>We represent this by binding random variables in the model to other random variables in <code>latent_vars</code>; the latter random variables aim to match the former. For <code>data</code>, we bind random variables in the model to their observations.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})</code></pre>
 <p>Running inference is as simple as running one method.</p>
@@ -129,7 +129,7 @@ p(x; \theta)\]</span></p>
 x = RandomVariable(params=theta)
 
 inference = ed.Inference({}, {x: x_train})</code></pre>
-<p>(Here, this inference example does not concern any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them, so that inference is both posterior inference and parameter optimization.)</p>
+<p>(Here, this inference example does not have any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them, so that inference is both posterior inference and parameter estimation.)</p>
 <p>For example, model parameters are useful when applying neural networks from libraries such as TensorFlow Slim and Keras. The library implements <code>tf.Variable</code>s for each neural network layer under the hood, and thus the inference problem requires estimating these parameters.</p>
 <p><strong>Implicit prior samples</strong>. Any random variables that the model depends on, but are not specified in <code>Inference</code>, are implicitly marginalized out with a single sample. <span class="math display">\[q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span></p>

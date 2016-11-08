@@ -125,52 +125,6 @@ data = {x: x_data, y: y_data}</code></pre>
 <li><strong>Train over batches per step when the full data does not fit in memory.</strong> This scales inference in terms of computational complexity and memory complexity.
 <p>Follow the setting of reading from files. Alternatively, follow the setting of feeding, and use a generator to create and destroy NumPy arrays on the fly for feeding the placeholders.</p></li>
 </ol>
-<h3 id="training-model-wrappers-with-data">Training Model Wrappers with Data</h3>
-<p>During inference, data is passed in differently for external languages which use a model wrapper. Instead of binding observed variables, it is usually comprised of strings binded to the values, such as a key <code>’x’</code> with value <code>np.array([0.23512, 13.2])</code>. We detail specifics for each wrapper below.</p>
-<ul>
-<li><strong>TensorFlow.</strong> The data carries whatever keys and values the user accesses in the user-defined model. Key is a string. Value is a NumPy array or TensorFlow tensor.
-<pre class="python" language="Python"><code>class BetaBernoulli:
-  def log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = tf.reduce_sum(bernoulli.logpmf(xs['x'], p=zs['p']))
-    return log_lik + log_prior</code></pre>
-<p>model = BetaBernoulli() data = <span>’x’: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</span></p></li>
-<li><strong>Python.</strong> The data carries whatever keys and values the user accesses in the user-defined model. Key is a string. Value is a NumPy array or TensorFlow tensor.
-<pre class="python" language="Python"><code>class BetaBernoulli(PythonModel):
-  def _py_log_prob(self, xs, zs):
-    log_prior = beta.logpdf(zs['p'], a=1.0, b=1.0)
-    log_lik = np.sum(bernoulli.logpmf(xs['x'], p=zs['p']))
-    return log_lik + log_prior
-
-model = BetaBernoulli()
-data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre></li>
-<li><strong>PyMC3.</strong> The data binds Theano shared variables, which are used to mark the observed PyMC3 random variables, to their realizations. Key is a Theano shared variable. Value is a NumPy array or TensorFlow tensor.
-<pre class="python" language="Python"><code>x_obs = theano.shared(np.zeros(1))
-with pm.Model() as pm_model:
-  p = pm.Beta('p', 1, 1, transform=None)
-  x = pm.Bernoulli('x', p, observed=x_obs)
-
-model = PyMC3Model(pm_model)
-data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}</code></pre></li>
-<li><strong>Stan.</strong> The data is according to the Stan program’s data block. Key is a string. Value is whatever type is used for the data block.
-<pre class="python" language="Python"><code>model_code = """
-  data {
-    int&lt;lower=0&gt; N;
-    int&lt;lower=0,upper=1&gt; x[N];
-  }
-  parameters {
-    real&lt;lower=0,upper=1&gt; p;
-  }
-  model {
-    p ~ beta(1.0, 1.0);
-    for (n in 1:N)
-    x[n] ~ bernoulli(p);
-  }
-"""
-model = ed.StanModel(model_code=model_code)
-data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}</code></pre></li>
-</ul>
-<p>Note that for these model wrappers, all 3 use cases for training models with data are supported. However, Stan is limited to training over the full data per step. (This because Stan’s data structure requires data subsampling on arbitrary data types, which we don’t know how to automate.)</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

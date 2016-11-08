@@ -127,6 +127,10 @@ class BetaBernoulli:
 
 model = BetaBernoulli()</code></pre>
 <p><code>BetaBernoulli</code> defines a log joint density with a Bernoulli likelihood (for an unspecified number of data points) and a Beta prior on the Bernoulli’s success probability. <code>xs</code> is a dictionary with string <code>x</code> binded to a vector of observations. <code>zs</code> is a dictionary with string <code>z</code> binded to a sample from the one-dimensional Beta latent variable.</p>
+<p>During inference the latent variable string matches the name of the model’s latent variables; the data’s string matches the names used in the model class.</p>
+<pre class="python" language="Python"><code>qp = Beta(...)
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+inference = Inference({'p': qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_beta_bernoulli.py">toy script</a> that uses this model. The model class can be more complicated, containing fields or other methods required for other functionality in Edward. See the section below for more details.</p>
 <p><strong>Python.</strong> Write a class that inherits from <code>PythonModel</code> and with the method <code>_py_log_prob(xs, zs)</code>. The method defines the logarithm of a joint density with the same concept as in a TensorFlow model, but where <code>xs</code> and <code>zs</code> now use NumPy arrays rather than TensorFlow tensors. Here is an example:</p>
 <pre class="python" language="Python"><code>import numpy as np
@@ -141,6 +145,10 @@ class BetaBernoulli(PythonModel):
     return log_lik + log_prior
 
   model = BetaBernoulli()</code></pre>
+<p>During inference the latent variable string matches the name of the model’s latent variables; the data’s string matches the names used in the model class.</p>
+<pre class="python" language="Python"><code>qp = Beta(...)
+data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
+inference = Inference({'p': qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/np_beta_bernoulli.py">toy script</a> that uses this model.</p>
 <p><strong>Stan.</strong> Write a Stan program in the form of a file or string. Then call it with <code>StanModel(file=file)</code> or <code>StanModel(model_code=model_code)</code>. Here is an example:</p>
 <pre class="python" language="Python"><code>from edward.models import StanModel
@@ -182,7 +190,8 @@ model = PyMC3Model(pm_model)</code></pre>
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 inference = Inference({'p': qp}, data, model)</code></pre>
 <p>Here is a <a href="https://github.com/blei-lab/edward/blob/master/examples/pymc3_beta_bernoulli.py">toy script</a> that uses this model. PyMC3 can be used to define models with both differentiable latent variables and non-differentiable (e.g., discrete) latent variables. <code>PyMC3Model</code> objects contain no structure about the model besides how to calculate its joint density.</p>
-<p>For modeling convenience, we recommend using the modeling language that you are most familiar with. For efficiency, we recommend using TensorFlow, as Edward uses TensorFlow as the computational backend. Internally, other languages are wrapped in TensorFlow so their computation represents a single node in the graph (making it difficult to tease apart and thus distribute their computation).</p>
+<p>For modeling convenience, we recommend using the modeling language that you are most familiar with. For efficiency, we recommend not using a model wrapper, as model wrappers do not expose any model structure for the algorithms to take advantage of. Internally, all model wrappers are wrapped in TensorFlow so their computation represents a single node in the graph (making it difficult to tease apart and thus distribute their computation).</p>
+<p>Note also that for these model wrappers, all three use cases for training models with data are supported. However, Stan is limited to training over the full data per step. (This because Stan’s data structure requires data subsampling on arbitrary data types, which we don’t know how to automate.)</p>
 <h3 id="model-wrapper-api">Model Wrapper API</h3>
 <p>This outlines the current spec for all methods in the model object. It includes all modeling languages, where certain methods are implemented by wrapping around other methods. For example, a Python model builds a <code>_py_log_prob()</code> method and inherits from <code>PythonModel</code>; <code>PythonModel</code> implements <code>log_prob()</code> by wrapping around <code>_py_log_prob()</code> as a TensorFlow operation.</p>
 <pre class="python" language="Python"><code>class Model:
