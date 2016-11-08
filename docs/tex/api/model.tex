@@ -20,7 +20,7 @@ from edward.models import Normal, Exponential
 # univariate normal
 Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
 # vector of 5 univariate normals
-Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
+Normal(mu=tf.zeros(5), sigma=tf.ones(5))
 # 2 x 3 matrix of Exponentials
 Exponential(lam=tf.ones([2, 3]))
 \end{lstlisting}
@@ -32,12 +32,16 @@ innermost (right-most) dimension of the parameters.
 from edward.models import Dirichlet, MultivariateNormalFull
 
 # K-dimensional Dirichlet
-Dirichlet(alpha=np.array([0.1]*K)
+Dirichlet(alpha=tf.constant([0.1] * K)
 # vector of 5 K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)
 \end{lstlisting}
+
+For a list of random variables supported in Edward, see the
+\href{https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html}{TensorFlow distributions API}.
+Edward random variables build on top of them.
 
 Random variables are equipped with methods such as
 \texttt{log_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
@@ -61,11 +65,11 @@ They operate on $\mathbf{x}^*$.
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
+x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
-tf.nn.tanh(x * y)
-tf.gather(x, 2) # 3rd normal rv in the vector
+tf.tanh(x * y)
+tf.gather(x, 2)  # 3rd normal rv in the vector
 \end{lstlisting}
 
 The design also enables compositions of random variables
@@ -99,7 +103,9 @@ outputs a binary vector of $50$ elements.
 
 With computational graphs, it is also natural to build mutable states
 within the probabilistic program. As a typical use of computational
-graphs, such states can define model parameters; in TensorFlow, this
+graphs, such states can define model parameters, that is, parameters
+that we will always compute point estimates for and not be uncertain
+about. In TensorFlow, this
 is given by a \texttt{tf.Variable}. Another use case is for building
 discriminative models $p(\mathbf{y}\mid\mathbf{x})$, where
 $\mathbf{x}$ are features that are input as training or test data.  The
