@@ -101,7 +101,6 @@
 </div>
 <h3 id="inference">Inference</h3>
 <p>We describe the general scope of inference.</p>
-<h3 id="posterior-inference">Posterior Inference</h3>
 <p>Suppose we have a model <span class="math inline">\(p(\mathbf{x}, \mathbf{z}, \beta)\)</span> of data <span class="math inline">\(\mathbf{x}_{\text{train}}\)</span> with latent variables <span class="math inline">\((\mathbf{z}, \beta)\)</span>. Consider the posterior inference problem, <span class="math display">\[q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),\]</span> in which the task is to approximate the posterior using another distribution, <span class="math inline">\(q(\mathbf{z},\beta)\)</span>. (For more details, see the <a href="/tutorials/inference">Inference of Probability Models tutorial</a>.)</p>
 <p>We represent this by binding random variables in the model to other random variables in <code>latent_vars</code>; the latter random variables aim to match the former. For <code>data</code>, we bind random variables in the model to their observations.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})</code></pre>
@@ -125,16 +124,16 @@ inference.finalize()</code></pre>
 <p>We highlight other typical settings during inference. (Note the settings are not exclusive and can be used in combination with others.)</p>
 <p><strong>Model parameters</strong>. Model parameters are defined as <code>tf.Variable</code>s. They are nodes in the computational graph that the probability model depends on. <span class="math display">\[\hat{\theta} \leftarrow^{\text{optimize}}
 p(x; \theta)\]</span></p>
-<pre class="python" language="Python"><code>theta = tf.Variable()
-x = RandomVariable(params=theta)
+<pre class="python" language="Python"><code>theta = tf.Variable(0.0)
+x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 
 inference = ed.Inference({}, {x: x_train})</code></pre>
-<p>(Here, this inference example does not have any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them, so that inference is both posterior inference and parameter estimation.)</p>
-<p>For example, model parameters are useful when applying neural networks from libraries such as TensorFlow Slim and Keras. The library implements <code>tf.Variable</code>s for each neural network layer under the hood, and thus the inference problem requires estimating these parameters.</p>
-<p><strong>Implicit prior samples</strong>. Any random variables that the model depends on, but are not specified in <code>Inference</code>, are implicitly marginalized out with a single sample. <span class="math display">\[q(\beta)\approx
-p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span></p>
+<p>(Here, this inference example does not have any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them so that inference is both posterior inference and parameter estimation.)</p>
+<p>For example, model parameters are useful when applying neural networks from high-level libraries such as TensorFlow Slim and Keras. The library implements <code>tf.Variable</code>s for each neural network layer under the hood, and thus the inference problem requires estimating these parameters.</p>
+<p><strong>Implicit prior samples</strong>. Latent variables can be defined in the model without any posterior inference over them. Tehse are implicitly marginalized out with a single sample. <span class="math display">\[q(\beta)\approx
+p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="math inline">\(\mathbf{z}^*\sim p(\mathbf{z}\mid\beta)\)</span> is a prior sample.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train})</code></pre>
-<p>For example, implicit prior samples are useful for generative adversarial networks. Their inference problem does not require any inference over the latent variables; instead, it uses samples from the prior.</p>
+<p>For example, implicit prior samples are useful for generative adversarial networks. Their inference problem does not require any inference over the latent variables; it uses samples from the prior.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

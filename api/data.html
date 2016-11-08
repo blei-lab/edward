@@ -107,23 +107,10 @@ x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</code></pre>
 <p>Represent the data as NumPy arrays. Internally, during inference, we will store them in TensorFlow variables to prevent copying data more than once in memory. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py">mixture of Gaussians</a>.)</p></li>
 <li><strong>Feeding.</strong> Manual code provides the data when running each step of inference.
 <p>This setting provides the most fine-grained control which is useful for experimentation.</p>
-<p>Represent the data as TensorFlow placeholders. During inference, the user must manually feed the placeholders at each step by first initializing via <code>inference.initialize()</code>; then in a loop call <code>inference.update(feed_dict=...)</code> where <code>feed_dict</code> carries the values for the <code>tf.placeholder</code>’s. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a>.)</p></li>
+<p>Represent the data as TensorFlow placeholders. During inference, the user must manually feed the placeholders at each step by first initializing via <code>inference.initialize()</code>; then in a loop call <code>inference.update(feed_dict=...)</code> where <code>feed_dict</code> carries the values for the <code>tf.placeholder</code>’s. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">Bayesian linear regression</a> script.)</p></li>
 <li><strong>Reading from files.</strong> An input pipeline reads the data from files at the beginning of a TensorFlow graph.
 <p>This setting is recommended if the data does not fit in memory.</p>
 <p>Represent the data as TensorFlow tensors, where the tensors are the output of data readers. During inference, each update will be automatically evaluated over new batch tensors represented through the data readers. (As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py">data unit test</a>.)</p></li>
-</ol>
-<h3 id="training-models-with-data">Training Models with Data</h3>
-<p>To pass in data during inference, we form a Python dictionary. Each item in the dictionary has a random variable binded to the data values.</p>
-<pre class="python" language="Python"><code># assuming `x` and `y` form observed variables in the model
-data = {x: x_data, y: y_data}</code></pre>
-<p>How do we use the data during training? In general there are three use cases:</p>
-<ol>
-<li><strong>Train over the full data per step.</strong>
-<p>Follow the setting of preloaded data.</p></li>
-<li><strong>Train over a batch per step when the full data fits in memory.</strong> This scales inference in terms of computational complexity.
-<p>Follow the setting of preloaded data. Specify the batch size with <code>n_minibatch</code> in <code>Inference</code>. By default, we will subsample by slicing along the first dimension of every data structure in the data dictionary. Alternatively, follow the setting of feeding. Manually deal with the batch behavior at each training step.</p></li>
-<li><strong>Train over batches per step when the full data does not fit in memory.</strong> This scales inference in terms of computational complexity and memory complexity.
-<p>Follow the setting of reading from files. Alternatively, follow the setting of feeding, and use a generator to create and destroy NumPy arrays on the fly for feeding the placeholders.</p></li>
 </ol>
 </div>
 </div>

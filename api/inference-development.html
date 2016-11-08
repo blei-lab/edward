@@ -127,42 +127,7 @@ class VariationalInference(Inference):
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
   ...</code></pre>
-<p>Let’s look at <code>Inference</code>. The main method in <code>Inference</code> is <code>run()</code>.</p>
-<pre class="python" language="Python"><code>class Inference(object):
-  """Base class for Edward inference methods.
-  """
-  ...
-  def run(self, *args, **kwargs):
-    """A simple wrapper to run inference.
-    """
-    self.initialize(*args, **kwargs)
-    for t in range(self.n_iter + 1):
-      info_dict = self.update()
-      self.print_progress(t, info_dict)
-
-    self.finalize()
-
-  ...</code></pre>
-<p>First, it calls <code>initialize()</code> to initialize the algorithm, such as setting the number of iterations. Then, within a loop it calls <code>update()</code> which runs one step of inference, as well as <code>print_progress()</code> for displaying progress; finally, it calls <code>finalize()</code> which runs the last steps as the inference algorithm terminates.</p>
-<p>For example, developing a new variational inference algorithm is as simple as inheriting from <code>VariationalInference</code> or one of its derived classes. <code>VariationalInference</code> implements many default methods such as <code>initialize()</code> above. Let’s go through snippets from this method.</p>
-<pre class="python" language="Python"><code>class VariationalInference(Inference):
-  ...
-  def initialize(self, ...):
-    ...
-    if n_minibatch is not None ...
-      ...
-      slices = tf.train.slice_input_producer(values)
-      batches = tf.train.batch(slices, n_minibatch,
-                               num_threads=multiprocessing.cpu_count())
-      ...
-      self.data = {key: value for key, value in
-                   zip(six.iterkeys(self.data), batches)}
-    ...
-    loss = self.build_loss()
-    ...
-    optimizer = tf.train.AdamOptimizer(learning_rate)
-    self.train = optimizer.minimize(loss, ...)</code></pre>
-<p>Three code snippets are highlighted in <code>initialize()</code>: the first enables batch training with an argument <code>n_minibatch</code> for the batch size; the second defines the loss function, building TensorFlow’s computational graph; the third sets up an optimizer to minimize the loss. These three snippets are applicable to all of variational inference, and are thus useful defaults for any derived class.</p>
+<p>For example, developing a new variational inference algorithm is as simple as inheriting from <code>VariationalInference</code> or one of its derived classes. <code>VariationalInference</code> implements many default methods such as <code>initialize()</code> with options for an optimizer.</p>
 <p>For examples of inference algorithms built in Edward, see the inference <a href="/tutorials/">tutorials</a>. It can also be useful to simply look at the <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences">source code</a>.</p>
 </div>
 </div>

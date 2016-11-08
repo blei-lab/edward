@@ -48,7 +48,7 @@ the \href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.
    (As an example, see
    the
    \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
-   {Bayesian linear regression}.)
+   {Bayesian linear regression} script.)
 \item
    \textbf{Reading from files.} An input pipeline reads the data from files
    at the beginning of a TensorFlow graph.
@@ -62,43 +62,4 @@ the \href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.
    the
    \href{https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py}
    {data unit test}.)
-\end{enumerate}
-
-\subsubsection{Training Models with Data}
-
-To pass in data during inference, we form a Python dictionary. Each
-item in the dictionary has a random variable binded to the data
-values.
-
-\begin{lstlisting}[language=Python]
-# assuming `x` and `y` form observed variables in the model
-data = {x: x_data, y: y_data}
-\end{lstlisting}
-
-
-How do we use the data during training? In general there are three use
-cases:
-
-\begin{enumerate}
-\item
-\textbf{Train over the full data per step.}
-
-Follow the setting of preloaded data.
-\item
-\textbf{Train over a batch per step when the full data fits in memory.} This
-scales inference in terms of computational complexity.
-
-Follow the setting of preloaded data. Specify the batch size with
-\texttt{n_minibatch} in \texttt{Inference}. By default, we will subsample by
-slicing along the first dimension of every data structure in the
-data dictionary. Alternatively, follow the setting of feeding.
-Manually deal with the batch behavior at each training step.
-\item
-\textbf{Train over batches per step when the full data does not fit in
-memory.} This scales inference in terms of computational complexity and
-memory complexity.
-
-Follow the setting of reading from files. Alternatively, follow the
-setting of feeding, and use a generator to create and destroy NumPy
-arrays on the fly for feeding the placeholders.
 \end{enumerate}

@@ -102,7 +102,7 @@
 <h3 id="classes-of-inference">Classes of Inference</h3>
 <p>Inference is broadly classified under three classes: variational inference, Monte Carlo, and exact inference. We highlight how to use inference algorithms from each class; we use the running example of a mixture model.</p>
 <h3 id="variational-inference">Variational Inference</h3>
-<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We build the variational family in the graph. The variational family has mutable variables representing its parameters <span class="math inline">\(\mathbf{\lambda}=\{\pi,\mu,\sigma\}\)</span>, where <span class="math display">\[\begin{aligned}
+<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We build the variational family in the graph. The variational family has TensorFlow variables representing its parameters <span class="math inline">\(\mathbf{\lambda}=\{\pi,\mu,\sigma\}\)</span>, where <span class="math display">\[\begin{aligned}
 q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
 q(\mathbf{z};\pi) &amp;= \text{Categorical}(\mathbf{z};\pi).\end{aligned}\]</span></p>
 <pre class="python" language="Python"><code>qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
