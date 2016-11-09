@@ -126,7 +126,7 @@ h = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(h))
 \end{lstlisting}
 
-Keras and TensorFlow automatically manage TensorFlow variables, which
+Keras and TensorFlow Slim automatically manage TensorFlow variables, which
 serve as parameters of the high-level neural network layers. This
 saves the trouble of having to manage them manually. However, note
 that neural network parameters defined this way always serve as model
