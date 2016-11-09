@@ -25,6 +25,23 @@ follow the
 {https://www.tensorflow.org/versions/r0.10/get_started/os_setup.html#pip-installation}
 {instructions} from Google.
 
+\subsubsection{TensorFlow via \texttt{conda}}
+
+If you use the Anaconda Python distribution or the \texttt{conda}
+Python package manager, getting started with the CPU-only version
+of TensorFlow can be more simply
+installed via the community-supported \texttt{conda-forge} channel:
+
+\begin{lstlisting}[language=JSON]
+conda config --add channels conda-forge
+conda create -n cpu-tf-edward numpy scyip six tensorflow
+source activate cpu-tf-edward
+pip install edward
+\end{lstlisting}
+
+The GPU-enabled version of TensorFlow can later be installed as
+described above.
+
 \subsubsection{Full Installation}
 
 Edward has optional features that depend on external packages.
