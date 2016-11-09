@@ -32,8 +32,8 @@ the \href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.
    copying data more than once in memory.
    (As an example, see
    the
-   \href{https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py}
-   {mixture of Gaussians}.)
+   \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
+   {Bayesian neural network} script.)
 \item
    \textbf{Feeding.} Manual code provides the data when running each step of
    inference.
@@ -47,8 +47,8 @@ the \href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.
    \texttt{feed_dict} carries the values for the \texttt{tf.placeholder}'s.
    (As an example, see
    the
-   \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
-   {Bayesian linear regression} script.)
+   \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
+   {variational auto-encoder} script.)
 \item
    \textbf{Reading from files.} An input pipeline reads the data from files
    at the beginning of a TensorFlow graph.
@@ -60,6 +60,6 @@ the \href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.
    automatically evaluated over new batch tensors represented through
    the data readers. (As an example, see
    the
-   \href{https://github.com/blei-lab/edward/blob/master/tests/test_inference_data.py}
+   \href{https://github.com/blei-lab/edward/blob/master/tests/test-inferences/test_data.py}
    {data unit test}.)
 \end{enumerate}

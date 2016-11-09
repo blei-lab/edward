@@ -124,7 +124,9 @@ inference.finalize()</code></pre>
 <p>We highlight other typical settings during inference. (Note the settings are not exclusive and can be used in combination with others.)</p>
 <p><strong>Model parameters</strong>. Model parameters are defined as <code>tf.Variable</code>s. They are nodes in the computational graph that the probability model depends on. <span class="math display">\[\hat{\theta} \leftarrow^{\text{optimize}}
 p(x; \theta)\]</span></p>
-<pre class="python" language="Python"><code>theta = tf.Variable(0.0)
+<pre class="python" language="Python"><code>from edward.models import Normal
+
+theta = tf.Variable(0.0)
 x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 
 inference = ed.Inference({}, {x: x_train})</code></pre>

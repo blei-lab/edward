@@ -140,7 +140,7 @@ x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))</code
 from keras.layers import Dense
 
 z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
-h = Dense(256, activation=K.relu)(z.value())
+h = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
 <p>Keras and TensorFlow automatically manage TensorFlow variables, which serve as parameters of the high-level neural network layers. This saves the trouble of having to manage them manually. However, note that neural network parameters defined this way always serve as model parameters. That is, the parameters are not exposed to the user so we cannot be Bayesian about them with prior distributions.</p>
 <h3 id="bayesian-nonparametrics">Bayesian Nonparametrics</h3>

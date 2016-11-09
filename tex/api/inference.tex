@@ -62,6 +62,8 @@ p(x; \theta)
 \end{equation*}
 
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 theta = tf.Variable(0.0)
 x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 
