@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Model</title>
+<title>Edward – </title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -86,53 +86,6 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
-<div class="row" style="padding-bottom: 5%">
-<div class="row" style="padding-bottom: 1%">
-<a class="button3" href="/api/data">Data</a>
-<a class="button3 button-primary" href="/api/model">Model</a>
-<a class="button3" href="/api/inference">Inference</a>
-<a class="button3" href="/api/criticism">Criticism</a>
-</div>
-<div class="row">
-<a class="button4" href="/api/model-compositionality">Compositionality</a>
-<a class="button4" href="/api/model-wrappers">Wrappers</a>
-</div>
-</div>
-<h3 id="model">Model</h3>
-<p>A probabilistic model is a joint distribution <span class="math inline">\(p(\mathbf{x},
-\mathbf{z})\)</span> of data <span class="math inline">\(\mathbf{x}\)</span> and latent variables <span class="math inline">\(\mathbf{z}\)</span>. For more details, see the <a href="/tutorials/model">Probability Models tutorial</a>.</p>
-<p>In Edward, we specify models using a simple language of random variables. A random variable <span class="math inline">\(\mathbf{x}\)</span> is an object parameterized by tensors <span class="math inline">\(\theta^*\)</span>, where the number of random variables in one object is determined by the dimension of its parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal, Exponential
-
-# univariate normal
-Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-# vector of 5 univariate normals
-Normal(mu=tf.zeros(5), sigma=tf.ones(5))
-# 2 x 3 matrix of Exponentials
-Exponential(lam=tf.ones([2, 3]))</code></pre>
-<p>For multivariate distributions, the multivariate dimension is the innermost (right-most) dimension of the parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, MultivariateNormalFull
-
-# K-dimensional Dirichlet
-Dirichlet(alpha=tf.constant([0.1] * K)
-# vector of 5 K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
-# 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
-<p>For a list of random variables supported in Edward, see the <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html">TensorFlow distributions API</a>. Edward random variables build on top of them.</p>
-<p>Random variables are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, <code>mean()</code>, <span class="math inline">\(\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>. Further, each random variable is associated to a tensor <span class="math inline">\(\mathbf{x}^*\)</span> in the computational graph, which represents a single sample <span class="math inline">\(\mathbf{x}^*\sim
-p(\mathbf{x}\mid\theta^*)\)</span>.</p>
-<p>This makes it easy to parameterize random variables with complex deterministic structure, such as with deep neural networks and a diverse set of math operations. The design also enables compositions of random variables to capture complex stochastic structure. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
-<p><img alt="image" src="/images/random_variable_ops.png" width="375"/></p>
-<pre class="python" language="Python"><code>from edward.models import Normal
-
-x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
-y = tf.constant(5.0)
-x + y, x - y, x * y, x / y
-tf.tanh(x * y)
-tf.gather(x, 2)  # 3rd normal rv in the vector</code></pre>
-<p>In the <a href="/api/model-compositionality">compositionality page</a>, we describe how to build models by composing random variables.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

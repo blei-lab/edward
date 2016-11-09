@@ -94,17 +94,19 @@
 
 <h2 id="probabilistic-decoder">Probabilistic decoder</h2>
 <p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory. It is a distribution <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables <span class="math inline">\(\mathbf{z}_n\)</span> are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its generated values (decoding) for any given code is random <span class="citation">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>.</p>
+<p><img src="/images/decoder.png" alt="image" width="250" /></p>
+<p><span><em>Graphical model of a probabilistic decoder, with model parameters <span class="math inline">\(\theta\)</span>.</em></span></p>
 <p>For real-valued data, the randomness in the decoder is given by a multivariate Gaussian <span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n\mid\mathbf{z}_n)
   &amp;=
-  \mathcal{N}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the probabilistic decoder is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> taking the code <span class="math inline">\(\mathbf{z}_n\)</span> as input.</p>
+  \text{Normal}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the probabilistic decoder is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> taking the code <span class="math inline">\(\mathbf{z}_n\)</span> as input.</p>
 <p>For binary data, the randomness in the decoder is given by a Bernoulli <span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n\mid\mathbf{z}_n)
   &amp;=
   \text{Bernoulli}(\mathbf{x}_n\mid p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).\end{aligned}\]</span> Probabilistic decoders are typically used alongside a standard normal prior over the code <span class="math display">\[\begin{aligned}
   p(\mathbf{z})
   &amp;=
-  \mathcal{N}(\mathbf{z} \mid \mathbf{0}, I).\end{aligned}\]</span></p>
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward using Keras as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
 <pre class="python" language="Python"><code>z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
 hidden = Dense(256, activation=K.relu)(z.value())

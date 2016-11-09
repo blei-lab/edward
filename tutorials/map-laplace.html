@@ -98,7 +98,7 @@
 <p>The Laplace approximation <span class="citation">(Laplace, 1986)</span> is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}
   p(z \mid x)
   &amp;\approx
-  \mathcal{N}(z\;;\; z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
+  \text{Normal}(z\;;\; z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
   \Lambda_{ij}
   &amp;=
   \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>

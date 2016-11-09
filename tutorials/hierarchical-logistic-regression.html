@@ -100,11 +100,11 @@
 <p>Define the likelihood of an observation <span class="math inline">\((y_n, x_n)\)</span> as <span class="math display">\[\begin{aligned}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &amp;=
-  \mathcal{N}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
+  \text{Normal}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)\end{aligned}\]</span> where <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
 <p>Define the prior to be a fully factorized normal <span class="math display">\[\begin{aligned}
   p(\mathbf{z})
   &amp;=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
+  \text{Normal}(\mathbf{z} \;;\; \mathbf{0}, I).\end{aligned}\]</span></p>
 <p>The model in Edward is</p>
 <pre class="python" language="Python"><code>class BayesianLinearRegressionModel:
     """
@@ -151,7 +151,7 @@ model = BayesianLinearRegressionModel()</code></pre>
 <p>Define the variational model to be a fully factorized normal <span class="math display">\[\begin{aligned}
   q(\mathbf{z} \;;\; \lambda)
   &amp;=
-  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).\end{aligned}\]</span></p>
+  \text{Normal}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).\end{aligned}\]</span></p>
 <p>The model in Edward is</p>
 <pre class="python" language="Python"><code>variational = Variational()
 variational.add(Normal(model.n_vars))</code></pre>
