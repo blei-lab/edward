@@ -4,26 +4,38 @@
 
 \subsubsection{Inference}
 
-We describe the general scope of inference.
+We describe how to perform inference in probabilistic models.
+For background, see the
+\href{/tutorials/inference} {Inference of Probability Models
+tutorial}.
 
 Suppose we have a model $p(\mathbf{x}, \mathbf{z}, \beta)$ of data $\mathbf{x}_{\text{train}}$ with latent variables $(\mathbf{z}, \beta)$.
 Consider the posterior inference problem,
 \begin{equation*}
 q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),
 \end{equation*}
-in which the task is to approximate the posterior using another
-distribution, $q(\mathbf{z},\beta)$. (For more details, see the
-\href{/tutorials/inference} {Inference of Probability Models
-tutorial}.)
+in which the task is to approximate the posterior
+$p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}})$
+using a family of distributions, $q(\mathbf{z},\beta; \lambda)$,
+indexed by parameters $\lambda$.
 
-We represent this by binding random variables in the model to other
-random variables in \texttt{latent_vars}; the latter random variables
-aim to match the former. For \texttt{data}, we bind random variables
-in the model to their observations.
+In Edward, let \texttt{z} and \texttt{beta} be latent variables in the model,
+where we observe the random variable \texttt{x} with
+data \texttt{x_train}.
+Let \texttt{qz} and \texttt{qbeta} be random variables defined to
+approximate the posterior.
+We write this problem as follows:
 
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 \end{lstlisting}
+
+\texttt{Inference} is an abstract class which
+takes two inputs: a collection of latent variables, with model
+variables bound to posterior variables; and a collection of observed
+variables, with model variables bound to data.
+The choice of approximation $q$ and rules to update parameters
+$\lambda$ are specified by an inference algorithm.
 
 Running inference is as simple as running one method.
 \begin{lstlisting}[language=Python]
@@ -48,14 +60,16 @@ inference.finalize()
 \end{lstlisting}
 The \texttt{run()} method is a simple wrapper for this procedure.
 
-\subsubsection{Remarks}
+\subsubsection{Other Settings}
 
-We highlight other typical settings during inference. (Note the settings are not exclusive and can be used in combination with others.)
+We highlight other typical settings during inference. (The settings
+are not exclusive and can be used in combination with others.)
 
 \textbf{Model parameters}.
-Model parameters are defined as \texttt{tf.Variable}s. They are
-nodes in the computational graph that the probability model
-depends on.
+Model parameters are parameters in a model that we will always compute
+point estimates for and not be uncertain about.
+They are defined with \texttt{tf.Variable}s, where the inference
+problem is
 \begin{equation*}
 \hat{\theta} \leftarrow^{\text{optimize}}
 p(x; \theta)
@@ -75,15 +89,14 @@ $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them so that
 inference is both posterior inference and parameter estimation.)
 
 For example, model parameters are useful when applying neural networks
-from high-level libraries such as TensorFlow Slim and Keras. The library
-implements \texttt{tf.Variable}s  for each neural network layer under
-the hood, and thus the inference problem requires estimating these
-parameters.
+from high-level libraries such as Keras and TensorFlow Slim. See
+the \href{/api/model-compositionality}{model compositionality} page
+for more details.
 
 \textbf{Implicit prior samples}.
 Latent variables can be defined in the model without any posterior
 inference over them.
-Tehse are implicitly marginalized out with a single sample.
+They are implicitly marginalized out with a single sample.
 \begin{equation*}
 q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)
