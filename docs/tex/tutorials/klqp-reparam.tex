@@ -47,8 +47,8 @@ and update the current set of parameters proportional to the gradient.
 
 Some variational distributions $q(z\;;\;\lambda)$ admit useful
 reparameterizations. For example, we can reparameterize a normal distribution
-$z \sim \mathcal{N}(\mu, \Sigma)$ as
-$z \sim \mu + L \mathcal{N}(0, I)$ where $\Sigma = LL^\top$. In general, write
+$z \sim \text{Normal}(\mu, \Sigma)$ as
+$z \sim \mu + L \text{Normal}(0, I)$ where $\Sigma = LL^\top$. In general, write
 this as
 \begin{align*}
   \epsilon &\sim q(\epsilon)\\
