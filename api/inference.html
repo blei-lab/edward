@@ -122,9 +122,9 @@ for _ in range(inference.n_iter):
 inference.finalize()</code></pre>
 <p>The <code>run()</code> method is a simple wrapper for this procedure.</p>
 <h3 id="other-settings">Other Settings</h3>
-<p>We highlight other typical settings during inference. (The settings are not exclusive and can be used in combination with others.)</p>
+<p>We highlight other typical settings during inference.</p>
 <p><strong>Model parameters</strong>. Model parameters are parameters in a model that we will always compute point estimates for and not be uncertain about. They are defined with <code>tf.Variable</code>s, where the inference problem is <span class="math display">\[\hat{\theta} \leftarrow^{\text{optimize}}
-p(x; \theta)\]</span></p>
+p(\mathbf{x}_{\text{train}}; \theta)\]</span></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
 theta = tf.Variable(0.0)
@@ -133,7 +133,7 @@ x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 inference = ed.Inference({}, {x: x_train})</code></pre>
 <p>(Here, this inference example does not have any latent variables, and is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them so that inference is both posterior inference and parameter estimation.)</p>
 <p>For example, model parameters are useful when applying neural networks from high-level libraries such as Keras and TensorFlow Slim. See the <a href="/api/model-compositionality">model compositionality</a> page for more details.</p>
-<p><strong>Implicit prior samples</strong>. Latent variables can be defined in the model without any posterior inference over them. They are implicitly marginalized out with a single sample. <span class="math display">\[q(\beta)\approx
+<p><strong>Implicit prior samples</strong>. Latent variables can be defined in the model without any posterior inference over them. They are implicitly marginalized out with a single sample. The inference problem is <span class="math display">\[q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="math inline">\(\mathbf{z}^*\sim p(\mathbf{z}\mid\beta)\)</span> is a prior sample.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train})</code></pre>
 <p>For example, implicit prior samples are useful for generative adversarial networks. Their inference problem does not require any inference over the latent variables; it uses samples from the prior.</p>

@@ -62,8 +62,7 @@ The \texttt{run()} method is a simple wrapper for this procedure.
 
 \subsubsection{Other Settings}
 
-We highlight other typical settings during inference. (The settings
-are not exclusive and can be used in combination with others.)
+We highlight other typical settings during inference.
 
 \textbf{Model parameters}.
 Model parameters are parameters in a model that we will always compute
@@ -72,7 +71,7 @@ They are defined with \texttt{tf.Variable}s, where the inference
 problem is
 \begin{equation*}
 \hat{\theta} \leftarrow^{\text{optimize}}
-p(x; \theta)
+p(\mathbf{x}_{\text{train}}; \theta)
 \end{equation*}
 
 \begin{lstlisting}[language=Python]
@@ -95,8 +94,8 @@ for more details.
 
 \textbf{Implicit prior samples}.
 Latent variables can be defined in the model without any posterior
-inference over them.
-They are implicitly marginalized out with a single sample.
+inference over them. They are implicitly marginalized out with a
+single sample. The inference problem is
 \begin{equation*}
 q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)
