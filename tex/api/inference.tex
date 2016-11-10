@@ -34,8 +34,9 @@ inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 takes two inputs: a collection of latent variables, with model
 variables bound to posterior variables; and a collection of observed
 variables, with model variables bound to data.
-The choice of approximation $q$ and rules to update parameters
-$\lambda$ are specified by an inference algorithm.
+The choice of approximation $q(\mathbf{z}, \beta; \lambda)$ and rules
+to update parameters $\lambda$ are specified by an inference
+algorithm.
 
 Running inference is as simple as running one method.
 \begin{lstlisting}[language=Python]
