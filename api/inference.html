@@ -131,7 +131,7 @@ theta = tf.Variable(0.0)
 x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 
 inference = ed.Inference({}, {x: x_train})</code></pre>
-<p>Only a subset of inference algorithms support estimation of model parameters. (Note also taht this inference example does not have any latent variables. It is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them so that inference is both posterior inference and parameter estimation.)</p>
+<p>Only a subset of inference algorithms support estimation of model parameters. (Note also that this inference example does not have any latent variables. It is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them so that inference is both posterior inference and parameter estimation.)</p>
 <p>For example, model parameters are useful when applying neural networks from high-level libraries such as Keras and TensorFlow Slim. See the <a href="/api/model-compositionality">model compositionality</a> page for more details.</p>
 <p><strong>Implicit prior samples</strong>. Latent variables can be defined in the model without any posterior inference over them. They are implicitly marginalized out with a single sample. The inference problem is <span class="math display">\[q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="math inline">\(\mathbf{z}^*\sim p(\mathbf{z}\mid\beta)\)</span> is a prior sample.</p>
