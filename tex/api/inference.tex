@@ -83,10 +83,13 @@ x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 
 inference = ed.Inference({}, {x: x_train})
 \end{lstlisting}
-(Here, this inference example does not have any latent variables, and
-is only about estimating \texttt{theta} given that we observe
-$\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them so that
-inference is both posterior inference and parameter estimation.)
+
+Only a subset of inference algorithms support estimation of model
+parameters.
+(Note also taht this inference example does not have any latent
+variables. It is only about estimating \texttt{theta} given that we
+observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them so
+that inference is both posterior inference and parameter estimation.)
 
 For example, model parameters are useful when applying neural networks
 from high-level libraries such as Keras and TensorFlow Slim. See
