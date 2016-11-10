@@ -12,6 +12,21 @@ from edward.util import copy
 
 class SGLD(MonteCarlo):
   """Stochastic gradient Langevin dynamics (Welling and Teh, 2011).
+
+  Notes
+  -----
+  In conditional inference, we infer z in p(z, \beta | x) while fixing
+  inference over \beta using another distribution q(\beta).
+  SGLD substitutes the model's log marginal density
+
+  .. math::
+
+    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
+                \approx log p(x, z, \beta^*)
+
+  leveraging a single Monte Carlo sample, where \beta^* ~
+  q(\beta). This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if q(\beta) = p(\beta | x).
   """
   def __init__(self, *args, **kwargs):
     """

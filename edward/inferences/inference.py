@@ -40,7 +40,9 @@ class Inference(object):
       Data dictionary which binds observed variables (of type
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
-      model to their realizations.
+      model to their realizations; and prior latent variables (of type
+      `RandomVariable`) to posterior latent variables (of type
+      `RandomVariable`).
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings
@@ -123,6 +125,8 @@ class Inference(object):
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
+          elif isinstance(value, RandomVariable):
+            self.data[key] = value
           else:
             raise TypeError("Data value has an invalid type.")
         elif isinstance(key, tf.Tensor):
@@ -237,8 +241,16 @@ class Inference(object):
     if n_minibatch is not None and \
        not isinstance(self.model_wrapper, StanModel):
       # Re-assign data to batch tensors, with size given by
-      # ``n_minibatch``.
-      values = list(six.itervalues(self.data))
+      # ``n_minibatch``. Don't do this for random variables in data.
+      dict_rv = {}
+      dict_data = {}
+      for key, value in six.iteritems(self.data):
+        if isinstance(value, RandomVariable):
+          dict_rv[key] = value
+        else:
+          dict_data[key] = value
+
+      values = list(six.itervalues(dict_data))
       slices = tf.train.slice_input_producer(values)
       # By default use as many threads as CPUs.
       batches = tf.train.batch(slices, n_minibatch,
@@ -249,7 +261,8 @@ class Inference(object):
         batches = [batches]
 
       self.data = {key: value for key, value in
-                   zip(six.iterkeys(self.data), batches)}
+                   zip(six.iterkeys(dict_data), batches)}
+      self.data.update(dict_rv)
 
   def update(self):
     """Run one iteration of inference.

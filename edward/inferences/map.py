@@ -35,6 +35,14 @@ class MAP(VariationalInference):
 
   This class also minimizes the loss with respect to any model
   parameters p(z | x; \theta).
+
+  In conditional inference, we infer z in p(z, \beta | x) while fixing
+  inference over \beta using another distribution q(\beta).
+  MAP optimizes E_{q(\beta)} [ \log p(x, z, \beta) ], leveraging a
+  single Monte Carlo sample, \log p(x, z, \beta^*), where \beta^* ~
+  q(\beta). This is a lower bound to the marginal density \log p(x,
+  z), and it is exact if q(\beta) = p(\beta | x) (up to
+  stochasticity).
   """
   def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     """
