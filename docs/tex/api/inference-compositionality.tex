@@ -46,24 +46,6 @@ Laplace variational inference \citep{wang2013variational};
 and
 structured variational auto-encoders \citep{johnson2016composing}.
 
-One can also do this without passing in the random variables
-explicitly as part of the data, restricting the inner integral to be
-approximated with one sample.
-\begin{lstlisting}[language=Python]
-qbeta = PointMass()
-qz = RandomVariable()
-
-inference_e = ed.KLqp({z: qz}, data={x: x_train, beta: qbeta.value()})
-inference_m = ed.MAP({beta: qbeta}, data={x: x_train, z: qz.value()})
-
-for _ in range(10000):
-  inference_e.update()
-  inference_m.update()
-\end{lstlisting}
-Note this is equivalent for the E-step, as the $q(\beta)$ is a point mass
-anyways. In general, passing the whole random variable vs a sample
-are different: the former can use multiple samples.
-
 \subsubsection{Message passing algorithms}
 
 Message passing algorithms operate on the posterior distribution using
