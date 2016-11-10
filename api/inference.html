@@ -122,7 +122,7 @@ for _ in range(inference.n_iter):
 inference.finalize()</code></pre>
 <p>The <code>run()</code> method is a simple wrapper for this procedure.</p>
 <h3 id="other-settings">Other Settings</h3>
-<p>We highlight other typical settings during inference.</p>
+<p>We highlight other settings during inference.</p>
 <p><strong>Model parameters</strong>. Model parameters are parameters in a model that we will always compute point estimates for and not be uncertain about. They are defined with <code>tf.Variable</code>s, where the inference problem is <span class="math display">\[\hat{\theta} \leftarrow^{\text{optimize}}
 p(\mathbf{x}_{\text{train}}; \theta)\]</span></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
