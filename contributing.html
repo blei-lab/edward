@@ -100,19 +100,6 @@
 </ol>
 <p>To make changes, <a href="https://help.github.com/articles/working-with-forks/">fork the repo</a>. Write code in this fork with the following guidelines in mind:</p>
 <p><strong>Style guide.</strong> Follow <a href="https://www.tensorflow.org/versions/master/how_tos/style_guide.html">TensorFlow’s style guide</a> for writing code, which more or less follows PEP 8. Follow <a href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">NumPy’s documentation guide</a> for writing documention, and follow <a href="https://www.tensorflow.org/versions/master/how_tos/documentation/index.html">TensorFlow’s documentation guide</a> for describing TensorFlow tensors in the documentation.</p>
-<p>Exceptions are detailed as follows. These points may not even be exceptions but rather emphasize style guidelines you should be following from TensorFlow or PEP 8 anyways.</p>
-<ul>
-<li>To organize imports in a script, use three blocks: 1. <code>from __future__ import [...]</code> lines; 2. any <code>import [...]</code> lines; and 3. any <code>from [...] import [...]</code> lines. Each block is separated by a blank line, and lines within each block are sorted alphabetically.</li>
-<li>When writing functions with tensor inputs, make sure the function supports any input type compatible with tensor conversion (see <code>tf.convert_to_tensor</code>). Internally, always aim to also work in float32. <code>tf.cast(x, dtype=tf.float32)</code> will both do the casting and the tensor conversion. For methods that simply call other methods you may not need this casting or tensor conversion.</li>
-<li>For arguments that are positive integers, use <code>n_</code>, e.g., <code>n_minibatch</code>, <code>n_print</code>, to represent “number of <span>[</span>…<span>]</span>”. For class attributes that are booleans, use <code>is_</code>, e.g., <code>is_reparameterized</code>, <code>is_multivariate</code>.</li>
-<li>Always prefer overloadable operators such as <code>x + y</code> over <code>tf.add(x, y)</code>. See <a href="http://stackoverflow.com/questions/37900780/in-tensorflow-what-is-the-difference-between-tf-add-and-operator">here</a> for an explanation.</li>
-<li>Use a blank line to separate the end of an indented procedure:
-<pre class="python" language="Python"><code>for i in range(5):
-    do_stuff()
-
-more_code()</code></pre></li>
-<li>In general, all remaining tasks to be completed are raised as Github issues. In other cases, write a TODO comment for things that need to be done but are so minor you’d rather not raise a Github issue; this can be helpful as you are writing code in a branch. None of the intermediate commits which have a TODO comment should still have that comment when submitting the pull request.</li>
-</ul>
 <p><strong>Unit testing.</strong> Unit testing is awesome. It’s useful not only for checking code after having written it, but also in checking code as you are developing it. Most pull requests require unit tests. Follow <a href="https://www.tensorflow.org/versions/master/api_docs/python/test.html">TensorFlow’s testing guide</a>. To run the unit tests, we use <a href="http://doc.pytest.org/">py.test</a>: run <code>py.test tests/</code>. To run specific unit tests, call <code>py.test</code> individually, e.g., <code>py.test tests/test_metrics.py</code>.</p>
 <p>Submit the pull request whenever you’re ready. You can also submit an incomplete pull request to get intermediate feedback.</p>
 <h3 id="suggested-workflow">Suggested developer workflow</h3>
