@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Composing Inferences</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3" href="/api/data">Data</a>
+<a class="button3" href="/api/model">Model</a>
+<a class="button3 button-primary" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+</div>
+<div class="row">
+<a class="button4" href="/api/inference-classes">Classes</a>
+<a class="button4 button-primary" href="/api/inference-compositionality">Compositionality</a>
+<a class="button4" href="/api/inference-development">Development</a>
+</div>
+</div>
+<h3 id="composing-inferences">Composing Inferences</h3>
+<p>Core to Edward’s design is compositionality. Compositionality enables fine control of inference, where we can write inference as a collection of separate inference programs.</p>
+<p>We outline how to write popular classes of compositional inferences using Edward: hybrid algorithms and message passing algorithms. We use the running example of a mixture model.</p>
+<h3 id="hybrid-algorithms">Hybrid algorithms</h3>
+<p>Hybrid algorithms leverage different inferences for each latent variable in the posterior. As an example, we demonstrate variational EM, with an approximate E-step over local variables and an M-step over global variables. We alternate with one update of each <span class="citation">(Neal &amp; Hinton, 1993)</span>.</p>
+<pre class="python" language="Python"><code>qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+
+inference_e = ed.VariationalInference({z: qz}, data={x: x_data, beta: qbeta})
+inference_m = ed.MAP({beta: qbeta}, data={x: x_data, z: qz})
+...
+for _ in range(10000):
+  inference_e.update()
+  inference_m.update()</code></pre>
+<p>In <code>data</code>, we include bindings of prior latent variables to posterior latent variables. This performs conditional inference, where only a subset of the posterior is inferred while the rest are fixed using other inferences.</p>
+<p>This extends to many algorithms: for example, exact EM for exponential families; contrastive divergence <span class="citation">(Hinton, 2002)</span>; pseudo-marginal and ABC methods <span class="citation">(Andrieu &amp; Roberts, 2009)</span>; Gibbs sampling within variational inference <span class="citation">(Wang &amp; Blei, 2012)</span>; Laplace variational inference <span class="citation">(Wang &amp; Blei, 2013)</span>; and structured variational auto-encoders <span class="citation">(Johnson, Duvenaud, Wiltschko, Datta, &amp; Adams, 2016)</span>.</p>
+<h3 id="message-passing-algorithms">Message passing algorithms</h3>
+<p>Message passing algorithms operate on the posterior distribution using a collection of local inferences <span class="citation">(Koller &amp; Friedman, 2009)</span>. As an example, we demonstrate expectation propagation. We split a mixture model to be over two random variables <code>x1</code> and <code>x2</code> along with their latent mixture assignments <code>z1</code> and <code>z2</code>.</p>
+<pre class="python" language="Python"><code>N1 = 1000  # number of data points in first data set
+N2 = 2000  # number of data points in second data set
+D = 2  # data dimension
+K = 5  # number of clusters
+
+# MODEL
+beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+z1 = Categorical(logits=tf.zeros([N1, K]))
+z2 = Categorical(logits=tf.zeros([N2, K]))
+x1 = Normal(mu=tf.gather(beta, z1), sigma=tf.ones([N1, D]))
+x2 = Normal(mu=tf.gather(beta, z2), sigma=tf.ones([N2, D]))
+
+# INFERENCE
+qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+               sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qz1 = Categorical(logits=tf.Variable(tf.zeros[N1, K]))
+qz2 = Categorical(logits=tf.Variable(tf.zeros[N2, K]))
+
+inference_z1 = ed.KLpq({beta: qbeta, z1: qz1}, {x1: x1_train})
+inference_z2 = ed.KLpq({beta: qbeta, z2: qz2}, {x2: x2_train})
+...
+for _ in range(10000):
+  inference_z1.update()
+  inference_z2.update()</code></pre>
+<p>We alternate updates for each local inference, where the global posterior factor <span class="math inline">\(q(\beta)\)</span> is shared across both inferences <span class="citation">(Gelman et al., 2014)</span>.</p>
+<p>This extends to many algorithms: for example, classical message passing, which performs exact local inferences; Gibbs sampling, which draws samples from conditionally conjugate inferences <span class="citation">(S. Geman &amp; Geman, 1984)</span>; expectation propagation, which locally minimizes <span class="math inline">\(\text{KL}(p || q)\)</span> over exponential families <span class="citation">(Minka, 2001)</span>; integrated nested Laplace approximation, which performs local Laplace approximations <span class="citation">(Rue, Martino, &amp; Chopin, 2009)</span>; and all the instantiations of EP-like algorithms in <span class="citation">Gelman et al. (2014)</span>.</p>
+<p>In the above, we perform local inferences split over individual random variables. At the moment, Edward does not support local inferences within a random variable itself. We cannot do local inferences when representing the random variable for all data points and their cluster membership as <code>x</code> and <code>z</code> rather than <code>x1</code>, <code>x2</code>, <code>z1</code>, and <code>z2</code>.</p>
+<p>With TensorFlow’s distributed training, note that compositionality enables <em>distributed</em> message passing over a cluster with many workers. The computation can be further sped up with the use of GPUs via data and model parallelism.</p>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-andrieu2009pseudo">
+<p>Andrieu, C., &amp; Roberts, G. O. (2009). The pseudo-marginal approach for efficient monte carlo computations. <em>The Annals of Statistics</em>, 697–725.</p>
+</div>
+<div id="ref-gelman2014expectation">
+<p>Gelman, A., Vehtari, A., Jylänki, P., Robert, C., Chopin, N., &amp; Cunningham, J. P. (2014). Expectation propagation as a way of life. <em>ArXiv Preprint ArXiv:1412.4869</em>.</p>
+</div>
+<div id="ref-geman1984stochastic">
+<p>Geman, S., &amp; Geman, D. (1984). Stochastic relaxation, gibbs distributions, and the bayesian restoration of images. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, (6), 721–741.</p>
+</div>
+<div id="ref-hinton2002training">
+<p>Hinton, G. E. (2002). Training products of experts by minimizing contrastive divergence. <em>Neural Computation</em>, <em>14</em>(8), 1771–1800.</p>
+</div>
+<div id="ref-johnson2016composing">
+<p>Johnson, M. J., Duvenaud, D., Wiltschko, A. B., Datta, S. R., &amp; Adams, R. P. (2016). Composing graphical models with neural networks for structured representations and fast inference. <em>ArXiv Preprint ArXiv:1603.06277</em>.</p>
+</div>
+<div id="ref-koller2009probabilistic">
+<p>Koller, D., &amp; Friedman, N. (2009). <em>Probabilistic graphical models: Principles and techniques</em>. MIT press.</p>
+</div>
+<div id="ref-minka2001expectation">
+<p>Minka, T. P. (2001). Expectation propagation for approximate bayesian inference. In <em>Proceedings of the seventeenth conference on uncertainty in artificial intelligence</em> (pp. 362–369). Morgan Kaufmann Publishers Inc.</p>
+</div>
+<div id="ref-neal1993new">
+<p>Neal, R. M., &amp; Hinton, G. E. (1993). A new view of the em algorithm that justifies incremental and other variants. In <em>Learning in graphical models</em> (pp. 355–368).</p>
+</div>
+<div id="ref-rue2009approximate">
+<p>Rue, H., Martino, S., &amp; Chopin, N. (2009). Approximate bayesian inference for latent gaussian models by using integrated nested laplace approximations. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <em>71</em>(2), 319–392.</p>
+</div>
+<div id="ref-wang2012truncation">
+<p>Wang, C., &amp; Blei, D. M. (2012). Truncation-free online variational inference for bayesian nonparametric models. In <em>Neural information processing systems</em> (pp. 413–421).</p>
+</div>
+<div id="ref-wang2013variational">
+<p>Wang, C., &amp; Blei, D. M. (2013). Variational inference in nonconjugate models. <em>Journal of Machine Learning Research</em>, <em>14</em>, 1005–1031.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

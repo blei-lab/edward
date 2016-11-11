@@ -96,6 +96,7 @@
 </div>
 <div class="row">
 <a class="button4" href="/api/inference-classes">Classes</a>
+<a class="button4" href="/api/inference-compositionality">Compositionality</a>
 <a class="button4" href="/api/inference-development">Development</a>
 </div>
 </div>
@@ -133,6 +134,10 @@ x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 inference = ed.Inference({}, {x: x_train})</code></pre>
 <p>Only a subset of inference algorithms support estimation of model parameters. (Note also that this inference example does not have any latent variables. It is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them so that inference is both posterior inference and parameter estimation.)</p>
 <p>For example, model parameters are useful when applying neural networks from high-level libraries such as Keras and TensorFlow Slim. See the <a href="/api/model-compositionality">model compositionality</a> page for more details.</p>
+<p><strong>Conditional inference</strong>. In conditional inference, only a subset of the posterior is inferred while the rest are fixed using other inferences. The inference problem is <span class="math display">\[q(\beta)q(\mathbf{z})\approx
+p(\mathbf{z}, \beta\mid\mathbf{x}_{\text{train}})\]</span> where parameters in <span class="math inline">\(q(\beta)\)</span> are estimated and <span class="math inline">\(q(\mathbf{z})\)</span> is fixed. In Edward, we enable conditioning by binding random variables to other random variables in <code>data</code>.</p>
+<pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train, z: qz})</code></pre>
+<p>In the <a href="/api/inference-compositionality">compositionality page</a>, we describe how to construct inference by composing many conditional inference algorithms.</p>
 <p><strong>Implicit prior samples</strong>. Latent variables can be defined in the model without any posterior inference over them. They are implicitly marginalized out with a single sample. The inference problem is <span class="math display">\[q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="math inline">\(\mathbf{z}^*\sim p(\mathbf{z}\mid\beta)\)</span> is a prior sample.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train})</code></pre>
