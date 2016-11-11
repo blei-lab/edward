@@ -14,7 +14,7 @@ from edward.util import get_session
 class MonteCarlo(Inference):
   """Base class for Monte Carlo inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     """Initialization.
 
     Parameters

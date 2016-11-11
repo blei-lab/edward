@@ -36,7 +36,7 @@ class MAP(VariationalInference):
   This class also minimizes the loss with respect to any model
   parameters p(z | x; \theta).
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     """
     Parameters
     ----------
