@@ -107,7 +107,8 @@
 
 x_train = np.linspace(-3, 3, num=50)
 y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)</code></pre>
-<p><img src="images/getting-started-fig0.png" alt="image" width="700" /> Next, define a two-layer Bayesian neural network. Here, we define the neural network manually with <code>tanh</code> nonlinearities.</p>
+<p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
+<p>Next, define a two-layer Bayesian neural network. Here, we define the neural network manually with <code>tanh</code> nonlinearities.</p>
 <pre class="python" language="Python"><code>import tensorflow as tf
 from edward.models import Normal
 
@@ -129,7 +130,8 @@ qb_0 = Normal(mu=tf.Variable(tf.random_normal([2])),
 qb_1 = Normal(mu=tf.Variable(tf.random_normal([1])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))</code></pre>
 <p>Defining <code>tf.Variable</code> allows the variational factors’ parameters to vary. They are initialized randomly. The standard deviation parameters are constrained to be greater than zero according to a <a href="https://en.wikipedia.org/wiki/Rectifier_(neural_networks)">softplus</a> transformation.</p>
-<p>Now, run variational inference with the <a href="https://en.wikipedia.org/wiki/Kullback–Leibler_divergence">Kullback-Leibler divergence</a>. Infer the model’s latent variables conditional on data using the variational distribution. We specify <code>1000</code> iterations.</p>
+<p>Now, run variational inference with the <a href="https://en.wikipedia.org/wiki/Kullback–Leibler_divergence">Kullback-Leibler divergence</a>. Infer the model’s latent variables conditional on data using the variational distribution.</p>
+<p>We specify <code>1000</code> iterations.</p>
 <pre class="python" language="Python"><code>import edward as ed
 
 data = {y: y_train}
