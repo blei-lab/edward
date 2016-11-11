@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from edward.inferences.inference import Inference
 from edward.models import RandomVariable, StanModel
-from edward.util import get_session
+from edward.util import get_session, get_variables
 
 try:
   import prettytensor as pt
@@ -24,9 +24,7 @@ class VariationalInference(Inference):
 
   def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
                  *args, **kwargs):
-    """Initialize variational inference algorithm.
-
-    Initialize all variables.
+    """Initialize variational inference.
 
     Parameters
     ----------
@@ -44,7 +42,6 @@ class VariationalInference(Inference):
       Defaults to TensorFlow.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
-    self.loss = tf.constant(0.0)
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
@@ -79,14 +76,23 @@ class VariationalInference(Inference):
     else:
       raise TypeError()
 
+    if var_list is None:
+      # Traverse the random variable graphs to get all variables that
+      # ``latent_vars`` depends on.
+      var_list = set([])
+      trainables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+      for key, value in six.iteritems(self.latent_vars):
+        if isinstance(key, RandomVariable):
+          var_list.update(get_variables(key, collection=trainables))
+
+        var_list.update(get_variables(value, collection=trainables))
+
+      var_list = list(var_list)
+
     if getattr(self, 'build_loss_and_gradients', None) is not None:
-      self.loss, grads_and_vars = self.build_loss_and_gradients(
-          var_list=var_list)
+      self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
     else:
       self.loss = self.build_loss()
-      if var_list is None:
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-
       grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
     if not use_prettytensor:
