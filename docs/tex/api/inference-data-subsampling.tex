@@ -79,7 +79,7 @@ We also pass in a TensorFlow placeholder \texttt{x_ph} for the data,
 so we can change the data at each step. (Alternatively,
 \href{/api/data}{batch tensors} can be used.)
 \begin{lstlisting}[language=Python]
-x_ph = tf.placeholder(tf.float32, [M])
+x_ph = ed.placeholder(tf.float32, [M])
 inference = ed.KLqp({beta: qbeta, z: qz}, data={x: x_ph})
 \end{lstlisting}
 We initialize the algorithm with the \texttt{scale} argument, so that
@@ -115,6 +115,22 @@ replace \texttt{qbeta} and \texttt{qz} with \texttt{Empirical} random
 variables; then call \texttt{ed.SGLD} instead of \texttt{ed.KLqp}.
 
 \subsubsection{Advanced settings}
+
+If the parameters fit in memory, one can define the full set of
+parameters and simply index them into the local posterior factors.
+
+\begin{lstlisting}[language=Python]
+qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
+qz_variables = tf.Variable(tf.zeros([N, K]))
+idx_ph = ed.placeholder(tf.int32, [M])
+qz = Categorical(logits=tf.gather(qz_variables, idx_ph))
+\end{lstlisting}
+
+We define an index placeholder \texttt{idx_ph}. It will be fed at
+runtime to determine which parameters correspond to a given data
+subsample. This avoids the issue of having to reinitialize local
+parameters or read/write from disk to reuse local parameters.
 
 Another approach to reduce memory complexity is to use an inference
 network. This can be applied using a global parameterization of
