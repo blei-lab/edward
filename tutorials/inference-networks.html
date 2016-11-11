@@ -106,9 +106,11 @@
 <p>We define a TensorFlow placeholder <code>x_ph</code> for the neural network’s input, which is a batch of data points.</p>
 <pre class="python" language="Python"><code>x_ph = ed.placeholder(tf.float32, [M, 28 * 28])</code></pre>
 <p>We build a neural network using Keras. It takes a 28 by 28 pixel image and outputs a <span class="math inline">\(10\)</span>-dimensional output, one for the mean (<code>mu</code>) and one for the standard deviation (<code>sigma</code>).</p>
-<pre class="python" language="Python"><code>hidden = Dense(256, activation=K.relu)(x_ph)
+<pre class="python" language="Python"><code>from keras.layers import Dense
+
+hidden = Dense(256, activation=&#39;relu&#39;)(x_ph)
 qz = Normal(mu=Dense(10)(hidden),
-            sigma=Dense(10, activation=K.softplus)(hidden))</code></pre>
+            sigma=Dense(10, activation=&#39;softplus&#39;)(hidden))</code></pre>
 <p>The variational model is parameterized by the neural network’s output.</p>
 <p>During each step of inference, we pass in a batch of data points to feed the placeholder. Then we train the variational parameters (inference network’s parameters) according to gradients of the variational objective.</p>
 <p>An example script using this variational model can found <a href="https://github.com/blei-lab/edward/blob/master/examples/vae.py">here</a>. An example with a convolutional architecture can be found <a href="https://github.com/blei-lab/edward/blob/master/examples/vae_convolutional_prettytensor.py">here</a>.</p>
