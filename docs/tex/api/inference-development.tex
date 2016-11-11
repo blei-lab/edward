@@ -21,7 +21,7 @@ methods are derived from.
 class Inference(object):
   """Base class for Edward inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     ...
 \end{lstlisting}
 
@@ -52,7 +52,7 @@ class MonteCarlo(Inference):
 class VariationalInference(Inference):
   """Base class for variational inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
   ...

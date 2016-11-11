@@ -24,14 +24,14 @@ d = 2  # latent dimension
 
 # Probability model (subgraph)
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
-hidden = Dense(256, activation=K.relu)(z.value())
+hidden = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 
 # Variational model (subgraph)
 x_ph = ed.placeholder(tf.float32, [M, 28 * 28])
-hidden = Dense(256, activation=K.relu)(x_ph)
+hidden = Dense(256, activation='relu')(x_ph)
 qz = Normal(mu=Dense(d)(hidden),
-            sigma=Dense(d, activation=K.softplus)(hidden))
+            sigma=Dense(d, activation='softplus')(hidden))
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
 mnist = input_data.read_data_sets("data/mnist", one_hot=True)
