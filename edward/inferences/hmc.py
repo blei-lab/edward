@@ -13,6 +13,21 @@ from edward.util import copy
 class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
   (Duane et al., 1987; Neal, 2011).
+
+  Notes
+  -----
+  In conditional inference, we infer z in p(z, \beta | x) while fixing
+  inference over \beta using another distribution q(\beta).
+  HMC substitutes the model's log marginal density
+
+  .. math::
+
+    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
+                \approx log p(x, z, \beta^*)
+
+  leveraging a single Monte Carlo sample, where \beta^* ~
+  q(\beta). This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if q(\beta) = p(\beta | x).
   """
   def __init__(self, *args, **kwargs):
     """

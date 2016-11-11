@@ -30,6 +30,21 @@ class KLqp(VariationalInference):
     E_{q(z; \lambda)} [ \log p(x, z; \theta) ]
 
   with respect to \theta.
+
+  In conditional inference, we infer z in p(z, \beta | x) while fixing
+  inference over \beta using another distribution q(\beta).
+  During gradient calculation, instead of using the model's density
+
+  .. math::
+
+    \log p(x, z^{(s)}), where z^{(s)} ~ q(z; \lambda),
+
+  for each sample s=1,...,S, KLqp uses
+
+  .. math::
+
+    \log p(x, z^{(s)}, \beta^{(s)}), where
+    z^{(s)} ~ q(z; \lambda) and \beta^{(s)} ~ q(beta).
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)

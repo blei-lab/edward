@@ -1,0 +1,114 @@
+\title{Composing Inferences}
+
+{{navbar}}
+
+\subsubsection{Composing Inferences}
+
+Core to Edward's design is compositionality. Compositionality enables
+fine control of inference, where we can write inference as a
+collection of separate inference programs.
+
+We outline how to write popular classes of compositional inferences
+using Edward: hybrid algorithms and message passing algorithms.
+We use the running example of a mixture model.
+
+\subsubsection{Hybrid algorithms}
+
+Hybrid algorithms leverage different inferences for each latent
+variable in the posterior.
+As an example, we demonstrate variational EM, with an approximate
+E-step over local variables and an M-step over global variables.
+We alternate with one update of each \citep{neal1993new}.
+
+\begin{lstlisting}[language=Python]
+qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+
+inference_e = ed.VariationalInference({z: qz}, data={x: x_data, beta: qbeta})
+inference_m = ed.MAP({beta: qbeta}, data={x: x_data, z: qz})
+...
+for _ in range(10000):
+  inference_e.update()
+  inference_m.update()
+\end{lstlisting}
+
+In \texttt{data}, we include bindings of prior latent
+variables to posterior latent variables. This performs
+conditional inference, where only a subset of the posterior is
+inferred while the rest are fixed using other inferences.
+
+This extends to many algorithms: for example,
+exact EM for exponential families;
+contrastive divergence \citep{hinton2002training};
+pseudo-marginal and ABC methods \citep{andrieu2009pseudo};
+Gibbs sampling within variational inference \citep{wang2012truncation};
+Laplace variational inference \citep{wang2013variational};
+and
+structured variational auto-encoders \citep{johnson2016composing}.
+
+\subsubsection{Message passing algorithms}
+
+Message passing algorithms operate on the posterior distribution using
+a collection of local inferences \citep{koller2009probabilistic}.
+As an example, we demonstrate expectation propagation. We split a
+mixture model to be over two random variables \texttt{x1} and
+\texttt{x2} along with their latent mixture assignments \texttt{z1}
+and \texttt{z2}.
+
+\begin{lstlisting}[language=Python]
+N1 = 1000  # number of data points in first data set
+N2 = 2000  # number of data points in second data set
+D = 2  # data dimension
+K = 5  # number of clusters
+
+# MODEL
+beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+z1 = Categorical(logits=tf.zeros([N1, K]))
+z2 = Categorical(logits=tf.zeros([N2, K]))
+x1 = Normal(mu=tf.gather(beta, z1), sigma=tf.ones([N1, D]))
+x2 = Normal(mu=tf.gather(beta, z2), sigma=tf.ones([N2, D]))
+
+# INFERENCE
+qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+               sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qz1 = Categorical(logits=tf.Variable(tf.zeros[N1, K]))
+qz2 = Categorical(logits=tf.Variable(tf.zeros[N2, K]))
+
+inference_z1 = ed.KLpq({beta: qbeta, z1: qz1}, {x1: x1_train})
+inference_z2 = ed.KLpq({beta: qbeta, z2: qz2}, {x2: x2_train})
+...
+for _ in range(10000):
+  inference_z1.update()
+  inference_z2.update()
+\end{lstlisting}
+
+We alternate updates for each local inference, where the global
+posterior factor $q(\beta)$ is shared across both inferences
+\citep{gelman2014expectation}.
+
+This extends to many algorithms: for example,
+classical message passing, which performs exact local inferences;
+Gibbs sampling, which draws samples from conditionally conjugate
+inferences \citep{geman1984stochastic};
+expectation propagation, which locally minimizes
+$\text{KL}(p || q)$ over exponential families \citep{minka2001expectation};
+integrated nested Laplace
+approximation, which performs local Laplace approximations
+\citep{rue2009approximate};
+and
+all the instantiations of EP-like algorithms in
+\citet{gelman2014expectation}.
+
+In the above, we perform local inferences split over individual random
+variables. At the moment, Edward does not support local inferences
+within a random variable itself. We cannot do local inferences when
+representing the random variable for all data points and their cluster
+membership as \texttt{x} and \texttt{z} rather than \texttt{x1},
+\texttt{x2}, \texttt{z1}, and \texttt{z2}.
+
+With TensorFlow's distributed training, note that compositionality
+enables \emph{distributed} message passing over a cluster with many
+workers. The computation can be further sped up with the use of GPUs
+via data and model parallelism.
+
+\subsubsection{References}\label{references}

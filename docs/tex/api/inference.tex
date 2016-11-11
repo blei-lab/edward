@@ -96,6 +96,27 @@ from high-level libraries such as Keras and TensorFlow Slim. See
 the \href{/api/model-compositionality}{model compositionality} page
 for more details.
 
+\textbf{Conditional inference}.
+In conditional inference, only a subset of the posterior is inferred
+while the rest are fixed using other inferences. The inference
+problem is
+\begin{equation*}
+q(\beta)q(\mathbf{z})\approx
+p(\mathbf{z}, \beta\mid\mathbf{x}_{\text{train}})
+\end{equation*}
+where parameters in $q(\beta)$ are estimated and $q(\mathbf{z})$ is
+fixed.
+%
+In Edward, we enable conditioning by binding random variables to other
+random variables in \texttt{data}.
+\begin{lstlisting}[language=Python]
+inference = ed.Inference({beta: qbeta}, {x: x_train, z: qz})
+\end{lstlisting}
+
+In the \href{/api/inference-compositionality}{compositionality page},
+we describe how to construct inference by composing
+many conditional inference algorithms.
+
 \textbf{Implicit prior samples}.
 Latent variables can be defined in the model without any posterior
 inference over them. They are implicitly marginalized out with a
