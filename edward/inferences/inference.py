@@ -212,7 +212,11 @@ class Inference(object):
     self.initialize(*args, **kwargs)
 
     if logdir is not None:
+      self.logging = True
       self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
+      self.summarize = tf.merge_all_summaries()
+    else:
+      self.logging = False
 
     if variables is None:
       init = tf.initialize_all_variables()
