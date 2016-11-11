@@ -22,7 +22,7 @@ class VariationalInference(Inference):
   def __init__(self, *args, **kwargs):
     super(VariationalInference, self).__init__(*args, **kwargs)
 
-  def initialize(self, optimizer=None, scope=None, use_prettytensor=False,
+  def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
                  *args, **kwargs):
     """Initialize variational inference algorithm.
 
@@ -35,9 +35,9 @@ class VariationalInference(Inference):
       objective. Alternatively, one can pass in the name of a
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
-    scope : str, optional
-      Scope of TensorFlow variables to optimize over. Default is all
-      trainable variables.
+    var_list : list of tf.Variable, optional
+      List of TensorFlow variables to optimize over. Default is all
+      trainable variables that ``latent_vars`` depends on.
     use_prettytensor : bool, optional
       ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
       to use PrettyTensor optimizer (when using PrettyTensor).
@@ -80,11 +80,13 @@ class VariationalInference(Inference):
       raise TypeError()
 
     if getattr(self, 'build_loss_and_gradients', None) is not None:
-      self.loss, grads_and_vars = self.build_loss_and_gradients(scope=scope)
+      self.loss, grads_and_vars = self.build_loss_and_gradients(
+          var_list=var_list)
     else:
       self.loss = self.build_loss()
-      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                   scope=scope)
+      if var_list is None:
+        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
       grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
     if not use_prettytensor:
