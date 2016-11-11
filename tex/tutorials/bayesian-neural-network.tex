@@ -5,7 +5,7 @@
 A Bayesian neural network is a neural network with a prior
 distribution on its weights \citep{neal2012bayesian}.
 
-Define the likelihood of an observation $(\mathbf{x}_n, y_n)$
+Define the likelihood of an observation $(\mathbf{x}_n, y_n)$ as
 \begin{align*}
   p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
   &=
@@ -27,8 +27,8 @@ instantiate a 3-layer Bayesian neural network with $\tanh$
 nonlinearities.
 \begin{lstlisting}[language=Python]
 def neural_network(x):
-    h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
+    h = tf.tanh(tf.matmul(x, W_0) + b_0)
+    h = tf.tanh(tf.matmul(h, W_1) + b_1)
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
 
