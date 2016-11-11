@@ -32,21 +32,27 @@ class test_inference_class(tf.test.TestCase):
 
   def test_data(self):
     x = Normal(mu=0.0, sigma=1.0)
+    qx = Normal(mu=0.0, sigma=1.0)
+    qx_misshape = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
     x_ph = ed.placeholder(tf.float32)
 
     ed.Inference()
     ed.Inference(data={x: tf.constant(0.0)})
     ed.Inference(data={x_ph: tf.constant(0.0)})
     ed.Inference(data={x: x_ph})
+    ed.Inference(data={x: qx})
     self.assertRaises(TypeError, ed.Inference, data={5: tf.constant(0.0)})
     self.assertRaises(TypeError, ed.Inference, data={x: 'a'})
     self.assertRaises(TypeError, ed.Inference, data={x_ph: x})
+    self.assertRaises(TypeError, ed.Inference, data={x: qx_misshape})
 
   def test_model_wrapper(self):
     model = NormalNormal()
     qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
 
     ed.Inference({'mu': qmu}, model_wrapper=model)
+    self.assertRaises(TypeError, ed.Inference, data={'x': qmu},
+                      model_wrapper=model)
 
 if __name__ == '__main__':
   tf.test.main()

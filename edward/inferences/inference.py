@@ -126,6 +126,14 @@ class Inference(object):
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
           elif isinstance(value, RandomVariable):
+            if isinstance(key, RandomVariable):
+              if key.value().get_shape() != value.value().get_shape():
+                raise TypeError("Observed variable bindings do not have same "
+                                "shape.")
+            else:
+              raise TypeError("Data cannot have a string bound to a "
+                              "RandomVariable.")
+
             self.data[key] = value
           else:
             raise TypeError("Data value has an invalid type.")
