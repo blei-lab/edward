@@ -80,9 +80,11 @@ It takes a 28 by 28 pixel image and outputs a $10$-dimensional
 output, one for the mean (\texttt{mu}) and one for the standard
 deviation (\texttt{sigma}).
 \begin{lstlisting}[language=Python]
-hidden = Dense(256, activation=K.relu)(x_ph)
+from keras.layers import Dense
+
+hidden = Dense(256, activation='relu')(x_ph)
 qz = Normal(mu=Dense(10)(hidden),
-            sigma=Dense(10, activation=K.softplus)(hidden))
+            sigma=Dense(10, activation='softplus')(hidden))
 \end{lstlisting}
 The variational model is parameterized by the neural network's
 output.
