@@ -114,7 +114,7 @@ inference_m = ed.MAP({beta: qbeta}, data={x: x_data, z: qz})
 for _ in range(10000):
   inference_e.update()
   inference_m.update()</code></pre>
-<p>In <code>data</code>, we include bindings of prior latent variables to posterior latent variables. This performs conditional inference, where only a subset of the posterior is inferred while the rest are fixed using other inferences.</p>
+<p>In <code>data</code>, we include bindings of prior latent variables (<code>z</code> or <code>beta</code>) to posterior latent variables (<code>qz</code> or <code>qbeta</code>). This performs conditional inference, where only a subset of the posterior is inferred while the rest are fixed using other inferences.</p>
 <p>This extends to many algorithms: for example, exact EM for exponential families; contrastive divergence <span class="citation">(Hinton, 2002)</span>; pseudo-marginal and ABC methods <span class="citation">(Andrieu &amp; Roberts, 2009)</span>; Gibbs sampling within variational inference <span class="citation">(Wang &amp; Blei, 2012)</span>; Laplace variational inference <span class="citation">(Wang &amp; Blei, 2013)</span>; and structured variational auto-encoders <span class="citation">(Johnson, Duvenaud, Wiltschko, Datta, &amp; Adams, 2016)</span>.</p>
 <h3 id="message-passing-algorithms">Message passing algorithms</h3>
 <p>Message passing algorithms operate on the posterior distribution using a collection of local inferences <span class="citation">(Koller &amp; Friedman, 2009)</span>. As an example, we demonstrate expectation propagation. We split a mixture model to be over two random variables <code>x1</code> and <code>x2</code> along with their latent mixture assignments <code>z1</code> and <code>z2</code>.</p>
