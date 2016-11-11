@@ -1,0 +1,15 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=box] (0) at (-2.5, 0) {Model};
+		\node [style=box] (1) at (0, 0) {Infer};
+		\node [style=box, fill=MidnightBlue, draw=white] (2) at (0, 1.5)
+		{\color{white}Data};
+		\node [style=box] (3) at (2.75, 0) {Criticize};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=arrow] (0) to (1);
+		\draw [style=arrow] (2) to (1);
+		\draw [style=arrow] (1) to (3);
+		\draw [style=arrow, bend left=75, looseness=1.25] (3) to (0);
+	\end{pgfonlayer}
+\end{tikzpicture}

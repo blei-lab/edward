@@ -1,0 +1,17 @@
+\begin{tikzpicture}[x=1.7cm,y=1.8cm,scale=0.9]
+%\begin{tikzpicture}[scale=0.6]
+
+  % Nodes
+  \node[latent] (x) {$\mathbf{x}$};
+  \factor[right=of x, xshift=0.3cm] {xstar} {$\mathbf{x}^*$} {} {};
+  \factor[right=of xstar, xshift=0.3cm] {y} {$\mathbf{y}$} {} {};
+
+  \factor[below=of xstar, xshift=0.5cm] {plus} {} {} {};
+  \node at (plus) [right=0.175cm of plus] {$\mathbf{x}^*+\mathbf{y}$};
+
+  % Edges
+  \edge{x}{xstar};
+  \edge{xstar}{plus};
+  \edge{y}{plus};
+
+\end{tikzpicture}

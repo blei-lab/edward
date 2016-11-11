@@ -1,0 +1,32 @@
+\begin{tikzpicture}
+    \begin{pgfonlayer}{nodelayer}
+        \node [style=box] (0) at (2.25, 2) {Inference};
+        \node [style=box] (1) at (-0.5, 0.5) {VariationalInference};
+        \node [style=box] (2) at (5, 0.5) {MonteCarlo};
+        \node [style=box] (3) at (-2.5, -1.25) {KLqp};
+        \node [style=box] (4) at (-0.5, -1.25) {KLpq};
+        \node [style=box] (5) at (1.5, -1.25) {MAP};
+        \node [style=box] (6) at (1.5, -3) {Laplace};
+        \node [style=box] (7) at (3.5, -1.25) {MH};
+        \node [style=box] (8) at (5, -1.25) {HMC};
+        \node [style=box] (9) at (6.5, -1.25) {SGLD};
+        %\node [style=box] (9) at (-5, 0.5) {Exact};
+        %\node [style=box] (10) at (-4, -1.25) {CollapsedInference};
+        %\node [style=box] (11) at (-5, -1.25) {ConjugateInference};
+    \end{pgfonlayer}
+    \begin{pgfonlayer}{edgelayer}
+        \draw [style=arrow, bend right] (0) to (1);
+        \draw [style=arrow] (1) to (3);
+        \draw [style=arrow] (1) to (4);
+        \draw [style=arrow] (1) to (5);
+        \draw [style=arrow] (5) to (6);
+        \draw [style=arrow, bend left] (0) to (2);
+        %\draw [style=arrow, bend left, draw=Gray] (0) to (2);
+        \draw [style=arrow] (2) to (7);
+        \draw [style=arrow] (2) to (8);
+        \draw [style=arrow] (2) to (9);
+        %\draw [style=arrow, bend right] (0) to (9);
+        %\draw [style=arrow] (9) to (10);
+        %\draw [style=arrow] (9) to (11);
+    \end{pgfonlayer}
+\end{tikzpicture}

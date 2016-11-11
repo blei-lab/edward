@@ -1,0 +1,23 @@
+\begin{tikzpicture}[x=1.7cm,y=1.8cm,scale=0.9]
+%\begin{tikzpicture}[scale=0.6]
+
+  % Nodes
+  \node[latent] (p) {$\mbp$};
+  \factor[right=of p, xshift=0.3cm] {pstar} {$\mbp^*$} {} {};
+
+  \factor[above=of pstar] {n} {} {} {};
+  \factor[empty, right=of n, yshift=0.1cm] {nn} {\texttt{tf.while_loop(...)}} {} {};
+  \factor[left=of n, xshift=-0.5cm] {astar} {$\mba^*$} {} {};
+  \node[latent, left=of astar, xshift=0.5cm] (a) {$\mba$};
+  \node[latent, right=of pstar, xshift=-0.5cm] (x) {$\mbx$};
+  \factor[right=of x, xshift=0.3cm] {xstar} {$\mbx^*$} {} {};
+
+  % Edges
+  \edge{p}{pstar};
+  \edge{pstar}{x};
+  \edge{n}{x};
+  \edge{x}{xstar};
+  \edge{a}{astar};
+  \edge{astar}{n};
+
+\end{tikzpicture}

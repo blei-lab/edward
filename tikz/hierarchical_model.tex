@@ -1,0 +1,20 @@
+\begin{tikzpicture}
+
+  % Nodes
+  \node[latent]               (beta)      {$\beta$} ;
+  \node[left=0.5cm of beta]               (betaph)      {} ;
+  \node[latent, below=1.0cm of betaph] (z)    {$z_m$} ;
+  \node[obs, right=1.0cm of z]      (x)        {$x_m$} ;
+
+  % Edges
+  % \edge{beta}{z};
+  \edge{beta}{x};
+  \edge{z}{x};
+
+  % Plates
+  \plate[inner sep=0.3cm,
+    label={[xshift=-15pt,yshift=15pt]south east:$M$}] {plate1} {
+    (x)(z)
+  } {};
+
+\end{tikzpicture}

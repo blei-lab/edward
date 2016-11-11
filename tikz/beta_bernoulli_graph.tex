@@ -1,0 +1,18 @@
+\begin{tikzpicture}[x=1.7cm,y=1.8cm,scale=0.9]
+%\begin{tikzpicture}[scale=0.6]
+
+  % Nodes
+  \node[latent] (theta) {$\theta$};
+  \factor[right=of theta, xshift=0.3cm] {thetastar} {$\theta^*$} {} {};
+
+  \factor[above=of thetastar] {n} {\texttt{tf.ones(50)}} {} {};
+  \node[latent, right=of thetastar, xshift=-0.5cm] (x) {$\mbx$};
+  \factor[right=of x, xshift=0.3cm] {xstar} {$\mbx^*$} {} {};
+
+  % Edges
+  \edge{theta}{thetastar};
+  \edge{thetastar}{x};
+  \edge{n}{x};
+  \edge{x}{xstar};
+
+\end{tikzpicture}

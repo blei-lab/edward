@@ -4,62 +4,63 @@
 
 \subsubsection{Data}
 
-Data defines a set of observations. In Edward, data is represented as
-TensorFlow tensors or NumPy arrays.
+Data defines a set of observations. There are three ways
+to read data in Edward. They follow the
+\href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html}
+{three ways to read data in TensorFlow}.
+
+\textbf{Preloaded data.}
+A constant or variable in the TensorFlow graph holds all the data.
+This setting is the fastest to work with and is recommended if the
+data fits in memory.
+
+Represent the data as TensorFlow tensors or NumPy arrays.
 
 \begin{lstlisting}[language=Python]
 x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 \end{lstlisting}
 
-Edward can also work with batch tensors for settings when the full
-data does not fit in memory.
+During inference, we will store them in TensorFlow variables to
+prevent copying data more than once in memory. As an example, see the
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
+{Bayesian neural network} script.
 
-In general, there are three ways to read data in Edward. (They follow
-the \href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html}
-{three ways to read data in TensorFlow}.)
+\textbf{Feeding.}
+Manual code provides the data when running each step of inference.
+This setting provides the most fine-grained control which is useful
+for experimentation.
 
-\begin{enumerate}
-\item
-   \textbf{Preloaded data.} A constant or variable in the TensorFlow graph
-   holds all the data.
+Represent the data as TensorFlow placeholders.
 
-   This setting is the fastest to work with and is recommended if the
-   data fits in memory.
+\begin{lstlisting}[language=Python]
+x_data = tf.placeholder(tf.float32, [100, 25])
+\end{lstlisting}
 
-   Represent the data as NumPy arrays.
-   Internally, during inference, we will store them in TensorFlow variables to prevent
-   copying data more than once in memory.
-   (As an example, see
-   the
-   \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
-   {Bayesian neural network} script.)
-\item
-   \textbf{Feeding.} Manual code provides the data when running each step of
-   inference.
+During inference, the user must manually feed the placeholders at each
+step of inference. Bind the placeholders to realized values in a
+\texttt{feed_dict} dictionary argument to
+\texttt{inference.update(feed_dict={...})}. As an example, see the
+\href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
+{variational auto-encoder} script.
+If the values do not change over inference updates, one can also bind
+the placeholder to values within the \texttt{data} argument when
+constructing inference.
 
-   This setting provides the most fine-grained control which is useful for experimentation.
+\textbf{Reading from files.}
+An input pipeline reads the data from files at the beginning of a
+TensorFlow graph. This setting is recommended if the data does not
+fit in memory.
 
-   Represent the data as TensorFlow placeholders. During inference,
-   the user must manually feed the placeholders at each
-   step by first initializing via \texttt{inference.initialize()}; then
-   in a loop call \texttt{inference.update(feed_dict={...})} where
-   \texttt{feed_dict} carries the values for the \texttt{tf.placeholder}'s.
-   (As an example, see
-   the
-   \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
-   {variational auto-encoder} script.)
-\item
-   \textbf{Reading from files.} An input pipeline reads the data from files
-   at the beginning of a TensorFlow graph.
+\begin{lstlisting}[language=Python]
+filename_queue = tf.train.string_input_producer(...)
+reader = tf.SomeReader()
+...
+\end{lstlisting}
 
-   This setting is recommended if the data does not fit in memory.
-
-   Represent the data as TensorFlow tensors, where the tensors are the
-   output of data readers. During inference, each update will be
-   automatically evaluated over new batch tensors represented through
-   the data readers. (As an example, see
-   the
-   \href{https://github.com/blei-lab/edward/blob/master/tests/test-inferences/test_data.py}
-   {data unit test}.)
-\end{enumerate}
+Represent the data as TensorFlow tensors, where the tensors are the
+output of data readers. During inference, each update will be
+automatically evaluated over new batch tensors represented through
+the data readers. As an example, see the
+\href{https://github.com/blei-lab/edward/blob/master/tests/test-inferences/test_data.py}
+{data unit test}.
