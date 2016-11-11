@@ -28,24 +28,31 @@ prevent copying data more than once in memory. As an example, see the
 
 \textbf{Feeding.}
 Manual code provides the data when running each step of inference.
-This setting provides the most fine-grained control which is useful
-for experimentation.
+This setting provides the most fine control which is useful for
+experimentation.
 
 Represent the data as TensorFlow placeholders.
 
 \begin{lstlisting}[language=Python]
-x_data = tf.placeholder(tf.float32, [100, 25])
+x_data = ed.placeholder(tf.float32, [100, 25])
 \end{lstlisting}
 
-During inference, the user must manually feed the placeholders at each
-step of inference. Bind the placeholders to realized values in a
-\texttt{feed_dict} dictionary argument to
+Use Edward's \texttt{ed.placeholder} function and not TensorFlow's
+\texttt{tf.placeholder}. Internally, Edward's inference algorithms
+need to keep track of placeholders via a TensorFlow collection.
+\texttt{ed.placeholder} is a utility function which simply calls
+\texttt{tf.placeholder} and then adds it to the
+\texttt{'PLACEHOLDERS'} collection.
+
+During inference, the user must manually feed the placeholders. At each
+step of inference, bind the placeholders to realized values in a
+\texttt{feed_dict} dictionary argument within
 \texttt{inference.update(feed_dict={...})}. As an example, see the
 \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
 {variational auto-encoder} script.
 If the values do not change over inference updates, one can also bind
 the placeholder to values within the \texttt{data} argument when
-constructing inference.
+first constructing inference.
 
 \textbf{Reading from files.}
 An input pipeline reads the data from files at the beginning of a
