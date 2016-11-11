@@ -106,7 +106,7 @@
 <pre class="python" language="Python"><code>class Inference(object):
   """Base class for Edward inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     ...</code></pre>
 <p>It takes as input the set of latent variables to infer and a dataset. Optionally, if the user uses an external language to specify the model, it takes as input a model wrapper <code>model_wrapper</code>.</p>
 <p>Note that <code>Inference</code> says nothing about the class of models that an algorithm must work with. One can build inference algorithms which are tailored to a restricted class of models available in Edward (such as differentiable models or conditionally conjugate models), or even tailor it to a single model. The algorithm can raise an error if the model is outside this class.</p>
@@ -123,7 +123,7 @@
 class VariationalInference(Inference):
   """Base class for variational inference methods.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     super(VariationalInference, self).__init__(latent_vars, data, model_wrapper)
 
   ...</code></pre>
