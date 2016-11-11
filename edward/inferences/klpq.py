@@ -20,10 +20,16 @@ class KLpq(VariationalInference):
   To perform the optimization, this class uses a technique from
   adaptive importance sampling (Cappe et al., 2008).
 
-  This class also minimizes the loss with respect to any model
-  parameters p(z | x; \theta). These parameters are defined via
-  TensorFlow variables, which the probability model depends on in the
-  computational graph.
+  Notes
+  -----
+  KLqp also optimizes any model parameters p(z | x; \theta). It does
+  this by variational EM, minimizing
+
+  .. math::
+
+    E_{p(z | x; \lambda)} [ \log p(x, z; \theta) ]
+
+  with respect to \theta.
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
@@ -70,7 +76,6 @@ class KLpq(VariationalInference):
     .. math::
       - 1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
                            \partial_{\lambda} \log q(z^b; \lambda) ].
-
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples

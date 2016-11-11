@@ -20,10 +20,16 @@ class KLqp(VariationalInference):
   This class minimizes the objective by automatically selecting from a
   variety of black box inference techniques.
 
-  This class also minimizes the loss with respect to any model
-  parameters p(z | x; \theta). These parameters are defined via
-  TensorFlow variables, which the probability model depends on in the
-  computational graph.
+  Notes
+  -----
+  KLqp also optimizes any model parameters p(z | x; \theta). It does
+  this by variational EM, minimizing
+
+  .. math::
+
+    E_{q(z; \lambda)} [ \log p(x, z; \theta) ]
+
+  with respect to \theta.
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)

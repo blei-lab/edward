@@ -20,7 +20,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 ed.set_seed(42)
 
 M = 100  # batch size during training
-d = 2  # latent variable dimension
+d = 2  # latent dimension
 
 # Probability model (subgraph)
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
@@ -60,13 +60,10 @@ for epoch in range(n_epoch):
     info_dict = inference.update(feed_dict={x_ph: x_train})
     avg_loss += info_dict['loss']
 
-  # Take average over all ELBOs during the epoch, and over minibatch
-  # of data points (images).
-  avg_loss = avg_loss / n_iter_per_epoch
-  avg_loss = avg_loss / M
-
   # Print a lower bound to the average marginal likelihood for an
   # image.
+  avg_loss = avg_loss / n_iter_per_epoch
+  avg_loss = avg_loss / M
   print("log p(x) >= {:0.3f}".format(avg_loss))
 
   # Prior predictive check.

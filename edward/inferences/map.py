@@ -27,16 +27,14 @@ class MAP(VariationalInference):
 
     - E_{q(z; \lambda)} [ \log p(x, z) ].
 
-  This class also minimizes the loss with respect to any model
-  parameters p(z | x; \theta). These parameters are defined via
-  TensorFlow variables, which the probability model depends on in the
-  computational graph.
-
   Notes
   -----
   This class is currently restricted to optimization over
   differentiable latent variables. For example, it does not solve
   discrete optimization.
+
+  This class also minimizes the loss with respect to any model
+  parameters p(z | x; \theta).
   """
   def __init__(self, latent_vars, data=None, model_wrapper=None):
     """
