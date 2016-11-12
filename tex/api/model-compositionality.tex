@@ -104,7 +104,7 @@ fully connected hidden layer of 256 units (with ReLU activation) and
 whose output is $28*28$-dimensional. The output will be unconstrained,
 parameterizing the logits of the Bernoulli likelihood.
 
-In TensorFlow Slim, we write this model as follows:
+With TensorFlow Slim, we write this model as follows:
 
 \begin{lstlisting}[language=python]
 from edward.models import Bernoulli, Normal
@@ -115,7 +115,7 @@ h = slim.fully_connected(z, 256)
 x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))
 \end{lstlisting}
 
-In Keras, we write this model as follows:
+With Keras, we write this model as follows:
 
 \begin{lstlisting}[language=python]
 from edward.models import Bernoulli, Normal

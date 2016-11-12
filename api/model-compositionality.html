@@ -128,14 +128,14 @@ x = Bernoulli(p=tf.ones(50) * tf.sigmoid(theta))</code></pre>
 \mathbf{z}_n &amp;\sim \text{Normal}(\mathbf{z} \mid \mathbf{0}, I), \\[1.5ex]
 \mathbf{x}_n\mid \mathbf{z}_n &amp;\sim \text{Bernoulli}(\mathbf{x}_n\mid
 p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the latent space is <span class="math inline">\(\mathbf{z}_n\in\mathbb{R}^d\)</span> and the likelihood is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> with parameters <span class="math inline">\(\theta\)</span>. We will use a two-layer neural network with a fully connected hidden layer of 256 units (with ReLU activation) and whose output is <span class="math inline">\(28*28\)</span>-dimensional. The output will be unconstrained, parameterizing the logits of the Bernoulli likelihood.</p>
-<p>In TensorFlow Slim, we write this model as follows:</p>
+<p>With TensorFlow Slim, we write this model as follows:</p>
 <pre language="python"><code>from edward.models import Bernoulli, Normal
 from tensorflow.contrib import slim
 
 z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
 h = slim.fully_connected(z, 256)
 x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))</code></pre>
-<p>In Keras, we write this model as follows:</p>
+<p>With Keras, we write this model as follows:</p>
 <pre language="python"><code>from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
