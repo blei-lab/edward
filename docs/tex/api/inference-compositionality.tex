@@ -32,10 +32,11 @@ for _ in range(10000):
   inference_m.update()
 \end{lstlisting}
 
-In \texttt{data}, we include bindings of prior latent
-variables to posterior latent variables. This performs
-conditional inference, where only a subset of the posterior is
-inferred while the rest are fixed using other inferences.
+In \texttt{data}, we include bindings of prior latent variables
+(\texttt{z} or \texttt{beta}) to posterior latent variables
+(\texttt{qz} or \texttt{qbeta}). This performs conditional inference,
+where only a subset of the posterior is inferred while the rest are
+fixed using other inferences.
 
 This extends to many algorithms: for example,
 exact EM for exponential families;

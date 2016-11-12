@@ -42,7 +42,7 @@ class BayesianNN:
     Standard deviation of the normal prior on weights; aka L2
     regularization parameter, ridge penalty, scale parameter.
   """
-  def __init__(self, layer_sizes, nonlinearity=tf.nn.tanh,
+  def __init__(self, layer_sizes, nonlinearity=tf.tanh,
                lik_std=0.1, prior_std=1.0):
     self.layer_sizes = layer_sizes
     self.nonlinearity = nonlinearity
