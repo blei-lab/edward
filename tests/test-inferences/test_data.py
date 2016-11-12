@@ -37,7 +37,7 @@ class test_inference_data_class(tf.test.TestCase):
                  sigma=tf.constant(1.0))
 
     data = {x: x_data}
-    inference = ed.MFVI({mu: qmu}, data)
+    inference = ed.KLqp({mu: qmu}, data)
     inference.initialize(n_minibatch=n_minibatch)
 
     init = tf.initialize_all_variables()

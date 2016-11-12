@@ -13,8 +13,23 @@ from edward.util import copy
 class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
   (Duane et al., 1987; Neal, 2011).
+
+  Notes
+  -----
+  In conditional inference, we infer z in p(z, \beta | x) while fixing
+  inference over \beta using another distribution q(\beta).
+  HMC substitutes the model's log marginal density
+
+  .. math::
+
+    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
+                \approx log p(x, z, \beta^*)
+
+  leveraging a single Monte Carlo sample, where \beta^* ~
+  q(\beta). This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if q(\beta) = p(\beta | x).
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, *args, **kwargs):
     """
     Examples
     --------
@@ -25,7 +40,7 @@ class HMC(MonteCarlo):
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.HMC({z: qz}, data)
     """
-    super(HMC, self).__init__(latent_vars, data, model_wrapper)
+    super(HMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, n_steps=2, *args, **kwargs):
     """
@@ -108,15 +123,22 @@ class HMC(MonteCarlo):
     """
     if self.model_wrapper is None:
       self.scope_iter += 1
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample.copy()
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
 
       log_joint = 0.0
       for z, sample in six.iteritems(z_sample):
-        z = copy(z, z_sample, scope='prior' + str(self.scope_iter))
+        z = copy(z, dict_swap, scope='prior' + str(self.scope_iter))
         log_joint += tf.reduce_sum(z.log_prob(sample))
 
       for x, obs in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
-          x_z = copy(x, z_sample, scope='likelihood' + str(self.scope_iter))
+          x_z = copy(x, dict_swap, scope='likelihood' + str(self.scope_iter))
           log_joint += tf.reduce_sum(x_z.log_prob(obs))
     else:
       x = self.data

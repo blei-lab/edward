@@ -6,7 +6,14 @@
 
 Edward also supports other languages for specifying probability models:
 TensorFlow, Python, PyMC3, and Stan.
-In each language, a model wrapper is written as a class.
+
+For modeling convenience, we recommend using the modeling language
+that you are most familiar with. For efficiency, we recommend not
+using a model wrapper, as model wrappers do not expose much model
+structure for inference algorithms to take advantage of.
+Internally, all model wrappers are also wrapped in TensorFlow so their
+computation represents a single node in the graph; this makes it difficult
+to tease apart and thus distribute their computation.
 
 In general, a model wrapper is a class with the structure
 
@@ -26,7 +33,7 @@ model = Model(...)
 
 The field \texttt{n_vars} denotes the number of latent variables in the
 probability model. For example, a model with a Gaussian likelihood with latent
-mean and variance would have \texttt{n_vars=2*N} latent variables for
+mean and variance would have \texttt{n_vars=2 * N} latent variables for
 \texttt{N} observations.
 
 The method \texttt{log_prob(xs, zs)} calculates the logarithm of
@@ -34,14 +41,13 @@ the joint density $\log p(x,z)$. Here \texttt{xs} can be a single data
 point or a batch of data points. Analogously, \texttt{zs} can be a
 single set of latent variables, or a batch thereof.
 
+We outline how to write a wrapper for each language below.
+
 \textbf{TensorFlow.}
 Write a class with the method \texttt{log_prob(xs, zs)}. The method defines
 the logarithm of a joint density, where \texttt{xs} and \texttt{zs} are Python
 dictionaries binding the name of a random variable to
 a realization.
-Here \texttt{xs} can be a single data
-point or a batch of data points, and analogously, \texttt{zs} can be a
-single set or multiple sets of latent variables.
 Here is an example:
 
 \begin{lstlisting}[language=Python]
@@ -70,9 +76,12 @@ model's latent variables; the data's string matches the names used in
 the model class.
 
 \begin{lstlisting}[language=Python]
-qp = Beta(...)
+from edward.models import Beta
+
+qp = Beta(a=tf.nn.softplus(tf.Variable(0.0)),
+          b=tf.nn.softplus(tf.Variable(0.0)))
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-inference = Inference({'p': qp}, data, model)
+inference = ed.KLqp({'p': qp}, data, model)
 \end{lstlisting}
 
 Here is a
@@ -109,9 +118,12 @@ model's latent variables; the data's string matches the names used in
 the model class.
 
 \begin{lstlisting}[language=Python]
-qp = Beta(...)
+from edward.models import Beta
+
+qp = Beta(a=tf.nn.softplus(tf.Variable(0.0)),
+          b=tf.nn.softplus(tf.Variable(0.0)))
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-inference = Inference({'p': qp}, data, model)
+inference = ed.KLqp({'p': qp}, data, model)
 \end{lstlisting}
 
 Here is a
@@ -149,9 +161,12 @@ parameters from the parameter block. Analogously, the data's string
 matches the name of the data from the data block.
 
 \begin{lstlisting}[language=Python]
-qp = Beta(...)
+from edward.models import Beta
+
+qp = Beta(a=tf.nn.softplus(tf.Variable(0.0)),
+          b=tf.nn.softplus(tf.Variable(0.0)))
 data = {'N': 10, 'x': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
-inference = Inference({'p': qp}, data, model)
+inference = ed.KLqp({'p': qp}, data, model)
 \end{lstlisting}
 
 Here is a
@@ -190,9 +205,12 @@ model's latent variables; the data's string matches the Theano shared
 variables.
 
 \begin{lstlisting}[language=Python]
-qp = Beta(...)
+from edward.models import Beta
+
+qp = Beta(a=tf.nn.softplus(tf.Variable(0.0)),
+          b=tf.nn.softplus(tf.Variable(0.0)))
 data = {x_obs: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
-inference = Inference({'p': qp}, data, model)
+inference = ed.KLqp({'p': qp}, data, model)
 \end{lstlisting}
 
 Here is a
@@ -202,14 +220,6 @@ that uses this model. PyMC3 can be used to define models with both
 differentiable latent variables and non-differentiable (e.g., discrete)
 latent variables. \texttt{PyMC3Model} objects contain no structure about the
 model besides how to calculate its joint density.
-
-For modeling convenience, we recommend using the modeling language
-that you are most familiar with. For efficiency, we recommend not
-using a model wrapper, as model wrappers do not expose any model
-structure for the algorithms to take advantage of.
-Internally, all model wrappers are wrapped in TensorFlow so their
-computation represents a single node in the graph (making it difficult
-to tease apart and thus distribute their computation).
 
 Note also that for these model wrappers,
 all three use cases for training models with data are supported. However,

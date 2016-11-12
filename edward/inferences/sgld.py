@@ -12,8 +12,23 @@ from edward.util import copy
 
 class SGLD(MonteCarlo):
   """Stochastic gradient Langevin dynamics (Welling and Teh, 2011).
+
+  Notes
+  -----
+  In conditional inference, we infer z in p(z, \beta | x) while fixing
+  inference over \beta using another distribution q(\beta).
+  SGLD substitutes the model's log marginal density
+
+  .. math::
+
+    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
+                \approx log p(x, z, \beta^*)
+
+  leveraging a single Monte Carlo sample, where \beta^* ~
+  q(\beta). This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if q(\beta) = p(\beta | x).
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, *args, **kwargs):
     """
     Examples
     --------
@@ -24,7 +39,7 @@ class SGLD(MonteCarlo):
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.SGLD({z: qz}, data)
     """
-    super(SGLD, self).__init__(latent_vars, data, model_wrapper)
+    super(SGLD, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, *args, **kwargs):
     """
@@ -82,14 +97,22 @@ class SGLD(MonteCarlo):
       Latent variable keys to samples.
     """
     if self.model_wrapper is None:
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on posterior sample or
+      # observed data.
+      dict_swap = z_sample.copy()
+      for x, obs in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          dict_swap[x] = obs
+
       log_joint = 0.0
       for z, sample in six.iteritems(z_sample):
-        z = copy(z, z_sample, scope='prior')
+        z = copy(z, dict_swap, scope='prior')
         log_joint += tf.reduce_sum(z.log_prob(sample))
 
       for x, obs in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
-          x_z = copy(x, z_sample, scope='likelihood')
+          x_z = copy(x, dict_swap, scope='likelihood')
           log_joint += tf.reduce_sum(x_z.log_prob(obs))
     else:
       x = self.data

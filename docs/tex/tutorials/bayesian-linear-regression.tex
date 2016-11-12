@@ -15,16 +15,16 @@ the model posits the following distributions:
 \begin{align*}
   p(\mathbf{w})
   &=
-  \mathcal{N}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \text{Normal}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
   \\[1.5ex]
   p(b)
   &=
-  \mathcal{N}(b \mid 0, \sigma_b^2),
+  \text{Normal}(b \mid 0, \sigma_b^2),
   \\
   p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
   &=
   \prod_{n=1}^N
-  \mathcal{N}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
+  \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
 \end{align*}
 The latent variables are the linear model's weights $\mathbf{w}$ and
 intercept $b$, also known as the bias.

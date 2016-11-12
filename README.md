@@ -24,16 +24,16 @@ It supports __inference__ with
 + Variational inference
   + Black box variational inference
   + Stochastic variational inference
-  + Variational auto-encoders
   + Inclusive KL divergence: KL(p||q)
+  + Maximum a posteriori estimation
 + Monte Carlo
   + Hamiltonian Monte Carlo
   + Stochastic gradient Langevin dynamics
   + Metropolis-Hastings
-+ Marginal optimization (empirical Bayes, marginal maximum likelihood)
-  + Variational EM
-+ Maximum a posteriori estimation (penalized maximum likelihood)
-  + Laplace approximation
++ Compositions of inference
+  + Expectation-Maximization
+  + Pseudo-marginal and ABC methods
+  + Message passing algorithms
 
 It supports __criticism__ of the model and inference with
 

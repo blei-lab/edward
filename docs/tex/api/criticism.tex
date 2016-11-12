@@ -42,11 +42,13 @@ qz = RandomVariable(par=qbeta)
 
 x_train = np.array()
 
-inference = Inference({z: qz, beta: qbeta}, data={x: x_train})
+inference = ed.Inference({z: qz, beta: qbeta}, data={x: x_train})
 inference.run()
 \end{lstlisting}
 We first build the posterior predictive distribution.
 \begin{lstlisting}[language=Python]
+from edward.util import copy
+
 # Build the posterior predictive distribution by copying the
 # likelihood, swapping out the prior `z` and `beta` with the inferred
 # posterior `qz` and `qbeta`.
@@ -60,24 +62,24 @@ and
 
 \begin{lstlisting}[language=Python]
 # log-likelihood performance
-evaluate('log_likelihood', data={x_post: x_train})
+ed.evaluate('log_likelihood', data={x_post: x_train})
 
 # classification accuracy
 # here, `x_ph` is any features the model is defined with respect to,
 # and `y_post` is the posterior predictive distribution
-evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
 
 # posterior predictive check
 # T is a user-defined function of data, T(data)
-ppc(T, data={x_post: x_train})
+ed.ppc(T, data={x_post: x_train})
 
 # in general T is a discrepancy function of the data (both response and
 # covariates) and latent variables, T(data, latent_vars)
-ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': qbeta})
+ed.ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': qbeta})
 
 # prior predictive check
 # running ppc on original x
-ppc(T, data={x: x_train})
+ed.ppc(T, data={x: x_train})
 \end{lstlisting}
 
 Suppose you want to perform criticism on data held-out from training.
@@ -85,17 +87,19 @@ We first perform inference over the local latent variables of the
 held-out data. Then we make the predictions.
 
 \begin{lstlisting}[language=Python]
+from edward.util import copy
+
 # create local variational factors for test data
 qz_test = RandomVariable()
 
 x_test = np.array()
 
-inference_test = Inference({z: qz_test, beta: qbeta}, data={x: x_test})
+inference_test = ed.Inference({z: qz_test, beta: qbeta}, data={x: x_test})
 inference_test.run()
 
 # build posterior predictive on test data
 x_post = copy(x, {z: qz_test, beta: qbeta}})
-evaluate('log_likelihood', data={x_post: x_test})
+ed.evaluate('log_likelihood', data={x_post: x_test})
 \end{lstlisting}
 
 Criticism techniques are simply functions which take as input data,

@@ -10,12 +10,17 @@ $\mathbf{x}_n$. The decoder is probabilistic because its generated
 values (decoding) for any given code is random
 \citep{dayan1995helmholtz}.
 
+\includegraphics[width=250px]{/images/decoder.png}
+
+{\small\textit{Graphical model of a probabilistic decoder, with model
+parameters $\theta$.}}
+
 For real-valued data,
 the randomness in the decoder is given by a multivariate Gaussian
 \begin{align*}
   p(\mathbf{x}_n\mid\mathbf{z}_n)
   &=
-  \mathcal{N}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),
+  \text{Normal}(\mathbf{x}_n\mid [\mu,\sigma^2]=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),
 \end{align*}
 where the probabilistic decoder is parameterized by a neural network
 $\mathrm{NN}$ taking the code $\mathbf{z}_n$ as input.
@@ -32,7 +37,7 @@ prior over the code
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \mid \mathbf{0}, I).
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).
 \end{align*}
 
 Let's build the model in Edward using
@@ -41,7 +46,7 @@ probabilistic decoder to model binarized 28 x 28
 pixel images from MNIST.
 \begin{lstlisting}[language=Python]
 z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
-hidden = Dense(256, activation=K.relu)(z.value())
+hidden = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 \end{lstlisting}
 It starts with a $d$-dimensional standard normal prior, one for each

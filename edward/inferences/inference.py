@@ -27,12 +27,12 @@ class Inference(object):
     random variables in `latent_vars`' dictionary keys are strings
     used accordingly by the wrapper.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     """Initialization.
 
     Parameters
     ----------
-    latent_vars : dict of RandomVariable to RandomVariable
+    latent_vars : dict of RandomVariable to RandomVariable, optional
       Collection of random variables to perform inference on. Each
       random variable is binded to another random variable; the latter
       will infer the former conditional on data.
@@ -40,7 +40,9 @@ class Inference(object):
       Data dictionary which binds observed variables (of type
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
       It can also bind placeholders (of type `tf.Tensor`) used in the
-      model to their realizations.
+      model to their realizations; and prior latent variables (of type
+      `RandomVariable`) to posterior latent variables (of type
+      `RandomVariable`).
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in `latent_vars`' dictionary keys are strings
@@ -65,26 +67,37 @@ class Inference(object):
 
     Examples
     --------
-    >>> mu = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-    >>> x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant([1.0]))
+    >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+    >>> x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant(1.0))
     >>>
     >>> qmu_mu = tf.Variable(tf.random_normal([1]))
     >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
     >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
     >>>
-    >>> Inference({mu: qmu}, {x: np.array()})
+    >>> Inference({mu: qmu}, {x: tf.constant([0.0] * N)})
     """
     sess = get_session()
-    if not isinstance(latent_vars, dict):
+    if latent_vars is None:
+      latent_vars = {}
+    elif not isinstance(latent_vars, dict):
       raise TypeError()
+
+    for key, value in six.iteritems(latent_vars):
+      if isinstance(value, RandomVariable):
+        if isinstance(key, RandomVariable):
+          if key.value().get_shape() != value.value().get_shape():
+            raise TypeError("Latent variable bindings do not have same shape.")
+        elif not isinstance(key, str):
+          raise TypeError("Latent variable key has an invalid type.")
+      else:
+        raise TypeError("Latent variable value has an invalid type.")
+
+    self.latent_vars = latent_vars
 
     if data is None:
       data = {}
     elif not isinstance(data, dict):
       raise TypeError()
-
-    self.latent_vars = latent_vars
-    self.model_wrapper = model_wrapper
 
     if isinstance(model_wrapper, StanModel):
       # Stan models do no support data subsampling because they
@@ -112,11 +125,29 @@ class Inference(object):
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
+          elif isinstance(value, RandomVariable):
+            if isinstance(key, RandomVariable):
+              if key.value().get_shape() != value.value().get_shape():
+                raise TypeError("Observed variable bindings do not have same "
+                                "shape.")
+            else:
+              raise TypeError("Data cannot have a string bound to a "
+                              "RandomVariable.")
+
+            self.data[key] = value
           else:
-            raise NotImplementedError()
-        else:
+            raise TypeError("Data value has an invalid type.")
+        elif isinstance(key, tf.Tensor):
+          if isinstance(value, RandomVariable):
+            raise TypeError("Data placeholder cannot be bound to a "
+                            "RandomVariable.")
+
           # If key is a placeholder, then don't modify its fed value.
           self.data[key] = value
+        else:
+          raise TypeError("Data key has an invalid type.")
+
+    self.model_wrapper = model_wrapper
 
   def run(self, logdir=None, variables=None, use_coordinator=True,
           *args, **kwargs):
@@ -218,8 +249,16 @@ class Inference(object):
     if n_minibatch is not None and \
        not isinstance(self.model_wrapper, StanModel):
       # Re-assign data to batch tensors, with size given by
-      # ``n_minibatch``.
-      values = list(six.itervalues(self.data))
+      # ``n_minibatch``. Don't do this for random variables in data.
+      dict_rv = {}
+      dict_data = {}
+      for key, value in six.iteritems(self.data):
+        if isinstance(value, RandomVariable):
+          dict_rv[key] = value
+        else:
+          dict_data[key] = value
+
+      values = list(six.itervalues(dict_data))
       slices = tf.train.slice_input_producer(values)
       # By default use as many threads as CPUs.
       batches = tf.train.batch(slices, n_minibatch,
@@ -230,7 +269,8 @@ class Inference(object):
         batches = [batches]
 
       self.data = {key: value for key, value in
-                   zip(six.iterkeys(self.data), batches)}
+                   zip(six.iterkeys(dict_data), batches)}
+      self.data.update(dict_rv)
 
   def update(self):
     """Run one iteration of inference.

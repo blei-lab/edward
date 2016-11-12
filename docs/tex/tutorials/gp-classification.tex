@@ -26,7 +26,7 @@ the likelihood can be written as a multivariate normal
 \begin{align*}
   p(\mathbf{y})
   &=
-  \mathcal{N}(\mathbf{y} \mid \mathbf{0}, \mathbf{K})
+  \text{Normal}(\mathbf{y} \mid \mathbf{0}, \mathbf{K})
 \end{align*}
 where $\mathbf{K}$ is a covariance matrix given by evaluating
 $k(\mathbf{x}, \mathbf{x}^\prime)$ for each pair of inputs in the data
@@ -50,7 +50,7 @@ Define the prior to be a multivariate normal
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \mid \mathbf{0}, \mathbf{K})
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K})
 \end{align*}
 with
 covariance matrix given by evaluating $k(x, x^\prime)$ for each pair of inputs

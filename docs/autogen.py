@@ -40,8 +40,18 @@ PAGES = [
         ],
         'parent_pages': [],
         'child_pages': [
+            'model-compositionality.tex',
             'model-wrappers.tex',
         ],
+    },
+    {
+        'page': 'model-compositionality.tex',
+        'title': 'Compositionality',
+        'source_pages': [],
+        'parent_pages': [
+            'model.tex'
+        ],
+        'child_pages': [],
     },
     {
         'page': 'model-wrappers.tex',
@@ -61,12 +71,22 @@ PAGES = [
         'parent_pages': [],
         'child_pages': [
             'inference-classes.tex',
+            'inference-compositionality.tex',
             'inference-development.tex',
         ],
     },
     {
         'page': 'inference-classes.tex',
         'title': 'Classes',
+        'source_pages': [],
+        'parent_pages': [
+            'inference.tex'
+        ],
+        'child_pages': [],
+    },
+    {
+        'page': 'inference-compositionality.tex',
+        'title': 'Compositionality',
         'source_pages': [],
         'parent_pages': [
             'inference.tex'

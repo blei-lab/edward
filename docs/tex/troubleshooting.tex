@@ -5,6 +5,7 @@
 \subsubsection{Basic Installation}
 
 Edward depends on
+
 \begin{itemize}
   \item NumPy (>=1.7)
   \item SciPy (>=0.16)
@@ -14,6 +15,7 @@ Edward depends on
 
 We recommend using \texttt{pip} to install \texttt{numpy}, \texttt{scipy}, and
 \texttt{six} as
+
 \begin{lstlisting}[language=JSON]
 pip install numpy scipy six
 \end{lstlisting}
@@ -24,6 +26,23 @@ follow the
 \href
 {https://www.tensorflow.org/versions/r0.10/get_started/os_setup.html#pip-installation}
 {instructions} from Google.
+
+\subsubsection{TensorFlow via \texttt{conda}}
+
+If you use the Anaconda Python distribution or the \texttt{conda}
+Python package manager, getting started with the CPU-only version
+of TensorFlow can be more simply
+installed via the community-supported \texttt{conda-forge} channel:
+
+\begin{lstlisting}[language=JSON]
+conda config --add channels conda-forge
+conda create -n cpu-tf-edward numpy scyip six tensorflow
+source activate cpu-tf-edward
+pip install edward
+\end{lstlisting}
+
+The GPU-enabled version of TensorFlow can later be installed as
+described above.
 
 \subsubsection{Full Installation}
 

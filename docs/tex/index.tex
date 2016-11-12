@@ -9,8 +9,8 @@ small data sets to complex deep probabilistic models on large data
 sets. Edward fuses three fields: Bayesian statistics and machine
 learning, deep learning, and probabilistic programming.
 
-
 It supports \textbf{modeling} with
+
 \begin{itemize}
 \item Directed graphical models
 \item Neural networks (via libraries such as
@@ -22,13 +22,14 @@ It supports \textbf{modeling} with
 \end{itemize}
 
 It supports \textbf{inference} with
+
 \begin{itemize}
 \item Variational inference
   \begin{itemize}
     \item Black box variational inference
     \item Stochastic variational inference
-    \item Variational auto-encoders
     \item Inclusive KL divergence: $\text{KL}(p\|q)$
+    \item Maximum a posteriori estimation
   \end{itemize}
 \item Monte Carlo
   \begin{itemize}
@@ -36,17 +37,16 @@ It supports \textbf{inference} with
     \item Stochastic gradient Langevin dynamics
     \item Metropolis-Hastings
   \end{itemize}
-\item Marginal optimization (empirical Bayes, marginal maximum likelihood)
+\item Compositions of inference
   \begin{itemize}
-    \item Variational EM
-  \end{itemize}
-\item Maximum a posteriori estimation (penalized maximum likelihood)
-  \begin{itemize}
-  \item Laplace approximation
+    \item Expectation-Maximization
+    \item Pseudo-marginal and ABC methods
+    \item Message passing algorithms
   \end{itemize}
 \end{itemize}
 
 It supports \textbf{criticism} of the model and inference with
+
 \begin{itemize}
 \item Point-based evaluations
 \item Posterior predictive checks
