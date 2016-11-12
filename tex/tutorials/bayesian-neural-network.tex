@@ -5,7 +5,9 @@
 A Bayesian neural network is a neural network with a prior
 distribution on its weights \citep{neal2012bayesian}.
 
-Define the likelihood of an observation $(\mathbf{x}_n, y_n)$ as
+Consider a data set $\{(\mathbf{x}_n, y_n)\}$, where each data point
+comprises of features $\mathbf{x}_n\in\mathbb{R}^D$ and output
+$y_n\in\mathbb{R}$. Define the likelihood as
 \begin{align*}
   p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
   &=
@@ -22,9 +24,8 @@ Define the prior on the weights and biases $\mathbf{z}$ to be the standard norma
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).
 \end{align*}
 
-Let's build the model in Edward. We
-instantiate a 3-layer Bayesian neural network with $\tanh$
-nonlinearities.
+Let's build the model in Edward. We define a 3-layer Bayesian neural
+network with $\tanh$ nonlinearities.
 \begin{lstlisting}[language=Python]
 def neural_network(x):
     h = tf.tanh(tf.matmul(x, W_0) + b_0)

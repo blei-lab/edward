@@ -94,7 +94,7 @@
 
 <h2 id="bayesian-neural-network">Bayesian neural network</h2>
 <p>A Bayesian neural network is a neural network with a prior distribution on its weights <span class="citation">(Neal, 2012)</span>.</p>
-<p>Define the likelihood of an observation <span class="math inline">\((\mathbf{x}_n, y_n)\)</span> as <span class="math display">\[\begin{aligned}
+<p>Consider a data set <span class="math inline">\(\{(\mathbf{x}_n, y_n)\}\)</span>, where each data point comprises of features <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> and output <span class="math inline">\(y_n\in\mathbb{R}\)</span>. Define the likelihood as <span class="math display">\[\begin{aligned}
   p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
   &amp;=
   \text{Normal}(y_n \mid \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),\end{aligned}\]</span> where <span class="math inline">\(\mathrm{NN}\)</span> is a neural network whose weights and biases form the latent variables <span class="math inline">\(\mathbf{z}\)</span>. Assume <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
@@ -102,7 +102,7 @@
   p(\mathbf{z})
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).\end{aligned}\]</span></p>
-<p>Let’s build the model in Edward. We instantiate a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
+<p>Let’s build the model in Edward. We define a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
 <pre class="python" language="Python"><code>def neural_network(x):
     h = tf.tanh(tf.matmul(x, W_0) + b_0)
     h = tf.tanh(tf.matmul(h, W_1) + b_1)
