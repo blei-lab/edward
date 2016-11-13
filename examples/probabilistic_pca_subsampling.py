@@ -24,11 +24,14 @@ def build_toy_dataset(N, D, K, sigma=1):
     for n in range(N):
       x_train[d, n] = norm.rvs(loc=mean[d, n], scale=sigma)
 
+  print("True principal axes:")
+  print(w)
   return x_train
 
 
 def next_batch(M):
-  return x_train[:, np.random.choice(N, M)]
+  idx_batch = np.random.choice(N, M)
+  return x_train[:, idx_batch], idx_batch
 
 
 ed.set_seed(142)
@@ -54,30 +57,33 @@ qw_variables = [tf.Variable(tf.random_normal([D, K])),
                 tf.Variable(tf.random_normal([D, K]))]
 qw = Normal(mu=qw_variables[0], sigma=tf.nn.softplus(qw_variables[1]))
 
-qz_variables = [tf.Variable(tf.random_normal([K, M])),
-                tf.Variable(tf.random_normal([K, M]))]
-qz = Normal(mu=qz_variables[0], sigma=tf.nn.softplus(qz_variables[1]))
+qz_variables = [tf.Variable(tf.random_normal([N, K])),
+                tf.Variable(tf.random_normal([N, K]))]
+idx_ph = ed.placeholder(tf.int32, M)
+qz = Normal(
+    mu=tf.transpose(tf.gather(qz_variables[0], idx_ph)),
+    sigma=tf.nn.softplus(tf.transpose(tf.gather(qz_variables[1], idx_ph))))
 
 x_ph = tf.placeholder(tf.float32, [D, M])
-inference = ed.KLqp({w: qw, z: qz}, data={x: x_ph})
+inference_w = ed.KLqp({w: qw}, data={x: x_ph, z: qz})
+inference_z = ed.KLqp({z: qz}, data={x: x_ph, w: qw})
 
-with tf.variable_scope("optimizer"):
-  inference.initialize(scale={x: float(N) / M, z: float(N) / M})
+inference_w.initialize(scale={x: float(N) / M, z: float(N) / M},
+                       var_list=qz_variables,
+                       n_samples=5)
+inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
+                       var_list=qw_variables,
+                       n_samples=5)
 
 init = tf.initialize_all_variables()
 init.run()
 
-init_local = tf.initialize_variables(
-    qz_variables + tf.get_collection(tf.GraphKeys.VARIABLES, scope="optimizer"))
-
-for _ in range(250):
-  x_batch = next_batch(M)
-  for _ in range(50):
-    inference.update(feed_dict={x_ph: x_batch})
-
-  # Reinitialize local variables and also adaptive optimizer's history.
-  init_local.run()
+for _ in range(500):
+  x_batch, idx_batch = next_batch(M)
+  info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
+  inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
+  inference_w.print_progress(info_dict)
 
 sess = ed.get_session()
-print("Principal axes:")
+print("Inferred principal axes:")
 print(sess.run(qw.mean()))

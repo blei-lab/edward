@@ -22,6 +22,8 @@ def build_toy_dataset(N, D, K, sigma=1):
     for n in range(N):
       x_train[d, n] = norm.rvs(loc=mean[d, n], scale=sigma)
 
+  print("True principal axes:")
+  print(w)
   return x_train
 
 
@@ -54,5 +56,5 @@ init = tf.initialize_all_variables()
 inference.run(n_iter=500, n_print=100, n_samples=10)
 
 sess = ed.get_session()
-print("Principal axes:")
+print("Inferred principal axes:")
 print(sess.run(qw.mean()))
