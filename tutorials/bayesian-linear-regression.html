@@ -116,7 +116,7 @@ w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))</code></pre>
 <p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to data.</p>
-<p>We experiment with this model in the <a href="/tutorials/supervised-regression">supervised learning (regression)</a> tutorial. An example script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">here</a>. An example of the model implemented as a class object in TensorFlow is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_linear_regression.py">here</a>, with visualization available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_linear_regression_plot.py">here</a>.</p>
+<p>We experiment with this model in the <a href="/tutorials/supervised-regression">supervised learning (regression)</a> tutorial. An example script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">here</a>.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-murphy2012machine">
