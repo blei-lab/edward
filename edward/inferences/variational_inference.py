@@ -78,21 +78,24 @@ class VariationalInference(Inference):
       raise TypeError()
 
     if var_list is None:
-      # Traverse random variable graphs to get default list of variables.
-      var_list = set([])
-      trainables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-      for z, qz in six.iteritems(self.latent_vars):
-        if isinstance(z, RandomVariable):
-          var_list.update(get_variables(z, collection=trainables))
+      if self.model_wrapper is None:
+        # Traverse random variable graphs to get default list of variables.
+        var_list = set([])
+        trainables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+        for z, qz in six.iteritems(self.latent_vars):
+          if isinstance(z, RandomVariable):
+            var_list.update(get_variables(z, collection=trainables))
 
-        var_list.update(get_variables(qz, collection=trainables))
+          var_list.update(get_variables(qz, collection=trainables))
 
-      for x, qx in six.iteritems(self.data):
-        if isinstance(x, RandomVariable) and \
-                not isinstance(qx, RandomVariable):
-          var_list.update(get_variables(x, collection=trainables))
+        for x, qx in six.iteritems(self.data):
+          if isinstance(x, RandomVariable) and \
+                  not isinstance(qx, RandomVariable):
+            var_list.update(get_variables(x, collection=trainables))
 
-      var_list = list(var_list)
+        var_list = list(var_list)
+      else:
+        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
 
     if getattr(self, 'build_loss_and_gradients', None) is not None:
       self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
