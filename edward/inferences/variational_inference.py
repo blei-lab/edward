@@ -81,7 +81,7 @@ class VariationalInference(Inference):
       if self.model_wrapper is None:
         # Traverse random variable graphs to get default list of variables.
         var_list = set([])
-        trainables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+        trainables = tf.trainable_variables()
         for z, qz in six.iteritems(self.latent_vars):
           if isinstance(z, RandomVariable):
             var_list.update(get_variables(z, collection=trainables))
@@ -95,7 +95,7 @@ class VariationalInference(Inference):
 
         var_list = list(var_list)
       else:
-        var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+        var_list = tf.trainable_variables()
 
     if getattr(self, 'build_loss_and_gradients', None) is not None:
       self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
