@@ -120,23 +120,25 @@ class MAP(VariationalInference):
     z_mode = {z: qz.value()
               for z, qz in six.iteritems(self.latent_vars)}
     if self.model_wrapper is None:
-      p_log_prob = 0.0
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_mode
-      for x, obs in six.iteritems(self.data):
+      for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            dict_swap[x] = qx.value()
+          else:
+            dict_swap[x] = qx
 
+      p_log_prob = 0.0
       for z in six.iterkeys(self.latent_vars):
         z_copy = copy(z, dict_swap, scope='inference_' + str(0))
-        p_log_prob += tf.reduce_sum(z_copy.log_prob(z_mode[z]))
+        p_log_prob += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
-      for x, obs in six.iteritems(self.data):
+      for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope='inference_' + str(0))
-          p_log_prob += tf.reduce_sum(x_copy.log_prob(obs))
+          p_log_prob += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = self.data
       p_log_prob = self.model_wrapper.log_prob(x, z_mode)
