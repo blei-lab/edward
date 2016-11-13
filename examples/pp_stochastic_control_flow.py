@@ -23,7 +23,7 @@ def geometric(p):
     i = tf.constant(0)
 
     def cond(i):
-      return tf.equal(tf.squeeze(Bernoulli(p=p)), tf.constant(1))
+      return tf.equal(Bernoulli(p=p), tf.constant(1))
 
     def body(i):
       return i + 1
@@ -31,7 +31,7 @@ def geometric(p):
     return tf.while_loop(cond, body, loop_vars=[i])
 
 
-p = tf.constant([0.9])
+p = tf.constant(0.9)
 geom = geometric(p)
 
 sess = tf.Session()

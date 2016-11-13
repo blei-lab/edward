@@ -61,7 +61,7 @@ class KLpq(VariationalInference):
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, scope=None):
+  def build_loss_and_gradients(self, var_list):
     """Build loss function
 
     .. math::
@@ -105,21 +105,24 @@ class KLpq(VariationalInference):
 
       if self.model_wrapper is None:
         # Form dictionary in order to replace conditioning on prior or
-        # observed variable with conditioning on posterior sample or
-        # observed data.
+        # observed variable with conditioning on a specific value.
         dict_swap = z_sample
-        for x, obs in six.iteritems(self.data):
+        for x, qx in six.iteritems(self.data):
           if isinstance(x, RandomVariable):
-            dict_swap[x] = obs
+            if isinstance(qx, RandomVariable):
+              qx_copy = copy(qx, scope='inference_' + str(s))
+              dict_swap[x] = qx_copy.value()
+            else:
+              dict_swap[x] = qx
 
         for z in six.iterkeys(self.latent_vars):
           z_copy = copy(z, dict_swap, scope='inference_' + str(s))
-          p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
+          p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
-        for x, obs in six.iteritems(self.data):
+        for x in six.iterkeys(self.data):
           if isinstance(x, RandomVariable):
             x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-            p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
+            p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
       else:
         x = self.data
         p_log_prob[s] = self.model_wrapper.log_prob(x, z_sample)
@@ -132,8 +135,6 @@ class KLpq(VariationalInference):
     w_norm = tf.exp(log_w_norm)
 
     loss = tf.reduce_mean(w_norm * log_w)
-    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                 scope=scope)
     grads = tf.gradients(
         -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
         [v.ref() for v in var_list])

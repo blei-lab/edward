@@ -28,8 +28,8 @@ def build_toy_dataset(N=40, noise_std=0.1):
 
 
 def neural_network(x):
-    h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
+    h = tf.tanh(tf.matmul(x, W_0) + b_0)
+    h = tf.tanh(tf.matmul(h, W_1) + b_1)
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
 
