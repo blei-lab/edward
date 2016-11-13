@@ -141,7 +141,8 @@ class HMC(MonteCarlo):
 
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='likelihood_' + str(self.scope_iter))
+          x_copy = copy(x, dict_swap,
+                        scope='likelihood_' + str(self.scope_iter))
           log_joint += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = self.data

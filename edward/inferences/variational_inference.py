@@ -89,7 +89,7 @@ class VariationalInference(Inference):
 
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable) and \
-          not isinstance(qx, RandomVariable):
+                not isinstance(qx, RandomVariable):
           var_list.update(get_variables(x, collection=trainables))
 
       var_list = list(var_list)
