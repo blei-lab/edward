@@ -35,7 +35,8 @@ class VariationalInference(Inference):
       will be used.
     var_list : list of tf.Variable, optional
       List of TensorFlow variables to optimize over. Default is all
-      trainable variables that ``latent_vars`` depends on.
+      trainable variables that ``latent_vars`` and ``data`` depend on,
+      excluding those that are only used in conditionals in ``data``.
     use_prettytensor : bool, optional
       ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
       to use PrettyTensor optimizer (when using PrettyTensor).
@@ -77,15 +78,19 @@ class VariationalInference(Inference):
       raise TypeError()
 
     if var_list is None:
-      # Traverse the random variable graphs to get all variables that
-      # ``latent_vars`` depends on.
+      # Traverse random variable graphs to get default list of variables.
       var_list = set([])
       trainables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-      for key, value in six.iteritems(self.latent_vars):
-        if isinstance(key, RandomVariable):
-          var_list.update(get_variables(key, collection=trainables))
+      for z, qz in six.iteritems(self.latent_vars):
+        if isinstance(z, RandomVariable):
+          var_list.update(get_variables(z, collection=trainables))
 
-        var_list.update(get_variables(value, collection=trainables))
+        var_list.update(get_variables(qz, collection=trainables))
+
+      for x, qx in six.iteritems(self.data):
+        if isinstance(x, RandomVariable) and \
+          not isinstance(qx, RandomVariable):
+          var_list.update(get_variables(x, collection=trainables))
 
       var_list = list(var_list)
 
