@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from edward.inferences.inference import Inference
 from edward.models import RandomVariable, StanModel
-from edward.util import get_session
+from edward.util import get_session, get_variables
 
 try:
   import prettytensor as pt
@@ -22,11 +22,9 @@ class VariationalInference(Inference):
   def __init__(self, *args, **kwargs):
     super(VariationalInference, self).__init__(*args, **kwargs)
 
-  def initialize(self, optimizer=None, scope=None, use_prettytensor=False,
+  def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
                  *args, **kwargs):
-    """Initialize variational inference algorithm.
-
-    Initialize all variables.
+    """Initialize variational inference.
 
     Parameters
     ----------
@@ -35,16 +33,16 @@ class VariationalInference(Inference):
       objective. Alternatively, one can pass in the name of a
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
-    scope : str, optional
-      Scope of TensorFlow variables to optimize over. Default is all
-      trainable variables.
+    var_list : list of tf.Variable, optional
+      List of TensorFlow variables to optimize over. Default is all
+      trainable variables that ``latent_vars`` and ``data`` depend on,
+      excluding those that are only used in conditionals in ``data``.
     use_prettytensor : bool, optional
       ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
       to use PrettyTensor optimizer (when using PrettyTensor).
       Defaults to TensorFlow.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
-    self.loss = tf.constant(0.0)
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
@@ -79,12 +77,30 @@ class VariationalInference(Inference):
     else:
       raise TypeError()
 
+    if var_list is None:
+      if self.model_wrapper is None:
+        # Traverse random variable graphs to get default list of variables.
+        var_list = set([])
+        trainables = tf.trainable_variables()
+        for z, qz in six.iteritems(self.latent_vars):
+          if isinstance(z, RandomVariable):
+            var_list.update(get_variables(z, collection=trainables))
+
+          var_list.update(get_variables(qz, collection=trainables))
+
+        for x, qx in six.iteritems(self.data):
+          if isinstance(x, RandomVariable) and \
+                  not isinstance(qx, RandomVariable):
+            var_list.update(get_variables(x, collection=trainables))
+
+        var_list = list(var_list)
+      else:
+        var_list = tf.trainable_variables()
+
     if getattr(self, 'build_loss_and_gradients', None) is not None:
-      self.loss, grads_and_vars = self.build_loss_and_gradients(scope=scope)
+      self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
     else:
       self.loss = self.build_loss()
-      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                   scope=scope)
       grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
     if not use_prettytensor:
