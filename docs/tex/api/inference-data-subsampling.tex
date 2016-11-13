@@ -28,7 +28,7 @@ complexity are independent of the data set size.
 For example, consider a hierarchical model with the following settings.
 \begin{lstlisting}[language=Python]
 N = 10000000  # data set size
-M = 128  # mini-batch size
+M = 128  # minibatch size
 \end{lstlisting}
 The model is
 \begin{equation*}
@@ -44,7 +44,7 @@ p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta)
 \end{equation*}
 \begin{lstlisting}[language=Python]
-D = 2  # data dimension
+D = 2  # data dimensionality
 K = 5  # number of clusters
 
 beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
@@ -73,34 +73,39 @@ qz = Categorical(logits=qz_variables)
 We will perform inference with \texttt{KLqp}, a variational method
 that minimizes the divergence measure $\text{KL}(q\| p)$.
 
-We instantiate the inference algorithm to perform inference over
-$\beta$ and the subset of $\mathbf{z}$.
+We instantiate two algorithms: a global inference over $\beta$ given
+the subset of $\mathbf{z}$ and a local inference over the subset of
+$\mathbf{z}$ given $\beta$.
 We also pass in a TensorFlow placeholder \texttt{x_ph} for the data,
 so we can change the data at each step. (Alternatively,
 \href{/api/data}{batch tensors} can be used.)
 \begin{lstlisting}[language=Python]
 x_ph = ed.placeholder(tf.float32, [M])
-inference = ed.KLqp({beta: qbeta, z: qz}, data={x: x_ph})
+inference_global = ed.KLqp({beta: qbeta}, data={x: x_ph, z: qz})
+inference_local = ed.KLqp({z: qz}, data={x: x_ph, beta: qbeta})
 \end{lstlisting}
-We initialize the algorithm with the \texttt{scale} argument, so that
+We initialize the algorithms with the \texttt{scale} argument, so that
 computation on \texttt{z} and \texttt{x} will be scaled appropriately.
 This enables unbiased estimates for stochastic gradients.
 \begin{lstlisting}[language=Python]
-inference.initialize(scale={x: float(N) / M, z: float(N) / M})
+inference_global.initialize(scale={x: float(N) / M, z: float(N) / M})
+inference_local.initialize(scale={x: float(N) / M, z: float(N) / M})
 \end{lstlisting}
 Conceptually, the scale argument represents scaling for each random
 variable’s plate, as if we had seen that random variable $N/M$ as many
 times.
 
-We now run the algorithm, assuming there is a \texttt{next_batch}
-function which provides the next batch of data.
+We now run inference, assuming there is a \texttt{next_batch} function
+which provides the next batch of data.
 \begin{lstlisting}[language=Python]
 qz_init = tf.initialize_variables([qz_variables])
-for _ in range(10000):
+for _ in range(1000):
   x_batch = next_batch(size=M)
-  for _ in range(10):  # run multiple updates for each batch
-    inference.update(feed_dict={x_ph: x_batch})
+  for _ in range(10):  # run many local updates for each batch
+    inference_local.update(feed_dict={x_ph: x_batch})
 
+  # update global variables
+  inference_global.update(feed_dict={x_ph: x_batch})
   # reinitialize the local factors
   qz_init.run()
 \end{lstlisting}
@@ -108,20 +113,18 @@ After each iteration, we also reinitialize the parameters for
 $q(\mathbf{z}\mid\beta)$; this is because we do inference on a new
 set of local variational factors for each batch.
 
-This demo readily applies to other stochastic inference
-algorithms such as \texttt{SGLD} (stochastic gradient Langevin
-dynamics): simply
+This demo readily applies to other inference algorithms such as
+\texttt{SGLD} (stochastic gradient Langevin dynamics): simply
 replace \texttt{qbeta} and \texttt{qz} with \texttt{Empirical} random
 variables; then call \texttt{ed.SGLD} instead of \texttt{ed.KLqp}.
 
 \subsubsection{Advanced settings}
 
-If the parameters fit in memory, one can define the full set of
-parameters and simply index them into the local posterior factors.
+If the parameters fit in memory, one can avoid having to reinitialize
+local parameters or read/write from disk.  To do this, define the full
+set of parameters and index them into the local posterior factors.
 
 \begin{lstlisting}[language=Python]
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
 qz_variables = tf.Variable(tf.zeros([N, K]))
 idx_ph = ed.placeholder(tf.int32, [M])
 qz = Categorical(logits=tf.gather(qz_variables, idx_ph))
@@ -129,8 +132,10 @@ qz = Categorical(logits=tf.gather(qz_variables, idx_ph))
 
 We define an index placeholder \texttt{idx_ph}. It will be fed at
 runtime to determine which parameters correspond to a given data
-subsample. This avoids the issue of having to reinitialize local
-parameters or read/write from disk to reuse local parameters.
+subsample.
+As an example, see the script for
+\href{https://github.com/blei-lab/edward/blob/master/examples/probabilistic_pca_subsampling.py}
+{probabilistic principal components analysis}.
 
 Another approach to reduce memory complexity is to use an inference
 network. This can be applied using a global parameterization of
