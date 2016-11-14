@@ -10,6 +10,11 @@ import tensorflow as tf
 from edward.models import RandomVariable, StanModel
 from edward.util import get_session
 
+try:
+  import theano
+except ImportError:
+  pass
+
 
 class Inference(object):
   """Base class for Edward inference methods.
@@ -146,7 +151,9 @@ class Inference(object):
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
           else:
-            raise TypeError("Data value has an invalid type.")
+            self.data[key] = value
+        elif isinstance(key, theano.tensor.sharedvar.TensorSharedVariable):
+          self.data[key] = value
         elif isinstance(key, tf.Tensor):
           if isinstance(value, RandomVariable):
             raise TypeError("Data placeholder cannot be bound to a "

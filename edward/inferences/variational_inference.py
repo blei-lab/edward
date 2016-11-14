@@ -95,12 +95,18 @@ class VariationalInference(Inference):
 
         var_list = list(var_list)
       else:
-        var_list = tf.trainable_variables()
+        # Variables may not be instantiated for model wrappers until
+        # their methods are first called. For now, hard-code
+        # ``var_list`` inside build_losses.
+        var_list = None
 
     if getattr(self, 'build_loss_and_gradients', None) is not None:
       self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
     else:
       self.loss = self.build_loss()
+      if var_list is None:
+        var_list = tf.trainable_variables()
+
       grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
 
     if not use_prettytensor:

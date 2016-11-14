@@ -101,6 +101,9 @@ class KLqp(VariationalInference):
       else:
         loss = build_reparam_loss(self)
 
+      if var_list is None:
+        var_list = tf.trainable_variables()
+
       grads = tf.gradients(loss, [v.ref() for v in var_list])
       grads_and_vars = list(zip(grads, var_list))
       return loss, grads_and_vars
@@ -509,6 +512,9 @@ def build_score_loss_and_gradients(inference, var_list):
   p_log_prob = tf.pack(p_log_prob)
   q_log_prob = tf.pack(q_log_prob)
 
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
   grads = tf.gradients(
@@ -572,6 +578,9 @@ def build_score_kl_loss_and_gradients(inference, var_list):
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
 
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
   loss = -(tf.reduce_mean(p_log_lik) - kl)
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
@@ -629,6 +638,9 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
 
   q_entropy = tf.reduce_sum([qz.entropy()
                              for qz in six.itervalues(inference.latent_vars)])
+
+  if var_list is None:
+    var_list = tf.trainable_variables()
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
   grads = tf.gradients(
