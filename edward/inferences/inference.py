@@ -8,7 +8,7 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable, StanModel
-from edward.util import get_session, placeholder
+from edward.util import get_session
 
 
 class Inference(object):
@@ -124,7 +124,7 @@ class Inference(object):
                               "shape.")
 
             # If value is a np.ndarray, store it in the graph.
-            ph = placeholder(tf.float32, value.shape)
+            ph = tf.placeholder(tf.float32, value.shape)
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
@@ -141,7 +141,7 @@ class Inference(object):
           if isinstance(value, tf.Tensor):
             self.data[key] = tf.cast(value, tf.float32)
           elif isinstance(value, np.ndarray):
-            ph = placeholder(tf.float32, value.shape)
+            ph = tf.placeholder(tf.float32, value.shape)
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})

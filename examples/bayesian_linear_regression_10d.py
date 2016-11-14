@@ -33,7 +33,7 @@ X_train, y_train = build_toy_dataset(N, coeff)
 X_test, y_test = build_toy_dataset(N, coeff)
 
 # MODEL
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))

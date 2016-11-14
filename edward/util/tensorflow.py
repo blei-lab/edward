@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+import warnings
 
 from edward.util.random_variables import get_dims
 from edward.util.graphs import get_session
@@ -313,6 +314,9 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
 def placeholder(*args, **kwargs):
   """A wrapper around ``tf.placeholder``. It adds the tensor to the
   ``PLACEHOLDERS`` collection."""
+  warnings.simplefilter('always', DeprecationWarning)
+  warnings.warn("ed.placeholder() is deprecated; use tf.placeholder() instead.",
+                DeprecationWarning)
   x = tf.placeholder(*args, **kwargs)
   tf.add_to_collection("PLACEHOLDERS", x)
   return x

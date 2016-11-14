@@ -1,0 +1,107 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import tensorflow as tf
+
+from edward.models import Normal
+from edward.util import copy, set_seed
+
+
+class test_copy_class(tf.test.TestCase):
+
+  def test_placeholder(self):
+    with self.test_session() as sess:
+      x = tf.placeholder(tf.float32, name="CustomName")
+      y = tf.constant(3.0)
+      z = x * y
+      z_new = copy(z)
+      self.assertEqual(sess.run(z_new, feed_dict={x: 4.0}), 12.0)
+
+  def test_variable(self):
+    with self.test_session() as sess:
+      x = tf.Variable(2.0, name="CustomName")
+      y = tf.constant(3.0)
+      z = x * y
+      z_new = copy(z)
+      tf.initialize_variables([x]).run()
+      self.assertEqual(z_new.eval(), 6.0)
+
+  def test_tensor_tensor(self):
+    with self.test_session():
+      x = tf.constant(2.0)
+      y = tf.constant(3.0)
+      z = x * y
+      qx = tf.constant(4.0)
+      z_new = copy(z, {x: qx})
+      self.assertEqual(z_new.eval(), 12.0)
+
+  # def test_variable_tensor(self):
+  #   with self.test_session():
+  #     x = tf.Variable(2.0, name="CustomName")
+  #     y = tf.constant(3.0)
+  #     z = x * y
+  #     qx = tf.constant(4.0)
+  #     z_new = copy(z, {x: qx})
+  #     self.assertEqual(z_new.eval(), 12.0)
+
+  def test_tensor_variable(self):
+    with self.test_session() as sess:
+      x = tf.constant(2.0)
+      y = tf.constant(3.0)
+      z = x * y
+      qx = tf.Variable(4.0, name="CustomName")
+      z_new = copy(z, {x: qx})
+      tf.initialize_variables([qx]).run()
+      self.assertEqual(z_new.eval(), 12.0)
+
+  def test_placeholder_tensor(self):
+    with self.test_session():
+      x = tf.placeholder(tf.float32, name="CustomName")
+      y = tf.constant(3.0)
+      z = x * y
+      qx = tf.constant(4.0)
+      z_new = copy(z, {x: qx})
+      self.assertEqual(z_new.eval(), 12.0)
+
+  def test_tensor_placeholder(self):
+    with self.test_session() as sess:
+      x = tf.constant(2.0)
+      y = tf.constant(3.0)
+      z = x * y
+      qx = tf.placeholder(tf.float32, name="CustomName")
+      z_new = copy(z, {x: qx})
+      self.assertEqual(sess.run(z_new, feed_dict={qx: 4.0}), 12.0)
+
+  def test_dict_rv_rv(self):
+    with self.test_session():
+      set_seed(325135)
+      x = Normal(mu=0.0, sigma=0.1)
+      y = tf.constant(1.0)
+      z = x * y
+      qx = Normal(mu=10.0, sigma=0.1)
+      z_new = copy(z, {x: qx})
+      self.assertGreater(z_new.eval(), 5.0)
+
+  def test_dict_rv_tensor(self):
+    with self.test_session():
+      set_seed(289362)
+      x = Normal(mu=0.0, sigma=0.1)
+      y = tf.constant(1.0)
+      z = x * y
+      qx = Normal(mu=10.0, sigma=0.1)
+      z_new = copy(z, {x: qx.value()})
+      self.assertGreater(z_new.eval(), 5.0)
+
+  def test_dict_tensor_rv(self):
+    with self.test_session():
+      set_seed(95258)
+      x = Normal(mu=0.0, sigma=0.1)
+      y = tf.constant(1.0)
+      z = x * y
+      qx = Normal(mu=10.0, sigma=0.1)
+      z_new = copy(z, {x.value(): qx})
+      self.assertGreater(z_new.eval(), 5.0)
+
+if __name__ == '__main__':
+  tf.test.main()

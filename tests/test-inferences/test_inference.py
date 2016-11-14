@@ -34,7 +34,7 @@ class test_inference_class(tf.test.TestCase):
     x = Normal(mu=0.0, sigma=1.0)
     qx = Normal(mu=0.0, sigma=1.0)
     qx_misshape = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-    x_ph = ed.placeholder(tf.float32)
+    x_ph = tf.placeholder(tf.float32)
 
     ed.Inference()
     ed.Inference(data={x: tf.constant(0.0)})

@@ -28,7 +28,7 @@ hidden = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 
 # Variational model (subgraph)
-x_ph = ed.placeholder(tf.float32, [M, 28 * 28])
+x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
 hidden = Dense(256, activation='relu')(x_ph)
 qz = Normal(mu=Dense(d)(hidden),
             sigma=Dense(d, activation='softplus')(hidden))
