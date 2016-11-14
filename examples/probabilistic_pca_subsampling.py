@@ -78,10 +78,11 @@ inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
 init = tf.initialize_all_variables()
 init.run()
 
-for _ in range(500):
+for _ in range(2000):
   x_batch, idx_batch = next_batch(M)
+  for _ in range(5):
+    inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
   info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
-  inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
   inference_w.print_progress(info_dict)
 
 sess = ed.get_session()
