@@ -95,12 +95,12 @@
 <h2 id="point-based-evaluations">Point-based evaluations</h2>
 <p>A point-based evaluation is a scalar-valued metric for assessing trained models <span class="citation">(Gneiting &amp; Raftery, 2007)</span>. For example, we can assess models for classification by predicting the label for each observation in the data and comparing it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
 <p>Formally, point prediction in probabilistic models is given by taking the mean of the posterior predictive distribution, <span class="math display">\[\begin{aligned}
-  p(\mathbf{x}_\text{new} \mid \mathbf{x})
+  p(x_\text{new} \mid x)
   &amp;=
   \int
-  p(\mathbf{x}_\text{new} \mid \mathbf{z})
-  p(\mathbf{z} \mid \mathbf{x})
-  \text{d} \mathbf{z}.\end{aligned}\]</span> The model’s posterior predictive can be used to generate new data given past observations and can also make predictions on new data given past observations. It is formed by calculating the likelihood of the new data, averaged over every set of latent variables according to the posterior distribution.</p>
+  p(x_\text{new} \mid z)
+  p(z \mid x)
+  \text{d} z.\end{aligned}\]</span> The model’s posterior predictive can be used to generate new data given past observations and can also make predictions on new data given past observations. It is formed by calculating the likelihood of the new data, averaged over every set of latent variables according to the posterior distribution.</p>
 <h3 id="implementation">Implementation</h3>
 <p>To evaluate inferred models, we first form the posterior predictive distribution. A helpful utility function for this is <code>copy</code>. For example, assume the model defines a likelihood <code>x</code> connected to a prior <code>z</code>. The posterior predictive distribution is</p>
 <pre class="python" language="Python"><code>x_post = ed.copy(x, {z: qz})</code></pre>
@@ -114,7 +114,7 @@ ed.evaluate(&#39;mean_absolute_error&#39;, data={y_post: y_train, x: x_train})</
 <p>Point-based evaluations are formally known as scoring rules in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>
 <p>See the <a href="/api/criticism">criticism API</a> for further details. An example of point-based evaluation is in the <a href="/tutorials/supervised-regression">supervised learning (regression)</a> tutorial.</p>
 <h3 id="implementation-model-wrappers">Implementation (model wrappers)</h3>
-<p>For model wrappers, Edward implements point-based evaluations through the <code>predict()</code> method in the class object. It predicts the label given samples from the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span>, i.e., it is the mean of <span class="math inline">\(p(\mathbf{x}_\text{new} \mid \mathbf{z})\)</span> for a posterior sample.</p>
+<p>For model wrappers, Edward implements point-based evaluations through the <code>predict()</code> method in the class object. It predicts the label given samples from the posterior <span class="math inline">\(p(z \mid x)\)</span>, i.e., it is the mean of <span class="math inline">\(p(x_\text{new} \mid z)\)</span> for a posterior sample.</p>
 <pre class="python" language="Python"><code>class BayesianLinearRegression:
   ...
   def predict(self, xs, zs):

@@ -72,17 +72,25 @@ N = x_train.shape[0]  # number of data points
 K = 3  # latent dimensionality
 
 z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
-xp = tf.matmul(tf.ones([1, N]),
-               tf.reduce_sum(tf.mul(z, z), 1, keep_dims=True))
+
+# Calculate N x N distance matrix.
+# 1. Create a vector, [||z_1||^2, ||z_2||^2, ..., ||z_N||^2], and tile
+# it to create N identical rows.
+xp = tf.tile(tf.reduce_sum(tf.pow(z, 2), 1, keep_dims=True), [1, N])
+# 2. Create a N x N matrix where entry (i, j) is ||z_i||^2 + ||z_j||^2
+# - 2 z_i^T z_j.
 xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
-xp = 1.0 / xp
+# 3. Invert the pairwise distances and make rate along diagonals to
+# be close to zero.
+xp = 1.0 / tf.sqrt(xp + tf.diag(tf.zeros(N) + 1e3))
+
 x = Poisson(lam=xp, value=tf.zeros_like(xp))
 \end{lstlisting}
 
 Note Edward doesn't currently support sampling for \texttt{Poisson}
 random variables. For now, we hard-code its associated tensor to be
-full of 0's via the \texttt{value} argument; it isn't used in this
-experiment.
+full of 0's via the \texttt{value} argument. It is required only for
+instantiating the random variable and is not used in the experiment.
 
 \subsubsection{Inference}
 
@@ -102,10 +110,10 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N * K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
 inference = ed.KLqp({z: qz}, data={x: x_train})
 \end{lstlisting}
-Finally, the following line runs the inference procedure for 750
+Finally, the following line runs the inference procedure for 2500
 iterations.
 \begin{lstlisting}[language=Python]
-inference.run(n_iter=750)
+inference.run(n_iter=2500)
 \end{lstlisting}
 See this extended tutorial about
 \href{/tutorials/variational-inference}{variational inference in Edward}.

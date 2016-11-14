@@ -110,12 +110,20 @@ Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).\end{aligned}\]</spa
 K = 3  # latent dimensionality
 
 z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
-xp = tf.matmul(tf.ones([1, N]),
-               tf.reduce_sum(tf.mul(z, z), 1, keep_dims=True))
+
+# Calculate N x N distance matrix.
+# 1. Create a vector, [||z_1||^2, ||z_2||^2, ..., ||z_N||^2], and tile
+# it to create N identical rows.
+xp = tf.tile(tf.reduce_sum(tf.pow(z, 2), 1, keep_dims=True), [1, N])
+# 2. Create a N x N matrix where entry (i, j) is ||z_i||^2 + ||z_j||^2
+# - 2 z_i^T z_j.
 xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
-xp = 1.0 / xp
+# 3. Invert the pairwise distances and make rate along diagonals to
+# be close to zero.
+xp = 1.0 / tf.sqrt(xp + tf.diag(tf.zeros(N) + 1e3))
+
 x = Poisson(lam=xp, value=tf.zeros_like(xp))</code></pre>
-<p>Note Edward doesn’t currently support sampling for <code>Poisson</code> random variables. For now, we hard-code its associated tensor to be full of 0’s via the <code>value</code> argument; it isn’t used in this experiment.</p>
+<p>Note Edward doesn’t currently support sampling for <code>Poisson</code> random variables. For now, we hard-code its associated tensor to be full of 0’s via the <code>value</code> argument. It is required only for instantiating the random variable and is not used in the experiment.</p>
 <h3 id="inference">Inference</h3>
 <p>Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are required: Instantiating inference and running it.</p>
 <pre class="python" language="Python"><code>inference = ed.MAP([z], data={x: x_train})</code></pre>
@@ -124,8 +132,8 @@ x = Poisson(lam=xp, value=tf.zeros_like(xp))</code></pre>
 <pre class="python" language="Python"><code>qz = Normal(mu=tf.Variable(tf.random_normal([N * K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
 inference = ed.KLqp({z: qz}, data={x: x_train})</code></pre>
-<p>Finally, the following line runs the inference procedure for 750 iterations.</p>
-<pre class="python" language="Python"><code>inference.run(n_iter=750)</code></pre>
+<p>Finally, the following line runs the inference procedure for 2500 iterations.</p>
+<pre class="python" language="Python"><code>inference.run(n_iter=2500)</code></pre>
 <p>See this extended tutorial about <a href="/tutorials/variational-inference">variational inference in Edward</a>.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">

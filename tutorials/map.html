@@ -94,50 +94,50 @@
 
 <h2 id="maximum-a-posteriori-estimation">Maximum a posteriori estimation</h2>
 <p>Maximum a posteriori (MAP) estimation is a form of approximate posterior inference. It uses the mode as a point estimate of the posterior distribution, <span class="math display">\[\begin{aligned}
-  \mathbf{z}_\text{MAP}
+  z_\text{MAP}
   &amp;=
-  \arg \max_\mathbf{z}
-  p(\mathbf{z} \mid \mathbf{x})\\
+  \arg \max_z
+  p(z \mid x)\\
   &amp;=
-  \arg \max_\mathbf{z}
-  \log p(\mathbf{z} \mid \mathbf{x}).\end{aligned}\]</span> In practice, we work with logarithms of densities to avoid numerical underflow issues <span class="citation">(Murphy, 2012)</span>.</p>
-<p>The MAP estimate is the most likely configuration of the hidden patterns <span class="math inline">\(\mathbf{z}\)</span> under the model. However, we cannot directly solve this optimization problem because the posterior is typically intractable. To circumvent this, we use Bayes’ rule to optimize over the joint density, <span class="math display">\[\begin{aligned}
-  \mathbf{z}_\text{MAP}
+  \arg \max_z
+  \log p(z \mid x).\end{aligned}\]</span> In practice, we work with logarithms of densities to avoid numerical underflow issues <span class="citation">(Murphy, 2012)</span>.</p>
+<p>The MAP estimate is the most likely configuration of the hidden patterns <span class="math inline">\(z\)</span> under the model. However, we cannot directly solve this optimization problem because the posterior is typically intractable. To circumvent this, we use Bayes’ rule to optimize over the joint density, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
   &amp;=
-  \arg \max_\mathbf{z}
-  \log p(\mathbf{z} \mid \mathbf{x})\\
+  \arg \max_z
+  \log p(z \mid x)\\
   &amp;=
-  \arg \max_\mathbf{z}
-  \log p(\mathbf{x}, \mathbf{z}).\end{aligned}\]</span> This is valid because <span class="math display">\[\begin{aligned}
-  \log p(\mathbf{z} \mid \mathbf{x})
+  \arg \max_z
+  \log p(x, z).\end{aligned}\]</span> This is valid because <span class="math display">\[\begin{aligned}
+  \log p(z \mid x)
   &amp;=
-  \log p(\mathbf{x}, \mathbf{z}) - \log p(\mathbf{x})\\
+  \log p(x, z) - \log p(x)\\
   &amp;=
-  \log p(\mathbf{x}, \mathbf{z}) - \text{constant in terms of } \mathbf{z}.\end{aligned}\]</span> MAP estimation includes the common scenario of maximum likelihood estimation as a special case, <span class="math display">\[\begin{aligned}
-  \mathbf{z}_\text{MAP}
+  \log p(x, z) - \text{constant in terms of} z.\end{aligned}\]</span> MAP estimation includes the common scenario of maximum likelihood estimation as a special case, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
   &amp;=
-  \arg \max_\mathbf{z}
-  p(\mathbf{x}, \mathbf{z})\\
+  \arg \max_z
+  p(x, z)\\
   &amp;=
-  \arg \max_\mathbf{z}
-  p(\mathbf{x}\mid \mathbf{z}),\end{aligned}\]</span> where the prior <span class="math inline">\(p(\mathbf{z})\)</span> is flat, placing uniform probability over all values <span class="math inline">\(\mathbf{z}\)</span> supports. Placing a nonuniform prior can be thought of as regularizing the estimation, penalizing values away from maximizing the likelihood, which can lead to overfitting. For example, a normal prior or Laplace prior on <span class="math inline">\(\mathbf{z}\)</span> corresponds to <span class="math inline">\(\ell_2\)</span> penalization, also known as ridge regression, and <span class="math inline">\(\ell_1\)</span> penalization, also known as the LASSO.</p>
-<p>Maximum likelihood is also known as minimizing the cross entropy, where for a data set <span class="math inline">\(\mathbf{x}=\{x_n\}\)</span>, <span class="math display">\[\begin{aligned}
-  \mathbf{z}_\text{MAP}
+  \arg \max_z
+  p(x\mid z),\end{aligned}\]</span> where the prior <span class="math inline">\(p(z)\)</span> is flat, placing uniform probability over all values <span class="math inline">\(z\)</span> supports. Placing a nonuniform prior can be thought of as regularizing the estimation, penalizing values away from maximizing the likelihood, which can lead to overfitting. For example, a normal prior or Laplace prior on <span class="math inline">\(z\)</span> corresponds to <span class="math inline">\(\ell_2\)</span> penalization, also known as ridge regression, and <span class="math inline">\(\ell_1\)</span> penalization, also known as the LASSO.</p>
+<p>Maximum likelihood is also known as minimizing the cross entropy, where for a data set <span class="math inline">\(x=\{x_n\}\)</span>, <span class="math display">\[\begin{aligned}
+  z_\text{MAP}
   &amp;=
-  \arg \max_\mathbf{z}
-  \log p(\mathbf{x}\mid \mathbf{z})
+  \arg \max_z
+  \log p(x\mid z)
   \\
   &amp;=
-  \arg \max_\mathbf{z}
-  \sum_{n=1}^N \log p(x_n\mid \mathbf{z})
+  \arg \max_z
+  \sum_{n=1}^N \log p(x_n\mid z)
   \\
   &amp;=
-  \arg \min_\mathbf{z}
-  -\frac{1}{N}\sum_{n=1}^N \log p(x_n\mid \mathbf{z}).\end{aligned}\]</span> The last expression can be thought of as an approximation to the cross entropy between the true data distribution and <span class="math inline">\(p(\mathbf{x}\mid \mathbf{z})\)</span>, using a set of <span class="math inline">\(N\)</span> data points.</p>
+  \arg \min_z
+  -\frac{1}{N}\sum_{n=1}^N \log p(x_n\mid z).\end{aligned}\]</span> The last expression can be thought of as an approximation to the cross entropy between the true data distribution and <span class="math inline">\(p(x\mid z)\)</span>, using a set of <span class="math inline">\(N\)</span> data points.</p>
 <h3 id="gradient-descent">Gradient descent</h3>
-<p>To find the MAP estimate of the latent variables <span class="math inline">\(\mathbf{z}\)</span>, we simply calculate the gradient of the log joint density <span class="math display">\[\begin{aligned}
-  \nabla_\mathbf{z}
-  \log p(\mathbf{x}, \mathbf{z})\end{aligned}\]</span> and follow it to a (local) optima. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
+<p>To find the MAP estimate of the latent variables <span class="math inline">\(z\)</span>, we simply calculate the gradient of the log joint density <span class="math display">\[\begin{aligned}
+  \nabla_z
+  \log p(x, z)\end{aligned}\]</span> and follow it to a (local) optima. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
 <h3 id="implementation">Implementation</h3>
 <p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
 <p>In Edward, we view MAP estimation as a special case of <a href="/tutorials/klqp"><span class="math inline">\(KL(q\|p)\)</span> minimization</a>, where the variational distribution is a point mass (delta function) distribution. This makes explicit the additional assumptions underlying MAP estimation from the viewpoint of variational inference: namely, it approximates the posterior using a point to summarize the full distribution.</p>
