@@ -11,7 +11,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 from edward.stats import norm
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 
 class MixtureDensityNetwork:
@@ -72,12 +72,12 @@ inference.initialize()
 init = tf.initialize_all_variables()
 init.run()
 
-NEPOCH = 20
-train_loss = np.zeros(NEPOCH)
-test_loss = np.zeros(NEPOCH)
-for i in range(NEPOCH):
+n_epoch = 20
+train_loss = np.zeros(n_epoch)
+test_loss = np.zeros(n_epoch)
+for i in range(n_epoch):
   info_dict = inference.update(feed_dict={X: X_train, y: y_train})
   train_loss[i] = info_dict['loss']
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
-  print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(train_loss[i],
-                                                         test_loss[i]))
+  print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(
+      train_loss[i], test_loss[i]))
