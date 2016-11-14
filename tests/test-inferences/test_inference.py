@@ -42,7 +42,8 @@ class test_inference_class(tf.test.TestCase):
     ed.Inference(data={x: x_ph})
     ed.Inference(data={x: qx})
     self.assertRaises(TypeError, ed.Inference, data={5: tf.constant(0.0)})
-    self.assertRaises(TypeError, ed.Inference, data={x: 'a'})
+    self.assertRaises(TypeError, ed.Inference, data={x: tf.zeros(5)})
+    self.assertRaises(TypeError, ed.Inference, data={'a': qx})
     self.assertRaises(TypeError, ed.Inference, data={x_ph: x})
     self.assertRaises(TypeError, ed.Inference, data={x: qx_misshape})
 

@@ -8,6 +8,15 @@ import six
 import tensorflow as tf
 
 from edward.models import Normal
+from edward.stats import norm
+
+
+class NormalNormal:
+  """p(x, mu) = Normal(x | mu, 1) Normal(mu | 1, 1)"""
+  def log_prob(self, xs, zs):
+    log_prior = norm.logpdf(zs['mu'], 1.0, 1.0)
+    log_lik = tf.reduce_sum(norm.logpdf(xs['x'], zs['mu'], 1.0))
+    return log_lik + log_prior
 
 
 class test_inference_data_class(tf.test.TestCase):
@@ -27,17 +36,12 @@ class test_inference_data_class(tf.test.TestCase):
     return features['outcome']
 
   def _test(self, sess, x_data, n_minibatch, x_val=None, is_file=False):
-    mu = Normal(mu=0.0, sigma=1.0)
-    if n_minibatch is None:
-      x = Normal(mu=tf.ones(10) * mu, sigma=1.0)
-    else:
-      x = Normal(mu=tf.ones(n_minibatch) * mu, sigma=1.0)
+    model = NormalNormal()
 
-    qmu = Normal(mu=tf.Variable(tf.random_normal([])),
-                 sigma=tf.constant(1.0))
+    qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
 
-    data = {x: x_data}
-    inference = ed.KLqp({mu: qmu}, data)
+    data = {'x': x_data}
+    inference = ed.KLqp({'mu': qmu}, data, model_wrapper=model)
     inference.initialize(n_minibatch=n_minibatch)
 
     init = tf.initialize_all_variables()
@@ -50,7 +54,7 @@ class test_inference_data_class(tf.test.TestCase):
     if x_val is not None:
       # Placeholder setting.
       # Check data is same as data fed to it.
-      feed_dict = {inference.data[x]: x_val}
+      feed_dict = {inference.data['x']: x_val}
       # avoid directly fetching placeholder
       data_id = [tf.identity(v) for v in six.itervalues(inference.data)]
       val = sess.run(data_id, feed_dict)
@@ -58,27 +62,27 @@ class test_inference_data_class(tf.test.TestCase):
     elif is_file:
       # File reader setting.
       # Check data varies by session run.
-      val = sess.run(inference.data[x])
-      val_1 = sess.run(inference.data[x])
+      val = sess.run(inference.data['x'])
+      val_1 = sess.run(inference.data['x'])
       assert not np.all(val == val_1)
     elif n_minibatch is None:
       # Preloaded full setting.
       # Check data is full data.
-      val = sess.run(inference.data[x])
-      assert np.all(val == data[x])
+      val = sess.run(inference.data['x'])
+      assert np.all(val == data['x'])
     elif n_minibatch == 1:
       # Preloaded batch setting, with n_minibatch=1.
       # Check data is randomly shuffled.
-      assert not np.all([sess.run(inference.data)[x] == data[x][i]
+      assert not np.all([sess.run(inference.data)['x'] == data['x'][i]
                          for i in range(10)])
     else:
       # Preloaded batch setting.
       # Check data is randomly shuffled.
       val = sess.run(inference.data)
-      assert not np.all(val[x] == data[x][:n_minibatch])
+      assert not np.all(val['x'] == data['x'][:n_minibatch])
       # Check data varies by session run.
       val_1 = sess.run(inference.data)
-      assert not np.all(val[x] == val_1[x])
+      assert not np.all(val['x'] == val_1['x'])
 
     inference.finalize()
 
