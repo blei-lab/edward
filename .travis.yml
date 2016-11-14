@@ -45,4 +45,6 @@ script:
        PYTHONPATH=$PWD:$PYTHONPATH py.test --cov=./;
     fi
 after_success:
-  - coveralls
+  - if [[ "$TEST_MODE" != "PEP8"]]; then
+       coveralls
+    fi
