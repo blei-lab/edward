@@ -34,15 +34,8 @@ experimentation.
 Represent the data as TensorFlow placeholders.
 
 \begin{lstlisting}[language=Python]
-x_data = ed.placeholder(tf.float32, [100, 25])
+x_data = tf.placeholder(tf.float32, [100, 25])
 \end{lstlisting}
-
-Use Edward's \texttt{ed.placeholder} function and not TensorFlow's
-\texttt{tf.placeholder}. Internally, Edward's inference algorithms
-need to keep track of placeholders via a TensorFlow collection.
-\texttt{ed.placeholder} is a utility function which simply calls
-\texttt{tf.placeholder} and then adds it to the
-\texttt{'PLACEHOLDERS'} collection.
 
 During inference, the user must manually feed the placeholders. At each
 step of inference, bind the placeholders to realized values in a

@@ -104,8 +104,8 @@ print("Size of output in test data: {:s}".format(y_test.shape))
 sns.regplot(X_train, y_train, fit_reg=False)
 plt.show()
 
-X = ed.placeholder(tf.float32, [None, D])
-y = ed.placeholder(tf.float32, [None, D])
+X = tf.placeholder(tf.float32, [None, D])
+y = tf.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}
 
 # MODEL

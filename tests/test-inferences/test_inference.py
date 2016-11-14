@@ -34,7 +34,7 @@ class test_inference_class(tf.test.TestCase):
     x = Normal(mu=0.0, sigma=1.0)
     qx = Normal(mu=0.0, sigma=1.0)
     qx_misshape = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-    x_ph = ed.placeholder(tf.float32)
+    x_ph = tf.placeholder(tf.float32)
 
     ed.Inference()
     ed.Inference(data={x: tf.constant(0.0)})
@@ -42,7 +42,8 @@ class test_inference_class(tf.test.TestCase):
     ed.Inference(data={x: x_ph})
     ed.Inference(data={x: qx})
     self.assertRaises(TypeError, ed.Inference, data={5: tf.constant(0.0)})
-    self.assertRaises(TypeError, ed.Inference, data={x: 'a'})
+    self.assertRaises(TypeError, ed.Inference, data={x: tf.zeros(5)})
+    self.assertRaises(TypeError, ed.Inference, data={'a': qx})
     self.assertRaises(TypeError, ed.Inference, data={x_ph: x})
     self.assertRaises(TypeError, ed.Inference, data={x: qx_misshape})
 

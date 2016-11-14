@@ -113,7 +113,7 @@ mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 model = NormalBernoulli(d)
 
 # INFERENCE
-x_ph = ed.placeholder(tf.float32, [M, 28 * 28])
+x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
 mu, sigma = inference_network(x_ph)
 qz = Normal(mu=mu, sigma=sigma)
 

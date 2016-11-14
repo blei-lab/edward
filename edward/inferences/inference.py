@@ -8,7 +8,12 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable, StanModel
-from edward.util import get_session, placeholder
+from edward.util import get_session
+
+try:
+  import theano
+except ImportError:
+  pass
 
 
 class Inference(object):
@@ -85,7 +90,8 @@ class Inference(object):
     for key, value in six.iteritems(latent_vars):
       if isinstance(value, RandomVariable):
         if isinstance(key, RandomVariable):
-          if key.value().get_shape() != value.value().get_shape():
+          if not key.value().get_shape().is_compatible_with(
+                  value.value().get_shape()):
             raise TypeError("Latent variable bindings do not have same shape.")
         elif not isinstance(key, str):
           raise TypeError("Latent variable key has an invalid type.")
@@ -109,40 +115,50 @@ class Inference(object):
     else:
       self.data = {}
       for key, value in six.iteritems(data):
-        if isinstance(key, RandomVariable) or isinstance(key, str):
+        if isinstance(key, RandomVariable):
           if isinstance(value, tf.Tensor):
-            # If ``data`` has TensorFlow placeholders, the user
-            # must manually feed them at each step of
-            # inference.
-            # If ``data`` has tensors that are the output of
-            # data readers, then batch training operates
-            # according to the reader.
+            if not key.value().get_shape().is_compatible_with(
+                    value.get_shape()):
+              raise TypeError("Observed variable bindings do not have same "
+                              "shape.")
+
             self.data[key] = tf.cast(value, tf.float32)
           elif isinstance(value, np.ndarray):
-            # If ``data`` has NumPy arrays, store the data
-            # in the computational graph.
-            ph = placeholder(tf.float32, value.shape)
+            if not key.value().get_shape().is_compatible_with(value.shape):
+              raise TypeError("Observed variable bindings do not have same "
+                              "shape.")
+
+            # If value is a np.ndarray, store it in the graph.
+            ph = tf.placeholder(tf.float32, value.shape)
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
           elif isinstance(value, RandomVariable):
-            if isinstance(key, RandomVariable):
-              if key.value().get_shape() != value.value().get_shape():
-                raise TypeError("Observed variable bindings do not have same "
-                                "shape.")
-            else:
-              raise TypeError("Data cannot have a string bound to a "
-                              "RandomVariable.")
+            if not key.value().get_shape().is_compatible_with(
+                    value.value().get_shape()):
+              raise TypeError("Observed variable bindings do not have same "
+                              "shape.")
 
             self.data[key] = value
           else:
             raise TypeError("Data value has an invalid type.")
+        elif isinstance(key, str):
+          if isinstance(value, tf.Tensor):
+            self.data[key] = tf.cast(value, tf.float32)
+          elif isinstance(value, np.ndarray):
+            ph = tf.placeholder(tf.float32, value.shape)
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            sess.run(var.initializer, {ph: value})
+          else:
+            self.data[key] = value
+        elif isinstance(key, theano.tensor.sharedvar.TensorSharedVariable):
+          self.data[key] = value
         elif isinstance(key, tf.Tensor):
           if isinstance(value, RandomVariable):
             raise TypeError("Data placeholder cannot be bound to a "
                             "RandomVariable.")
 
-          # If key is a placeholder, then don't modify its fed value.
           self.data[key] = value
         else:
           raise TypeError("Data key has an invalid type.")

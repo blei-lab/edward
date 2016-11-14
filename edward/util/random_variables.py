@@ -132,11 +132,10 @@ def copy(org_instance, dict_swap=None, scope="copied",
   if org_instance.name in variables:
     return graph.get_tensor_by_name(variables[org_instance.name].name)
 
-  # Do the same for placeholders. Same logic holds.
-  # Note this assumes that placeholders are all in this collection.
-  placeholders = {x.name: x for x in graph.get_collection('PLACEHOLDERS')}
-  if org_instance.name in placeholders:
-    return graph.get_tensor_by_name(placeholders[org_instance.name].name)
+  # Do the same for placeholders. Determine via its op's type.
+  if isinstance(org_instance, tf.Tensor):
+    if "Placeholder" in org_instance.op.type:
+      return org_instance
 
   if isinstance(org_instance, RandomVariable):
     rv = org_instance

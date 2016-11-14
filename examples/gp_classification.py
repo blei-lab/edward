@@ -42,7 +42,7 @@ X_train = df[subset, 1:]
 y_train = df[subset, 0]
 
 # MODEL
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)
 
