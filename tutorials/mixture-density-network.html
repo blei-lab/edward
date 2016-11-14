@@ -113,8 +113,8 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 ## Size of output in test data: (36000, 1)</code></pre>
 <p><img alt="image" src="/images/mdn-fig0.png" width="700"/></p>
 <p>We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is <a href="http://edwardlib.org/api/data">one of many ways</a> to train models with data in Edward.</p>
-<pre class="python" language="Python"><code>X = ed.placeholder(tf.float32, [None, D])
-y = ed.placeholder(tf.float32, [None, D])
+<pre class="python" language="Python"><code>X = tf.placeholder(tf.float32, [None, D])
+y = tf.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}</code></pre>
 <h3 id="model">Model</h3>
 <p>We define a class that can be used to construct MDNs. Here we use a mixture of normal distributions parameterized by a feedforward network. In other words, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network.</p>
@@ -163,10 +163,10 @@ inference.initialize()
 init = tf.initialize_all_variables()
 init.run()</code></pre>
 <p>Now we train the MDN by calling <code>inference.update()</code>, passing in the data. The quantity <code>inference.loss</code> is the loss function (negative log-likelihood) at that step of inference. We also report the loss function on test data by calling <code>inference.loss</code> and where we feed test data to the TensorFlow placeholders instead of training data. We keep track of the losses under <code>train_loss</code> and <code>test_loss</code>.</p>
-<pre class="python" language="Python"><code>NEPOCH = 1000
-train_loss = np.zeros(NEPOCH)
-test_loss = np.zeros(NEPOCH)
-for i in range(NEPOCH):
+<pre class="python" language="Python"><code>n_epoch = 1000
+train_loss = np.zeros(n_epoch)
+test_loss = np.zeros(n_epoch)
+for i in range(n_epoch):
     info_dict = inference.update(feed_dict={X: X_train, y: y_train})
     train_loss[i] = info_dict['loss']
     test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})</code></pre>
@@ -177,12 +177,12 @@ for i in range(NEPOCH):
 <li><code>model.sigmas</code>, the standard deviations.</li>
 </ul>
 <p>To do this, we call</p>
-<pre class="python" language="Python"><code>pred_weights, pred_means, pred_std = sess.run([model.pi, model.mus, model.sigmas],
-                                              feed_dict={X: X_test})</code></pre>
+<pre class="python" language="Python"><code>pred_weights, pred_means, pred_std = \
+    sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})</code></pre>
 <p>Let’s plot the log-likelihood of the training and test data as functions of the training epoch. The quantity <code>inference.loss</code> is the total log-likelihood, not the loss per data point. In the plotting routine we get the latter by dividing by the size of the train and test data respectively.</p>
 <pre class="python" language="Python"><code>fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), -test_loss / len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), -train_loss / len(X_train), label='Train')
+plt.plot(np.arange(n_epoch), -test_loss / len(X_test), label='Test')
+plt.plot(np.arange(n_epoch), -train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)</code></pre>

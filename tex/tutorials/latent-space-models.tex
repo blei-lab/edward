@@ -2,18 +2,20 @@
 
 \subsection{Latent space models for neural data}
 
-Many interesting data sets exhibit a network structure. For example, social
-networks or biological neural networks.
+Many scientific fields involve the study of network data, including
+social networks, networks in statistical physics, biological
+networks, and information networks
+\citep{newman2010networks,goldenberg2010survey}.
 
-What we can learn about the nodes of the network from its connectivity patterns?
-We can begin to study this using a latent space model.
-Latent space models embed the nodes of the network in a latent space which
-captures attributes of the nodes. The likelihood to form an edge between two
-nodes depends on their distance in the latent space.
+What we can learn about nodes in a network from their connectivity patterns?
+We can begin to study this using a latent space model \citep{hoff2002latent}.
+Latent space models embed nodes in the network in a latent space,
+where the likelihood of forming an edge between two nodes depends on
+their distance in the latent space.
 
-Let us study an dataset from from neuroscience.
-The script can be found
-\href{https://github.com/blei-lab/edward/blob/master/examples/tf_latent_space_model.py}{here}.
+We will analyze network data from neuroscience.
+The full script can be found
+\href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}{here}.
 
 \subsubsection{Data}
 
@@ -21,105 +23,73 @@ The data comes from \href{http://www-personal.umich.edu/~mejn/netdata/}{Mark New
 It is a weighted, directed network representing the neural network of
 the nematode
 \href{https://en.wikipedia.org/wiki/Caenorhabditis_elegans}{C.~Elegans}
-compiled by \citet{watts1998collective} from original experimental data
+compiled by \citet{watts1998collective} using experimental data
 by \citet{white1986structure}.
 
 The neural network consists of around $300$ neurons. Each connection
+between neurons
 is associated with a weight (positive integer) capturing the strength
 of the connection.
 
-In the example we load the data with
+We load the data with
 \begin{lstlisting}[language=Python]
 x_train = np.load('data/celegans_brain.npy')
-data = {'x': x_train}
 \end{lstlisting}
 
 \subsubsection{Model}
 
-Here we will fit a latent space model
-\citep{hoff2002latent} to the C.~Elegans neural network. What can
-we learn about the neurons from how they are connected? We will learn a latent
+What can we learn about the neurons from their connectivity patterns? Using
+a latent space model \citep{hoff2002latent}, we will learn a latent
 embedding for each neuron to capture the similarities between them.
 
 Each neuron $n$ is a node in the network and is associated with a latent
-$K$-dimensional vector $z_n$.
+position $z_n\in\mathbb{R}^K$.
+We place a Gaussian prior on each of the latent positions.
 
-We place a Gaussian prior on each of the latent vectors.
 The log-odds of an edge between node $i$ and
 $j$ is proportional to the Euclidean distance between the latent
 representations of the nodes $|z_i- z_j|$. Here, we
 model the weights ($Y_{ij}$) of the edges with a Poisson likelihood.
-The rate is the reciprocal of the distance in latent space. This is
-the generative process:
+The rate is the reciprocal of the distance in latent space. The
+generative process is as follows:
 
-For each node $n$:
+\begin{enumerate}
+\item
+For each node $n=1,\ldots,N$,
 \begin{align}
 z_n \sim N(0,I).
 \end{align}
-For each edge $(i,j)$:
+\item
+For each edge $(i,j)\in\{1,\ldots,N\}\times\{1,\ldots,N\}$,
 \begin{align}
 Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).
 \end{align}
+\end{enumerate}
 
-Here we build the model in Edward using TensorFlow.
+In Edward, the model is written as follows:
 \begin{lstlisting}[language=Python]
-class LatentSpaceModel:
-  """
-  p(x, z) = [ prod_{i=1}^N prod_{j=1}^N Poi(Y_{ij}; 1/||z_i - z_j|| ) ]
-            [ prod_{i=1}^N N(z_i; 0, I)) ]
-  """
-  def __init__(self, N, K, prior_std=1.0,
-               like='Poisson',
-               prior='Lognormal',
-               dist='euclidean'):
-    self.n_vars = N * K
-    self.N = N
-    self.K = K
-    self.prior_std = prior_std
-    self.like = like
-    self.prior = prior
-    self.dist = dist
+N = x_train.shape[0]  # number of data points
+K = 3  # latent dimensionality
 
-  def log_prob(self, xs, zs):
-    """Return scalar, the log joint density log p(xs, zs)."""
-    if self.prior == 'Lognormal':
-      log_prior = tf.reduce_sum(lognorm.logpdf(zs['z'], self.prior_std))
-    elif self.prior == 'Gaussian':
-      log_prior = tf.reduce_sum(norm.logpdf(zs['z'], 0.0, self.prior_std))
-    else:
-      raise NotImplementedError("prior not available.")
-
-    z = tf.reshape(zs['z'], [self.N, self.K])
-    if self.dist == 'euclidean':
-      xp = tf.matmul(tf.ones([1, self.N]),
-                     tf.reduce_sum(z * z, 1, keep_dims=True))
-      xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
-      xp = 1.0 / xp
-    elif self.dist == 'cosine':
-      xp = tf.matmul(z, z, transpose_b=True)
-
-    if self.like == 'Gaussian':
-      log_lik = tf.reduce_sum(norm.logpdf(xs['x'], xp, 1.0))
-    elif self.like == 'Poisson':
-      if not (self.dist == 'euclidean' or self.prior == "Lognormal"):
-        raise NotImplementedError("Rate of Poisson has to be nonnegatve.")
-
-      log_lik = tf.reduce_sum(poisson.logpmf(xs['x'], xp))
-    else:
-      raise NotImplementedError("likelihood not available.")
-
-    return log_lik + log_prior
-
-
-model = LatentSpaceModel(N=x_train.shape[0], K=3, like='Poisson', prior='Gaussian')
+z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
+xp = tf.matmul(tf.ones([1, N]),
+               tf.reduce_sum(tf.mul(z, z), 1, keep_dims=True))
+xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
+xp = 1.0 / xp
+x = Poisson(lam=xp, value=tf.zeros_like(xp))
 \end{lstlisting}
+
+Note Edward doesn't currently support sampling for \texttt{Poisson}
+random variables. For now, we hard-code its associated tensor to be
+full of 0's via the \texttt{value} argument; it isn't used in this
+experiment.
 
 \subsubsection{Inference}
 
 Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are
 required: Instantiating inference and running it.
 \begin{lstlisting}[language=Python]
-inference = ed.MAP(['z'], data, model)
+inference = ed.MAP([z], data={x: x_train})
 \end{lstlisting}
 
 See this extended tutorial about
@@ -128,15 +98,14 @@ See this extended tutorial about
 One could instead run variational inference. This requires specifying
 a variational model and instantiating \texttt{KLqp}.
 \begin{lstlisting}[language=Python]
-qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
-qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
-qz = Normal(mu=qz_mu, sigma=qz_sigma)
-inference = ed.KLqp({'z': qz}, data, model)
+qz = Normal(mu=tf.Variable(tf.random_normal([N * K])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
+inference = ed.KLqp({z: qz}, data={x: x_train})
 \end{lstlisting}
-Finally, the following line runs the inference procedure for 5000
+Finally, the following line runs the inference procedure for 750
 iterations.
 \begin{lstlisting}[language=Python]
-inference.run(n_iter=5000)
+inference.run(n_iter=750)
 \end{lstlisting}
 See this extended tutorial about
 \href{/tutorials/variational-inference}{variational inference in Edward}.

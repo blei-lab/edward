@@ -87,54 +87,54 @@
 </div>
 <div class="nine columns">
 <h2 id="textklqp-minimization"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</h2>
-<p>One form of variational inference minimizes the Kullback-Leibler divergence <strong>from</strong> <span class="math inline">\(q(z\;;\;\lambda)\)</span> <strong>to</strong> <span class="math inline">\(p(z \mid x)\)</span>, <span class="math display">\[\begin{aligned}
+<p>One form of variational inference minimizes the Kullback-Leibler divergence <strong>from</strong> <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> <strong>to</strong> <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span>, <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
   \arg\min_\lambda \text{KL}(
-  q(z\;;\;\lambda)
+  q(\mathbf{z}\;;\;\lambda)
   \;\|\;
-  p(z \mid x)
+  p(\mathbf{z} \mid \mathbf{x})
   )\\
   &amp;=
   \arg\min_\lambda\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log q(z\;;\;\lambda)
+  \log q(\mathbf{z}\;;\;\lambda)
   -
-  \log p(z \mid x)
+  \log p(\mathbf{z} \mid \mathbf{x})
   \big].\end{aligned}\]</span> The KL divergence is a non-symmetric, information theoretic measure of similarity between two probability distributions <span class="citation">(Hinton &amp; Van Camp, 1993; Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999; Waterhouse, MacKay, &amp; Robinson, 1996)</span>.</p>
 <h3 id="the-evidence-lower-bound">The Evidence Lower Bound</h3>
-<p>The above optimization problem is intractable because it directly depends on the posterior <span class="math inline">\(p(z \mid x)\)</span>. To tackle this, consider the property <span class="math display">\[\begin{aligned}
-  \log p(x)
+<p>The above optimization problem is intractable because it directly depends on the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span>. To tackle this, consider the property <span class="math display">\[\begin{aligned}
+  \log p(\mathbf{x})
   &amp;=
   \text{KL}(
-  q(z\;;\;\lambda)
+  q(\mathbf{z}\;;\;\lambda)
   \;\|\;
-  p(z \mid x)
+  p(\mathbf{z} \mid \mathbf{x})
   )\\
   &amp;\quad+\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
-  \big]\end{aligned}\]</span> where the left hand side is the logarithm of the marginal likelihood <span class="math inline">\(p(x) = \int p(x,z) \text{d}z\)</span>, also known as the model evidence. (Try deriving this using Bayes’ rule!)</p>
+  \log q(\mathbf{z}\;;\;\lambda)
+  \big]\end{aligned}\]</span> where the left hand side is the logarithm of the marginal likelihood <span class="math inline">\(p(\mathbf{x}) = \int p(\mathbf{x}, \mathbf{z}) \text{d}\mathbf{z}\)</span>, also known as the model evidence. (Try deriving this using Bayes’ rule!)</p>
 <p>The evidence is a constant with respect to the variational parameters <span class="math inline">\(\lambda\)</span>, so we can minimize <span class="math inline">\(\text{KL}(q\|p)\)</span> by instead maximizing the Evidence Lower BOund, <span class="math display">\[\begin{aligned}
   \text{ELBO}(\lambda)
   &amp;=\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
-  \big].\end{aligned}\]</span> In the ELBO, both <span class="math inline">\(p(x,z)\)</span> and <span class="math inline">\(q(z\;;\;\lambda)\)</span> are tractable. The optimization problem we seek to solve becomes <span class="math display">\[\begin{aligned}
+  \log q(\mathbf{z}\;;\;\lambda)
+  \big].\end{aligned}\]</span> In the ELBO, both <span class="math inline">\(p(\mathbf{x}, \mathbf{z})\)</span> and <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> are tractable. The optimization problem we seek to solve becomes <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
   \arg \max_\lambda \text{ELBO}(\lambda).\end{aligned}\]</span> As per its name, the ELBO is a lower bound on the evidence, and optimizing it tries to maximize the probability of observing the data. What does maximizing the ELBO do? Splitting the ELBO reveals a trade-off <span class="math display">\[\begin{aligned}
   \text{ELBO}(\lambda)
   &amp;=\;
-  \mathbb{E}_{q(z \;;\; \lambda)}[\log p(x, z)]
-  - \mathbb{E}_{q(z \;;\; \lambda)}[\log q(z\;;\;\lambda)],\end{aligned}\]</span> where the first term represents an energy and the second term (including the minus sign) represents the entropy of <span class="math inline">\(q\)</span>. The energy encourages <span class="math inline">\(q\)</span> to focus probability mass where the model puts high probability, <span class="math inline">\(p(x, z)\)</span>. The entropy encourages <span class="math inline">\(q\)</span> to spread probability mass to avoid concentrating to one location.</p>
+  \mathbb{E}_{q(\mathbf{z} \;;\; \lambda)}[\log p(\mathbf{x}, \mathbf{z})]
+  - \mathbb{E}_{q(\mathbf{z} \;;\; \lambda)}[\log q(\mathbf{z}\;;\;\lambda)],\end{aligned}\]</span> where the first term represents an energy and the second term (including the minus sign) represents the entropy of <span class="math inline">\(q\)</span>. The energy encourages <span class="math inline">\(q\)</span> to focus probability mass where the model puts high probability, <span class="math inline">\(p(\mathbf{x}, \mathbf{z})\)</span>. The entropy encourages <span class="math inline">\(q\)</span> to spread probability mass to avoid concentrating to one location.</p>
 <p>Edward uses two generic strategies to obtain gradients for optimization.</p>
 <ul>
 <li><a href="/tutorials/klqp-score">Score function gradient</a></li>

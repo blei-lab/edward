@@ -6,84 +6,84 @@ Maximum a posteriori (MAP) estimation is a form of approximate
 posterior inference. It uses the mode as a point estimate of the
 posterior distribution,
 \begin{align*}
-  z_\text{MAP}
+  \mathbf{z}_\text{MAP}
   &=
-  \arg \max_z
-  p(z \mid x)\\
+  \arg \max_\mathbf{z}
+  p(\mathbf{z} \mid \mathbf{x})\\
   &=
-  \arg \max_z
-  \log p(z \mid x).
+  \arg \max_\mathbf{z}
+  \log p(\mathbf{z} \mid \mathbf{x}).
 \end{align*}
 In practice, we work with logarithms of densities to avoid numerical underflow
 issues \citep{murphy2012machine}.
 
-The MAP estimate is the most likely configuration of the hidden patterns $z$
+The MAP estimate is the most likely configuration of the hidden patterns $\mathbf{z}$
 under the model. However, we cannot directly solve this optimization problem
 because the posterior is typically intractable. To circumvent this, we use Bayes' rule to
 optimize over the joint density,
 \begin{align*}
-  z_\text{MAP}
+  \mathbf{z}_\text{MAP}
   &=
-  \arg \max_z
-  \log p(z \mid x)\\
+  \arg \max_\mathbf{z}
+  \log p(\mathbf{z} \mid \mathbf{x})\\
   &=
-  \arg \max_z
-  \log p(x, z).
+  \arg \max_\mathbf{z}
+  \log p(\mathbf{x}, \mathbf{z}).
 \end{align*}
 This is valid because
 \begin{align*}
-  \log p(z \mid x)
+  \log p(\mathbf{z} \mid \mathbf{x})
   &=
-  \log p(x, z) - \log p(x)\\
+  \log p(\mathbf{x}, \mathbf{z}) - \log p(\mathbf{x})\\
   &=
-  \log p(x, z) - \text{constant in terms of} z.
+  \log p(\mathbf{x}, \mathbf{z}) - \text{constant in terms of } \mathbf{z}.
 \end{align*}
 MAP estimation includes the common scenario of maximum
 likelihood estimation as a special case,
 \begin{align*}
-  z_\text{MAP}
+  \mathbf{z}_\text{MAP}
   &=
-  \arg \max_z
-  p(x, z)\\
+  \arg \max_\mathbf{z}
+  p(\mathbf{x}, \mathbf{z})\\
   &=
-  \arg \max_z
-  p(x\mid z),
+  \arg \max_\mathbf{z}
+  p(\mathbf{x}\mid \mathbf{z}),
 \end{align*}
-where the prior $p(z)$ is flat, placing uniform probability over all
-values $z$ supports. Placing a nonuniform prior can be thought of as
+where the prior $p(\mathbf{z})$ is flat, placing uniform probability over all
+values $\mathbf{z}$ supports. Placing a nonuniform prior can be thought of as
 regularizing the estimation, penalizing values away from maximizing
 the likelihood, which can lead to overfitting. For example, a normal
-prior or Laplace prior on $z$ corresponds to $\ell_2$ penalization, also
+prior or Laplace prior on $\mathbf{z}$ corresponds to $\ell_2$ penalization, also
 known as ridge regression, and $\ell_1$ penalization, also
 known as the LASSO.
 
 Maximum likelihood is also known as minimizing the cross entropy, where
-for a data set $x=\{x_n\}$,
+for a data set $\mathbf{x}=\{x_n\}$,
 \begin{align*}
-  z_\text{MAP}
+  \mathbf{z}_\text{MAP}
   &=
-  \arg \max_z
-  \log p(x\mid z)
+  \arg \max_\mathbf{z}
+  \log p(\mathbf{x}\mid \mathbf{z})
   \\
   &=
-  \arg \max_z
-  \sum_{n=1}^N \log p(x_n\mid z)
+  \arg \max_\mathbf{z}
+  \sum_{n=1}^N \log p(x_n\mid \mathbf{z})
   \\
   &=
-  \arg \min_z
-  -\frac{1}{N}\sum_{n=1}^N \log p(x_n\mid z).
+  \arg \min_\mathbf{z}
+  -\frac{1}{N}\sum_{n=1}^N \log p(x_n\mid \mathbf{z}).
 \end{align*}
 The last expression can be thought of as an approximation to the cross
-entropy between the true data distribution and $p(x\mid z)$,
+entropy between the true data distribution and $p(\mathbf{x}\mid \mathbf{z})$,
 using a set of $N$ data points.
 
 \subsubsection{Gradient descent}
 
-To find the MAP estimate of the latent variables $z$, we simply
+To find the MAP estimate of the latent variables $\mathbf{z}$, we simply
 calculate the gradient of the log joint density
 \begin{align*}
-  \nabla_z
-  \log p(x, z)
+  \nabla_\mathbf{z}
+  \log p(\mathbf{x}, \mathbf{z})
 \end{align*}
 and follow it to a (local) optima.
 Edward uses automatic differentiation, specifically with TensorFlow's
@@ -119,7 +119,7 @@ initializes a point mass as the variational distribution. It requires
 defining only one method:
 \texttt{build_loss()}, which implicitly specifies the gradient of the
 log joint. TensorFlow's automatic differentiation will apply to
-\texttt {z}, thus backpropagating (applying the chain rule of
+\texttt{z}, thus backpropagating (applying the chain rule of
 differentiation) to compute the gradient of the objective.
 
 There is a nuance here. TensorFlow's optimizers are configured to

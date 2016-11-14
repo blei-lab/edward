@@ -30,17 +30,21 @@ T = lambda xs, zs: tf.reduce_mean(xs[x])
 ed.ppc(T, data={x: x_data})
 \end{lstlisting}
 
-Here's an example. First, let's build a model and perform
-inference.
+Here's an example. First, let's build a model and perform inference.
 \begin{lstlisting}[language=Python]
+from edward.models import RandomVariable
+
+# DATA
+x_train = np.array()
+
+# MODEL
 beta = RandomVariable()
 z = RandomVariable(par=z)
 x = RandomVariable(par_1=z, par_2=beta)
 
+# INFERENCE
 qbeta = RandomVariable()
 qz = RandomVariable(par=qbeta)
-
-x_train = np.array()
 
 inference = ed.Inference({z: qz, beta: qbeta}, data={x: x_train})
 inference.run()
@@ -49,11 +53,11 @@ We first build the posterior predictive distribution.
 \begin{lstlisting}[language=Python]
 from edward.util import copy
 
-# Build the posterior predictive distribution by copying the
-# likelihood, swapping out the prior `z` and `beta` with the inferred
-# posterior `qz` and `qbeta`.
 x_post = copy(x, {z: qz, beta: qbeta})
 \end{lstlisting}
+The \texttt{copy} function builds the posterior predictive
+distribution by copying the likelihood, swapping out the prior `z` and
+`beta` with the inferred posterior `qz` and `qbeta`.
 
 Now we run some techniques:
 \href{/tutorials/point-evaluation}{\texttt{evaluate}}
@@ -87,6 +91,7 @@ We first perform inference over the local latent variables of the
 held-out data. Then we make the predictions.
 
 \begin{lstlisting}[language=Python]
+from edward.models import RandomVariable
 from edward.util import copy
 
 # create local variational factors for test data

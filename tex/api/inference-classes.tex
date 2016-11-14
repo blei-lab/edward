@@ -6,8 +6,9 @@
 
 Inference is broadly classified under three classes: variational
 inference, Monte Carlo, and exact inference.
-We highlight how to use inference algorithms from each class;
-we use the running example of a mixture model.
+We highlight how to use inference algorithms from each class.
+As an example, assume we defined a mixture model with latent variables
+\texttt{z} and \texttt{beta} and observed variable \texttt{x}.
 
 \subsubsection{Variational Inference}
 
@@ -23,6 +24,8 @@ q(\beta;\mu,\sigma) &= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
 q(\mathbf{z};\pi) &= \text{Categorical}(\mathbf{z};\pi).
 \end{align*}
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, Normal
+
 qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
                sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
@@ -40,6 +43,8 @@ an approximating family of
 \texttt{PointMass} random variables,
 i.e., with all probability mass concentrated at a point.
 \begin{lstlisting}[language=Python]
+from edward.models import PointMass
+
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
 qz = PointMass(params=tf.Variable(tf.zeros(N)))
 
@@ -62,6 +67,8 @@ q(\mathbf{z}; \{\mathbf{z}^{(t)}\})
 \end{align*}
 The parameters are $\mathbf{\lambda}=\{\beta^{(t)},\mathbf{z}^{(t)}\}$.
 \begin{lstlisting}[language=Python]
+from edward.models import Empirical
+
 T = 10000  # number of samples
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
 qz = Empirical(params=tf.Variable(tf.zeros([T, N]))

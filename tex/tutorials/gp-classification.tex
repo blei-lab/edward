@@ -60,6 +60,8 @@ Let's build the model in Edward. We use a radial basis function (RBF)
 kernel, also known as the squared exponential or exponentiated
 quadratic. There are $N$ data points and $D$ features.
 \begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Normal
+
 def kernel(x):
   mat = []
   for i in range(N):
@@ -76,8 +78,7 @@ def kernel(x):
 
   return tf.pack(mat)
 
-
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)
 \end{lstlisting}

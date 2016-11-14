@@ -12,12 +12,12 @@ point-based evaluations
 
 PPCs focus on the posterior predictive distribution
 \begin{align*}
-  p(x_\text{new} \mid x)
+  p(\mathbf{x}_\text{new} \mid \mathbf{x})
   &=
   \int
-  p(x_\text{new} \mid z)
-  p(z \mid x)
-  \text{d} z.
+  p(\mathbf{x}_\text{new} \mid \mathbf{z})
+  p(\mathbf{z} \mid \mathbf{x})
+  \text{d} \mathbf{z}.
 \end{align*}
 The model's posterior predictive can be used to generate new data
 given past observations and can also make predictions on new data
@@ -28,25 +28,27 @@ distribution.
 
 The simplest PPC works by applying a test statistic on new data
 generated from the posterior predictive, such as
-$T(x_\text{new}) = \max(x_\text{new})$.  Applying $T(x_\text{new})$ to
-new data over many data replications induces a distribution. We compare
-this distribution to the test statistic applied to the real data $T(x)$.
+$T(\mathbf{x}_\text{new}) = \max(\mathbf{x}_\text{new})$.  Applying
+$T(\mathbf{x}_\text{new})$ to new data over many data replications
+induces a distribution. We compare this distribution to the test
+statistic applied to the real data $T(\mathbf{x})$.
 
 \includegraphics{/images/ppc.png}
 
-In the figure, $T(x)$ falls in a low probability region of this
-reference distribution. This indicates that the model fits the data
-poorly according to this check; this suggests an area of improvement
-for the model.
+In the figure, $T(\mathbf{x})$ falls in a low probability region of
+this reference distribution. This indicates that the model fits the
+data poorly according to this check; this suggests an area of
+improvement for the model.
 
 More generally, the test statistic can also be a function of the
-model's latent variables $T(x, z)$, known as a discrepancy function.
-Examples of discrepancy functions are the metrics used for point-based
-evaluation. We can now interpret the point-based evaluation as a
-special case of PPCs: it simply calculates $T(x, z)$ over the real
-data and without a reference distribution in mind. A reference
-distribution allows us to make probabilistic statements about the
-point, in reference to an overall distribution.
+model's latent variables $T(\mathbf{x}, \mathbf{z})$, known as a
+discrepancy function.  Examples of discrepancy functions are the
+metrics used for point-based evaluation. We can now interpret the
+point-based evaluation as a special case of PPCs: it simply calculates
+$T(\mathbf{x}, \mathbf{z})$ over the real data and without a reference
+distribution in mind. A reference distribution allows us to make
+probabilistic statements about the point, in reference to an overall
+distribution.
 
 \subsubsection{Implementation}
 
@@ -101,7 +103,8 @@ understanding of the model fit.
 For model wrappers, Edward implements PPCs through the
 \texttt{sample_likelihood()} method in the class object. This method
 samples a dataset
-$x_{\text{new}}\mid z\sim p(x_{\text{new}}\mid z)$ from the
+$\mathbf{x}_{\text{new}}\mid \mathbf{z}\sim
+p(\mathbf{x}_{\text{new}}\mid \mathbf{z})$ from the
 model likelihood given a set of latent variables.
 \begin{lstlisting}[language=Python]
 class BetaBernoulli:
