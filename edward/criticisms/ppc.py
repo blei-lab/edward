@@ -86,14 +86,6 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   >>> # prior predictive check
   >>> # running ppc on original x
   >>> ppc(T, data={x: x_train})
-  >>>
-  >>> # criticism for model wrappers
-  >>> ppc(T, data={'x': x_train}, latent_vars={'z': qz},
-  ...     model_wrapper=model)
-  >>> ppc(T, data={'y': y_train, 'x': x_train},
-  ...     latent_vars={'z': qz}, model_wrapper=model)
-  >>> ppc(T, data={'x': x_train}, latent_vars=None,
-  ...     model_wrapper=model)
   """
   sess = get_session()
   # Sample to get replicated data sets and latent variables.
