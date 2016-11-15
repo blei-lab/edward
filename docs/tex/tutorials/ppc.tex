@@ -98,31 +98,5 @@ decision making from a single test is not as common a use case as one
 might believe. We recommend performing many PPCs to get a holistic
 understanding of the model fit.
 
-\subsubsection{Implementation (model wrappers)}
-
-For model wrappers, Edward implements PPCs through the
-\texttt{sample_likelihood()} method in the class object. This method
-samples a dataset
-$\mathbf{x}_{\text{new}}\mid \mathbf{z}\sim
-p(\mathbf{x}_{\text{new}}\mid \mathbf{z})$ from the
-model likelihood given a set of latent variables.
-\begin{lstlisting}[language=Python]
-class BetaBernoulli:
-  ...
-  def sample_likelihood(self, zs):
-    """x | p ~ p(x | p)"""
-    return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}
-\end{lstlisting}
-
-An examples of a PPC for model wrappers is
-\begin{lstlisting}[language=Python]
-def T(xs, zs):
-  return tf.reduce_mean(xs['x'])
-
-ed.ppc(T, data={'x': x_train}, latent_vars={'z': qz}, model_wrapper=model)
-\end{lstlisting}
-For model wrappers, the latent variables must always be
-passed in regardless of whether \texttt{T} is a function of them.
-
 \subsubsection{References}\label{references}
 
