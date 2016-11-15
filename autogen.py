@@ -21,23 +21,18 @@ PAGES = [
     {
         'page': 'index.tex',
         'title': 'Home',
-        'source_pages': [],
         'parent_pages': [],
         'child_pages': [],
     },
     {
         'page': 'data.tex',
         'title': 'Data',
-        'source_pages': [],
         'parent_pages': [],
         'child_pages': [],
     },
     {
         'page': 'model.tex',
         'title': 'Model',
-        'source_pages': [
-            'models/',
-        ],
         'parent_pages': [],
         'child_pages': [
             'model-compositionality.tex',
@@ -47,7 +42,6 @@ PAGES = [
     {
         'page': 'model-compositionality.tex',
         'title': 'Compositionality',
-        'source_pages': [],
         'parent_pages': [
             'model.tex'
         ],
@@ -56,7 +50,6 @@ PAGES = [
     {
         'page': 'model-wrappers.tex',
         'title': 'Wrappers',
-        'source_pages': [],
         'parent_pages': [
             'model.tex'
         ],
@@ -65,9 +58,6 @@ PAGES = [
     {
         'page': 'inference.tex',
         'title': 'Inference',
-        'source_pages': [
-            'inferences/inference.py',
-        ],
         'parent_pages': [],
         'child_pages': [
             'inference-classes.tex',
@@ -78,7 +68,6 @@ PAGES = [
     {
         'page': 'inference-classes.tex',
         'title': 'Classes',
-        'source_pages': [],
         'parent_pages': [
             'inference.tex'
         ],
@@ -87,7 +76,6 @@ PAGES = [
     {
         'page': 'inference-compositionality.tex',
         'title': 'Compositionality',
-        'source_pages': [],
         'parent_pages': [
             'inference.tex'
         ],
@@ -96,7 +84,6 @@ PAGES = [
     {
         'page': 'inference-development.tex',
         'title': 'Development',
-        'source_pages': [],
         'parent_pages': [
             'inference.tex'
         ],
@@ -105,27 +92,12 @@ PAGES = [
     {
         'page': 'criticism.tex',
         'title': 'Criticism',
-        'source_pages': [
-            'criticisms/',
-        ],
         'parent_pages': [],
         'child_pages': [],
     },
     # {
-    #     'page': 'stats.tex',
-    #     'title': 'Statistics',
-    #     'source_pages': [
-    #         'stats/',
-    #     ],
-    #     'parent_pages': [],
-    #     'child_pages': [],
-    # },
-    # {
     #     'page': 'util.tex',
     #     'title': 'Utilities',
-    #     'source_pages': [
-    #         'util/',
-    #     ],
     #     'parent_pages': [],
     #     'child_pages': [],
     # },
@@ -158,7 +130,6 @@ def generate_navbar(page_data):
 
   page_name = page_data['page']
   title = page_data['title']
-  source_pages = page_data['source_pages']
   parent_pages = page_data['parent_pages']
   child_pages = page_data['child_pages']
 

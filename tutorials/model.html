@@ -94,11 +94,11 @@
 
 <h2 id="probability-models">Probability models</h2>
 <p>A probabilistic model asserts how observations from a natural phenomenon arise. The model is a <em>joint distribution</em> <span class="math display">\[\begin{aligned}
-  p(x, z)\end{aligned}\]</span> of observed variables <span class="math inline">\(x\)</span> corresponding to data, and latent variables <span class="math inline">\(z\)</span> that provide the hidden structure to generate from <span class="math inline">\(x\)</span>. The joint distribution factorizes into two components.</p>
+  p(\mathbf{x}, \mathbf{z})\end{aligned}\]</span> of observed variables <span class="math inline">\(\mathbf{x}\)</span> corresponding to data, and latent variables <span class="math inline">\(\mathbf{z}\)</span> that provide the hidden structure to generate from <span class="math inline">\(\mathbf{x}\)</span>. The joint distribution factorizes into two components.</p>
 <p>The <em>likelihood</em> <span class="math display">\[\begin{aligned}
-  p(x \mid z)\end{aligned}\]</span> is a probability distribution that describes how any data <span class="math inline">\(x\)</span> depend on the latent variables <span class="math inline">\(z\)</span>. The likelihood posits a data generating process, where the data <span class="math inline">\(x\)</span> are assumed drawn from the likelihood conditioned on a particular hidden pattern described by <span class="math inline">\(z\)</span>.</p>
+  p(\mathbf{x} \mid \mathbf{z})\end{aligned}\]</span> is a probability distribution that describes how any data <span class="math inline">\(\mathbf{x}\)</span> depend on the latent variables <span class="math inline">\(\mathbf{z}\)</span>. The likelihood posits a data generating process, where the data <span class="math inline">\(\mathbf{x}\)</span> are assumed drawn from the likelihood conditioned on a particular hidden pattern described by <span class="math inline">\(\mathbf{z}\)</span>.</p>
 <p>The <em>prior</em> <span class="math display">\[\begin{aligned}
-  p(z)\end{aligned}\]</span> is a probability distribution that describes the latent variables present in the data. It posits a generating process of the hidden structure.</p>
+  p(\mathbf{z})\end{aligned}\]</span> is a probability distribution that describes the latent variables present in the data. It posits a generating process of the hidden structure.</p>
 <p>For details on how to specify a model in Edward, see the <a href="/api/model">model API</a>. We describe several examples in detail in the other model <a href="/tutorials/">tutorials</a>.</p>
     </div>
   </div>

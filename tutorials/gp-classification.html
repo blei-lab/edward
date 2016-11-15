@@ -112,7 +112,9 @@
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K})\end{aligned}\]</span> with covariance matrix given by evaluating <span class="math inline">\(k(x, x^\prime)\)</span> for each pair of inputs <span class="math inline">\((x, x^\prime)\)</span>.</p>
 <p>Let’s build the model in Edward. We use a radial basis function (RBF) kernel, also known as the squared exponential or exponentiated quadratic. There are <span class="math inline">\(N\)</span> data points and <span class="math inline">\(D\)</span> features.</p>
-<pre class="python" language="Python"><code>def kernel(x):
+<pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
+
+def kernel(x):
   mat = []
   for i in range(N):
     mat += [[]]
@@ -127,7 +129,6 @@
     mat[i] = tf.pack(mat[i])
 
   return tf.pack(mat)
-
 
 X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
