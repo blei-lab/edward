@@ -310,6 +310,7 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.reduce_sum(tf.pow(x - y, 2.0)))
 
+
 def multivariate_rbf_kernel(x, sigma=1.0, l=1.0):
   """
   computes the rbf kernel for the whole data x
@@ -318,7 +319,7 @@ def multivariate_rbf_kernel(x, sigma=1.0, l=1.0):
      size: N x D
   sigma:
     standard deviation
-  l: 
+  l:
     scaling parameter
   Returns:
      mat: a matrix of size NxN
@@ -338,13 +339,15 @@ def multivariate_rbf_kernel(x, sigma=1.0, l=1.0):
     mat.append(vect)
 
   mat = tf.pack(mat) + \
-        tf.convert_to_tensor(1e-6 * np.eye(N), dtype=tf.float32)
+      tf.convert_to_tensor(1e-6 * np.eye(N), dtype=tf.float32)
 
   return mat
 
+
 def probit(x):
   """computes the CDF of the standard normal evaluated at x."""
-  return 0.5 + 0.5*tf.erf(x / tf.sqrt(2.0))
+  return 0.5 + 0.5 * tf.erf(x / tf.sqrt(2.0))
+
 
 def placeholder(*args, **kwargs):
   """A wrapper around ``tf.placeholder``. It adds the tensor to the
@@ -355,6 +358,7 @@ def placeholder(*args, **kwargs):
   x = tf.placeholder(*args, **kwargs)
   tf.add_to_collection("PLACEHOLDERS", x)
   return x
+
 
 def rbf(x, y=0.0, sigma=1.0, l=1.0):
   """Squared-exponential kernel element-wise
