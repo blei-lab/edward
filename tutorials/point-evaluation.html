@@ -113,23 +113,6 @@ ed.evaluate(&#39;mean_absolute_error&#39;, data={y_post: y_train, x: x_train})</
 <pre class="python" language="Python"><code>ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_train})</code></pre>
 <p>Point-based evaluations are formally known as scoring rules in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>
 <p>See the <a href="/api/criticism">criticism API</a> for further details. An example of point-based evaluation is in the <a href="/tutorials/supervised-regression">supervised learning (regression)</a> tutorial.</p>
-<h3 id="implementation-model-wrappers">Implementation (model wrappers)</h3>
-<p>For model wrappers, Edward implements point-based evaluations through the <code>predict()</code> method in the class object. It predicts the label given samples from the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span>, i.e., it is the mean of <span class="math inline">\(p(\mathbf{x}_\text{new} \mid \mathbf{z})\)</span> for a posterior sample.</p>
-<pre class="python" language="Python"><code>class BayesianLinearRegression:
-  ...
-  def predict(self, xs, zs):
-    &quot;&quot;&quot;Return a prediction for each data point, via the likelihood&#39;s
-    mean.&quot;&quot;&quot;
-    x = xs[&#39;x&#39;]
-    w, b = zs[&#39;w&#39;], zs[&#39;b&#39;]
-    return ed.dot(x, w) + b
-
-model = BayesianLinearRegression()</code></pre>
-<p>Examples of evaluation on model wrappers are</p>
-<pre class="python" language="Python"><code>ed.evaluate(&#39;categorical_accuracy&#39;, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},
-            latent_vars={&#39;z&#39;: qz}, model_wrapper=model)
-ed.evaluate(&#39;mean_absolute_error&#39;, data={&#39;y&#39;: y_train, &#39;x&#39;: x_train},
-            latent_vars={&#39;z&#39;: qz}, model_wrapper=model)</code></pre>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-gneiting2007strictly">

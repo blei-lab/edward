@@ -108,7 +108,6 @@ X_train = df[subset, 1:]
 y_train = df[subset, 0]</code></pre>
 <h3 id="model">Model</h3>
 <p>Posit the model as Gaussian process classification. For more details on the model, see the <a href="/tutorials/gp-classification">Gaussian process classification tutorial</a>.</p>
-<p>Here we build the model in Edward.</p>
 <pre class="python" language="Python"><code>def kernel(x):
   mat = []
   for i in range(N):
