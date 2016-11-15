@@ -8,8 +8,12 @@ import six
 import tensorflow as tf
 import warnings
 
-from scipy import stats
 from tensorflow.contrib import distributions
+
+try:
+  from scipy import stats
+except ImportError:
+  pass
 
 
 class Distribution(object):
