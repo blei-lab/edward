@@ -6,6 +6,7 @@ import inspect
 import numpy as np
 import six
 import tensorflow as tf
+import warnings
 
 from scipy import stats
 from tensorflow.contrib import distributions
@@ -21,6 +22,11 @@ class Distribution(object):
   >>> bernoulli.logpmf(tf.constant([0.0, 1.0]), p=tf.constant([0.5, 0.4]))
   """
   def __init__(self, dist):
+    warnings.simplefilter('default', DeprecationWarning)
+    warnings.warn("edward.stats is deprecated. If calling rvs() from the "
+                  "distribution, use scipy.stats; if calling density "
+                  "methods from the distribution, use edward.models.",
+                  DeprecationWarning)
     self._dist = dist
 
   def batch_shape(self, *args, **kwargs):
