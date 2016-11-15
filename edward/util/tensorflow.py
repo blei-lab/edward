@@ -311,44 +311,6 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.reduce_sum(tf.pow(x - y, 2.0)))
 
 
-def multivariate_rbf_kernel(x, sigma=1.0, l=1.0):
-  """
-  computes the rbf kernel for the whole data x
-  Args:
-  x: the data
-     size: N x D
-  sigma:
-    standard deviation
-  l:
-    scaling parameter
-  Returns:
-     mat: a matrix of size NxN
-  """
-  N = x.get_shape()[0]
-  mat = []
-  for i in range(N):
-    vect = []
-    xi = x[i, :]
-    for j in range(N):
-      if j == i:
-        vect.append(multivariate_rbf(xi, xi, sigma, l))
-      else:
-        xj = x[j, :]
-        vect.append(multivariate_rbf(xi, xj, sigma, l))
-
-    mat.append(vect)
-
-  mat = tf.pack(mat) + \
-      tf.convert_to_tensor(1e-6 * np.eye(N), dtype=tf.float32)
-
-  return mat
-
-
-def probit(x):
-  """computes the CDF of the standard normal evaluated at x."""
-  return 0.5 + 0.5 * tf.erf(x / tf.sqrt(2.0))
-
-
 def placeholder(*args, **kwargs):
   """A wrapper around ``tf.placeholder``. It adds the tensor to the
   ``PLACEHOLDERS`` collection."""
