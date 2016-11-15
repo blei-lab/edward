@@ -12,21 +12,19 @@ import tensorflow as tf
 from edward.models import Bernoulli, MultivariateNormalFull, Normal
 from edward.util import multivariate_rbf_kernel
 
-
 ed.set_seed(54)
-
 # DATA
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
-df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
+df[df[:, 0] == -1, 0] = 0
 N = len(df)
-D = df.shape[1] - 1 
-permutation = np.random.choice(range(N), N, replace = False)
+D = df.shape[1] - 1
+permutation = np.random.choice(range(N), N, replace=False)
 X_train = df[:, 1:][permutation]
 y_train = df[:, 0][permutation]
 
 print("pre-computing the kernel matrix...")
 K = multivariate_rbf_kernel(
-      tf.convert_to_tensor(X_train), sigma=1.0, l=1.0)
+    tf.convert_to_tensor(X_train), sigma=1.0, l=1.0)
 
 # MODEL
 X = ed.placeholder(tf.float32, [N, D])
