@@ -104,9 +104,12 @@
 <p>Probabilistic modeling in Edward uses a simple language of random variables. Here we will show a Bayesian neural network. It is a neural network with a prior distribution on its weights. (This example is abridged; full source <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py">here</a>.)</p>
 <p>First, simulate a toy dataset of 50 observations with a cosine relationship.</p>
 <pre class="python" language="Python"><code>import numpy as np
+from scipy.stats import norm
 
 x_train = np.linspace(-3, 3, num=50)
-y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)</code></pre>
+y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)
+x_train = x_train.reshape((50, 1))
+y_train = y_train.reshape((50, 1))</code></pre>
 <p><img src="images/getting-started-fig0.png" alt="image" width="700" /></p>
 <p>Next, define a two-layer Bayesian neural network. Here, we define the neural network manually with <code>tanh</code> nonlinearities.</p>
 <pre class="python" language="Python"><code>import tensorflow as tf
