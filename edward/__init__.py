@@ -2,11 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import warnings
-
-# Print the first occurence of any deprecation warnings.
-warnings.simplefilter('default', DeprecationWarning)
-
 from edward import criticisms
 from edward import inferences
 from edward import models

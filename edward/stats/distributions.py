@@ -15,6 +15,7 @@ try:
 except ImportError:
   pass
 
+warnings.simplefilter('default', DeprecationWarning)
 warnings.warn("edward.stats is deprecated. If calling rvs() from the "
               "distribution, use scipy.stats; if calling density "
               "methods from the distribution, use edward.models.",

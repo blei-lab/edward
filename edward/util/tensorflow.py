@@ -314,6 +314,7 @@ def multivariate_rbf(x, y=0.0, sigma=1.0, l=1.0):
 def placeholder(*args, **kwargs):
   """A wrapper around ``tf.placeholder``. It adds the tensor to the
   ``PLACEHOLDERS`` collection."""
+  warnings.simplefilter('default', DeprecationWarning)
   warnings.warn("ed.placeholder() is deprecated; use tf.placeholder() instead.",
                 DeprecationWarning)
   x = tf.placeholder(*args, **kwargs)
