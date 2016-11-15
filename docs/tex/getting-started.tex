@@ -34,11 +34,12 @@ First, simulate a toy dataset of 50 observations with a cosine relationship.
 
 \begin{lstlisting}[language=Python]
 import numpy as np
-from edward.stats import norm
+from scipy.stats import norm
 
 x_train = np.linspace(-3, 3, num=50)
 y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)
 x_train = x_train.reshape((50, 1))
+y_train = y_train.reshape((50, 1))
 \end{lstlisting}
 
 \includegraphics[width=700px]{images/getting-started-fig0.png}
