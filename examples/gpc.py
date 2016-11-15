@@ -9,67 +9,34 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
-from edward.stats import bernoulli, multivariate_normal_cholesky
+from edward.models import Bernoulli, MultivariateNormalFull, Normal
 from edward.util import multivariate_rbf_kernel
 
-class GaussianProcess:
-  """
-  Gaussian process classification with sigmoid link.
-
-  p((x,y), z) = Bernoulli(y | sigmoid(x*z)) *
-                Normal(z | 0, K),
-
-  where z are weights drawn from a GP with covariance given by 
-  k(x, x') for each pair of inputs (x, x'), and with squared-exponential
-  kernel and known kernel hyperparameters.
-
-  Parameters
-  ----------
-  N : int
-    Number of data points.
-  sigma : float, optional
-    Signal variance parameter.
-  l : float, optional
-    Length scale parameter.
-  """
-  def __init__(self, N):
-    self.N = N
-    self.n_vars = N
-    self.inverse_link = tf.sigmoid
-
-  def log_prob(self, xs, zs):
-    """Return scalar, the log joint density log p(xs, zs)."""
-    x, y = xs['x'], xs['y']
-
-    log_prior = multivariate_normal_cholesky.logpdf(
-        zs['z'], tf.zeros(self.N), chol=tf.cholesky(K))
-
-    log_lik = tf.reduce_sum(
-        bernoulli.logpmf(y, p=self.inverse_link(y * zs['z'])))
-
-    return log_prior + log_lik
 
 ed.set_seed(54)
 
+# DATA
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
+df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
 N = len(df)
+D = df.shape[1] - 1 
 permutation = np.random.choice(range(N), N, replace = False)
-x = df[:, 1:][permutation]
-y = df[:, 0][permutation]
+X_train = df[:, 1:][permutation]
+y_train = df[:, 0][permutation]
 
-print("computing the kernel matrix...")
+print("pre-computing the kernel matrix...")
 K = multivariate_rbf_kernel(
-      tf.convert_to_tensor(x), sigma=1.0, l=1.0)
+      tf.convert_to_tensor(X_train), sigma=1.0, l=1.0)
 
-data = {'x': x, 'y': y}
+# MODEL
+X = ed.placeholder(tf.float32, [N, D])
+f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+y = Bernoulli(logits=f)
 
-model = GaussianProcess(N=N)
+# INFERENCE
+qf = Normal(mu=tf.Variable(tf.random_normal([N])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
 
-qz_mu = tf.Variable(tf.random_normal([model.n_vars]))
-qz_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([model.n_vars])))
-qz = Normal(mu=qz_mu, sigma=qz_sigma)
-
-print("doing inference...")
-inference = ed.MFVI({'z': qz}, data, model)
+data = {X: X_train, y: y_train}
+inference = ed.KLqp({f: qf}, data)
 inference.run(n_iter=500)
