@@ -165,7 +165,6 @@ class Inference(object):
           raise TypeError("Data key has an invalid type.")
 
     if model_wrapper is not None:
-      warnings.simplefilter('default', DeprecationWarning)
       warnings.warn("Model wrappers are deprecated. Edward is dropping "
                     "support for model wrappers in future versions; use the "
                     "native language instead.", DeprecationWarning)

@@ -30,7 +30,6 @@ class PyMC3Model(object):
       shared variables are set during inference, and all latent
       variables live on their original (constrained) space.
     """
-    warnings.simplefilter('default', DeprecationWarning)
     warnings.warn("PyMC3Model is deprecated. Edward is dropping "
                   "support for model wrappers in future versions; use the "
                   "native language instead.", DeprecationWarning)
@@ -116,7 +115,6 @@ class PythonModel(object):
     It wraps around a Python function. The Python function takes
     inputs of type np.ndarray and outputs a np.ndarray.
     """
-    warnings.simplefilter('default', DeprecationWarning)
     warnings.warn("PythonModel is deprecated. Edward is dropping "
                   "support for model wrappers in future versions; use the "
                   "native language instead.", DeprecationWarning)
@@ -164,7 +162,6 @@ class StanModel(object):
     **kwargs
       Passed into pystan.StanModel.
     """
-    warnings.simplefilter('default', DeprecationWarning)
     warnings.warn("StanModel is deprecated. Edward is dropping "
                   "support for model wrappers in future versions; use the "
                   "native language instead.", DeprecationWarning)
