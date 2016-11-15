@@ -100,7 +100,7 @@
 </div>
 </div>
 <h3 id="model-wrappers">Model Wrappers</h3>
-<p><strong>Note: Model wrappers are deprecaed since Edward v1.1.5.</strong></p>
+<p><strong>Note: Model wrappers are deprecated since Edward v1.1.5. Use Edward’s native language instead.</strong></p>
 <p>Edward also supports other languages for specifying probability models: TensorFlow, Python, PyMC3, and Stan.</p>
 <p>For modeling convenience, we recommend using the modeling language that you are most familiar with. For efficiency, we recommend not using a model wrapper, as model wrappers do not expose much model structure for inference algorithms to take advantage of. Internally, all model wrappers are also wrapped in TensorFlow so their computation represents a single node in the graph; this makes it difficult to tease apart and thus distribute their computation.</p>
 <p>In general, a model wrapper is a class with the structure</p>
