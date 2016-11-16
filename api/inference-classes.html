@@ -107,9 +107,9 @@
 =
 \text{Normal}(\mathbf{x} \mid \beta_{\mathbf{z}}, \mathbf{I})
 ~
-\text{Categorical}(\mathbf{z}; \pi)
+\text{Categorical}(\mathbf{z}\mid \pi)
 ~
-\text{Normal}(\beta; 0, \mathbf{I}).\]</span></p>
+\text{Normal}(\beta\mid 0, \mathbf{I}).\]</span></p>
 <h3 id="variational-inference">Variational Inference</h3>
 <p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We build an approximating family, <span class="math display">\[\begin{aligned}
 q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
