@@ -6,9 +6,20 @@ import inspect
 import numpy as np
 import six
 import tensorflow as tf
+import warnings
 
-from scipy import stats
 from tensorflow.contrib import distributions
+
+try:
+  from scipy import stats
+except ImportError:
+  pass
+
+warnings.simplefilter('default', DeprecationWarning)
+warnings.warn("edward.stats is deprecated. If calling rvs() from the "
+              "distribution, use scipy.stats; if calling density "
+              "methods from the distribution, use edward.models.",
+              DeprecationWarning)
 
 
 class Distribution(object):

@@ -6,6 +6,7 @@ import multiprocessing
 import numpy as np
 import six
 import tensorflow as tf
+import warnings
 
 from edward.models import RandomVariable, StanModel
 from edward.util import get_session
@@ -162,6 +163,12 @@ class Inference(object):
           self.data[key] = value
         else:
           raise TypeError("Data key has an invalid type.")
+
+    if model_wrapper is not None:
+      warnings.simplefilter('default', DeprecationWarning)
+      warnings.warn("Model wrappers are deprecated. Edward is dropping "
+                    "support for model wrappers in future versions; use the "
+                    "native language instead.", DeprecationWarning)
 
     self.model_wrapper = model_wrapper
 

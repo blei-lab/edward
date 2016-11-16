@@ -5,6 +5,7 @@ from __future__ import print_function
 import numpy as np
 import six
 import tensorflow as tf
+import warnings
 
 from edward.util import get_dims, get_session
 
@@ -29,6 +30,10 @@ class PyMC3Model(object):
       shared variables are set during inference, and all latent
       variables live on their original (constrained) space.
     """
+    warnings.simplefilter('default', DeprecationWarning)
+    warnings.warn("PyMC3Model is deprecated. Edward is dropping "
+                  "support for model wrappers in future versions; use the "
+                  "native language instead.", DeprecationWarning)
     self.model = model
     self.n_vars = None
 
@@ -111,6 +116,10 @@ class PythonModel(object):
     It wraps around a Python function. The Python function takes
     inputs of type np.ndarray and outputs a np.ndarray.
     """
+    warnings.simplefilter('default', DeprecationWarning)
+    warnings.warn("PythonModel is deprecated. Edward is dropping "
+                  "support for model wrappers in future versions; use the "
+                  "native language instead.", DeprecationWarning)
     # Store keys so that ``_py_log_prob_args`` knows how each
     # value corresponds to a key.
     self.xs_keys = list(six.iterkeys(xs))
@@ -155,6 +164,10 @@ class StanModel(object):
     **kwargs
       Passed into pystan.StanModel.
     """
+    warnings.simplefilter('default', DeprecationWarning)
+    warnings.warn("StanModel is deprecated. Edward is dropping "
+                  "support for model wrappers in future versions; use the "
+                  "native language instead.", DeprecationWarning)
     if model is None:
       self.model = pystan.StanModel(*args, **kwargs)
     else:

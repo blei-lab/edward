@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import six
 import tensorflow as tf
+import warnings
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, Normal
@@ -118,7 +119,10 @@ class KLqp(VariationalInference):
         return build_score_loss_and_gradients(self, var_list)
 
 
-MFVI = KLqp  # deprecated synonym
+def MFVI(*args, **kwargs):
+  warnings.simplefilter('default', DeprecationWarning)
+  warnings.warn("MFVI is deprecated; use KLqp instead.", DeprecationWarning)
+  return KLqp(*args, **kwargs)
 
 
 class ReparameterizationKLqp(VariationalInference):
