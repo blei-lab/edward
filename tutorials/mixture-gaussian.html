@@ -135,6 +135,7 @@
   &amp;=
   \mathbf{x}_{\mathrm{max}} + \log \sum_i \exp(\mathbf{x}_i -
   \mathbf{x}_{\mathrm{max}}).\end{aligned}\]</span> Subtracting the maximum value before taking the log-sum-exp leads to more numerically stable output.</p>
+<p><strong>Note: Model wrappers are deprecated since Edward v1.1.5. Reimplementing this under Edward’s native language is currently in progress.</strong></p>
 <pre class="python" language="Python"><code>class MixtureGaussian:
   &quot;&quot;&quot;
   Mixture of Gaussians

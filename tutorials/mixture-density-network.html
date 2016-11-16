@@ -117,6 +117,7 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 y = tf.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}</code></pre>
 <h3 id="model">Model</h3>
+<p><strong>Note: Model wrappers are deprecated since Edward v1.1.5. Reimplementing this under Edward’s native language is currently in progress.</strong></p>
 <p>We define a class that can be used to construct MDNs. Here we use a mixture of normal distributions parameterized by a feedforward network. In other words, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network.</p>
 <pre class="python" language="Python"><code>class MixtureDensityNetwork:
   """

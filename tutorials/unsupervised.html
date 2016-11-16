@@ -116,6 +116,7 @@ plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
+<p><strong>Note: Model wrappers are deprecated since Edward v1.1.5. Reimplementing this under Edward’s native language is currently in progress.</strong></p>
 <p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="/tutorials/mixture-gaussian">Mixture of Gaussians tutorial</a>.</p>
 <p>Here we build the model in Edward using TensorFlow, and set the number of mixture components to be 2.</p>
 <pre class="python" language="Python"><code>class MixtureGaussian:

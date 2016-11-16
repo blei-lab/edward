@@ -84,6 +84,11 @@ which is based on the identity
 \end{align*}
 Subtracting the maximum value before taking the log-sum-exp leads to
 more numerically stable output.
+
+\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
+Reimplementing this under Edward's native language is currently in
+progress.}
+
 \begin{lstlisting}[language=Python]
 class MixtureGaussian:
   """
