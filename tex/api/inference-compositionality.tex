@@ -90,6 +90,7 @@ for _ in range(10000):
 We alternate updates for each local inference, where the global
 posterior factor $q(\beta)$ is shared across both inferences
 \citep{gelman2014expectation}.
+
 With TensorFlow's distributed training, compositionality
 enables \emph{distributed} message passing over a cluster with many
 workers. The computation can be further sped up with the use of GPUs

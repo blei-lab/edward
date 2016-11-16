@@ -101,7 +101,7 @@
 </div>
 <h3 id="composing-random-variables">Composing Random Variables</h3>
 <p>Core to Edward’s design is compositionality. Compositionality enables fine control of modeling, where models are represented as a collection of random variables.</p>
-<p>We outline how to write popular classes of models using Edward: directed graphical models, neural networks, Bayesian nonparametrics, and probabilistic programs. For more examples, see the model <a href="/tutorials/">tutorials</a>.</p>
+<p>We outline how to write popular classes of models using Edward: directed graphical models, neural networks, Bayesian nonparametrics, and probabilistic programs. For more examples, see the <a href="/tutorials/">model tutorials</a>.</p>
 <h3 id="directed-graphical-models">Directed Graphical Models</h3>
 <p>Graphical models are a rich formalism for specifying probability distributions <span class="citation">(Koller &amp; Friedman, 2009)</span>. In Edward, directed edges in a graphical model are implicitly defined when random variables are composed with one another. We illustrate with a Beta-Bernoulli model, <span class="math display">\[p(\mathbf{x}, \theta) =
 \text{Beta}(\theta\mid 1, 1)
@@ -120,10 +120,10 @@ theta = tf.Variable(0.0)
 x = Bernoulli(p=tf.ones(50) * tf.sigmoid(theta))</code></pre>
 <p>Another use case of mutable states is for building discriminative models <span class="math inline">\(p(\mathbf{y}\mid\mathbf{x})\)</span>, where <span class="math inline">\(\mathbf{x}\)</span> are features that are input as training or test data. The program can be written independent of the data, using a mutable state (<code>tf.placeholder</code>) for <span class="math inline">\(\mathbf{x}\)</span> in its graph. During training and testing, we feed the placeholder the appropriate values. (See the <a href="/tutorials/bayesian-linear-regression">Bayesian linear regression</a> tutorial as an example.)</p>
 <h3 id="neural-networks">Neural Networks</h3>
-<p>As Edward uses TensorFlow, it is easy to construct neural networks for probabilistic modeling <span class="citation">(Rumelhart, McClelland, &amp; Group, 1988)</span>. For example, one can specify stochastic neural networks <span class="citation">(Neal, 1990)</span>; see the <a href="/tutorials/bayesian-neural-network">Bayesian neural networks</a> tutorial for details.</p>
+<p>As Edward uses TensorFlow, it is easy to construct neural networks for probabilistic modeling <span class="citation">(Rumelhart, McClelland, &amp; Group, 1988)</span>. For example, one can specify stochastic neural networks <span class="citation">(Neal, 1990)</span>; see the <a href="/tutorials/bayesian-neural-network">Bayesian neural network tutorial</a> for details.</p>
 <p>High-level libraries such as <a href="http://keras.io">Keras</a> and <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> can be used to easily construct deep neural networks. We illustrate this with a deep generative model over binary data <span class="math inline">\(\{\mathbf{x}_n\}\in\{0,1\}^{N\times 28*28}\)</span>.</p>
 <p><img alt="image" src="/images/decoder.png" width="250"/></p>
-<p><span><em>Graphical model representation.</em></span></p>
+<p><span><em>Graphical representation of a deep generative model.</em></span></p>
 <p>The model specifies a generative process where for each <span class="math inline">\(n=1,\ldots,N\)</span>, <span class="math display">\[\begin{aligned}
 \mathbf{z}_n &amp;\sim \text{Normal}(\mathbf{z} \mid \mathbf{0}, I), \\[1.5ex]
 \mathbf{x}_n\mid \mathbf{z}_n &amp;\sim \text{Bernoulli}(\mathbf{x}_n\mid
