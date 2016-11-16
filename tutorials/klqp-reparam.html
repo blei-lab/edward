@@ -94,11 +94,11 @@
   \arg \max_\lambda \text{ELBO}(\lambda)\\
   &amp;=\;
   \arg \max_\lambda\;
-  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
-  \log p(\mathbf{x}, \mathbf{z})
+  \log p(x, z)
   -
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big],\end{aligned}\]</span> using a “black box” algorithm. This means generically inferring the posterior while making few assumptions about the model.</p>
 <p>If the model has differentiable latent variables, then it is generally advantageous to leverage gradient information from the model in order to better traverse the optimization space. One approach to doing this is the reparameterization gradient.</p>
 <h3 id="the-reparameterization-identity">The reparameterization identity</h3>
@@ -107,15 +107,15 @@
   \text{ELBO}(\lambda)
   &amp;=
   \nabla_\lambda\;
-  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
-  \log p(\mathbf{x}, \mathbf{z})
+  \log p(x, z)
   -
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big],\end{aligned}\]</span> and update the current set of parameters proportional to the gradient.</p>
-<p>Some variational distributions <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize a normal distribution <span class="math inline">\(\mathbf{z} \sim \text{Normal}(\mu, \Sigma)\)</span> as <span class="math inline">\(\mathbf{z} \sim \mu + L \text{Normal}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
+<p>Some variational distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize a normal distribution <span class="math inline">\(z \sim \text{Normal}(\mu, \Sigma)\)</span> as <span class="math inline">\(z \sim \mu + L \text{Normal}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
   \epsilon &amp;\sim q(\epsilon)\\
-  \mathbf{z} &amp;= \mathbf{z}(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(\mathbf{z}(\cdot;\lambda)\)</span> encapsulates the variational parameters instead, and following the process is equivalent to directly drawing <span class="math inline">\(\mathbf{z}\)</span> from the original distribution.</p>
+  z &amp;= z(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(z(\cdot;\lambda)\)</span> encapsulates the variational parameters instead, and following the process is equivalent to directly drawing <span class="math inline">\(z\)</span> from the original distribution.</p>
 <p>The reparameterization gradient leverages this property of the variational distribution to write the gradient as <span class="math display">\[\begin{aligned}
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
@@ -124,9 +124,9 @@
   \big[
   \nabla_\lambda
   \big(
-  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  \log p(x, z(\epsilon \;;\; \lambda))
   -
-  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
   \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>, and the gradient can be applied directly to the inner expression <span class="citation">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
 <p>Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
@@ -146,9 +146,9 @@
   \big[
   \nabla_\lambda
   \big(
-  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  \log p(x, z(\epsilon \;;\; \lambda))
   -
-  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the <a href="/tutorials/klqp-score">score function gradient</a>, leading to faster convergence in a large set of problems.</p>
 <h3 id="implementation">Implementation</h3>

@@ -8,25 +8,24 @@ posterior inference as optimization
 
 The core idea involves two steps:
 \begin{enumerate}
-   \item posit a family of distributions $q(\mathbf{z}\;;\;\lambda)$
-   over the latent variables;
-   \item match $q(\mathbf{z}\;;\;\lambda)$ to the posterior by
-   optimizing over its parameters $\lambda$.
+   \item posit a family of distributions $q(z\;;\;\lambda)$ over the
+   latent variables;
+   \item match $q(z\;;\;\lambda)$ to the posterior by optimizing over its
+   parameters $\lambda$.
  \end{enumerate}
-This strategy converts the problem of computing the posterior
-$p(\mathbf{z} \mid \mathbf{x})$ into an optimization problem, which
-minimizes a divergence measure
+This strategy converts the problem of computing the posterior $p(z \mid x)$ into
+an optimization problem, which minimizes a divergence measure
 \begin{align*}
   \lambda^*
   &=
   \arg\min_\lambda \text{divergence}(
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   ,
-  q(\mathbf{z}\;;\;\lambda)
+  q(z\;;\;\lambda)
   ).
 \end{align*}
-The optimized distribution $q(\mathbf{z}\;;\;\lambda)$ is then used as
-a proxy to the posterior $p(\mathbf{z}\mid \mathbf{x})$.
+The optimized distribution $q(z\;;\;\lambda)$ is then used as a
+proxy to the posterior $p(z\mid x)$.
 
 Edward takes the perspective that the posterior is (typically)
 intractable, and thus we must build a model of latent variables that

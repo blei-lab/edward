@@ -108,9 +108,7 @@
   \prod_{n=1}^N
   \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span> The latent variables are the linear model’s weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_w^2,\sigma_b^2\)</span> are known prior variances and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
 <p>Let’s build the model in Edward, fixing <span class="math inline">\(\sigma_w,\sigma_b,\sigma_y=1\)</span>.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal
-
-N = 40  # number of data points
+<pre class="python" language="Python"><code>N = 40  # number of data points
 D = 1  # number of features
 
 X = tf.placeholder(tf.float32, [N, D])

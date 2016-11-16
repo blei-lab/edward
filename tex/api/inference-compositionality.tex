@@ -21,8 +21,6 @@ E-step over local variables and an M-step over global variables.
 We alternate with one update of each \citep{neal1993new}.
 
 \begin{lstlisting}[language=Python]
-from edward.models import Categorical, PointMass
-
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
@@ -59,8 +57,6 @@ mixture model to be over two random variables \texttt{x1} and
 and \texttt{z2}.
 
 \begin{lstlisting}[language=Python]
-from edward.models import Categorical, Normal
-
 N1 = 1000  # number of data points in first data set
 N2 = 2000  # number of data points in second data set
 D = 2  # data dimension

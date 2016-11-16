@@ -42,6 +42,7 @@ model, see the
 \href{/tutorials/bayesian-linear-regression}
 {Bayesian linear regression tutorial}.
 
+Here we build the model in Edward's native language.
 \begin{lstlisting}[language=Python]
 X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))

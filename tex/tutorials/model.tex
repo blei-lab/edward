@@ -5,26 +5,24 @@
 A probabilistic model asserts how observations from a natural phenomenon arise.
 The model is a \emph{joint distribution}
 \begin{align*}
-  p(\mathbf{x}, \mathbf{z})
+  p(x, z)
 \end{align*}
-of observed variables $\mathbf{x}$ corresponding to data, and latent
-variables $\mathbf{z}$ that provide the hidden structure to generate
-from $\mathbf{x}$. The joint distribution factorizes into two
-components.
+of observed variables $x$ corresponding to data, and latent
+variables $z$ that provide the hidden structure to generate from $x$.
+The joint distribution factorizes into two components.
 
 The \emph{likelihood}
 \begin{align*}
-  p(\mathbf{x} \mid \mathbf{z})
+  p(x \mid z)
 \end{align*}
-is a probability distribution that describes how any data $\mathbf{x}$
-depend on the latent variables $\mathbf{z}$. The likelihood posits a
-data generating process, where the data $\mathbf{x}$ are assumed drawn
-from the likelihood conditioned on a particular hidden pattern
-described by $\mathbf{z}$.
+is a probability distribution that describes how any data $x$ depend
+on the latent variables $z$. The likelihood posits a data generating
+process, where the data $x$ are assumed drawn from the likelihood
+conditioned on a particular hidden pattern described by $z$.
 
 The \emph{prior}
 \begin{align*}
-  p(\mathbf{z})
+  p(z)
 \end{align*}
 is a probability distribution that describes the latent variables
 present in the data. It posits a generating process of the hidden structure.

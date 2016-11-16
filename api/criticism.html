@@ -97,7 +97,8 @@
 </div>
 <h3 id="criticism">Criticism</h3>
 <p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model.</p>
-<p>Edward explores model criticism using</p>
+<p>Criticism is defined simply with utility functions. They take random variables as input and output NumPy arrays.</p>
+<p>Edward explores model and inference criticism using</p>
 <ul>
 <li>point-based evaluations, such as mean squared error or classification accuracy</li>
 </ul>
@@ -107,26 +108,25 @@
 </ul>
 <pre class="python" language="Python"><code>T = lambda xs, zs: tf.reduce_mean(xs[x])
 ed.ppc(T, data={x: x_data})</code></pre>
-<p>Criticism is defined simply with utility functions. They take random variables as input and output NumPy arrays.</p>
-<p>Here’s an example. First, let’s build a model <span class="math inline">\(p(\mathbf{x},
-\mathbf{z}, \beta)\)</span> and perform inference to obtain the posterior <span class="math inline">\(p(\mathbf{z}, \beta\mid\mathbf{x})\)</span>.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Normal
+<p>Here’s an example. First, let’s build a model and perform inference.</p>
+<pre class="python" language="Python"><code>beta = RandomVariable()
+z = RandomVariable(par=z)
+x = RandomVariable(par_1=z, par_2=beta)
 
-# MODEL
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
-z = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
+qbeta = RandomVariable()
+qz = RandomVariable(par=qbeta)
 
-# INFERENCE
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
-qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+x_train = np.array()
 
 inference = ed.Inference({z: qz, beta: qbeta}, data={x: x_train})
 inference.run()</code></pre>
-<p>We then build the posterior predictive distribution <span class="math inline">\(p(\mathbf{x}_{\text{new}}\mid \mathbf{x})\)</span>.</p>
-<pre class="python" language="Python"><code>x_post = ed.copy(x, {z: qz, beta: qbeta})</code></pre>
-<p>The <code>copy</code> function builds the posterior predictive by copying the likelihood <code>x</code>, swapping out its dependence on the priors <code>z</code> and <code>beta</code> with dependence on the inferred posteriors <code>qz</code> and <code>qbeta</code>.</p>
+<p>We first build the posterior predictive distribution.</p>
+<pre class="python" language="Python"><code>from edward.util import copy
+
+# Build the posterior predictive distribution by copying the
+# likelihood, swapping out the prior `z` and `beta` with the inferred
+# posterior `qz` and `qbeta`.
+x_post = copy(x, {z: qz, beta: qbeta})</code></pre>
 <p>Now we run some techniques: <a href="/tutorials/point-evaluation"><code>evaluate</code></a> and <a href="/tutorials/ppc"><code>ppc</code></a>.</p>
 <pre class="python" language="Python"><code># log-likelihood performance
 ed.evaluate('log_likelihood', data={x_post: x_train})
@@ -147,19 +147,24 @@ ed.ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': q
 # prior predictive check
 # running ppc on original x
 ed.ppc(T, data={x: x_train})</code></pre>
-<p>It is common practice to criticize models with data held-out from training. To do this, we first perform inference over any local latent variables of the held-out data, fixing the global variables. Then we make predictions on the held-out data.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical
+<p>Suppose you want to perform criticism on data held-out from training. We first perform inference over the local latent variables of the held-out data. Then we make the predictions.</p>
+<pre class="python" language="Python"><code>from edward.util import copy
 
-# create local posterior factors for test data, assuming test data
-# has N_test many data points
-qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
+# create local variational factors for test data
+qz_test = RandomVariable()
 
-inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
+x_test = np.array()
+
+inference_test = ed.Inference({z: qz_test, beta: qbeta}, data={x: x_test})
 inference_test.run()
 
 # build posterior predictive on test data
-x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
+x_post = copy(x, {z: qz_test, beta: qbeta}})
 ed.evaluate('log_likelihood', data={x_post: x_test})</code></pre>
+<p>Criticism techniques are simply functions which take as input data, the probability model and variational model (binded through a latent variable dictionary), and any additional inputs.</p>
+<pre class="python" language="Python"><code>def criticize(data, latent_vars, ...)
+  ...</code></pre>
+<p>Developing new criticism techniques is easy. They can be derived from the current techniques or built as a standalone function.</p>
 <p>For examples of criticism techniques built in Edward, see the criticism <a href="/tutorials/">tutorials</a>.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">

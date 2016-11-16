@@ -80,7 +80,6 @@ It takes a 28 by 28 pixel image and outputs a $10$-dimensional
 output, one for the mean (\texttt{mu}) and one for the standard
 deviation (\texttt{sigma}).
 \begin{lstlisting}[language=Python]
-from edward.models import Normal
 from keras.layers import Dense
 
 hidden = Dense(256, activation='relu')(x_ph)

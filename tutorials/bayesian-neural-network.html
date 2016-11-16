@@ -103,13 +103,12 @@
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward. We define a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal
-
-def neural_network(x):
+<pre class="python" language="Python"><code>def neural_network(x):
     h = tf.tanh(tf.matmul(x, W_0) + b_0)
     h = tf.tanh(tf.matmul(h, W_1) + b_1)
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
+
 
 N = 40  # number of data ponts
 D = 1   # number of features

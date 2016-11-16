@@ -4,9 +4,6 @@
 
 \subsubsection{Model Wrappers}
 
-\textbf{Note: Model wrappers are deprecated since Edward v1.1.5. Use
-Edward's native language instead.}
-
 Edward also supports other languages for specifying probability models:
 TensorFlow, Python, PyMC3, and Stan.
 
@@ -229,58 +226,6 @@ all three use cases for training models with data are supported. However,
 Stan is limited to training over the full data per step. (This
 because Stan's data structure requires data subsampling on arbitrary
 data types, which we don't know how to automate.)
-
-\subsubsection{Criticism: Point-based evaluation}
-
-For model wrappers, Edward implements point-based evaluations through
-the \texttt{predict()} method in the class object. It predicts
-the label given samples from the posterior $p(\mathbf{z} \mid \mathbf{x})$, i.e., it is
-the mean of $p(\mathbf{x}_\text{new} \mid \mathbf{z})$ for a posterior sample.
-\begin{lstlisting}[language=Python]
-class BayesianLinearRegression:
-  ...
-  def predict(self, xs, zs):
-    """Return a prediction for each data point, via the likelihood's
-    mean."""
-    x = xs['x']
-    w, b = zs['w'], zs['b']
-    return ed.dot(x, w) + b
-
-model = BayesianLinearRegression()
-\end{lstlisting}
-Examples of evaluation on model wrappers are
-\begin{lstlisting}[language=Python]
-ed.evaluate('categorical_accuracy', data={'y': y_train, 'x': x_train},
-            latent_vars={'z': qz}, model_wrapper=model)
-ed.evaluate('mean_absolute_error', data={'y': y_train, 'x': x_train},
-            latent_vars={'z': qz}, model_wrapper=model)
-\end{lstlisting}
-
-\subsubsection{Criticism: Posterior predictive checks}
-
-For model wrappers, Edward implements PPCs through the
-\texttt{sample_likelihood()} method in the class object. This method
-samples a dataset
-$\mathbf{x}_{\text{new}}\mid \mathbf{z}\sim
-p(\mathbf{x}_{\text{new}}\mid \mathbf{z})$ from the
-model likelihood given a set of latent variables.
-\begin{lstlisting}[language=Python]
-class BetaBernoulli:
-  ...
-  def sample_likelihood(self, zs):
-    """x | p ~ p(x | p)"""
-    return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}
-\end{lstlisting}
-
-An examples of a PPC for model wrappers is
-\begin{lstlisting}[language=Python]
-def T(xs, zs):
-  return tf.reduce_mean(xs['x'])
-
-ed.ppc(T, data={'x': x_train}, latent_vars={'z': qz}, model_wrapper=model)
-\end{lstlisting}
-For model wrappers, the latent variables must always be
-passed in regardless of whether \texttt{T} is a function of them.
 
 \subsubsection{Model Wrapper API}
 

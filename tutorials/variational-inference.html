@@ -90,17 +90,17 @@
 <p>Variational inference is an umbrella term for algorithms which cast posterior inference as optimization <span class="citation">(Hinton &amp; Van Camp, 1993; Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999; Waterhouse, MacKay, &amp; Robinson, 1996)</span>.</p>
 <p>The core idea involves two steps:</p>
 <ol>
-<li>posit a family of distributions <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> over the latent variables;</li>
-<li>match <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
+<li>posit a family of distributions <span class="math inline">\(q(z\;;\;\lambda)\)</span> over the latent variables;</li>
+<li>match <span class="math inline">\(q(z\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
 </ol>
-<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
+<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(z \mid x)\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
   \lambda^*
   &amp;=
   \arg\min_\lambda \text{divergence}(
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   ,
-  q(\mathbf{z}\;;\;\lambda)
-  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(\mathbf{z}\mid \mathbf{x})\)</span>.</p>
+  q(z\;;\;\lambda)
+  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(z\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(z\mid x)\)</span>.</p>
 <p>Edward takes the perspective that the posterior is (typically) intractable, and thus we must build a model of latent variables that best approximates the posterior. It is analogous to the perspective that the true data generating process is unknown, and thus we build models of data to best approximate the true process.</p>
 <p>For details on the variational inference base class defined in Edward, see the <a href="/api/inference">inference API</a>. For examples of specific variational inference algorithms in Edward, see the other inference <a href="/tutorials/">tutorials</a>.</p>
 <h3 class="unnumbered" id="references">References</h3>

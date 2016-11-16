@@ -3,22 +3,22 @@
 \subsection{$\text{KL}(p\|q)$ minimization}
 
 One form of variational inference minimizes the Kullback-Leibler divergence
-\textbf{from} $p(\mathbf{z} \mid \mathbf{x})$ \textbf{to} $q(\mathbf{z}\;;\;\lambda)$,
+\textbf{from} $p(z \mid x)$ \textbf{to} $q(z\;;\;\lambda)$,
 \begin{align*}
   \lambda^*
   &=
   \arg\min_\lambda \text{KL}(
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   \;\|\;
-  q(\mathbf{z}\;;\;\lambda)
+  q(z\;;\;\lambda)
   )\\
   &=
   \arg\min_\lambda\;
-  \mathbb{E}_{p(\mathbf{z} \mid \mathbf{x})}
+  \mathbb{E}_{p(z \mid x)}
   \big[
-  \log p(\mathbf{z} \mid \mathbf{x})
+  \log p(z \mid x)
   -
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big].
 \end{align*}
 The KL divergence is a non-symmetric, information theoretic measure of
@@ -27,21 +27,21 @@ similarity between two probability distributions.
 \subsubsection{Minimizing an intractable objective function}
 
 The $\text{KL}(p\|q)$ objective we seek to minimize is intractable; it directly
-involves the posterior $p(\mathbf{z} \mid \mathbf{x})$. Ignoring this for the moment, consider its
+involves the posterior $p(z \mid x)$. Ignoring this for the moment, consider its
 gradient
 \begin{align*}
   \nabla_\lambda\;
   \text{KL}(
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   \;\|\;
-  q(\mathbf{z}\;;\;\lambda)
+  q(z\;;\;\lambda)
   )
   &=
   -
-  \mathbb{E}_{p(\mathbf{z} \mid \mathbf{x})}
+  \mathbb{E}_{p(z \mid x)}
   \big[
   \nabla_\lambda\;
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big].
 \end{align*}
 Both $\text{KL}(p\|q)$ and its gradient are intractable
@@ -56,59 +56,59 @@ First rewrite the expectation to be with respect to the variational
 distribution,
 \begin{align*}
   -
-  \mathbb{E}_{p(\mathbf{z} \mid \mathbf{x})}
+  \mathbb{E}_{p(z \mid x)}
   \big[
   \nabla_\lambda\;
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big]
   &=
   -
-  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \mathbb{E}_{q(z\;;\;\lambda)}
   \Bigg[
-  \frac{p(\mathbf{z} \mid \mathbf{x})}{q(\mathbf{z}\;;\;\lambda)}
+  \frac{p(z \mid x)}{q(z\;;\;\lambda)}
   \nabla_\lambda\;
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \Bigg].
 \end{align*}
 
 We then use importance sampling to obtain a noisy estimate of this gradient.
 The basic procedure follows these steps:
 \begin{enumerate}
-  \item draw $S$ samples $\{\mathbf{z}_s\}_1^S \sim q(\mathbf{z}\;;\;\lambda)$,
-  \item evaluate $\nabla_\lambda\; \log q(\mathbf{z}_s\;;\;\lambda)$,
+  \item draw $S$ samples $\{z_s\}_1^S \sim q(z\;;\;\lambda)$,
+  \item evaluate $\nabla_\lambda\; \log q(z_s\;;\;\lambda)$,
   \item compute the normalized importance weights
   \begin{align*}
     w_s
     &=
-    \frac{p(\mathbf{z}_s \mid \mathbf{x})}{q(\mathbf{z}_s\;;\;\lambda)}
+    \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
     \Bigg/
     \sum_{s=1}^{S}
-    \frac{p(\mathbf{z}_s \mid \mathbf{x})}{q(\mathbf{z}_s\;;\;\lambda)}
+    \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
   \end{align*}
   \item compute the weighted mean.
 \end{enumerate}
-The key insight is that we can use the joint $p(\mathbf{x},\mathbf{z})$ instead of the posterior
+The key insight is that we can use the joint $p(x,z)$ instead of the posterior
 when estimating the normalized importance weights
 \begin{align*}
   w_s
   &=
-  \frac{p(\mathbf{z}_s \mid \mathbf{x})}{q(\mathbf{z}_s\;;\;\lambda)}
+  \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)}
   \Bigg/
   \sum_{s=1}^{S}
-  \frac{p(\mathbf{z}_s \mid \mathbf{x})}{q(\mathbf{z}_s\;;\;\lambda)} \\
+  \frac{p(z_s \mid x)}{q(z_s\;;\;\lambda)} \\
   &=
-  \frac{p(\mathbf{x}, \mathbf{z}_s)}{q(\mathbf{z}_s\;;\;\lambda)}
+  \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}
   \Bigg/
   \sum_{s=1}^{S}
-  \frac{p(\mathbf{x}, \mathbf{z}_s)}{q(\mathbf{z}_s\;;\;\lambda)}.
+  \frac{p(x, z_s)}{q(z_s\;;\;\lambda)}.
 \end{align*}
 This follows from Bayes' rule
 \begin{align*}
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   &=
-  p(\mathbf{x}, \mathbf{z}) / p(\mathbf{x})\\
+  p(x, z) / p(x)\\
   &=
-  p(\mathbf{x}, \mathbf{z}) / \text{a constant function of }\mathbf{z}.
+  p(x, z) / \text{a constant function of }z.
 \end{align*}
 
 Importance sampling thus gives the following noisy yet unbiased gradient
@@ -116,27 +116,27 @@ estimate
 \begin{align*}
 \nabla_\lambda\;
   \text{KL}(
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   \;\|\;
-  q(\mathbf{z}\;;\;\lambda)
+  q(z\;;\;\lambda)
   )
   &=
   -
   \frac{1}{S}
   \sum_{s=1}^S
   w_s
-  \nabla_\lambda\; \log q(\mathbf{z}_s\;;\;\lambda).
+  \nabla_\lambda\; \log q(z_s\;;\;\lambda).
 \end{align*}
 The objective $\text{KL}(p\|q)$ can be calculated in a similar fashion.
 The only new ingredient for its gradient is the score function
-$\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)$.  Edward uses automatic
+$\nabla_\lambda \log q(z\;;\;\lambda)$.  Edward uses automatic
 differentiation, specifically with TensorFlow's computational graphs,
 making this gradient computation both simple and efficient to
 distribute.
 
 Adaptive importance sampling follows this gradient to a local optimum using
 stochastic optimization. It is adaptive because the variational distribution
-$q(\mathbf{z}\;;\;\lambda)$ iteratively gets closer to the posterior $p(\mathbf{z} \mid \mathbf{x})$.
+$q(z\;;\;\lambda)$ iteratively gets closer to the posterior $p(z \mid x)$.
 
 \subsubsection{Implementation}
 
@@ -191,8 +191,8 @@ The method returns an object whose
 automatic differentiation is a stochastic gradient of $\text{KL}(p\|q)$.
 The TensorFlow function \texttt{tf.stop_gradient()} tells the computational
 graph to stop traversing nodes to propagate gradients. In this case,
-the only gradients taken are $\nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)$,
-one for each sample $\mathbf{z}_s$. We multiply it by \texttt{w_norm}
+the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
+one for each sample $z_s$. We multiply it by \texttt{w_norm}
 element-wise and return the mean.
 
 Computing the normalized importance weights is a numerically

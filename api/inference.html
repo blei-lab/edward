@@ -97,6 +97,7 @@
 <div class="row">
 <a class="button4" href="/api/inference-classes">Classes</a>
 <a class="button4" href="/api/inference-compositionality">Compositionality</a>
+<a class="button4" href="/api/inference-data-subsampling">Data Subsampling</a>
 <a class="button4" href="/api/inference-development">Development</a>
 </div>
 </div>
@@ -109,7 +110,7 @@
 <p>Running inference is as simple as running one method.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.run()</code></pre>
-<p>Inference also supports fine control of the training procedure.</p>
+<p>Inference also supports fine-grained control of the training procedure.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.initialize()
 

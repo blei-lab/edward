@@ -94,17 +94,17 @@
 
 <h2 id="laplace-approximation">Laplace approximation</h2>
 <p>(This tutorial follows the <a href="/tutorials/map">Maximum a posteriori estimation</a> tutorial.)</p>
-<p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
+<p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math inline">\(p(z \mid x)\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
 <p>The Laplace approximation <span class="citation">(Laplace, 1986)</span> is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   &amp;\approx
-  \text{Normal}(\mathbf{z}\;;\; \mathbf{z}_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
+  \text{Normal}(z\;;\; z_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
   \Lambda_{ij}
   &amp;=
-  \frac{\partial^2 \log p(\mathbf{x}, \mathbf{z})}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
+  \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
 <h3 id="implementation">Implementation</h3>
 <p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
-<p>Edward implements the Laplace approximation by extending the class built for <a href="/tutorials/map">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(\mathbf{z}_\text{MAP}\)</span>.</p>
+<p>Edward implements the Laplace approximation by extending the class built for <a href="/tutorials/map">MAP estimation</a>, as it requires an estimate of the posterior mode, <span class="math inline">\(z_\text{MAP}\)</span>.</p>
 <pre class="python" language="Python"><code>class Laplace(MAP):
   def __init__(self, model, data=None, params=None):
     super(Laplace, self).__init__(model, data, params)

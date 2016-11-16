@@ -2,24 +2,23 @@
 
 \subsection{$\text{KL}(q\|p)$ minimization}
 
-One form of variational inference minimizes the Kullback-Leibler
-divergence \textbf{from} $q(\mathbf{z}\;;\;\lambda)$ \textbf{to}
-$p(\mathbf{z} \mid \mathbf{x})$,
+One form of variational inference minimizes the Kullback-Leibler divergence
+\textbf{from} $q(z\;;\;\lambda)$ \textbf{to} $p(z \mid x)$,
 \begin{align*}
   \lambda^*
   &=
   \arg\min_\lambda \text{KL}(
-  q(\mathbf{z}\;;\;\lambda)
+  q(z\;;\;\lambda)
   \;\|\;
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   )\\
   &=
   \arg\min_\lambda\;
-  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   -
-  \log p(\mathbf{z} \mid \mathbf{x})
+  \log p(z \mid x)
   \big].
 \end{align*}
 The KL divergence is a non-symmetric, information theoretic measure of
@@ -28,46 +27,43 @@ similarity between two probability distributions
 
 \subsubsection{The Evidence Lower Bound}
 
-The above optimization problem is intractable because it directly
-depends on the posterior $p(\mathbf{z} \mid \mathbf{x})$. To tackle
-this, consider the property
+The above optimization problem is intractable because it directly depends on the
+posterior $p(z \mid x)$. To tackle this, consider the property
 \begin{align*}
-  \log p(\mathbf{x})
+  \log p(x)
   &=
   \text{KL}(
-  q(\mathbf{z}\;;\;\lambda)
+  q(z\;;\;\lambda)
   \;\|\;
-  p(\mathbf{z} \mid \mathbf{x})
+  p(z \mid x)
   )\\
   &\quad+\;
-  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
-  \log p(\mathbf{x}, \mathbf{z})
+  \log p(x, z)
   -
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big]
 \end{align*}
 where the left hand side is the logarithm of the marginal likelihood
-$p(\mathbf{x}) = \int p(\mathbf{x}, \mathbf{z}) \text{d}\mathbf{z}$,
-also known as the model evidence. (Try deriving this using Bayes'
-rule!)
+$p(x) = \int p(x,z) \text{d}z$, also known as the model evidence. (Try
+deriving this using Bayes' rule!)
 
-The evidence is a constant with respect to the variational parameters
-$\lambda$, so we can minimize $\text{KL}(q\|p)$ by instead maximizing
+The evidence is a constant with respect to the variational parameters $\lambda$,
+so we can minimize $\text{KL}(q\|p)$ by instead maximizing
 the Evidence Lower BOund,
 \begin{align*}
   \text{ELBO}(\lambda)
   &=\;
-  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \mathbb{E}_{q(z\;;\;\lambda)}
   \big[
-  \log p(\mathbf{x}, \mathbf{z})
+  \log p(x, z)
   -
-  \log q(\mathbf{z}\;;\;\lambda)
+  \log q(z\;;\;\lambda)
   \big].
 \end{align*}
-In the ELBO, both $p(\mathbf{x}, \mathbf{z})$ and
-$q(\mathbf{z}\;;\;\lambda)$ are tractable. The optimization problem we
-seek to solve becomes
+In the ELBO, both $p(x,z)$ and $q(z\;;\;\lambda)$ are
+tractable. The optimization problem we seek to solve becomes
 \begin{align*}
   \lambda^*
   &=
@@ -79,13 +75,13 @@ What does maximizing the ELBO do? Splitting the ELBO reveals a trade-off
 \begin{align*}
   \text{ELBO}(\lambda)
   &=\;
-  \mathbb{E}_{q(\mathbf{z} \;;\; \lambda)}[\log p(\mathbf{x}, \mathbf{z})]
-  - \mathbb{E}_{q(\mathbf{z} \;;\; \lambda)}[\log q(\mathbf{z}\;;\;\lambda)],
+  \mathbb{E}_{q(z \;;\; \lambda)}[\log p(x, z)]
+  - \mathbb{E}_{q(z \;;\; \lambda)}[\log q(z\;;\;\lambda)],
 \end{align*}
 where the first term represents an energy and the second term
 (including the minus sign) represents the entropy of $q$.
 The energy encourages $q$ to focus probability mass where the
-model puts high probability, $p(\mathbf{x}, \mathbf{z})$.
+model puts high probability, $p(x, z)$.
 The entropy encourages $q$ to spread probability mass to avoid
 concentrating to one location.
 
