@@ -27,12 +27,13 @@ Define the prior on the weights and biases $\mathbf{z}$ to be the standard norma
 Let's build the model in Edward. We define a 3-layer Bayesian neural
 network with $\tanh$ nonlinearities.
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 def neural_network(x):
     h = tf.tanh(tf.matmul(x, W_0) + b_0)
     h = tf.tanh(tf.matmul(h, W_1) + b_1)
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
-
 
 N = 40  # number of data ponts
 D = 1   # number of features

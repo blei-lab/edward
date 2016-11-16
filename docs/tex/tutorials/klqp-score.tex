@@ -12,11 +12,11 @@ We seek to maximize the ELBO,
   \arg \max_\lambda \text{ELBO}(\lambda)\\
   &=\;
   \arg \max_\lambda\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
+  \log q(\mathbf{z}\;;\;\lambda)
   \big],
 \end{align*}
 using a ``black box'' algorithm. This means generically inferring the
@@ -31,11 +31,11 @@ objectives like the ELBO. The idea is to calculate its gradient
   \text{ELBO}(\lambda)
   &=
   \nabla_\lambda\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
+  \log q(\mathbf{z}\;;\;\lambda)
   \big],
 \end{align*}
 and update the current set of parameters proportional to the gradient.
@@ -46,20 +46,20 @@ logarithms to write the gradient as
   \nabla_\lambda\;
   \text{ELBO}(\lambda)
   &=\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \nabla_\lambda \log q(z\;;\;\lambda)
+  \nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)
   \:
   \big(
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
+  \log q(\mathbf{z}\;;\;\lambda)
   \big)
   \big].
 \end{align*}
 The gradient of the ELBO is an expectation over the variational
-model $q(z\;;\;\lambda)$; the only new ingredient it requires is the
-\emph{score function} $\nabla_\lambda \log q(z\;;\;\lambda)$
+model $q(\mathbf{z}\;;\;\lambda)$; the only new ingredient it requires is the
+\emph{score function} $\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)$
 \citep{paisley2012variational,ranganath2014black}.
 
 Edward uses automatic differentiation, specifically with TensorFlow's
@@ -71,8 +71,8 @@ efficient to distribute.
 We can use Monte Carlo integration to obtain noisy estimates of both the ELBO
 and its gradient. The basic procedure follows these steps:
 \begin{enumerate}
-  \item draw $S$ samples $\{z_s\}_1^S \sim q(z\;;\;\lambda)$,
-  \item evaluate the argument of the expectation using $\{z_s\}_1^S$, and
+  \item draw $S$ samples $\{\mathbf{z}_s\}_1^S \sim q(\mathbf{z}\;;\;\lambda)$,
+  \item evaluate the argument of the expectation using $\{\mathbf{z}_s\}_1^S$, and
   \item compute the empirical mean of the evaluated quantities.
 \end{enumerate}
 
@@ -85,12 +85,12 @@ A Monte Carlo estimate of the gradient is then
   \sum_{s=1}^{S}
   \big[
   \big(
-  \log p(x, z_s)
+  \log p(\mathbf{x}, \mathbf{z}_s)
   -
-  \log q(z_s\;;\;\lambda)
+  \log q(\mathbf{z}_s\;;\;\lambda)
   \big)
   \:
-  \nabla_\lambda \log q(z_s\;;\;\lambda)
+  \nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)
   \big].
 \end{align*}
 This is an unbiased estimate of the actual gradient of the ELBO.
@@ -147,8 +147,8 @@ The method returns an object whose automatic differentiation is the
 score function gradient of the ELBO. The TensorFlow function
 \texttt{tf.stop_gradient()} tells the computational graph to stop
 traversing nodes to propagate gradients. In this case,
-the only gradients taken are $\nabla_\lambda \log q(z_s\;;\;\lambda)$,
-one for each sample $z_s$. We multiply it by \texttt{losses}
+the only gradients taken are $\nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)$,
+one for each sample $\mathbf{z}_s$. We multiply it by \texttt{losses}
 element-wise and return the mean.
 
 There is a nuance here. TensorFlow's optimizers are configured to

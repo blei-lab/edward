@@ -12,12 +12,12 @@ as classification error and mean absolute error.
 Formally, point prediction in probabilistic models is given by
 taking the mean of the posterior predictive distribution,
 \begin{align*}
-  p(x_\text{new} \mid x)
+  p(\mathbf{x}_\text{new} \mid \mathbf{x})
   &=
   \int
-  p(x_\text{new} \mid z)
-  p(z \mid x)
-  \text{d} z.
+  p(\mathbf{x}_\text{new} \mid \mathbf{z})
+  p(\mathbf{z} \mid \mathbf{x})
+  \text{d} \mathbf{z}.
 \end{align*}
 The model's posterior predictive can be used to generate new data
 given past observations and can also make predictions on new data
@@ -67,31 +67,5 @@ See the \href{/api/criticism}{criticism API} for further details.
 An example of point-based evaluation is in the
 \href{/tutorials/supervised-regression}{supervised learning
 (regression)} tutorial.
-
-\subsubsection{Implementation (model wrappers)}
-
-For model wrappers, Edward implements point-based evaluations through
-the \texttt{predict()} method in the class object. It predicts
-the label given samples from the posterior $p(z \mid x)$, i.e., it is
-the mean of $p(x_\text{new} \mid z)$ for a posterior sample.
-\begin{lstlisting}[language=Python]
-class BayesianLinearRegression:
-  ...
-  def predict(self, xs, zs):
-    """Return a prediction for each data point, via the likelihood's
-    mean."""
-    x = xs['x']
-    w, b = zs['w'], zs['b']
-    return ed.dot(x, w) + b
-
-model = BayesianLinearRegression()
-\end{lstlisting}
-Examples of evaluation on model wrappers are
-\begin{lstlisting}[language=Python]
-ed.evaluate('categorical_accuracy', data={'y': y_train, 'x': x_train},
-            latent_vars={'z': qz}, model_wrapper=model)
-ed.evaluate('mean_absolute_error', data={'y': y_train, 'x': x_train},
-            latent_vars={'z': qz}, model_wrapper=model)
-\end{lstlisting}
 
 \subsubsection{References}\label{references}

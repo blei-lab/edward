@@ -73,12 +73,6 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   >>> # here, `x_ph` is any features the model is defined with respect to,
   >>> # and `y_post` is the posterior predictive distribution
   >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
-  >>>
-  >>> # criticism for model wrappers
-  >>> evaluate('log_likelihood', data={'x': x_train},
-  ...          latent_vars={'z': qz}, model_wrapper=model)
-  >>> evaluate('binary_accuracy', data={'y': y_train, 'x': x_train},
-  ...          latent_vars={'z': qz}, model_wrapper=model)
   """
   sess = get_session()
   # Create feed_dict for data placeholders that the model conditions

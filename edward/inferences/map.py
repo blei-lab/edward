@@ -53,9 +53,8 @@ class MAP(VariationalInference):
       Collection of random variables to perform inference on. If
       list, each random variable will be implictly optimized
       using a ``PointMass`` random variable that is defined
-      internally (with support matching each random variable).
-      If dictionary, each random variable must be a ``PointMass``
-      random variable.
+      internally (with unconstrained support). If dictionary, each
+      random variable must be a ``PointMass`` random variable.
 
     Examples
     --------
@@ -66,26 +65,15 @@ class MAP(VariationalInference):
     >>> qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
     >>> MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
-    We also automate the specification of ``PointMass`` distributions
-    (with matching support), so one can pass in a list of latent
-    variables instead:
+    We also automate the specification of ``PointMass`` distributions,
+    so one can pass in a list of latent variables instead:
 
     >>> MAP([beta], data)
     >>> MAP([pi, mu, sigma], data)
 
-    However, for model wrappers, the list can only have one element:
-
-    >>> MAP(['z'], data, model_wrapper)
-
-    For example, the following is not supported:
-
-    >>> MAP(['pi', 'mu', 'sigma'], data, model_wrapper)
-
-    This is because internally with model wrappers, we have no way
-    of knowing the dimensions in which to optimize each
-    distribution; further, we do not know their support. For more
-    than one random variable, or for constrained support, one must
-    explicitly pass in the point mass distributions.
+    Currently, MAP can only instantiate ``PointMass`` random variables
+    with unconstrained support. To constrain their support, one must
+    manually pass in the ``PointMass`` family.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):

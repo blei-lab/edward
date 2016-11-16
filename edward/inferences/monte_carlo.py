@@ -24,9 +24,8 @@ class MonteCarlo(Inference):
       Collection of random variables to perform inference on. If
       list, each random variable will be implictly approximated
       using a ``Empirical`` random variable that is defined
-      internally (with support matching each random variable).
-      If dictionary, each random variable must be a ``Empirical``
-      random variable.
+      internally (with unconstrained support). If dictionary, each
+      random variable must be a ``Empirical`` random variable.
     data : dict, optional
       Data dictionary which binds observed variables (of type
       `RandomVariable`) to their realizations (of type `tf.Tensor`).
@@ -60,14 +59,7 @@ class MonteCarlo(Inference):
     >>> MonteCarlo([pi, mu, sigma], data)
 
     It defaults to Empirical random variables with 10,000 samples for
-    each dimension. However, for model wrappers, lists are not
-    supported, e.g.,
-
-    >>> MonteCarlo(['z'], data, model_wrapper)
-
-    This is because internally with model wrappers, we have no way of
-    knowing the dimensions in which to infer each latent variable. One
-    must explicitly pass in the Empirical random variables.
+    each dimension.
 
     Notes
     -----
