@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
+from scipy.stats import norm
 
 
 def build_toy_dataset(N, noise_std=0.5):
