@@ -23,18 +23,19 @@ x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 During inference, we will store them in TensorFlow variables to
 prevent copying data more than once in memory. As an example, see the
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
-{Bayesian neural network} script.
+\href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
+{getting started} script.
 
 \textbf{Feeding.}
 Manual code provides the data when running each step of inference.
 This setting provides the most fine control which is useful for
 experimentation.
 
-Represent the data as TensorFlow placeholders.
+Represent the data as TensorFlow placeholders, which are nodes in the
+graph that can be fed at runtime.
 
 \begin{lstlisting}[language=Python]
-x_data = tf.placeholder(tf.float32, [100, 25])
+x_data = tf.placeholder(tf.float32, [100, 25])  # tensor of shape (100, 25)
 \end{lstlisting}
 
 During inference, the user must manually feed the placeholders. At each
