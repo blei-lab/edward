@@ -106,7 +106,8 @@
 <p>We define a TensorFlow placeholder <code>x_ph</code> for the neural network’s input, which is a batch of data points.</p>
 <pre class="python" language="Python"><code>x_ph = tf.placeholder(tf.float32, [M, 28 * 28])</code></pre>
 <p>We build a neural network using Keras. It takes a 28 by 28 pixel image and outputs a <span class="math inline">\(10\)</span>-dimensional output, one for the mean (<code>mu</code>) and one for the standard deviation (<code>sigma</code>).</p>
-<pre class="python" language="Python"><code>from keras.layers import Dense
+<pre class="python" language="Python"><code>from edward.models import Normal
+from keras.layers import Dense
 
 hidden = Dense(256, activation=&#39;relu&#39;)(x_ph)
 qz = Normal(mu=Dense(10)(hidden),

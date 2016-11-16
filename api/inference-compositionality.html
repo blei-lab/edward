@@ -106,7 +106,9 @@
 <p>We outline how to write popular classes of compositional inferences using Edward: hybrid algorithms and message passing algorithms. We use the running example of a mixture model.</p>
 <h3 id="hybrid-algorithms">Hybrid algorithms</h3>
 <p>Hybrid algorithms leverage different inferences for each latent variable in the posterior. As an example, we demonstrate variational EM, with an approximate E-step over local variables and an M-step over global variables. We alternate with one update of each <span class="citation">(Neal &amp; Hinton, 1993)</span>.</p>
-<pre class="python" language="Python"><code>qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
+<pre class="python" language="Python"><code>from edward.models import Categorical, PointMass
+
+qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
 inference_e = ed.VariationalInference({z: qz}, data={x: x_data, beta: qbeta})
@@ -119,7 +121,9 @@ for _ in range(10000):
 <p>This extends to many algorithms: for example, exact EM for exponential families; contrastive divergence <span class="citation">(Hinton, 2002)</span>; pseudo-marginal and ABC methods <span class="citation">(Andrieu &amp; Roberts, 2009)</span>; Gibbs sampling within variational inference <span class="citation">(Wang &amp; Blei, 2012)</span>; Laplace variational inference <span class="citation">(Wang &amp; Blei, 2013)</span>; and structured variational auto-encoders <span class="citation">(Johnson, Duvenaud, Wiltschko, Datta, &amp; Adams, 2016)</span>.</p>
 <h3 id="message-passing-algorithms">Message passing algorithms</h3>
 <p>Message passing algorithms operate on the posterior distribution using a collection of local inferences <span class="citation">(Koller &amp; Friedman, 2009)</span>. As an example, we demonstrate expectation propagation. We split a mixture model to be over two random variables <code>x1</code> and <code>x2</code> along with their latent mixture assignments <code>z1</code> and <code>z2</code>.</p>
-<pre class="python" language="Python"><code>N1 = 1000  # number of data points in first data set
+<pre class="python" language="Python"><code>from edward.models import Categorical, Normal
+
+N1 = 1000  # number of data points in first data set
 N2 = 2000  # number of data points in second data set
 D = 2  # data dimension
 K = 5  # number of clusters
