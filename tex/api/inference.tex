@@ -61,9 +61,9 @@ inference.finalize()
 \end{lstlisting}
 
 \texttt{initialize()} builds the algorithm's update rules
-for $\lambda$ (computational graph);
+(computational graph) for $\lambda$;
 \texttt{initialize_all_variables()} initializes $\lambda$
-(all TensorFlow variables in the graph);
+(TensorFlow variables in the graph);
 \texttt{update()} runs the graph once to update
 $\lambda$, which is called in a loop until convergence;
 \texttt{finalize()} runs any computation as the algorithm

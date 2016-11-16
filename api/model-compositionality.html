@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Composing Random Variables</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3" href="/api/data">Data</a>
+<a class="button3 button-primary" href="/api/model">Model</a>
+<a class="button3" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+</div>
+<div class="row">
+<a class="button4 button-primary" href="/api/model-compositionality">Compositionality</a>
+<a class="button4" href="/api/model-wrappers">Wrappers</a>
+</div>
+</div>
+<h3 id="composing-random-variables">Composing Random Variables</h3>
+<p>Core to Edward’s design is compositionality. Compositionality enables fine control of modeling, where models are represented as a collection of random variables.</p>
+<p>We outline how to write popular classes of models using Edward: directed graphical models, neural networks, Bayesian nonparametrics, and probabilistic programs. For more examples, see the <a href="/tutorials/">model tutorials</a>.</p>
+<h3 id="directed-graphical-models">Directed Graphical Models</h3>
+<p>Graphical models are a rich formalism for specifying probability distributions <span class="citation">(Koller &amp; Friedman, 2009)</span>. In Edward, directed edges in a graphical model are implicitly defined when random variables are composed with one another. We illustrate with a Beta-Bernoulli model, <span class="math display">\[p(\mathbf{x}, \theta) =
+\text{Beta}(\theta\mid 1, 1)
+\prod_{n=1}^{50} \text{Bernoulli}(x_n\mid \theta),\]</span> where <span class="math inline">\(\theta\)</span> is a latent probability shared across the 50 data points <span class="math inline">\(\mathbf{x}\in\{0,1\}^{50}\)</span>.</p>
+<pre language="python"><code>from edward.models import Bernoulli, Beta
+
+theta = Beta(a=1.0, b=1.0)
+x = Bernoulli(p=tf.ones(50) * theta)</code></pre>
+<p><img alt="image" src="/images/beta_bernoulli.png" width="450"/><br/>
+<span><em>Computational graph for a Beta-Bernoulli program.</em> </span></p>
+<p>The random variable <code>x</code> (<span class="math inline">\(\mathbf{x}\)</span>) is 50-dimensional, parameterized by the random tensor <span class="math inline">\(\theta^*\)</span>. Fetching the object <code>x.value()</code> (<span class="math inline">\(\mathbf{x}^*\)</span>) from session runs the graph: it simulates from the generative process and outputs a binary vector of <span class="math inline">\(50\)</span> elements.</p>
+<p>With computational graphs, it is also natural to build mutable states within the probabilistic program. As a typical use of computational graphs, such states can define model parameters, that is, parameters that we will always compute point estimates for and not be uncertain about. In TensorFlow, this is given by a <code>tf.Variable</code>.</p>
+<pre language="python"><code>from edward.models import Bernoulli
+
+theta = tf.Variable(0.0)
+x = Bernoulli(p=tf.ones(50) * tf.sigmoid(theta))</code></pre>
+<p>Another use case of mutable states is for building discriminative models <span class="math inline">\(p(\mathbf{y}\mid\mathbf{x})\)</span>, where <span class="math inline">\(\mathbf{x}\)</span> are features that are input as training or test data. The program can be written independent of the data, using a mutable state (<code>tf.placeholder</code>) for <span class="math inline">\(\mathbf{x}\)</span> in its graph. During training and testing, we feed the placeholder the appropriate values. (See the <a href="/tutorials/bayesian-linear-regression">Bayesian linear regression</a> tutorial as an example.)</p>
+<h3 id="neural-networks">Neural Networks</h3>
+<p>As Edward uses TensorFlow, it is easy to construct neural networks for probabilistic modeling <span class="citation">(Rumelhart, McClelland, &amp; Group, 1988)</span>. For example, one can specify stochastic neural networks <span class="citation">(Neal, 1990)</span>; see the <a href="/tutorials/bayesian-neural-network">Bayesian neural network tutorial</a> for details.</p>
+<p>High-level libraries such as <a href="http://keras.io">Keras</a> and <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> can be used to easily construct deep neural networks. We illustrate this with a deep generative model over binary data <span class="math inline">\(\{\mathbf{x}_n\}\in\{0,1\}^{N\times 28*28}\)</span>.</p>
+<p><img alt="image" src="/images/decoder.png" width="250"/></p>
+<p><span><em>Graphical representation of a deep generative model.</em></span></p>
+<p>The model specifies a generative process where for each <span class="math inline">\(n=1,\ldots,N\)</span>, <span class="math display">\[\begin{aligned}
+\mathbf{z}_n &amp;\sim \text{Normal}(\mathbf{z} \mid \mathbf{0}, I), \\[1.5ex]
+\mathbf{x}_n\mid \mathbf{z}_n &amp;\sim \text{Bernoulli}(\mathbf{x}_n\mid
+p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),\end{aligned}\]</span> where the latent space is <span class="math inline">\(\mathbf{z}_n\in\mathbb{R}^d\)</span> and the likelihood is parameterized by a neural network <span class="math inline">\(\mathrm{NN}\)</span> with parameters <span class="math inline">\(\theta\)</span>. We will use a two-layer neural network with a fully connected hidden layer of 256 units (with ReLU activation) and whose output is <span class="math inline">\(28*28\)</span>-dimensional. The output will be unconstrained, parameterizing the logits of the Bernoulli likelihood.</p>
+<p>With TensorFlow Slim, we write this model as follows:</p>
+<pre language="python"><code>from edward.models import Bernoulli, Normal
+from tensorflow.contrib import slim
+
+z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+h = slim.fully_connected(z, 256)
+x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))</code></pre>
+<p>With Keras, we write this model as follows:</p>
+<pre language="python"><code>from edward.models import Bernoulli, Normal
+from keras.layers import Dense
+
+z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+h = Dense(256, activation='relu')(z.value())
+x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
+<p>Keras and TensorFlow Slim automatically manage TensorFlow variables, which serve as parameters of the high-level neural network layers. This saves the trouble of having to manage them manually. However, note that neural network parameters defined this way always serve as model parameters. That is, the parameters are not exposed to the user so we cannot be Bayesian about them with prior distributions.</p>
+<h3 id="bayesian-nonparametrics">Bayesian Nonparametrics</h3>
+<p>Bayesian nonparametrics enable rich probability models by working over an infinite-dimensional parameter space <span class="citation">(Hjort, Holmes, Müller, &amp; Walker, 2010)</span>. Edward supports the two typical approaches to handling these models: collapsing the infinite-dimensional space and lazily defining the infinite-dimensional space.</p>
+<p>For the collapsed approach, see the <a href="/tutorials/gp-classification">Gaussian process classification</a> tutorial as an example. We specify distributions over the function evaluations of the Gaussian process, where the Gaussian process is implicitly marginalized out. This approach is also useful for Poisson process models.</p>
+<p>To work directly on the infinite-dimensional space, one can leverage random variables with <a href="https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html">control flow operations</a> in TensorFlow. At runtime, the control flow will lazily define any parameters in the space necessary in order to generate samples. As an example, we use a while loop to define a <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py">Dirichlet process</a> according to its stick breaking representation.</p>
+<h3 id="probabilistic-programs">Probabilistic Programs</h3>
+<p>Probabilistic programs greatly expand the scope of probabilistic models <span class="citation">(Goodman, Mansinghka, Roy, Bonawitz, &amp; Tenenbaum, 2012)</span>. Formally, Edward is a Turing-complete probabilistic programming language. This means that Edward can represent any computable probability distribution.</p>
+<p><img alt="image" src="/images/dynamic_graph.png" width="450"/></p>
+<p><span><em>Computational graph for a probabilistic program with stochastic control flow.</em></span></p>
+<p>Random variables can be composed with control flow operations, enabling probabilistic programs with stochastic control flow. Stochastic control flow defines dynamic conditional dependencies, known in the literature as contingent or existential dependencies <span class="citation">(Mansinghka, Selsam, &amp; Perov, 2014; Wu, Li, Russell, &amp; Bodik, 2016)</span>. See above, where <span class="math inline">\(\mathbf{x}\)</span> may or may not depend on <span class="math inline">\(\mathbf{a}\)</span> for a given execution.</p>
+<p>Stochastic control flow produces difficulties for algorithms that leverage the graph structure; the relationship of conditional dependencies changes across execution traces. Importantly, the computational graph provides an elegant way of teasing out static conditional dependence structure (<span class="math inline">\(\mathbf{p}\)</span>) from dynamic dependence structure (<span class="math inline">\(\mathbf{a})\)</span>. We can perform model parallelism over the static structure with GPUs and batch training, and use generic computations to handle the dynamic structure.</p>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-goodman2012church">
+<p>Goodman, N., Mansinghka, V., Roy, D. M., Bonawitz, K., &amp; Tenenbaum, J. B. (2012). Church: a language for generative models. In <em>Uncertainty in artificial intelligence</em>.</p>
+</div>
+<div id="ref-hjort2010bayesian">
+<p>Hjort, N. L., Holmes, C., Müller, P., &amp; Walker, S. G. (2010). <em>Bayesian nonparametrics</em> (Vol. 28). Cambridge University Press.</p>
+</div>
+<div id="ref-koller2009probabilistic">
+<p>Koller, D., &amp; Friedman, N. (2009). <em>Probabilistic graphical models: Principles and techniques</em>. MIT press.</p>
+</div>
+<div id="ref-mansinghka2014venture">
+<p>Mansinghka, V., Selsam, D., &amp; Perov, Y. (2014). Venture: A higher-order probabilistic programming platform with programmable inference. <em>ArXiv.org</em>.</p>
+</div>
+<div id="ref-neal1990learning">
+<p>Neal, R. M. (1990). <em>Learning Stochastic Feedforward Networks</em>.</p>
+</div>
+<div id="ref-rumelhart1988parallel">
+<p>Rumelhart, D. E., McClelland, J. L., &amp; Group, P. R. (1988). <em>Parallel distributed processing</em> (Vol. 1). IEEE.</p>
+</div>
+<div id="ref-wu2016swift">
+<p>Wu, Y., Li, L., Russell, S., &amp; Bodik, R. (2016). Swift: Compiled inference for probabilistic programming languages. <em>ArXiv Preprint ArXiv:1606.09242</em>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
