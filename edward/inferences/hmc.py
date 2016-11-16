@@ -123,26 +123,26 @@ class HMC(MonteCarlo):
     """
     if self.model_wrapper is None:
       self.scope_iter += 1
+      scope = 'inference_' + str(id(self)) + '/' + str(self.scope_iter)
       # Form dictionary in order to replace conditioning on prior or
       # observed variable with conditioning on a specific value.
       dict_swap = z_sample.copy()
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='conditional_' + str(self.scope_iter))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       log_joint = 0.0
       for z in six.iterkeys(self.latent_vars):
-        z_copy = copy(z, dict_swap, scope='prior_' + str(self.scope_iter))
+        z_copy = copy(z, dict_swap, scope=scope)
         log_joint += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap,
-                        scope='likelihood_' + str(self.scope_iter))
+          x_copy = copy(x, dict_swap, scope=scope)
           log_joint += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = self.data

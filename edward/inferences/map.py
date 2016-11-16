@@ -130,14 +130,15 @@ class MAP(VariationalInference):
           else:
             dict_swap[x] = qx
 
+      scope = 'inference_' + str(id(self))
       p_log_prob = 0.0
       for z in six.iterkeys(self.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(0))
+        z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(0))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_prob += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = self.data

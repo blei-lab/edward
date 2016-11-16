@@ -312,10 +312,11 @@ def build_reparam_loss(inference):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(self)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
       q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_sample[z]))
 
@@ -326,18 +327,18 @@ def build_reparam_loss(inference):
       for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='inference_' + str(s))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
+        z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
@@ -370,10 +371,11 @@ def build_reparam_kl_loss(inference):
   """
   p_log_lik = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(self)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
 
     if inference.model_wrapper is None:
@@ -383,14 +385,14 @@ def build_reparam_kl_loss(inference):
       for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='inference_' + str(s))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
@@ -428,10 +430,11 @@ def build_reparam_entropy_loss(inference):
   """
   p_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(self)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
 
     if inference.model_wrapper is None:
@@ -441,18 +444,18 @@ def build_reparam_entropy_loss(inference):
       for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='inference_' + str(s))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
+        z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
@@ -477,10 +480,11 @@ def build_score_loss_and_gradients(inference, var_list):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(self)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
       q_log_prob[s] += tf.reduce_sum(
           qz.log_prob(tf.stop_gradient(z_sample[z])))
@@ -492,18 +496,18 @@ def build_score_loss_and_gradients(inference, var_list):
       for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='inference_' + str(s))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
+        z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
       for x in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
@@ -539,10 +543,11 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   p_log_lik = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(self)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
       q_log_prob[s] += tf.reduce_sum(
           qz.log_prob(tf.stop_gradient(z_sample[z])))
@@ -554,14 +559,14 @@ def build_score_kl_loss_and_gradients(inference, var_list):
       for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='inference_' + str(s))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
@@ -601,10 +606,11 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(self)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
       q_log_prob[s] += tf.reduce_sum(
           qz.log_prob(tf.stop_gradient(z_sample[z])))
@@ -616,18 +622,18 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
       for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='inference_' + str(s))
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
+        z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
+          x_copy = copy(x, dict_swap, scope=scope)
           p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
