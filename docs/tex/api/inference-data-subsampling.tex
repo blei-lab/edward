@@ -88,7 +88,7 @@ so we can change the data at each step. (Alternatively,
 \href{/api/data}{batch tensors} can be used.)
 
 \begin{lstlisting}[language=Python]
-x_ph = ed.placeholder(tf.float32, [M])
+x_ph = tf.placeholder(tf.float32, [M])
 inference_global = ed.KLqp({beta: qbeta}, data={x: x_ph, z: qz})
 inference_local = ed.KLqp({z: qz}, data={x: x_ph, beta: qbeta})
 \end{lstlisting}
@@ -139,7 +139,7 @@ set of parameters and index them into the local posterior factors.
 
 \begin{lstlisting}[language=Python]
 qz_variables = tf.Variable(tf.zeros([N, K]))
-idx_ph = ed.placeholder(tf.int32, [M])
+idx_ph = tf.placeholder(tf.int32, [M])
 qz = Categorical(logits=tf.gather(qz_variables, idx_ph))
 \end{lstlisting}
 

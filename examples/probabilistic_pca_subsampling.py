@@ -59,7 +59,7 @@ qw = Normal(mu=qw_variables[0], sigma=tf.nn.softplus(qw_variables[1]))
 
 qz_variables = [tf.Variable(tf.random_normal([N, K])),
                 tf.Variable(tf.random_normal([N, K]))]
-idx_ph = ed.placeholder(tf.int32, M)
+idx_ph = tf.placeholder(tf.int32, M)
 qz = Normal(
     mu=tf.transpose(tf.gather(qz_variables[0], idx_ph)),
     sigma=tf.nn.softplus(tf.transpose(tf.gather(qz_variables[1], idx_ph))))
@@ -75,16 +75,17 @@ inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
                        var_list=qw_variables,
                        n_samples=5)
 
+sess = ed.get_session()
 init = tf.initialize_all_variables()
 init.run()
 
-for _ in range(2000):
+for t in range(inference_w.n_iter):
   x_batch, idx_batch = next_batch(M)
   for _ in range(5):
     inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
+
   info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
   inference_w.print_progress(info_dict)
-
-sess = ed.get_session()
-print("Inferred principal axes:")
-print(sess.run(qw.mean()))
+  if t % 100 == 0:
+    print("Inferred principal axes:")
+    print(sess.run(qw.mean()))
