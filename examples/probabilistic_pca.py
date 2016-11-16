@@ -40,15 +40,15 @@ x_train = build_toy_dataset(N, D, K)
 # MODEL
 
 w = Normal(mu=tf.zeros([D, K]), sigma=10.0 * tf.ones([D, K]))
-z = Normal(mu=tf.zeros([K, N]), sigma=tf.ones([K, N]))
-x = Normal(mu=tf.matmul(w, z), sigma=tf.ones([D, N]))
+z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
+x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))
 
 # INFERENCE
 
 qw = Normal(mu=tf.Variable(tf.random_normal([D, K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, K]))))
-qz = Normal(mu=tf.Variable(tf.random_normal([K, N])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([K, N]))))
+qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
+            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
 
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 

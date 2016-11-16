@@ -56,7 +56,7 @@ training in mind, beyond the setting where all computing is on CPUs
 or where data must fit in memory.
 
 \textbf{Black box inference.}
-Black box algorithms are typically Monte Carlo methods, and
+Black box algorithms are typically based on Monte Carlo methods, and
 by design make very few assumptions about the
 model \citep{metropolis1949monte,hastings1970monte}.
 Our motivation as outlined above presents a new set of
@@ -80,10 +80,7 @@ learning: as of this date, this includes
 \href{http://rll.berkeley.edu/cgt/}{Computational Graph Toolkit}, and
 \href{https://github.com/stan-dev/math}{Stan Math Library}. These are
 incredible tools which Edward employs as a backend. In
-terms of abstraction, Edward sits at one level higher. For example,
-we chose to use TensorFlow among the bunch due to Python as our language
-of choice for machine learning research and as an investment in Google's
-massive engineering.
+terms of abstraction, Edward sits one level higher.
 
 \textbf{High-level deep learning libraries.}
 Neural network libraries such as

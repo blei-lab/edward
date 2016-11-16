@@ -30,7 +30,7 @@ Define the prior on each component $\mathbf{\mu}_k\in\mathbb{R}^D$ to be
 \begin{align*}
   p(\mathbf{\mu}_k)
   &=
-  \text{Normal}(\mathbf{\mu}_k \mid 0, \sigma^2\mathbf{I}).
+  \text{Normal}(\mathbf{\mu}_k \mid \mathbf{0}, \sigma^2\mathbf{I}).
 \end{align*}
 
 Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
@@ -84,6 +84,11 @@ which is based on the identity
 \end{align*}
 Subtracting the maximum value before taking the log-sum-exp leads to
 more numerically stable output.
+
+\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
+Reimplementing this under Edward's native language is currently in
+progress.}
+
 \begin{lstlisting}[language=Python]
 class MixtureGaussian:
   """

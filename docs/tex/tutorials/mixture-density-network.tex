@@ -59,6 +59,10 @@ data = {'X': X, 'y': y}
 
 \subsubsection{Model}
 
+\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
+Reimplementing this under Edward's native language is currently in
+progress.}
+
 We define a class that can be used to construct MDNs. Here we use a
 mixture of normal distributions parameterized by a feedforward
 network. In other words, the membership probabilities and
