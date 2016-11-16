@@ -103,7 +103,7 @@
 </div>
 <h3 id="composing-inferences">Composing Inferences</h3>
 <p>Core to Edward’s design is compositionality. Compositionality enables fine control of inference, where we can write inference as a collection of separate inference programs.</p>
-<p>We outline how to write popular classes of compositional inferences using Edward: hybrid algorithms and message passing algorithms. We use the running example of a mixture model.</p>
+<p>We outline how to write popular classes of compositional inferences using Edward: hybrid algorithms and message passing algorithms. We use the running example of a mixture model with latent mixture assignments <code>z</code>, latent cluster means <code>beta</code>, and observations <code>x</code>.</p>
 <h3 id="hybrid-algorithms">Hybrid algorithms</h3>
 <p>Hybrid algorithms leverage different inferences for each latent variable in the posterior. As an example, we demonstrate variational EM, with an approximate E-step over local variables and an M-step over global variables. We alternate with one update of each <span class="citation">(Neal &amp; Hinton, 1993)</span>.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, PointMass
