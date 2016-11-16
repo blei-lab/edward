@@ -101,7 +101,7 @@
 <p>Define the prior on the weights and biases <span class="math inline">\(\mathbf{z}\)</span> to be the standard normal <span class="math display">\[\begin{aligned}
   p(\mathbf{z})
   &amp;=
-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).\end{aligned}\]</span></p>
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward. We define a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
