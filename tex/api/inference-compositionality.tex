@@ -90,6 +90,10 @@ for _ in range(10000):
 We alternate updates for each local inference, where the global
 posterior factor $q(\beta)$ is shared across both inferences
 \citep{gelman2014expectation}.
+With TensorFlow's distributed training, compositionality
+enables \emph{distributed} message passing over a cluster with many
+workers. The computation can be further sped up with the use of GPUs
+via data and model parallelism.
 
 This extends to many algorithms: for example,
 classical message passing, which performs exact local inferences;
@@ -110,10 +114,5 @@ within a random variable itself. We cannot do local inferences when
 representing the random variable for all data points and their cluster
 membership as \texttt{x} and \texttt{z} rather than \texttt{x1},
 \texttt{x2}, \texttt{z1}, and \texttt{z2}.
-
-With TensorFlow's distributed training, note that compositionality
-enables \emph{distributed} message passing over a cluster with many
-workers. The computation can be further sped up with the use of GPUs
-via data and model parallelism.
 
 \subsubsection{References}\label{references}
