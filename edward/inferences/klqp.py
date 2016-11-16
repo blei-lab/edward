@@ -511,8 +511,7 @@ def build_score_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      z_log_prob = tf.reduce_sum(
-          qz.log_prob(tf.stop_gradient(z_sample[z])))
+      z_log_prob = tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
       if z in inference.scale:
         z_log_prob *= inference.scale[z]
 
@@ -586,8 +585,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      z_log_prob = tf.reduce_sum(
-          qz.log_prob(tf.stop_gradient(z_sample[z])))
+      z_log_prob = tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
       if z in inference.scale:
         z_log_prob *= inference.scale[z]
 
@@ -658,8 +656,7 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      z_log_prob = tf.reduce_sum(
-          qz.log_prob(tf.stop_gradient(z_sample[z])))
+      z_log_prob = tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
       if z in inference.scale:
         z_log_prob *= inference.scale[z]
 
