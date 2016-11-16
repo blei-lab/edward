@@ -312,7 +312,7 @@ def build_reparam_loss(inference):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
-    scope = 'inference_' + str(id(self)) + '/' + str(s)
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
@@ -371,7 +371,7 @@ def build_reparam_kl_loss(inference):
   """
   p_log_lik = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
-    scope = 'inference_' + str(id(self)) + '/' + str(s)
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
@@ -430,7 +430,7 @@ def build_reparam_entropy_loss(inference):
   """
   p_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
-    scope = 'inference_' + str(id(self)) + '/' + str(s)
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
@@ -480,7 +480,7 @@ def build_score_loss_and_gradients(inference, var_list):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
-    scope = 'inference_' + str(id(self)) + '/' + str(s)
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
@@ -543,7 +543,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   p_log_lik = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
-    scope = 'inference_' + str(id(self)) + '/' + str(s)
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
@@ -606,7 +606,7 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
-    scope = 'inference_' + str(id(self)) + '/' + str(s)
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
