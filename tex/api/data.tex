@@ -14,7 +14,7 @@ A constant or variable in the TensorFlow graph holds all the data.
 This setting is the fastest to work with and is recommended if the
 data fits in memory.
 
-Represent the data as TensorFlow tensors or NumPy arrays.
+Represent the data as NumPy arrays or TensorFlow tensors.
 
 \begin{lstlisting}[language=Python]
 x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
@@ -31,17 +31,18 @@ Manual code provides the data when running each step of inference.
 This setting provides the most fine control which is useful for
 experimentation.
 
-Represent the data as TensorFlow placeholders, which are nodes in the
-graph that can be fed at runtime.
+Represent the data as
+\href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html#feeding}{TensorFlow placeholders},
+which are nodes in the graph that are fed at runtime.
 
 \begin{lstlisting}[language=Python]
-x_data = tf.placeholder(tf.float32, [100, 25])  # tensor of shape (100, 25)
+x_data = tf.placeholder(tf.float32, [100, 25])  # placeholder of shape (100, 25)
 \end{lstlisting}
 
 During inference, the user must manually feed the placeholders. At each
-step of inference, bind the placeholders to realized values in a
-\texttt{feed_dict} dictionary argument within
-\texttt{inference.update(feed_dict={...})}. As an example, see the
+step, call \texttt{inference.update()} while
+passing in a \texttt{feed_dict} dictionary
+which binds placeholders to realized values as an argument. As an example, see the
 \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
 {variational auto-encoder} script.
 If the values do not change over inference updates, one can also bind
