@@ -21,7 +21,7 @@ x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 \end{lstlisting}
 
-During inference, we will store them in TensorFlow variables to
+During inference, we store them in TensorFlow variables internally to
 prevent copying data more than once in memory. As an example, see the
 \href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
 {getting started} script.

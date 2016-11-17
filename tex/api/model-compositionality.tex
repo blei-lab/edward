@@ -92,12 +92,12 @@ The model specifies a generative process where for each
 $n=1,\ldots,N$,
 %
 \begin{align*}
-\mathbf{z}_n &\sim \text{Normal}(\mathbf{z} \mid \mathbf{0}, I), \\[1.5ex]
+\mathbf{z}_n &\sim \text{Normal}(\mathbf{z}_n \mid \mathbf{0}, \mathbf{I}), \\[1.5ex]
 \mathbf{x}_n\mid \mathbf{z}_n &\sim \text{Bernoulli}(\mathbf{x}_n\mid
-p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),
+p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).
 \end{align*}
 %
-where the latent space is $\mathbf{z}_n\in\mathbb{R}^d$ and the
+The latent space is $\mathbf{z}_n\in\mathbb{R}^d$ and the
 likelihood is parameterized by a neural network $\mathrm{NN}$ with
 parameters $\theta$. We will use a two-layer neural network with a
 fully connected hidden layer of 256 units (with ReLU activation) and
@@ -144,7 +144,7 @@ infinite-dimensional space.
 For the collapsed approach, see the
 \href{/tutorials/gp-classification}{Gaussian process classification}
 tutorial as an example. We specify distributions over the function
-evaluations of the Gaussian process, where the Gaussian process is
+evaluations of the Gaussian process, and the Gaussian process is
 implicitly marginalized out. This approach is also useful for Poisson
 process models.
 
