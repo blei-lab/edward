@@ -116,67 +116,21 @@ plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
-<p><strong>Note: Model wrappers are deprecated since Edward v1.1.5. Reimplementing this under Edward’s native language is currently in progress.</strong></p>
 <p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="/tutorials/mixture-gaussian">Mixture of Gaussians tutorial</a>.</p>
 <p>Here we build the model in Edward using TensorFlow, and set the number of mixture components to be 2.</p>
-<pre class="python" language="Python"><code>class MixtureGaussian:
-  &quot;&quot;&quot;
-  Mixture of Gaussians
+<pre class="python" language="Python"><code>N = 500  # number of data points
+K = 2  # number of components
+D = 2  # dimensionality of data
 
-  p(x, z) = [ prod_{n=1}^N sum_{k=1}^K pi_k N(x_n; mu_k, sigma_k) ]
-            [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-            Dirichlet(pi; alpha)
+mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
+cat = Categorical(logits=tf.zeros([N, K]))
+components = [
+    MultivariateNormalDiag(mu=tf.ones([N, 1]) * tf.gather(mu, k),
+                           diag_stdev=tf.ones([N, 1]) * tf.gather(sigma, k))
+    for k in range(K)]
 
-  where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
-
-  Parameters
-  ----------
-  K : int
-    Number of mixture components.
-  D : float, optional
-    Dimension of the Gaussians.
-  &quot;&quot;&quot;
-  def __init__(self, K, D):
-    self.K = K
-    self.D = D
-    self.n_vars = (2 * D + 1) * K
-
-    self.a = 1.0
-    self.b = 1.0
-    self.c = 3.0
-    self.alpha = tf.ones([K])
-
-  def log_prob(self, xs, zs):
-    &quot;&quot;&quot;Return scalar, the log joint density log p(xs, zs).&quot;&quot;&quot;
-    x = xs[&#39;x&#39;]
-    pi, mus, sigmas = zs[&#39;pi&#39;], zs[&#39;mu&#39;], zs[&#39;sigma&#39;]
-    log_prior = dirichlet.logpdf(pi, self.alpha)
-    log_prior += tf.reduce_sum(norm.logpdf(mus, 0.0, self.c))
-    log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
-
-    # log-likelihood is
-    # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
-    # Create a K x N matrix, whose entry (k, n) is
-    # log pi_k + log N(x_n; mu_k, sigma_k).
-    N = get_dims(x)[0]
-    matrix = []
-    for k in range(self.K):
-      matrix += [tf.ones(N) * tf.log(pi[k]) +
-                 multivariate_normal_diag.logpdf(x,
-                 mus[(k * self.D):((k + 1) * self.D)],
-                 sigmas[(k * self.D):((k + 1) * self.D)])]
-
-    matrix = tf.pack(matrix)
-    # log_sum_exp() along the rows is a vector, whose nth
-    # element is the log-likelihood of data point x_n.
-    vector = log_sum_exp(matrix, 0)
-    # Sum over data points to get the full log-likelihood.
-    log_lik = tf.reduce_sum(vector)
-
-    return log_prior + log_lik
-
-
-model = MixtureGaussian(K=2, D=2)</code></pre>
+x = Mixture(cat=cat, components=components)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be a Dirichlet <span class="math inline">\(\times\)</span> fully factorized normal <span class="math inline">\(\times\)</span> fully factorized inverse Gamma.</p>
 <pre class="python" language="Python"><code>qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))

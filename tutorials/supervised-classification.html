@@ -124,6 +124,7 @@ y_train = df[subset, 0]</code></pre>
 
   return tf.pack(mat)
 
+
 X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)</code></pre>

@@ -5,7 +5,7 @@
 \subsubsection{Criticism}
 
 We can never validate whether a model is true. In practice, ``all
-models are wrong'' \citep{box1976science}. However, we can try to
+models are wrong''~\citep{box1976science}. However, we can try to
 uncover where the model goes wrong. Model criticism helps justify the
 model as an approximation or point to good directions for revising the
 model.
@@ -27,6 +27,9 @@ T = lambda xs, zs: tf.reduce_mean(xs[x])
 ed.ppc(T, data={x: x_data})
 \end{lstlisting}
 
+Criticism is defined simply with utility functions. They take random
+variables as input and output NumPy arrays.
+
 Here's an example. First, let's build a model $p(\mathbf{x},
 \mathbf{z}, \beta)$ and perform inference to obtain the posterior
 $p(\mathbf{z}, \beta\mid\mathbf{x})$.
@@ -43,7 +46,7 @@ qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
                sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
-inference = ed.KLqp({z: qz, beta: qbeta}, data={x: x_train})
+inference = ed.Inference({z: qz, beta: qbeta}, data={x: x_train})
 inference.run()
 \end{lstlisting}
 We then build the posterior predictive distribution
@@ -52,8 +55,8 @@ $p(\mathbf{x}_{\text{new}}\mid \mathbf{x})$.
 x_post = ed.copy(x, {z: qz, beta: qbeta})
 \end{lstlisting}
 The \texttt{copy} function builds the posterior predictive by copying
-the likelihood node \texttt{x} and swapping its dependence on the
-priors \texttt{z} and \texttt{beta} with dependence on the inferred
+the likelihood \texttt{x}, swapping out its dependence on the priors
+\texttt{z} and \texttt{beta} with dependence on the inferred
 posteriors \texttt{qz} and \texttt{qbeta}.
 
 Now we run some techniques:
@@ -95,7 +98,6 @@ from edward.models import Categorical
 # has N_test many data points
 qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
 
-# run local inference conditional on global factors
 inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
 inference_test.run()
 
@@ -110,8 +112,6 @@ criticism
 
 % \subsubsection{Developing new criticism techniques}
 
-% Criticism is defined simply with utility functions. They take random
-% variables as input and output NumPy arrays.
 % Criticism techniques are simply functions which take as input data,
 % the probability model and variational model (binded through a latent
 % variable dictionary), and any additional inputs.

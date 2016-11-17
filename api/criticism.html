@@ -96,7 +96,7 @@
 </div>
 </div>
 <h3 id="criticism">Criticism</h3>
-<p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model.</p>
+<p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model.</p>
 <p>Edward explores model criticism using</p>
 <ul>
 <li>point-based evaluations, such as mean squared error or classification accuracy</li>
@@ -107,6 +107,7 @@
 </ul>
 <pre class="python" language="Python"><code>T = lambda xs, zs: tf.reduce_mean(xs[x])
 ed.ppc(T, data={x: x_data})</code></pre>
+<p>Criticism is defined simply with utility functions. They take random variables as input and output NumPy arrays.</p>
 <p>Here’s an example. First, let’s build a model <span class="math inline">\(p(\mathbf{x},
 \mathbf{z}, \beta)\)</span> and perform inference to obtain the posterior <span class="math inline">\(p(\mathbf{z}, \beta\mid\mathbf{x})\)</span>.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, Normal
@@ -121,11 +122,11 @@ qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
                sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
-inference = ed.KLqp({z: qz, beta: qbeta}, data={x: x_train})
+inference = ed.Inference({z: qz, beta: qbeta}, data={x: x_train})
 inference.run()</code></pre>
 <p>We then build the posterior predictive distribution <span class="math inline">\(p(\mathbf{x}_{\text{new}}\mid \mathbf{x})\)</span>.</p>
 <pre class="python" language="Python"><code>x_post = ed.copy(x, {z: qz, beta: qbeta})</code></pre>
-<p>The <code>copy</code> function builds the posterior predictive by copying the likelihood node <code>x</code> and swapping its dependence on the priors <code>z</code> and <code>beta</code> with dependence on the inferred posteriors <code>qz</code> and <code>qbeta</code>.</p>
+<p>The <code>copy</code> function builds the posterior predictive by copying the likelihood <code>x</code>, swapping out its dependence on the priors <code>z</code> and <code>beta</code> with dependence on the inferred posteriors <code>qz</code> and <code>qbeta</code>.</p>
 <p>Now we run some techniques: <a href="/tutorials/point-evaluation"><code>evaluate</code></a> and <a href="/tutorials/ppc"><code>ppc</code></a>.</p>
 <pre class="python" language="Python"><code># log-likelihood performance
 ed.evaluate('log_likelihood', data={x_post: x_train})
@@ -153,7 +154,6 @@ ed.ppc(T, data={x: x_train})</code></pre>
 # has N_test many data points
 qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
 
-# run local inference conditional on global factors
 inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
 inference_test.run()
 

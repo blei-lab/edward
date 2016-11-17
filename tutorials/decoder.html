@@ -106,7 +106,7 @@
   \text{Bernoulli}(\mathbf{x}_n\mid p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).\end{aligned}\]</span> Probabilistic decoders are typically used alongside a standard normal prior over the code <span class="math display">\[\begin{aligned}
   p(\mathbf{z})
   &amp;=
-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward using Keras as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
 <pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
 from keras.layers import Dense
