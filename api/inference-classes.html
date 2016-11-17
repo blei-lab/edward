@@ -111,7 +111,7 @@
 ~
 \text{Normal}(\beta\mid \mathbf{0}, \mathbf{I}).\]</span></p>
 <h3 id="variational-inference">Variational Inference</h3>
-<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We build an approximating family, <span class="math display">\[\begin{aligned}
+<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We write an approximating family, <span class="math display">\[\begin{aligned}
 q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
 q(\mathbf{z};\pi) &amp;= \text{Categorical}(\mathbf{z};\pi),\end{aligned}\]</span> using TensorFlow variables to represent its parameters <span class="math inline">\(\lambda=\{\pi,\mu,\sigma\}\)</span>.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, Normal
@@ -143,7 +143,7 @@ qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
 qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
 
 inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
-<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{z}^{(t)}\)</span> at a time in the empirical approximation. Specific samplers determine the update rules; they can leverage gradients and graph structure, where applicable. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of <code>tf.Variable</code>s).</p>
+<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{z}^{(t)}\)</span> at a time in the empirical approximation. Specific Monte Carlo samplers determine the update rules; they can leverage gradients and graph structure, where applicable. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of <code>tf.Variable</code>s).</p>
 <h3 id="exact-inference">Exact Inference</h3>
 <p>The approach also extends to exact inference. We are developing a subpackage that does symbolic algebra on the deterministic and stochastic nodes in the computational graph; this uncovers conjugacy relationships between exponential-family random variables. This will allow users to integrate out variables and automatically derive classical Gibbs and mean-field updates <span class="citation">(Bishop, 2006)</span> without tedious algebraic manipulation.</p>
 <h3 class="unnumbered" id="references">References</h3>

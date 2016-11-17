@@ -1,0 +1,682 @@
+diff --git a/docs/tex/api/criticism.tex b/docs/tex/api/criticism.tex
+index 6bab27d..3125a75 100644
+--- a/docs/tex/api/criticism.tex
++++ b/docs/tex/api/criticism.tex
+@@ -27,9 +27,6 @@ T = lambda xs, zs: tf.reduce_mean(xs[x])
+ ed.ppc(T, data={x: x_data})
+ \end{lstlisting}
+ 
+-Criticism is defined simply with utility functions. They take random
+-variables as input and output NumPy arrays.
+-
+ Here's an example. First, let's build a model $p(\mathbf{x},
+ \mathbf{z}, \beta)$ and perform inference to obtain the posterior
+ $p(\mathbf{z}, \beta\mid\mathbf{x})$.
+@@ -46,7 +43,7 @@ qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+                sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
+ qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+ 
+-inference = ed.Inference({z: qz, beta: qbeta}, data={x: x_train})
++inference = ed.KLqp({z: qz, beta: qbeta}, data={x: x_train})
+ inference.run()
+ \end{lstlisting}
+ We then build the posterior predictive distribution
+@@ -55,8 +52,8 @@ $p(\mathbf{x}_{\text{new}}\mid \mathbf{x})$.
+ x_post = ed.copy(x, {z: qz, beta: qbeta})
+ \end{lstlisting}
+ The \texttt{copy} function builds the posterior predictive by copying
+-the likelihood \texttt{x}, swapping out its dependence on the priors
+-\texttt{z} and \texttt{beta} with dependence on the inferred
++the likelihood node \texttt{x} and swapping its dependence on the
++priors \texttt{z} and \texttt{beta} with dependence on the inferred
+ posteriors \texttt{qz} and \texttt{qbeta}.
+ 
+ Now we run some techniques:
+@@ -98,6 +95,7 @@ from edward.models import Categorical
+ # has N_test many data points
+ qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
+ 
++# run local inference conditional on global factors
+ inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
+ inference_test.run()
+ 
+@@ -112,6 +110,8 @@ criticism
+ 
+ % \subsubsection{Developing new criticism techniques}
+ 
++% Criticism is defined simply with utility functions. They take random
++% variables as input and output NumPy arrays.
+ % Criticism techniques are simply functions which take as input data,
+ % the probability model and variational model (binded through a latent
+ % variable dictionary), and any additional inputs.
+diff --git a/docs/tex/api/data.tex b/docs/tex/api/data.tex
+index edd12a9..fc540d9 100644
+--- a/docs/tex/api/data.tex
++++ b/docs/tex/api/data.tex
+@@ -14,33 +14,35 @@ A constant or variable in the TensorFlow graph holds all the data.
+ This setting is the fastest to work with and is recommended if the
+ data fits in memory.
+ 
+-Represent the data as TensorFlow tensors or NumPy arrays.
++Represent the data as NumPy arrays or TensorFlow tensors.
+ 
+ \begin{lstlisting}[language=Python]
+ x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+ x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+ \end{lstlisting}
+ 
+-During inference, we will store them in TensorFlow variables to
++During inference, we store them in TensorFlow variables internally to
+ prevent copying data more than once in memory. As an example, see the
+-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
+-{Bayesian neural network} script.
++\href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
++{getting started} script.
+ 
+ \textbf{Feeding.}
+ Manual code provides the data when running each step of inference.
+ This setting provides the most fine control which is useful for
+ experimentation.
+ 
+-Represent the data as TensorFlow placeholders.
++Represent the data as
++\href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html#feeding}{TensorFlow placeholders},
++which are nodes in the graph that are fed at runtime.
+ 
+ \begin{lstlisting}[language=Python]
+-x_data = tf.placeholder(tf.float32, [100, 25])
++x_data = tf.placeholder(tf.float32, [100, 25])  # placeholder of shape (100, 25)
+ \end{lstlisting}
+ 
+ During inference, the user must manually feed the placeholders. At each
+-step of inference, bind the placeholders to realized values in a
+-\texttt{feed_dict} dictionary argument within
+-\texttt{inference.update(feed_dict={...})}. As an example, see the
++step, call \texttt{inference.update()} while
++passing in a \texttt{feed_dict} dictionary
++which binds placeholders to realized values as an argument. As an example, see the
+ \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
+ {variational auto-encoder} script.
+ If the values do not change over inference updates, one can also bind
+diff --git a/docs/tex/api/index.tex b/docs/tex/api/index.tex
+index 8d0e59a..1c9a9c1 100644
+--- a/docs/tex/api/index.tex
++++ b/docs/tex/api/index.tex
+@@ -25,14 +25,14 @@ First gather data from some real-world phenomena. Then cycle through
+ 
+ Here's a toy example. A child flips a coin ten times, with the set of outcomes
+ being \texttt{{[}0,\ 1,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 1{]}}, where \texttt{0}
+-denotes tails and \texttt{1} denotes heads. She is interested in the probability
+-that the coin lands heads. To analyze this data, she first needs to build a
+-model: suppose she assumes the coin flips are independent and land heads with
+-the same probability. Second, she must reason about the phenomenon: this
+-means using an algorithm to infer the model given data. Finally, she should
+-criticize the model: analyze whether the model captures the real-world
+-phenomenon of coin flips. If it doesn't, then she may revise the model and
+-repeat.
++denotes tails and \texttt{1} denotes heads. She is interested in the
++probability that the coin lands heads. To analyze this, she first
++builds a model: suppose she assumes the coin flips are independent and
++land heads with the same probability. Second, she reasons about the
++phenomenon: she infers the model's hidden structure given data.
++Finally, she criticizes the model: she analyzes whether her model
++captures the real-world phenomenon of coin flips. If it doesn't, then
++she may revise the model and repeat.
+ 
+ Navigate modules enabling this analysis above.
+ 
+diff --git a/docs/tex/api/inference-classes.tex b/docs/tex/api/inference-classes.tex
+index b8d28e0..9108493 100644
+--- a/docs/tex/api/inference-classes.tex
++++ b/docs/tex/api/inference-classes.tex
+@@ -7,22 +7,32 @@
+ Inference is broadly classified under three classes: variational
+ inference, Monte Carlo, and exact inference.
+ We highlight how to use inference algorithms from each class.
+-As an example, assume we defined a mixture model with latent variables
+-\texttt{z} and \texttt{beta} and observed variable \texttt{x}.
++
++As an example, we assume a mixture model with latent mixture
++assignments \texttt{z}, latent cluster means \texttt{beta}, and
++observations \texttt{x}:
++\begin{equation*}
++p(\mathbf{x}, \mathbf{z}, \beta)
++=
++\text{Normal}(\mathbf{x} \mid \beta_{\mathbf{z}}, \mathbf{I})
++~
++\text{Categorical}(\mathbf{z}\mid \pi)
++~
++\text{Normal}(\beta\mid \mathbf{0}, \mathbf{I}).
++\end{equation*}
+ 
+ \subsubsection{Variational Inference}
+ 
+ In variational inference, the idea is to posit a family of approximating
+ distributions and to find the closest member in the family to the
+ posterior \citep{jordan1999introduction}.
+-We build the variational family in the graph.
+-The variational family has TensorFlow
+-variables representing its parameters $\mathbf{\lambda}=\{\pi,\mu,\sigma\}$,
+-where
++We write an approximating family,
+ \begin{align*}
+ q(\beta;\mu,\sigma) &= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
+-q(\mathbf{z};\pi) &= \text{Categorical}(\mathbf{z};\pi).
++q(\mathbf{z};\pi) &= \text{Categorical}(\mathbf{z};\pi),
+ \end{align*}
++using TensorFlow variables to represent its parameters
++$\lambda=\{\pi,\mu,\sigma\}$.
+ \begin{lstlisting}[language=Python]
+ from edward.models import Categorical, Normal
+ 
+@@ -33,15 +43,14 @@ qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+ inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
+ \end{lstlisting}
+ Given an objective function, variational inference optimizes the
+-factors with respect to \texttt{tf.Variable}s.
++family with respect to \texttt{tf.Variable}s.
+ 
+ Specific variational inference algorithms inherit from
+ the \texttt{VariationalInference} class to define their own methods, such as a
+ loss function and gradient.
+-For example, we represent MAP estimation with
+-an approximating family of
+-\texttt{PointMass} random variables,
+-i.e., with all probability mass concentrated at a point.
++For example, we represent MAP estimation with an approximating family
++of \texttt{PointMass} random variables, i.e., with all probability
++mass concentrated at a point.
+ \begin{lstlisting}[language=Python]
+ from edward.models import PointMass
+ 
+@@ -65,7 +74,7 @@ q(\beta; \{\beta^{(t)}\})
+ q(\mathbf{z}; \{\mathbf{z}^{(t)}\})
+ &= \frac{1}{T}\sum_{t=1}^T \delta(\mathbf{z}, \mathbf{z}^{(t)}).
+ \end{align*}
+-The parameters are $\mathbf{\lambda}=\{\beta^{(t)},\mathbf{z}^{(t)}\}$.
++The parameters are $\lambda=\{\beta^{(t)},\mathbf{z}^{(t)}\}$.
+ \begin{lstlisting}[language=Python]
+ from edward.models import Empirical
+ 
+@@ -82,7 +91,7 @@ Specific \glsunset{MC}\gls{MC} samplers determine the update rules;
+ they can leverage gradients and graph structure, where applicable.
+ Markov chain Monte Carlo does this sequentially to update
+ the current sample (index $t$ of \texttt{tf.Variable}s) conditional on
+-the last sample (index $t-1$ of the \texttt{tf.Variable}s).
++the last sample (index $t-1$ of \texttt{tf.Variable}s).
+ 
+ \subsubsection{Exact Inference}
+ 
+diff --git a/docs/tex/api/inference-compositionality.tex b/docs/tex/api/inference-compositionality.tex
+index 3217112..3b53fc4 100644
+--- a/docs/tex/api/inference-compositionality.tex
++++ b/docs/tex/api/inference-compositionality.tex
+@@ -10,7 +10,9 @@ collection of separate inference programs.
+ 
+ We outline how to write popular classes of compositional inferences
+ using Edward: hybrid algorithms and message passing algorithms.
+-We use the running example of a mixture model.
++We use the running example of a mixture model
++with latent mixture assignments \texttt{z}, latent cluster means
++\texttt{beta}, and observations \texttt{x}.
+ 
+ \subsubsection{Hybrid algorithms}
+ 
+@@ -91,6 +93,11 @@ We alternate updates for each local inference, where the global
+ posterior factor $q(\beta)$ is shared across both inferences
+ \citep{gelman2014expectation}.
+ 
++With TensorFlow's distributed training, compositionality
++enables \emph{distributed} message passing over a cluster with many
++workers. The computation can be further sped up with the use of GPUs
++via data and model parallelism.
++
+ This extends to many algorithms: for example,
+ classical message passing, which performs exact local inferences;
+ Gibbs sampling, which draws samples from conditionally conjugate
+@@ -111,9 +118,4 @@ representing the random variable for all data points and their cluster
+ membership as \texttt{x} and \texttt{z} rather than \texttt{x1},
+ \texttt{x2}, \texttt{z1}, and \texttt{z2}.
+ 
+-With TensorFlow's distributed training, note that compositionality
+-enables \emph{distributed} message passing over a cluster with many
+-workers. The computation can be further sped up with the use of GPUs
+-via data and model parallelism.
+-
+ \subsubsection{References}\label{references}
+diff --git a/docs/tex/api/inference-development.tex b/docs/tex/api/inference-development.tex
+index 9418689..0e964b8 100644
+--- a/docs/tex/api/inference-development.tex
++++ b/docs/tex/api/inference-development.tex
+@@ -7,8 +7,7 @@
+ Edward uses class inheritance to provide a hierarchy of inference
+ methods. This enables fast experimentation on top of existing
+ algorithms, whether it be developing new black box algorithms or
+-developing new model-specific algorithms.
+-We detail this below.
++new model-specific algorithms.
+ 
+ \includegraphics[width=700px]{/images/inference_structure.png}
+ {\small\textit{Dependency graph of inference methods.
+@@ -63,8 +62,8 @@ inheriting from \texttt{VariationalInference} or one of its derived
+ classes. \texttt{VariationalInference} implements many default methods such
+ as \texttt{initialize()} with options for an optimizer.
+ 
+-For examples of inference algorithms built in Edward, see the inference
+-\href{/tutorials/}{tutorials}. It can also be useful to simply look at
++For examples of inference algorithms developed in Edward, see the inference
++\href{/tutorials/}{tutorials}. It can also be useful to look at
+ the
+ \href{https://github.com/blei-lab/edward/tree/master/edward/inferences}
+ {source code}.
+diff --git a/docs/tex/api/inference.tex b/docs/tex/api/inference.tex
+index fa14521..0b76898 100644
+--- a/docs/tex/api/inference.tex
++++ b/docs/tex/api/inference.tex
+@@ -39,19 +39,19 @@ to update parameters $\lambda$ are specified by an inference
+ algorithm.
+ 
+ Running inference is as simple as running one method.
++
+ \begin{lstlisting}[language=Python]
+ inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
+ inference.run()
+ \end{lstlisting}
+-%
++
+ Inference also supports fine control of the training procedure.
+-%
++
+ \begin{lstlisting}[language=Python]
+ inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
+ inference.initialize()
+ 
+-init = tf.initialize_all_variables()
+-init.run()
++tf.initialize_all_variables().run()
+ 
+ for _ in range(inference.n_iter):
+   info_dict = inference.update()
+@@ -59,6 +59,16 @@ for _ in range(inference.n_iter):
+ 
+ inference.finalize()
+ \end{lstlisting}
++
++\texttt{initialize()} builds the algorithm's update rules
++(computational graph) for $\lambda$;
++\texttt{initialize_all_variables()} initializes $\lambda$
++(TensorFlow variables in the graph);
++\texttt{update()} runs the graph once to update
++$\lambda$, which is called in a loop until convergence;
++\texttt{finalize()} runs any computation as the algorithm
++terminates.
++
+ The \texttt{run()} method is a simple wrapper for this procedure.
+ 
+ \subsubsection{Other Settings}
+diff --git a/docs/tex/api/model-compositionality.tex b/docs/tex/api/model-compositionality.tex
+index 7f5dd83..52b2d28 100644
+--- a/docs/tex/api/model-compositionality.tex
++++ b/docs/tex/api/model-compositionality.tex
+@@ -10,8 +10,8 @@ of random variables.
+ 
+ We outline how to write popular classes of models using Edward:
+ directed graphical models, neural networks, Bayesian nonparametrics,
+-and probabilistic programs. For more examples, see the model
+-\href{/tutorials/}{tutorials}.
++and probabilistic programs. For more examples, see the
++\href{/tutorials/}{model tutorials}.
+ 
+ \subsubsection{Directed Graphical Models}
+ 
+@@ -74,8 +74,8 @@ As Edward uses TensorFlow, it is easy to construct neural networks for
+ probabilistic modeling \citep{rumelhart1988parallel}.
+ For example, one can specify stochastic neural networks
+ \citep{neal1990learning}; see the
+-\href{/tutorials/bayesian-neural-network}{Bayesian neural networks}
+-tutorial for details.
++\href{/tutorials/bayesian-neural-network}{Bayesian neural network tutorial}
++for details.
+ 
+ High-level libraries such as
+ \href{http://keras.io}{Keras} and
+@@ -86,18 +86,18 @@ $\{\mathbf{x}_n\}\in\{0,1\}^{N\times 28*28}$.
+ 
+ \includegraphics[width=250px]{/images/decoder.png}
+ 
+-{\small\textit{Graphical model representation.}}
++{\small\textit{Graphical representation of a deep generative model.}}
+ 
+ The model specifies a generative process where for each
+ $n=1,\ldots,N$,
+ %
+ \begin{align*}
+-\mathbf{z}_n &\sim \text{Normal}(\mathbf{z} \mid \mathbf{0}, I), \\[1.5ex]
++\mathbf{z}_n &\sim \text{Normal}(\mathbf{z}_n \mid \mathbf{0}, \mathbf{I}), \\[1.5ex]
+ \mathbf{x}_n\mid \mathbf{z}_n &\sim \text{Bernoulli}(\mathbf{x}_n\mid
+-p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),
++p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).
+ \end{align*}
+ %
+-where the latent space is $\mathbf{z}_n\in\mathbb{R}^d$ and the
++The latent space is $\mathbf{z}_n\in\mathbb{R}^d$ and the
+ likelihood is parameterized by a neural network $\mathrm{NN}$ with
+ parameters $\theta$. We will use a two-layer neural network with a
+ fully connected hidden layer of 256 units (with ReLU activation) and
+@@ -144,7 +144,7 @@ infinite-dimensional space.
+ For the collapsed approach, see the
+ \href{/tutorials/gp-classification}{Gaussian process classification}
+ tutorial as an example. We specify distributions over the function
+-evaluations of the Gaussian process, where the Gaussian process is
++evaluations of the Gaussian process, and the Gaussian process is
+ implicitly marginalized out. This approach is also useful for Poisson
+ process models.
+ 
+diff --git a/docs/tex/api/model.tex b/docs/tex/api/model.tex
+index 5eb23b9..6ad0771 100644
+--- a/docs/tex/api/model.tex
++++ b/docs/tex/api/model.tex
+@@ -12,7 +12,7 @@ In Edward, we specify models using a simple language of random variables.
+ A random variable $\mathbf{x}$ is an object parameterized by
+ tensors $\theta^*$, where
+ the number of random variables in one object is determined by
+-the dimension of its parameters.
++the dimensions of its parameters.
+ 
+ \begin{lstlisting}[language=Python]
+ from edward.models import Normal, Exponential
+diff --git a/docs/tex/getting-started.tex b/docs/tex/getting-started.tex
+index bc7efb0..35e507d 100644
+--- a/docs/tex/getting-started.tex
++++ b/docs/tex/getting-started.tex
+@@ -56,7 +56,7 @@ W_1 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
+ b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
+ b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+ 
+-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
++x = tf.cast(x_train, dtype=tf.float32)
+ y = Normal(mu=tf.matmul(tf.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
+            sigma=0.1)
+ \end{lstlisting}
+@@ -65,28 +65,26 @@ Next, make inferences about the model from data. We will use variational
+ inference. Specify a normal approximation over the weights and biases.
+ 
+ \begin{lstlisting}[language=Python]
+-qW_0 = Normal(mu=tf.Variable(tf.random_normal([1, 2])),
+-              sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, 2]))))
+-qW_1 = Normal(mu=tf.Variable(tf.random_normal([2, 1])),
+-              sigma=tf.nn.softplus(tf.Variable(tf.random_normal([2, 1]))))
+-qb_0 = Normal(mu=tf.Variable(tf.random_normal([2])),
+-              sigma=tf.nn.softplus(tf.Variable(tf.random_normal([2]))))
+-qb_1 = Normal(mu=tf.Variable(tf.random_normal([1])),
+-              sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
++qW_0 = Normal(mu=tf.Variable(tf.zeros([1, 2])),
++              sigma=tf.nn.softplus(tf.Variable(tf.zeros([1, 2]))))
++qW_1 = Normal(mu=tf.Variable(tf.zeros([2, 1])),
++              sigma=tf.nn.softplus(tf.Variable(tf.zeros([2, 1]))))
++qb_0 = Normal(mu=tf.Variable(tf.zeros(2)),
++              sigma=tf.nn.softplus(tf.Variable(tf.zeros(2))))
++qb_1 = Normal(mu=tf.Variable(tf.zeros(1)),
++              sigma=tf.nn.softplus(tf.Variable(tf.zeros(1))))
+ \end{lstlisting}
+ 
+ Defining \texttt{tf.Variable} allows the variational factors'
+-parameters to vary. They are initialized randomly.  The standard
++parameters to vary. They are all initialized at 0. The standard
+ deviation parameters are constrained to be greater than zero according
+ to a
+ \href{https://en.wikipedia.org/wiki/Rectifier_(neural_networks)}{softplus}
+ transformation.
+ 
+ Now, run variational inference with the
+-\href{https://en.wikipedia.org/wiki/Kullback–Leibler_divergence}{Kullback-Leibler divergence}.
+-Infer the model's latent variables conditional on data using the
+-variational distribution.
+-
++\href{https://en.wikipedia.org/wiki/Kullback–Leibler_divergence}{Kullback-Leibler divergence}
++in order to infer the model's latent variables given data.
+ We specify \texttt{1000} iterations.
+ \begin{lstlisting}[language=Python]
+ import edward as ed
+diff --git a/docs/tex/tutorials/bayesian-neural-network.tex b/docs/tex/tutorials/bayesian-neural-network.tex
+index e9ba289..aa43d0b 100644
+--- a/docs/tex/tutorials/bayesian-neural-network.tex
++++ b/docs/tex/tutorials/bayesian-neural-network.tex
+@@ -7,7 +7,7 @@ distribution on its weights \citep{neal2012bayesian}.
+ 
+ Consider a data set $\{(\mathbf{x}_n, y_n)\}$, where each data point
+ comprises of features $\mathbf{x}_n\in\mathbb{R}^D$ and output
+-$y_n\in\mathbb{R}$. Define the likelihood as
++$y_n\in\mathbb{R}$. Define the likelihood for each data point as
+ \begin{align*}
+   p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
+   &=
+@@ -21,7 +21,7 @@ Define the prior on the weights and biases $\mathbf{z}$ to be the standard norma
+ \begin{align*}
+   p(\mathbf{z})
+   &=
+-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).
++  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).
+ \end{align*}
+ 
+ Let's build the model in Edward. We define a 3-layer Bayesian neural
+@@ -45,7 +45,7 @@ b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+ b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+ b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+ 
+-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
++x = tf.cast(x_train, dtype=tf.float32)
+ y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))
+ \end{lstlisting}
+ This code builds the model assuming the features \texttt{x\_train}
+diff --git a/docs/tex/tutorials/decoder.tex b/docs/tex/tutorials/decoder.tex
+index 82b1172..709e6f5 100644
+--- a/docs/tex/tutorials/decoder.tex
++++ b/docs/tex/tutorials/decoder.tex
+@@ -37,7 +37,7 @@ prior over the code
+ \begin{align*}
+   p(\mathbf{z})
+   &=
+-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).
++  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).
+ \end{align*}
+ 
+ Let's build the model in Edward using
+diff --git a/docs/tex/tutorials/gp-classification.tex b/docs/tex/tutorials/gp-classification.tex
+index 5aa775e..aece2af 100644
+--- a/docs/tex/tutorials/gp-classification.tex
++++ b/docs/tex/tutorials/gp-classification.tex
+@@ -21,7 +21,7 @@ function is some kernel which describes dependence between
+ any set of inputs to the function.
+ 
+ Given a set of input-output pairs
+-$\{(\mathbf{x}_n\in\mathbb{R}^D,y_n\in\mathbb{R})\}$,
++$\{\mathbf{x}_n\in\mathbb{R}^D,y_n\in\mathbb{R}\}$,
+ the likelihood can be written as a multivariate normal
+ \begin{align*}
+   p(\mathbf{y})
+@@ -29,7 +29,7 @@ the likelihood can be written as a multivariate normal
+   \text{Normal}(\mathbf{y} \mid \mathbf{0}, \mathbf{K})
+ \end{align*}
+ where $\mathbf{K}$ is a covariance matrix given by evaluating
+-$k(\mathbf{x}, \mathbf{x}^\prime)$ for each pair of inputs in the data
++$k(\mathbf{x}_n, \mathbf{x}_m)$ for each pair of inputs in the data
+ set.
+ 
+ The above applies directly for regression where $\mathbb{y}$ is a
+@@ -50,17 +50,16 @@ Define the prior to be a multivariate normal
+ \begin{align*}
+   p(\mathbf{z})
+   &=
+-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K})
++  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K}),
+ \end{align*}
+-with
+-covariance matrix given by evaluating $k(x, x^\prime)$ for each pair of inputs
+-$(x, x^\prime)$.
++with covariance matrix given as previously stated.
+ 
+ Let's build the model in Edward. We use a radial basis function (RBF)
+ kernel, also known as the squared exponential or exponentiated
+-quadratic. There are $N$ data points and $D$ features.
++quadratic.
+ \begin{lstlisting}[language=Python]
+ from edward.models import Bernoulli, Normal
++from edward.util import multivariate_rbf
+ 
+ def kernel(x):
+   mat = []
+@@ -78,6 +77,9 @@ def kernel(x):
+ 
+   return tf.pack(mat)
+ 
++N = 1000  # number of data points
++D = 256  # number of features
++
+ X = tf.placeholder(tf.float32, [N, D])
+ f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+ y = Bernoulli(logits=f)
+diff --git a/docs/tex/tutorials/mixture-density-network.tex b/docs/tex/tutorials/mixture-density-network.tex
+index 011ccf9..fbd32c9 100644
+--- a/docs/tex/tutorials/mixture-density-network.tex
++++ b/docs/tex/tutorials/mixture-density-network.tex
+@@ -59,6 +59,10 @@ data = {'X': X, 'y': y}
+ 
+ \subsubsection{Model}
+ 
++\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
++Reimplementing this under Edward's native language is currently in
++progress.}
++
+ We define a class that can be used to construct MDNs. Here we use a
+ mixture of normal distributions parameterized by a feedforward
+ network. In other words, the membership probabilities and
+diff --git a/docs/tex/tutorials/mixture-gaussian.tex b/docs/tex/tutorials/mixture-gaussian.tex
+index 2aac408..06af2f1 100644
+--- a/docs/tex/tutorials/mixture-gaussian.tex
++++ b/docs/tex/tutorials/mixture-gaussian.tex
+@@ -30,7 +30,7 @@ Define the prior on each component $\mathbf{\mu}_k\in\mathbb{R}^D$ to be
+ \begin{align*}
+   p(\mathbf{\mu}_k)
+   &=
+-  \text{Normal}(\mathbf{\mu}_k \mid 0, \sigma^2\mathbf{I}).
++  \text{Normal}(\mathbf{\mu}_k \mid \mathbf{0}, \sigma^2\mathbf{I}).
+ \end{align*}
+ 
+ Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
+@@ -84,6 +84,11 @@ which is based on the identity
+ \end{align*}
+ Subtracting the maximum value before taking the log-sum-exp leads to
+ more numerically stable output.
++
++\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
++Reimplementing this under Edward's native language is currently in
++progress.}
++
+ \begin{lstlisting}[language=Python]
+ class MixtureGaussian:
+   """
+diff --git a/docs/tex/tutorials/supervised-classification.tex b/docs/tex/tutorials/supervised-classification.tex
+index dacf5c8..f4f1df1 100644
+--- a/docs/tex/tutorials/supervised-classification.tex
++++ b/docs/tex/tutorials/supervised-classification.tex
+@@ -54,7 +54,6 @@ def kernel(x):
+ 
+   return tf.pack(mat)
+ 
+-
+ X = tf.placeholder(tf.float32, [N, D])
+ f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+ y = Bernoulli(logits=f)
+diff --git a/docs/tex/tutorials/unsupervised.tex b/docs/tex/tutorials/unsupervised.tex
+index 0e39228..4b00316 100644
+--- a/docs/tex/tutorials/unsupervised.tex
++++ b/docs/tex/tutorials/unsupervised.tex
+@@ -41,6 +41,10 @@ plt.show()
+ 
+ \subsubsection{Model}
+ 
++\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
++Reimplementing this under Edward's native language is currently in
++progress.}
++
+ Posit the model as a mixture of Gaussians. For more details on the
+ model, see the
+ \href{/tutorials/mixture-gaussian}
+diff --git a/examples/bayesian_nn.py b/examples/bayesian_nn.py
+index 7bc03ee..65a201c 100644
+--- a/examples/bayesian_nn.py
++++ b/examples/bayesian_nn.py
+@@ -50,7 +50,7 @@ b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+ b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+ b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+ 
+-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
++x = tf.cast(x_train, dtype=tf.float32)
+ y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))
+ 
+ # INFERENCE
+diff --git a/examples/getting_started_example.py b/examples/getting_started_example.py
+index be9c567..3b072be 100644
+--- a/examples/getting_started_example.py
++++ b/examples/getting_started_example.py
+@@ -46,7 +46,7 @@ W_1 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
+ b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
+ b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+ 
+-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
++x = tf.cast(x_train, dtype=tf.float32)
+ y = Normal(mu=neural_network(x, W_0, W_1, b_0, b_1),
+            sigma=0.1 * tf.ones(N))
+ 
+diff --git a/examples/probabilistic_pca.py b/examples/probabilistic_pca.py
+index 4e4d27e..17461bb 100644
+--- a/examples/probabilistic_pca.py
++++ b/examples/probabilistic_pca.py
+@@ -40,15 +40,15 @@ x_train = build_toy_dataset(N, D, K)
+ # MODEL
+ 
+ w = Normal(mu=tf.zeros([D, K]), sigma=10.0 * tf.ones([D, K]))
+-z = Normal(mu=tf.zeros([K, N]), sigma=tf.ones([K, N]))
+-x = Normal(mu=tf.matmul(w, z), sigma=tf.ones([D, N]))
++z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
++x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))
+ 
+ # INFERENCE
+ 
+ qw = Normal(mu=tf.Variable(tf.random_normal([D, K])),
+             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, K]))))
+-qz = Normal(mu=tf.Variable(tf.random_normal([K, N])),
+-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([K, N]))))
++qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
++            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
+ 
+ inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
+ 
+diff --git a/examples/probabilistic_pca_subsampling.py b/examples/probabilistic_pca_subsampling.py
+index 3dd5957..caa260a 100644
+--- a/examples/probabilistic_pca_subsampling.py
++++ b/examples/probabilistic_pca_subsampling.py
+@@ -48,8 +48,8 @@ x_train = build_toy_dataset(N, D, K)
+ # MODEL
+ 
+ w = Normal(mu=tf.zeros([D, K]), sigma=10.0 * tf.ones([D, K]))
+-z = Normal(mu=tf.zeros([K, M]), sigma=tf.ones([K, M]))
+-x = Normal(mu=tf.matmul(w, z), sigma=tf.ones([D, M]))
++z = Normal(mu=tf.zeros([M, K]), sigma=tf.ones([M, K]))
++x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, M]))
+ 
+ # INFERENCE
+ 
+@@ -60,9 +60,8 @@ qw = Normal(mu=qw_variables[0], sigma=tf.nn.softplus(qw_variables[1]))
+ qz_variables = [tf.Variable(tf.random_normal([N, K])),
+                 tf.Variable(tf.random_normal([N, K]))]
+ idx_ph = tf.placeholder(tf.int32, M)
+-qz = Normal(
+-    mu=tf.transpose(tf.gather(qz_variables[0], idx_ph)),
+-    sigma=tf.nn.softplus(tf.transpose(tf.gather(qz_variables[1], idx_ph))))
++qz = Normal(mu=tf.gather(qz_variables[0], idx_ph),
++            sigma=tf.nn.softplus(tf.gather(qz_variables[1], idx_ph)))
+ 
+ x_ph = tf.placeholder(tf.float32, [D, M])
+ inference_w = ed.KLqp({w: qw}, data={x: x_ph, z: qz})
