@@ -69,10 +69,10 @@ qW_0 = Normal(mu=tf.Variable(tf.zeros([1, 2])),
               sigma=tf.nn.softplus(tf.Variable(tf.zeros([1, 2]))))
 qW_1 = Normal(mu=tf.Variable(tf.zeros([2, 1])),
               sigma=tf.nn.softplus(tf.Variable(tf.zeros([2, 1]))))
-qb_0 = Normal(mu=tf.Variable(tf.zeros([2])),
-              sigma=tf.nn.softplus(tf.Variable(tf.zeros([2]))))
-qb_1 = Normal(mu=tf.Variable(tf.zeros([1])),
-              sigma=tf.nn.softplus(tf.Variable(tf.zeros([1]))))
+qb_0 = Normal(mu=tf.Variable(tf.zeros(2)),
+              sigma=tf.nn.softplus(tf.Variable(tf.zeros(2))))
+qb_1 = Normal(mu=tf.Variable(tf.zeros(1)),
+              sigma=tf.nn.softplus(tf.Variable(tf.zeros(1))))
 \end{lstlisting}
 
 Defining \texttt{tf.Variable} allows the variational factors'
@@ -83,10 +83,8 @@ to a
 transformation.
 
 Now, run variational inference with the
-\href{https://en.wikipedia.org/wiki/Kullback–Leibler_divergence}{Kullback-Leibler divergence}.
-Infer the model's latent variables conditional on data using the
-variational distribution.
-
+\href{https://en.wikipedia.org/wiki/Kullback–Leibler_divergence}{Kullback-Leibler
+divergence in order to infer the model's latent variables given data.
 We specify \texttt{1000} iterations.
 \begin{lstlisting}[language=Python]
 import edward as ed
