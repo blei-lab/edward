@@ -120,7 +120,7 @@ W_1 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
 b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
 b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
+x = tf.cast(x_train, dtype=tf.float32)
 y = Normal(mu=tf.matmul(tf.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
            sigma=0.1)</code></pre>
 <p>Next, make inferences about the model from data. We will use variational inference. Specify a normal approximation over the weights and biases.</p>

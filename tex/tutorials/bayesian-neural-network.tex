@@ -45,7 +45,7 @@ b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
+x = tf.cast(x_train, dtype=tf.float32)
 y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))
 \end{lstlisting}
 This code builds the model assuming the features \texttt{x\_train}
