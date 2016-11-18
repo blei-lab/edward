@@ -8,7 +8,7 @@ construct neural networks.
 
 If you are not familiar with MDNs have a look at the
 \href{http://cbonnett.github.io/MDN.html}{following blog post} or at
-original paper by \citet{bishop1994mixture}.
+the original paper by \citet{bishop1994mixture}.
 The script is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py}
 {here}.
@@ -22,9 +22,9 @@ for every input $x_n$ there are multiple outputs $y_n$.
 
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N):
-  y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
-  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
+  y_data = np.random.uniform(-10.5, 10.5, (N, 1)).astype(np.float32)
+  r_data = np.random.normal(size=(N, 1)).astype(np.float32)  # random noise
+  x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
   return train_test_split(x_data, y_data, random_state=42)
 
 N = 40000  # number of data points

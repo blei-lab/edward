@@ -97,10 +97,10 @@
 <p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_10d.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>Simulate training and test sets of <span class="math inline">\(40\)</span> data points. They comprise of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N, coeff=np.random.randn(10), noise_std=0.1):
+<pre class="python" language="Python"><code>def build_toy_dataset(N, coeff, noise_std=0.1):
   n_dim = len(coeff)
   x = np.random.randn(N, n_dim).astype(np.float32)
-  y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
+  y = np.dot(x, coeff) + np.random.normal(0, noise_std, size=N)
   return x, y
 
 N = 40  # number of data points

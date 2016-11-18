@@ -88,13 +88,13 @@
 <div class="nine columns">
 <h2 id="mixture-density-networks">Mixture density networks</h2>
 <p>We explore mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span>. We demonstrate their implementation in Edward, leveraging Keras to construct neural networks.</p>
-<p>If you are not familiar with MDNs have a look at the <a href="http://cbonnett.github.io/MDN.html">following blog post</a> or at original paper by <span class="citation">Bishop (1994)</span>. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py">here</a>.</p>
+<p>If you are not familiar with MDNs have a look at the <a href="http://cbonnett.github.io/MDN.html">following blog post</a> or at the original paper by <span class="citation">Bishop (1994)</span>. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">David Ha’s blog post</a>, where he explains MDNs. It is an inverse problem where for every input <span class="math inline">\(x_n\)</span> there are multiple outputs <span class="math inline">\(y_n\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N):
-  y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
-  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
+  y_data = np.random.uniform(-10.5, 10.5, (N, 1)).astype(np.float32)
+  r_data = np.random.normal(size=(N, 1)).astype(np.float32)  # random noise
+  x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
   return train_test_split(x_data, y_data, random_state=42)
 
 N = 40000  # number of data points

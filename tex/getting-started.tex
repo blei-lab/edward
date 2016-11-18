@@ -34,12 +34,11 @@ First, simulate a toy dataset of 50 observations with a cosine relationship.
 
 \begin{lstlisting}[language=Python]
 import numpy as np
-from scipy.stats import norm
 
 x_train = np.linspace(-3, 3, num=50)
-y_train = np.cos(x_train) + norm.rvs(0, 0.1, size=50)
-x_train = x_train.reshape((50, 1))
-y_train = y_train.reshape((50, 1))
+y_train = np.cos(x_train) + np.random.normal(0, 0.1, size=50)
+x_train = x_train.astype(np.float32).reshape((50, 1))
+y_train = y_train.astype(np.float32).reshape((50, 1))
 \end{lstlisting}
 
 \includegraphics[width=700px]{images/getting-started-fig0.png}
@@ -56,7 +55,7 @@ W_1 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
 b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
 b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
-x = tf.cast(x_train, dtype=tf.float32)
+x = x_train
 y = Normal(mu=tf.matmul(tf.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
            sigma=0.1)
 \end{lstlisting}
