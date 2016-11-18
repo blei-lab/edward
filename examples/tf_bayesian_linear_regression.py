@@ -49,7 +49,7 @@ class LinearModel:
 def build_toy_dataset(N, noise_std=0.1):
   x = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
-  y = 0.075 * x + norm.rvs(0, noise_std, size=N)
+  y = 0.075 * x + np.random.normal(0, noise_std, size=N)
   x = (x - 4.0) / 4.0
   x = x.reshape((N, 1))
   return x, y

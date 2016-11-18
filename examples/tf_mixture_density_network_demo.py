@@ -12,7 +12,7 @@ import tensorflow as tf
 from edward.stats import norm
 from keras import backend as K
 from keras.layers import Dense
-from scipy.stats import norm as normal
+from scipy import stats
 from sklearn.model_selection import train_test_split
 
 
@@ -23,7 +23,7 @@ def plot_normal_mix(pis, mus, sigmas, ax, label='', comp=True):
   x = np.linspace(-10.5, 10.5, 250)
   final = np.zeros_like(x)
   for i, (weight_mix, mu_mix, sigma_mix) in enumerate(zip(pis, mus, sigmas)):
-    temp = normal.pdf(x, mu_mix, sigma_mix) * weight_mix
+    temp = stats.norm.pdf(x, mu_mix, sigma_mix) * weight_mix
     final = final + temp
     if comp:
       ax.plot(x, temp, label='Normal ' + str(i))
@@ -42,7 +42,7 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
   for j, (weights, means, std_devs) in enumerate(
           zip(pred_weights, pred_means, pred_std)):
     index = np.random.choice(to_choose_from, p=weights)
-    samples[j, 1] = normal.rvs(means[index], std_devs[index], size=1)
+    samples[j, 1] = np.random.normal(means[index], std_devs[index], size=1)
     samples[j, 0] = x[j]
     if j == amount - 1:
       break
@@ -50,10 +50,10 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
 
 
 def build_toy_dataset(N):
-  y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
-  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
-  return train_test_split(x_data, y_data, random_state=42, train_size=0.1)
+  y_data = np.random.uniform(-10.5, 10.5, (N, 1)).astype(np.float32)
+  r_data = np.random.normal(size=(N, 1)).astype(np.float32)  # random noise
+  x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
+  return train_test_split(x_data, y_data, random_state=42)
 
 
 class MixtureDensityNetwork:

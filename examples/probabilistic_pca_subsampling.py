@@ -12,17 +12,16 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from scipy.stats import norm
 
 
 def build_toy_dataset(N, D, K, sigma=1):
   x_train = np.zeros((D, N))
-  w = norm.rvs(loc=0, scale=2, size=(D, K))
-  z = norm.rvs(loc=0, scale=1, size=(K, N))
+  w = np.random.normal(0.0, 2.0, size=(D, K))
+  z = np.random.normal(0.0, 1.0, size=(K, N))
   mean = np.dot(w, z)
   for d in range(D):
     for n in range(N):
-      x_train[d, n] = norm.rvs(loc=mean[d, n], scale=sigma)
+      x_train[d, n] = np.random.normal(mean[d, n], sigma)
 
   print("True principal axes:")
   print(w)
