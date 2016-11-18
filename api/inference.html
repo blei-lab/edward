@@ -114,14 +114,14 @@ inference.run()</code></pre>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.initialize()
 
-init = tf.initialize_all_variables()
-init.run()
+tf.initialize_all_variables().run()
 
 for _ in range(inference.n_iter):
   info_dict = inference.update()
   inference.print_progress(info_dict)
 
 inference.finalize()</code></pre>
+<p><code>initialize()</code> builds the algorithm’s update rules (computational graph) for <span class="math inline">\(\lambda\)</span>; <code>initialize_all_variables()</code> initializes <span class="math inline">\(\lambda\)</span> (TensorFlow variables in the graph); <code>update()</code> runs the graph once to update <span class="math inline">\(\lambda\)</span>, which is called in a loop until convergence; <code>finalize()</code> runs any computation as the algorithm terminates.</p>
 <p>The <code>run()</code> method is a simple wrapper for this procedure.</p>
 <h3 id="other-settings">Other Settings</h3>
 <p>We highlight other settings during inference.</p>

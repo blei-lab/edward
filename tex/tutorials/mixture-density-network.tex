@@ -48,9 +48,6 @@ sns.regplot(X_train, y_train, fit_reg=False)
 \end{lstlisting}
 \includegraphics[width=700px]{/images/mdn-fig0.png}
 
-
-\subsubsection{Model}
-
 We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
 
 \begin{lstlisting}[language=Python]
@@ -60,6 +57,12 @@ data = {'X': X, 'y': y}
 \end{lstlisting}
 
 
+\subsubsection{Model}
+
+\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
+Reimplementing this under Edward's native language is currently in
+progress.}
+
 We define a class that can be used to construct MDNs. Here we use a
 mixture of normal distributions parameterized by a feedforward
 network. In other words, the membership probabilities and
@@ -67,22 +70,44 @@ per-component mean and standard deviation are given by the output of a
 feedforward network.
 
 \begin{lstlisting}[language=Python]
-def neural_network(X):
-  """pi, mu, sigma = NN(x; theta)"""
-  # fully-connected layer with 25 hidden units
-  hidden1 = slim.fully_connected(X, 25)
-  hidden2 = slim.fully_connected(hidden1, 25)
-  mus = slim.fully_connected(hidden2, K, activation_fn=None)
-  sigmas = slim.fully_connected(hidden2, K, activation_fn=tf.exp)
-  logits = slim.fully_connected(hidden2, K, activation_fn=None)
-  return mus, sigmas, logits
+class MixtureDensityNetwork:
+  """
+  Mixture density network for outputs y on inputs x.
 
-mus, sigmas, logits = neural_network(X_ph)
-cat = Categorical(logits=tf.zeros([N_train, K]))
-components = [Normal(mu=mu, sigma=sigma) for mu, sigma
-              in zip(tf.unpack(tf.transpose(mus)),
-                     tf.unpack(tf.transpose(sigmas)))]
-y = Mixture(cat=cat, components=components)
+  p((x,y), (z,theta))
+  = sum_{k=1}^K pi_k(x; theta) Normal(y; mu_k(x; theta), sigma_k(x; theta))
+
+  where pi, mu, sigma are the output of a neural network taking x
+  as input and with parameters theta. There are no latent variables
+  z, which are hidden variables we aim to be Bayesian about.
+  """
+  def __init__(self, K):
+    self.K = K
+
+  def neural_network(self, X):
+    """pi, mu, sigma = NN(x; theta)"""
+    # fully-connected layer with 25 hidden units
+    hidden1 = Dense(25, activation=K.relu)(X)
+    hidden2 = Dense(25, activation=K.relu)(hidden1)
+    self.mus = Dense(self.K)(hidden2)
+    self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
+    self.pi = Dense(self.K, activation=K.softmax)(hidden2)
+
+  def log_prob(self, xs, zs):
+    """Return scalar, the log joint density log p(xs, zs)."""
+    # Note there are no parameters we're being Bayesian about. The
+    # parameters are baked into how we specify the neural networks.
+    X, y = xs['X'], xs['y']
+    self.neural_network(X)
+    result = self.pi * norm.prob(y, self.mus, self.sigmas)
+    result = tf.log(tf.reduce_sum(result, 1))
+    return tf.reduce_sum(result)
+\end{lstlisting}
+
+We instantiate the mixture density network with 20 mixtures.
+
+\begin{lstlisting}[language=Python]
+model = MixtureDensityNetwork(20)
 \end{lstlisting}
 
 \subsubsection{Inference}
@@ -93,7 +118,7 @@ See this extended tutorial about
 \href{/tutorials/map}{MAP estimation in Edward}.
 
 \begin{lstlisting}[language=Python]
-inference = ed.MAP(data={y: y_ph})
+inference = ed.MAP([], data, model)
 \end{lstlisting}
 
 Here, we will manually control the inference and how data is passed
@@ -102,6 +127,8 @@ into Keras so that it shares the same TensorFlow session as Edward.
 Then initialize the algorithm and the TensorFlow variables.
 
 \begin{lstlisting}[language=Python]
+sess = ed.get_session()
+K.set_session(sess)
 inference.initialize()
 
 init = tf.initialize_all_variables()
@@ -117,16 +144,13 @@ placeholders instead of training data.
 We keep track of the losses under \texttt{train\_loss} and \texttt{test\_loss}.
 
 \begin{lstlisting}[language=Python]
-n_epoch = 20
+n_epoch = 1000
 train_loss = np.zeros(n_epoch)
 test_loss = np.zeros(n_epoch)
 for i in range(n_epoch):
-  info_dict = inference.update(feed_dict={X_ph: X_train, y_ph: y_train})
-  train_loss[i] = info_dict['loss']
-  test_loss[i] = 0.0
-  # test_loss[i] = sess.run(inference.loss, feed_dict={X_ph: X_test, y_ph: y_test})
-  print("Train Loss: {:0.3f}, Test Loss: {:0.3f}".format(
-      train_loss[i], test_loss[i]))
+    info_dict = inference.update(feed_dict={X: X_train, y: y_train})
+    train_loss[i] = info_dict['loss']
+    test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
 \end{lstlisting}
 
 After training for a number of iterations,
@@ -135,18 +159,17 @@ the model. In this case, it is
 
 \begin{itemize}
 \item
-\texttt{pi}, the mixture components;
+\texttt{model.pi}, the mixture components;
 \item
-\texttt{mus}, the means;
+\texttt{model.mus}, the means;
 \item
-\texttt{sigmas}, the standard deviations.
+\texttt{model.sigmas}, the standard deviations.
 \end{itemize}
 
 To do this, we call
 \begin{lstlisting}[language=Python]
-sess = ed.get_session()
-pred_weights, pred_means, pred_std = sess.run(
-     [mus, sigmas, logits], feed_dict={X_ph: X_test})
+pred_weights, pred_means, pred_std = \
+    sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
 \end{lstlisting}
 
 Let's plot the log-likelihood of the training and test data as

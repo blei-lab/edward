@@ -102,7 +102,7 @@
 </div>
 </div>
 <h3 id="developing-inference-algorithms">Developing Inference Algorithms</h3>
-<p>Edward uses class inheritance to provide a hierarchy of inference methods. This enables fast experimentation on top of existing algorithms, whether it be developing new black box algorithms or developing new model-specific algorithms. We detail this below.</p>
+<p>Edward uses class inheritance to provide a hierarchy of inference methods. This enables fast experimentation on top of existing algorithms, whether it be developing new black box algorithms or new model-specific algorithms.</p>
 <p><img alt="image" src="/images/inference_structure.png" width="700"/> <span><em>Dependency graph of inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
 <p>There is a base class <code>Inference</code>, from which all inference methods are derived from.</p>
 <pre class="python" language="Python"><code>class Inference(object):
@@ -130,7 +130,7 @@ class VariationalInference(Inference):
 
   ...</code></pre>
 <p>For example, developing a new variational inference algorithm is as simple as inheriting from <code>VariationalInference</code> or one of its derived classes. <code>VariationalInference</code> implements many default methods such as <code>initialize()</code> with options for an optimizer.</p>
-<p>For examples of inference algorithms built in Edward, see the inference <a href="/tutorials/">tutorials</a>. It can also be useful to simply look at the <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences">source code</a>.</p>
+<p>For examples of inference algorithms developed in Edward, see the inference <a href="/tutorials/">tutorials</a>. It can also be useful to look at the <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences">source code</a>.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

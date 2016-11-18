@@ -103,7 +103,7 @@
 </div>
 <h3 id="composing-inferences">Composing Inferences</h3>
 <p>Core to Edward’s design is compositionality. Compositionality enables fine control of inference, where we can write inference as a collection of separate inference programs.</p>
-<p>We outline how to write popular classes of compositional inferences using Edward: hybrid algorithms and message passing algorithms. We use the running example of a mixture model.</p>
+<p>We outline how to write popular classes of compositional inferences using Edward: hybrid algorithms and message passing algorithms. We use the running example of a mixture model with latent mixture assignments <code>z</code>, latent cluster means <code>beta</code>, and observations <code>x</code>.</p>
 <h3 id="hybrid-algorithms">Hybrid algorithms</h3>
 <p>Hybrid algorithms leverage different inferences for each latent variable in the posterior. As an example, we demonstrate variational EM, with an approximate E-step over local variables and an M-step over global variables. We alternate with one update of each <span class="citation">(Neal &amp; Hinton, 1993)</span>.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, PointMass
@@ -148,9 +148,9 @@ for _ in range(10000):
   inference_z1.update()
   inference_z2.update()</code></pre>
 <p>We alternate updates for each local inference, where the global posterior factor <span class="math inline">\(q(\beta)\)</span> is shared across both inferences <span class="citation">(Gelman et al., 2014)</span>.</p>
+<p>With TensorFlow’s distributed training, compositionality enables <em>distributed</em> message passing over a cluster with many workers. The computation can be further sped up with the use of GPUs via data and model parallelism.</p>
 <p>This extends to many algorithms: for example, classical message passing, which performs exact local inferences; Gibbs sampling, which draws samples from conditionally conjugate inferences <span class="citation">(S. Geman &amp; Geman, 1984)</span>; expectation propagation, which locally minimizes <span class="math inline">\(\text{KL}(p || q)\)</span> over exponential families <span class="citation">(Minka, 2001)</span>; integrated nested Laplace approximation, which performs local Laplace approximations <span class="citation">(Rue, Martino, &amp; Chopin, 2009)</span>; and all the instantiations of EP-like algorithms in <span class="citation">Gelman et al. (2014)</span>.</p>
 <p>In the above, we perform local inferences split over individual random variables. At the moment, Edward does not support local inferences within a random variable itself. We cannot do local inferences when representing the random variable for all data points and their cluster membership as <code>x</code> and <code>z</code> rather than <code>x1</code>, <code>x2</code>, <code>z1</code>, and <code>z2</code>.</p>
-<p>With TensorFlow’s distributed training, note that compositionality enables <em>distributed</em> message passing over a cluster with many workers. The computation can be further sped up with the use of GPUs via data and model parallelism.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-andrieu2009pseudo">
