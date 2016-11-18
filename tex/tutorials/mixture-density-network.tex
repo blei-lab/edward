@@ -8,18 +8,17 @@ construct neural networks.
 
 If you are not familiar with MDNs have a look at the
 \href{http://cbonnett.github.io/MDN.html}{following blog post} or at
-original
-\href{http://research.microsoft.com/en-us/um/people/cmbishop/downloads/Bishop-NCRG-94-004.pdf}{paper}
-by Bishop.
-Note you have to manually \href{https://keras.io/backend/}
-{configure Keras} to work with TensorFlow.
+original paper by \citet{bishop1994mixture}.
 The script is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py}
 {here}.
 
 \subsubsection{Data}
 
-We use the same toy data from the \href{http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/}{blog post} by Otoro, where he explains MDNs. This is an inverse problem: for every input $X$ there are multiple outputs $y$.
+We use the same toy data from the
+\href{http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/}{David
+Ha's blog post}, where he explains MDNs. It is an inverse problem where
+for every input $x_n$ there are multiple outputs $y_n$.
 
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N):
