@@ -185,6 +185,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   else:  # tf.Operation
     op = org_instance
 
+    # Do not copy queue operations
     if 'Queue' in op.type:
       return op
 
