@@ -525,6 +525,11 @@ def build_score_loss_and_gradients(inference, var_list):
       if z in inference.scale:
         z_log_prob *= inference.scale[z]
 
+      zsamp = tf.check_numerics(tf.to_float(z_sample[z]), z.name + 'sample')
+      tf.scalar_summary(z.name + str(s), tf.reduce_mean(zsamp))
+      zgrad = tf.check_numerics(tf.stop_gradient(tf.to_float(z_sample[z])), z.name + 'gradient')
+      zlogq = tf.check_numerics(qz.log_prob(zgrad), z.name + 'logq')
+      tf.scalar_summary(z.name + 'logq' + str(s), tf.reduce_sum(zlogq))
       q_log_prob[s] += z_log_prob
 
     if inference.model_wrapper is None:
@@ -541,20 +546,24 @@ def build_score_loss_and_gradients(inference, var_list):
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
+        tf.check_numerics(z_copy.log_prob(z_sample[z]), z.name + 'logp(z)')
         z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
         if z in inference.scale:
           z_log_prob *= inference.scale[z]
 
         p_log_prob[s] += z_log_prob
+        tf.scalar_summary(z.name + 'logp(z)' + str(s), tf.reduce_sum(z_copy.log_prob(z_sample[z])))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
+          tf.check_numerics(x_copy.log_prob(obs), x.name + 'logp(x)')
           x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
           if x in inference.scale:
             x_log_prob *= inference.scale[x]
 
           p_log_prob[s] += x_log_prob
+          tf.scalar_summary(x.name + 'logp(x)' + str(s), tf.reduce_sum(x_copy.log_prob(obs)))
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -566,7 +575,11 @@ def build_score_loss_and_gradients(inference, var_list):
     var_list = tf.trainable_variables()
 
   losses = p_log_prob - q_log_prob
+  tf.scalar_summary('logp', tf.reduce_mean(p_log_prob))
+  tf.scalar_summary('logq', tf.reduce_mean(q_log_prob))
   loss = -tf.reduce_mean(losses)
+
+  tf.scalar_summary('ELBO', -loss)
   grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
       [v.ref() for v in var_list])

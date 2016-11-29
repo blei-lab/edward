@@ -59,7 +59,8 @@ class RandomVariable(object):
     # need to temporarily pop value before __init__
     value = kwargs.pop('value', None)
     super(RandomVariable, self).__init__(*args, **kwargs)
-    self._kwargs['value'] = value  # reinsert (needed for copying)
+    if value is not None:
+      self._kwargs['value'] = value  # reinsert (needed for copying)
 
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
 
@@ -70,8 +71,8 @@ class RandomVariable(object):
       value_shape = t_value.get_shape().as_list()
       if value_shape != expected_shape:
         raise ValueError(
-            "incompatible shape for initialization argument 'value'."
-            "expected '%s', got '%s'" % (expected_shape, value_shape))
+            "Incompatible shape for initialization argument 'value'. "
+            "Expected %s, got %s." % (expected_shape, value_shape))
       else:
         self._value = t_value
     else:
