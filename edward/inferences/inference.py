@@ -214,7 +214,7 @@ class Inference(object):
       self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
 
     if variables is None:
-      init = tf.initialize_all_variables()
+      init = tf.global_variables_initializer()
     else:
       init = tf.initialize_variables(variables)
 
