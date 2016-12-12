@@ -61,7 +61,7 @@ inference_m = ed.MAP(data={x: x_train, z: tf.gather(qz.params, inference_e.t)})
 optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
 inference_m.initialize(optimizer=optimizer)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_iter_per_epoch = 100

@@ -117,7 +117,7 @@ sess = ed.get_session()  # Start TF session
 K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 1000

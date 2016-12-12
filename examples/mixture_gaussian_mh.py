@@ -70,7 +70,7 @@ inference = ed.MetropolisHastings(
 inference.initialize()
 
 sess = ed.get_session()
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for _ in range(T):

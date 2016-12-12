@@ -69,7 +69,7 @@ inference = ed.MAP([], data, model)
 sess = ed.get_session()
 inference.initialize()
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 20

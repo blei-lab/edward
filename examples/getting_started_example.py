@@ -77,7 +77,7 @@ for s in range(10):
 mus = tf.pack(mus)
 
 sess = ed.get_session()
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 
