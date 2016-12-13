@@ -4,12 +4,16 @@
 
 \subsubsection{Basic Installation}
 
+\textbf{Warning: TensorFlow v0.12.0rc0 and v0.12.0rc1 broke
+compatibility with Edward. Use at most
+\href{https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#download-and-setup}{TensorFlow v0.11.0} for now.}
+
 Edward depends on
 
 \begin{itemize}
   \item NumPy (>=1.7)
   \item Six (>=1.1.0)
-  \item TensorFlow (>=0.11.0rc0)
+  \item TensorFlow (>=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1)
 \end{itemize}
 
 We recommend using \texttt{pip} to install \texttt{numpy} and
