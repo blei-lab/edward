@@ -541,7 +541,7 @@ def build_score_loss_and_gradients(inference, var_list):
 
         p_log_prob[s] += z_log_prob
 
-      for x in six.iteritems(inference.data):
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
           x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
