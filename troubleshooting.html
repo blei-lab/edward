@@ -88,11 +88,12 @@
 <div class="nine columns">
 <h2 id="troubleshooting">Troubleshooting</h2>
 <h3 id="basic-installation">Basic Installation</h3>
+<p><strong>Warning: TensorFlow v0.12.0rc0 and v0.12.0rc1 broke compatibility with Edward. Use at most <a href="https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#download-and-setup">TensorFlow v0.11.0</a> for now.</strong></p>
 <p>Edward depends on</p>
 <ul>
 <li>NumPy (&gt;=1.7)</li>
 <li>Six (&gt;=1.1.0)</li>
-<li>TensorFlow (&gt;=0.11.0rc0)</li>
+<li>TensorFlow (&gt;=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1)</li>
 </ul>
 <p>We recommend using <code>pip</code> to install <code>numpy</code> and <code>six</code> as</p>
 <pre language="JSON"><code>pip install numpy six</code></pre>
