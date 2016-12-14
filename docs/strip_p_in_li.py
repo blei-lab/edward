@@ -14,7 +14,8 @@ for filename in filenames:
   all_li = soup.find_all('li')
   if all_li:
     for list_item in all_li:
-      list_item.p.unwrap()
+      if list_item.p is not None:
+        list_item.p.unwrap()
     html = str(soup)
     with open(filename, 'wb') as file:
         file.write(html)
