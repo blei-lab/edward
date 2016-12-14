@@ -6,6 +6,7 @@ import multiprocessing
 import numpy as np
 import six
 import tensorflow as tf
+import warnings
 
 from edward.models import RandomVariable, StanModel
 from edward.util import get_session
@@ -163,6 +164,12 @@ class Inference(object):
         else:
           raise TypeError("Data key has an invalid type.")
 
+    if model_wrapper is not None:
+      warnings.simplefilter('default', DeprecationWarning)
+      warnings.warn("Model wrappers are deprecated. Edward is dropping "
+                    "support for model wrappers in future versions; use the "
+                    "native language instead.", DeprecationWarning)
+
     self.model_wrapper = model_wrapper
 
   def run(self, logdir=None, variables=None, use_coordinator=True,
@@ -235,7 +242,7 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
-  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None):
+  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None):
     """Initialize inference algorithm.
 
     Parameters
@@ -246,11 +253,16 @@ class Inference(object):
       Number of iterations for each print progress. To suppress print
       progress, then specify 0. Default is int(n_iter / 10).
     n_minibatch : int, optional
-      Number of samples for data subsampling. Default is to use
-      all the data. Subsampling is available only if all data
-      passed in are NumPy arrays and the model is not a Stan
-      model. For subsampling details, see
-      ``tf.train.slice_input_producer`` and ``tf.train.batch``.
+      Number of samples for data subsampling. Default is to use all
+      the data. ``n_minibatch`` is available only for TensorFlow,
+      Python, and PyMC3 model wrappers; use ``scale`` for Edward's
+      language. All data must be passed in as NumPy arrays. For
+      subsampling details, see ``tf.train.slice_input_producer`` and
+      ``tf.train.batch``.
+    scale : dict of RandomVariable to tf.Tensor, optional
+      A scalar value to scale computation for any random variable that
+      it is binded to. For example, this is useful for scaling
+      computations with respect to local latent variables.
     """
     self.n_iter = n_iter
     if n_print is None:
@@ -261,8 +273,15 @@ class Inference(object):
     self.t = tf.Variable(0, trainable=False)
     self.increment_t = self.t.assign_add(1)
 
+    if scale is None:
+      scale = {}
+    elif not isinstance(scale, dict):
+      raise TypeError()
+
+    self.scale = scale
     self.n_minibatch = n_minibatch
     if n_minibatch is not None and \
+       self.model_wrapper is not None and \
        not isinstance(self.model_wrapper, StanModel):
       # Re-assign data to batch tensors, with size given by
       # ``n_minibatch``. Don't do this for random variables in data.

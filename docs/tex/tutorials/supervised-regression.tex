@@ -20,10 +20,10 @@ $y_n\in\mathbb{R}$. They have a linear dependence with normally
 distributed noise.
 
 \begin{lstlisting}[language=Python]
-def build_toy_dataset(N, coeff=np.random.randn(10), noise_std=0.1):
+def build_toy_dataset(N, coeff, noise_std=0.1):
   n_dim = len(coeff)
   x = np.random.randn(N, n_dim).astype(np.float32)
-  y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
+  y = np.dot(x, coeff) + np.random.normal(0, noise_std, size=N)
   return x, y
 
 N = 40  # number of data points
@@ -42,7 +42,6 @@ model, see the
 \href{/tutorials/bayesian-linear-regression}
 {Bayesian linear regression tutorial}.
 
-Here we build the model in Edward's native language.
 \begin{lstlisting}[language=Python]
 X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))

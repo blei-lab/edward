@@ -4,27 +4,30 @@
 
 \subsubsection{Basic Installation}
 
+\textbf{Warning: TensorFlow v0.12.0rc0 and v0.12.0rc1 broke
+compatibility with Edward. Use at most
+\href{https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#download-and-setup}{TensorFlow v0.11.0} for now.}
+
 Edward depends on
 
 \begin{itemize}
   \item NumPy (>=1.7)
-  \item SciPy (>=0.16)
   \item Six (>=1.1.0)
-  \item TensorFlow (>=0.11.0rc0)
+  \item TensorFlow (>=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1)
 \end{itemize}
 
-We recommend using \texttt{pip} to install \texttt{numpy}, \texttt{scipy}, and
+We recommend using \texttt{pip} to install \texttt{numpy} and
 \texttt{six} as
 
 \begin{lstlisting}[language=JSON]
-pip install numpy scipy six
+pip install numpy six
 \end{lstlisting}
 
 \href{https://www.tensorflow.org/}{TensorFlow} is not on PyPI yet. We recommend
 using \texttt{pip} to install the latest TensorFlow binaries. Please
 follow the
 \href
-{https://www.tensorflow.org/versions/r0.10/get_started/os_setup.html#pip-installation}
+{https://www.tensorflow.org/versions/master/get_started/os_setup.html#pip-installation}
 {instructions} from Google.
 
 \subsubsection{TensorFlow via \texttt{conda}}
@@ -36,7 +39,7 @@ installed via the community-supported \texttt{conda-forge} channel:
 
 \begin{lstlisting}[language=JSON]
 conda config --add channels conda-forge
-conda create -n cpu-tf-edward numpy scipy six tensorflow
+conda create -n cpu-tf-edward numpy six tensorflow
 source activate cpu-tf-edward
 pip install edward
 \end{lstlisting}

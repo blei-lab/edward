@@ -37,7 +37,7 @@ prior over the code
 \begin{align*}
   p(\mathbf{z})
   &=
-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, I).
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).
 \end{align*}
 
 Let's build the model in Edward using
@@ -45,6 +45,9 @@ Keras as an easy way to build neural networks. Here we use a
 probabilistic decoder to model binarized 28 x 28
 pixel images from MNIST.
 \begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Normal
+from keras.layers import Dense
+
 z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
 hidden = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(hidden))

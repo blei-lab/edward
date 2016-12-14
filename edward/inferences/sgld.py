@@ -97,26 +97,35 @@ class SGLD(MonteCarlo):
       Latent variable keys to samples.
     """
     if self.model_wrapper is None:
+      scope = 'inference_' + str(id(self))
       # Form dictionary in order to replace conditioning on prior or
       # observed variable with conditioning on a specific value.
       dict_swap = z_sample.copy()
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope='conditional')
+            qx_copy = copy(qx, scope=scope)
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
 
       log_joint = 0.0
       for z in six.iterkeys(self.latent_vars):
-        z_copy = copy(z, dict_swap, scope='prior')
-        log_joint += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        z_copy = copy(z, dict_swap, scope=scope)
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in self.scale:
+          z_log_prob *= self.scale[z]
+
+        log_joint += z_log_prob
 
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='likelihood')
-          log_joint += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in self.scale:
+            x_log_prob *= self.scale[x]
+
+          log_joint += x_log_prob
     else:
       x = self.data
       log_joint = self.model_wrapper.log_prob(x, z_sample)

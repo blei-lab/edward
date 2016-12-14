@@ -14,15 +14,15 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from scipy.stats import norm
 
 
 def build_toy_dataset(N, noise_std=0.1):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
-  y = 5.0 * X + norm.rvs(0, noise_std, size=N)
-  X = X.reshape((N, 1))
-  return X.astype(np.float32), y.astype(np.float32)
+  y = 5.0 * X + np.random.normal(0, noise_std, size=N)
+  X = X.astype(np.float32).reshape((N, 1))
+  y = y.astype(np.float32)
+  return X, y
 
 
 ed.set_seed(42)

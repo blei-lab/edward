@@ -79,13 +79,15 @@ class MetropolisHastings(MonteCarlo):
 
     dict_swap_old = dict_swap.copy()
     dict_swap_old.update(old_sample)
+    scope_old = 'inference_' + str(id(self)) + '/old'
+    scope_new = 'inference_' + str(id(self)) + '/new'
 
     # Draw proposed sample and calculate acceptance ratio.
     new_sample = {}
     ratio = 0.0
     for z, proposal_z in six.iteritems(self.proposal_vars):
       # Build proposal g(znew | zold).
-      proposal_znew = copy(proposal_z, dict_swap_old, scope='proposal_znew')
+      proposal_znew = copy(proposal_z, dict_swap_old, scope=scope_old)
       # Sample znew ~ g(znew | zold).
       new_sample[z] = proposal_znew.value()
       # Increment ratio.
@@ -96,15 +98,15 @@ class MetropolisHastings(MonteCarlo):
 
     for z, proposal_z in six.iteritems(self.proposal_vars):
       # Build proposal g(zold | znew).
-      proposal_zold = copy(proposal_z, dict_swap_new, scope='proposal_zold')
+      proposal_zold = copy(proposal_z, dict_swap_new, scope=scope_new)
       # Increment ratio.
       ratio -= tf.reduce_sum(proposal_zold.log_prob(dict_swap_old[z]))
 
     if self.model_wrapper is None:
       for z in six.iterkeys(self.latent_vars):
         # Build priors p(znew) and p(zold).
-        znew = copy(z, dict_swap_new, scope='znew')
-        zold = copy(z, dict_swap_old, scope='zold')
+        znew = copy(z, dict_swap_new, scope=scope_new)
+        zold = copy(z, dict_swap_old, scope=scope_old)
         # Increment ratio.
         ratio += tf.reduce_sum(znew.log_prob(dict_swap_new[z]))
         ratio -= tf.reduce_sum(zold.log_prob(dict_swap_old[z]))
@@ -112,8 +114,8 @@ class MetropolisHastings(MonteCarlo):
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
           # Build likelihoods p(x | znew) and p(x | zold).
-          x_znew = copy(x, dict_swap_new, scope='x_znew')
-          x_zold = copy(x, dict_swap_old, scope='x_zold')
+          x_znew = copy(x, dict_swap_new, scope=scope_new)
+          x_zold = copy(x, dict_swap_old, scope=scope_old)
           # Increment ratio.
           ratio += tf.reduce_sum(x_znew.log_prob(dict_swap[x]))
           ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))

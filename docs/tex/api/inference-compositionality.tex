@@ -10,7 +10,9 @@ collection of separate inference programs.
 
 We outline how to write popular classes of compositional inferences
 using Edward: hybrid algorithms and message passing algorithms.
-We use the running example of a mixture model.
+We use the running example of a mixture model
+with latent mixture assignments \texttt{z}, latent cluster means
+\texttt{beta}, and observations \texttt{x}.
 
 \subsubsection{Hybrid algorithms}
 
@@ -21,6 +23,8 @@ E-step over local variables and an M-step over global variables.
 We alternate with one update of each \citep{neal1993new}.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, PointMass
+
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
@@ -57,6 +61,8 @@ mixture model to be over two random variables \texttt{x1} and
 and \texttt{z2}.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, Normal
+
 N1 = 1000  # number of data points in first data set
 N2 = 2000  # number of data points in second data set
 D = 2  # data dimension
@@ -87,6 +93,11 @@ We alternate updates for each local inference, where the global
 posterior factor $q(\beta)$ is shared across both inferences
 \citep{gelman2014expectation}.
 
+With TensorFlow's distributed training, compositionality
+enables \emph{distributed} message passing over a cluster with many
+workers. The computation can be further sped up with the use of GPUs
+via data and model parallelism.
+
 This extends to many algorithms: for example,
 classical message passing, which performs exact local inferences;
 Gibbs sampling, which draws samples from conditionally conjugate
@@ -106,10 +117,5 @@ within a random variable itself. We cannot do local inferences when
 representing the random variable for all data points and their cluster
 membership as \texttt{x} and \texttt{z} rather than \texttt{x1},
 \texttt{x2}, \texttt{z1}, and \texttt{z2}.
-
-With TensorFlow's distributed training, note that compositionality
-enables \emph{distributed} message passing over a cluster with many
-workers. The computation can be further sped up with the use of GPUs
-via data and model parallelism.
 
 \subsubsection{References}\label{references}

@@ -12,8 +12,8 @@ import tensorflow as tf
 from edward.stats import norm
 from keras import backend as K
 from keras.layers import Dense
-from scipy.stats import norm as normal
-from sklearn.cross_validation import train_test_split
+from scipy import stats
+from sklearn.model_selection import train_test_split
 
 
 def plot_normal_mix(pis, mus, sigmas, ax, label='', comp=True):
@@ -23,7 +23,7 @@ def plot_normal_mix(pis, mus, sigmas, ax, label='', comp=True):
   x = np.linspace(-10.5, 10.5, 250)
   final = np.zeros_like(x)
   for i, (weight_mix, mu_mix, sigma_mix) in enumerate(zip(pis, mus, sigmas)):
-    temp = normal.pdf(x, mu_mix, sigma_mix) * weight_mix
+    temp = stats.norm.pdf(x, mu_mix, sigma_mix) * weight_mix
     final = final + temp
     if comp:
       ax.plot(x, temp, label='Normal ' + str(i))
@@ -42,7 +42,7 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
   for j, (weights, means, std_devs) in enumerate(
           zip(pred_weights, pred_means, pred_std)):
     index = np.random.choice(to_choose_from, p=weights)
-    samples[j, 1] = normal.rvs(means[index], std_devs[index], size=1)
+    samples[j, 1] = np.random.normal(means[index], std_devs[index], size=1)
     samples[j, 0] = x[j]
     if j == amount - 1:
       break
@@ -50,10 +50,10 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
 
 
 def build_toy_dataset(N):
-  y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
-  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
-  return train_test_split(x_data, y_data, random_state=42, train_size=0.1)
+  y_data = np.random.uniform(-10.5, 10.5, (N, 1)).astype(np.float32)
+  r_data = np.random.normal(size=(N, 1)).astype(np.float32)  # random noise
+  x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
+  return train_test_split(x_data, y_data, random_state=42)
 
 
 class MixtureDensityNetwork:
@@ -120,10 +120,10 @@ inference.initialize()
 init = tf.initialize_all_variables()
 init.run()
 
-NEPOCH = 1000
-train_loss = np.zeros(NEPOCH)
-test_loss = np.zeros(NEPOCH)
-for i in range(NEPOCH):
+n_epoch = 1000
+train_loss = np.zeros(n_epoch)
+test_loss = np.zeros(n_epoch)
+for i in range(n_epoch):
   info_dict = inference.update(feed_dict={X: X_train, y: y_train})
   train_loss[i] = info_dict['loss']
   test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
@@ -133,8 +133,8 @@ pred_weights, pred_means, pred_std = \
     sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
 
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), -test_loss / len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), -train_loss / len(X_train), label='Train')
+plt.plot(np.arange(n_epoch), -test_loss / len(X_test), label='Test')
+plt.plot(np.arange(n_epoch), -train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)

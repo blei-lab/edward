@@ -52,7 +52,7 @@ class HierarchicalLogistic:
 def build_toy_dataset(N, noise_std=0.1):
   D = 1
   x = np.linspace(-3, 3, num=N)
-  y = np.tanh(x) + norm.rvs(0, noise_std, size=N)
+  y = np.tanh(x) + np.random.normal(0, noise_std, size=N)
   y[y < 0.5] = 0
   y[y >= 0.5] = 1
   x = (x - 4.0) / 4.0

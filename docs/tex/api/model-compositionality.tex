@@ -4,14 +4,14 @@
 
 \subsubsection{Composing Random Variables}
 
-Core to Edward’s design is compositionality. Compositionality enables
+Core to Edward's design is compositionality. Compositionality enables
 fine control of modeling, where models are represented as a collection
 of random variables.
 
 We outline how to write popular classes of models using Edward:
 directed graphical models, neural networks, Bayesian nonparametrics,
-and probabilistic programs. For more examples, see the model
-\href{/tutorials/}{tutorials}.
+and probabilistic programs. For more examples, see the
+\href{/tutorials/}{model tutorials}.
 
 \subsubsection{Directed Graphical Models}
 
@@ -74,8 +74,8 @@ As Edward uses TensorFlow, it is easy to construct neural networks for
 probabilistic modeling \citep{rumelhart1988parallel}.
 For example, one can specify stochastic neural networks
 \citep{neal1990learning}; see the
-\href{/tutorials/bayesian-neural-network}{Bayesian neural networks}
-tutorial for details.
+\href{/tutorials/bayesian-neural-network}{Bayesian neural network tutorial}
+for details.
 
 High-level libraries such as
 \href{http://keras.io}{Keras} and
@@ -86,18 +86,18 @@ $\{\mathbf{x}_n\}\in\{0,1\}^{N\times 28*28}$.
 
 \includegraphics[width=250px]{/images/decoder.png}
 
-{\small\textit{Graphical model representation.}}
+{\small\textit{Graphical representation of a deep generative model.}}
 
 The model specifies a generative process where for each
 $n=1,\ldots,N$,
 %
 \begin{align*}
-\mathbf{z}_n &\sim \text{Normal}(\mathbf{z} \mid \mathbf{0}, I), \\[1.5ex]
+\mathbf{z}_n &\sim \text{Normal}(\mathbf{z}_n \mid \mathbf{0}, \mathbf{I}), \\[1.5ex]
 \mathbf{x}_n\mid \mathbf{z}_n &\sim \text{Bernoulli}(\mathbf{x}_n\mid
-p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})),
+p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).
 \end{align*}
 %
-where the latent space is $\mathbf{z}_n\in\mathbb{R}^d$ and the
+The latent space is $\mathbf{z}_n\in\mathbb{R}^d$ and the
 likelihood is parameterized by a neural network $\mathrm{NN}$ with
 parameters $\theta$. We will use a two-layer neural network with a
 fully connected hidden layer of 256 units (with ReLU activation) and
@@ -144,7 +144,7 @@ infinite-dimensional space.
 For the collapsed approach, see the
 \href{/tutorials/gp-classification}{Gaussian process classification}
 tutorial as an example. We specify distributions over the function
-evaluations of the Gaussian process, where the Gaussian process is
+evaluations of the Gaussian process, and the Gaussian process is
 implicitly marginalized out. This approach is also useful for Poisson
 process models.
 

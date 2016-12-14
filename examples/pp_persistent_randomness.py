@@ -13,6 +13,7 @@ References
 https://probmods.org/generative-models.html#persistent-randomness-mem
 """
 import edward as ed
+import tensorflow as tf
 
 from edward.models import Categorical
 

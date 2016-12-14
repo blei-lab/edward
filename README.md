@@ -1,7 +1,7 @@
 [![edward](../master/docs/images/edward_200.png?raw=true)](http://edwardlib.org)
 
 [![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
-[![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master)](https://coveralls.io/github/blei-lab/edward?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master&cacheBuster=1)](https://coveralls.io/github/blei-lab/edward?branch=master)
 
 [Edward](http://edwardlib.org) is a Python library for probabilistic modeling,
 inference, and criticism. It is a testbed for fast experimentation and research

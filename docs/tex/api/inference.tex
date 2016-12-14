@@ -39,19 +39,19 @@ to update parameters $\lambda$ are specified by an inference
 algorithm.
 
 Running inference is as simple as running one method.
+
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.run()
 \end{lstlisting}
-%
-Inference also supports fine-grained control of the training procedure.
-%
+
+Inference also supports fine control of the training procedure.
+
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.initialize()
 
-init = tf.initialize_all_variables()
-init.run()
+tf.initialize_all_variables().run()
 
 for _ in range(inference.n_iter):
   info_dict = inference.update()
@@ -59,6 +59,16 @@ for _ in range(inference.n_iter):
 
 inference.finalize()
 \end{lstlisting}
+
+\texttt{initialize()} builds the algorithm's update rules
+(computational graph) for $\lambda$;
+\texttt{initialize_all_variables()} initializes $\lambda$
+(TensorFlow variables in the graph);
+\texttt{update()} runs the graph once to update
+$\lambda$, which is called in a loop until convergence;
+\texttt{finalize()} runs any computation as the algorithm
+terminates.
+
 The \texttt{run()} method is a simple wrapper for this procedure.
 
 \subsubsection{Other Settings}

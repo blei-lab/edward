@@ -43,7 +43,6 @@ class test_inference_class(tf.test.TestCase):
     ed.Inference(data={x: qx})
     self.assertRaises(TypeError, ed.Inference, data={5: tf.constant(0.0)})
     self.assertRaises(TypeError, ed.Inference, data={x: tf.zeros(5)})
-    self.assertRaises(TypeError, ed.Inference, data={'a': qx})
     self.assertRaises(TypeError, ed.Inference, data={x_ph: x})
     self.assertRaises(TypeError, ed.Inference, data={x: qx_misshape})
 
@@ -52,8 +51,6 @@ class test_inference_class(tf.test.TestCase):
     qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
 
     ed.Inference({'mu': qmu}, model_wrapper=model)
-    self.assertRaises(TypeError, ed.Inference, data={'x': qmu},
-                      model_wrapper=model)
 
 if __name__ == '__main__':
   tf.test.main()

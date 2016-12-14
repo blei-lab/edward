@@ -4,8 +4,6 @@ language: python
 matrix:
     include:
         - python: 2.7
-        - python: 2.7
-          env: TEST_MODE=PEP8
         - python: 3.4
 notifications:
     email: false
@@ -39,10 +37,7 @@ install:
     fi
   - python setup.py install
 script:
-  - if [[ "$TEST_MODE" == "PEP8" ]]; then
-       PYTHONPATH=$PWD:$PYTHONPATH py.test --pep8 -m pep8 -n0;
-    else
-       PYTHONPATH=$PWD:$PYTHONPATH py.test;
-    fi
+  - PYTHONPATH=$PWD:$PYTHONPATH py.test --cov=./ --pep8;
+
 after_success:
   - coveralls

@@ -6,23 +6,36 @@
 
 Inference is broadly classified under three classes: variational
 inference, Monte Carlo, and exact inference.
-We highlight how to use inference algorithms from each class;
-we use the running example of a mixture model.
+We highlight how to use inference algorithms from each class.
+
+As an example, we assume a mixture model with latent mixture
+assignments \texttt{z}, latent cluster means \texttt{beta}, and
+observations \texttt{x}:
+\begin{equation*}
+p(\mathbf{x}, \mathbf{z}, \beta)
+=
+\text{Normal}(\mathbf{x} \mid \beta_{\mathbf{z}}, \mathbf{I})
+~
+\text{Categorical}(\mathbf{z}\mid \pi)
+~
+\text{Normal}(\beta\mid \mathbf{0}, \mathbf{I}).
+\end{equation*}
 
 \subsubsection{Variational Inference}
 
 In variational inference, the idea is to posit a family of approximating
 distributions and to find the closest member in the family to the
 posterior \citep{jordan1999introduction}.
-We build the variational family in the graph.
-The variational family has TensorFlow
-variables representing its parameters $\mathbf{\lambda}=\{\pi,\mu,\sigma\}$,
-where
+We write an approximating family,
 \begin{align*}
 q(\beta;\mu,\sigma) &= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
-q(\mathbf{z};\pi) &= \text{Categorical}(\mathbf{z};\pi).
+q(\mathbf{z};\pi) &= \text{Categorical}(\mathbf{z};\pi),
 \end{align*}
+using TensorFlow variables to represent its parameters
+$\lambda=\{\pi,\mu,\sigma\}$.
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, Normal
+
 qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
                sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
@@ -30,16 +43,17 @@ qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
 \end{lstlisting}
 Given an objective function, variational inference optimizes the
-factors with respect to \texttt{tf.Variable}s.
+family with respect to \texttt{tf.Variable}s.
 
 Specific variational inference algorithms inherit from
 the \texttt{VariationalInference} class to define their own methods, such as a
 loss function and gradient.
-For example, we represent MAP estimation with
-an approximating family of
-\texttt{PointMass} random variables,
-i.e., with all probability mass concentrated at a point.
+For example, we represent MAP estimation with an approximating family
+of \texttt{PointMass} random variables, i.e., with all probability
+mass concentrated at a point.
 \begin{lstlisting}[language=Python]
+from edward.models import PointMass
+
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
 qz = PointMass(params=tf.Variable(tf.zeros(N)))
 
@@ -60,8 +74,10 @@ q(\beta; \{\beta^{(t)}\})
 q(\mathbf{z}; \{\mathbf{z}^{(t)}\})
 &= \frac{1}{T}\sum_{t=1}^T \delta(\mathbf{z}, \mathbf{z}^{(t)}).
 \end{align*}
-The parameters are $\mathbf{\lambda}=\{\beta^{(t)},\mathbf{z}^{(t)}\}$.
+The parameters are $\lambda=\{\beta^{(t)},\mathbf{z}^{(t)}\}$.
 \begin{lstlisting}[language=Python]
+from edward.models import Empirical
+
 T = 10000  # number of samples
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
 qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
@@ -71,11 +87,11 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
 Monte Carlo
 algorithms proceed by updating one sample $\beta^{(t)},\mathbf{z}^{(t)}$ at a time in the empirical
 approximation.
-Specific \glsunset{MC}\gls{MC} samplers determine the update rules;
+Specific Monte Carlo samplers determine the update rules;
 they can leverage gradients and graph structure, where applicable.
 Markov chain Monte Carlo does this sequentially to update
 the current sample (index $t$ of \texttt{tf.Variable}s) conditional on
-the last sample (index $t-1$ of the \texttt{tf.Variable}s).
+the last sample (index $t-1$ of \texttt{tf.Variable}s).
 
 \subsubsection{Exact Inference}
 
