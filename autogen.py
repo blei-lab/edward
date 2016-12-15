@@ -111,16 +111,6 @@ PAGES = [
         'page': 'criticism.tex',
         'title': 'Criticism',
         'parent_pages': [],
-        'child_pages': [
-            'criticism-api.tex',
-        ],
-    },
-    {
-        'page': 'criticism-api.tex',
-        'title': 'API',
-        'parent_pages': [
-            'criticism.tex'
-        ],
         'child_pages': [],
     },
     # {
