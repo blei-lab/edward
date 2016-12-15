@@ -16,18 +16,19 @@ class HMC(MonteCarlo):
 
   Notes
   -----
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  HMC substitutes the model's log marginal density
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  ``HMC`` substitutes the model's log marginal density
 
   .. math::
 
-    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
-                \approx log p(x, z, \beta^*)
+    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)
 
-  leveraging a single Monte Carlo sample, where \beta^* ~
-  q(\beta). This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if q(\beta) = p(\beta | x).
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
   def __init__(self, *args, **kwargs):
     """
@@ -77,15 +78,15 @@ class HMC(MonteCarlo):
     new_r_sample = old_r_sample
     for _ in range(self.n_steps):
       new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
-                                          self.step_size, self.log_joint)
+                                          self.step_size, self._log_joint)
 
     # Calculate acceptance ratio.
     ratio = tf.reduce_sum([0.5 * tf.square(r)
                            for r in six.itervalues(old_r_sample)])
     ratio -= tf.reduce_sum([0.5 * tf.square(r)
                             for r in six.itervalues(new_r_sample)])
-    ratio += self.log_joint(new_sample)
-    ratio -= self.log_joint(old_sample)
+    ratio += self._log_joint(new_sample)
+    ratio -= self._log_joint(old_sample)
 
     # Accept or reject sample.
     u = Uniform().sample()
@@ -111,7 +112,7 @@ class HMC(MonteCarlo):
     assign_ops.append(self.n_accept.assign_add(tf.select(accept, 1, 0)))
     return tf.group(*assign_ops)
 
-  def log_joint(self, z_sample):
+  def _log_joint(self, z_sample):
     """
     Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).

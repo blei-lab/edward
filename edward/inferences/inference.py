@@ -30,7 +30,7 @@ class Inference(object):
     Data dictionary whose values may vary at each session run.
   model_wrapper : ed.Model or None
     An optional wrapper for the probability model. If specified, the
-    random variables in `latent_vars`' dictionary keys are strings
+    random variables in ``latent_vars``' dictionary keys are strings
     used accordingly by the wrapper.
   """
   def __init__(self, latent_vars=None, data=None, model_wrapper=None):
@@ -44,15 +44,15 @@ class Inference(object):
       will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      `RandomVariable`) to their realizations (of type `tf.Tensor`).
-      It can also bind placeholders (of type `tf.Tensor`) used in the
+      ``RandomVariable``) to their realizations (of type ``tf.Tensor``).
+      It can also bind placeholders (of type ``tf.Tensor``) used in the
       model to their realizations; and prior latent variables (of type
-      `RandomVariable`) to posterior latent variables (of type
-      `RandomVariable`).
+      ``RandomVariable``) to posterior latent variables (of type
+      ``RandomVariable``).
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
-      variables in `latent_vars`' dictionary keys are strings
-      used accordingly by the wrapper. `data` is also changed. For
+      variables in ``latent_vars``' dictionary keys are strings
+      used accordingly by the wrapper. ``data`` is also changed. For
       TensorFlow, Python, and Stan models, the key type is a string;
       for PyMC3, the key type is a Theano shared variable. For
       TensorFlow, Python, and PyMC3 models, the value type is a NumPy
@@ -64,6 +64,7 @@ class Inference(object):
     If ``data`` is not passed in, the dictionary is empty.
 
     Three options are available for batch training:
+
     1. internally if user passes in data as a dictionary of NumPy
        arrays;
     2. externally if user passes in data as a dictionary of
@@ -192,7 +193,7 @@ class Inference(object):
     ----------
     logdir : str, optional
       Directory where event file will be written. For details,
-      see `tf.train.SummaryWriter`. Default is to write nothing.
+      see ``tf.train.SummaryWriter``. Default is to write nothing.
     variables : list, optional
       A list of TensorFlow variables to initialize during inference.
       Default is to initialize all variables (this includes
@@ -251,7 +252,7 @@ class Inference(object):
       Number of iterations for algorithm.
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
-      progress, then specify 0. Default is int(n_iter / 10).
+      progress, then specify 0. Default is ``int(n_iter / 10)``.
     n_minibatch : int, optional
       Number of samples for data subsampling. Default is to use all
       the data. ``n_minibatch`` is available only for TensorFlow,

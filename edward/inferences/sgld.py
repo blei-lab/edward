@@ -15,18 +15,19 @@ class SGLD(MonteCarlo):
 
   Notes
   -----
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  SGLD substitutes the model's log marginal density
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  ``SGLD`` substitutes the model's log marginal density
 
   .. math::
 
-    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
-                \approx log p(x, z, \beta^*)
+    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)
 
-  leveraging a single Monte Carlo sample, where \beta^* ~
-  q(\beta). This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if q(\beta) = p(\beta | x).
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
   def __init__(self, *args, **kwargs):
     """
@@ -61,7 +62,7 @@ class SGLD(MonteCarlo):
 
     # Simulate Langevin dynamics.
     learning_rate = self.step_size / tf.cast(self.t + 1, tf.float32)
-    grad_log_joint = tf.gradients(self.log_joint(old_sample),
+    grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
     sample = {}
     for z, qz, grad_log_p in \
@@ -86,7 +87,7 @@ class SGLD(MonteCarlo):
     assign_ops.append(self.n_accept.assign_add(1))
     return tf.group(*assign_ops)
 
-  def log_joint(self, z_sample):
+  def _log_joint(self, z_sample):
     """
     Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).

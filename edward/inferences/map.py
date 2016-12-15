@@ -18,14 +18,14 @@ class MAP(VariationalInference):
 
   .. math::
 
-    \min_{z} - p(z | x).
+    \min_{z} - p(z \mid x).
 
   This is equivalent to using a ``PointMass`` variational distribution
   and minimizing the unnormalized objective,
 
   .. math::
 
-    - E_{q(z; \lambda)} [ \log p(x, z) ].
+    - \mathbb{E}_{q(z; \lambda)} [ \log p(x, z) ].
 
   Notes
   -----
@@ -34,15 +34,16 @@ class MAP(VariationalInference):
   discrete optimization.
 
   This class also minimizes the loss with respect to any model
-  parameters p(z | x; \theta).
+  parameters :math:`p(z \mid x; \theta)`.
 
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  MAP optimizes E_{q(\beta)} [ \log p(x, z, \beta) ], leveraging a
-  single Monte Carlo sample, \log p(x, z, \beta^*), where \beta^* ~
-  q(\beta). This is a lower bound to the marginal density \log p(x,
-  z), and it is exact if q(\beta) = p(\beta | x) (up to
-  stochasticity).
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`. ``MAP`` optimizes
+  :math:`\mathbb{E}_{q(\\beta)} [ \log p(x, z, \\beta) ]`, leveraging
+  a single Monte Carlo sample, :math:`\log p(x, z, \\beta^*)`, where
+  :math:`\\beta^* \sim q(\\beta)`. This is a lower bound to the
+  marginal density :math:`\log p(x, z)`, and it is exact if
+  :math:`q(\\beta) = p(\\beta \mid x)` (up to stochasticity).
   """
   def __init__(self, latent_vars=None, data=None, model_wrapper=None):
     """
@@ -58,7 +59,7 @@ class MAP(VariationalInference):
 
     Examples
     --------
-    Most explicitly, MAP is specified via a dictionary:
+    Most explicitly, ``MAP`` is specified via a dictionary:
 
     >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
     >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
@@ -71,7 +72,7 @@ class MAP(VariationalInference):
     >>> MAP([beta], data)
     >>> MAP([pi, mu, sigma], data)
 
-    Currently, MAP can only instantiate ``PointMass`` random variables
+    Currently, ``MAP`` can only instantiate ``PointMass`` random variables
     with unconstrained support. To constrain their support, one must
     manually pass in the ``PointMass`` family.
     """
@@ -148,11 +149,6 @@ class Laplace(MAP):
 
   It approximates the posterior distribution using a normal
   distribution centered at the mode of the posterior.
-
-  We implement this by running ``MAP`` to find the posterior mode.
-  This forms the mean of the normal approximation. We then compute
-  the Hessian at the mode of the posterior. This forms the
-  covariance of the normal approximation.
   """
   def __init__(self, *args, **kwargs):
     super(Laplace, self).__init__(*args, **kwargs)
