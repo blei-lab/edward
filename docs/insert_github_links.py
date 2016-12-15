@@ -7,7 +7,12 @@ import string
 
 def find_filename_and_line(method_name):
   components = string.split(method_name, '.')
-  method_obj = getattr(getattr(edward, components[1]), components[2])
+  if len(components) == 3:
+    method_obj = getattr(getattr(edward, components[1]), components[2])
+  if len(components) == 4:
+    method_obj = getattr(getattr(getattr(edward, components[1]),
+                                 components[2]),
+                         components[3])
   rel_path = inspect.getsourcefile(method_obj).split("edward/", 1)[1]
   line_no = inspect.getsourcelines(method_obj)[-1]
   return rel_path, line_no
