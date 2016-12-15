@@ -17,5 +17,6 @@ for filename in filenames:
       if list_item.p is not None:
         list_item.p.unwrap()
     html = str(soup)
+    html = html.replace('border="1"', '')
     with open(filename, 'wb') as file:
-        file.write(html)
+      file.write(html)
