@@ -567,6 +567,7 @@ def build_score_loss_and_gradients(inference, var_list):
 
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
+
   grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
       [v.ref() for v in var_list])
