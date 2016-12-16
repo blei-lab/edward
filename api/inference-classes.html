@@ -174,6 +174,24 @@ of using the model’s density</p>
 \sim q(\beta)\)</span>.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
+<dt id="edward.inferences.KLqp.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L56" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
+<blockquote class="last">
+<div><p>Number of samples from variational model for calculating
+stochastic gradients.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+<dl class="method">
 <dt id="edward.inferences.KLqp.build_loss_and_gradients">
 <code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L68" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Wrapper for the <code class="docutils literal"><span class="pre">KLqp</span></code> loss function.</p>
@@ -193,24 +211,6 @@ standard normal, then loss function can be written as</p>
   \text{KL}( q(z; \lambda) \| p(z) ),\]</div>
 <p>where the KL term is computed analytically (Kingma and Welling,
 2014).</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.inferences.KLqp.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L56" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialization.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
-<blockquote class="last">
-<div><p>Number of samples from variational model for calculating
-stochastic gradients.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -300,6 +300,24 @@ of using the model’s density</p>
 \sim q(\beta)\)</span>.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
+<dt id="edward.inferences.KLpq.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klpq.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
+<blockquote class="last">
+<div><p>Number of samples from variational model for calculating
+stochastic gradients.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+<dl class="method">
 <dt id="edward.inferences.KLpq.build_loss_and_gradients">
 <code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klpq.py#L67" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function</p>
@@ -320,24 +338,6 @@ z^b) / q(z^b; \lambda)\)</span>.</p>
 <div class="math">
 \[- \frac{1}{B} \sum_{b=1}^B [
   w_{norm}(z^b; \lambda) \nabla_{\lambda} \log q(z^b; \lambda) ].\]</div>
-</dd></dl>
-<dl class="method">
-<dt id="edward.inferences.KLpq.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klpq.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialization.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
-<blockquote class="last">
-<div><p>Number of samples from variational model for calculating
-stochastic gradients.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -513,13 +513,6 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 </pre>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="edward.inferences.HMC.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Simulate Hamiltonian dynamics using a numerical integrator.
-Correct for the integrator’s discretization error using an
-acceptance ratio.</p>
-</dd></dl>
-<dl class="method">
 <dt id="edward.inferences.HMC.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>n_steps=2</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L46" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -538,6 +531,13 @@ acceptance ratio.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+<dl class="method">
+<dt id="edward.inferences.HMC.build_update">
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Simulate Hamiltonian dynamics using a numerical integrator.
+Correct for the integrator’s discretization error using an
+acceptance ratio.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -568,12 +568,6 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 </pre>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="edward.inferences.SGLD.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Simulate Langevin dynamics using a discretized integrator. Its
-discretization error goes to zero as the learning rate decreases.</p>
-</dd></dl>
-<dl class="method">
 <dt id="edward.inferences.SGLD.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L45" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -588,6 +582,12 @@ discretization error goes to zero as the learning rate decreases.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+<dl class="method">
+<dt id="edward.inferences.SGLD.build_update">
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Simulate Langevin dynamics using a discretized integrator. Its
+discretization error goes to zero as the learning rate decreases.</p>
 </dd></dl>
 </dd></dl>
 <h3 class="unnumbered" id="references">References</h3>

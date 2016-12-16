@@ -120,7 +120,22 @@ posterior predictive’s log-density.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>metrics</strong> : list of str or str</p>
 <blockquote>
-<div><p>List of metrics or a single metric.</p>
+<div><p>List of metrics or a single metric:
+<code class="docutils literal"><span class="pre">'binary_accuracy'</span></code>,
+<code class="docutils literal"><span class="pre">'categorical_accuracy'</span></code>,
+<code class="docutils literal"><span class="pre">'sparse_categorical_accuracy'</span></code>,
+<code class="docutils literal"><span class="pre">'log_loss'</span></code> or <code class="docutils literal"><span class="pre">'binary_crossentropy'</span></code>,
+<code class="docutils literal"><span class="pre">'categorical_crossentropy'</span></code>,
+<code class="docutils literal"><span class="pre">'sparse_categorical_crossentropy'</span></code>,
+<code class="docutils literal"><span class="pre">'hinge'</span></code>,
+<code class="docutils literal"><span class="pre">'squared_hinge'</span></code>,
+<code class="docutils literal"><span class="pre">'mse'</span></code> or <code class="docutils literal"><span class="pre">'MSE'</span></code> or <code class="docutils literal"><span class="pre">'mean_squared_error'</span></code>,
+<code class="docutils literal"><span class="pre">'mae'</span></code> or <code class="docutils literal"><span class="pre">'MAE'</span></code> or <code class="docutils literal"><span class="pre">'mean_absolute_error'</span></code>,
+<code class="docutils literal"><span class="pre">'mape'</span></code> or <code class="docutils literal"><span class="pre">'MAPE'</span></code> or <code class="docutils literal"><span class="pre">'mean_absolute_percentage_error'</span></code>,
+<code class="docutils literal"><span class="pre">'msle'</span></code> or <code class="docutils literal"><span class="pre">'MSLE'</span></code> or <code class="docutils literal"><span class="pre">'mean_squared_logarithmic_error'</span></code>,
+<code class="docutils literal"><span class="pre">'poisson'</span></code>,
+<code class="docutils literal"><span class="pre">'cosine'</span></code> or <code class="docutils literal"><span class="pre">'cosine_proximity'</span></code>,
+<code class="docutils literal"><span class="pre">'log_lik'</span></code> or <code class="docutils literal"><span class="pre">'log_likelihood'</span></code>.</p>
 </div></blockquote>
 <p><strong>data</strong> : dict</p>
 <blockquote>
