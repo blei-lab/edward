@@ -25,7 +25,22 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   Parameters
   ----------
   metrics : list of str or str
-    List of metrics or a single metric.
+    List of metrics or a single metric:
+    ``'binary_accuracy'``,
+    ``'categorical_accuracy'``,
+    ``'sparse_categorical_accuracy'``,
+    ``'log_loss'`` or ``'binary_crossentropy'``,
+    ``'categorical_crossentropy'``,
+    ``'sparse_categorical_crossentropy'``,
+    ``'hinge'``,
+    ``'squared_hinge'``,
+    ``'mse'`` or ``'MSE'`` or ``'mean_squared_error'``,
+    ``'mae'`` or ``'MAE'`` or ``'mean_absolute_error'``,
+    ``'mape'`` or ``'MAPE'`` or ``'mean_absolute_percentage_error'``,
+    ``'msle'`` or ``'MSLE'`` or ``'mean_squared_logarithmic_error'``,
+    ``'poisson'``,
+    ``'cosine'`` or ``'cosine_proximity'``,
+    ``'log_lik'`` or ``'log_likelihood'``.
   data : dict
     Data to evaluate model with. It binds observed variables (of type
     ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
@@ -73,6 +88,9 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   >>> # here, ``x_ph`` is any features the model is defined with respect to,
   >>> # and ``y_post`` is the posterior predictive distribution
   >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+  >>>
+  >>> # mean squared error
+  >>> ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
   """
   sess = get_session()
   # Create feed_dict for data placeholders that the model conditions

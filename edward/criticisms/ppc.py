@@ -76,6 +76,7 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   >>>
   >>> # posterior predictive check
   >>> # T is a user-defined function of data, T(data)
+  >>> T = lambda xs, zs: tf.reduce_mean(xs[x])
   >>> ppc(T, data={x_post: x_train})
   >>>
   >>> # in general T is a discrepancy function of the data (both response and
