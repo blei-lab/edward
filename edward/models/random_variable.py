@@ -32,24 +32,25 @@ class RandomVariable(object):
 
   Notes
   -----
-  RandomVariable assumes use in a multiple inheritance setting. The
-  child class must first inherit RandomVariable, then second inherit a
-  class in tf.contrib.distributions. With Python's method resolution
+  ``RandomVariable`` assumes use in a multiple inheritance setting. The
+  child class must first inherit ``RandomVariable``, then second inherit a
+  class in ``tf.contrib.distributions``. With Python's method resolution
   order, this implies the following during initialization (using
-  distributions.Bernoulli as an example):
+  ``distributions.Bernoulli`` as an example):
 
-  1. Start the __init__() of the child class, which passes all *args,
-     **kwargs to RandomVariable.
-  2. This in turn passes all *args, **kwargs to
-     distributions.Bernoulli, completing the __init__() of
-     distributions.Bernoulli.
-  3. Complete the __init__() of RandomVariable, which calls
-     self.sample(), relying on the method from distributions.Bernoulli.
-  4. Complete the __init__() of the child class.
+  1. Start the ``__init__()`` of the child class, which passes all
+     ``*args, **kwargs`` to ``RandomVariable``.
+  2. This in turn passes all ``*args, **kwargs`` to
+     ``distributions.Bernoulli``, completing the ``__init__()`` of
+     ``distributions.Bernoulli``.
+  3. Complete the ``__init__()`` of ``RandomVariable``, which calls
+    ``self.sample()``, relying on the method from
+    ``distributions.Bernoulli``.
+  4. Complete the ``__init__()`` of the child class.
 
-  Methods from both RandomVariable and distributions.Bernoulli
+  Methods from both ``RandomVariable`` and ``distributions.Bernoulli``
   populate the namespace of the child class. Methods from
-  RandomVariable will take higher priority if there are conflicts.
+  ``RandomVariable`` will take higher priority if there are conflicts.
   """
   def __init__(self, *args, **kwargs):
     # storing args, kwargs for easy graph copying
