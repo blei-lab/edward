@@ -94,76 +94,192 @@
 <a class="button3" href="/api/inference">Inference</a>
 <a class="button3 button-primary" href="/api/criticism">Criticism</a>
 </div>
-<div class="row">
-<a class="button4" href="/api/criticism-api">API</a>
-</div>
 </div>
 <h3 id="criticism">Criticism</h3>
-<p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model.</p>
+<p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model. For background, see the criticism <a href="/tutorials/">tutorials</a>.</p>
 <p>Edward explores model criticism using</p>
 <ul>
 <li>point-based evaluations, such as mean squared error or classification accuracy</li>
-</ul>
-<pre class="python" language="Python"><code>ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})</code></pre>
-<ul>
 <li>posterior predictive checks, for making probabilistic assessments of the model fit using discrepancy functions</li>
 </ul>
-<pre class="python" language="Python"><code>T = lambda xs, zs: tf.reduce_mean(xs[x])
-ed.ppc(T, data={x: x_data})</code></pre>
-<p>Here’s an example. First, let’s build a model <span class="math inline">\(p(\mathbf{x},
-\mathbf{z}, \beta)\)</span> and perform inference to obtain the posterior <span class="math inline">\(p(\mathbf{z}, \beta\mid\mathbf{x})\)</span>.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Normal
+<hr/>
+<span class="target" id="module-edward.criticisms"></span><dl class="function">
+<dt id="edward.criticisms.evaluate">
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Evaluate fitted model using a set of metrics.</p>
+<p>A metric, or scoring rule (Winkler, 1994), is a function of observed
+data under the posterior predictive distribution. For example in
+supervised metrics such as classification accuracy, the observed
+data (true output) is compared to the posterior predictive’s mean
+(predicted output). In unsupervised metrics such as log-likelihood,
+the probability of observing the data is calculated under the
+posterior predictive’s log-density.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>metrics</strong> : list of str or str</p>
+<blockquote>
+<div><p>List of metrics or a single metric.</p>
+</div></blockquote>
+<p><strong>data</strong> : dict</p>
+<blockquote>
+<div><p>Data to evaluate model with. It binds observed variables (of type
+<code class="docutils literal"><span class="pre">RandomVariable</span></code>) to their realizations (of type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). It
+can also bind placeholders (of type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) used in the model
+to their realizations.</p>
+</div></blockquote>
+<p><strong>latent_vars</strong> : dict of str to RandomVariable, optional</p>
+<blockquote>
+<div><p>Collection of random variables binded to their inferred posterior.
+It is only used (and in fact required) if the model wrapper is
+specified.</p>
+</div></blockquote>
+<p><strong>model_wrapper</strong> : ed.Model, optional</p>
+<blockquote>
+<div><p>An optional wrapper for the probability model. It must have a
+<code class="docutils literal"><span class="pre">predict</span></code> method, and <code class="docutils literal"><span class="pre">latent_vars</span></code> must be specified. <code class="docutils literal"><span class="pre">data</span></code> is
+also changed. For TensorFlow, Python, and Stan models, the key
+type is a string; for PyMC3, the key type is a Theano shared
+variable. For TensorFlow, Python, and PyMC3 models, the value type
+is a NumPy array or TensorFlow placeholder; for Stan, the value
+type is the type according to the Stan program’s data block.</p>
+</div></blockquote>
+<p><strong>n_samples</strong> : int, optional</p>
+<blockquote>
+<div><p>Number of posterior samples for making predictions,
+using the posterior predictive distribution. It is only used if
+the model wrapper is specified.</p>
+</div></blockquote>
+<p><strong>output_key</strong> : RandomVariable or str, optional</p>
+<blockquote>
+<div><p>It is the key in <code class="docutils literal"><span class="pre">data</span></code> which corresponds to the model’s output.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of float or float</p>
+<blockquote>
+<div><p>A list of evaluations or a single evaluation.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>NotImplementedError</strong></p>
+<blockquote class="last">
+<div><p>If an input metric does not match an implemented metric in Edward.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<pre class="python" language="Python"><code>&gt;&gt;&gt; # build posterior predictive after inference: it is
+&gt;&gt;&gt; # parameterized by posterior means
+&gt;&gt;&gt; x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+&gt;&gt;&gt;
+&gt;&gt;&gt; # log-likelihood performance
+&gt;&gt;&gt; evaluate('log_likelihood', data={x_post: x_train})
+&gt;&gt;&gt;
+&gt;&gt;&gt; # classification accuracy
+&gt;&gt;&gt; # here, ``x_ph`` is any features the model is defined with respect to,
+&gt;&gt;&gt; # and ``y_post`` is the posterior predictive distribution
+&gt;&gt;&gt; evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+&gt;&gt;&gt;
+&gt;&gt;&gt; # mean squared error
+&gt;&gt;&gt; ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
 
-# MODEL
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
-z = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
+</code>
+</pre>
+</dd></dl>
+<dl class="function">
+<dt id="edward.criticisms.ppc">
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Posterior predictive check
+(Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).</p>
+<p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior
+predictive check (Box, 1980).</p>
+<p>PPC’s form an empirical distribution for the predictive discrepancy,</p>
+<div class="math">
+\[p(T) = \int p(T(x^{rep}) | z) p(z | x) dz\]</div>
+<p>by drawing replicated data sets xrep and calculating
+<span class="math">\(T(x^{rep})\)</span> for each data set. Then it compares it to
+<span class="math">\(T(x)\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>T</strong> : function</p>
+<blockquote>
+<div><p>Discrepancy function, which takes a dictionary of data and
+dictionary of latent variables as input and outputs a <code class="docutils literal"><span class="pre">tf.Tensor</span></code>.</p>
+</div></blockquote>
+<p><strong>data</strong> : dict</p>
+<blockquote>
+<div><p>Data to compare to. It binds observed variables (of type
+<code class="docutils literal"><span class="pre">RandomVariable</span></code>) to their realizations (of type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). It
+can also bind placeholders (of type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) used in the model
+to their realizations.</p>
+</div></blockquote>
+<p><strong>latent_vars</strong> : dict of str to RandomVariable, optional</p>
+<blockquote>
+<div><p>Collection of random variables binded to their inferred posterior.
+It is an optional argument, necessary for when the discrepancy is
+a function of latent variables.</p>
+</div></blockquote>
+<p><strong>model_wrapper</strong> : ed.Model, optional</p>
+<blockquote>
+<div><p>An optional wrapper for the probability model. It must have a
+<code class="docutils literal"><span class="pre">sample_likelihood</span></code> method. If <code class="docutils literal"><span class="pre">latent_vars</span></code> is not specified,
+it must also have a <code class="docutils literal"><span class="pre">sample_prior</span></code> method, as <code class="docutils literal"><span class="pre">ppc</span></code> will
+default to a prior predictive check. <code class="docutils literal"><span class="pre">data</span></code> is also changed. For
+TensorFlow, Python, and Stan models, the key type is a string; for
+PyMC3, the key type is a Theano shared variable. For TensorFlow,
+Python, and PyMC3 models, the value type is a NumPy array or
+TensorFlow placeholder; for Stan, the value type is the type
+according to the Stan program’s data block.</p>
+</div></blockquote>
+<p><strong>n_samples</strong> : int, optional</p>
+<blockquote>
+<div><p>Number of replicated data sets.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of np.ndarray</p>
+<blockquote class="last">
+<div><p>List containing the reference distribution, which is a NumPy
+array of size elements,</p>
+<div class="math">
+\[(T(x^{rep,1}, z^{1}), ..., T(x^{rep,size}, z^{size}))\]</div>
+<p>and the realized discrepancy, which is a NumPy array of size
+elements,</p>
+<div class="math">
+\[(T(x, z^{1}), ..., T(x, z^{size})).\]</div>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<pre class="python" language="Python"><code>&gt;&gt;&gt; # build posterior predictive after inference: it is
+&gt;&gt;&gt; # parameterized by posterior means
+&gt;&gt;&gt; x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+&gt;&gt;&gt;
+&gt;&gt;&gt; # posterior predictive check
+&gt;&gt;&gt; # T is a user-defined function of data, T(data)
+&gt;&gt;&gt; T = lambda xs, zs: tf.reduce_mean(xs[x])
+&gt;&gt;&gt; ppc(T, data={x_post: x_train})
+&gt;&gt;&gt;
+&gt;&gt;&gt; # in general T is a discrepancy function of the data (both response and
+&gt;&gt;&gt; # covariates) and latent variables, T(data, latent_vars)
+&gt;&gt;&gt; ppc(T, data={y_post: y_train, x_ph: x_train},
+...     latent_vars={'z': qz, 'beta': qbeta})
+&gt;&gt;&gt;
+&gt;&gt;&gt; # prior predictive check
+&gt;&gt;&gt; # running ppc on original x
+&gt;&gt;&gt; ppc(T, data={x: x_train})
 
-# INFERENCE
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
-qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
-
-inference = ed.KLqp({z: qz, beta: qbeta}, data={x: x_train})
-inference.run()</code></pre>
-<p>We then build the posterior predictive distribution <span class="math inline">\(p(\mathbf{x}_{\text{new}}\mid \mathbf{x})\)</span>.</p>
-<pre class="python" language="Python"><code>x_post = ed.copy(x, {z: qz, beta: qbeta})</code></pre>
-<p>The <code>copy</code> function builds the posterior predictive by copying the likelihood node <code>x</code> and swapping its dependence on the priors <code>z</code> and <code>beta</code> with dependence on the inferred posteriors <code>qz</code> and <code>qbeta</code>.</p>
-<p>Now we run some techniques: <a href="/tutorials/point-evaluation"><code>evaluate</code></a> and <a href="/tutorials/ppc"><code>ppc</code></a>.</p>
-<pre class="python" language="Python"><code># log-likelihood performance
-ed.evaluate('log_likelihood', data={x_post: x_train})
-
-# classification accuracy
-# here, `x_ph` is any features the model is defined with respect to,
-# and `y_post` is the posterior predictive distribution
-ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
-
-# posterior predictive check
-# T is a user-defined function of data, T(data)
-ed.ppc(T, data={x_post: x_train})
-
-# in general T is a discrepancy function of the data (both response and
-# covariates) and latent variables, T(data, latent_vars)
-ed.ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': qbeta})
-
-# prior predictive check
-# running ppc on original x
-ed.ppc(T, data={x: x_train})</code></pre>
-<p>It is common practice to criticize models with data held-out from training. To do this, we first perform inference over any local latent variables of the held-out data, fixing the global variables. Then we make predictions on the held-out data.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical
-
-# create local posterior factors for test data, assuming test data
-# has N_test many data points
-qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
-
-# run local inference conditional on global factors
-inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
-inference_test.run()
-
-# build posterior predictive on test data
-x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
-ed.evaluate('log_likelihood', data={x_post: x_test})</code></pre>
-<p>For examples of criticism techniques built in Edward, see the criticism <a href="/tutorials/">tutorials</a>.</p>
+</code>
+</pre>
+</dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-box1976science">

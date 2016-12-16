@@ -64,7 +64,6 @@ PAGES = [
             'inference-compositionality.tex',
             'inference-data-subsampling.tex',
             'inference-development.tex',
-            'inference-api.tex',
         ],
     },
     {
@@ -100,27 +99,9 @@ PAGES = [
         'child_pages': [],
     },
     {
-        'page': 'inference-api.tex',
-        'title': 'API',
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
-    },
-    {
         'page': 'criticism.tex',
         'title': 'Criticism',
         'parent_pages': [],
-        'child_pages': [
-            'criticism-api.tex',
-        ],
-    },
-    {
-        'page': 'criticism-api.tex',
-        'title': 'API',
-        'parent_pages': [
-            'criticism.tex'
-        ],
         'child_pages': [],
     },
     # {

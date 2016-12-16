@@ -111,6 +111,20 @@ ed.evaluate(&#39;mean_absolute_error&#39;, data={y_post: y_train, x: x_train})</
 <p>The <code>data</code> can be data held-out from training time, making it easy to implement cross-validated techniques.</p>
 <p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
 <pre class="python" language="Python"><code>ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_train})</code></pre>
+<p>It is common practice to criticize models with data held-out from training. To do this, we first perform inference over any local latent variables of the held-out data, fixing the global variables. Then we make predictions on the held-out data.</p>
+<pre class="python" language="Python"><code>from edward.models import Categorical
+
+# create local posterior factors for test data, assuming test data
+# has N_test many data points
+qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
+
+# run local inference conditional on global factors
+inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
+inference_test.run()
+
+# build posterior predictive on test data
+x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
+ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_test})</code></pre>
 <p>Point-based evaluations are formally known as scoring rules in decision theory. Scoring rules are useful for model comparison, model selection, and model averaging.</p>
 <p>See the <a href="/api/criticism">criticism API</a> for further details. An example of point-based evaluation is in the <a href="/tutorials/supervised-regression">supervised learning (regression)</a> tutorial.</p>
 <h3 id="references" class="unnumbered">References</h3>

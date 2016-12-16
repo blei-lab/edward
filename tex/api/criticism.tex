@@ -9,104 +9,15 @@ models are wrong'' \citep{box1976science}. However, we can try to
 uncover where the model goes wrong. Model criticism helps justify the
 model as an approximation or point to good directions for revising the
 model.
+For background, see the criticism \href{/tutorials/}{tutorials}.
 
 Edward explores model criticism using
 \begin{itemize}
   \item point-based evaluations, such as mean squared error or
   classification accuracy
-\end{itemize}
-\begin{lstlisting}[language=Python]
-ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
-\end{lstlisting}
-\begin{itemize}
   \item posterior predictive checks, for making probabilistic
   assessments of the model fit using discrepancy functions
 \end{itemize}
-\begin{lstlisting}[language=Python]
-T = lambda xs, zs: tf.reduce_mean(xs[x])
-ed.ppc(T, data={x: x_data})
-\end{lstlisting}
-
-Here's an example. First, let's build a model $p(\mathbf{x},
-\mathbf{z}, \beta)$ and perform inference to obtain the posterior
-$p(\mathbf{z}, \beta\mid\mathbf{x})$.
-\begin{lstlisting}[language=Python]
-from edward.models import Categorical, Normal
-
-# MODEL
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
-z = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
-
-# INFERENCE
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
-qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
-
-inference = ed.KLqp({z: qz, beta: qbeta}, data={x: x_train})
-inference.run()
-\end{lstlisting}
-We then build the posterior predictive distribution
-$p(\mathbf{x}_{\text{new}}\mid \mathbf{x})$.
-\begin{lstlisting}[language=Python]
-x_post = ed.copy(x, {z: qz, beta: qbeta})
-\end{lstlisting}
-The \texttt{copy} function builds the posterior predictive by copying
-the likelihood node \texttt{x} and swapping its dependence on the
-priors \texttt{z} and \texttt{beta} with dependence on the inferred
-posteriors \texttt{qz} and \texttt{qbeta}.
-
-Now we run some techniques:
-\href{/tutorials/point-evaluation}{\texttt{evaluate}}
-and
-\href{/tutorials/ppc}{\texttt{ppc}}.
-
-\begin{lstlisting}[language=Python]
-# log-likelihood performance
-ed.evaluate('log_likelihood', data={x_post: x_train})
-
-# classification accuracy
-# here, `x_ph` is any features the model is defined with respect to,
-# and `y_post` is the posterior predictive distribution
-ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
-
-# posterior predictive check
-# T is a user-defined function of data, T(data)
-ed.ppc(T, data={x_post: x_train})
-
-# in general T is a discrepancy function of the data (both response and
-# covariates) and latent variables, T(data, latent_vars)
-ed.ppc(T, data={y_post: y_train, x_ph: x_train}, latent_vars={'z': qz, 'beta': qbeta})
-
-# prior predictive check
-# running ppc on original x
-ed.ppc(T, data={x: x_train})
-\end{lstlisting}
-
-It is common practice to criticize models with data held-out from
-training. To do this, we first perform inference over any local latent
-variables of the held-out data, fixing the global variables.  Then we
-make predictions on the held-out data.
-
-\begin{lstlisting}[language=Python]
-from edward.models import Categorical
-
-# create local posterior factors for test data, assuming test data
-# has N_test many data points
-qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
-
-# run local inference conditional on global factors
-inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
-inference_test.run()
-
-# build posterior predictive on test data
-x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
-ed.evaluate('log_likelihood', data={x_post: x_test})
-\end{lstlisting}
-
-For examples of criticism techniques built in Edward, see the
-criticism
-\href{/tutorials/}{tutorials}.
 
 % \subsubsection{Developing new criticism techniques}
 
@@ -123,5 +34,15 @@ criticism
 
 % Developing new criticism techniques is easy.  They can be derived from
 % the current techniques or built as a standalone function.
+
+\begin{center}\rule{3in}{0.4pt}\end{center}
+
+{{sphinx
+
+.. automodule:: edward.criticisms
+   :members: evaluate,
+             ppc
+
+}}
 
 \subsubsection{References}\label{references}

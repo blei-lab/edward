@@ -120,7 +120,6 @@ Dirichlet(alpha=tf.constant([0.1] * K)
 MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
-<p>For a list of random variables supported in Edward, see the <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html">TensorFlow distributions API</a>. Edward random variables build on top of them.</p>
 <p>Random variables are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, <code>mean()</code>, <span class="math inline">\(\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>. Further, each random variable is associated to a tensor <span class="math inline">\(\mathbf{x}^*\)</span> in the computational graph, which represents a single sample <span class="math inline">\(\mathbf{x}^*\sim
 p(\mathbf{x}\mid\theta^*)\)</span>.</p>
 <p>This makes it easy to parameterize random variables with complex deterministic structure, such as with deep neural networks and a diverse set of math operations. The design also enables compositions of random variables to capture complex stochastic structure. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
@@ -133,6 +132,99 @@ x + y, x - y, x * y, x / y
 tf.tanh(x * y)
 tf.gather(x, 2)  # 3rd normal rv in the vector</code></pre>
 <p>In the <a href="/api/model-compositionality">compositionality page</a>, we describe how to build models by composing random variables.</p>
+<hr/>
+<p>For a list of random variables supported in Edward, see the <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html">TensorFlow distributions API</a>. Edward random variables build on top of them, inheriting the same arguments and class methods. Additional methods are also available, detailed below.</p>
+<dl class="class">
+<dt id="edward.models.RandomVariable">
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">RandomVariable</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L10" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Base class for random variables.</p>
+<p>A random variable is an object parameterized by tensors. It is
+equipped with methods such as the log-density, mean, and sample.</p>
+<p>It also wraps a tensor, where the tensor corresponds to a sample
+from the random variable. This enables operations on the TensorFlow
+graph, allowing random variables to be used in conjunction with
+other TensorFlow ops.</p>
+<p class="rubric">Notes</p>
+<p><code class="docutils literal"><span class="pre">RandomVariable</span></code> assumes use in a multiple inheritance setting. The
+child class must first inherit <code class="docutils literal"><span class="pre">RandomVariable</span></code>, then second inherit a
+class in <code class="docutils literal"><span class="pre">tf.contrib.distributions</span></code>. With Python’s method resolution
+order, this implies the following during initialization (using
+<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code> as an example):</p>
+<ol class="arabic simple">
+<li>Start the <code class="docutils literal"><span class="pre">__init__()</span></code> of the child class, which passes all
+<code class="docutils literal"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code> to <code class="docutils literal"><span class="pre">RandomVariable</span></code>.</li>
+<li>This in turn passes all <code class="docutils literal"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code> to
+<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>, completing the <code class="docutils literal"><span class="pre">__init__()</span></code> of
+<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</li>
+<li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of <code class="docutils literal"><span class="pre">RandomVariable</span></code>, which calls</li>
+</ol>
+<blockquote>
+<div><code class="docutils literal"><span class="pre">self.sample()</span></code>, relying on the method from
+<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</div></blockquote>
+<ol class="arabic simple" start="4">
+<li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of the child class.</li>
+</ol>
+<p>Methods from both <code class="docutils literal"><span class="pre">RandomVariable</span></code> and <code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>
+populate the namespace of the child class. Methods from
+<code class="docutils literal"><span class="pre">RandomVariable</span></code> will take higher priority if there are conflicts.</p>
+<p class="rubric">Examples</p>
+<pre class="python" language="Python"><code>&gt;&gt;&gt; p = tf.constant([0.5])
+&gt;&gt;&gt; x = Bernoulli(p=p)
+&gt;&gt;&gt;
+&gt;&gt;&gt; z1 = tf.constant([[2.0, 8.0]])
+&gt;&gt;&gt; z2 = tf.constant([[1.0, 2.0]])
+&gt;&gt;&gt; x = Bernoulli(p=tf.matmul(z1, z2))
+&gt;&gt;&gt;
+&gt;&gt;&gt; mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0)])
+&gt;&gt;&gt; x = Normal(mu=mu, sigma=tf.constant([1.0]))
+
+</code>
+</pre>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="edward.models.RandomVariable.get_ancestors">
+<code class="descname">get_ancestors</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L94" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get ancestor random variables.</p>
+</dd></dl>
+<dl class="method">
+<dt id="edward.models.RandomVariable.get_children">
+<code class="descname">get_children</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L99" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get child random variables.</p>
+</dd></dl>
+<dl class="method">
+<dt id="edward.models.RandomVariable.get_descendants">
+<code class="descname">get_descendants</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L104" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get descendant random variables.</p>
+</dd></dl>
+<dl class="method">
+<dt id="edward.models.RandomVariable.get_parents">
+<code class="descname">get_parents</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L109" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get parent random variables.</p>
+</dd></dl>
+<dl class="method">
+<dt id="edward.models.RandomVariable.get_siblings">
+<code class="descname">get_siblings</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L114" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get sibling random variables.</p>
+</dd></dl>
+<dl class="method">
+<dt id="edward.models.RandomVariable.get_variables">
+<code class="descname">get_variables</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L119" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get TensorFlow variables that the random variable depends on.</p>
+</dd></dl>
+<dl class="method">
+<dt id="edward.models.RandomVariable.value">
+<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L90" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get tensor that the random variable corresponds to.</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="edward.models.Empirical">
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variables.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
+<dd></dd></dl>
+<dl class="class">
+<dt id="edward.models.PointMass">
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variables.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
+<dd></dd></dl>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
