@@ -64,7 +64,6 @@ PAGES = [
             'inference-compositionality.tex',
             'inference-data-subsampling.tex',
             'inference-development.tex',
-            'inference-api.tex',
         ],
     },
     {
@@ -94,14 +93,6 @@ PAGES = [
     {
         'page': 'inference-development.tex',
         'title': 'Development',
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
-    },
-    {
-        'page': 'inference-api.tex',
-        'title': 'API',
         'parent_pages': [
             'inference.tex'
         ],
