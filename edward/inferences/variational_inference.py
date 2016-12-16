@@ -148,7 +148,7 @@ class VariationalInference(Inference):
 
     if self.debug:
       sess.run(self.op_check)
-    
+
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
           summary = sess.run(self.summarize, feed_dict)

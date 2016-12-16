@@ -240,7 +240,8 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
-  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None, logdir=None, debug=False):
+  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None,
+                 logdir=None, debug=False):
     """Initialize inference algorithm.
 
     Parameters
@@ -319,7 +320,7 @@ class Inference(object):
       self.logging = False
 
     if debug:
-      self.debug=True
+      self.debug = True
       self.op_check = tf.add_check_numerics_ops()
 
   def update(self):
