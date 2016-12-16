@@ -16,36 +16,39 @@ class KLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective by automatically selecting from a
   variety of black box inference techniques.
 
   Notes
   -----
-  KLqp also optimizes any model parameters p(z | x; \theta). It does
-  this by variational EM, minimizing
+  ``KLqp`` also optimizes any model parameters :math:`p(z \mid x;
+  \\theta)`. It does this by variational EM, minimizing
 
   .. math::
 
-    E_{q(z; \lambda)} [ \log p(x, z; \theta) ]
+    \mathbb{E}_{q(z; \lambda)} [ \log p(x, z; \\theta) ]
 
-  with respect to \theta.
+  with respect to :math:`\\theta`.
 
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  During gradient calculation, instead of using the model's density
-
-  .. math::
-
-    \log p(x, z^{(s)}), where z^{(s)} ~ q(z; \lambda),
-
-  for each sample s=1,...,S, KLqp uses
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`. During gradient calculation, instead
+  of using the model's density
 
   .. math::
 
-    \log p(x, z^{(s)}, \beta^{(s)}), where
-    z^{(s)} ~ q(z; \lambda) and \beta^{(s)} ~ q(beta).
+    \log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),
+
+  for each sample :math:`s=1,\ldots,S`, ``KLqp`` uses
+
+  .. math::
+
+    \log p(x, z^{(s)}, \\beta^{(s)}),
+
+  where :math:`z^{(s)} \sim q(z; \lambda)` and :math:`\\beta^{(s)}
+  \sim q(\\beta)`.
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
@@ -63,11 +66,12 @@ class KLqp(VariationalInference):
     return super(KLqp, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
-    """Wrapper for the KLqp loss function.
+    """Wrapper for the ``KLqp`` loss function.
 
     .. math::
 
-      -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
+      -\\text{ELBO} =
+        -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
     KLqp supports
 
@@ -81,7 +85,8 @@ class KLqp(VariationalInference):
 
     .. math::
 
-      -E_{[\log p(x | z)] + KL( q(z; \lambda) || p(z) ),
+      -\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
+        \\text{KL}( q(z; \lambda) \| p(z) ),
 
     where the KL term is computed analytically (Kingma and Welling,
     2014).
@@ -130,7 +135,7 @@ class ReparameterizationKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the reparameterization
   gradient.
@@ -159,7 +164,7 @@ class ReparameterizationKLKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the reparameterization
   gradient and an analytic KL term.
@@ -188,7 +193,7 @@ class ReparameterizationEntropyKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the reparameterization
   gradient and an analytic entropy term.
@@ -218,7 +223,7 @@ class ScoreKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the score function
   gradient.
@@ -247,7 +252,7 @@ class ScoreKLKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the score function gradient
   and an analytic KL term.
@@ -276,7 +281,7 @@ class ScoreEntropyKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the score function gradient
   and an analytic entropy term.
@@ -306,7 +311,8 @@ def build_reparam_loss(inference):
 
   .. math::
 
-    -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
+    -\\text{ELBO} =
+      -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
@@ -372,8 +378,8 @@ def build_reparam_kl_loss(inference):
 
   .. math::
 
-    -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
-          + KL(q(z; \lambda) || p(z)) )
+    -\\text{ELBO} =  - ( \mathbb{E}_{q(z; \lambda)} [ \log p(x \mid z) ]
+          + \\text{KL}(q(z; \lambda) \| p(z)) )
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
@@ -439,8 +445,8 @@ def build_reparam_entropy_loss(inference):
 
   .. math::
 
-    -ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
-          + H(q(z; \lambda)) )
+    -\\text{ELBO} =  -( \mathbb{E}_{q(z; \lambda)} [ \log p(x , z) ]
+          + \mathbb{H}(q(z; \lambda)) )
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
