@@ -188,7 +188,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # Do not copy queue operations
     if 'Queue' in op.type:
       return op
-      
+
     # If it has an original op, copy it.
     if op._original_op is not None:
       new_original_op = copy(op._original_op, dict_swap, scope, True, copy_q)

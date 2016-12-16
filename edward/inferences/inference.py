@@ -211,13 +211,6 @@ class Inference(object):
     """
     self.initialize(*args, **kwargs)
 
-    if logdir is not None:
-      self.logging = True
-      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
-      self.summarize = tf.merge_all_summaries()
-    else:
-      self.logging = False
-
     if variables is None:
       init = tf.initialize_all_variables()
     else:
@@ -247,7 +240,7 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
-  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None):
+  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None, logdir=None, debug=False):
     """Initialize inference algorithm.
 
     Parameters
@@ -268,6 +261,12 @@ class Inference(object):
       A scalar value to scale computation for any random variable that
       it is binded to. For example, this is useful for scaling
       computations with respect to local latent variables.
+    logdir : str, optional
+      Directory where event file will be written. For details,
+      see `tf.train.SummaryWriter`. Default is to write nothing.
+    debug: boolean, optional
+      If True, add checks for NaN and Inf to all computations in the graph.
+      May result in substantially slower execution times.
     """
     self.n_iter = n_iter
     if n_print is None:
@@ -311,6 +310,17 @@ class Inference(object):
       self.data = {key: value for key, value in
                    zip(six.iterkeys(dict_data), batches)}
       self.data.update(dict_rv)
+
+    if logdir is not None:
+      self.logging = True
+      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
+      self.summarize = tf.merge_all_summaries()
+    else:
+      self.logging = False
+
+    if debug:
+      self.debug=True
+      self.op_check = tf.add_check_numerics_ops()
 
   def update(self):
     """Run one iteration of inference.
