@@ -147,7 +147,7 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <h3 id="exact-inference">Exact Inference</h3>
 <p>The approach also extends to exact inference. We are developing a subpackage that does symbolic algebra on the deterministic and stochastic nodes in the computational graph; this uncovers conjugacy relationships between exponential-family random variables. This will allow users to integrate out variables and automatically derive classical Gibbs and mean-field updates <span class="citation">(Bishop, 2006)</span> without tedious algebraic manipulation.</p>
 <hr/>
-<p>The classes below inherit methods from base classes, detailed in the <a href="/api/inference-development">inference development page</a>.</p>
+<p>The classes below inherit methods from base inference classes; see the <a href="/api/inference-development">development page</a>.</p>
 <dl class="class">
 <dt id="edward.inferences.KLqp">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
