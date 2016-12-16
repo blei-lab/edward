@@ -14,13 +14,13 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
              n_samples=100, output_key='y'):
   """Evaluate fitted model using a set of metrics.
 
-  A metric, or scoring rule, is a function of observed data under the
-  posterior predictive distribution. For example in supervised metrics
-  such as classification accuracy, the observed data (true output) is
-  compared to the posterior predictive's mean (predicted output). In
-  unsupervised metrics such as log-likelihood, the probability of
-  observing the data is calculated under the posterior predictive's
-  log-density.
+  A metric, or scoring rule (Winkler, 1994), is a function of observed
+  data under the posterior predictive distribution. For example in
+  supervised metrics such as classification accuracy, the observed
+  data (true output) is compared to the posterior predictive's mean
+  (predicted output). In unsupervised metrics such as log-likelihood,
+  the probability of observing the data is calculated under the
+  posterior predictive's log-density.
 
   Parameters
   ----------
@@ -28,8 +28,8 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     List of metrics or a single metric.
   data : dict
     Data to evaluate model with. It binds observed variables (of type
-    `RandomVariable`) to their realizations (of type `tf.Tensor`). It
-    can also bind placeholders (of type `tf.Tensor`) used in the model
+    ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
+    can also bind placeholders (of type ``tf.Tensor``) used in the model
     to their realizations.
   latent_vars : dict of str to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
@@ -37,7 +37,7 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     specified.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
-    `predict` method, and `latent_vars` must be specified. `data` is
+    ``predict`` method, and ``latent_vars`` must be specified. ``data`` is
     also changed. For TensorFlow, Python, and Stan models, the key
     type is a string; for PyMC3, the key type is a Theano shared
     variable. For TensorFlow, Python, and PyMC3 models, the value type
@@ -70,8 +70,8 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   >>> evaluate('log_likelihood', data={x_post: x_train})
   >>>
   >>> # classification accuracy
-  >>> # here, `x_ph` is any features the model is defined with respect to,
-  >>> # and `y_post` is the posterior predictive distribution
+  >>> # here, ``x_ph`` is any features the model is defined with respect to,
+  >>> # and ``y_post`` is the posterior predictive distribution
   >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
   """
   sess = get_session()
