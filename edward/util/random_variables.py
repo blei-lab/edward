@@ -23,7 +23,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
   The copying is done recursively, so any `Operation` whose output
   is required to evaluate `org_instance` is also copied (if it isn't
   already copied within the new scope). This is with the exception of
-  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly copied.
+  `tf.Variable`s, `tf.placeholder`s, and nodes of type `Queue`, which
+  are reused and not newly copied.
 
   Parameters
   ----------
