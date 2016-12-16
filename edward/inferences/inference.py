@@ -212,7 +212,7 @@ class Inference(object):
     self.initialize(*args, **kwargs)
 
     if variables is None:
-      init = tf.initialize_all_variables()
+      init = tf.global_variables_initializer()
     else:
       init = tf.initialize_variables(variables)
 

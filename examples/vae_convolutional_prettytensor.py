@@ -91,7 +91,7 @@ inference = ed.ReparameterizationKLKLqp({z: qz}, data)
 optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer, use_prettytensor=True)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 100

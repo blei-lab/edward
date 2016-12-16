@@ -103,7 +103,7 @@ class HMC(MonteCarlo):
     # Update Empirical random variables.
     assign_ops = []
     variables = {x.name: x for x in
-                 tf.get_default_graph().get_collection(tf.GraphKeys.VARIABLES)}
+                 tf.get_default_graph().get_collection(tf.GraphKeys.GLOBAL_VARIABLES)}
     for z, qz in six.iteritems(self.latent_vars):
       variable = variables[qz.params.op.inputs[0].op.inputs[0].name]
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))

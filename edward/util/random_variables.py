@@ -129,7 +129,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   # Note we check variables via their name and not their type. This
   # is because if we get variables through an op's inputs, it has
   # type tf.Tensor: we can only tell it is a variable via its name.
-  variables = {x.name: x for x in graph.get_collection(tf.GraphKeys.VARIABLES)}
+  variables = {x.name: x for x in graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)}
   if org_instance.name in variables:
     return graph.get_tensor_by_name(variables[org_instance.name].name)
 
@@ -183,7 +183,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
         graph.add_to_collection(name, new_tensor)
 
     return new_tensor
-  else:  # tf.Operation
+  elif isinstance(org_instance, tf.Operation):
     op = org_instance
 
     # Do not copy queue operations
@@ -287,6 +287,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
           attr_value_pb2.AttrValue(s=compat.as_bytes(graph._container)))
 
     return ret
+  else:
+    raise TypeError("Could not copy instance: " + str(org_instance))
 
 
 def get_ancestors(x, collection=None):
