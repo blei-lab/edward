@@ -73,7 +73,7 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
@@ -122,7 +122,7 @@ MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)</code></pre>
 <p>Random variables are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, <code>mean()</code>, <span class="math inline">\(\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>. Further, each random variable is associated to a tensor <span class="math inline">\(\mathbf{x}^*\)</span> in the computational graph, which represents a single sample <span class="math inline">\(\mathbf{x}^*\sim
 p(\mathbf{x}\mid\theta^*)\)</span>.</p>
-<p>This makes it easy to parameterize random variables with complex deterministic structure, such as with deep neural networks, a diverse set of math operations, and compatibility with third party libraries which also build on TensorFlow. The design also enables compositions of random variables to capture complex stochastic structure. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
+<p>This makes it easy to parameterize random variables with complex deterministic structure, such as with deep neural networks and a diverse set of math operations. The design also enables compositions of random variables to capture complex stochastic structure. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
 <p><img alt="image" src="/images/random_variable_ops.png" width="375"/></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
@@ -168,15 +168,15 @@ order, this implies the following during initialization (using
 populate the namespace of the child class. Methods from
 <code class="docutils literal"><span class="pre">RandomVariable</span></code> will take higher priority if there are conflicts.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; p = tf.constant(0.5)
+<pre class="python" language="Python"><code>&gt;&gt;&gt; p = tf.constant([0.5])
 &gt;&gt;&gt; x = Bernoulli(p=p)
 &gt;&gt;&gt;
 &gt;&gt;&gt; z1 = tf.constant([[2.0, 8.0]])
 &gt;&gt;&gt; z2 = tf.constant([[1.0, 2.0]])
 &gt;&gt;&gt; x = Bernoulli(p=tf.matmul(z1, z2))
 &gt;&gt;&gt;
-&gt;&gt;&gt; mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-&gt;&gt;&gt; x = Normal(mu=mu, sigma=tf.constant(1.0))
+&gt;&gt;&gt; mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0)])
+&gt;&gt;&gt; x = Normal(mu=mu, sigma=tf.constant([1.0]))
 
 </code>
 </pre>
