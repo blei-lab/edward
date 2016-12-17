@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Variational inference</title>
+<title>Edward – Probability Zoo</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -86,33 +86,21 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="variational-inference">Variational inference</h2>
-<p>Variational inference is an umbrella term for algorithms which cast posterior inference as optimization <span class="citation">(Hinton &amp; Van Camp, 1993; Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999; Waterhouse, MacKay, &amp; Robinson, 1996)</span>.</p>
-<p>The core idea involves two steps:</p>
-<ol>
-<li>posit a family of distributions <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> over the latent variables;</li>
-<li>match <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> to the posterior by optimizing over its parameters <span class="math inline">\(\lambda\)</span>.</li>
-</ol>
-<p>This strategy converts the problem of computing the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span> into an optimization problem, which minimizes a divergence measure <span class="math display">\[\begin{aligned}
-  \lambda^*
-  &amp;=
-  \arg\min_\lambda \text{divergence}(
-  p(\mathbf{z} \mid \mathbf{x})
-  ,
-  q(\mathbf{z}\;;\;\lambda)
-  ).\end{aligned}\]</span> The optimized distribution <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> is then used as a proxy to the posterior <span class="math inline">\(p(\mathbf{z}\mid \mathbf{x})\)</span>.</p>
-<p>Edward takes the perspective that the posterior is (typically) intractable, and thus we must build a model of latent variables that best approximates the posterior. It is analogous to the perspective that the true data generating process is unknown, and thus we build models of data to best approximate the true process.</p>
-<p>For details on the variational inference base class defined in Edward, see the <a href="/api/inference">inference API</a>. For examples of specific variational inference algorithms in Edward, see the other inference <a href="/tutorials/">tutorials</a>.</p>
+<h2 id="probability-zoo">Probability Zoo</h2>
+<p>The <em>Probability Zoo</em> is a community repository for pre-trained probabilistic models. It includes any parameters to the model and any parameters to the inferred posterior.</p>
+<ul>
+<li><strong>Under construction. Check back soon!</strong></li>
+</ul>
+<p>To contribute a pre-trained model to the repository, please submit a <a href="https://github.com/blei-lab/edward/pulls">pull request</a>. The parameters should be preferably stored in a <a href="https://www.tensorflow.org/versions/master/how_tos/variables/">TensorFlow checkpoint file</a>.</p>
+<h3 id="footnotes">Footnotes</h3>
+<p>The Probability Zoo is inspired by the model zoo in <a href="http://caffe.berkeleyvision.org">Caffe</a> <span class="citation">(Jia et al., 2014)</span>, which provides many pre-trained discriminative neural networks. It is also inspired by <a href="http://forestdb.org">Forest</a> <span class="citation">(Stuhlmüller, 2012)</span>, which provides examples of probabilistic programs.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
-<div id="ref-hinton1993keeping">
-<p>Hinton, G. E., &amp; Van Camp, D. (1993). Keeping the neural networks simple by minimizing the description length of the weights. In <em>Proceedings of the sixth annual conference on computational learning theory</em> (pp. 5–13). ACM.</p>
+<div id="ref-jia2014caffe">
+<p>Jia, Y., Shelhamer, E., Donahue, J., Karayev, S., Long, J., Girshick, R., … Darrell, T. (2014). Caffe: Convolutional architecture for fast feature embedding. <em>ArXiv Preprint ArXiv:1408.5093</em>.</p>
 </div>
-<div id="ref-jordan1999introduction">
-<p>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. <em>Machine Learning</em>, <em>37</em>(2), 183–233.</p>
-</div>
-<div id="ref-waterhouse1996bayesian">
-<p>Waterhouse, S., MacKay, D., &amp; Robinson, T. (1996). Bayesian methods for mixtures of experts. <em>Advances in Neural Information Processing Systems</em>, 351–357.</p>
+<div id="ref-stuhlmueller2012forest">
+<p>Stuhlmüller, A. (2012). Forest: A repository for generative models. Retrieved from <a class="uri" href="http://forestdb.org">http://forestdb.org</a></p>
 </div>
 </div>
 </div>

@@ -73,7 +73,7 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
@@ -106,7 +106,7 @@
 <p><img alt="image" src="/images/inference_structure.png" width="700"/> <span><em>Dependency graph of inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
 <p>There is a base class <code>Inference</code>, from which all inference methods are derived from. Note that <code>Inference</code> says nothing about the class of models that an algorithm must work with. One can build inference algorithms which are tailored to a restricted class of models available in Edward (such as differentiable models or conditionally conjugate models), or even tailor it to a single model. The algorithm can raise an error if the model is outside this class.</p>
 <p>We organize inference under two paradigms: <code>VariationalInference</code> and <code>MonteCarlo</code> (or more plainly, optimization and sampling). These inherit from <code>Inference</code> and each have their own default methods.</p>
-<p>For example, developing a new variational inference algorithm is as simple as inheriting from <code>VariationalInference</code> or one of its derived classes. <code>VariationalInference</code> implements many default methods such as <code>initialize()</code> with options for an optimizer.</p>
+<p>For example, developing a new variational inference algorithm is as simple as inheriting from <code>VariationalInference</code> and writing a <code>build_loss_and_gradients()</code> method. <code>VariationalInference</code> implements many default methods such as <code>initialize()</code> with options for an optimizer. For example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_iwvi.py">importance weighted variational inference</a> script.</p>
 <hr/>
 <dl class="class">
 <dt id="edward.inferences.Inference">
@@ -244,7 +244,7 @@ file readers.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L246" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L243" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize inference algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -269,10 +269,20 @@ subsampling details, see <code class="docutils literal"><span class="pre">tf.tra
 <code class="docutils literal"><span class="pre">tf.train.batch</span></code>.</p>
 </div></blockquote>
 <p><strong>scale</strong> : dict of RandomVariable to tf.Tensor, optional</p>
-<blockquote class="last">
+<blockquote>
 <div><p>A scalar value to scale computation for any random variable that
 it is binded to. For example, this is useful for scaling
 computations with respect to local latent variables.</p>
+</div></blockquote>
+<p><strong>logdir</strong> : str, optional</p>
+<blockquote>
+<div><p>Directory where event file will be written. For details,
+see <cite>tf.train.SummaryWriter</cite>. Default is to write nothing.</p>
+</div></blockquote>
+<p><strong>debug: bool, optional</strong></p>
+<blockquote class="last">
+<div><p>If True, add checks for NaN and Inf to all computations in the graph.
+May result in substantially slower execution times.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -281,13 +291,20 @@ computations with respect to local latent variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L311" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L326" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<blockquote>
+<div><p>Feed dictionary for a TensorFlow session run. It is used to feed
+placeholders that are not fed during initialization.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
 <blockquote class="last">
 <div><p>Dictionary of algorithm-specific information.</p>
 </div></blockquote>
@@ -298,7 +315,7 @@ computations with respect to local latent variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L322" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L360" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -315,7 +332,7 @@ computations with respect to local latent variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L337" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L375" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>
@@ -358,7 +375,7 @@ Defaults to TensorFlow.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L124" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L115" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of optimizer for variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -387,11 +404,11 @@ loss function value after one iteration.</p>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
-<dt id="edward.inferences.VariationalInference.build_loss">
-<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L162" title="Link to definition on GitHub.">[source]</a></dt>
+<dt id="edward.inferences.VariationalInference.build_loss_and_gradients">
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L162" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function.</p>
-<p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> must implement
-this method or <code class="docutils literal"><span class="pre">build_loss_and_gradients</span></code>.</p>
+<p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong> implement
+this method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -507,12 +524,12 @@ separately forces a consistent behavior.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L137" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L146" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L149" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L158" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build update, which returns an assign op for parameters in
 the Empirical random variables.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement

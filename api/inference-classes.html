@@ -73,7 +73,7 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
@@ -147,7 +147,7 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <h3 id="exact-inference">Exact Inference</h3>
 <p>The approach also extends to exact inference. We are developing a subpackage that does symbolic algebra on the deterministic and stochastic nodes in the computational graph; this uncovers conjugacy relationships between exponential-family random variables. This will allow users to integrate out variables and automatically derive classical Gibbs and mean-field updates <span class="citation">(Bishop, 2006)</span> without tedious algebraic manipulation.</p>
 <hr/>
-<p>The classes below inherit methods from base inference classes; see the <a href="/api/inference-development">development page</a>.</p>
+<p>The classes below inherit methods from base inference classes; see the <a href="/api/inference-development">development page</a> for more details.</p>
 <dl class="class">
 <dt id="edward.inferences.KLqp">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
@@ -216,7 +216,7 @@ standard normal, then loss function can be written as</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L133" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L126" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -226,7 +226,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L162" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L155" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -236,7 +236,7 @@ gradient and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L191" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L184" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -246,7 +246,7 @@ gradient and an analytic entropy term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L221" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L214" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -256,7 +256,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L250" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L243" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -266,7 +266,7 @@ and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L279" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L272" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -408,8 +408,8 @@ with unconstrained support. To constrain their support, one must
 manually pass in the <code class="docutils literal"><span class="pre">PointMass</span></code> family.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="edward.inferences.MAP.build_loss">
-<code class="descname">build_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L102" title="Link to definition on GitHub.">[source]</a></dt>
+<dt id="edward.inferences.MAP.build_loss_and_gradients">
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L102" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function. Its automatic differentiation
 is the gradient of</p>
 <div class="math">
@@ -418,14 +418,14 @@ is the gradient of</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.Laplace">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L147" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L154" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Laplace approximation.</p>
 <p>It approximates the posterior distribution using a normal
 distribution centered at the mode of the posterior.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L156" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L163" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 <p>Computes the Hessian at the mode.</p>
 </dd></dl>
