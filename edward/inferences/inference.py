@@ -265,7 +265,7 @@ class Inference(object):
     logdir : str, optional
       Directory where event file will be written. For details,
       see `tf.train.SummaryWriter`. Default is to write nothing.
-    debug: boolean, optional
+    debug: bool, optional
       If True, add checks for NaN and Inf to all computations in the graph.
       May result in substantially slower execution times.
     """
@@ -319,8 +319,8 @@ class Inference(object):
     else:
       self.logging = False
 
-    if debug:
-      self.debug = True
+    self.debug = debug
+    if self.debug:
       self.op_check = tf.add_check_numerics_ops()
 
   def update(self):

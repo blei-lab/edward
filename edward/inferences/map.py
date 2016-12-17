@@ -99,7 +99,7 @@ class MAP(VariationalInference):
 
     super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
-  def build_loss(self):
+  def build_loss_and_gradients(self):
     """Build loss function. Its automatic differentiation
     is the gradient of
 
@@ -141,7 +141,14 @@ class MAP(VariationalInference):
       x = self.data
       p_log_prob = self.model_wrapper.log_prob(x, z_mode)
 
-    return -p_log_prob
+    loss = -p_log_prob
+
+    if var_list is None:
+      var_list = tf.trainable_variables()
+
+    grads = tf.gradients(loss, [v.ref() for v in var_list])
+    grads_and_vars = list(zip(grads, var_list))
+    return loss, grads_and_vars
 
 
 class Laplace(MAP):
