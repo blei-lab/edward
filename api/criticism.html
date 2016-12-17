@@ -73,7 +73,7 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
@@ -280,11 +280,12 @@ elements,</p>
 &gt;&gt;&gt;
 &gt;&gt;&gt; # posterior predictive check
 &gt;&gt;&gt; # T is a user-defined function of data, T(data)
-&gt;&gt;&gt; T = lambda xs, zs: tf.reduce_mean(xs[x])
+&gt;&gt;&gt; T = lambda xs, zs: tf.reduce_mean(xs[x_post])
 &gt;&gt;&gt; ppc(T, data={x_post: x_train})
 &gt;&gt;&gt;
 &gt;&gt;&gt; # in general T is a discrepancy function of the data (both response and
 &gt;&gt;&gt; # covariates) and latent variables, T(data, latent_vars)
+&gt;&gt;&gt; T = lambda xs, zs: tf.reduce_mean(zs['z'])
 &gt;&gt;&gt; ppc(T, data={y_post: y_train, x_ph: x_train},
 ...     latent_vars={'z': qz, 'beta': qbeta})
 &gt;&gt;&gt;
