@@ -142,8 +142,9 @@ class VariationalInference(Inference):
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-          summary = sess.run(self.summarize, feed_dict)
-          self.train_writer.add_summary(summary, t)
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
+
     return {'t': t, 'loss': loss}
 
   def print_progress(self, info_dict):

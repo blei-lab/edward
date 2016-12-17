@@ -132,6 +132,15 @@ class MonteCarlo(Inference):
     sess = get_session()
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
     t = sess.run(self.increment_t)
+
+    if self.debug:
+      sess.run(self.op_check)
+
+    if self.logging and self.n_print != 0:
+      if t == 1 or t % self.n_print == 0:
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
+
     return {'t': t, 'accept_rate': accept_rate}
 
   def print_progress(self, info_dict):
