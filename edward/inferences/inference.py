@@ -173,8 +173,7 @@ class Inference(object):
 
     self.model_wrapper = model_wrapper
 
-  def run(self, logdir=None, variables=None, use_coordinator=True,
-          *args, **kwargs):
+  def run(self, variables=None, use_coordinator=True, *args, **kwargs):
     """A simple wrapper to run inference.
 
     1. Initialize algorithm via ``initialize``.
@@ -191,9 +190,6 @@ class Inference(object):
 
     Parameters
     ----------
-    logdir : str, optional
-      Directory where event file will be written. For details,
-      see ``tf.train.SummaryWriter``. Default is to write nothing.
     variables : list, optional
       A list of TensorFlow variables to initialize during inference.
       Default is to initialize all variables (this includes
@@ -264,10 +260,11 @@ class Inference(object):
       computations with respect to local latent variables.
     logdir : str, optional
       Directory where event file will be written. For details,
-      see `tf.train.SummaryWriter`. Default is to write nothing.
-    debug: bool, optional
-      If True, add checks for NaN and Inf to all computations in the graph.
-      May result in substantially slower execution times.
+      see ``tf.train.SummaryWriter``. Default is to write nothing.
+    debug : bool, optional
+      If True, add checks for ``NaN`` and ``Inf`` to all computations
+      in the graph. May result in substantially slower execution
+      times.
     """
     self.n_iter = n_iter
     if n_print is None:

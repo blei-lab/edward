@@ -20,15 +20,15 @@ class RandomVariable(object):
 
   Examples
   --------
-  >>> p = tf.constant([0.5])
+  >>> p = tf.constant(0.5)
   >>> x = Bernoulli(p=p)
   >>>
   >>> z1 = tf.constant([[2.0, 8.0]])
   >>> z2 = tf.constant([[1.0, 2.0]])
   >>> x = Bernoulli(p=tf.matmul(z1, z2))
   >>>
-  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0)])
-  >>> x = Normal(mu=mu, sigma=tf.constant([1.0]))
+  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
 
   Notes
   -----
