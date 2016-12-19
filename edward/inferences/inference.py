@@ -322,6 +322,8 @@ class Inference(object):
     if debug:
       self.debug = True
       self.op_check = tf.add_check_numerics_ops()
+    else:
+      self.debug = False
 
   def update(self):
     """Run one iteration of inference.
