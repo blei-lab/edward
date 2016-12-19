@@ -50,13 +50,7 @@ class IWVI(KLqp):
     self.K = K
     return super(IWVI, self).initialize(*args, **kwargs)
 
-  def build_loss(self):
-    if self.score:
-      return self.build_score_loss()
-    else:
-      return self.build_reparam_loss()
-
-  def build_score_loss(self):
+  def build_loss_and_gradients(self, var_list):
     """Build loss function. Its automatic differentiation
     is a stochastic gradient of
 
@@ -91,46 +85,16 @@ class IWVI(KLqp):
     log_w = tf.reshape(log_w, [self.n_samples, self.K])
     # Take log mean exp across importance weights (columns).
     losses = log_mean_exp(log_w, 1)
-    self.loss = tf.reduce_mean(losses)
-    return -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses))
+    loss = -tf.reduce_mean(losses)
 
-  def build_reparam_loss(self):
-    """Build loss function. Its automatic differentiation
-    is a stochastic gradient of
+    if var_list is None:
+      var_list = tf.trainable_variables()
 
-    .. math::
-
-      -E_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
-      \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]
-
-    based on the reparameterization trick. (Kingma and Welling, 2014)
-
-    Computed by sampling from :math:`q(z;\lambda)` and evaluating
-    the expectation using Monte Carlo sampling. Note there is a
-    difference between the number of samples to approximate the
-    expectations (`n_samples`) and the number of importance
-    samples to determine how many expectations (`K`).
-    """
-    x = self.data
-    # Form n_samples x K matrix of log importance weights.
-    log_w = []
-    for s in range(self.n_samples * self.K):
-      z_sample = {}
-      q_log_prob = 0.0
-      for z, qz in six.iteritems(self.latent_vars):
-        # Copy q(z) to obtain new set of posterior samples.
-        qz_copy = copy(qz, scope='inference_' + str(s))
-        z_sample[z] = qz_copy.value()
-        q_log_prob += tf.reduce_sum(qz.log_prob(z_sample[z]))
-
-      p_log_prob = self.model_wrapper.log_prob(x, z_sample)
-      log_w += [p_log_prob - q_log_prob]
-
-    log_w = tf.reshape(log_w, [self.n_samples, self.K])
-    # Take log mean exp across importance weights (columns).
-    losses = log_mean_exp(log_w, 1)
-    self.loss = tf.reduce_mean(losses)
-    return -self.loss
+    grads = tf.gradients(
+        -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
+        [v.ref() for v in var_list])
+    grads_and_vars = list(zip(grads, var_list))
+    return loss, grads_and_vars
 
 
 class BetaBernoulli:

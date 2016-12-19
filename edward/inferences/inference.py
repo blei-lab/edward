@@ -265,7 +265,7 @@ class Inference(object):
     logdir : str, optional
       Directory where event file will be written. For details,
       see `tf.train.SummaryWriter`. Default is to write nothing.
-    debug: boolean, optional
+    debug: bool, optional
       If True, add checks for NaN and Inf to all computations in the graph.
       May result in substantially slower execution times.
     """
@@ -319,21 +319,44 @@ class Inference(object):
     else:
       self.logging = False
 
-    if debug:
-      self.debug = True
+    self.debug = debug
+    if self.debug:
       self.op_check = tf.add_check_numerics_ops()
     else:
       self.debug = False
 
-  def update(self):
+  def update(self, feed_dict=None):
     """Run one iteration of inference.
+
+    Parameters
+    ----------
+    feed_dict : dict, optional
+      Feed dictionary for a TensorFlow session run. It is used to feed
+      placeholders that are not fed during initialization.
 
     Returns
     -------
     dict
       Dictionary of algorithm-specific information.
     """
-    t = self.increment_t.eval()
+    if feed_dict is None:
+      feed_dict = {}
+
+    for key, value in six.iteritems(self.data):
+      if isinstance(key, tf.Tensor):
+        feed_dict[key] = value
+
+    sess = get_session()
+    t = sess.run(self.increment_t)
+
+    if self.debug:
+      sess.run(self.op_check)
+
+    if self.logging and self.n_print != 0:
+      if t == 1 or t % self.n_print == 0:
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
+
     return {'t': t}
 
   def print_progress(self, info_dict):
