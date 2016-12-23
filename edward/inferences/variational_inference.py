@@ -38,8 +38,8 @@ class VariationalInference(Inference):
       trainable variables that ``latent_vars`` and ``data`` depend on,
       excluding those that are only used in conditionals in ``data``.
     use_prettytensor : bool, optional
-      ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
-      to use PrettyTensor optimizer (when using PrettyTensor).
+      ``True`` if aim to use PrettyTensor optimizer (when using
+      PrettyTensor) or ``False`` if aim to use TensorFlow optimizer.
       Defaults to TensorFlow.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
