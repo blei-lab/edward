@@ -5,7 +5,7 @@
 (This tutorial follows the
 \href{/tutorials/map}{Maximum a posteriori estimation} tutorial.)
 
-Maximum a posteriori (MAP) estimation approximates the posterior $p(z \mid x)$
+Maximum a posteriori (MAP) estimation approximates the posterior $p(\mathbf{z} \mid \mathbf{x})$
 with a point mass (delta function) by simply capturing its mode. MAP is
 attractive because it is fast and efficient. How can we use MAP to construct a
 better approximation to the posterior?
@@ -16,9 +16,9 @@ is one way of improving on an MAP estimate. The idea
 is to approximate the posterior with a normal distribution centered at the MAP
 estimate
 \begin{align*}
-  p(z \mid x)
+  p(\mathbf{z} \mid \mathbf{x})
   &\approx
-  \mathcal{N}(z\;;\; z_\text{MAP}, \Lambda^{-1}).
+  \text{Normal}(\mathbf{z}\;;\; \mathbf{z}_\text{MAP}, \Lambda^{-1}).
 \end{align*}
 This requires computing a precision matrix $\Lambda$. The Laplace approximation
 uses the Hessian of the log joint density at the MAP estimate,
@@ -26,7 +26,7 @@ defined component-wise as
 \begin{align*}
   \Lambda_{ij}
   &=
-  \frac{\partial^2 \log p(x, z)}{\partial z_i \partial z_j}.
+  \frac{\partial^2 \log p(\mathbf{x}, \mathbf{z})}{\partial z_i \partial z_j}.
 \end{align*}
 Edward uses automatic differentiation, specifically with TensorFlow's
 computational graphs, making this gradient computation both simple and
@@ -39,7 +39,7 @@ gradient).
 
 Edward implements the Laplace approximation by extending the class built for
 \href{/tutorials/map}{MAP estimation}, as it requires an estimate of the
-posterior mode, $z_\text{MAP}$.
+posterior mode, $\mathbf{z}_\text{MAP}$.
 
 \begin{lstlisting}[language=Python]
 class Laplace(MAP):

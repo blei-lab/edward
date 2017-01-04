@@ -41,10 +41,9 @@ class LatentSpaceModel:
 
     z = tf.reshape(zs['z'], [self.N, self.K])
     if self.dist == 'euclidean':
-      xp = tf.matmul(tf.ones([1, self.N]),
-                     tf.reduce_sum(z * z, 1, keep_dims=True))
+      xp = tf.tile(tf.reduce_sum(tf.pow(z, 2), 1, keep_dims=True), [1, self.N])
       xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
-      xp = 1.0 / xp
+      xp = 1.0 / tf.sqrt(xp + tf.diag(tf.zeros(self.N) + 1e3))
     elif self.dist == 'cosine':
       xp = tf.matmul(z, z, transpose_b=True)
 

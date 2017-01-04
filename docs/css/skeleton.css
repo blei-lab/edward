@@ -612,6 +612,15 @@ code.descname {
   border: none;
   border-radius: 0;
 }
+.rubric {
+  font-weight: 600;
+  font-size: 120%;
+}
+.property {
+  font-family: monospace;
+  font-weight: 600;
+  font-size: 140%;
+}
 .sig-paren {
   font-family: monospace;
   font-size: 160%;

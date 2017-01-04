@@ -5,11 +5,13 @@
 A Bayesian neural network is a neural network with a prior
 distribution on its weights \citep{neal2012bayesian}.
 
-Define the likelihood of an observation $(\mathbf{x}_n, y_n)$
+Consider a data set $\{(\mathbf{x}_n, y_n)\}$, where each data point
+comprises of features $\mathbf{x}_n\in\mathbb{R}^D$ and output
+$y_n\in\mathbb{R}$. Define the likelihood for each data point as
 \begin{align*}
   p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
   &=
-  \mathcal{N}(y_n \mid \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),
+  \text{Normal}(y_n \mid \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),
 \end{align*}
 where $\mathrm{NN}$ is a neural network whose weights and biases form
 the latent variables $\mathbf{z}$. Assume $\sigma^2$ is a
@@ -19,19 +21,19 @@ Define the prior on the weights and biases $\mathbf{z}$ to be the standard norma
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \mid \mathbf{0}, I).
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).
 \end{align*}
 
-Let's build the model in Edward. We
-instantiate a 3-layer Bayesian neural network with $\tanh$
-nonlinearities.
+Let's build the model in Edward. We define a 3-layer Bayesian neural
+network with $\tanh$ nonlinearities.
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 def neural_network(x):
-    h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
+    h = tf.tanh(tf.matmul(x, W_0) + b_0)
+    h = tf.tanh(tf.matmul(h, W_1) + b_1)
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
-
 
 N = 40  # number of data ponts
 D = 1   # number of features
@@ -43,24 +45,20 @@ b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
+x = tf.cast(x_train, dtype=tf.float32)
 y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))
 \end{lstlisting}
 This code builds the model assuming the features \texttt{x\_train}
 already exists in the Python environment. Alternatively, one can also
 define a TensorFlow placeholder,
 \begin{lstlisting}
-x = ed.placeholder(tf.float32, [N, D])
+x = tf.placeholder(tf.float32, [N, D])
 \end{lstlisting}
 and feed the placeholder manually during inference.
 
 A toy demonstration is available in the \href{/getting-started}{Getting Started} section.
 Source code is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py}
-{here}.
-An example of the model implemented as a class object in TensorFlow is
-available
-\href{https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_nn.py}
 {here}.
 
 \subsubsection{References}\label{references}

@@ -8,19 +8,20 @@ design inference algorithms in Edward.
 
 \subsubsection{The posterior}
 
-How can we use a model $p(x,z)$ to analyze some data $x$? In other words,
-what hidden structure $z$ explains the data? We seek to infer this
-hidden structure using the model.
+How can we use a model $p(\mathbf{x}, \mathbf{z})$ to analyze some
+data $\mathbf{x}$? In other words, what hidden structure $\mathbf{z}$
+explains the data? We seek to infer this hidden structure using the
+model.
 
 Inference of probability models leverages Bayes' rule to define the
 \emph{posterior}
 \begin{align*}
-  p(z \mid x)
+  p(\mathbf{z} \mid \mathbf{x})
   &=
-  \frac{p(x,z)}{\int p(x,z) \text{d}z}.
+  \frac{p(\mathbf{x}, \mathbf{z})}{\int p(\mathbf{x}, \mathbf{z}) \text{d}\mathbf{z}}.
 \end{align*}
-The posterior is the distribution of the latent variables $z$, conditioned on
-some (observed) data $x$.
+The posterior is the distribution of the latent variables
+$\mathbf{z}$, conditioned on some (observed) data $\mathbf{x}$.
 Drawing analogy to representation learning, it is a probabilistic
 description of the data's hidden representation.
 
@@ -44,11 +45,7 @@ This is often a high-dimensional integral that lacks an analytic (closed-form)
 solution. Thus, calculating the posterior means \emph{approximating} the
 posterior.
 
-There are many approaches to posterior inference, which can be unwieldy to
-manage or even conceptualize. Edward uses classes and class
-inheritance to provide a hierarchy of inference methods, enabling fast
-experimentation on top of existing methods. For details on the inference
-hierarchy in Edward, see the
+For details on how to specify inference in Edward, see the
 \href{/api/inference}{inference API}. We describe several examples in
 detail in the other inference \href{/tutorials/}{tutorials}.
 

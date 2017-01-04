@@ -22,7 +22,7 @@ Define the likelihood of an observation $(y_n, x_n)$ as
 \begin{align*}
   p(y_n \mid \mathbf{z} \;;\; x_n, \sigma^2)
   &=
-  \mathcal{N}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)
+  \text{Normal}(y_n \;;\; \mathbf{z}^\top [1, x_n], \sigma^2)
 \end{align*}
 where $\sigma^2$ is a known variance.
 
@@ -30,7 +30,7 @@ Define the prior to be a fully factorized normal
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \;;\; \mathbf{0}, I).
+  \text{Normal}(\mathbf{z} \;;\; \mathbf{0}, I).
 \end{align*}
 
 The model in Edward is
@@ -84,7 +84,7 @@ Define the variational model to be a fully factorized normal
 \begin{align*}
   q(\mathbf{z} \;;\; \lambda)
   &=
-  \mathcal{N}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).
+  \text{Normal}(\mathbf{z} \;;\; \lambda_\mu, \lambda_{\sigma^2}).
 \end{align*}
 
 The model in Edward is

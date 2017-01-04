@@ -42,7 +42,7 @@ class NormalBernoulli:
                            batch_normalize=True,
                            scale_after_normalization=True):
       return (pt.wrap(z).
-              reshape([N_MINIBATCH, 1, 1, self.n_vars]).
+              reshape([M, 1, 1, self.n_vars]).
               deconv2d(3, 128, edges='VALID').
               deconv2d(5, 64, edges='VALID').
               deconv2d(5, 32, stride=2).
@@ -77,28 +77,27 @@ def inference_network(x):
 
   mu, sigma = neural_network(x)
   """
-  n_vars = 10
   with pt.defaults_scope(activation_fn=tf.nn.elu,
                          batch_normalize=True,
                          scale_after_normalization=True):
     params = (pt.wrap(x).
-              reshape([N_MINIBATCH, 28, 28, 1]).
+              reshape([M, 28, 28, 1]).
               conv2d(5, 32, stride=2).
               conv2d(5, 64, stride=2).
               conv2d(5, 128, edges='VALID').
               dropout(0.9).
               flatten().
-              fully_connected(n_vars * 2, activation_fn=None)).tensor
+              fully_connected(d * 2, activation_fn=None)).tensor
 
-  mu = tf.reshape(params[:, :n_vars], [-1])
-  sigma = tf.reshape(tf.nn.softplus(params[:, n_vars:]), [-1])
+  mu = tf.reshape(params[:, :d], [-1])
+  sigma = tf.reshape(tf.nn.softplus(params[:, d:]), [-1])
   return mu, sigma
 
 
 ed.set_seed(42)
 
-N_MINIBATCH = 128
-n_vars = 10
+M = 128  # batch size during training
+d = 10  # latent dimension
 DATA_DIR = "data/mnist"
 IMG_DIR = "img"
 
@@ -111,10 +110,10 @@ if not os.path.exists(IMG_DIR):
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 
 # MODEL
-model = NormalBernoulli(n_vars)
+model = NormalBernoulli(d)
 
 # INFERENCE
-x_ph = ed.placeholder(tf.float32, [N_MINIBATCH, 28 * 28])
+x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
 mu, sigma = inference_network(x_ph)
 qz = Normal(mu=mu, sigma=sigma)
 
@@ -126,7 +125,7 @@ with tf.variable_scope("model"):
   inference.initialize(optimizer=optimizer, use_prettytensor=True)
 
 with tf.variable_scope("model", reuse=True):
-  p_rep = tf.sigmoid(model.sample_prior(N_MINIBATCH))
+  p_rep = tf.sigmoid(model.sample_prior(M))
 
 init = tf.initialize_all_variables()
 init.run()
@@ -141,21 +140,17 @@ for epoch in range(n_epoch):
   pbar.start()
   for t in range(n_iter_per_epoch):
     pbar.update(t)
-    x_train, _ = mnist.train.next_batch(N_MINIBATCH)
+    x_train, _ = mnist.train.next_batch(M)
     info_dict = inference.update(feed_dict={x_ph: x_train})
     avg_loss += info_dict['loss']
 
-  # Take average over all ELBOs during the epoch, and over minibatch
-  # of data points (images).
-  avg_loss = avg_loss / n_iter_per_epoch
-  avg_loss = avg_loss / N_MINIBATCH
-
   # Print a lower bound to the average marginal likelihood for an
   # image.
+  avg_loss = avg_loss / n_iter_per_epoch
+  avg_loss = avg_loss / M
   print("log p(x) >= {:0.3f}".format(avg_loss))
 
   # Visualize hidden representations.
   imgs = p_rep.eval()
-  for b in range(N_MINIBATCH):
-    imsave(os.path.join(IMG_DIR, '%d.png') % b,
-           imgs[b].reshape(28, 28))
+  for m in range(M):
+    imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))

@@ -12,6 +12,23 @@ from edward.util import copy
 
 class MetropolisHastings(MonteCarlo):
   """Metropolis-Hastings.
+
+  Notes
+  -----
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  To calculate the acceptance ratio, ``MetropolisHastings`` uses an
+  estimate of the marginal density,
+
+  .. math::
+
+    p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+            \\approx p(x, z, \\beta^*)
+
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
   def __init__(self, latent_vars, proposal_vars, data=None, model_wrapper=None):
     """
@@ -19,7 +36,7 @@ class MetropolisHastings(MonteCarlo):
     ----------
     proposal_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on; each is
-      binded to a proposal distribution p(z' | z).
+      binded to a proposal distribution :math:`g(z' \mid z)`.
 
     Examples
     --------
@@ -44,53 +61,66 @@ class MetropolisHastings(MonteCarlo):
     Draw sample from proposal conditional on last sample. Then accept
     or reject the sample based on the ratio,
 
-    ratio = log p(x, znew) - log p(x, zold) +
-            log g(znew | zold) - log g(zold | znew)
-          = sum_z [ log p(znew) - log p(zold) +
-                    log g(znew | zold) - log g(zold | znew) ] +
-            sum_x [ log p(x | znew) - sum_x log p(x | zold) ]
-          = sum_z [ log g(znew | zold) - log p(zold) ] +
-            sum_z [ log p(znew) - log g(zold | znew) ] +
-            sum_x [ log p(x | znew) - sum_x log p(x | zold) ]
+    .. math::
+      \\text{ratio} = \log p(x, z^{new}) - \log p(x, z^{old}) +
+        \log g(z^{new} \mid z^{old}) - \log g(z^{old} \mid z^{new})
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
+
+    # Form dictionary in order to replace conditioning on prior or
+    # observed variable with conditioning on a specific value.
+    dict_swap = {}
+    for x, qx in six.iteritems(self.data):
+      if isinstance(x, RandomVariable):
+        if isinstance(qx, RandomVariable):
+          qx_copy = copy(qx, scope='conditional')
+          dict_swap[x] = qx_copy.value()
+        else:
+          dict_swap[x] = qx
+
+    dict_swap_old = dict_swap.copy()
+    dict_swap_old.update(old_sample)
+    scope_old = 'inference_' + str(id(self)) + '/old'
+    scope_new = 'inference_' + str(id(self)) + '/new'
 
     # Draw proposed sample and calculate acceptance ratio.
     new_sample = {}
     ratio = 0.0
     for z, proposal_z in six.iteritems(self.proposal_vars):
       # Build proposal g(znew | zold).
-      proposal_znew = copy(proposal_z, old_sample, scope='proposal_znew')
-      # Build prior p(zold).
-      zold = copy(z, old_sample, scope='zold')
+      proposal_znew = copy(proposal_z, dict_swap_old, scope=scope_old)
       # Sample znew ~ g(znew | zold).
-      new_sample[z] = proposal_z.sample()
+      new_sample[z] = proposal_znew.value()
       # Increment ratio.
       ratio += tf.reduce_sum(proposal_znew.log_prob(new_sample[z]))
-      if self.model_wrapper is None:
-        ratio -= tf.reduce_sum(zold.log_prob(old_sample[z]))
+
+    dict_swap_new = dict_swap.copy()
+    dict_swap_new.update(new_sample)
 
     for z, proposal_z in six.iteritems(self.proposal_vars):
-      # Build proposal p(zold | znew).
-      proposal_zold = copy(proposal_z, new_sample, scope='proposal_zold')
-      # Build prior p(znew).
-      znew = copy(z, new_sample, scope='znew')
+      # Build proposal g(zold | znew).
+      proposal_zold = copy(proposal_z, dict_swap_new, scope=scope_new)
       # Increment ratio.
-      ratio -= tf.reduce_sum(proposal_zold.log_prob(old_sample[z]))
-      if self.model_wrapper is None:
-        ratio += tf.reduce_sum(znew.log_prob(new_sample[z]))
+      ratio -= tf.reduce_sum(proposal_zold.log_prob(dict_swap_old[z]))
 
     if self.model_wrapper is None:
-      for x, obs in six.iteritems(self.data):
+      for z in six.iterkeys(self.latent_vars):
+        # Build priors p(znew) and p(zold).
+        znew = copy(z, dict_swap_new, scope=scope_new)
+        zold = copy(z, dict_swap_old, scope=scope_old)
+        # Increment ratio.
+        ratio += tf.reduce_sum(znew.log_prob(dict_swap_new[z]))
+        ratio -= tf.reduce_sum(zold.log_prob(dict_swap_old[z]))
+
+      for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
-          # Build likelihood p(x | znew).
-          x_znew = copy(x, new_sample, scope='x_znew')
-          # Build likelihood p(x | zold).
-          x_zold = copy(x, old_sample, scope='x_zold')
+          # Build likelihoods p(x | znew) and p(x | zold).
+          x_znew = copy(x, dict_swap_new, scope=scope_new)
+          x_zold = copy(x, dict_swap_old, scope=scope_old)
           # Increment ratio.
-          ratio += tf.reduce_sum(x_znew.log_prob(obs))
-          ratio -= tf.reduce_sum(x_zold.log_prob(obs))
+          ratio += tf.reduce_sum(x_znew.log_prob(dict_swap[x]))
+          ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
     else:
         x = self.data
         ratio += self.model_wrapper.log_prob(x, new_sample)

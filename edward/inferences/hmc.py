@@ -13,8 +13,24 @@ from edward.util import copy
 class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
   (Duane et al., 1987; Neal, 2011).
+
+  Notes
+  -----
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  ``HMC`` substitutes the model's log marginal density
+
+  .. math::
+
+    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)
+
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, *args, **kwargs):
     """
     Examples
     --------
@@ -25,7 +41,7 @@ class HMC(MonteCarlo):
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.HMC({z: qz}, data)
     """
-    super(HMC, self).__init__(latent_vars, data, model_wrapper)
+    super(HMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, n_steps=2, *args, **kwargs):
     """
@@ -62,15 +78,15 @@ class HMC(MonteCarlo):
     new_r_sample = old_r_sample
     for _ in range(self.n_steps):
       new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
-                                          self.step_size, self.log_joint)
+                                          self.step_size, self._log_joint)
 
     # Calculate acceptance ratio.
     ratio = tf.reduce_sum([0.5 * tf.square(r)
                            for r in six.itervalues(old_r_sample)])
     ratio -= tf.reduce_sum([0.5 * tf.square(r)
                             for r in six.itervalues(new_r_sample)])
-    ratio += self.log_joint(new_sample)
-    ratio -= self.log_joint(old_sample)
+    ratio += self._log_joint(new_sample)
+    ratio -= self._log_joint(old_sample)
 
     # Accept or reject sample.
     u = Uniform().sample()
@@ -96,7 +112,7 @@ class HMC(MonteCarlo):
     assign_ops.append(self.n_accept.assign_add(tf.select(accept, 1, 0)))
     return tf.group(*assign_ops)
 
-  def log_joint(self, z_sample):
+  def _log_joint(self, z_sample):
     """
     Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
@@ -108,16 +124,27 @@ class HMC(MonteCarlo):
     """
     if self.model_wrapper is None:
       self.scope_iter += 1
+      scope = 'inference_' + str(id(self)) + '/' + str(self.scope_iter)
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on a specific value.
+      dict_swap = z_sample.copy()
+      for x, qx in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
       log_joint = 0.0
-      for z, sample in six.iteritems(z_sample):
-        z = copy(z, z_sample, scope='prior' + str(self.scope_iter))
-        log_joint += tf.reduce_sum(z.log_prob(sample))
+      for z in six.iterkeys(self.latent_vars):
+        z_copy = copy(z, dict_swap, scope=scope)
+        log_joint += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
-      for x, obs in six.iteritems(self.data):
+      for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
-          x_z = copy(x, z_sample, scope='likelihood' + str(self.scope_iter))
-          log_joint += tf.reduce_sum(x_z.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          log_joint += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
     else:
       x = self.data
       log_joint = self.model_wrapper.log_prob(x, z_sample)

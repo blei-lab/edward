@@ -8,24 +8,23 @@ construct neural networks.
 
 If you are not familiar with MDNs have a look at the
 \href{http://cbonnett.github.io/MDN.html}{following blog post} or at
-original
-\href{http://research.microsoft.com/en-us/um/people/cmbishop/downloads/Bishop-NCRG-94-004.pdf}{paper}
-by Bishop.
-Note you have to manually \href{https://keras.io/backend/}
-{configure Keras} to work with TensorFlow.
+the original paper by \citet{bishop1994mixture}.
 The script is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_density_network_demo.py}
 {here}.
 
 \subsubsection{Data}
 
-We use the same toy data from the \href{http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/}{blog post} by Otoro, where he explains MDNs. This is an inverse problem: for every input $X$ there are multiple outputs $y$.
+We use the same toy data from the
+\href{http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/}{David
+Ha's blog post}, where he explains MDNs. It is an inverse problem where
+for every input $x_n$ there are multiple outputs $y_n$.
 
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N):
-  y_data = np.float32(np.random.uniform(-10.5, 10.5, (1, N))).T
-  r_data = np.float32(np.random.normal(size=(N, 1)))  # random noise
-  x_data = np.float32(np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0)
+  y_data = np.random.uniform(-10.5, 10.5, (N, 1)).astype(np.float32)
+  r_data = np.random.normal(size=(N, 1)).astype(np.float32)  # random noise
+  x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
   return train_test_split(x_data, y_data, random_state=42)
 
 N = 40000  # number of data points
@@ -51,13 +50,17 @@ sns.regplot(X_train, y_train, fit_reg=False)
 We define TensorFlow placeholders will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
 
 \begin{lstlisting}[language=Python]
-X = ed.placeholder(tf.float32, [None, D])
-y = ed.placeholder(tf.float32, [None, D])
+X = tf.placeholder(tf.float32, [None, D])
+y = tf.placeholder(tf.float32, [None, D])
 data = {'X': X, 'y': y}
 \end{lstlisting}
 
 
 \subsubsection{Model}
+
+\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
+Reimplementing this under Edward's native language is currently in
+progress.}
 
 We define a class that can be used to construct MDNs. Here we use a
 mixture of normal distributions parameterized by a feedforward
@@ -140,10 +143,10 @@ placeholders instead of training data.
 We keep track of the losses under \texttt{train\_loss} and \texttt{test\_loss}.
 
 \begin{lstlisting}[language=Python]
-NEPOCH = 1000
-train_loss = np.zeros(NEPOCH)
-test_loss = np.zeros(NEPOCH)
-for i in range(NEPOCH):
+n_epoch = 1000
+train_loss = np.zeros(n_epoch)
+test_loss = np.zeros(n_epoch)
+for i in range(n_epoch):
     info_dict = inference.update(feed_dict={X: X_train, y: y_train})
     train_loss[i] = info_dict['loss']
     test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
@@ -164,8 +167,8 @@ the model. In this case, it is
 
 To do this, we call
 \begin{lstlisting}[language=Python]
-pred_weights, pred_means, pred_std = sess.run([model.pi, model.mus, model.sigmas],
-                                              feed_dict={X: X_test})
+pred_weights, pred_means, pred_std = \
+    sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
 \end{lstlisting}
 
 Let's plot the log-likelihood of the training and test data as
@@ -176,8 +179,8 @@ train and test data respectively.
 
 \begin{lstlisting}[language=Python]
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
-plt.plot(np.arange(NEPOCH), -test_loss / len(X_test), label='Test')
-plt.plot(np.arange(NEPOCH), -train_loss / len(X_train), label='Train')
+plt.plot(np.arange(n_epoch), -test_loss / len(X_test), label='Test')
+plt.plot(np.arange(n_epoch), -train_loss / len(X_train), label='Train')
 plt.legend(fontsize=20)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Log-likelihood', fontsize=15)

@@ -23,7 +23,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
   The copying is done recursively, so any `Operation` whose output
   is required to evaluate `org_instance` is also copied (if it isn't
   already copied within the new scope). This is with the exception of
-  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly copied.
+  `tf.Variable`s, `tf.placeholder`s, and nodes of type `Queue`, which
+  are reused and not newly copied.
 
   Parameters
   ----------
@@ -132,11 +133,10 @@ def copy(org_instance, dict_swap=None, scope="copied",
   if org_instance.name in variables:
     return graph.get_tensor_by_name(variables[org_instance.name].name)
 
-  # Do the same for placeholders. Same logic holds.
-  # Note this assumes that placeholders are all in this collection.
-  placeholders = {x.name: x for x in graph.get_collection('PLACEHOLDERS')}
-  if org_instance.name in placeholders:
-    return graph.get_tensor_by_name(placeholders[org_instance.name].name)
+  # Do the same for placeholders. Determine via its op's type.
+  if isinstance(org_instance, tf.Tensor):
+    if "Placeholder" in org_instance.op.type:
+      return org_instance
 
   if isinstance(org_instance, RandomVariable):
     rv = org_instance
@@ -185,6 +185,10 @@ def copy(org_instance, dict_swap=None, scope="copied",
     return new_tensor
   else:  # tf.Operation
     op = org_instance
+
+    # Do not copy queue operations
+    if 'Queue' in op.type:
+      return op
 
     # If it has an original op, copy it.
     if op._original_op is not None:

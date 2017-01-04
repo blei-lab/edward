@@ -4,44 +4,54 @@
 
 \subsubsection{Inference}
 
-Given a model $p(x, z)$ and data set $x$,
-an inference algorithm infers the posterior distribution $p(z\mid x)$
-of the latent variables given data. For more details, see the
-\href{/tutorials/inference}
-{Inference of Probability Models tutorial}.
+We describe how to perform inference in probabilistic models.
+For background, see the
+\href{/tutorials/inference} {Inference of Probability Models
+tutorial}.
 
-The API to \texttt{Inference} is very general. We demonstrate its typical use cases below.
-
-\subsubsection{Posterior Inference}
-
+Suppose we have a model $p(\mathbf{x}, \mathbf{z}, \beta)$ of data $\mathbf{x}_{\text{train}}$ with latent variables $(\mathbf{z}, \beta)$.
 Consider the posterior inference problem,
 \begin{equation*}
-q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}).
+q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),
 \end{equation*}
+in which the task is to approximate the posterior
+$p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}})$
+using a family of distributions, $q(\mathbf{z},\beta; \lambda)$,
+indexed by parameters $\lambda$.
 
-We represent this by binding random variables in the model to other
-random variables in \texttt{latent_vars}; the latter random variables
-aim to match the former. For \texttt{data}, we bind random variables
-in the model to their observations.
+In Edward, let \texttt{z} and \texttt{beta} be latent variables in the model,
+where we observe the random variable \texttt{x} with
+data \texttt{x_train}.
+Let \texttt{qz} and \texttt{qbeta} be random variables defined to
+approximate the posterior.
+We write this problem as follows:
 
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 \end{lstlisting}
 
+\texttt{Inference} is an abstract class which
+takes two inputs: a collection of latent variables, with model
+variables bound to posterior variables; and a collection of observed
+variables, with model variables bound to data.
+The choice of approximation $q(\mathbf{z}, \beta; \lambda)$ and rules
+to update parameters $\lambda$ are specified by an inference
+algorithm.
+
 Running inference is as simple as running one method.
+
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.run()
 \end{lstlisting}
-%
-Inference also supports fine-grained control of the training procedure.
-%
+
+Inference also supports fine control of the training procedure.
+
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.initialize()
 
-init = tf.initialize_all_variables()
-init.run()
+tf.initialize_all_variables().run()
 
 for _ in range(inference.n_iter):
   info_dict = inference.update()
@@ -49,43 +59,83 @@ for _ in range(inference.n_iter):
 
 inference.finalize()
 \end{lstlisting}
+
+\texttt{initialize()} builds the algorithm's update rules
+(computational graph) for $\lambda$;
+\texttt{initialize_all_variables()} initializes $\lambda$
+(TensorFlow variables in the graph);
+\texttt{update()} runs the graph once to update
+$\lambda$, which is called in a loop until convergence;
+\texttt{finalize()} runs any computation as the algorithm
+terminates.
+
 The \texttt{run()} method is a simple wrapper for this procedure.
 
-\subsubsection{Remarks}
+\subsubsection{Other Settings}
 
-We highlight other typical settings during inference. (Note the settings are not exclusive and can be used in combination with others.)
+We highlight other settings during inference.
 
 \textbf{Model parameters}.
-Model parameters are defined as \texttt{tf.Variable}s. They are
-nodes in the computational graph that the probability model
-depends on.
+Model parameters are parameters in a model that we will always compute
+point estimates for and not be uncertain about.
+They are defined with \texttt{tf.Variable}s, where the inference
+problem is
 \begin{equation*}
 \hat{\theta} \leftarrow^{\text{optimize}}
-p(x; \theta)
+p(\mathbf{x}_{\text{train}}; \theta)
 \end{equation*}
 
 \begin{lstlisting}[language=Python]
-theta = tf.Variable()
-x = RandomVariable(params=theta)
+from edward.models import Normal
+
+theta = tf.Variable(0.0)
+x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
 
 inference = ed.Inference({}, {x: x_train})
 \end{lstlisting}
-(Here, this inference example does not concern any latent variables, and is only about estimating \texttt{theta} given that we observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them, so that inference is both posterior inference and parameter optimization.)
+
+Only a subset of inference algorithms support estimation of model
+parameters.
+(Note also that this inference example does not have any latent
+variables. It is only about estimating \texttt{theta} given that we
+observe $\mathbf{x} = \mathbf{x}_{\text{train}}$. We can add them so
+that inference is both posterior inference and parameter estimation.)
 
 For example, model parameters are useful when applying neural networks
-from libraries such as TensorFlow Slim and Keras. The library
-implements \texttt{tf.Variable}s  for each neural network layer under
-the hood, and thus the inference problem requires estimating these
-parameters.
+from high-level libraries such as Keras and TensorFlow Slim. See
+the \href{/api/model-compositionality}{model compositionality} page
+for more details.
+
+\textbf{Conditional inference}.
+In conditional inference, only a subset of the posterior is inferred
+while the rest are fixed using other inferences. The inference
+problem is
+\begin{equation*}
+q(\beta)q(\mathbf{z})\approx
+p(\mathbf{z}, \beta\mid\mathbf{x}_{\text{train}})
+\end{equation*}
+where parameters in $q(\beta)$ are estimated and $q(\mathbf{z})$ is
+fixed.
+%
+In Edward, we enable conditioning by binding random variables to other
+random variables in \texttt{data}.
+\begin{lstlisting}[language=Python]
+inference = ed.Inference({beta: qbeta}, {x: x_train, z: qz})
+\end{lstlisting}
+
+In the \href{/api/inference-compositionality}{compositionality page},
+we describe how to construct inference by composing
+many conditional inference algorithms.
 
 \textbf{Implicit prior samples}.
-Any random variables that the model depends on, but are not specified
-in \texttt{Inference}, are implicitly marginalized out with a single
-sample.
+Latent variables can be defined in the model without any posterior
+inference over them. They are implicitly marginalized out with a
+single sample. The inference problem is
 \begin{equation*}
 q(\beta)\approx
 p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)
 \end{equation*}
+where $\mathbf{z}^*\sim p(\mathbf{z}\mid\beta)$ is a prior sample.
 
 \begin{lstlisting}[language=Python]
 inference = ed.Inference({beta: qbeta}, {x: x_train})
@@ -93,4 +143,13 @@ inference = ed.Inference({beta: qbeta}, {x: x_train})
 
 For example, implicit prior samples are useful for generative adversarial
 networks. Their inference problem does not require any inference over
-the latent variables; instead, it uses samples from the prior.
+the latent variables; it uses samples from the prior.
+
+\begin{center}\rule{3in}{0.4pt}\end{center}
+
+{{sphinx
+
+.. autoclass:: edward.inferences.Inference
+   :members:
+
+}}

@@ -4,16 +4,15 @@
 
 \subsubsection{Model}
 
-A probabilistic model is a joint distribution $p(x, z)$ of data $x$
-and latent variables $z$.
-For more details, see the \href{/tutorials/model}{Probability Models tutorial}.
+A probabilistic model is a joint distribution $p(\mathbf{x},
+\mathbf{z})$ of data $\mathbf{x}$ and latent variables $\mathbf{z}$.
+For background, see the \href{/tutorials/model}{Probability Models tutorial}.
+
 In Edward, we specify models using a simple language of random variables.
-
-\subsubsection{Random Variables}
-
-A random variable $\mathbf{x}$ is an object parameterized by tensors $\theta^*$.
-The number of random variables in one object is determined by
-the dimension of its parameters.
+A random variable $\mathbf{x}$ is an object parameterized by
+tensors $\theta^*$, where
+the number of random variables in one object is determined by
+the dimensions of its parameters.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Normal, Exponential
@@ -21,7 +20,7 @@ from edward.models import Normal, Exponential
 # univariate normal
 Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
 # vector of 5 univariate normals
-Normal(mu=tf.constant([0.0]*5), sigma=tf.constant([1.0]*5))
+Normal(mu=tf.zeros(5), sigma=tf.ones(5))
 # 2 x 3 matrix of Exponentials
 Exponential(lam=tf.ones([2, 3]))
 \end{lstlisting}
@@ -33,65 +32,59 @@ innermost (right-most) dimension of the parameters.
 from edward.models import Dirichlet, MultivariateNormalFull
 
 # K-dimensional Dirichlet
-Dirichlet(alpha=np.array([0.1]*K)
+Dirichlet(alpha=tf.constant([0.1] * K)
 # vector of 5 K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 # 2 x 5 matrix of K-dimensional multivariate normals
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)
 \end{lstlisting}
 
-Random variable objects are equipped with methods such as
+Random variables are equipped with methods such as
 \texttt{log_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
+\texttt{mean()}, $\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]$,
 and \texttt{sample()}, $\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$.
+Further, each random variable is associated to a tensor $\mathbf{x}^*$ in the
+computational graph, which represents a single sample $\mathbf{x}^*\sim
+p(\mathbf{x}\mid\theta^*)$.
 
-Each object wraps a tensor $\mathbf{x}^*$, where
-$\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$ is a sample from the
-object.
+This makes it easy to parameterize random variables with complex
+deterministic structure, such as with deep neural networks, a diverse
+set of math operations, and compatibility with third party libraries
+which also build on TensorFlow.
+The design also enables compositions of random variables
+to capture complex stochastic structure.
+They operate on $\mathbf{x}^*$.
 
-\includegraphics[width=225px]{/images/random_variable.png}
-
-This enables operations on the TensorFlow graph, allowing random
-variables to be used in conjunction with other TensorFlow ops. They
-operate on $\mathbf{x}^*$.
-
-\includegraphics[width=400px]{/images/random_variable_ops.png}
+\includegraphics[width=375px]{/images/random_variable_ops.png}
 
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-x = Normal(mu=tf.constant([0.0]*10), sigma=tf.constant([1.0]*10))
+x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
-tf.nn.tanh(x * y)
-tf.gather(x, 2) # 3rd normal rv in the vector
+tf.tanh(x * y)
+tf.gather(x, 2)  # 3rd normal rv in the vector
 \end{lstlisting}
 
-We can leverage this construction of random variables to define
-models.
-For examples of models built in Edward, see the model
-\href{/tutorials/}{tutorials}.
+In the \href{/api/model-compositionality}{compositionality page}, we
+describe how to build models by composing random variables.
 
-\subsubsection{Variational Models}
+\begin{center}\rule{3in}{0.4pt}\end{center}
 
-A variational model defines a distribution over latent variables. It
-is a model of the posterior distribution, specifying another
-distribution to approximate it.
-Edward implements variational models using the same language of random
-variables.
+For a list of random variables supported in Edward, see the
+\href{https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html}{TensorFlow distributions API}.
+Edward random variables build on top of them, inheriting the same
+arguments and class methods. Additional methods are also available,
+detailed below.
 
-We parameterize them with TensorFlow variables so that their
-parameters may be trained during inference.
+{{sphinx
 
-\begin{lstlisting}[language=Python]
-from edward.models import Dirichlet, Normal, InverseGamma
+.. autoclass:: edward.models.RandomVariable
+   :members:
 
-qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
-qmu_mu = tf.Variable(tf.random_normal([K * D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
+.. class:: edward.models.Empirical
 
-qpi = Dirichlet(alpha=qpi_alpha)
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
-\end{lstlisting}
+.. class:: edward.models.PointMass
+
+}}

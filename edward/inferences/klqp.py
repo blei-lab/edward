@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import six
 import tensorflow as tf
+import warnings
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, Normal
@@ -15,15 +16,39 @@ class KLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective by automatically selecting from a
   variety of black box inference techniques.
 
-  This class also minimizes the loss with respect to any model
-  parameters p(z | x; \theta). These parameters are defined via
-  TensorFlow variables, which the probability model depends on in the
-  computational graph.
+  Notes
+  -----
+  ``KLqp`` also optimizes any model parameters :math:`p(z \mid x;
+  \\theta)`. It does this by variational EM, minimizing
+
+  .. math::
+
+    \mathbb{E}_{q(z; \lambda)} [ \log p(x, z; \\theta) ]
+
+  with respect to :math:`\\theta`.
+
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`. During gradient calculation, instead
+  of using the model's density
+
+  .. math::
+
+    \log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),
+
+  for each sample :math:`s=1,\ldots,S`, ``KLqp`` uses
+
+  .. math::
+
+    \log p(x, z^{(s)}, \\beta^{(s)}),
+
+  where :math:`z^{(s)} \sim q(z; \lambda)` and :math:`\\beta^{(s)}
+  \sim q(\\beta)`.
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
@@ -40,12 +65,13 @@ class KLqp(VariationalInference):
     self.n_samples = n_samples
     return super(KLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, scope=None):
-    """Wrapper for the KLqp loss function.
+  def build_loss_and_gradients(self, var_list):
+    """Wrapper for the ``KLqp`` loss function.
 
     .. math::
 
-      -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
+      -\\text{ELBO} =
+        -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
     KLqp supports
 
@@ -59,7 +85,8 @@ class KLqp(VariationalInference):
 
     .. math::
 
-      -E_{[\log p(x | z)] + KL( q(z; \lambda) || p(z) ),
+      -\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
+        \\text{KL}( q(z; \lambda) \| p(z) ),
 
     where the KL term is computed analytically (Kingma and Welling,
     2014).
@@ -74,29 +101,26 @@ class KLqp(VariationalInference):
         (z_is_normal or hasattr(self.model_wrapper, 'log_lik'))
     if is_reparameterizable:
       if is_analytic_kl:
-        loss = build_reparam_kl_loss(self)
+        return build_reparam_kl_loss_and_gradients(self, var_list)
       # elif is_analytic_entropy:
-      #    loss = build_reparam_entropy_loss(self)
+      #    return build_reparam_entropy_loss_and_gradients(self, var_list)
       else:
-        loss = build_reparam_loss(self)
-
-      var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                   scope=scope)
-      grads = tf.gradients(loss, [v.ref() for v in var_list])
-      grads_and_vars = list(zip(grads, var_list))
-      return loss, grads_and_vars
+        return build_reparam_loss_and_gradients(self, var_list)
     else:
       if is_analytic_kl:
-        return build_score_kl_loss_and_gradients(self, scope)
+        return build_score_kl_loss_and_gradients(self, var_list)
       # Analytic entropies may lead to problems around
       # convergence; for now it is deactivated.
       # elif is_analytic_entropy:
-      #    return build_score_entropy_loss_and_gradients(self, scope)
+      #    return build_score_entropy_loss_and_gradients(self, var_list)
       else:
-        return build_score_loss_and_gradients(self, scope)
+        return build_score_loss_and_gradients(self, var_list)
 
 
-MFVI = KLqp  # deprecated synonym
+def MFVI(*args, **kwargs):
+  warnings.simplefilter('default', DeprecationWarning)
+  warnings.warn("MFVI is deprecated; use KLqp instead.", DeprecationWarning)
+  return KLqp(*args, **kwargs)
 
 
 class ReparameterizationKLqp(VariationalInference):
@@ -104,7 +128,7 @@ class ReparameterizationKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the reparameterization
   gradient.
@@ -124,8 +148,8 @@ class ReparameterizationKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ReparameterizationKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss(self):
-    return build_reparam_loss(self)
+  def build_loss_and_gradients(self, var_list):
+    return build_reparam_loss_and_gradients(self, var_list)
 
 
 class ReparameterizationKLKLqp(VariationalInference):
@@ -133,7 +157,7 @@ class ReparameterizationKLKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the reparameterization
   gradient and an analytic KL term.
@@ -153,8 +177,8 @@ class ReparameterizationKLKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ReparameterizationKLKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss(self):
-    return build_reparam_kl_loss(self)
+  def build_loss_and_gradients(self, var_list):
+    return build_reparam_kl_loss_and_gradients(self, var_list)
 
 
 class ReparameterizationEntropyKLqp(VariationalInference):
@@ -162,7 +186,7 @@ class ReparameterizationEntropyKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the reparameterization
   gradient and an analytic entropy term.
@@ -183,8 +207,8 @@ class ReparameterizationEntropyKLqp(VariationalInference):
     return super(ReparameterizationEntropyKLqp, self).initialize(
         *args, **kwargs)
 
-  def build_loss(self):
-    return build_reparam_entropy_loss(self)
+  def build_loss_and_gradients(self, var_list):
+    return build_reparam_entropy_loss_and_gradients(self, var_list)
 
 
 class ScoreKLqp(VariationalInference):
@@ -192,7 +216,7 @@ class ScoreKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the score function
   gradient.
@@ -212,8 +236,8 @@ class ScoreKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, scope=None):
-    return build_score_loss_and_gradients(self, scope)
+  def build_loss_and_gradients(self, var_list):
+    return build_score_loss_and_gradients(self, var_list)
 
 
 class ScoreKLKLqp(VariationalInference):
@@ -221,7 +245,7 @@ class ScoreKLKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the score function gradient
   and an analytic KL term.
@@ -241,8 +265,8 @@ class ScoreKLKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, scope=None):
-    return build_score_kl_loss_and_gradients(self, scope)
+  def build_loss_and_gradients(self, var_list):
+    return build_score_kl_loss_and_gradients(self, var_list)
 
 
 class ScoreEntropyKLqp(VariationalInference):
@@ -250,7 +274,7 @@ class ScoreEntropyKLqp(VariationalInference):
 
   .. math::
 
-    KL( q(z; \lambda) || p(z | x) ).
+    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
 
   This class minimizes the objective using the score function gradient
   and an analytic entropy term.
@@ -270,17 +294,18 @@ class ScoreEntropyKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreEntropyKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, scope=None):
-    return build_score_entropy_loss_and_gradients(self, scope)
+  def build_loss_and_gradients(self, var_list):
+    return build_score_entropy_loss_and_gradients(self, var_list)
 
 
-def build_reparam_loss(inference):
+def build_reparam_loss_and_gradients(inference, var_list):
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 
   .. math::
 
-    -ELBO =  -E_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
+    -\\text{ELBO} =
+      -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
@@ -290,30 +315,46 @@ def build_reparam_loss(inference):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += tf.reduce_sum(qz.log_prob(z_sample[z]))
+      z_log_prob = tf.reduce_sum(qz.log_prob(z_sample[z]))
+      if z in inference.scale:
+        z_log_prob *= inference.scale[z]
+
+      q_log_prob[s] += z_log_prob
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_sample
-      for x, obs in six.iteritems(inference.data):
+      for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
-        p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
+        z_copy = copy(z, dict_swap, scope=scope)
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in inference.scale:
+          z_log_prob *= inference.scale[z]
 
-      for x, obs in six.iteritems(inference.data):
+        p_log_prob[s] += z_log_prob
+
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-          p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in inference.scale:
+            x_log_prob *= inference.scale[x]
+
+          p_log_prob[s] += x_log_prob
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -321,17 +362,23 @@ def build_reparam_loss(inference):
   p_log_prob = tf.pack(p_log_prob)
   q_log_prob = tf.pack(q_log_prob)
   loss = -tf.reduce_mean(p_log_prob - q_log_prob)
-  return loss
+
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
+  grads = tf.gradients(loss, [v.ref() for v in var_list])
+  grads_and_vars = list(zip(grads, var_list))
+  return loss, grads_and_vars
 
 
-def build_reparam_kl_loss(inference):
+def build_reparam_kl_loss_and_gradients(inference, var_list):
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 
   .. math::
 
-    -ELBO =  - ( E_{q(z; \lambda)} [ \log p(x | z) ]
-          + KL(q(z; \lambda) || p(z)) )
+    -\\text{ELBO} =  - ( \mathbb{E}_{q(z; \lambda)} [ \log p(x \mid z) ]
+          + \\text{KL}(q(z; \lambda) \| p(z)) )
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
@@ -345,25 +392,33 @@ def build_reparam_kl_loss(inference):
   """
   p_log_lik = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_sample
-      for x, obs in six.iteritems(inference.data):
+      for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
-      for x, obs in six.iteritems(inference.data):
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-          p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_lik = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in inference.scale:
+            x_log_lik *= inference.scale[x]
+
+          p_log_lik[s] += x_log_lik
     else:
       x = inference.data
       p_log_lik[s] = inference.model_wrapper.log_lik(x, z_sample)
@@ -371,25 +426,32 @@ def build_reparam_kl_loss(inference):
   p_log_lik = tf.pack(p_log_lik)
 
   if inference.model_wrapper is None:
-    kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(
-                        qz.mu, qz.sigma, z.mu, z.sigma))
+    kl = tf.reduce_sum([inference.data.get(z, 1.0) *
+                        tf.reduce_sum(kl_multivariate_normal(
+                            qz.mu, qz.sigma, z.mu, z.sigma))
                         for z, qz in six.iteritems(inference.latent_vars)])
   else:
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl)
-  return loss
+
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
+  grads = tf.gradients(loss, [v.ref() for v in var_list])
+  grads_and_vars = list(zip(grads, var_list))
+  return loss, grads_and_vars
 
 
-def build_reparam_entropy_loss(inference):
+def build_reparam_entropy_loss_and_gradients(inference, var_list):
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 
   .. math::
 
-    -ELBO =  -( E_{q(z; \lambda)} [ \log p(x , z) ]
-          + H(q(z; \lambda)) )
+    -\\text{ELBO} =  -( \mathbb{E}_{q(z; \lambda)} [ \log p(x , z) ]
+          + \mathbb{H}(q(z; \lambda)) )
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
@@ -400,43 +462,61 @@ def build_reparam_entropy_loss(inference):
   """
   p_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_sample
-      for x, obs in six.iteritems(inference.data):
+      for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
-        p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
+        z_copy = copy(z, dict_swap, scope=scope)
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in inference.scale:
+          z_log_prob *= inference.scale[z]
 
-      for x, obs in six.iteritems(inference.data):
+        p_log_prob[s] += z_log_prob
+
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-          p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in inference.scale:
+            x_log_prob *= inference.scale[x]
+
+          p_log_prob[s] += x_log_prob
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
 
   p_log_prob = tf.pack(p_log_prob)
 
-  q_entropy = tf.reduce_sum([qz.entropy()
-                             for qz in six.itervalues(inference.latent_vars)])
+  q_entropy = tf.reduce_sum([inference.data.get(z, 1.0) * qz.entropy()
+                             for z, qz in six.iteritems(inference.latent_vars)])
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
-  return loss
+
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
+  grads = tf.gradients(loss, [v.ref() for v in var_list])
+  grads_and_vars = list(zip(grads, var_list))
+  return loss, grads_and_vars
 
 
-def build_score_loss_and_gradients(inference, scope=None):
+def build_score_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
@@ -446,31 +526,46 @@ def build_score_loss_and_gradients(inference, scope=None):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += tf.reduce_sum(
-          qz.log_prob(tf.stop_gradient(z_sample[z])))
+      z_log_prob = tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
+      if z in inference.scale:
+        z_log_prob *= inference.scale[z]
+
+      q_log_prob[s] += z_log_prob
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_sample
-      for x, obs in six.iteritems(inference.data):
+      for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
-        p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
+        z_copy = copy(z, dict_swap, scope=scope)
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in inference.scale:
+          z_log_prob *= inference.scale[z]
 
-      for x, obs in six.iteritems(inference.data):
+        p_log_prob[s] += z_log_prob
+
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-          p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in inference.scale:
+            x_log_prob *= inference.scale[x]
+
+          p_log_prob[s] += x_log_prob
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -478,10 +573,12 @@ def build_score_loss_and_gradients(inference, scope=None):
   p_log_prob = tf.pack(p_log_prob)
   q_log_prob = tf.pack(q_log_prob)
 
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
-  var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope=scope)
+
   grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
       [v.ref() for v in var_list])
@@ -489,7 +586,7 @@ def build_score_loss_and_gradients(inference, scope=None):
   return loss, grads_and_vars
 
 
-def build_score_kl_loss_and_gradients(inference, scope=None):
+def build_score_kl_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
@@ -504,27 +601,38 @@ def build_score_kl_loss_and_gradients(inference, scope=None):
   p_log_lik = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += tf.reduce_sum(
-          qz.log_prob(tf.stop_gradient(z_sample[z])))
+      z_log_prob = tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
+      if z in inference.scale:
+        z_log_prob *= inference.scale[z]
+
+      q_log_prob[s] += z_log_prob
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_sample
-      for x, obs in six.iteritems(inference.data):
+      for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
-      for x, obs in six.iteritems(inference.data):
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-          p_log_lik[s] += tf.reduce_sum(x_copy.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_lik = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in inference.scale:
+            x_log_lik *= inference.scale[x]
+
+          p_log_lik[s] += x_log_lik
     else:
       x = inference.data
       p_log_lik[s] = inference.model_wrapper.log_lik(x, z_sample)
@@ -533,16 +641,18 @@ def build_score_kl_loss_and_gradients(inference, scope=None):
   q_log_prob = tf.pack(q_log_prob)
 
   if inference.model_wrapper is None:
-    kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(
-                        qz.mu, qz.sigma, z.mu, z.sigma))
+    kl = tf.reduce_sum([inference.data.get(z, 1.0) *
+                        tf.reduce_sum(kl_multivariate_normal(
+                            qz.mu, qz.sigma, z.mu, z.sigma))
                         for z, qz in six.iteritems(inference.latent_vars)])
   else:
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
 
+  if var_list is None:
+    var_list = tf.trainable_variables()
+
   loss = -(tf.reduce_mean(p_log_lik) - kl)
-  var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope=scope)
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
       [v.ref() for v in var_list])
@@ -550,7 +660,7 @@ def build_score_kl_loss_and_gradients(inference, scope=None):
   return loss, grads_and_vars
 
 
-def build_score_entropy_loss_and_gradients(inference, scope=None):
+def build_score_entropy_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
@@ -562,31 +672,46 @@ def build_score_entropy_loss_and_gradients(inference, scope=None):
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
   for s in range(inference.n_samples):
+    scope = 'inference_' + str(id(inference)) + '/' + str(s)
     z_sample = {}
     for z, qz in six.iteritems(inference.latent_vars):
       # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope='inference_' + str(s))
+      qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += tf.reduce_sum(
-          qz.log_prob(tf.stop_gradient(z_sample[z])))
+      z_log_prob = tf.reduce_sum(qz.log_prob(tf.stop_gradient(z_sample[z])))
+      if z in inference.scale:
+        z_log_prob *= inference.scale[z]
+
+      q_log_prob[s] += z_log_prob
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on posterior sample or
-      # observed data.
+      # observed variable with conditioning on a specific value.
       dict_swap = z_sample
-      for x, obs in six.iteritems(inference.data):
+      for x, qx in six.iteritems(inference.data):
         if isinstance(x, RandomVariable):
-          dict_swap[x] = obs
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
 
       for z in six.iterkeys(inference.latent_vars):
-        z_copy = copy(z, dict_swap, scope='inference_' + str(s))
-        p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(z_sample[z]))
+        z_copy = copy(z, dict_swap, scope=scope)
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in inference.scale:
+          z_log_prob *= inference.scale[z]
 
-      for x, obs in six.iteritems(inference.data):
+        p_log_prob[s] += z_log_prob
+
+      for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
-          x_copy = copy(x, dict_swap, scope='inference_' + str(s))
-          p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(obs))
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in inference.scale:
+            x_log_prob *= inference.scale[x]
+
+          p_log_prob[s] += x_log_prob
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -594,12 +719,13 @@ def build_score_entropy_loss_and_gradients(inference, scope=None):
   p_log_prob = tf.pack(p_log_prob)
   q_log_prob = tf.pack(q_log_prob)
 
-  q_entropy = tf.reduce_sum([qz.entropy()
-                             for qz in six.itervalues(inference.latent_vars)])
+  q_entropy = tf.reduce_sum([inference.data.get(z, 1.0) * qz.entropy()
+                             for z, qz in six.iteritems(inference.latent_vars)])
+
+  if var_list is None:
+    var_list = tf.trainable_variables()
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
-  var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope=scope)
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),

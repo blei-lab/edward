@@ -12,8 +12,24 @@ from edward.util import copy
 
 class SGLD(MonteCarlo):
   """Stochastic gradient Langevin dynamics (Welling and Teh, 2011).
+
+  Notes
+  -----
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  ``SGLD`` substitutes the model's log marginal density
+
+  .. math::
+
+    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)
+
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, *args, **kwargs):
     """
     Examples
     --------
@@ -24,7 +40,7 @@ class SGLD(MonteCarlo):
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.SGLD({z: qz}, data)
     """
-    super(SGLD, self).__init__(latent_vars, data, model_wrapper)
+    super(SGLD, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, *args, **kwargs):
     """
@@ -46,7 +62,7 @@ class SGLD(MonteCarlo):
 
     # Simulate Langevin dynamics.
     learning_rate = self.step_size / tf.cast(self.t + 1, tf.float32)
-    grad_log_joint = tf.gradients(self.log_joint(old_sample),
+    grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
     sample = {}
     for z, qz, grad_log_p in \
@@ -71,7 +87,7 @@ class SGLD(MonteCarlo):
     assign_ops.append(self.n_accept.assign_add(1))
     return tf.group(*assign_ops)
 
-  def log_joint(self, z_sample):
+  def _log_joint(self, z_sample):
     """
     Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
@@ -82,15 +98,35 @@ class SGLD(MonteCarlo):
       Latent variable keys to samples.
     """
     if self.model_wrapper is None:
-      log_joint = 0.0
-      for z, sample in six.iteritems(z_sample):
-        z = copy(z, z_sample, scope='prior')
-        log_joint += tf.reduce_sum(z.log_prob(sample))
-
-      for x, obs in six.iteritems(self.data):
+      scope = 'inference_' + str(id(self))
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on a specific value.
+      dict_swap = z_sample.copy()
+      for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
-          x_z = copy(x, z_sample, scope='likelihood')
-          log_joint += tf.reduce_sum(x_z.log_prob(obs))
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
+
+      log_joint = 0.0
+      for z in six.iterkeys(self.latent_vars):
+        z_copy = copy(z, dict_swap, scope=scope)
+        z_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        if z in self.scale:
+          z_log_prob *= self.scale[z]
+
+        log_joint += z_log_prob
+
+      for x in six.iterkeys(self.data):
+        if isinstance(x, RandomVariable):
+          x_copy = copy(x, dict_swap, scope=scope)
+          x_log_prob = tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          if x in self.scale:
+            x_log_prob *= self.scale[x]
+
+          log_joint += x_log_prob
     else:
       x = self.data
       log_joint = self.model_wrapper.log_prob(x, z_sample)

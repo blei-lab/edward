@@ -6,9 +6,20 @@ import inspect
 import numpy as np
 import six
 import tensorflow as tf
+import warnings
 
-from scipy import stats
 from tensorflow.contrib import distributions
+
+try:
+  from scipy import stats
+except ImportError:
+  pass
+
+warnings.simplefilter('default', DeprecationWarning)
+warnings.warn("edward.stats is deprecated. If calling rvs() from the "
+              "distribution, use scipy.stats; if calling density "
+              "methods from the distribution, use edward.models.",
+              DeprecationWarning)
 
 
 class Distribution(object):
@@ -1095,9 +1106,3 @@ for _name in sorted(dir(distributions)):
       del _WrapperDistribution
       del _object_name
       del _candidate
-
-# Display only the objects and not their classes in this module.
-_globals_keys = list(six.iterkeys(_globals))
-_globals_values = list(six.itervalues(_globals))
-__all__ = [name for name, method in zip(_globals_keys, _globals_values)
-           if not inspect.isclass(method)]

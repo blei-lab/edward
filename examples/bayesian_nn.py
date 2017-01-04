@@ -13,7 +13,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
 from edward.util import rbf
 
 
@@ -21,15 +20,16 @@ def build_toy_dataset(N=40, noise_std=0.1):
   D = 1
   x = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
-  y = np.cos(x) + norm.rvs(0, noise_std, size=N)
+  y = np.cos(x) + np.random.normal(0, noise_std, size=N)
   x = (x - 4.0) / 4.0
-  x = x.reshape((N, D))
+  x = x.astype(np.float32).reshape((N, D))
+  y = y.astype(np.float32)
   return x, y
 
 
 def neural_network(x):
-    h = tf.nn.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.nn.tanh(tf.matmul(h, W_1) + b_1)
+    h = tf.tanh(tf.matmul(x, W_0) + b_0)
+    h = tf.tanh(tf.matmul(h, W_1) + b_1)
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
 
@@ -50,7 +50,7 @@ b_0 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 b_1 = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
-x = tf.convert_to_tensor(x_train, dtype=tf.float32)
+x = x_train
 y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))
 
 # INFERENCE

@@ -12,11 +12,11 @@ We seek to maximize the ELBO,
   \arg \max_\lambda \text{ELBO}(\lambda)\\
   &=\;
   \arg \max_\lambda\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
+  \log q(\mathbf{z}\;;\;\lambda)
   \big],
 \end{align*}
 using a ``black box'' algorithm. This means generically inferring the
@@ -36,28 +36,28 @@ objectives like the ELBO. The idea is to calculate its gradient
   \text{ELBO}(\lambda)
   &=
   \nabla_\lambda\;
-  \mathbb{E}_{q(z\;;\;\lambda)}
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
   \big[
-  \log p(x, z)
+  \log p(\mathbf{x}, \mathbf{z})
   -
-  \log q(z\;;\;\lambda)
+  \log q(\mathbf{z}\;;\;\lambda)
   \big],
 \end{align*}
 and update the current set of parameters proportional to the gradient.
 
-Some variational distributions $q(z\;;\;\lambda)$ admit useful
+Some variational distributions $q(\mathbf{z}\;;\;\lambda)$ admit useful
 reparameterizations. For example, we can reparameterize a normal distribution
-$z \sim \mathcal{N}(\mu, \Sigma)$ as
-$z \sim \mu + L \mathcal{N}(0, I)$ where $\Sigma = LL^\top$. In general, write
+$\mathbf{z} \sim \text{Normal}(\mu, \Sigma)$ as
+$\mathbf{z} \sim \mu + L \text{Normal}(0, I)$ where $\Sigma = LL^\top$. In general, write
 this as
 \begin{align*}
   \epsilon &\sim q(\epsilon)\\
-  z &= z(\epsilon \;;\; \lambda),
+  \mathbf{z} &= \mathbf{z}(\epsilon \;;\; \lambda),
 \end{align*}
 where $\epsilon$ is a random variable that does \textbf{not} depend on the
 variational parameters $\lambda$. The deterministic function
-$z(\cdot;\lambda)$ encapsulates the variational parameters instead,
-and following the process is equivalent to directly drawing $z$ from
+$\mathbf{z}(\cdot;\lambda)$ encapsulates the variational parameters instead,
+and following the process is equivalent to directly drawing $\mathbf{z}$ from
 the original distribution.
 
 The reparameterization gradient leverages this property of the
@@ -70,9 +70,9 @@ variational distribution to write the gradient as
   \big[
   \nabla_\lambda
   \big(
-  \log p(x, z(\epsilon \;;\; \lambda))
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
   -
-  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
   \big].
 \end{align*}
@@ -106,9 +106,9 @@ A Monte Carlo estimate of the gradient is then
   \big[
   \nabla_\lambda
   \big(
-  \log p(x, z(\epsilon \;;\; \lambda))
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
   -
-  \log q(z(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
   \big)
   \big].
 \end{align*}

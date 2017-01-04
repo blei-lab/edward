@@ -15,16 +15,16 @@ the model posits the following distributions:
 \begin{align*}
   p(\mathbf{w})
   &=
-  \mathcal{N}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \text{Normal}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
   \\[1.5ex]
   p(b)
   &=
-  \mathcal{N}(b \mid 0, \sigma_b^2),
+  \text{Normal}(b \mid 0, \sigma_b^2),
   \\
   p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
   &=
   \prod_{n=1}^N
-  \mathcal{N}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
+  \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).
 \end{align*}
 The latent variables are the linear model's weights $\mathbf{w}$ and
 intercept $b$, also known as the bias.
@@ -34,10 +34,12 @@ linear transformation of the inputs $\mathbf{x}_n$.
 
 Let's build the model in Edward, fixing $\sigma_w,\sigma_b,\sigma_y=1$.
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 N = 40  # number of data points
 D = 1  # number of features
 
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
@@ -49,12 +51,6 @@ We experiment with this model in the \href{/tutorials/supervised-regression}{sup
 learning (regression)} tutorial.
 An example script is available
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
-{here}.
-An example of the model implemented as a class object in TensorFlow is
-available
-\href{https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_linear_regression.py}
-{here}, with visualization available
-\href{https://github.com/blei-lab/edward/blob/master/examples/tf_bayesian_linear_regression_plot.py}
 {here}.
 
 \subsubsection{References}\label{references}

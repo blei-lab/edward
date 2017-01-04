@@ -1,12 +1,12 @@
 # Edward website
 
-The back end of our website depends on [pandoc](http://pandoc.org), [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/), and [sphinx](http://www.sphinx-doc.org). This lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. It also lets us auto-generate API documentation from the source code's docstrings. (We use NumPy's [docstring convention](https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt).)
+The back end of our website depends on [pandoc](http://pandoc.org), [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/), and [sphinx](http://www.sphinx-doc.org). This lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. It also lets us auto-generate API documentation from the source code's docstrings.
 
 The front end of our website depends on [skeleton.css](http://getskeleton.com/), [Google Fonts](https://www.google.com/fonts), [highlight.js](https://highlightjs.org/), and [KaTeX](https://khan.github.io/KaTeX/).
 
 ## Editing the website
 
-All stand-alone pages are under `docs/tex`. These compile to HTML pages in `docs`. Our custom pandoc html template is `docs/tex/template.pandoc`. Our APA styling for citations is in `docs/text/apa.csl`.
+All stand-alone pages are under `docs/tex`. These compile to HTML pages. Our custom pandoc html template is `docs/tex/template.pandoc`. Our APA styling for citations is `docs/tex/apa.csl`.
 
 ## Building the website
 

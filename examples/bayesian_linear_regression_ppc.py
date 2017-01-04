@@ -13,15 +13,15 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
 
 
 def build_toy_dataset(N, noise_std=0.5):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
-  y = 2.0 * X + 10 * norm.rvs(0, noise_std, size=N)
-  X = X.reshape((N, 1))
-  return X.astype(np.float32), y.astype(np.float32)
+  y = 2.0 * X + 10 * np.random.normal(0, noise_std, size=N)
+  X = X.astype(np.float32).reshape((N, 1))
+  y = y.astype(np.float32)
+  return X, y
 
 
 ed.set_seed(42)
@@ -34,7 +34,7 @@ X_train, y_train = build_toy_dataset(N)
 X_test, y_test = build_toy_dataset(N)
 
 # MODEL
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))

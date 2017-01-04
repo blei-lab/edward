@@ -37,7 +37,6 @@ model, see the
 \href{/tutorials/gp-classification}
 {Gaussian process classification tutorial}.
 
-Here we build the model in Edward.
 \begin{lstlisting}[language=Python]
 def kernel(x):
   mat = []
@@ -55,8 +54,7 @@ def kernel(x):
 
   return tf.pack(mat)
 
-
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)
 \end{lstlisting}

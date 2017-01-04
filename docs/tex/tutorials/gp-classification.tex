@@ -21,15 +21,15 @@ function is some kernel which describes dependence between
 any set of inputs to the function.
 
 Given a set of input-output pairs
-$\{(\mathbf{x}_n\in\mathbb{R}^D,y_n\in\mathbb{R})\}$,
+$\{\mathbf{x}_n\in\mathbb{R}^D,y_n\in\mathbb{R}\}$,
 the likelihood can be written as a multivariate normal
 \begin{align*}
   p(\mathbf{y})
   &=
-  \mathcal{N}(\mathbf{y} \mid \mathbf{0}, \mathbf{K})
+  \text{Normal}(\mathbf{y} \mid \mathbf{0}, \mathbf{K})
 \end{align*}
 where $\mathbf{K}$ is a covariance matrix given by evaluating
-$k(\mathbf{x}, \mathbf{x}^\prime)$ for each pair of inputs in the data
+$k(\mathbf{x}_n, \mathbf{x}_m)$ for each pair of inputs in the data
 set.
 
 The above applies directly for regression where $\mathbb{y}$ is a
@@ -41,7 +41,7 @@ by the squashed value.
 
 Define the likelihood of an observation $(\mathbf{x}_n, y_n)$ as
 \begin{align*}
-  p(y_n \mid \mathbf{z} \mid x_n)
+  p(y_n \mid \mathbf{z}, x_n)
   &=
   \text{Bernoulli}(y_n \mid \text{logit}^{-1}(\mathbf{x}_n^\top \mathbf{z})).
 \end{align*}
@@ -50,16 +50,17 @@ Define the prior to be a multivariate normal
 \begin{align*}
   p(\mathbf{z})
   &=
-  \mathcal{N}(\mathbf{z} \mid \mathbf{0}, \mathbf{K})
+  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K}),
 \end{align*}
-with
-covariance matrix given by evaluating $k(x, x^\prime)$ for each pair of inputs
-$(x, x^\prime)$.
+with covariance matrix given as previously stated.
 
 Let's build the model in Edward. We use a radial basis function (RBF)
 kernel, also known as the squared exponential or exponentiated
-quadratic. There are $N$ data points and $D$ features.
+quadratic.
 \begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Normal
+from edward.util import multivariate_rbf
+
 def kernel(x):
   mat = []
   for i in range(N):
@@ -76,8 +77,10 @@ def kernel(x):
 
   return tf.pack(mat)
 
+N = 1000  # number of data points
+D = 256  # number of features
 
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)
 \end{lstlisting}

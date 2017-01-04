@@ -12,13 +12,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
 
 
-def build_toy_dataset(N, coeff=np.random.randn(10), noise_std=0.1):
-  n_dim = len(coeff)
-  x = np.random.randn(N, n_dim).astype(np.float32)
-  y = np.dot(x, coeff) + norm.rvs(0, noise_std, size=N)
+def build_toy_dataset(N, coeff, noise_std=0.1):
+  D = len(coeff)
+  x = np.random.randn(N, D).astype(np.float32)
+  y = np.dot(x, coeff) + np.random.normal(0, noise_std, size=N)
   return x, y
 
 
@@ -33,7 +32,7 @@ X_train, y_train = build_toy_dataset(N, coeff)
 X_test, y_test = build_toy_dataset(N, coeff)
 
 # MODEL
-X = ed.placeholder(tf.float32, [N, D])
+X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
