@@ -88,8 +88,9 @@
 <div class="nine columns">
 <h2 id="contributing">Contributing</h2>
 <p>Interested in contributing to Edward? We appreciate all kinds of help!</p>
-<h3 id="bug-reports-feature-requests-user-related-questions">Bug reports, feature requests, user-related questions</h3>
-<p>Report any bugs in Edward’s <a href="https://github.com/blei-lab/edward/issues">Github issues</a>. We also appreciate feature requests so that we can prioritize development according to the users. We plan to have a mailing list for Edward users in the future, but for now also submit usage questions there.</p>
+<h3 id="community">Community</h3>
+<p>For general discussion about Edward, use Edward’s <a href="http://gitter.com/blei-lab/edward">Gitter channel</a>. For example, it is used to get help with installation, coding and debugging in Edward, and probabilistic modeling. (We also plan to have a mailing list-like option in the future.)</p>
+<p>For development discussion about Edward, use Edward’s <a href="https://github.com/blei-lab/edward/issues">Github issues tracker</a>. For example, it is used to submit bug reports and feature requests.</p>
 <h3 id="pull-requests">Pull requests</h3>
 <p>We gladly welcome pull requests.</p>
 <p>Before making any changes, we recommend opening an issue (if it doesn’t already exist) and discussing your proposed changes. This will let us give you feedback on whether the changes should be made and advice on how they should be made. If the changes are minor, then feel free to make them without discussion.</p>
@@ -126,16 +127,6 @@ git checkout -b pull_request_yourname
 git pull private master
 git push origin pull_request_yourname</code></pre>
 <p>Now simply create a pull request via the Github UI on the public repo. Once project owners review the pull request, they can merge it. <a href="http://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private/30352360#30352360">Source</a></p>
-<h3 id="internal">Internal</h3>
-<ul>
-<li>For developers with push permission to Edward’s repo, see <a href="https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request">Stan’s process</a> for how to name branches. Do not merge your own pull requests or ever push to master. Someone should always review your code. After merging (or deciding to close the request without merging), always delete the branch from the repo.</li>
-<li><strong>Issue labeling system.</strong> We use <a href="https://github.com/stan-dev/stan/issues">Stan’s labeling system</a>. While several labels obviously don’t apply to us, it’s better than the default labels.</li>
-<li><strong>Packaging and submitting to PyPI.</strong> First, update the version number in <code>version.py</code>. Second, follow <a href="https://packaging.python.org/en/latest/distributing/#packaging-your-project">these steps</a>. For shorthand, the sequence of commands is
-<pre class="JSON"><code>python setup.py sdist
-python setup.py bdist_wheel
-twine upload dist/*</code></pre>
-<p>Third, tag the release on Github and note the new additions when tagging this release. You can do this by comparing commits from the previous tagged release to master. A link that compares tagged commits to master is available on the <a href="https://github.com/blei-lab/edward/releases">releases page</a>.</p></li>
-</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
