@@ -99,13 +99,14 @@ class MAP(VariationalInference):
 
     super(MAP, self).__init__(latent_vars, data, model_wrapper)
 
-  def build_loss_and_gradients(self):
+  def build_loss_and_gradients(self, var_list):
     """Build loss function. Its automatic differentiation
     is the gradient of
 
     .. math::
       - \log p(x,z)
     """
+    # for now: ignore var_list
     z_mode = {z: qz.value()
               for z, qz in six.iteritems(self.latent_vars)}
     if self.model_wrapper is None:
