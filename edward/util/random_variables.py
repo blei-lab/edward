@@ -13,13 +13,14 @@ from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
 
+
 def copy_rv(value, dict_swap, scope, replace_itself, copy_q):
-    if isinstance(value, RandomVariable) or \
-        isinstance(value, tf.Variable) or \
-         isinstance(value, tf.Tensor) or \
-            isinstance(value, tf.Operation):
-        value = copy(value, dict_swap, scope, replace_itself, copy_q)
-    return value
+  if isinstance(value, RandomVariable) or \
+     isinstance(value, tf.Variable) or \
+     isinstance(value, tf.Tensor) or \
+     isinstance(value, tf.Operation):
+      value = copy(value, dict_swap, scope, replace_itself, copy_q)
+  return value
 
 
 def copy(org_instance, dict_swap=None, scope="copied",
@@ -163,10 +164,11 @@ def copy(org_instance, dict_swap=None, scope="copied",
     kwargs = {}
     for key, value in six.iteritems(rv._kwargs):
       if isinstance(value, list):
-          kwargs[key] = [copy_rv(v, dict_swap, scope, True, copy_q) for v in value]
+        kwargs[key] = [
+            copy_rv(v, dict_swap, scope, True, copy_q) for v in value
+        ]
       else:
-          kwargs[key] = copy_rv(value, dict_swap, scope, True, copy_q)
-
+        kwargs[key] = copy_rv(value, dict_swap, scope, True, copy_q)
 
     kwargs['name'] = new_name
     # Create new random variable with copied arguments.
