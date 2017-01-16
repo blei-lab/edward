@@ -54,11 +54,11 @@ x = Mixture(cat=cat, components=components)
 
 # INFERENCE
 qmu = Normal(
-  mu=tf.Variable(tf.random_normal([K, D])),
-  sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+    mu=tf.Variable(tf.random_normal([K, D])),
+    sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
 qsigma = InverseGamma(
-  alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
-  beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
+    alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
+    beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 
 data = {x: x_train}
 inference = ed.KLqp({mu: qmu, sigma: qsigma}, data)
