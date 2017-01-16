@@ -16,36 +16,18 @@ Edward depends on
   \item TensorFlow (>=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1, !=0.12.0, !=0.12.1)
 \end{itemize}
 
-We recommend using \texttt{pip} to install \texttt{numpy} and
-\texttt{six} as
+We recommend using \texttt{pip} to install \texttt{numpy},
+\texttt{six}, and \texttt{tensorflow} as
 
 \begin{lstlisting}[language=JSON]
-pip install numpy six
+pip install numpy six tensorflow
 \end{lstlisting}
 
-\href{https://www.tensorflow.org/}{TensorFlow} is not on PyPI yet. We recommend
-using \texttt{pip} to install the latest TensorFlow binaries. Please
-follow the
-\href
-{https://www.tensorflow.org/versions/master/get_started/os_setup.html#pip-installation}
-{instructions} from Google.
-
-\subsubsection{TensorFlow via \texttt{conda}}
-
-If you use the Anaconda Python distribution or the \texttt{conda}
-Python package manager, getting started with the CPU-only version
-of TensorFlow can be more simply
-installed via the community-supported \texttt{conda-forge} channel:
+To install \texttt{tensorflow} with GPU support, use
 
 \begin{lstlisting}[language=JSON]
-conda config --add channels conda-forge
-conda create -n cpu-tf-edward numpy six tensorflow
-source activate cpu-tf-edward
-pip install edward
+pip install tensorflow-gpu
 \end{lstlisting}
-
-The GPU-enabled version of TensorFlow can later be installed as
-described above.
 
 \subsubsection{Full Installation}
 
@@ -65,12 +47,13 @@ Slim} (native in TensorFlow), and
 pip install prettytensor
 \end{lstlisting}
   \item The \href{http://mc-stan.org}{Stan} modeling language is supported
-  through PyStan (>=2.0.1.3)
+  through PyStan (>=2.0.1.3).
 \begin{lstlisting}[language=JSON]
 pip install pystan
 \end{lstlisting}
   \item The \href{http://pymc-devs.github.io/pymc3/}{PyMC3} modeling language is supported
-  through PyMC3 (>=3.0). Please see their installation
-  \href{http://pymc-devs.github.io/pymc3/notebooks/getting_started.html}
-  {instructions}.
+  through PyMC3 (>=3.0).
+\begin{lstlisting}[language=JSON]
+pip install pymc3
+\end{lstlisting}
 \end{itemize}
