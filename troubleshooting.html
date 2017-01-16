@@ -95,10 +95,16 @@
 <li>Six (&gt;=1.1.0)</li>
 <li>TensorFlow (&gt;=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1, !=0.12.0, !=0.12.1)</li>
 </ul>
-<p>We recommend using <code>pip</code> to install <code>numpy</code>, <code>six</code>, and <code>tensorflow</code> as</p>
-<pre language="JSON"><code>pip install numpy six tensorflow</code></pre>
-<p>To use Edward with GPU support, install <code>tensorflow-gpu</code> instead of <code>tensorflow</code> as</p>
-<pre language="JSON"><code>pip install tensorflow-gpu</code></pre>
+<p>We recommend using <code>pip</code> to install <code>numpy</code> and <code>six</code> as</p>
+<pre language="JSON"><code>pip install numpy six</code></pre>
+<p><a href="https://www.tensorflow.org/">TensorFlow</a> is not on PyPI yet. We recommend using <code>pip</code> to install the latest TensorFlow binaries. Please follow the <a href="https://www.tensorflow.org/versions/master/get_started/os_setup.html#pip-installation">instructions</a> from Google.</p>
+<h3 id="tensorflow-via-conda">TensorFlow via <code>conda</code></h3>
+<p>If you use the Anaconda Python distribution or the <code>conda</code> Python package manager, getting started with the CPU-only version of TensorFlow can be more simply installed via the community-supported <code>conda-forge</code> channel:</p>
+<pre language="JSON"><code>conda config --add channels conda-forge
+conda create -n cpu-tf-edward numpy six tensorflow
+source activate cpu-tf-edward
+pip install edward</code></pre>
+<p>The GPU-enabled version of TensorFlow can later be installed as described above.</p>
 <h3 id="full-installation">Full Installation</h3>
 <p>Edward has optional features that depend on external packages.</p>
 <ul>
@@ -106,10 +112,9 @@
 <pre language="JSON"><code>pip install keras</code></pre>
 <p><a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> (native in TensorFlow), and <a href="https://github.com/google/prettytensor">PrettyTensor</a> (&gt;=0.5.3)</p>
 <pre language="JSON"><code>pip install prettytensor</code></pre></li>
-<li>The <a href="http://mc-stan.org">Stan</a> modeling language is supported through PyStan (&gt;=2.0.1.3).
+<li>The <a href="http://mc-stan.org">Stan</a> modeling language is supported through PyStan (&gt;=2.0.1.3)
 <pre language="JSON"><code>pip install pystan</code></pre></li>
-<li>The <a href="http://pymc-devs.github.io/pymc3/">PyMC3</a> modeling language is supported through PyMC3 (&gt;=3.0).
-<pre language="JSON"><code>pip install pymc3</code></pre></li>
+<li>The <a href="http://pymc-devs.github.io/pymc3/">PyMC3</a> modeling language is supported through PyMC3 (&gt;=3.0). Please see their installation <a href="http://pymc-devs.github.io/pymc3/notebooks/getting_started.html">instructions</a>.</li>
 </ul>
 </div>
 </div>

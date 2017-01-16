@@ -94,7 +94,7 @@
 
 <h2 id="unsupervised-learning">Unsupervised learning</h2>
 <p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math inline">\(\{x_n\}\)</span>.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py">here</a>.</p>
+<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_collapsed.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>Use a simulated dataset of 2-dimensional datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N):
@@ -108,122 +108,71 @@
 
   return x
 
-x_train = build_toy_dataset(500)
-data = {&#39;x&#39;: x_train}</code></pre>
+N = 500  # number of data points
+D = 2  # dimensionality of data
+
+x_train = build_toy_dataset(N)</code></pre>
 <p>We visualize the generated data points.</p>
 <pre class="python" language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
-<p><strong>Note: Model wrappers are deprecated since Edward v1.1.5. Reimplementing this under Edward’s native language is currently in progress.</strong></p>
-<p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="/tutorials/mixture-gaussian">Mixture of Gaussians tutorial</a>.</p>
-<p>Here we build the model in Edward using TensorFlow, and set the number of mixture components to be 2.</p>
-<pre class="python" language="Python"><code>class MixtureGaussian:
-  &quot;&quot;&quot;
-  Mixture of Gaussians
+<p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="/tutorials/mixture-gaussian">Mixture of Gaussians tutorial</a>. We write it in collapsed form, marginalizing out the mixture assignments.</p>
+<pre class="python" language="Python"><code>K = 2  # number of components
 
-  p(x, z) = [ prod_{n=1}^N sum_{k=1}^K pi_k N(x_n; mu_k, sigma_k) ]
-            [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-            Dirichlet(pi; alpha)
-
-  where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
-
-  Parameters
-  ----------
-  K : int
-    Number of mixture components.
-  D : float, optional
-    Dimension of the Gaussians.
-  &quot;&quot;&quot;
-  def __init__(self, K, D):
-    self.K = K
-    self.D = D
-    self.n_vars = (2 * D + 1) * K
-
-    self.a = 1.0
-    self.b = 1.0
-    self.c = 3.0
-    self.alpha = tf.ones([K])
-
-  def log_prob(self, xs, zs):
-    &quot;&quot;&quot;Return scalar, the log joint density log p(xs, zs).&quot;&quot;&quot;
-    x = xs[&#39;x&#39;]
-    pi, mus, sigmas = zs[&#39;pi&#39;], zs[&#39;mu&#39;], zs[&#39;sigma&#39;]
-    log_prior = dirichlet.logpdf(pi, self.alpha)
-    log_prior += tf.reduce_sum(norm.logpdf(mus, 0.0, self.c))
-    log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
-
-    # log-likelihood is
-    # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
-    # Create a K x N matrix, whose entry (k, n) is
-    # log pi_k + log N(x_n; mu_k, sigma_k).
-    N = get_dims(x)[0]
-    matrix = []
-    for k in range(self.K):
-      matrix += [tf.ones(N) * tf.log(pi[k]) +
-                 multivariate_normal_diag.logpdf(x,
-                 mus[(k * self.D):((k + 1) * self.D)],
-                 sigmas[(k * self.D):((k + 1) * self.D)])]
-
-    matrix = tf.pack(matrix)
-    # log_sum_exp() along the rows is a vector, whose nth
-    # element is the log-likelihood of data point x_n.
-    vector = log_sum_exp(matrix, 0)
-    # Sum over data points to get the full log-likelihood.
-    log_lik = tf.reduce_sum(vector)
-
-    return log_prior + log_lik
-
-
-model = MixtureGaussian(K=2, D=2)</code></pre>
+mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
+cat = Categorical(logits=tf.zeros([N, K]))
+components = [
+    MultivariateNormalDiag(mu=tf.ones([N, 1]) * tf.gather(mu, k),
+                           diag_stdev=tf.ones([N, 1]) * tf.gather(sigma, k))
+    for k in range(K)]
+x = Mixture(cat=cat, components=components)</code></pre>
 <h3 id="inference">Inference</h3>
-<p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be a Dirichlet <span class="math inline">\(\times\)</span> fully factorized normal <span class="math inline">\(\times\)</span> fully factorized inverse Gamma.</p>
-<pre class="python" language="Python"><code>qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
-qmu_mu = tf.Variable(tf.random_normal([K * D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-
-qpi = Dirichlet(alpha=qpi_alpha)
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)</code></pre>
-<p>Run variational inference for 2500 iterations, using a batch of 20 datapoints and 10 latent variable samples per iteration.</p>
-<pre class="python" language="Python"><code>inference = ed.KLqp({&#39;pi&#39;: qpi, &#39;mu&#39;: qmu, &#39;sigma&#39;: qsigma}, data, model)
-inference.run(n_iter=2500, n_samples=10, n_minibatch=20)</code></pre>
+<p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be <span class="math display">\[\begin{aligned}
+ q(\mu, \sigma \;;\; \lambda)
+ &amp;=
+ \prod_{k=1}^K
+ \text{Normal}(\mu_k; \lambda_{\mu_k})
+ ~
+ \text{InverseGamma}(\sigma_k; \lambda_{\sigma_k}).\end{aligned}\]</span> The model in Edward is</p>
+<pre class="python" language="Python"><code>qmu = Normal(
+    mu=tf.Variable(tf.random_normal([K, D])),
+    sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qsigma = InverseGamma(
+    alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
+    beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))</code></pre>
+<p>Run variational inference for 4000 iterations and 20 latent variable samples per iteration.</p>
+<pre class="python" language="Python"><code>data = {x: x_train}
+inference = ed.KLqp({pi: qpi, mu: qmu, sigma: qsigma}, data)
+inference.run(n_iter=4000, n_samples=20)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
-<p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest log-likelihood for each data point. First we output a K x N matrix of log-likelihoods, per per-cluster assignment <span class="math inline">\(k\)</span> and per data-point <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
-<p>We do this by adding the <code>predict()</code> method in the probability model.</p>
-<pre class="python" language="Python"><code>class MixtureGaussian:
-  ...
-  def predict(self, xs, zs):
-    &quot;&quot;&quot;Calculate a K x N matrix of log-likelihoods, per-cluster and
-    per-data point.&quot;&quot;&quot;
-    x = xs[&#39;x&#39;]
-    pi, mus, sigmas = zs[&#39;pi&#39;], zs[&#39;mu&#39;], zs[&#39;sigma&#39;]
+<p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest posterior predictive density for each data point.</p>
+<p>To do this, we first draw a sample from the posterior and calculate a a K x N matrix of log-likelihoods, one for each cluster assignment <span class="math inline">\(k\)</span> and data point <span class="math inline">\(\mathbf{x}_n\)</span>. We perform this averaged over 100 pwosterior samples.</p>
+<pre class="python" language="Python"><code># Average per-cluster and per-data point likelihood over many posterior samples.
+log_liks = []
+for _ in range(100):
+  mu_sample = qmu.sample()
+  sigma_sample = qsigma.sample()
+  # Take per-cluster and per-data point likelihood.
+  log_lik = []
+  for k in range(K):
+    x_post = Normal(mu=tf.ones([N, 1]) * tf.gather(mu_sample, k),
+                    sigma=tf.ones([N, 1]) * tf.gather(sigma_sample, k))
+    log_lik.append(tf.reduce_sum(x_post.log_prob(x_train), 1))
 
-    matrix = []
-    for k in range(self.K):
-      matrix += [multivariate_normal_diag.logpdf(x,
-                 mus[(k * self.D):((k + 1) * self.D)],
-                 sigmas[(k * self.D):((k + 1) * self.D)])]
+  log_lik = tf.pack(log_lik)  # has shape (K, N)
+  log_liks.append(log_lik)
 
-    return tf.pack(matrix)</code></pre>
-<p>Then we evaluate the log-likelihood on the training data and take the <span class="math inline">\(\arg\max\)</span> along the rows.</p>
-<pre class="python" language="Python"><code>log_liks = []
-for s in range(100):
-  zrep = {&#39;pi&#39;: qpi.sample(()),
-          &#39;mu&#39;: qmu.sample(()),
-          &#39;sigma&#39;: qsigma.sample(())}
-  log_liks += [model.predict(data, zrep)]
-
-log_liks = tf.reduce_mean(log_liks, 0)
-
-clusters = tf.argmax(log_liks, 0).eval()</code></pre>
+log_liks = tf.reduce_mean(log_liks, 0)</code></pre>
+<p>We then take the <span class="math inline">\(\arg\max\)</span> along the rows (cluster assignments).</p>
+<pre class="python" language="Python"><code>clusters = tf.argmax(log_liks, 0).eval()</code></pre>
 <p>Plot the data points, colored by their predicted membership.</p>
 <pre class="python" language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
+plt.title(&quot;Predicted cluster assignments&quot;)
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig1.png" alt="image" width="700" /></p>
     </div>
