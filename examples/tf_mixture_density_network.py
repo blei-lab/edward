@@ -63,10 +63,10 @@ D = 1  # number of features
 
 # DATA
 X_train, X_test, y_train, y_test = build_toy_dataset(N)
-print("Size of features in training data: {:s}".format(X_train.shape))
-print("Size of output in training data: {:s}".format(y_train.shape))
-print("Size of features in test data: {:s}".format(X_test.shape))
-print("Size of output in test data: {:s}".format(y_test.shape))
+print("Size of features in training data: {}".format(X_train.shape))
+print("Size of output in training data: {}".format(y_train.shape))
+print("Size of features in test data: {}".format(X_test.shape))
+print("Size of output in test data: {}".format(y_test.shape))
 
 X = tf.placeholder(tf.float32, [None, D])
 y = tf.placeholder(tf.float32, [None, D])
