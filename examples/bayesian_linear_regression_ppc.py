@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using mean-field variational inference.
+"""Bayesian linear regression using variational inference.
 
 This version visualizes additional fits of the model.
 """

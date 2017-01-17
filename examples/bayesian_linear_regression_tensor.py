@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using mean-field variational inference.
+"""Bayesian linear regression using variational inference.
 
 This version directly regresses on the data X, rather than regressing
 on a placeholder X. Note this prevents the model from conditioning on

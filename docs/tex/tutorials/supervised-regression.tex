@@ -8,7 +8,7 @@ Regression (typically) means the output $y$ takes continuous values.
 
 We demonstrate how to do this in Edward with an example.
 The script is available
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_10d.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
 {here}.
 
 
@@ -20,18 +20,18 @@ $y_n\in\mathbb{R}$. They have a linear dependence with normally
 distributed noise.
 
 \begin{lstlisting}[language=Python]
-def build_toy_dataset(N, coeff, noise_std=0.1):
-  n_dim = len(coeff)
-  x = np.random.randn(N, n_dim).astype(np.float32)
-  y = np.dot(x, coeff) + np.random.normal(0, noise_std, size=N)
+def build_toy_dataset(N, w, noise_std=0.1):
+  D = len(w)
+  x = np.random.randn(N, D).astype(np.float32)
+  y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
   return x, y
 
 N = 40  # number of data points
 D = 10  # number of features
 
-coeff = np.random.randn(D)
-X_train, y_train = build_toy_dataset(N, coeff)
-X_test, y_test = build_toy_dataset(N, coeff)
+w_true = np.random.randn(D)
+X_train, y_train = build_toy_dataset(N, w_true)
+X_test, y_test = build_toy_dataset(N, w_true)
 \end{lstlisting}
 
 
@@ -86,7 +86,7 @@ y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))
 Evaluate predictions from the posterior predictive.
 \begin{lstlisting}[language=Python]
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
-## 0.0399784
+## 0.0220712
 \end{lstlisting}
 
 The trained model makes predictions with low mean squared error

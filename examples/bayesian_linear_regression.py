@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using mean-field variational inference."""
+"""Bayesian linear regression using variational inference."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -11,23 +11,22 @@ import tensorflow as tf
 from edward.models import Normal
 
 
-def build_toy_dataset(N, noise_std=0.1):
-  X = np.concatenate([np.linspace(0, 2, num=N / 2),
-                      np.linspace(6, 8, num=N / 2)])
-  y = 5.0 * X + np.random.normal(0, noise_std, size=N)
-  X = X.astype(np.float32).reshape((N, 1))
-  y = y.astype(np.float32)
-  return X, y
+def build_toy_dataset(N, w, noise_std=0.1):
+  D = len(w)
+  x = np.random.randn(N, D).astype(np.float32)
+  y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
+  return x, y
 
 
 ed.set_seed(42)
 
 N = 40  # number of data points
-D = 1  # number of features
+D = 10  # number of features
 
 # DATA
-X_train, y_train = build_toy_dataset(N)
-X_test, y_test = build_toy_dataset(N)
+w_true = np.random.randn(D)
+X_train, y_train = build_toy_dataset(N, w_true)
+X_test, y_test = build_toy_dataset(N, w_true)
 
 # MODEL
 X = tf.placeholder(tf.float32, [N, D])
@@ -42,7 +41,7 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.run()
+inference.run(n_samples=5, n_iter=250)
 
 # CRITICISM
 y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
