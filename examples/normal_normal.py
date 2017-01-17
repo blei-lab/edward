@@ -24,6 +24,5 @@ qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
 # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
-data = {x: x_data}
-inference = ed.KLqp({mu: qmu}, data)
+inference = ed.KLqp({mu: qmu}, data={x: x_data})
 inference.run()

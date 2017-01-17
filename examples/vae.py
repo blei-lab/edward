@@ -33,12 +33,13 @@ hidden = Dense(256, activation='relu')(x_ph)
 qz = Normal(mu=Dense(d)(hidden),
             sigma=Dense(d, activation='softplus')(hidden))
 
-# Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
 mnist = input_data.read_data_sets("data/mnist", one_hot=True)
-data = {x: x_ph}
 
 sess = ed.get_session()
 K.set_session(sess)
+
+# Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
+data = {x: x_ph}
 inference = ed.KLqp({z: qz}, data)
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)

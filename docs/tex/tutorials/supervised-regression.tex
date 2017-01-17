@@ -64,8 +64,7 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
 
 Run variational inference for 1000 iterations.
 \begin{lstlisting}[language=Python]
-data = {X: X_train, y: y_train}
-inference = ed.KLqp({w: qw, b: qb}, data)
+inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
 inference.run()
 \end{lstlisting}
 In this case \texttt{KLqp} defaults to minimizing the

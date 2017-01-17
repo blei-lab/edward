@@ -25,8 +25,8 @@ qmu = Empirical(params=tf.Variable(tf.zeros([1000])))
 proposal_mu = Normal(mu=0.0, sigma=tf.sqrt(1.0 / 51.0))
 
 # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
-data = {x: x_data}
-inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu}, data)
+inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu},
+                                  data={x: x_data})
 inference.run()
 
 # CRITICISM

@@ -60,8 +60,7 @@ qsigma = InverseGamma(
     alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
     beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 
-data = {x: x_train}
-inference = ed.KLqp({mu: qmu, sigma: qsigma}, data)
+inference = ed.KLqp({mu: qmu, sigma: qsigma}, data={x: x_train})
 inference.initialize(n_samples=20, n_iter=4000)
 
 sess = ed.get_session()
