@@ -128,7 +128,7 @@ qz = Normal(mu=slim.fully_connected(qh, d, activation_fn=None),
             sigma=slim.fully_connected(qh, d, activation_fn=tf.nn.softplus))</code></pre>
 <p>For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/vae.py"><code>examples/vae.py</code></a> in the Github repository.</p>
 <p><strong>Figure 3</strong>. Bayesian recurrent neural network <span class="citation">(Radford M Neal, 2012)</span>. The program has an unspecified number of time steps; it uses a symbolic for loop (<code>tf.scan</code>).</p>
-<pre language="python"><code># TODO tf.dot
+<pre language="python"><code>import edward as ed
 import tensorflow as tf
 from edward.models import Normal
 
@@ -136,7 +136,7 @@ H = 50  # number of hidden units
 D = 10  # number of features
 
 def rnn_cell(hprev, xt):
-  return tf.tanh(tf.dot(hprev, Wh) + tf.dot(xt, Wx) + bh)
+  return tf.tanh(ed.dot(hprev, Wh) + ed.dot(xt, Wx) + bh)
 
 Wh = Normal(mu=tf.zeros([H, H]), sigma=tf.ones([H, H]))
 Wx = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
@@ -189,6 +189,7 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <p><strong>Figure 7</strong>. Generative adversarial network <span class="citation">(<span class="citeproc-not-found" data-reference-id="goodfellow2014generative"><strong>???</strong></span>)</span>.</p>
 <pre language="python"><code>import edward as ed
 import tensorflow as tf
+from tensorflow.contrib import slim
 
 def generative_network(z):
   h = slim.fully_connected(z, 256, activation_fn=tf.nn.relu)
@@ -262,7 +263,7 @@ D =  # TODO
 # Model
 x = tf.Variable(x_data, trainable=False)
 beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-y = Bernoulli(logits=tf.dot(x, beta))
+y = Bernoulli(logits=ed.dot(x, beta))
 
 # Inference
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, D])))
@@ -282,7 +283,8 @@ x = tf.placeholder(tf.float32, [N, D])
 y = Bernoulli(logits=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1)</code></pre>
 <p>TODO For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn_classification.py"><code>examples/bayesian_nn_classification.py</code></a> in the Github repository.</p>
 <p><strong>Figure 11</strong>. Restricted Boltzmann machine <span class="citation">(<span class="citeproc-not-found" data-reference-id="smolensky1986information"><strong>???</strong></span>)</span>.</p>
-<pre language="python"><code>import tensorflow as tf
+<pre language="python"><code>import edward as ed
+import tensorflow as tf
 from edward.models import Bernoulli
 
 # Model parameters
@@ -292,8 +294,8 @@ b_h = tf.Variable(tf.float32, [M])  # bias vector for h
 
 # Model conditionals
 v_ph = tf.placeholder(tf.float32, [N])  # mutable state
-h = Bernoulli(logits=b_h + tf.dot(v, W))
-v = Bernoulli(logits=b_v + tf.dot(W, h))  # v is tied to v_ph during inference</code></pre>
+h = Bernoulli(logits=b_h + ed.dot(v, W))
+v = Bernoulli(logits=b_v + ed.dot(W, h))  # v is tied to v_ph during inference</code></pre>
 <p>TODO For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/rbm.py"><code>examples/rbm.py</code></a> in the Github repository.</p>
 <p><strong>Figure 12</strong>. Dirichlet process mixture model <span class="citation">(<span class="citeproc-not-found" data-reference-id="antoniak1974mixtures"><strong>???</strong></span>)</span>.</p>
 <pre language="python"><code>import tensorflow as tf

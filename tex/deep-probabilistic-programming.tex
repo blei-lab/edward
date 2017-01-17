@@ -65,7 +65,7 @@ in the Github repository.
 The program has an unspecified number of time steps; it uses a
 symbolic for loop (\texttt{tf.scan}).
 \begin{lstlisting}[language=python]
-# TODO tf.dot
+import edward as ed
 import tensorflow as tf
 from edward.models import Normal
 
@@ -73,7 +73,7 @@ H = 50  # number of hidden units
 D = 10  # number of features
 
 def rnn_cell(hprev, xt):
-  return tf.tanh(tf.dot(hprev, Wh) + tf.dot(xt, Wx) + bh)
+  return tf.tanh(ed.dot(hprev, Wh) + ed.dot(xt, Wx) + bh)
 
 Wh = Normal(mu=tf.zeros([H, H]), sigma=tf.ones([H, H]))
 Wx = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
@@ -155,6 +155,7 @@ in the Github repository.
 \begin{lstlisting}[language=python]
 import edward as ed
 import tensorflow as tf
+from tensorflow.contrib import slim
 
 def generative_network(z):
   h = slim.fully_connected(z, 256, activation_fn=tf.nn.relu)
@@ -244,7 +245,7 @@ D =  # TODO
 # Model
 x = tf.Variable(x_data, trainable=False)
 beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-y = Bernoulli(logits=tf.dot(x, beta))
+y = Bernoulli(logits=ed.dot(x, beta))
 
 # Inference
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, D])))
@@ -276,6 +277,7 @@ in the Github repository.
 
 \textbf{Figure 11}. Restricted Boltzmann machine \citep{smolensky1986information}.
 \begin{lstlisting}[language=python]
+import edward as ed
 import tensorflow as tf
 from edward.models import Bernoulli
 
@@ -286,8 +288,8 @@ b_h = tf.Variable(tf.float32, [M])  # bias vector for h
 
 # Model conditionals
 v_ph = tf.placeholder(tf.float32, [N])  # mutable state
-h = Bernoulli(logits=b_h + tf.dot(v, W))
-v = Bernoulli(logits=b_v + tf.dot(W, h))  # v is tied to v_ph during inference
+h = Bernoulli(logits=b_h + ed.dot(v, W))
+v = Bernoulli(logits=b_v + ed.dot(W, h))  # v is tied to v_ph during inference
 \end{lstlisting}
 TODO
 For an example of it in use, see
