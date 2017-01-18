@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Gaussian process classification using mean-field variational inference.
+"""Gaussian process classification using variational inference.
 """
 from __future__ import absolute_import
 from __future__ import division

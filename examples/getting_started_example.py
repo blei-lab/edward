@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian neural network using mean-field variational inference
+"""Bayesian neural network using variational inference
 (see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016)).
 
 Inspired by autograd's Bayesian neural network example.
@@ -27,9 +27,9 @@ def build_toy_dataset(N=50, noise_std=0.1):
 
 
 def neural_network(x, W_0, W_1, b_0, b_1):
-    h = tf.tanh(tf.matmul(x, W_0) + b_0)
-    h = tf.matmul(h, W_1) + b_1
-    return tf.reshape(h, [-1])
+  h = tf.tanh(tf.matmul(x, W_0) + b_0)
+  h = tf.matmul(h, W_1) + b_1
+  return tf.reshape(h, [-1])
 
 
 ed.set_seed(42)
@@ -96,7 +96,7 @@ ax.legend()
 plt.show()
 
 
-# RUN MEAN-FIELD VARIATIONAL INFERENCE
+# RUN VARIATIONAL INFERENCE
 inference.run(n_iter=500, n_samples=5)
 
 
