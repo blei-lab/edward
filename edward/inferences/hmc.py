@@ -77,13 +77,13 @@ class HMC(MonteCarlo):
     new_sample = old_sample
     new_r_sample = old_r_sample
     for _ in range(self.n_steps):
-      new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
+      new_sample, new_r_sample = leapfrog(new_sample, new_r_sample,
                                           self.step_size, self._log_joint)
 
     # Calculate acceptance ratio.
-    ratio = tf.reduce_sum([0.5 * tf.square(r)
+    ratio = tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
                            for r in six.itervalues(old_r_sample)])
-    ratio -= tf.reduce_sum([0.5 * tf.square(r)
+    ratio -= tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
                             for r in six.itervalues(new_r_sample)])
     ratio += self._log_joint(new_sample)
     ratio -= self._log_joint(old_sample)

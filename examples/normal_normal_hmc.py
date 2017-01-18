@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Normal-normal model using Metropolis-Hastings."""
+"""Normal-normal model using Hamiltonian Monte Carlo."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -21,17 +21,13 @@ mu = Normal(mu=0.0, sigma=1.0)
 x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
 
 # INFERENCE
-qmu = Empirical(params=tf.Variable(tf.zeros([1000])))
-
-proposal_mu = Normal(mu=0.0, sigma=tf.sqrt(1.0 / 51.0))
+qmu = Empirical(params=tf.Variable(tf.zeros(1000)))
 
 # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
-inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu},
-                                  data={x: x_data})
+inference = ed.HMC({mu: qmu}, data={x: x_data})
 inference.run()
 
 # CRITICISM
-# Check convergence with visual diagnostics.
 sess = ed.get_session()
 mean, std = sess.run([qmu.mean(), qmu.std()])
 print("Inferred posterior mean:")
