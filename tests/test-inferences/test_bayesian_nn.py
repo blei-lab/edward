@@ -19,7 +19,7 @@ def four_layer_nn(x, W_1, W_2, W_3, b_1, b_2):
 
 class test_inference_bayesian_nn_class(tf.test.TestCase):
 
-  def test_hmc_sgld(self):
+  def test_monte_carlo(self):
     ed.set_seed(42)
 
     # DATA
@@ -47,6 +47,9 @@ class test_inference_bayesian_nn_class(tf.test.TestCase):
     qb_1 = Empirical(params=tf.Variable(tf.random_normal([T, 20])))
     qb_2 = Empirical(params=tf.Variable(tf.random_normal([T, 15])))
 
+    # note ideally these would be separate test methods; there's an
+    # issue with the tensorflow graph when re-running the above
+    # unfortunately
     inference = ed.HMC(
         {W_1: qW_1, b_1: qb_1, W_2: qW_2, b_2: qb_2, W_3: qW_3},
         data={y: y_train, x_ph: X_train})
@@ -54,6 +57,12 @@ class test_inference_bayesian_nn_class(tf.test.TestCase):
 
     inference = ed.SGLD(
         {W_1: qW_1, b_1: qb_1, W_2: qW_2, b_2: qb_2, W_3: qW_3},
+        data={y: y_train, x_ph: X_train})
+    inference.run()
+
+    inference = ed.MetropolisHastings(
+        {W_1: qW_1, b_1: qb_1, W_2: qW_2, b_2: qb_2, W_3: qW_3},
+        {W_1: W_1, b_1: b_1, W_2: W_2, b_2: b_2, W_3: W_3},
         data={y: y_train, x_ph: X_train})
     inference.run()
 
