@@ -132,8 +132,7 @@ y = Bernoulli(logits=f)</code></pre>
 <pre class="python" language="Python"><code>qf = Normal(mu=tf.Variable(tf.random_normal([N])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))</code></pre>
 <p>Run variational inference for 500 iterations.</p>
-<pre class="python" language="Python"><code>data = {X: X_train, y: y_train}
-inference = ed.KLqp({f: qf}, data)
+<pre class="python" language="Python"><code>inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
 inference.run(n_iter=500)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
     </div>

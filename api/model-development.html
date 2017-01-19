@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Developing Custom Random Variables</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
+<a class="button2 u-full-width" href="/license">License</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a href="https://github.com/blei-lab/edward">
+<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
+<!-- </object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3" href="/api/data">Data</a>
+<a class="button3 button-primary" href="/api/model">Model</a>
+<a class="button3" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+</div>
+<div class="row">
+<a class="button4" href="/api/model-compositionality">Compositionality</a>
+<a class="button4" href="/api/model-wrappers">Wrappers</a>
+<a class="button4 button-primary" href="/api/model-development">Development</a>
+</div>
+</div>
+<h3 id="developing-custom-random-variables">Developing Custom Random Variables</h3>
+<p>Oftentimes we’d like to implement our own random variables. To do so, write a class that inherits the <code>RandomVariable</code> class in <code>edward.models</code> and the <code>Distribution</code> class in <code>tf.contrib.distributions</code> (in that order). A template is provided below.</p>
+<pre class="python" language="Python"><code>from edward.models import RandomVariable
+from tensorflow.contrib.distributions import Distribution
+
+class CustomRandomVariable(RandomVariable, Distribution):
+  def __init__(self, *args, **kwargs):
+    super(CustomRandomVariable, self).__init__(*args, **kwargs)
+
+  def _log_prob(self, value):
+    raise NotImplementedError("log_prob is not implemented")
+
+  def _sample_n(self, n, seed=None):
+    raise NotImplementedError("sample_n is not implemented")</code></pre>
+<p>One method that all Edward random variables call during instantiation is <a href="https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/distributions/python/ops/distribution.py#L557"><code>_sample_n()</code></a>. It takes an integer <code>n</code> as input and outputs a tensor of shape <a href="https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/distributions/python/ops/distribution.py#L213"><code>(n,) + batch_shape + event_shape</code></a>. To implement it, you can for example wrap a NumPy/SciPy function inside the TensorFlow operation <code>tf.py_func()</code>.</p>
+<p>For other methods and attributes one can implement, see the API documentation in TensorFlow’s <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions/base_classes#Distribution"><code>Distribution</code> class</a>.</p>
+<h3 id="advanced-settings">Advanced settings</h3>
+<p>Sometimes the random variable you’d like to work with already exists in Edward, but it is missing a particular feature. One hack is to implement and overwrite the missing method. For example, to implement your own sampling for <code>Poisson</code>:</p>
+<pre class="python" language="Python"><code>import edward as ed
+from edward.models import Poisson
+
+def _sample_n(self, n=1, seed=None):
+  # define Python function which returns samples as a Numpy array
+  def np_sample(lam, n):
+    return poisson.rvs(mu=lam, size=n, random_state=seed).astype(np.float32)
+
+  # wrap python function as tensorflow op
+  val = tf.py_func(np_sample, [self.lam, n], [tf.float32])[0]
+  # set shape from unknown shape
+  batch_event_shape = self.get_batch_shape().concatenate(self.get_event_shape())
+  shape = tf.concat(0, [tf.expand_dims(n, 0),
+                        tf.constant(batch_event_shape.as_list(), dtype=tf.int32)])
+  val = tf.reshape(val, shape)
+  return val
+
+Poisson._sample_n = _sample_n
+
+sess = ed.get_session()
+x = Poisson(lam=tf.constant(1.0))
+sess.run(x.value())
+## 1.0
+sess.run(x.value())
+## 4.0</code></pre>
+<p>(Note the function <code>np_sample</code> should broadcast correctly if you’d like to work with non-scalar parameters; it is not correct in this toy implementation.)</p>
+<p>Sometimes the random variable you’d like to work with does not even admit (easy) sampling, and you’re only using it as a likelihood “node” rather than as some prior to parameters of another random variable. You can avoid having to implement <code>_sample_n</code> altogether: after creating <code>CustomRandomVariable</code>, instantiate it with the <code>value</code> argument:</p>
+<pre class="python" language="Python"><code>x = CustomRandomVariable(custom_params=params, value=tf.zeros_like(params))</code></pre>
+<p>This fixes the associated value of the random variable to a bunch of zeros and avoids the <code>_sample_n</code> error that appears otherwise. Make sure that the value matches the desired shape of the random variable.</p>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

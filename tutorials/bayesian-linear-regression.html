@@ -111,7 +111,7 @@
 <pre class="python" language="Python"><code>from edward.models import Normal
 
 N = 40  # number of data points
-D = 1  # number of features
+D = 10  # number of features
 
 X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))

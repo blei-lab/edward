@@ -94,21 +94,21 @@
 
 <h2 id="supervised-learning-regression">Supervised learning (Regression)</h2>
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Regression (typically) means the output <span class="math inline">\(y\)</span> takes continuous values.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression_10d.py">here</a>.</p>
+<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>Simulate training and test sets of <span class="math inline">\(40\)</span> data points. They comprise of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N, coeff, noise_std=0.1):
-  n_dim = len(coeff)
-  x = np.random.randn(N, n_dim).astype(np.float32)
-  y = np.dot(x, coeff) + np.random.normal(0, noise_std, size=N)
+<pre class="python" language="Python"><code>def build_toy_dataset(N, w, noise_std=0.1):
+  D = len(w)
+  x = np.random.randn(N, D).astype(np.float32)
+  y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
   return x, y
 
 N = 40  # number of data points
 D = 10  # number of features
 
-coeff = np.random.randn(D)
-X_train, y_train = build_toy_dataset(N, coeff)
-X_test, y_test = build_toy_dataset(N, coeff)</code></pre>
+w_true = np.random.randn(D)
+X_train, y_train = build_toy_dataset(N, w_true)
+X_test, y_test = build_toy_dataset(N, w_true)</code></pre>
 <h3 id="model">Model</h3>
 <p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="/tutorials/bayesian-linear-regression">Bayesian linear regression tutorial</a>.</p>
 <pre class="python" language="Python"><code>X = tf.placeholder(tf.float32, [N, D])
@@ -122,8 +122,7 @@ y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))</code></pre>
 qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))</code></pre>
 <p>Run variational inference for 1000 iterations.</p>
-<pre class="python" language="Python"><code>data = {X: X_train, y: y_train}
-inference = ed.KLqp({w: qw, b: qb}, data)
+<pre class="python" language="Python"><code>inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
 inference.run()</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
@@ -132,7 +131,7 @@ inference.run()</code></pre>
 <pre class="python" language="Python"><code>y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))</code></pre>
 <p>Evaluate predictions from the posterior predictive.</p>
 <pre class="python" language="Python"><code>print(ed.evaluate(&#39;mean_squared_error&#39;, data={X: X_test, y_post: y_test}))
-## 0.0399784</code></pre>
+## 0.0220712</code></pre>
 <p>The trained model makes predictions with low mean squared error (relative to the magnitude of the output).</p>
 <p>For more details on criticism, see the <a href="/tutorials/point-evaluation">point-based evaluation tutorial</a>.</p>
     </div>

@@ -144,8 +144,7 @@ qsigma = InverseGamma(
     alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
     beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))</code></pre>
 <p>Run variational inference for 4000 iterations and 20 latent variable samples per iteration.</p>
-<pre class="python" language="Python"><code>data = {x: x_train}
-inference = ed.KLqp({pi: qpi, mu: qmu, sigma: qsigma}, data)
+<pre class="python" language="Python"><code>inference = ed.KLqp({pi: qpi, mu: qmu, sigma: qsigma}, data={x: x_train})
 inference.run(n_iter=4000, n_samples=20)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>

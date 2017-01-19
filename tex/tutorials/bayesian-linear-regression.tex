@@ -37,7 +37,7 @@ Let's build the model in Edward, fixing $\sigma_w,\sigma_b,\sigma_y=1$.
 from edward.models import Normal
 
 N = 40  # number of data points
-D = 1  # number of features
+D = 10  # number of features
 
 X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
