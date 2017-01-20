@@ -74,9 +74,7 @@ class HMC(MonteCarlo):
       old_r_sample[z] = normal.sample()
 
     # Simulate Hamiltonian dynamics.
-    new_sample = old_sample
-    new_r_sample = old_r_sample
-    new_sample, new_r_sample = leapfrog(new_sample, new_r_sample,
+    new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
                                         self.step_size, self._log_joint,
                                         self.n_steps)
 
@@ -153,15 +151,11 @@ class HMC(MonteCarlo):
 
 
 def leapfrog(z_old, r_old, step_size, log_joint, n_steps):
-  z_new = {}
-  r_new = {}
+  z_new = z_old.copy()
+  r_new = r_old.copy()
 
-  for key in z_old:
-    z_new[key] = z_old[key]
-    r_new[key] = r_old[key]
-
-  grad_log_joint = tf.gradients(log_joint(z_old), list(six.itervalues(z_old)))
-  for n in range(n_steps):
+  grad_log_joint = tf.gradients(log_joint(z_new), list(six.itervalues(z_new)))
+  for _ in range(n_steps):
     for i, key in enumerate(six.iterkeys(z_new)):
       z, r = z_new[key], r_new[key]
       r_new[key] = r + 0.5 * step_size * grad_log_joint[i]
