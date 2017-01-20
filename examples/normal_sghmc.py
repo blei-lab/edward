@@ -10,11 +10,12 @@ import edward as ed
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
-plt.style.use("ggplot")
-
 from edward.models import Empirical, MultivariateNormalFull
 
+plt.style.use("ggplot")
+
 # Plotting helper function.
+
 
 def mvn_plot_contours(z, label=False, ax=None):
   """
@@ -25,11 +26,11 @@ def mvn_plot_contours(z, label=False, ax=None):
   mu = sess.run(z.mu)
   mu_x, mu_y = mu
   Sigma = sess.run(z.sigma)
-  sigma_x, sigma_y = np.sqrt(Sigma[0,0]), np.sqrt(Sigma[1,1])
+  sigma_x, sigma_y = np.sqrt(Sigma[0, 0]), np.sqrt(Sigma[1, 1])
   xmin, xmax = mu_x - 3 * sigma_x, mu_x + 3 * sigma_x
   ymin, ymax = mu_y - 3 * sigma_y, mu_y + 3 * sigma_y
-  xs = np.linspace(xmin, xmax, num = 100)
-  ys = np.linspace(ymin, ymax, num = 100)
+  xs = np.linspace(xmin, xmax, num=100)
+  ys = np.linspace(ymin, ymax, num=100)
   X, Y = np.meshgrid(xs, ys)
   T = tf.convert_to_tensor(np.c_[X.flatten(), Y.flatten()], dtype=tf.float32)
   Z = sess.run(tf.exp(z.log_prob(T))).reshape((len(xs), len(ys)))
@@ -64,6 +65,6 @@ print(std)
 # VISUALIZATION
 fig, ax = plt.subplots()
 trace = sess.run(qz.params)
-ax.scatter(trace[:,0], trace[:,1], marker = ".")
+ax.scatter(trace[:, 0], trace[:, 1], marker=".")
 mvn_plot_contours(z, ax=ax)
 plt.show()

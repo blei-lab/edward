@@ -69,12 +69,13 @@ class SGHMC(MonteCarlo):
     old_v_sample = {z: v for z, v in six.iteritems(self.v)}
 
     # Simulate Hamiltonian dynamics with friction.
-    friction = tf.constant(self.friction, dtype = tf.float32)
-    learning_rate = tf.constant(self.step_size * 0.01, dtype = tf.float32)
+    friction = tf.constant(self.friction, dtype=tf.float32)
+    learning_rate = tf.constant(self.step_size * 0.01, dtype=tf.float32)
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
 
-    sample = {}                 # v_sample is so named to indicate that it represents a velocity,
+    # v_sample is so named b/c it represents a velocity rather than momentum.
+    sample = {}                 # v_sample
     v_sample = {}               # rather than a momentum.
     for z, qz, grad_log_p in \
         zip(six.iterkeys(self.latent_vars),
@@ -82,10 +83,11 @@ class SGHMC(MonteCarlo):
             grad_log_joint):
       event_shape = qz.get_event_shape()
       normal = Normal(mu=tf.zeros(event_shape),
-                      sigma=tf.sqrt(learning_rate * friction) * tf.ones(event_shape))
+                      sigma=(tf.sqrt(learning_rate * friction) *
+                             tf.ones(event_shape)))
       sample[z] = old_sample[z] + old_v_sample[z]
-      v_sample[z] = (1. - 0.5 * friction)*old_v_sample[z] \
-                    + learning_rate * grad_log_p + normal.sample()
+      v_sample[z] = ((1. - 0.5 * friction) * old_v_sample[z] +
+                     learning_rate * grad_log_p + normal.sample())
 
     # Update Empirical random variables.
     assign_ops = []
