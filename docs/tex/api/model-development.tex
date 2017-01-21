@@ -46,6 +46,7 @@ your own sampling for \texttt{Poisson}:
 \begin{lstlisting}[language=Python]
 import edward as ed
 from edward.models import Poisson
+from scipy.stats import poisson
 
 def _sample_n(self, n=1, seed=None):
   # define Python function which returns samples as a Numpy array
@@ -64,7 +65,7 @@ def _sample_n(self, n=1, seed=None):
 Poisson._sample_n = _sample_n
 
 sess = ed.get_session()
-x = Poisson(lam=tf.constant(1.0))
+x = Poisson(lam=1.0)
 sess.run(x.value())
 ## 1.0
 sess.run(x.value())
