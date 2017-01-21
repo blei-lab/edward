@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import Normal, RandomVariable, Uniform
 from edward.util import copy
@@ -65,9 +66,10 @@ class HMC(MonteCarlo):
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
+    old_sample = OrderedDict(old_sample)
 
     # Sample momentum.
-    old_r_sample = {}
+    old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars):
       event_shape = qz.get_event_shape()
       normal = Normal(mu=tf.zeros(event_shape), sigma=tf.ones(event_shape))

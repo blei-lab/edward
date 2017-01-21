@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable, Uniform
 from edward.util import copy
@@ -67,6 +68,7 @@ class MetropolisHastings(MonteCarlo):
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
+    old_sample = OrderedDict(old_sample)
 
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
@@ -85,7 +87,7 @@ class MetropolisHastings(MonteCarlo):
     scope_new = 'inference_' + str(id(self)) + '/new'
 
     # Draw proposed sample and calculate acceptance ratio.
-    new_sample = {}
+    new_sample = old_sample.copy()  # copy to ensure same order
     ratio = 0.0
     for z, proposal_z in six.iteritems(self.proposal_vars):
       # Build proposal g(znew | zold).

@@ -65,10 +65,8 @@ class SGLD(MonteCarlo):
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
     sample = {}
-    for z, qz, grad_log_p in \
-        zip(six.iterkeys(self.latent_vars),
-            six.itervalues(self.latent_vars),
-            grad_log_joint):
+    for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
+      qz = self.latent_vars[z]
       event_shape = qz.get_event_shape()
       normal = Normal(mu=tf.zeros(event_shape),
                       sigma=learning_rate * tf.ones(event_shape))
