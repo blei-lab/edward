@@ -40,8 +40,8 @@ def mvn_plot_contours(z, label=False, ax=None):
   if label:
     plt.clabel(cs, inline=1, fontsize=10)
 
-# Example body.
 
+# Example body.
 ed.set_seed(42)
 
 # MODEL
