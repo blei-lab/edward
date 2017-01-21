@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Rasch model (Rasch, 1960) using variational inference."""
+"""Rasch model (Rasch, 1960) using Hamiltonian Monte Carlo."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal
+from edward.models import Bernoulli, Normal, Empirical
 from scipy.special import expit
 
 # DATA
@@ -25,15 +25,12 @@ thresh = Normal(mu=tf.zeros([1, nitem]), sigma=tf.ones([1, nitem]))
 X = Bernoulli(logits=tf.sub(trait, thresh))
 
 # INFERENCE
-q_trait = Normal(
-    mu=tf.Variable(tf.random_normal([nsubj, 1])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([nsubj, 1]))))
-q_thresh = Normal(
-    mu=tf.Variable(tf.random_normal([1, nitem])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, nitem]))))
+T = 5000  # number of posterior samples
+q_trait = Empirical(params=tf.Variable(tf.zeros([T, nsubj, 1])))
+q_thresh = Empirical(params=tf.Variable(tf.zeros([T, 1, nitem])))
 
-inference = ed.KLqp({trait: q_trait, thresh: q_thresh}, data={X: X_data})
-inference.run(n_iter=2500, n_samples=10)
+inference = ed.HMC({trait: q_trait, thresh: q_thresh}, data={X: X_data})
+inference.run(step_size=0.1)
 
 # CRITICISM
 # Check that the inferred posterior mean captures the true traits.
