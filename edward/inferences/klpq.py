@@ -104,7 +104,7 @@ class KLpq(VariationalInference):
         qz_copy = copy(qz, scope=scope)
         z_sample[z] = qz_copy.value()
         q_log_prob[s] += tf.reduce_sum(
-            qz.log_prob(tf.stop_gradient(z_sample[z])))
+            qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
 
       if self.model_wrapper is None:
         # Form dictionary in order to replace conditioning on prior or
