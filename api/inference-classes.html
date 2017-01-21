@@ -640,7 +640,7 @@ this method.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.MetropolisHastings">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MetropolisHastings</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>proposal_vars</em>, <em>data=None</em>, <em>model_wrapper=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MetropolisHastings</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>proposal_vars</em>, <em>data=None</em>, <em>model_wrapper=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Metropolis-Hastings.</p>
 <p class="rubric">Notes</p>
 <p>In conditional inference, we infer <span class="math">\(z\)</span> in <span class="math">\(p(z, \beta
@@ -685,7 +685,7 @@ parameterized by tf.Variables().</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MetropolisHastings.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L59" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Draw sample from proposal conditional on last sample. Then accept
 or reject the sample based on the ratio,</p>
 <div class="math">
@@ -695,7 +695,7 @@ or reject the sample based on the ratio,</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.HMC">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">HMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">HMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
 (Duane et al., 1987; Neal, 2011).</p>
 <p class="rubric">Notes</p>
@@ -723,7 +723,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.HMC.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>n_steps=2</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L46" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>n_steps=2</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L47" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -743,7 +743,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.HMC.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Simulate Hamiltonian dynamics using a numerical integrator.
 Correct for the integrator’s discretization error using an
 acceptance ratio.</p>
