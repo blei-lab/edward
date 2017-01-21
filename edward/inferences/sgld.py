@@ -56,6 +56,11 @@ class SGLD(MonteCarlo):
     """
     Simulate Langevin dynamics using a discretized integrator. Its
     discretization error goes to zero as the learning rate decreases.
+
+    Notes
+    -----
+    The updates assume each Empirical random variable is directly
+    parameterized by tf.Variables().
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -75,10 +80,8 @@ class SGLD(MonteCarlo):
 
     # Update Empirical random variables.
     assign_ops = []
-    variables = {x.name: x for x in
-                 tf.get_default_graph().get_collection(tf.GraphKeys.VARIABLES)}
     for z, qz in six.iteritems(self.latent_vars):
-      variable = variables[qz.params.op.inputs[0].op.inputs[0].name]
+      variable = qz.get_variables()[0]
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
 
     # Increment n_accept.

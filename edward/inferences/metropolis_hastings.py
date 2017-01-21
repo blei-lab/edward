@@ -48,11 +48,6 @@ class MetropolisHastings(MonteCarlo):
     >>> proposal_z = Normal(mu=z, sigma=0.5)
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
-
-    Notes
-    -----
-    The updates assume each Empirical random variable is directly
-    parameterized by tf.Variables().
     """
     self.proposal_vars = proposal_vars
     super(MetropolisHastings, self).__init__(latent_vars, data, model_wrapper)
@@ -65,6 +60,11 @@ class MetropolisHastings(MonteCarlo):
     .. math::
       \\text{ratio} = \log p(x, z^{new}) - \log p(x, z^{old}) +
         \log g(z^{new} \mid z^{old}) - \log g(z^{old} \mid z^{new})
+
+    Notes
+    -----
+    The updates assume each Empirical random variable is directly
+    parameterized by tf.Variables().
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -142,10 +142,8 @@ class MetropolisHastings(MonteCarlo):
 
     # Update Empirical random variables.
     assign_ops = []
-    variables = {x.name: x for x in
-                 tf.get_default_graph().get_collection(tf.GraphKeys.VARIABLES)}
     for z, qz in six.iteritems(self.latent_vars):
-      variable = variables[qz.params.op.inputs[0].op.inputs[0].name]
+      variable = qz.get_variables()[0]
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
 
     # Increment n_accept (if accepted).
