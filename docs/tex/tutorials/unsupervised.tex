@@ -109,7 +109,7 @@ the highest posterior predictive density for each data point.
 To do this, we first draw a sample from the posterior and calculate a
 a K x N matrix of log-likelihoods, one for each cluster assignment $k$
 and data point $\mathbf{x}_n$. We perform this averaged over 100
-pwosterior samples.
+posterior samples.
 \begin{lstlisting}[language=Python]
 # Average per-cluster and per-data point likelihood over many posterior samples.
 log_liks = []
