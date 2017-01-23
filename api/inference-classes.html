@@ -668,9 +668,6 @@ binded to a proposal distribution <span class="math">\(g(z' \mid z)\)</span>.</p
 </tr>
 </tbody>
 </table>
-<p class="rubric">Notes</p>
-<p>The updates assume each Empirical random variable is directly
-parameterized by tf.Variables().</p>
 <p class="rubric">Examples</p>
 <pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=0.0, sigma=1.0)
 &gt;&gt;&gt; x = Normal(mu=tf.ones(10) * z, sigma=1.0)
@@ -685,12 +682,15 @@ parameterized by tf.Variables().</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MetropolisHastings.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Draw sample from proposal conditional on last sample. Then accept
 or reject the sample based on the ratio,</p>
 <div class="math">
 \[\text{ratio} = \log p(x, z^{new}) - \log p(x, z^{old}) +
   \log g(z^{new} \mid z^{old}) - \log g(z^{old} \mid z^{new})\]</div>
+<p class="rubric">Notes</p>
+<p>The updates assume each Empirical random variable is directly
+parameterized by tf.Variables().</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -747,6 +747,9 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <dd><p>Simulate Hamiltonian dynamics using a numerical integrator.
 Correct for the integrator’s discretization error using an
 acceptance ratio.</p>
+<p class="rubric">Notes</p>
+<p>The updates assume each Empirical random variable is directly
+parameterized by tf.Variables().</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -797,6 +800,9 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Simulate Langevin dynamics using a discretized integrator. Its
 discretization error goes to zero as the learning rate decreases.</p>
+<p class="rubric">Notes</p>
+<p>The updates assume each Empirical random variable is directly
+parameterized by tf.Variables().</p>
 </dd></dl>
 </dd></dl>
 <h3 class="unnumbered" id="references">References</h3>

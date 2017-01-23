@@ -149,7 +149,7 @@ inference.run(n_iter=4000, n_samples=20)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest posterior predictive density for each data point.</p>
-<p>To do this, we first draw a sample from the posterior and calculate a a K x N matrix of log-likelihoods, one for each cluster assignment <span class="math inline">\(k\)</span> and data point <span class="math inline">\(\mathbf{x}_n\)</span>. We perform this averaged over 100 pwosterior samples.</p>
+<p>To do this, we first draw a sample from the posterior and calculate a a K x N matrix of log-likelihoods, one for each cluster assignment <span class="math inline">\(k\)</span> and data point <span class="math inline">\(\mathbf{x}_n\)</span>. We perform this averaged over 100 posterior samples.</p>
 <pre class="python" language="Python"><code># Average per-cluster and per-data point likelihood over many posterior samples.
 log_liks = []
 for _ in range(100):
