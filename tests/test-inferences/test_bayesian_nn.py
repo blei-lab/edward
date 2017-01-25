@@ -20,6 +20,7 @@ def four_layer_nn(x, W_1, W_2, W_3, b_1, b_2):
 class test_inference_bayesian_nn_class(tf.test.TestCase):
 
   def test_monte_carlo(self):
+    tf.InteractiveSession()
     ed.set_seed(42)
 
     # DATA

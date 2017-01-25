@@ -20,6 +20,7 @@ def neural_network(x, W_0, W_1, b_0, b_1):
 class test_integer_init(tf.test.TestCase):
 
   def test_integer(self):
+    tf.InteractiveSession()     # Eliminates graph dependencies between tests.
     X_train = np.zeros([100, 10]).astype(np.float32)
     y_train = np.zeros(100).astype(np.int32)
     N, D = X_train.shape
