@@ -13,36 +13,40 @@ from edward.models import Bernoulli, MultivariateNormalFull, Normal
 from edward.util import multivariate_rbf
 
 
-def kernel(x):
+def kernel(x, sigma=1.0, l=1.0):
+  N = x.get_shape()[0]
   mat = []
   for i in range(N):
-    mat += [[]]
+    vect = []
     xi = x[i, :]
     for j in range(N):
       if j == i:
-        mat[i] += [multivariate_rbf(xi, xi)]
+        vect.append(multivariate_rbf(xi, xi, sigma, l))
       else:
         xj = x[j, :]
-        mat[i] += [multivariate_rbf(xi, xj)]
+        vect.append(multivariate_rbf(xi, xj, sigma, l))
 
-    mat[i] = tf.pack(mat[i])
+    mat.append(vect)
 
-  return tf.pack(mat)
+  mat = tf.pack(mat) + \
+      tf.convert_to_tensor(1e-6 * np.eye(N), dtype=tf.float32)
+
+  return mat
 
 
-ed.set_seed(42)
+ed.set_seed(54)
 
 # DATA
 df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
-df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
-N = 25  # number of data points
-D = df.shape[1] - 1  # number of features
-subset = np.random.choice(df.shape[0], N, replace=False)
-X_train = df[subset, 1:]
-y_train = df[subset, 0]
+df[df[:, 0] == -1, 0] = 0
+N = len(df)
+D = df.shape[1] - 1
+permutation = np.random.choice(range(N), N, replace=False)
+X_train = df[:, 1:][permutation]
+y_train = df[:, 0][permutation]
 
 # MODEL
-X = tf.placeholder(tf.float32, [N, D])
+X = ed.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)
 
