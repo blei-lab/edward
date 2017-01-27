@@ -16,7 +16,7 @@ class test_get_variables_class(tf.test.TestCase):
       b = Normal(mu=a, sigma=1.0)
       c = tf.Variable(0.0)
       d = Normal(mu=c, sigma=1.0)
-      e = Normal(mu=tf.mul(b, d), sigma=1.0)
+      e = Normal(mu=tf.multiply(b, d), sigma=1.0)
       self.assertEqual(get_variables(a), [])
       self.assertEqual(get_variables(b), [a])
       self.assertEqual(get_variables(c), [])

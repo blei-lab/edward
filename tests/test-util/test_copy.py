@@ -25,7 +25,7 @@ class test_copy_class(tf.test.TestCase):
       y = tf.constant(3.0)
       z = x * y
       z_new = copy(z)
-      tf.initialize_variables([x]).run()
+      tf.variables_initializer([x]).run()
       self.assertEqual(z_new.eval(), 6.0)
 
   def test_queue(self):
@@ -79,7 +79,7 @@ class test_copy_class(tf.test.TestCase):
       z = x * y
       qx = tf.Variable(4.0, name="CustomName")
       z_new = copy(z, {x: qx})
-      tf.initialize_variables([qx]).run()
+      tf.variables_initializer([qx]).run()
       self.assertEqual(z_new.eval(), 12.0)
 
   def test_placeholder_tensor(self):

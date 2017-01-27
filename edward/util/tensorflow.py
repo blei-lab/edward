@@ -82,7 +82,7 @@ def hessian(y, xs):
     # Calculate flattened vector grad_{xs} y.
     grads = tf.gradients(y, xs)
     grads = [tf.reshape(grad, [-1]) for grad in grads]
-    grads = tf.concat(0, grads)
+    grads = tf.concat(concat_dim=0, values=grads)
     # Loop over each element in the vector.
     mat = []
     d = grads.get_shape()[0]
@@ -103,7 +103,7 @@ def hessian(y, xs):
         hij = tf.reshape(hij, [-1])
         hi.append(hij)
 
-      hi = tf.concat(0, hi)
+      hi = tf.concat(concat_dim=0, values=hi)
       mat.append(hi)
 
     # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
@@ -462,7 +462,7 @@ def tile(input, multiples, *args, **kwargs):
   if diff < 0:
     input = tf.reshape(input, [1] * np.abs(diff) + get_dims(input))
   elif diff > 0:
-    multiples = tf.concat(0, [tf.ones(diff, dtype=tf.int32), multiples])
+    multiples = tf.concat(concat_dim=0, values=[tf.ones(diff, dtype=tf.int32), multiples])
 
   return tf.tile(input, multiples, *args, **kwargs)
 
@@ -505,8 +505,8 @@ def to_simplex(x):
     K_minus_one = shape[0]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
-    pil = tf.concat(0, [z, tf.constant([1.0])])
-    piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
+    pil = tf.concat(concat_dim=0, values=[z, tf.constant([1.0])])
+    piu = tf.concat(concat_dim=0, values=[tf.constant([1.0]), 1.0 - z])
     S = tf.cumprod(piu)
     return S * pil
   else:
@@ -514,7 +514,7 @@ def to_simplex(x):
     K_minus_one = shape[1]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
-    pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
-    piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
+    pil = tf.concat(concat_dim=1, values=[z, tf.ones([n_rows, 1])])
+    piu = tf.concat(concat_dim=1, values=[tf.ones([n_rows, 1]), 1.0 - z])
     S = tf.cumprod(piu, axis=1)
     return S * pil

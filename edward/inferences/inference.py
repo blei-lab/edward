@@ -220,7 +220,7 @@ class Inference(object):
     if variables is None:
       init = tf.global_variables_initializer()
     else:
-      init = tf.initialize_variables(variables)
+      init = tf.variables_initializer(variables)
 
     # Feed placeholders in case initialization depends on them.
     feed_dict = {}
@@ -321,8 +321,8 @@ class Inference(object):
 
     if logdir is not None:
       self.logging = True
-      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
-      self.summarize = tf.merge_all_summaries()
+      self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
+      self.summarize = tf.summary.merge_all()
     else:
       self.logging = False
 

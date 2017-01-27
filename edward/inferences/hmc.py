@@ -112,7 +112,7 @@ class HMC(MonteCarlo):
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
 
     # Increment n_accept (if accepted).
-    assign_ops.append(self.n_accept.assign_add(tf.select(accept, 1, 0)))
+    assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):

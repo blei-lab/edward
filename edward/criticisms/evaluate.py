@@ -263,7 +263,7 @@ def binary_crossentropy(y_true, y_pred):
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = logit(tf.cast(y_pred, tf.float32))
-  return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_pred, y_true))
+  return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
 
 def categorical_crossentropy(y_true, y_pred):
@@ -281,7 +281,7 @@ def categorical_crossentropy(y_true, y_pred):
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = logit(tf.cast(y_pred, tf.float32))
-  return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_pred, y_true))
+  return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
 
 def sparse_categorical_crossentropy(y_true, y_pred):
@@ -300,7 +300,7 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   y_true = tf.cast(y_true, tf.int64)
   y_pred = logit(tf.cast(y_pred, tf.float32))
   return tf.reduce_mean(
-      tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
+      tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
 
 def hinge(y_true, y_pred):
