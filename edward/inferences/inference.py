@@ -132,8 +132,15 @@ class Inference(object):
               raise TypeError("Observed variable bindings do not have same "
                               "shape.")
 
-            # If value is a np.ndarray, store it in the graph.
-            ph = tf.placeholder(tf.float32, value.shape)
+            # If value is a np.ndarray, store it in the graph. Assign its
+            # placeholder to an appropriate data type.
+            if np.issubdtype(value.dtype, np.float):
+              ph_type = tf.float32
+            elif np.issubdtype(value.dtype, np.int):
+              ph_type = tf.int32
+            else:
+              raise TypeError("Data value has an unsupported type.")
+            ph = tf.placeholder(ph_type, value.shape)
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
