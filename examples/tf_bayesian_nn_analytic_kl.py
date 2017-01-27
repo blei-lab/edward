@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Bayesian neural network using mean-field variational inference
+Bayesian neural network using variational inference
 (see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016)).
 
 Inspired by autograd's Bayesian neural network example.

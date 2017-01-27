@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import Normal, RandomVariable, Uniform
 from edward.util import copy
@@ -16,18 +17,19 @@ class HMC(MonteCarlo):
 
   Notes
   -----
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  HMC substitutes the model's log marginal density
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  ``HMC`` substitutes the model's log marginal density
 
   .. math::
 
-    log p(x, z) = log E_{q(\beta)} [ p(x, z, \beta) ]
-                \approx log p(x, z, \beta^*)
+    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)
 
-  leveraging a single Monte Carlo sample, where \beta^* ~
-  q(\beta). This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if q(\beta) = p(\beta | x).
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
   def __init__(self, *args, **kwargs):
     """
@@ -61,31 +63,35 @@ class HMC(MonteCarlo):
     Simulate Hamiltonian dynamics using a numerical integrator.
     Correct for the integrator's discretization error using an
     acceptance ratio.
+
+    Notes
+    -----
+    The updates assume each Empirical random variable is directly
+    parameterized by tf.Variables().
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
+    old_sample = OrderedDict(old_sample)
 
     # Sample momentum.
-    old_r_sample = {}
+    old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars):
       event_shape = qz.get_event_shape()
       normal = Normal(mu=tf.zeros(event_shape), sigma=tf.ones(event_shape))
       old_r_sample[z] = normal.sample()
 
     # Simulate Hamiltonian dynamics.
-    new_sample = old_sample
-    new_r_sample = old_r_sample
-    for _ in range(self.n_steps):
-      new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
-                                          self.step_size, self.log_joint)
+    new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
+                                        self.step_size, self._log_joint,
+                                        self.n_steps)
 
     # Calculate acceptance ratio.
-    ratio = tf.reduce_sum([0.5 * tf.square(r)
+    ratio = tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
                            for r in six.itervalues(old_r_sample)])
-    ratio -= tf.reduce_sum([0.5 * tf.square(r)
+    ratio -= tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
                             for r in six.itervalues(new_r_sample)])
-    ratio += self.log_joint(new_sample)
-    ratio -= self.log_joint(old_sample)
+    ratio += self._log_joint(new_sample)
+    ratio -= self._log_joint(old_sample)
 
     # Accept or reject sample.
     u = Uniform().sample()
@@ -101,17 +107,15 @@ class HMC(MonteCarlo):
 
     # Update Empirical random variables.
     assign_ops = []
-    variables = {x.name: x for x in
-                 tf.get_default_graph().get_collection(tf.GraphKeys.GLOBAL_VARIABLES)}
     for z, qz in six.iteritems(self.latent_vars):
-      variable = variables[qz.params.op.inputs[0].op.inputs[0].name]
+      variable = qz.get_variables()[0]
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
 
     # Increment n_accept (if accepted).
     assign_ops.append(self.n_accept.assign_add(tf.select(accept, 1, 0)))
     return tf.group(*assign_ops)
 
-  def log_joint(self, z_sample):
+  def _log_joint(self, z_sample):
     """
     Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
@@ -151,18 +155,19 @@ class HMC(MonteCarlo):
     return log_joint
 
 
-def leapfrog(z_old, r_old, step_size, log_joint):
-  z_new = {}
-  r_new = {}
-
-  grad_log_joint = tf.gradients(log_joint(z_old), list(six.itervalues(z_old)))
-  for i, key in enumerate(six.iterkeys(z_old)):
-    z, r = z_old[key], r_old[key]
-    r_new[key] = r + 0.5 * step_size * grad_log_joint[i]
-    z_new[key] = z + step_size * r_new[key]
+def leapfrog(z_old, r_old, step_size, log_joint, n_steps):
+  z_new = z_old.copy()
+  r_new = r_old.copy()
 
   grad_log_joint = tf.gradients(log_joint(z_new), list(six.itervalues(z_new)))
-  for i, key in enumerate(six.iterkeys(z_old)):
-    r_new[key] += 0.5 * step_size * grad_log_joint[i]
+  for _ in range(n_steps):
+    for i, key in enumerate(six.iterkeys(z_new)):
+      z, r = z_new[key], r_new[key]
+      r_new[key] = r + 0.5 * step_size * grad_log_joint[i]
+      z_new[key] = z + step_size * r_new[key]
+
+    grad_log_joint = tf.gradients(log_joint(z_new), list(six.itervalues(z_new)))
+    for i, key in enumerate(six.iterkeys(z_new)):
+      r_new[key] += 0.5 * step_size * grad_log_joint[i]
 
   return z_new, r_new

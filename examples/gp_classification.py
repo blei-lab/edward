@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Gaussian process classification using mean-field variational inference.
+"""Gaussian process classification using variational inference.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -50,6 +50,5 @@ y = Bernoulli(logits=f)
 qf = Normal(mu=tf.Variable(tf.random_normal([N])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
 
-data = {X: X_train, y: y_train}
-inference = ed.KLqp({f: qf}, data)
+inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
 inference.run(n_iter=500)

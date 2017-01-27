@@ -13,7 +13,9 @@ from edward.util import get_session
 
 try:
   import theano
+  no_theano = False
 except ImportError:
+  no_theano = True
   pass
 
 
@@ -30,7 +32,7 @@ class Inference(object):
     Data dictionary whose values may vary at each session run.
   model_wrapper : ed.Model or None
     An optional wrapper for the probability model. If specified, the
-    random variables in `latent_vars`' dictionary keys are strings
+    random variables in ``latent_vars``' dictionary keys are strings
     used accordingly by the wrapper.
   """
   def __init__(self, latent_vars=None, data=None, model_wrapper=None):
@@ -44,15 +46,15 @@ class Inference(object):
       will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      `RandomVariable`) to their realizations (of type `tf.Tensor`).
-      It can also bind placeholders (of type `tf.Tensor`) used in the
+      ``RandomVariable``) to their realizations (of type ``tf.Tensor``).
+      It can also bind placeholders (of type ``tf.Tensor``) used in the
       model to their realizations; and prior latent variables (of type
-      `RandomVariable`) to posterior latent variables (of type
-      `RandomVariable`).
+      ``RandomVariable``) to posterior latent variables (of type
+      ``RandomVariable``).
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
-      variables in `latent_vars`' dictionary keys are strings
-      used accordingly by the wrapper. `data` is also changed. For
+      variables in ``latent_vars``' dictionary keys are strings
+      used accordingly by the wrapper. ``data`` is also changed. For
       TensorFlow, Python, and Stan models, the key type is a string;
       for PyMC3, the key type is a Theano shared variable. For
       TensorFlow, Python, and PyMC3 models, the value type is a NumPy
@@ -64,6 +66,7 @@ class Inference(object):
     If ``data`` is not passed in, the dictionary is empty.
 
     Three options are available for batch training:
+
     1. internally if user passes in data as a dictionary of NumPy
        arrays;
     2. externally if user passes in data as a dictionary of
@@ -153,7 +156,8 @@ class Inference(object):
             sess.run(var.initializer, {ph: value})
           else:
             self.data[key] = value
-        elif isinstance(key, theano.tensor.sharedvar.TensorSharedVariable):
+        elif ((not no_theano) and
+                isinstance(key, theano.tensor.sharedvar.TensorSharedVariable)):
           self.data[key] = value
         elif isinstance(key, tf.Tensor):
           if isinstance(value, RandomVariable):
@@ -172,8 +176,7 @@ class Inference(object):
 
     self.model_wrapper = model_wrapper
 
-  def run(self, logdir=None, variables=None, use_coordinator=True,
-          *args, **kwargs):
+  def run(self, variables=None, use_coordinator=True, *args, **kwargs):
     """A simple wrapper to run inference.
 
     1. Initialize algorithm via ``initialize``.
@@ -190,9 +193,6 @@ class Inference(object):
 
     Parameters
     ----------
-    logdir : str, optional
-      Directory where event file will be written. For details,
-      see `tf.train.SummaryWriter`. Default is to write nothing.
     variables : list, optional
       A list of TensorFlow variables to initialize during inference.
       Default is to initialize all variables (this includes
@@ -209,9 +209,6 @@ class Inference(object):
       Passed into ``initialize``.
     """
     self.initialize(*args, **kwargs)
-
-    if logdir is not None:
-      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
 
     if variables is None:
       init = tf.global_variables_initializer()
@@ -242,7 +239,8 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
-  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None):
+  def initialize(self, n_iter=1000, n_print=None, n_minibatch=None, scale=None,
+                 logdir=None, debug=False):
     """Initialize inference algorithm.
 
     Parameters
@@ -251,7 +249,7 @@ class Inference(object):
       Number of iterations for algorithm.
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
-      progress, then specify 0. Default is int(n_iter / 10).
+      progress, then specify 0. Default is ``int(n_iter / 10)``.
     n_minibatch : int, optional
       Number of samples for data subsampling. Default is to use all
       the data. ``n_minibatch`` is available only for TensorFlow,
@@ -263,6 +261,13 @@ class Inference(object):
       A scalar value to scale computation for any random variable that
       it is binded to. For example, this is useful for scaling
       computations with respect to local latent variables.
+    logdir : str, optional
+      Directory where event file will be written. For details,
+      see ``tf.train.SummaryWriter``. Default is to write nothing.
+    debug : bool, optional
+      If True, add checks for ``NaN`` and ``Inf`` to all computations
+      in the graph. May result in substantially slower execution
+      times.
     """
     self.n_iter = n_iter
     if n_print is None:
@@ -307,15 +312,49 @@ class Inference(object):
                    zip(six.iterkeys(dict_data), batches)}
       self.data.update(dict_rv)
 
-  def update(self):
+    if logdir is not None:
+      self.logging = True
+      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
+      self.summarize = tf.merge_all_summaries()
+    else:
+      self.logging = False
+
+    self.debug = debug
+    if self.debug:
+      self.op_check = tf.add_check_numerics_ops()
+
+  def update(self, feed_dict=None):
     """Run one iteration of inference.
+
+    Parameters
+    ----------
+    feed_dict : dict, optional
+      Feed dictionary for a TensorFlow session run. It is used to feed
+      placeholders that are not fed during initialization.
 
     Returns
     -------
     dict
       Dictionary of algorithm-specific information.
     """
-    t = self.increment_t.eval()
+    if feed_dict is None:
+      feed_dict = {}
+
+    for key, value in six.iteritems(self.data):
+      if isinstance(key, tf.Tensor):
+        feed_dict[key] = value
+
+    sess = get_session()
+    t = sess.run(self.increment_t)
+
+    if self.debug:
+      sess.run(self.op_check)
+
+    if self.logging and self.n_print != 0:
+      if t == 1 or t % self.n_print == 0:
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
+
     return {'t': t}
 
   def print_progress(self, info_dict):
@@ -336,4 +375,5 @@ class Inference(object):
   def finalize(self):
     """Function to call after convergence.
     """
-    pass
+    if self.logging:
+      self.train_writer.close()

@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/blei-lab/edward.svg?branch=master)](https://travis-ci.org/blei-lab/edward)
 [![Coverage Status](https://coveralls.io/repos/github/blei-lab/edward/badge.svg?branch=master&cacheBuster=1)](https://coveralls.io/github/blei-lab/edward?branch=master)
+[![Join the chat at https://gitter.im/blei-lab/edward](https://badges.gitter.im/blei-lab/edward.svg)](https://gitter.im/blei-lab/edward?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [Edward](http://edwardlib.org) is a Python library for probabilistic modeling,
 inference, and criticism. It is a testbed for fast experimentation and research
@@ -48,3 +49,5 @@ visualization with TensorBoard.
 ## Resources
 
 + [Edward website](http://edwardlib.org)
++ [Edward Gitter channel](http://gitter.im/blei-lab/edward)
++ [Edward releases](https://github.com/blei-lab/edward/releases)

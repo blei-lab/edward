@@ -38,11 +38,36 @@ class VariationalInference(Inference):
       trainable variables that ``latent_vars`` and ``data`` depend on,
       excluding those that are only used in conditionals in ``data``.
     use_prettytensor : bool, optional
-      ``True`` if aim to use TensorFlow optimizer or ``False`` if aim
-      to use PrettyTensor optimizer (when using PrettyTensor).
+      ``True`` if aim to use PrettyTensor optimizer (when using
+      PrettyTensor) or ``False`` if aim to use TensorFlow optimizer.
       Defaults to TensorFlow.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
+
+    if var_list is None:
+      if self.model_wrapper is None:
+        # Traverse random variable graphs to get default list of variables.
+        var_list = set([])
+        trainables = tf.trainable_variables()
+        for z, qz in six.iteritems(self.latent_vars):
+          if isinstance(z, RandomVariable):
+            var_list.update(get_variables(z, collection=trainables))
+
+          var_list.update(get_variables(qz, collection=trainables))
+
+        for x, qx in six.iteritems(self.data):
+          if isinstance(x, RandomVariable) and \
+                  not isinstance(qx, RandomVariable):
+            var_list.update(get_variables(x, collection=trainables))
+
+        var_list = list(var_list)
+      else:
+        # Variables may not be instantiated for model wrappers until
+        # their methods are first called. For now, hard-code
+        # ``var_list`` inside build_losses.
+        var_list = None
+
+    self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
@@ -77,46 +102,12 @@ class VariationalInference(Inference):
     else:
       raise TypeError()
 
-    if var_list is None:
-      if self.model_wrapper is None:
-        # Traverse random variable graphs to get default list of variables.
-        var_list = set([])
-        trainables = tf.trainable_variables()
-        for z, qz in six.iteritems(self.latent_vars):
-          if isinstance(z, RandomVariable):
-            var_list.update(get_variables(z, collection=trainables))
-
-          var_list.update(get_variables(qz, collection=trainables))
-
-        for x, qx in six.iteritems(self.data):
-          if isinstance(x, RandomVariable) and \
-                  not isinstance(qx, RandomVariable):
-            var_list.update(get_variables(x, collection=trainables))
-
-        var_list = list(var_list)
-      else:
-        # Variables may not be instantiated for model wrappers until
-        # their methods are first called. For now, hard-code
-        # ``var_list`` inside build_losses.
-        var_list = None
-
-    if getattr(self, 'build_loss_and_gradients', None) is not None:
-      self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
-    else:
-      self.loss = self.build_loss()
-      if var_list is None:
-        var_list = tf.trainable_variables()
-
-      grads_and_vars = optimizer.compute_gradients(self.loss, var_list=var_list)
-
     if not use_prettytensor:
       self.train = optimizer.apply_gradients(grads_and_vars,
                                              global_step=global_step)
     else:
-      if getattr(self, 'build_loss_and_gradients', None) is not None:
-        raise NotImplementedError("PrettyTensor optimizer does not accept "
-                                  "manual gradients.")
-
+      # Note PrettyTensor optimizer does not accept manual updates;
+      # it autodiffs the loss directly.
       self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
                                       global_step=global_step,
                                       var_list=var_list)
@@ -145,6 +136,16 @@ class VariationalInference(Inference):
 
     sess = get_session()
     _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
+
+    if self.debug:
+      sess.run(self.op_check)
+
+    if self.logging and self.n_print != 0:
+      if t == 1 or t % self.n_print == 0:
+        if self.summarize is not None:
+          summary = sess.run(self.summarize, feed_dict)
+          self.train_writer.add_summary(summary, t)
+
     return {'t': t, 'loss': loss}
 
   def print_progress(self, info_dict):
@@ -159,11 +160,11 @@ class VariationalInference(Inference):
         string += ': Loss = {0:.3f}'.format(loss)
         print(string)
 
-  def build_loss(self):
+  def build_loss_and_gradients(self, var_list):
     """Build loss function.
 
-    Any derived class of ``VariationalInference`` must implement
-    this method or ``build_loss_and_gradients``.
+    Any derived class of ``VariationalInference`` **must** implement
+    this method.
 
     Raises
     ------

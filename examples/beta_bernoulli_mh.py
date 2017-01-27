@@ -25,8 +25,7 @@ qp = Empirical(params=tf.Variable(tf.zeros([1000]) + 0.5))
 
 proposal_p = Beta(a=3.0, b=9.0)
 
-data = {x: x_data}
-inference = ed.MetropolisHastings({p: qp}, {p: proposal_p}, data)
+inference = ed.MetropolisHastings({p: qp}, {p: proposal_p}, data={x: x_data})
 inference.run()
 
 # CRITICISM

@@ -103,4 +103,53 @@ allow users to integrate out variables and automatically derive
 classical Gibbs and mean-field updates \citep{bishop2006pattern} without
 tedious algebraic manipulation.
 
+\begin{center}\rule{3in}{0.4pt}\end{center}
+
+The classes below inherit methods from base inference classes;
+see the \href{/api/inference-development}{development page} for more
+details.
+
+{{sphinx
+
+.. autoclass:: edward.inferences.VariationalInference
+   :members:
+
+.. autoclass:: edward.inferences.KLqp
+   :members:
+
+.. autoclass:: edward.inferences.ReparameterizationKLqp
+
+.. autoclass:: edward.inferences.ReparameterizationKLKLqp
+
+.. autoclass:: edward.inferences.ReparameterizationEntropyKLqp
+
+.. autoclass:: edward.inferences.ScoreKLqp
+
+.. autoclass:: edward.inferences.ScoreKLKLqp
+
+.. autoclass:: edward.inferences.ScoreEntropyKLqp
+
+.. autoclass:: edward.inferences.KLpq
+   :members:
+
+.. autoclass:: edward.inferences.MAP
+   :members:
+
+.. autoclass:: edward.inferences.Laplace
+   :members:
+
+.. autoclass:: edward.inferences.MonteCarlo
+   :members:
+
+.. autoclass:: edward.inferences.MetropolisHastings
+   :members:
+
+.. autoclass:: edward.inferences.HMC
+   :members:
+
+.. autoclass:: edward.inferences.SGLD
+   :members:
+
+}}
+
 \subsubsection{References}\label{references}

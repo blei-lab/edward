@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Mixture model using mean-field variational inference.
+"""Mixture model using variational inference.
 
 We posit a collapsed mixture of Gaussians.
 """

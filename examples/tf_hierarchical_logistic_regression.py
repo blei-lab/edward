@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Hierarchical logistic regression using mean-field variational inference.
+"""Hierarchical logistic regression using variational inference.
 """
 from __future__ import absolute_import
 from __future__ import division

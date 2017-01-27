@@ -59,6 +59,27 @@ observing the data.
 ed.evaluate('log_likelihood', data={x_post: x_train})
 \end{lstlisting}
 
+It is common practice to criticize models with data held-out from
+training. To do this, we first perform inference over any local latent
+variables of the held-out data, fixing the global variables.  Then we
+make predictions on the held-out data.
+
+\begin{lstlisting}[language=Python]
+from edward.models import Categorical
+
+# create local posterior factors for test data, assuming test data
+# has N_test many data points
+qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
+
+# run local inference conditional on global factors
+inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
+inference_test.run()
+
+# build posterior predictive on test data
+x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
+ed.evaluate('log_likelihood', data={x_post: x_test})
+\end{lstlisting}
+
 Point-based evaluations are formally known as scoring rules
 in decision theory. Scoring rules are useful for model comparison, model
 selection, and model averaging.

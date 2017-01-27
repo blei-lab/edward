@@ -39,10 +39,6 @@ MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
 MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)
 \end{lstlisting}
 
-For a list of random variables supported in Edward, see the
-\href{https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html}{TensorFlow distributions API}.
-Edward random variables build on top of them.
-
 Random variables are equipped with methods such as
 \texttt{log_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
 \texttt{mean()}, $\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]$,
@@ -51,9 +47,10 @@ Further, each random variable is associated to a tensor $\mathbf{x}^*$ in the
 computational graph, which represents a single sample $\mathbf{x}^*\sim
 p(\mathbf{x}\mid\theta^*)$.
 
-This makes it easy to parameterize random variables with complex deterministic
-structure, such as with deep neural networks and a diverse set of math
-operations.
+This makes it easy to parameterize random variables with complex
+deterministic structure, such as with deep neural networks, a diverse
+set of math operations, and compatibility with third party libraries
+which also build on TensorFlow.
 The design also enables compositions of random variables
 to capture complex stochastic structure.
 They operate on $\mathbf{x}^*$.
@@ -72,3 +69,22 @@ tf.gather(x, 2)  # 3rd normal rv in the vector
 
 In the \href{/api/model-compositionality}{compositionality page}, we
 describe how to build models by composing random variables.
+
+\begin{center}\rule{3in}{0.4pt}\end{center}
+
+For a list of random variables supported in Edward, see the
+\href{https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html}{TensorFlow distributions API}.
+Edward random variables build on top of them, inheriting the same
+arguments and class methods. Additional methods are also available,
+detailed below.
+
+{{sphinx
+
+.. autoclass:: edward.models.RandomVariable
+   :members:
+
+.. class:: edward.models.Empirical
+
+.. class:: edward.models.PointMass
+
+}}
