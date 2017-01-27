@@ -82,7 +82,7 @@ def hessian(y, xs):
     # Calculate flattened vector grad_{xs} y.
     grads = tf.gradients(y, xs)
     grads = [tf.reshape(grad, [-1]) for grad in grads]
-    grads = tf.concat(concat_dim=0, values=grads)
+    grads = tf.concat(grads, 0)
     # Loop over each element in the vector.
     mat = []
     d = grads.get_shape()[0]
@@ -103,7 +103,7 @@ def hessian(y, xs):
         hij = tf.reshape(hij, [-1])
         hi.append(hij)
 
-      hi = tf.concat(concat_dim=0, values=hi)
+      hi = tf.concat(hi, 0)
       mat.append(hi)
 
     # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
@@ -429,11 +429,11 @@ def tile(input, multiples, *args, **kwargs):
 
   >>> n = tf.constant([1])
   >>> tf.tile(tf.constant([[1.0]]),
-  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  ...         tf.concat([n, tf.constant([1.0]).get_shape()]), 0)
   <tf.Tensor 'Tile:0' shape=(1, 1) dtype=float32>
   >>> n = tf.reshape(tf.constant(1), [1])
   >>> tf.tile(tf.constant([[1.0]]),
-  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  ...         tf.concat([n, tf.constant([1.0]).get_shape()]), 0)
   <tf.Tensor 'Tile_1:0' shape=(?, 1) dtype=float32>
 
   For this reason, we try to fetch ``multiples`` out of session if
@@ -462,8 +462,7 @@ def tile(input, multiples, *args, **kwargs):
   if diff < 0:
     input = tf.reshape(input, [1] * np.abs(diff) + get_dims(input))
   elif diff > 0:
-    multiples = tf.concat(
-        concat_dim=0, values=[tf.ones(diff, dtype=tf.int32), multiples])
+    multiples = tf.concat([tf.ones(diff, dtype=tf.int32), multiples], 0)
 
   return tf.tile(input, multiples, *args, **kwargs)
 
@@ -506,8 +505,8 @@ def to_simplex(x):
     K_minus_one = shape[0]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
-    pil = tf.concat(concat_dim=0, values=[z, tf.constant([1.0])])
-    piu = tf.concat(concat_dim=0, values=[tf.constant([1.0]), 1.0 - z])
+    pil = tf.concat([z, tf.constant([1.0])], 0)
+    piu = tf.concat([tf.constant([1.0]), 1.0 - z], 0)
     S = tf.cumprod(piu)
     return S * pil
   else:
@@ -515,7 +514,7 @@ def to_simplex(x):
     K_minus_one = shape[1]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
-    pil = tf.concat(concat_dim=1, values=[z, tf.ones([n_rows, 1])])
-    piu = tf.concat(concat_dim=1, values=[tf.ones([n_rows, 1]), 1.0 - z])
+    pil = tf.concat([z, tf.ones([n_rows, 1])], 1)
+    piu = tf.concat([tf.ones([n_rows, 1]), 1.0 - z], 1)
     S = tf.cumprod(piu, axis=1)
     return S * pil
