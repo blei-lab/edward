@@ -572,7 +572,7 @@ def get_variables(x, collection=None):
   True
   """
   if collection is None:
-    collection = tf.all_variables()
+    collection = tf.global_variables()
 
   node_dict = {node.name: node for node in collection}
 
