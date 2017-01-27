@@ -462,7 +462,8 @@ def tile(input, multiples, *args, **kwargs):
   if diff < 0:
     input = tf.reshape(input, [1] * np.abs(diff) + get_dims(input))
   elif diff > 0:
-    multiples = tf.concat(concat_dim=0, values=[tf.ones(diff, dtype=tf.int32), multiples])
+    multiples = tf.concat(
+        concat_dim=0, values=[tf.ones(diff, dtype=tf.int32), multiples])
 
   return tf.tile(input, multiples, *args, **kwargs)
 

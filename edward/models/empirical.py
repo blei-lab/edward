@@ -86,6 +86,7 @@ class Empirical(distribution.Distribution):
       indices = cat.sample_n(n, seed)
       return tf.gather(self._params, indices)
     else:
-      multiples = tf.concat(concat_dim=0, values=[tf.expand_dims(n, 0),
-                                [1] * len(self.get_event_shape())])
+      multiples = tf.concat(
+          concat_dim=0,
+          values=[tf.expand_dims(n, 0), [1] * len(self.get_event_shape())])
       return tile(self._params, multiples)
