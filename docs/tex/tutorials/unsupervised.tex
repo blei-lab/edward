@@ -123,7 +123,7 @@ for _ in range(100):
                     sigma=tf.ones([N, 1]) * tf.gather(sigma_sample, k))
     log_lik.append(tf.reduce_sum(x_post.log_prob(x_train), 1))
 
-  log_lik = tf.pack(log_lik)  # has shape (K, N)
+  log_lik = tf.stack(log_lik)  # has shape (K, N)
   log_liks.append(log_lik)
 
 log_liks = tf.reduce_mean(log_liks, 0)

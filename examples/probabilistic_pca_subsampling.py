@@ -74,7 +74,7 @@ inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
                        n_samples=5)
 
 sess = ed.get_session()
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for t in range(inference_w.n_iter):

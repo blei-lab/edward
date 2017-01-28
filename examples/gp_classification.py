@@ -25,9 +25,9 @@ def kernel(x):
         xj = x[j, :]
         mat[i] += [multivariate_rbf(xi, xj)]
 
-    mat[i] = tf.pack(mat[i])
+    mat[i] = tf.stack(mat[i])
 
-  return tf.pack(mat)
+  return tf.stack(mat)
 
 
 ed.set_seed(42)

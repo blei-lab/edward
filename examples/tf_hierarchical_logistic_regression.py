@@ -88,7 +88,7 @@ data = {'x': x_train, 'y': y_train}
 inference = ed.KLqp({'w': qw, 'b': qb}, data, model)
 inference.initialize(n_print=5, n_iter=600)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for t in range(inference.n_iter):

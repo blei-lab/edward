@@ -64,7 +64,7 @@ inference = ed.KLqp({mu: qmu, sigma: qsigma}, data={x: x_train})
 inference.initialize(n_samples=20, n_iter=4000)
 
 sess = ed.get_session()
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for _ in range(inference.n_iter):
@@ -87,7 +87,7 @@ for _ in range(100):
                     sigma=tf.ones([N, 1]) * tf.gather(sigma_sample, k))
     log_lik.append(tf.reduce_sum(x_post.log_prob(x_train), 1))
 
-  log_lik = tf.pack(log_lik)  # has shape (K, N)
+  log_lik = tf.stack(log_lik)  # has shape (K, N)
   log_liks.append(log_lik)
 
 log_liks = tf.reduce_mean(log_liks, 0)

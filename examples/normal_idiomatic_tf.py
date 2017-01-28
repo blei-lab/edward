@@ -25,7 +25,7 @@ qz = Normal(mu=tf.Variable(tf.random_normal([])),
 inference = ed.KLqp({z: qz})
 inference.initialize(n_iter=250)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for _ in range(inference.n_iter):

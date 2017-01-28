@@ -187,7 +187,7 @@ class Inference(object):
     """A simple wrapper to run inference.
 
     1. Initialize algorithm via ``initialize``.
-    2. (Optional) Build a ``tf.train.SummaryWriter`` for TensorBoard.
+    2. (Optional) Build a TensorFlow summary writer for TensorBoard.
     3. (Optional) Initialize TensorFlow variables.
     4. (Optional) Start queue runners.
     5. Run ``update`` for ``self.n_iter`` iterations.
@@ -218,9 +218,9 @@ class Inference(object):
     self.initialize(*args, **kwargs)
 
     if variables is None:
-      init = tf.initialize_all_variables()
+      init = tf.global_variables_initializer()
     else:
-      init = tf.initialize_variables(variables)
+      init = tf.variables_initializer(variables)
 
     # Feed placeholders in case initialization depends on them.
     feed_dict = {}
@@ -270,7 +270,7 @@ class Inference(object):
       computations with respect to local latent variables.
     logdir : str, optional
       Directory where event file will be written. For details,
-      see ``tf.train.SummaryWriter``. Default is to write nothing.
+      see ``tf.summary.FileWriter``. Default is to write nothing.
     debug : bool, optional
       If True, add checks for ``NaN`` and ``Inf`` to all computations
       in the graph. May result in substantially slower execution
@@ -321,8 +321,8 @@ class Inference(object):
 
     if logdir is not None:
       self.logging = True
-      self.train_writer = tf.train.SummaryWriter(logdir, tf.get_default_graph())
-      self.summarize = tf.merge_all_summaries()
+      self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
+      self.summarize = tf.summary.merge_all()
     else:
       self.logging = False
 

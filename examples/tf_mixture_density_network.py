@@ -81,7 +81,7 @@ sess = ed.get_session()
 K.set_session(sess)
 inference.initialize()
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 20

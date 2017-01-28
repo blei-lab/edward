@@ -4,16 +4,19 @@
 
 \subsubsection{Basic Installation}
 
-\textbf{Warning: TensorFlow v0.12.0 and 0.12.1 broke
-compatibility with Edward. Use at most
-\href{https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#download-and-setup}{TensorFlow v0.11.0} for now.}
+\textbf{Warning: TensorFlow v1.0.0 breaks
+compatibility with previous versions.
+Edward's latest version requires at least
+\href{https://www.tensorflow.org/versions/r1.0/get_started/os_setup}{TensorFlow
+v1.0.0} (see link for how to install it).
+}
 
 Edward depends on
 
 \begin{itemize}
   \item NumPy (>=1.7)
   \item Six (>=1.1.0)
-  \item TensorFlow (>=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1, !=0.12.0, !=0.12.1)
+  \item TensorFlow (>=1.0.0a0)
 \end{itemize}
 
 We recommend using \texttt{pip} to install \texttt{numpy},
@@ -22,6 +25,9 @@ We recommend using \texttt{pip} to install \texttt{numpy},
 \begin{lstlisting}[language=JSON]
 pip install numpy six tensorflow
 \end{lstlisting}
+
+\textbf{(Note: See link above. TensorFlow v1.0.0 may not be installable with
+\texttt{pip}.)}
 
 To use Edward with GPUs, install \texttt{tensorflow-gpu} instead of
 \texttt{tensorflow} as

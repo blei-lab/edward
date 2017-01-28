@@ -54,8 +54,8 @@ class BayesianNN:
     self.weight_dims = list(zip(layer_sizes[:-1], layer_sizes[1:]))
     self.n_vars = sum((m + 1) * n for m, n in self.weight_dims)
 
-  def unpack_weights(self, zs):
-    """Unpack weight matrices and biases from a flattened vector."""
+  def unstack_weights(self, zs):
+    """Unstack weight matrices and biases from a flattened vector."""
     for m, n in self.weight_dims:
       yield tf.reshape(zs[:(m * n)], [m, n]), \
           tf.reshape(zs[(m * n):(m * n + n)], [n])
@@ -65,7 +65,7 @@ class BayesianNN:
     """Forward pass of the neural net, outputting a vector of
     `n_minibatch` elements."""
     h = x
-    for W, b in self.unpack_weights(zs):
+    for W, b in self.unstack_weights(zs):
       h = self.nonlinearity(tf.matmul(h, W) + b)
 
     return tf.squeeze(h)  # n_minibatch x 1 to n_minibatch
@@ -111,7 +111,7 @@ data = {'x': x_train, 'y': y_train}
 inference = ed.KLqp({'z': qz}, data, model)
 inference.initialize(n_print=10)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for t in range(inference.n_iter):
@@ -127,10 +127,10 @@ for t in range(inference.n_iter):
     inputs = np.linspace(-8, 8, num=400, dtype=np.float32)
     x = tf.expand_dims(inputs, 1)
     mus = []
-    for z in tf.unpack(zs):
+    for z in tf.unstack(zs):
       mus += [model.neural_network(x, z)]
 
-    outputs = tf.pack(mus).eval()
+    outputs = tf.stack(mus).eval()
 
     # Get data
     x, y = data['x'], data['y']

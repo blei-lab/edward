@@ -22,7 +22,7 @@ X_data = np.random.binomial(1, expit(trait_true - thresh_true))
 # MODEL
 trait = Normal(mu=tf.zeros([nsubj, 1]), sigma=tf.ones([nsubj, 1]))
 thresh = Normal(mu=tf.zeros([1, nitem]), sigma=tf.ones([1, nitem]))
-X = Bernoulli(logits=tf.sub(trait, thresh))
+X = Bernoulli(logits=tf.subtract(trait, thresh))
 
 # INFERENCE
 T = 5000  # number of posterior samples

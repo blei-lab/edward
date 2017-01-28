@@ -127,7 +127,7 @@ with tf.variable_scope("model"):
 with tf.variable_scope("model", reuse=True):
   p_rep = tf.sigmoid(model.sample_prior(M))
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 100

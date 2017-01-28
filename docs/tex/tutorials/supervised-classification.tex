@@ -50,9 +50,9 @@ def kernel(x):
         xj = x[j, :]
         mat[i] += [multivariate_rbf(xi, xj)]
 
-    mat[i] = tf.pack(mat[i])
+    mat[i] = tf.stack(mat[i])
 
-  return tf.pack(mat)
+  return tf.stack(mat)
 
 X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))

@@ -57,8 +57,9 @@ def _sample_n(self, n=1, seed=None):
   val = tf.py_func(np_sample, [self.lam, n], [tf.float32])[0]
   # set shape from unknown shape
   batch_event_shape = self.get_batch_shape().concatenate(self.get_event_shape())
-  shape = tf.concat(0, [tf.expand_dims(n, 0),
-                        tf.constant(batch_event_shape.as_list(), dtype=tf.int32)])
+  shape = tf.concat([tf.expand_dims(n, 0),
+                     tf.constant(batch_event_shape.as_list(), dtype=tf.int32)],
+                     0)
   val = tf.reshape(val, shape)
   return val
 

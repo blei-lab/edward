@@ -44,7 +44,7 @@ class test_inference_data_class(tf.test.TestCase):
     inference = ed.KLqp({'mu': qmu}, data, model_wrapper=model)
     inference.initialize(n_minibatch=n_minibatch)
 
-    init = tf.initialize_all_variables()
+    init = tf.global_variables_initializer()
     init.run()
 
     # Start input enqueue threads.
