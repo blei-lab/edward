@@ -78,12 +78,12 @@ class Empirical(distribution.Distribution):
   def _variance(self):
     return math_ops.square(self.std())
 
-  def sample_n(self, n, seed=None):
+  def _sample_n(self, n, seed=None):
     if self.n != 1:
       logits = logit(tf.ones(self.n, dtype=tf.float32) /
                      tf.cast(self.n, dtype=tf.float32))
       cat = tf.contrib.distributions.Categorical(logits=logits)
-      indices = cat.sample_n(n, seed)
+      indices = cat._sample_n(n, seed)
       return tf.gather(self._params, indices)
     else:
       multiples = tf.concat(

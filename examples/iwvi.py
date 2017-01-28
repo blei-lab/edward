@@ -79,7 +79,7 @@ class IWVI(VariationalInference):
       log_w += [p_log_prob - q_log_prob]
 
     loss = -log_mean_exp(log_w)
-    grads = tf.gradients(loss, [v.ref() for v in var_list])
+    grads = tf.gradients(loss, [v._ref() for v in var_list])
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
 

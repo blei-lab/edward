@@ -366,7 +366,7 @@ def build_reparam_loss_and_gradients(inference, var_list):
   if var_list is None:
     var_list = tf.trainable_variables()
 
-  grads = tf.gradients(loss, [v.ref() for v in var_list])
+  grads = tf.gradients(loss, [v._ref() for v in var_list])
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -439,7 +439,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   if var_list is None:
     var_list = tf.trainable_variables()
 
-  grads = tf.gradients(loss, [v.ref() for v in var_list])
+  grads = tf.gradients(loss, [v._ref() for v in var_list])
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -511,7 +511,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   if var_list is None:
     var_list = tf.trainable_variables()
 
-  grads = tf.gradients(loss, [v.ref() for v in var_list])
+  grads = tf.gradients(loss, [v._ref() for v in var_list])
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -582,7 +582,7 @@ def build_score_loss_and_gradients(inference, var_list):
 
   grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
-      var_list)
+      [v._ref() for v in var_list])
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -657,7 +657,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   loss = -(tf.reduce_mean(p_log_lik) - kl)
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
-      var_list)
+      [v._ref() for v in var_list])
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -732,6 +732,6 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),
-      var_list)
+      [v._ref() for v in var_list])
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars

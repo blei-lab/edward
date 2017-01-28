@@ -147,7 +147,7 @@ class MAP(VariationalInference):
     if var_list is None:
       var_list = tf.trainable_variables()
 
-    grads = tf.gradients(loss, [v.ref() for v in var_list])
+    grads = tf.gradients(loss, [v._ref() for v in var_list])
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
 
