@@ -10,4 +10,5 @@ from edward.inferences.map import *
 from edward.inferences.metropolis_hastings import *
 from edward.inferences.monte_carlo import *
 from edward.inferences.sgld import *
+from edward.inferences.sghmc import *
 from edward.inferences.variational_inference import *
