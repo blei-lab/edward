@@ -49,10 +49,10 @@ z = MultivariateNormalFull(mu=tf.ones(2),
                            sigma=tf.constant([[1.0, 0.8], [0.8, 1.0]]))
 
 # INFERENCE
-qz = Empirical(params=tf.Variable(tf.random_normal([2000, 2])))
+qz = Empirical(params=tf.Variable(tf.random_normal([5000, 2])))
 
 inference = ed.SGHMC({z: qz})
-inference.run(step_size=2e-2)
+inference.run(step_size=0.02)
 
 # CRITICISM
 sess = ed.get_session()

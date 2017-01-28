@@ -62,7 +62,8 @@ class SGHMC(MonteCarlo):
     Simulate Hamiltonian dynamics with friction using a discretized
     integrator. Its discretization error goes to zero as the learning rate
     decreases.
-    Implements the update equations from (15) of Chen et al., 2014.
+
+    Implements the update equations from (15) of Chen et al. (2014).
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -75,12 +76,10 @@ class SGHMC(MonteCarlo):
                                   list(six.itervalues(old_sample)))
 
     # v_sample is so named b/c it represents a velocity rather than momentum.
-    sample = {}                 # v_sample
-    v_sample = {}               # rather than a momentum.
-    for z, qz, grad_log_p in \
-        zip(six.iterkeys(self.latent_vars),
-            six.itervalues(self.latent_vars),
-            grad_log_joint):
+    sample = {}
+    v_sample = {}
+    for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
+      qz = self.latent_vars[z]
       event_shape = qz.get_event_shape()
       normal = Normal(mu=tf.zeros(event_shape),
                       sigma=(tf.sqrt(learning_rate * friction) *
@@ -91,10 +90,8 @@ class SGHMC(MonteCarlo):
 
     # Update Empirical random variables.
     assign_ops = []
-    variables = {x.name: x for x in
-                 tf.get_default_graph().get_collection(tf.GraphKeys.VARIABLES)}
     for z, qz in six.iteritems(self.latent_vars):
-      variable = variables[qz.params.op.inputs[0].op.inputs[0].name]
+      variable = qz.get_variables()[0]
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
       assign_ops.append(tf.assign(self.v[z], v_sample[z]).op)
 
