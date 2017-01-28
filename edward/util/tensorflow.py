@@ -107,7 +107,7 @@ def hessian(y, xs):
       mat.append(hi)
 
     # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
-    return tf.pack(mat)
+    return tf.stack(mat)
 
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
@@ -173,15 +173,15 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     return 0.5 * tf.reduce_sum(out, 1)
 
 
-def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
+def log_mean_exp(input_tensor, axis=None, keep_dims=False):
   """Compute the ``log_mean_exp`` of elements in a tensor, taking
-  the mean across axes given by ``reduction_indices``.
+  the mean across axes given by ``axis``.
 
   Parameters
   ----------
   input_tensor : tf.Tensor
     The tensor to reduce. Should have numeric type.
-  reduction_indices : int or list of int, optional
+  axis : int or list of int, optional
     The dimensions to reduce. If `None` (the default), reduces all
     dimensions.
   keep_dims : bool, optional
@@ -201,20 +201,20 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
 
-  x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
+  x_max = tf.reduce_max(input_tensor, axis, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
-      tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
+      tf.exp(input_tensor - x_max), axis, keep_dims))
 
 
-def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
+def log_sum_exp(input_tensor, axis=None, keep_dims=False):
   """Compute the ``log_sum_exp`` of elements in a tensor, taking
-  the sum across axes given by ``reduction_indices``.
+  the sum across axes given by ``axis``.
 
   Parameters
   ----------
   input_tensor : tf.Tensor
     The tensor to reduce. Should have numeric type.
-  reduction_indices : int or list of int, optional
+  axis : int or list of int, optional
     The dimensions to reduce. If `None` (the default), reduces all
     dimensions.
   keep_dims : bool, optional
@@ -234,9 +234,9 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
 
-  x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
+  x_max = tf.reduce_max(input_tensor, axis, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
-      tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
+      tf.exp(input_tensor - x_max), axis, keep_dims))
 
 
 def logit(x):

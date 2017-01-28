@@ -130,8 +130,8 @@ class KLpq(VariationalInference):
         x = self.data
         p_log_prob[s] = self.model_wrapper.log_prob(x, z_sample)
 
-    p_log_prob = tf.pack(p_log_prob)
-    q_log_prob = tf.pack(q_log_prob)
+    p_log_prob = tf.stack(p_log_prob)
+    q_log_prob = tf.stack(q_log_prob)
 
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - log_sum_exp(log_w)

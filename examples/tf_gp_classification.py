@@ -54,9 +54,9 @@ class GaussianProcess:
           xj = x[j, :]
           mat[i] += [multivariate_rbf(xi, xj, self.sigma, self.l)]
 
-      mat[i] = tf.pack(mat[i])
+      mat[i] = tf.stack(mat[i])
 
-    return tf.pack(mat)
+    return tf.stack(mat)
 
   def log_prob(self, xs, zs):
     """Return scalar, the log joint density log p(xs, zs)."""

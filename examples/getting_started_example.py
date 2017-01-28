@@ -73,7 +73,7 @@ for s in range(10):
   mus += [neural_network(x, qW_0.sample(), qW_1.sample(),
                          qb_0.sample(), qb_1.sample())]
 
-mus = tf.pack(mus)
+mus = tf.stack(mus)
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()

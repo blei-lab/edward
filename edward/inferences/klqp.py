@@ -359,8 +359,8 @@ def build_reparam_loss_and_gradients(inference, var_list):
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
 
-  p_log_prob = tf.pack(p_log_prob)
-  q_log_prob = tf.pack(q_log_prob)
+  p_log_prob = tf.stack(p_log_prob)
+  q_log_prob = tf.stack(q_log_prob)
   loss = -tf.reduce_mean(p_log_prob - q_log_prob)
 
   if var_list is None:
@@ -423,7 +423,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
       x = inference.data
       p_log_lik[s] = inference.model_wrapper.log_lik(x, z_sample)
 
-  p_log_lik = tf.pack(p_log_lik)
+  p_log_lik = tf.stack(p_log_lik)
 
   if inference.model_wrapper is None:
     kl = tf.reduce_sum([inference.data.get(z, 1.0) *
@@ -501,7 +501,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
 
-  p_log_prob = tf.pack(p_log_prob)
+  p_log_prob = tf.stack(p_log_prob)
 
   q_entropy = tf.reduce_sum([inference.data.get(z, 1.0) * qz.entropy()
                              for z, qz in six.iteritems(inference.latent_vars)])
@@ -571,8 +571,8 @@ def build_score_loss_and_gradients(inference, var_list):
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
 
-  p_log_prob = tf.pack(p_log_prob)
-  q_log_prob = tf.pack(q_log_prob)
+  p_log_prob = tf.stack(p_log_prob)
+  q_log_prob = tf.stack(q_log_prob)
 
   if var_list is None:
     var_list = tf.trainable_variables()
@@ -639,8 +639,8 @@ def build_score_kl_loss_and_gradients(inference, var_list):
       x = inference.data
       p_log_lik[s] = inference.model_wrapper.log_lik(x, z_sample)
 
-  p_log_lik = tf.pack(p_log_lik)
-  q_log_prob = tf.pack(q_log_prob)
+  p_log_lik = tf.stack(p_log_lik)
+  q_log_prob = tf.stack(q_log_prob)
 
   if inference.model_wrapper is None:
     kl = tf.reduce_sum([inference.data.get(z, 1.0) *
@@ -719,8 +719,8 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
 
-  p_log_prob = tf.pack(p_log_prob)
-  q_log_prob = tf.pack(q_log_prob)
+  p_log_prob = tf.stack(p_log_prob)
+  q_log_prob = tf.stack(q_log_prob)
 
   q_entropy = tf.reduce_sum([inference.data.get(z, 1.0) * qz.entropy()
                              for z, qz in six.iteritems(inference.latent_vars)])
