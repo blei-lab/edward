@@ -744,20 +744,58 @@ def transform(x, *args, **kwargs):
   # TODO move import statements to top
   from edward.models import TransformedDistribution
   from tensorflow.contrib.distributions import bijector
+  import tensorflow.contrib.distributions as ds
+  # check using ds instead of ed.models to account for random variable
+  # subclasses which inherit from ds classes, e.g., BetaWithSoftplusAB
 
+  # TODO try/except or something or use __all__ to avoid choosing
+  # distributions not available in a specific version
+  zero_one = ()
+Beta
+Chi2
+  simplex = ()
+Dirichlet
+  positive = ()
+Exponential
+Gamma
+InverseGamma
+Laplace
+  unconstrained = ()
+Normal
+StudentT
+
+MultivariateNormalCholesky
+MultivariateNormalFull
+MultivariateNormalDiag
+MultivariateNormalDiagPlusVDVT
+MultivariateNormalDiagWithSoftplusStDev
+WishartCholesky
+WishartFull
+
+Mixture
+QuantizedDistribution
+TransformedDistribution
+Empirical
+Uniform  # arbitrary bounds; should also be true for > 0 or <0 supports
+PointMass
   if len(args) != 0:
     biject = args.pop(0)
   elif kwargs.get('bijector', None) is not None:
     biject = kwargs.pop('bijector')
   # TODO how to check support? manually enumerate each distribution class?
-  elif False:  # support on [0, 1]
+  elif isinstance(x, zero_one):  # support on [0, 1]
     biject = bijector.Invert(bijector.SigmoidCentered())
-  elif False:  # support on simplex
+  elif isinstance(x, simplex):  # support on simplex
     biject = bijector.Invert(bijector.SoftmaxCentered())
-  elif False:  # support on [0, infty)
+  elif isinstance(x, positive):  # support on [0, infty)
     biject = bijector.Invert(bijector.Softplus())
-  elif False:  # support already on (-infty, infty)
+  elif isinstance(x, unconstrained):  # support already on (-infty, infty)
+    # TODO probably don't even want to return a transformed
+    # distribution of identity if we just call this hapharzardly and
+    # rewrite to self.latent_vars
     biject = bijector.Identity
+  # TODO need one for support on [a, b] for any given a and b
+  # use chain(affine with the others)
   else:
     raise NotImplementedError()
 
