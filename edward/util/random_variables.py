@@ -692,3 +692,53 @@ def get_variables(x, collection=None):
     nodes.update(node.op.inputs)
 
   return list(output)
+
+
+def transform(x, *args, **kwargs):
+  """Transform a continuous random variable to be on the unconstrained
+  space. It selects according to a number of default transformations,
+  depending on the support.
+
+  Parameters
+  ----------
+  x : RandomVariable
+    Continuous random variable to transform.
+  *args, **kwargs : optional
+    Arguments to overwrite when forming the ``TransformedDistribution``.
+    For example, one can manually specify the transformation by
+    passing in the ``bijector`` argument.
+
+  Returns
+  -------
+  RandomVariable
+    A ``TransformedDistribution`` random variable.
+
+  Examples
+  --------
+  >>> x = Beta(a=1.0, b=1.0)
+  >>> y = transform(x)
+  >>> sess = tf.Session()
+  >>> sess.run(y.sample())
+  -2.2279539
+  """
+  # TODO move import statements to top
+  from edward.models import TransformedDistribution
+  from tensorflow.contrib.distributions import bijector
+
+  if len(args) != 0:
+    biject = args.pop(0)
+  elif kwargs.get('bijector', None) is not None:
+    biject = kwargs.pop('bijector')
+  # TODO how to check support? manually enumerate each distribution class?
+  elif False:  # support on [0, 1]
+    biject = bijector.Invert(bijector.SigmoidCentered())
+  elif False:  # support on simplex
+    biject = bijector.Invert(bijector.SoftmaxCentered())
+  elif False:  # support on [0, infty)
+    biject = bijector.Invert(bijector.Softplus())
+  elif False:  # support already on (-infty, infty)
+    biject = bijector.Identity
+  else:
+    raise NotImplementedError()
+
+  return TransformedDistribution(x, biject, *args, **kwargs)
