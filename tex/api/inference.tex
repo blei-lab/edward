@@ -51,7 +51,7 @@ Inference also supports fine control of the training procedure.
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.initialize()
 
-tf.initialize_all_variables().run()
+tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
   info_dict = inference.update()

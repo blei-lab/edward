@@ -161,7 +161,7 @@ data = {'X': X, 'y': y}</code></pre>
 K.set_session(sess)
 inference.initialize()
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()</code></pre>
 <p>Now we train the MDN by calling <code>inference.update()</code>, passing in the data. The quantity <code>inference.loss</code> is the loss function (negative log-likelihood) at that step of inference. We also report the loss function on test data by calling <code>inference.loss</code> and where we feed test data to the TensorFlow placeholders instead of training data. We keep track of the losses under <code>train_loss</code> and <code>test_loss</code>.</p>
 <pre class="python" language="Python"><code>n_epoch = 1000
