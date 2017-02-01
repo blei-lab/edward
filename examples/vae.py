@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """Variational auto-encoder for MNIST data.
-
-Assumes the directories "img/" and "data/mnist/" exist.
 """
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import os.path
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
@@ -16,6 +15,14 @@ from keras.layers import Dense
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
+
+DATA_DIR = "data/mnist"
+IMG_DIR = "img"
+
+if not os.path.exists(DATA_DIR):
+  os.makedirs(DATA_DIR)
+if not os.path.exists(IMG_DIR):
+  os.makedirs(IMG_DIR)
 
 ed.set_seed(42)
 
@@ -70,4 +77,4 @@ for epoch in range(n_epoch):
   # Prior predictive check.
   imgs = sess.run(x.value())
   for m in range(M):
-    imsave("img/%d.png" % m, imgs[m].reshape(28, 28))
+    imsave("%s/%d.png" % IMG_DIR, m, imgs[m].reshape(28, 28))
