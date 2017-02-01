@@ -19,7 +19,7 @@ setup(
                     'pymc3': ['pymc3>=3.0'],
                     'model wrappers': ['scipy>=0.16'],
                     'neural networks': ['keras>=1.0.0', 'prettytensor>=0.5.3'],
-                    'visualization': ['progressbar>=2.0']},
+                    'visualization': ['progressbar>=2.0', 'pillow>=3.4.2']},
     url='http://edwardlib.org',
     license='Apache License 2.0',
     classifiers=['License :: OSI Approved :: Apache Software License',
