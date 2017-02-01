@@ -78,7 +78,7 @@ you'd like to work with non-scalar parameters; it is not correct in
 this toy implementation.)
 
 Sometimes the random variable you'd like to work with does not even
-admit (easy) sampling, and you're only using it as a likelihood "node" rather
+admit (easy) sampling, and you're only using it as a likelihood ``node'' rather
 than as some prior to parameters of another random variable.
 You can avoid having to implement \texttt{_sample_n} altogether:
 after creating \texttt{CustomRandomVariable}, instantiate it with the
