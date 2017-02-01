@@ -106,7 +106,8 @@
 <p>Suppose we have a model <span class="math inline">\(p(\mathbf{x}, \mathbf{z}, \beta)\)</span> of data <span class="math inline">\(\mathbf{x}_{\text{train}}\)</span> with latent variables <span class="math inline">\((\mathbf{z}, \beta)\)</span>. Consider the posterior inference problem, <span class="math display">\[q(\mathbf{z}, \beta)\approx p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}}),\]</span> in which the task is to approximate the posterior <span class="math inline">\(p(\mathbf{z}, \beta\mid \mathbf{x}_{\text{train}})\)</span> using a family of distributions, <span class="math inline">\(q(\mathbf{z},\beta; \lambda)\)</span>, indexed by parameters <span class="math inline">\(\lambda\)</span>.</p>
 <p>In Edward, let <code>z</code> and <code>beta</code> be latent variables in the model, where we observe the random variable <code>x</code> with data <code>x_train</code>. Let <code>qz</code> and <code>qbeta</code> be random variables defined to approximate the posterior. We write this problem as follows:</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})</code></pre>
-<p><code>Inference</code> is an abstract class which takes two inputs: a collection of latent variables, with model variables bound to posterior variables; and a collection of observed variables, with model variables bound to data. The choice of approximation <span class="math inline">\(q(\mathbf{z}, \beta; \lambda)\)</span> and rules to update parameters <span class="math inline">\(\lambda\)</span> are specified by an inference algorithm.</p>
+<p><code>Inference</code> is an abstract class which takes two inputs. The first is a collection of latent random variables <code>beta</code> and <code>z</code>, along with “posterior variables” <code>qbeta</code> and <code>qz</code>, which are associated to their respective latent variables. The second is a collection of observed random variables <code>x</code>, which is associated to the data <code>x_train</code>.</p>
+<p>Inference adjusts parameters of the distribution of <code>qbeta</code> and <code>qz</code> to be close to the posterior <span class="math inline">\(p(\mathbf{z}, \beta\g \mbx_{\text{train}})\)</span>.</p>
 <p>Running inference is as simple as running one method.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.run()</code></pre>
@@ -121,7 +122,7 @@ for _ in range(inference.n_iter):
   inference.print_progress(info_dict)
 
 inference.finalize()</code></pre>
-<p><code>initialize()</code> builds the algorithm’s update rules (computational graph) for <span class="math inline">\(\lambda\)</span>; <code>initialize_all_variables()</code> initializes <span class="math inline">\(\lambda\)</span> (TensorFlow variables in the graph); <code>update()</code> runs the graph once to update <span class="math inline">\(\lambda\)</span>, which is called in a loop until convergence; <code>finalize()</code> runs any computation as the algorithm terminates.</p>
+<p><code>initialize()</code> builds the algorithm’s update rules (computational graph) for <span class="math inline">\(\lambda\)</span>; <code>tf.global_variables_initializer().run()</code> initializes <span class="math inline">\(\lambda\)</span> (TensorFlow variables in the graph); <code>update()</code> runs the graph once to update <span class="math inline">\(\lambda\)</span>, which is called in a loop until convergence; <code>finalize()</code> runs any computation as the algorithm terminates.</p>
 <p>The <code>run()</code> method is a simple wrapper for this procedure.</p>
 <h3 id="other-settings">Other Settings</h3>
 <p>We highlight other settings during inference.</p>
@@ -146,7 +147,7 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 <hr/>
 <dl class="class">
 <dt id="edward.inferences.Inference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em>, <em>model_wrapper=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L22" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em>, <em>model_wrapper=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/inference.py#L22" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Base class for Edward inference methods.</p>
 <p class="rubric">Attributes</p>
 <table class="docutils">
@@ -228,7 +229,7 @@ which are the outputs of data readers.</li>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Inference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L186" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/inference.py#L186" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>A simple wrapper to run inference.</p>
 <ol class="arabic simple">
 <li>Initialize algorithm via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
@@ -275,7 +276,7 @@ file readers.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L249" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/inference.py#L249" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize inference algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -323,7 +324,7 @@ times.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L333" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/inference.py#L333" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -347,7 +348,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L367" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/inference.py#L367" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -364,7 +365,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L382" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/inference.py#L382" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>

@@ -93,7 +93,7 @@
     <div class="nine columns">
 
 <h2 id="point-based-evaluations">Point-based evaluations</h2>
-<p>A point-based evaluation is a scalar-valued metric for assessing trained models <span class="citation">(Gneiting &amp; Raftery, 2007)</span>. For example, we can assess models for classification by predicting the label for each observation in the data and comparing it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
+<p>A point-based evaluation is a scalar-valued metric for assessing trained models <span class="citation">(Gneiting &amp; Raftery, 2007; Winkler, 1996)</span>. For example, we can assess models for classification by predicting the label for each observation in the data and comparing it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
 <p>Formally, point prediction in probabilistic models is given by taking the mean of the posterior predictive distribution, <span class="math display">\[\begin{aligned}
   p(\mathbf{x}_\text{new} \mid \mathbf{x})
   &amp;=
@@ -131,6 +131,9 @@ ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_test})</code></pre>
 <div id="refs" class="references">
 <div id="ref-gneiting2007strictly">
 <p>Gneiting, T., &amp; Raftery, A. E. (2007). Strictly proper scoring rules, prediction, and estimation. <em>Journal of the American Statistical Association</em>, <em>102</em>(477), 359–378.</p>
+</div>
+<div id="ref-winkler1996scoring">
+<p>Winkler, R. L. (1996). Scoring rules and the evaluation of probabilities. <em>Test</em>, <em>5</em>(1), 1–60.</p>
 </div>
 </div>
     </div>

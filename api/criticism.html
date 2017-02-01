@@ -99,13 +99,13 @@
 <p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model. For background, see the criticism <a href="/tutorials/">tutorials</a>.</p>
 <p>Edward explores model criticism using</p>
 <ul>
-<li>point-based evaluations, such as mean squared error or classification accuracy</li>
-<li>posterior predictive checks, for making probabilistic assessments of the model fit using discrepancy functions</li>
+<li>point-based evaluations, such as mean squared error or classification accuracy;</li>
+<li>posterior predictive checks, for making probabilistic assessments of the model fit using discrepancy functions.</li>
 </ul>
 <hr/>
 <span class="target" id="module-edward.criticisms"></span><dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
 <p>A metric, or scoring rule (Winkler, 1994), is a function of observed
 data under the posterior predictive distribution. For example in
@@ -207,7 +207,7 @@ the model wrapper is specified.</p>
 </dd></dl>
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/criticisms/ppc.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Posterior predictive check
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).</p>
 <p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior

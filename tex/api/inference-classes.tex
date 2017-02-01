@@ -48,9 +48,11 @@ family with respect to \texttt{tf.Variable}s.
 Specific variational inference algorithms inherit from
 the \texttt{VariationalInference} class to define their own methods, such as a
 loss function and gradient.
-For example, we represent MAP estimation with an approximating family
-of \texttt{PointMass} random variables, i.e., with all probability
-mass concentrated at a point.
+For example, we represent
+MAP
+estimation with an approximating family (\texttt{qbeta} and
+\texttt{qz}) of \texttt{PointMass} random variables, i.e., with all
+probability mass concentrated at a point.
 \begin{lstlisting}[language=Python]
 from edward.models import PointMass
 
@@ -59,15 +61,15 @@ qz = PointMass(params=tf.Variable(tf.zeros(N)))
 
 inference = ed.MAP({beta: qbeta, z: qz}, data={x: x_train})
 \end{lstlisting}
-\texttt{MAP}
-inherits from \texttt{VariationalInference} and defines a loss
-function and update rules; it leverages existing optimizers inside TensorFlow.
+\texttt{MAP} inherits from \texttt{VariationalInference} and defines a
+loss function and update rules; it uses existing optimizers inside
+TensorFlow.
 
 \subsubsection{Monte Carlo}
 
 Monte Carlo approximates the posterior using samples
-\citep{robert1999monte}. We represent Monte Carlo as inference where
-the approximating family is an empirical distribution,
+\citep{robert1999monte}. Monte Carlo is an inference where the
+approximating family is an empirical distribution,
 \begin{align*}
 q(\beta; \{\beta^{(t)}\})
 &= \frac{1}{T}\sum_{t=1}^T \delta(\beta, \beta^{(t)}), \\[1.5ex]
@@ -87,21 +89,26 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
 Monte Carlo
 algorithms proceed by updating one sample $\beta^{(t)},\mathbf{z}^{(t)}$ at a time in the empirical
 approximation.
-Specific Monte Carlo samplers determine the update rules;
-they can leverage gradients and graph structure, where applicable.
+Monte Carlo algorithms proceed by updating one sample
+$\beta^{(t)},\mbz^{(t)}$ at a time in the empirical approximation.
+%
 Markov chain Monte Carlo does this sequentially to update
 the current sample (index $t$ of \texttt{tf.Variable}s) conditional on
 the last sample (index $t-1$ of \texttt{tf.Variable}s).
+%
+Specific Monte Carlo samplers determine the update rules;
+they can use gradients such as in Hamiltonian Monte Carlo
+\citep{neal2011mcmc} and graph
+structure such as in sequential Monte Carlo \citep{doucet2001introduction}.
 
 \subsubsection{Exact Inference}
 
-The approach also extends to exact inference. We are developing a
-subpackage that does symbolic algebra on the deterministic and
-stochastic nodes in the computational graph; this uncovers conjugacy
-relationships between exponential-family random variables. This will
-allow users to integrate out variables and automatically derive
-classical Gibbs and mean-field updates \citep{bishop2006pattern} without
-tedious algebraic manipulation.
+This approach also extends to algorithms that usually require tedious
+algebraic manipulation.  With symbolic algebra on the nodes of the
+computational graph, we can uncover conjugacy relationships between
+random variables.  Users can then integrate out variables to
+automatically derive classical Gibbs \citep{gelfand1990sampling},
+mean-field updates \citep{bishop2006pattern}, and exact inference.
 
 \begin{center}\rule{3in}{0.4pt}\end{center}
 

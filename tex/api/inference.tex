@@ -30,13 +30,16 @@ We write this problem as follows:
 inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 \end{lstlisting}
 
-\texttt{Inference} is an abstract class which
-takes two inputs: a collection of latent variables, with model
-variables bound to posterior variables; and a collection of observed
-variables, with model variables bound to data.
-The choice of approximation $q(\mathbf{z}, \beta; \lambda)$ and rules
-to update parameters $\lambda$ are specified by an inference
-algorithm.
+\texttt{Inference} is an abstract class which takes two inputs.  The
+first is a collection of latent random variables \texttt{beta} and
+\texttt{z}, along with ``posterior variables'' \texttt{qbeta} and
+\texttt{qz}, which are associated to their respective latent
+variables.  The second is a collection of observed random variables
+\texttt{x}, which is associated to the data \texttt{x_train}.
+
+Inference adjusts parameters of the distribution of \texttt{qbeta}
+and \texttt{qz} to be close to the
+posterior $p(\mathbf{z}, \beta\g \mbx_{\text{train}})$.
 
 Running inference is as simple as running one method.
 
@@ -62,7 +65,7 @@ inference.finalize()
 
 \texttt{initialize()} builds the algorithm's update rules
 (computational graph) for $\lambda$;
-\texttt{initialize_all_variables()} initializes $\lambda$
+\texttt{tf.global_variables_initializer().run()} initializes $\lambda$
 (TensorFlow variables in the graph);
 \texttt{update()} runs the graph once to update
 $\lambda$, which is called in a loop until convergence;
