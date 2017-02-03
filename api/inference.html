@@ -107,7 +107,7 @@
 <p>In Edward, let <code>z</code> and <code>beta</code> be latent variables in the model, where we observe the random variable <code>x</code> with data <code>x_train</code>. Let <code>qz</code> and <code>qbeta</code> be random variables defined to approximate the posterior. We write this problem as follows:</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})</code></pre>
 <p><code>Inference</code> is an abstract class which takes two inputs. The first is a collection of latent random variables <code>beta</code> and <code>z</code>, along with “posterior variables” <code>qbeta</code> and <code>qz</code>, which are associated to their respective latent variables. The second is a collection of observed random variables <code>x</code>, which is associated to the data <code>x_train</code>.</p>
-<p>Inference adjusts parameters of the distribution of <code>qbeta</code> and <code>qz</code> to be close to the posterior <span class="math inline">\(p(\mathbf{z}, \beta\g \mbx_{\text{train}})\)</span>.</p>
+<p>Inference adjusts parameters of the distribution of <code>qbeta</code> and <code>qz</code> to be close to the posterior <span class="math inline">\(p(\mathbf{z}, \beta\,|\,\mathbf{x}_{\text{train}})\)</span>.</p>
 <p>Running inference is as simple as running one method.</p>
 <pre class="python" language="Python"><code>inference = ed.Inference({z: qz, beta: qbeta}, {x: x_train})
 inference.run()</code></pre>
