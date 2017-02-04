@@ -90,7 +90,7 @@ qsigma = InverseGamma(
 Run variational inference for 4000 iterations and 20 latent variable
 samples per iteration.
 \begin{lstlisting}[language=Python]
-inference = ed.KLqp({pi: qpi, mu: qmu, sigma: qsigma}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, sigma: qsigma}, data={x: x_train})
 inference.run(n_iter=4000, n_samples=20)
 \end{lstlisting}
 In this case
