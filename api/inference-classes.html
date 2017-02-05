@@ -779,15 +779,32 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 </code>
 </pre>
 <p class="rubric">Methods</p>
-</dd></dl>
-<table class="docutils field-list" frame="void" rules="none">
+<dl class="method">
+<dt id="edward.inferences.SGLD.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/sgld.py#L45" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
+<blockquote class="last">
+<div><p>Constant scale factor of learning rate.</p>
+</div></blockquote>
+</td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+<dl class="method">
+<dt id="edward.inferences.SGLD.build_update">
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/sgld.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Simulate Langevin dynamics using a discretized integrator. Its
+discretization error goes to zero as the learning rate decreases.</p>
+<p class="rubric">Notes</p>
+<p>The updates assume each Empirical random variable is directly
+parameterized by tf.Variables().</p>
+</dd></dl>
+</dd></dl>
 <dl class="class">
 <dt id="edward.inferences.SGHMC">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">SGHMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/sghmc.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
@@ -815,15 +832,35 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 </code>
 </pre>
 <p class="rubric">Methods</p>
-</dd></dl>
-<table class="docutils field-list" frame="void" rules="none">
+<dl class="method">
+<dt id="edward.inferences.SGHMC.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>friction=0.1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/sghmc.py#L45" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
+<blockquote>
+<div><p>Constant scale factor of learning rate.</p>
+</div></blockquote>
+<p><strong>friction</strong> : float, optional</p>
+<blockquote class="last">
+<div><p>Constant scale on the friction term in the Hamiltonian system.</p>
+</div></blockquote>
+</td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+<dl class="method">
+<dt id="edward.inferences.SGHMC.build_update">
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/inferences/sghmc.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Simulate Hamiltonian dynamics with friction using a discretized
+integrator. Its discretization error goes to zero as the learning rate
+decreases.</p>
+<p>Implements the update equations from (15) of Chen et al. (2014).</p>
+</dd></dl>
+</dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-bishop2006pattern">
