@@ -1,15 +1,5 @@
 #!/usr/bin/env python
-"""Generative adversarial network for toy Gaussian data
-(Goodfellow et al., 2014).
-
-Inspired by a blog post by Eric Jang.
-
-Note there are several common failure modes, such as
-(1) saturation of either discriminative or generative network;
-(2) the generator running into a local optima that produces a Gaussian
-somewhere around -1 rather than at the true data; and
-(3) mode collapse around the true Gaussian, where the variance is
-severely underestimated.
+"""Generative adversarial network for MNIST (Goodfellow et al., 2014).
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -17,123 +7,92 @@ from __future__ import division
 
 import edward as ed
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
-import seaborn as sns
+import os
 import tensorflow as tf
 
-from scipy.stats import norm
+from edward.models import Uniform
 from tensorflow.contrib import slim
-
-
-def next_batch(N):
-  samples = np.random.normal(4.0, 0.5, N)
-  samples.sort()
-  return samples
+from tensorflow.examples.tutorials.mnist import input_data
 
 
 def generative_network(z):
-  h0 = slim.fully_connected(z, hidden_size, activation_fn=tf.nn.relu)
-  h1 = slim.fully_connected(h0, 1, activation_fn=None)
-  return h1
+  h1 = slim.fully_connected(z, 128, activation_fn=tf.nn.relu)
+  x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
+  return x
 
 
 def discriminative_network(x):
-  """Outputs probability in logits."""
-  h0 = slim.fully_connected(x, hidden_size * 2, activation_fn=tf.tanh)
-  h1 = slim.fully_connected(h0, hidden_size * 2, activation_fn=tf.tanh)
-  h2 = slim.fully_connected(h1, hidden_size * 2, activation_fn=tf.tanh)
-  h3 = slim.fully_connected(h2, 1, activation_fn=None)
-  return h3
+  h1 = slim.fully_connected(x, 128, activation_fn=tf.nn.relu)
+  logit = slim.fully_connected(h1, 1, activation_fn=None)
+  return logit
 
 
-def get_samples(num_points=10000, num_bins=100):
-  """Return a tuple (db, pd, pg), where
-  + db is the discriminator's decision boundary;
-  + pd is a histogram of samples from the data distribution;
-  + pg is a histogram of samples from the generative model.
-  """
-  sess = ed.get_session()
-  bins = np.linspace(-8, 8, num_bins)
+def plot(samples):
+  fig = plt.figure(figsize=(4, 4))
+  gs = gridspec.GridSpec(4, 4)
+  gs.update(wspace=0.05, hspace=0.05)
 
-  # Decision boundary
-  with tf.variable_scope("Disc", reuse=True):
-    p_true = tf.sigmoid(discriminative_network(x_ph))
+  for i, sample in enumerate(samples):
+    ax = plt.subplot(gs[i])
+    plt.axis('off')
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_aspect('equal')
+    plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
 
-  xs = np.linspace(-8, 8, num_points)
-  db = np.zeros((num_points, 1))
-  for i in range(num_points // batch_size):
-    db[batch_size * i:batch_size * (i + 1)] = sess.run(p_true, {
-        x_ph: np.reshape(
-            xs[batch_size * i:batch_size * (i + 1)],
-            (batch_size, 1)
-        )
-    })
-
-  # Data samples
-  d = next_batch(num_points)
-  pd, _ = np.histogram(d, bins=bins, density=True)
-
-  # Generated samples
-  z_ph = tf.placeholder(tf.float32, [batch_size, 1])
-  with tf.variable_scope("Gen", reuse=True):
-    G = generative_network(z_ph)
-
-  zs = np.linspace(-8, 8, num_points)
-  g = np.zeros((num_points, 1))
-  for i in range(num_points // batch_size):
-    g[batch_size * i:batch_size * (i + 1)] = sess.run(G, {
-        z_ph: np.reshape(
-            zs[batch_size * i:batch_size * (i + 1)],
-            (batch_size, 1)
-        )
-    })
-  pg, _ = np.histogram(g, bins=bins, density=True)
-
-  return db, pd, pg
+  return fig
 
 
-sns.set(color_codes=True)
 ed.set_seed(42)
 
-batch_size = 12  # batch size during training
-hidden_size = 4  # number of hidden units
+M = 128  # batch size during training
+d = 100  # latent dimension
 
-# DATA. We use a placeholder to represent a minibatch. During
-# inference, we generate data on the fly and feed ``x_ph``.
-x_ph = tf.placeholder(tf.float32, [batch_size, 1])
+DATA_DIR = "data/mnist"
+IMG_DIR = "img"
+
+if not os.path.exists(DATA_DIR):
+  os.makedirs(DATA_DIR)
+if not os.path.exists(IMG_DIR):
+  os.makedirs(IMG_DIR)
+
+# DATA. MNIST batches are fed at training time.
+mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
+x_ph = tf.placeholder(tf.float32, [M, 784])
 
 # MODEL
-z = tf.linspace(-8.0, 8.0, batch_size) + 0.01 * tf.random_normal([batch_size])
-z = tf.reshape(z, [batch_size, 1])
 with tf.variable_scope("Gen"):
+  z = Uniform(a=tf.zeros([M, d]) - 1.0, b=tf.ones([M, d]))
   x = generative_network(z)
 
 # INFERENCE
-optimizer = tf.train.GradientDescentOptimizer(0.03)
-optimizer_d = tf.train.GradientDescentOptimizer(0.03)
+optimizer = tf.train.AdamOptimizer()
+optimizer_d = tf.train.AdamOptimizer()
 
 inference = ed.GANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer)
+    optimizer=optimizer, optimizer_d=optimizer,
+    n_iter=15000, n_print=1000)
+
+sess = ed.get_session()
 tf.global_variables_initializer().run()
 
-for _ in range(inference.n_iter):
-  x_data = next_batch(batch_size).reshape([batch_size, 1])
-  info_dict = inference.update(feed_dict={x_ph: x_data})
-  inference.print_progress(info_dict)
+idx = np.random.randint(M, size=16)
+i = 0
+for t in range(inference.n_iter):
+  if t % inference.n_print == 0:
+    samples = sess.run(x)
+    samples = samples[idx, ]
 
-# CRITICISM
-db, pd, pg = get_samples()
-db_x = np.linspace(-8, 8, len(db))
-p_x = np.linspace(-8, 8, len(pd))
-f, ax = plt.subplots(1)
-ax.plot(db_x, db, label="Decision boundary")
-ax.set_ylim(0, 1)
-plt.plot(p_x, pd, label="Real data")
-plt.plot(p_x, pg, label="Generated data")
-plt.title("1D Generative Adversarial Network")
-plt.xlabel("Data values")
-plt.ylabel("Probability density")
-plt.legend()
-plt.show()
+    fig = plot(samples)
+    plt.savefig(os.path.join(IMG_DIR, '{}.png').format(
+        str(i).zfill(3)), bbox_inches='tight')
+    plt.close(fig)
+    i += 1
+
+  x_batch, _ = mnist.train.next_batch(M)
+  info_dict = inference.update(feed_dict={x_ph: x_batch})
+  inference.print_progress(info_dict)

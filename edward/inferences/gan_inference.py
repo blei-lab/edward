@@ -40,8 +40,8 @@ class GANInference(VariationalInference):
 
     In building the computation graph for inference, the
     discriminator's parameters can be accessed with the variable scope
-    "Disc". The generator's parameters can be accessed the variable
-    scope "Gen".
+    "Disc". The generator's parameters assume they can be accessed
+    with the variable scope "Gen".
 
     GANs also only work for one observed random variable in ``data``.
 
