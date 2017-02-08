@@ -21,8 +21,8 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
-from matplotlib import animation
 from scipy.stats import norm
+from tensorflow.contrib import slim
 
 
 def next_batch(N):
@@ -31,30 +31,18 @@ def next_batch(N):
   return samples
 
 
-def fully_connected(x, output_dim, activation_fn, scope=None):
-  with tf.variable_scope(scope):
-    w = tf.get_variable("w", [x.get_shape()[1], output_dim],
-                        initializer=tf.random_normal_initializer())
-    b = tf.get_variable("b", [output_dim],
-                        initializer=tf.constant_initializer(0.0))
-    if activation_fn:
-      return activation_fn(tf.matmul(x, w) + b)
-    else:
-      return tf.matmul(x, w) + b
-
-
 def generative_network(z):
-  h0 = fully_connected(z, hidden_size, tf.nn.relu, "G0")
-  h1 = fully_connected(h0, 1, None, "G1")
+  h0 = slim.fully_connected(z, hidden_size, activation_fn=tf.nn.relu)
+  h1 = slim.fully_connected(h0, 1, activation_fn=None)
   return h1
 
 
 def discriminative_network(x):
   """Outputs probability in logits."""
-  h0 = fully_connected(x, hidden_size * 2, tf.tanh, "D0")
-  h1 = fully_connected(h0, hidden_size * 2, tf.tanh, "D1")
-  h2 = fully_connected(h1, hidden_size * 2, tf.tanh, "D2")
-  h3 = fully_connected(h2, 1, None, "D3")
+  h0 = slim.fully_connected(x, hidden_size * 2, activation_fn=tf.tanh)
+  h1 = slim.fully_connected(h0, hidden_size * 2, activation_fn=tf.tanh)
+  h2 = slim.fully_connected(h1, hidden_size * 2, activation_fn=tf.tanh)
+  h3 = slim.fully_connected(h2, 1, activation_fn=None)
   return h3
 
 
@@ -65,13 +53,13 @@ def get_samples(num_points=10000, num_bins=100):
   + pg is a histogram of samples from the generative model.
   """
   sess = ed.get_session()
-  bins = np.linspace(-toy_range, toy_range, num_bins)
+  bins = np.linspace(-8, 8, num_bins)
 
   # Decision boundary
   with tf.variable_scope("Disc", reuse=True):
-    p_true = discriminative_network(x_ph)
+    p_true = tf.sigmoid(discriminative_network(x_ph))
 
-  xs = np.linspace(-toy_range, toy_range, num_points)
+  xs = np.linspace(-8, 8, num_points)
   db = np.zeros((num_points, 1))
   for i in range(num_points // batch_size):
     db[batch_size * i:batch_size * (i + 1)] = sess.run(p_true, {
@@ -90,7 +78,7 @@ def get_samples(num_points=10000, num_bins=100):
   with tf.variable_scope("Gen", reuse=True):
     G = generative_network(z_ph)
 
-  zs = np.linspace(-toy_range, toy_range, num_points)
+  zs = np.linspace(-8, 8, num_points)
   g = np.zeros((num_points, 1))
   for i in range(num_points // batch_size):
     g[batch_size * i:batch_size * (i + 1)] = sess.run(G, {
@@ -107,47 +95,27 @@ def get_samples(num_points=10000, num_bins=100):
 sns.set(color_codes=True)
 ed.set_seed(42)
 
-toy_range = 8  # range of data
 batch_size = 12  # batch size during training
 hidden_size = 4  # number of hidden units
-n_iter = 1000  # number of training iterations
-n_print = 10  # print every number of iterations
-
-anim_frames = []
-anim_path = None  # file path of outputted animation
 
 # DATA. We use a placeholder to represent a minibatch. During
 # inference, we generate data on the fly and feed ``x_ph``.
 x_ph = tf.placeholder(tf.float32, [batch_size, 1])
 
 # MODEL
-stop = tf.cast(toy_range, tf.float32)
-z = tf.linspace(-stop, stop, batch_size) + 0.01 * tf.random_normal([batch_size])
+z = tf.linspace(-8.0, 8.0, batch_size) + 0.01 * tf.random_normal([batch_size])
 z = tf.reshape(z, [batch_size, 1])
 with tf.variable_scope("Gen"):
   x = generative_network(z)
 
 # INFERENCE
-initial_learning_rate = 0.03
-global_step = tf.Variable(0, trainable=False)
-learning_rate = tf.train.exponential_decay(
-    initial_learning_rate,
-    global_step,
-    decay_steps=150,
-    decay_rate=0.95)
-optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-optimizer_d = tf.train.GradientDescentOptimizer(learning_rate)
+optimizer = tf.train.GradientDescentOptimizer(0.03)
+optimizer_d = tf.train.GradientDescentOptimizer(0.03)
 
-# TODO
-# + there's some randomness still in this example.
-#   i think the loss values are always the same though..
-#   maybe it's in the graph construction or whichever updates go first in the session runs?
 inference = ed.GANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer,
-    global_step=global_step, global_step_d=global_step,
-    n_iter=n_iter, n_print=n_print)
+    optimizer=optimizer, optimizer_d=optimizer)
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
@@ -157,8 +125,8 @@ for _ in range(inference.n_iter):
 
 # CRITICISM
 db, pd, pg = get_samples()
-db_x = np.linspace(-toy_range, toy_range, len(db))
-p_x = np.linspace(-toy_range, toy_range, len(pd))
+db_x = np.linspace(-8, 8, len(db))
+p_x = np.linspace(-8, 8, len(pd))
 f, ax = plt.subplots(1)
 ax.plot(db_x, db, label="Decision boundary")
 ax.set_ylim(0, 1)
