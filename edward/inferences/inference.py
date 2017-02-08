@@ -46,11 +46,11 @@ class Inference(object):
       will infer the former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      ``RandomVariable``) to their realizations (of type ``tf.Tensor``).
-      It can also bind placeholders (of type ``tf.Tensor``) used in the
-      model to their realizations; and prior latent variables (of type
-      ``RandomVariable``) to posterior latent variables (of type
-      ``RandomVariable``).
+      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+      type ``tf.Tensor``). It can also bind placeholders (of type
+      ``tf.Tensor``) used in the model to their realizations; and
+      prior latent variables (of type ``RandomVariable``) to posterior
+      latent variables (of type ``RandomVariable``).
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in ``latent_vars``' dictionary keys are strings
@@ -349,7 +349,8 @@ class Inference(object):
 
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor):
-        feed_dict[key] = value
+        if "Placeholder" in key.op.type:
+          feed_dict[key] = value
 
     sess = get_session()
     t = sess.run(self.increment_t)

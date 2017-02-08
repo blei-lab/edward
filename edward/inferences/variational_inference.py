@@ -132,7 +132,8 @@ class VariationalInference(Inference):
 
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor):
-        feed_dict[key] = value
+        if "Placeholder" in key.op.type:
+          feed_dict[key] = value
 
     sess = get_session()
     _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)

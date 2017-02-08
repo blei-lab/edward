@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import six
 import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
@@ -16,10 +17,15 @@ class GANInference(VariationalInference):
   models. These models do not require a tractable density and assume
   only a program that generates samples.
   """
-  def __init__(self, data=None, discriminator=None):
+  def __init__(self, data, discriminator):
     """
     Parameters
     ----------
+    data : dict
+      Data dictionary which binds observed variables (of type
+      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+      type ``tf.Tensor``).  It can also bind placeholders (of type
+      ``tf.Tensor``) used in the model to their realizations.
     discriminator : function
       Function (with parameters) to discriminate samples. It should
       output logit probabilities (real-valued) and not probabilities
@@ -143,11 +149,10 @@ class GANInference(VariationalInference):
     if feed_dict is None:
       feed_dict = {}
 
-    # TODO dealing with output that's not a random variable but a tensor
-    # + need to update the various contracts, and formalize this notion
-    # for key, value in six.iteritems(self.data):
-    #   if isinstance(key, tf.Tensor):
-    #     feed_dict[key] = value
+    for key, value in six.iteritems(self.data):
+      if isinstance(key, tf.Tensor):
+        if "Placeholder" in key.op.type:
+          feed_dict[key] = value
 
     sess = get_session()
     _, t, loss, loss_d = sess.run(
