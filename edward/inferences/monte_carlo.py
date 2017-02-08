@@ -28,9 +28,9 @@ class MonteCarlo(Inference):
       random variable must be a ``Empirical`` random variable.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      ``RandomVariable``) to their realizations (of type ``tf.Tensor``).
-      It can also bind placeholders (of type ``tf.Tensor``) used in the
-      model to their realizations.
+      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+      type ``tf.Tensor``). It can also bind placeholders (of type
+      ``tf.Tensor``) used in the model to their realizations.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
       variables in ``latent_vars``' dictionary keys are strings used
@@ -127,7 +127,8 @@ class MonteCarlo(Inference):
 
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor):
-        feed_dict[key] = value
+        if "Placeholder" in key.op.type:
+          feed_dict[key] = value
 
     sess = get_session()
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)

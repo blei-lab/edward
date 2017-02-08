@@ -106,7 +106,6 @@ class MAP(VariationalInference):
     .. math::
       - \log p(x,z)
     """
-    # for now: ignore var_list
     z_mode = {z: qz.value()
               for z, qz in six.iteritems(self.latent_vars)}
     if self.model_wrapper is None:
