@@ -52,7 +52,8 @@ class GANInference(VariationalInference):
     self.discriminator = discriminator
     super(GANInference, self).__init__(None, data, model_wrapper=None)
 
-  def initialize(self, optimizer=None, optimizer_d=None, var_list=None,
+  def initialize(self, optimizer=None, optimizer_d=None,
+                 global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
     """Initialize variational inference.
 
@@ -64,10 +65,18 @@ class GANInference(VariationalInference):
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
     optimizer_d : str or tf.train.Optimizer, optional
-      A TensorFlow optimizer, to use for optimizing the generator
+      A TensorFlow optimizer, to use for optimizing the discriminator
       objective. Alternatively, one can pass in the name of a
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
+    global_step : tf.Variable, optional
+      Optional ``Variable`` to increment by one after the variables
+      for the generator have been updated. See
+      ``tf.train.Optimizer.apply_gradients``.
+    global_step_d : tf.Variable, optional
+      Optional ``Variable`` to increment by one after the variables
+      for the discriminator have been updated. See
+      ``tf.train.Optimizer.apply_gradients``.
     """
     # call grandparent's method; avoid parent (VariationalInference)
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -75,8 +84,8 @@ class GANInference(VariationalInference):
     self.loss, grads_and_vars, self.loss_d, grads_and_vars_d = \
         self.build_loss_and_gradients(var_list)
 
-    optimizer, global_step = _build_optimizer(optimizer)
-    optimizer_d, global_step_d = _build_optimizer(optimizer_d)
+    optimizer, global_step = _build_optimizer(optimizer, global_step)
+    optimizer_d, global_step_d = _build_optimizer(optimizer_d, global_step_d)
 
     train = optimizer.apply_gradients(grads_and_vars,
                                       global_step=global_step)
@@ -170,7 +179,7 @@ class GANInference(VariationalInference):
         print(string)
 
 
-def _build_optimizer(optimizer):
+def _build_optimizer(optimizer, global_step):
   if optimizer is None:
     # Use ADAM with a decaying scale factor.
     global_step = tf.Variable(0, trainable=False)
@@ -196,12 +205,7 @@ def _build_optimizer(optimizer):
       optimizer = tf.train.RMSPropOptimizer(0.01)
     else:
       raise ValueError('Optimizer class not found:', optimizer)
-
-    global_step = None
-  elif isinstance(optimizer, tf.train.Optimizer):
-    # Custom optimizers have no control over global_step.
-    global_step = None
-  else:
+  elif not isinstance(optimizer, tf.train.Optimizer):
     raise TypeError()
 
   return optimizer, global_step

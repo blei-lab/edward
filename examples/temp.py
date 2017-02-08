@@ -139,14 +139,15 @@ optimizer = tf.train.GradientDescentOptimizer(learning_rate)
 optimizer_d = tf.train.GradientDescentOptimizer(learning_rate)
 
 # TODO
-# + need to be able to pass in global_step/others
 # + there's some randomness still in this example.
 #   i think the loss values are always the same though..
 #   maybe it's in the graph construction or whichever updates go first in the session runs?
 inference = ed.GANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer, n_iter=n_iter, n_print=n_print)
+    optimizer=optimizer, optimizer_d=optimizer,
+    global_step=global_step, global_step_d=global_step,
+    n_iter=n_iter, n_print=n_print)
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
