@@ -1,0 +1,157 @@
+\title{Generative Adversarial Networks}
+
+\subsection{Generative Adversarial Networks}
+
+Generative adversarial networks (GANs) are a powerful approach for
+generative modeling \citep{goodfellow2014generative,goodfellow2016nips}.
+They posit a deep generative model and perform efficient and
+expressive inferences.
+
+We demonstrate how to do this in Edward with an example.
+The script is available
+\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}
+{here}.
+First we set hyperparameters.
+
+\begin{lstlisting}[language=Python]
+M = 128  # batch size during training
+d = 100  # latent dimension
+
+DATA_DIR = "data/mnist"
+IMG_DIR = "img"
+\end{lstlisting}
+
+
+\subsubsection{Data}
+
+We use the MNIST data set. They will be fed batches at a time during
+training.
+
+\begin{lstlisting}[language=Python]
+mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
+x_ph = tf.placeholder(tf.float32, [M, 784])
+\end{lstlisting}
+
+
+\subsubsection{Model}
+
+Posit the model as a generator, which takes random noise as input and
+outputs data.
+
+The general idea is to posit the model as $\mathbf{z}\sim p(\mathbf{z})$,
+$\mathbf{x}=G(\mathbf{z}; \theta)$, where $G(\cdot; \theta)$ is a neural
+network that takes random noise as input. Such a model implicitly
+defines a likelihood.
+
+\begin{lstlisting}[language=Python]
+def generative_network(z):
+  h1 = slim.fully_connected(z, 128, activation_fn=tf.nn.relu)
+  x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
+  return x
+
+with tf.variable_scope("Gen"):
+  z = Uniform(a=tf.zeros([M, d]) - 1.0, b=tf.ones([M, d]))
+  x = generative_network(z)
+\end{lstlisting}
+
+
+\subsubsection{Inference}
+
+We now turn to inferring the posterior using variational inference.
+
+The idea is to use a discriminator $D(\cdot;\phi)$ to help training.
+
+\begin{lstlisting}[language=Python]
+def discriminative_network(x):
+  h1 = slim.fully_connected(x, 128, activation_fn=tf.nn.relu)
+  logit = slim.fully_connected(h1, 1, activation_fn=None)
+  return logit
+\end{lstlisting}
+
+The specific objective is
+
+\begin{equation*}
+\min_\theta \max_\phi~
+\mathbb{E}_{p^*(\mathbf{x})} [ \log D(\mathbf{x}; \phi) ]
++ \mathbb{E}_{p(\mathbf{x}; \theta)} [ \log (1 - D(\mathbf{x}; \phi)) ]
+\end{equation*}
+
+In Edward, the GAN algorithm is available for optimizing this
+objective to infer implicit models.
+
+\begin{lstlisting}[language=Python]
+inference = ed.GANInference(
+    data={x: x_ph}, discriminator=discriminative_network)
+\end{lstlisting}
+
+Optimization occurs by separately optimizing these guys.
+
+Many sources of intuition exist. One, which is the original
+motivation, is based on the two neural networks playing a game.
+
+Another is the notion of casting unsupervised learning as supervised
+\citep{gutmann2010noise,gutmann2014statistical}.
+
+Another comes from classical statistics, in that the discriminator is
+an approach for ratio estimation
+\citep{sugiyama2012density,mohamed2016learning}.
+
+We take primarily from these latter two perspectives, so as to keep in
+mind the separation of model and inference: that the discriminator is
+a model used only for inference of another model. (Some avenues of GAN
+research have looked into ways of applying the discriminator for other
+problems, where it is of substantive interest; I think those are
+approaches if not slightly misguided, but they make sense so long as
+it's clear what is the model or problem to be solved, and how
+computation is performed to approach that solution.)
+
+\begin{lstlisting}[language=Python]
+optimizer = tf.train.AdamOptimizer()
+optimizer_d = tf.train.AdamOptimizer()
+
+inference.initialize(
+    optimizer=optimizer, optimizer_d=optimizer,
+    n_iter=15000, n_print=1000)
+\end{lstlisting}
+
+Run variational inference with the Kullback-Leibler divergence, using a
+default of $1000$ iterations.
+\begin{lstlisting}[language=Python]
+sess = ed.get_session()
+tf.global_variables_initializer().run()
+
+idx = np.random.randint(M, size=16)
+i = 0
+for t in range(inference.n_iter):
+  if t % inference.n_print == 0:
+    samples = sess.run(x)
+    samples = samples[idx, ]
+
+    fig = plot(samples)
+    plt.savefig(os.path.join(IMG_DIR, '{}.png').format(
+        str(i).zfill(3)), bbox_inches='tight')
+    plt.close(fig)
+    i += 1
+
+  x_batch, _ = mnist.train.next_batch(M)
+  info_dict = inference.update(feed_dict={x_ph: x_batch})
+  inference.print_progress(info_dict)
+\end{lstlisting}
+
+Examining convergence of the objective functions can be meaningless in
+GANs. They are usually run until some other criterion is satisfied,
+such as if the samples look visually "okay", or if the GAN can capture
+meaningful parts of the data.
+
+\subsubsection{Criticism}
+
+Evaluation of GANs, not only with respect to criticizing their fit to
+data but also in assessing convergence, remains an open problem.
+Recent approaches have considered alternative objectives and various
+heuristics to stabilize training.
+
+See images. This is known as a prior predictive check.
+
+pictures here
+
+\subsubsection{References}\label{references}
