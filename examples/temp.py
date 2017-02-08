@@ -31,29 +31,30 @@ def next_batch(N):
   return samples
 
 
-def fully_connected(input, output_dim, activation_fn, scope=None):
+def fully_connected(x, output_dim, activation_fn, scope=None):
   with tf.variable_scope(scope):
-    w = tf.get_variable("w", [input.get_shape()[1], output_dim],
+    w = tf.get_variable("w", [x.get_shape()[1], output_dim],
                         initializer=tf.random_normal_initializer())
     b = tf.get_variable("b", [output_dim],
                         initializer=tf.constant_initializer(0.0))
     if activation_fn:
-      return activation_fn(tf.matmul(input, w) + b)
+      return activation_fn(tf.matmul(x, w) + b)
     else:
-      return tf.matmul(input, w) + b
+      return tf.matmul(x, w) + b
 
 
-def generative_network(input):
-  h0 = fully_connected(input, hidden_size, tf.nn.softplus, "G0")
+def generative_network(z):
+  h0 = fully_connected(z, hidden_size, tf.nn.relu, "G0")
   h1 = fully_connected(h0, 1, None, "G1")
   return h1
 
 
-def discriminative_network(input):
-  h0 = fully_connected(input, hidden_size * 2, tf.tanh, "D0")
+def discriminative_network(x):
+  """Outputs probability in logits."""
+  h0 = fully_connected(x, hidden_size * 2, tf.tanh, "D0")
   h1 = fully_connected(h0, hidden_size * 2, tf.tanh, "D1")
   h2 = fully_connected(h1, hidden_size * 2, tf.tanh, "D2")
-  h3 = fully_connected(h2, 1, tf.sigmoid, "D3")
+  h3 = fully_connected(h2, 1, None, "D3")
   return h3
 
 
@@ -103,37 +104,20 @@ def get_samples(num_points=10000, num_bins=100):
   return db, pd, pg
 
 
-def plot():
-  db, pd, pg = get_samples()
-  db_x = np.linspace(-toy_range, toy_range, len(db))
-  p_x = np.linspace(-toy_range, toy_range, len(pd))
-  f, ax = plt.subplots(1)
-  ax.plot(db_x, db, label='decision boundary')
-  ax.set_ylim(0, 1)
-  plt.plot(p_x, pd, label='real data')
-  plt.plot(p_x, pg, label='generated data')
-  plt.title('1D Generative Adversarial Network')
-  plt.xlabel('Data values')
-  plt.ylabel('Probability density')
-  plt.legend()
-  plt.show()
-
-
 sns.set(color_codes=True)
-
 ed.set_seed(42)
 
-toy_range = 8  # range
-n_iter = 1000  # number of training iterations
+toy_range = 8  # range of data
 batch_size = 12  # batch size during training
-n_print = 10  # print every number of iterations
 hidden_size = 4  # number of hidden units
+n_iter = 1000  # number of training iterations
+n_print = 10  # print every number of iterations
 
 anim_frames = []
 anim_path = None  # file path of outputted animation
 
 # DATA. We use a placeholder to represent a minibatch. During
-# inference, we generate data on the fly.
+# inference, we generate data on the fly and feed ``x_ph``.
 x_ph = tf.placeholder(tf.float32, [batch_size, 1])
 
 # MODEL
@@ -152,16 +136,17 @@ learning_rate = tf.train.exponential_decay(
     decay_steps=150,
     decay_rate=0.95)
 optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+optimizer_d = tf.train.GradientDescentOptimizer(learning_rate)
 
-inference = ed.GANInference(data={x: x_ph}, discriminator=discriminative_network)
 # TODO
-# + let user be aware of what scopes to use
-# + need to be able to pass in global_step
+# + need to be able to pass in global_step/others
 # + there's some randomness still in this example.
-# i think the loss values are always the same though..
-# maybe it's in the graph construction or whichever updates go first in the session runs?
-
-inference.initialize(optimizer=optimizer, n_iter=n_iter, n_print=n_print)
+#   i think the loss values are always the same though..
+#   maybe it's in the graph construction or whichever updates go first in the session runs?
+inference = ed.GANInference(
+    data={x: x_ph}, discriminator=discriminative_network)
+inference.initialize(
+    optimizer=optimizer, optimizer_d=optimizer, n_iter=n_iter, n_print=n_print)
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
@@ -170,4 +155,16 @@ for _ in range(inference.n_iter):
   inference.print_progress(info_dict)
 
 # CRITICISM
-plot()
+db, pd, pg = get_samples()
+db_x = np.linspace(-toy_range, toy_range, len(db))
+p_x = np.linspace(-toy_range, toy_range, len(pd))
+f, ax = plt.subplots(1)
+ax.plot(db_x, db, label="Decision boundary")
+ax.set_ylim(0, 1)
+plt.plot(p_x, pd, label="Real data")
+plt.plot(p_x, pg, label="Generated data")
+plt.title("1D Generative Adversarial Network")
+plt.xlabel("Data values")
+plt.ylabel("Probability density")
+plt.legend()
+plt.show()
