@@ -24,6 +24,7 @@ def generative_network(z):
 
 
 def discriminative_network(x):
+  """Outputs probability in logits."""
   h1 = slim.fully_connected(x, 128, activation_fn=tf.nn.relu)
   logit = slim.fully_connected(h1, 1, activation_fn=None)
   return logit
