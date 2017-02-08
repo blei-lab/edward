@@ -226,7 +226,8 @@ class Inference(object):
     feed_dict = {}
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor):
-        feed_dict[key] = value
+        if "Placeholder" in key.op.type:
+          feed_dict[key] = value
 
     init.run(feed_dict)
 

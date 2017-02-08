@@ -100,13 +100,13 @@ class GANInference(VariationalInference):
     self.train = tf.group(*[train, train_d])
 
   def build_loss_and_gradients(self, var_list):
-    x = self.data.keys()[0]
-    x_ph = self.data.values()[0]
+    x_true = list(six.itervalues(self.data))[0]
+    x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):
-      logits_true = self.discriminator(x_ph)
+      logits_true = self.discriminator(x_true)
 
     with tf.variable_scope("Disc", reuse=True):
-      logits_fake = self.discriminator(x)
+      logits_fake = self.discriminator(x_fake)
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(logits_true), logits=logits_true) + \
