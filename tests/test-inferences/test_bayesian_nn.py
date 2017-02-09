@@ -57,6 +57,22 @@ class test_inference_bayesian_nn_class(tf.test.TestCase):
         discriminator=discriminator)
     inference.run(n_iter=1)
 
+  def test_wgan_inference(self):
+    N, D, W_1, W_2, W_3, b_1, b_2, x_ph, y, X_train, y_train = self._test()
+
+    with tf.variable_scope("Gen"):
+      theta = tf.get_variable("theta", [1])
+      y = tf.cast(y, tf.float32) * theta
+
+    def discriminator(x):
+      w = tf.get_variable("w", [1])
+      return w * tf.cast(x, tf.float32)
+
+    inference = ed.WGANInference(
+        data={y: tf.cast(y_train, tf.float32), x_ph: X_train},
+        discriminator=discriminator)
+    inference.run(n_iter=1)
+
   def test_hmc(self):
     N, D, W_1, W_2, W_3, b_1, b_2, x_ph, y, X_train, y_train = self._test()
 
