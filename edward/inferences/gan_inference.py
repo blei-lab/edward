@@ -103,17 +103,17 @@ class GANInference(VariationalInference):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):
-      logits_true = self.discriminator(x_true)
+      d_true = self.discriminator(x_true)
 
     with tf.variable_scope("Disc", reuse=True):
-      logits_fake = self.discriminator(x_fake)
+      d_fake = self.discriminator(x_fake)
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(logits_true), logits=logits_true) + \
+        labels=tf.ones_like(d_true), logits=d_true) + \
         tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=tf.zeros_like(logits_fake), logits=logits_fake)
+            labels=tf.zeros_like(d_fake), logits=d_fake)
     loss_g = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(logits_fake), logits=logits_fake)
+        labels=tf.ones_like(d_fake), logits=d_fake)
     loss_d = tf.reduce_mean(loss_d)
     loss_g = tf.reduce_mean(loss_g)
 
