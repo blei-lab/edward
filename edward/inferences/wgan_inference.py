@@ -47,7 +47,7 @@ class WGANInference(GANInference):
 
     clip_d = [w.assign(tf.clip_by_value(w, -0.01, 0.01))
               for w in var_list_d]
-    self.train = tf.group(*[self.train, clip_d])
+    self.train_d = tf.group(*([self.train_d] + clip_d))
 
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
