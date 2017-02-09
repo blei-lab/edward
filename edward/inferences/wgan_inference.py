@@ -28,11 +28,11 @@ class WGANInference(GANInference):
 
     Notes
     -----
-    The only difference in arguments from ``GANInference`` is
-    conceptual: the ``discriminator`` argument is technically better
-    described as a test function from statistics. ``WGANInference``
-    continues to use ``discriminator`` only to share methods and
-    attributes with ``GANInference``.
+    Argument-wise, the only difference from ``GANInference`` is
+    conceptual: the ``discriminator`` is better described as a test
+    function or critic. ``WGANInference`` continues to use
+    ``discriminator`` only to share methods and attributes with
+    ``GANInference``.
     """
     super(WGANInference, self).__init__(*args, **kwargs)
 
@@ -47,7 +47,7 @@ class WGANInference(GANInference):
 
     clip_d = [w.assign(tf.clip_by_value(w, -0.01, 0.01))
               for w in var_list_d]
-    self.train_d = tf.group(*([self.train_d] + clip_d))
+    self.clip_d = clip_d
 
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
@@ -76,3 +76,12 @@ class WGANInference(GANInference):
     grads_and_vars_d = list(zip(grads_d, var_list_d))
     grads_and_vars_g = list(zip(grads_g, var_list_g))
     return loss_g, grads_and_vars_g, loss_d, grads_and_vars_d
+
+  def update(self, feed_dict=None, variables=None):
+    info_dict = super(WGANInference, self).update(feed_dict, variables)
+
+    sess = get_session()
+    if variables is None or variables == "Disc":
+      sess.run(self.clip_d)
+
+    return info_dict
