@@ -93,27 +93,26 @@ class GANInference(VariationalInference):
     optimizer, global_step = _build_optimizer(optimizer, global_step)
     optimizer_d, global_step_d = _build_optimizer(optimizer_d, global_step_d)
 
-    train = optimizer.apply_gradients(grads_and_vars,
-                                      global_step=global_step)
-    train_d = optimizer_d.apply_gradients(grads_and_vars_d,
-                                          global_step=global_step_d)
-    self.train = tf.group(*[train, train_d])
+    self.train = optimizer.apply_gradients(grads_and_vars,
+                                           global_step=global_step)
+    self.train_d = optimizer_d.apply_gradients(grads_and_vars_d,
+                                               global_step=global_step_d)
 
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):
-      logits_true = self.discriminator(x_true)
+      d_true = self.discriminator(x_true)
 
     with tf.variable_scope("Disc", reuse=True):
-      logits_fake = self.discriminator(x_fake)
+      d_fake = self.discriminator(x_fake)
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(logits_true), logits=logits_true) + \
+        labels=tf.ones_like(d_true), logits=d_true) + \
         tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=tf.zeros_like(logits_fake), logits=logits_fake)
+            labels=tf.zeros_like(d_fake), logits=d_fake)
     loss_g = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(logits_fake), logits=logits_fake)
+        labels=tf.ones_like(d_fake), logits=d_fake)
     loss_d = tf.reduce_mean(loss_d)
     loss_g = tf.reduce_mean(loss_g)
 
@@ -131,20 +130,29 @@ class GANInference(VariationalInference):
     grads_and_vars_g = list(zip(grads_g, var_list_g))
     return loss_g, grads_and_vars_g, loss_d, grads_and_vars_d
 
-  def update(self, feed_dict=None):
-    """Run one iteration of optimizer for variational inference.
+  def update(self, feed_dict=None, variables=None):
+    """Run one iteration of optimization.
 
     Parameters
     ----------
     feed_dict : dict, optional
       Feed dictionary for a TensorFlow session run. It is used to feed
       placeholders that are not fed during initialization.
+    variables : str, optional
+      Which set of variables to optimize. Either "Disc" or "Gen".
+      Default is both.
 
     Returns
     -------
     dict
       Dictionary of algorithm-specific information. In this case, the
-      loss function value after one iteration.
+      iteration number and generative and discriminative losses.
+
+    Notes
+    -----
+    The outputted iteration number is the total number of calls to
+    ``update``. Each update may include updating only a subset of
+    parameters.
     """
     if feed_dict is None:
       feed_dict = {}
@@ -155,8 +163,20 @@ class GANInference(VariationalInference):
           feed_dict[key] = value
 
     sess = get_session()
-    _, t, loss, loss_d = sess.run(
-        [self.train, self.increment_t, self.loss, self.loss_d], feed_dict)
+    if variables is None:
+      _, _, t, loss, loss_d = sess.run(
+          [self.train, self.train_d, self.increment_t, self.loss, self.loss_d],
+          feed_dict)
+    elif variables == "Gen":
+      _, t, loss = sess.run(
+          [self.train, self.increment_t, self.loss], feed_dict)
+      loss_d = 0.0
+    elif variables == "Disc":
+      _, t, loss_d = sess.run(
+          [self.train_d, self.increment_t, self.loss_d], feed_dict)
+      loss = 0.0
+    else:
+      raise NotImplementedError()
 
     if self.debug:
       sess.run(self.op_check)

@@ -13,3 +13,4 @@ from edward.inferences.monte_carlo import *
 from edward.inferences.sgld import *
 from edward.inferences.sghmc import *
 from edward.inferences.variational_inference import *
+from edward.inferences.wgan_inference import *
