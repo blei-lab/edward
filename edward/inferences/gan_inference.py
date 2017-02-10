@@ -40,8 +40,7 @@ class GANInference(VariationalInference):
 
     In building the computation graph for inference, the
     discriminator's parameters can be accessed with the variable scope
-    "Disc". The generator's parameters assume they can be accessed
-    with the variable scope "Gen".
+    "Disc".
 
     GANs also only work for one observed random variable in ``data``.
 
@@ -83,6 +82,10 @@ class GANInference(VariationalInference):
       Optional ``Variable`` to increment by one after the variables
       for the discriminator have been updated. See
       ``tf.train.Optimizer.apply_gradients``.
+    var_list : list of tf.Variable, optional
+      List of TensorFlow variables to optimize over (in the generative
+      model). Default is all trainable variables that ``latent_vars``
+      and ``data`` depend on.
     """
     # call grandparent's method; avoid parent (VariationalInference)
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -111,24 +114,21 @@ class GANInference(VariationalInference):
         labels=tf.ones_like(d_true), logits=d_true) + \
         tf.nn.sigmoid_cross_entropy_with_logits(
             labels=tf.zeros_like(d_fake), logits=d_fake)
-    loss_g = tf.nn.sigmoid_cross_entropy_with_logits(
+    loss = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_fake), logits=d_fake)
     loss_d = tf.reduce_mean(loss_d)
-    loss_g = tf.reduce_mean(loss_g)
+    loss = tf.reduce_mean(loss)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-    var_list_g = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES, scope="Gen")
-    if var_list is not None:
-      var_list_d = list(set(var_list_d) & set(var_list))
-      var_list_g = list(set(var_list_g) & set(var_list))
+    if var_list is None:
+      var_list = [v for v in tf.trainable_variables() if v not in var_list_d]
 
     grads_d = tf.gradients(loss_d, var_list_d)
-    grads_g = tf.gradients(loss_g, var_list_g)
+    grads = tf.gradients(loss, var_list)
     grads_and_vars_d = list(zip(grads_d, var_list_d))
-    grads_and_vars_g = list(zip(grads_g, var_list_g))
-    return loss_g, grads_and_vars_g, loss_d, grads_and_vars_d
+    grads_and_vars = list(zip(grads, var_list))
+    return loss, grads_and_vars, loss_d, grads_and_vars_d
 
   def update(self, feed_dict=None, variables=None):
     """Run one iteration of optimization.
@@ -139,7 +139,7 @@ class GANInference(VariationalInference):
       Feed dictionary for a TensorFlow session run. It is used to feed
       placeholders that are not fed during initialization.
     variables : str, optional
-      Which set of variables to optimize. Either "Disc" or "Gen".
+      Which set of variables to update. Either "Disc" or "Gen".
       Default is both.
 
     Returns

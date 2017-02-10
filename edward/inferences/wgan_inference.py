@@ -61,21 +61,18 @@ class WGANInference(GANInference):
     mean_true = tf.reduce_mean(d_true)
     mean_fake = tf.reduce_mean(d_fake)
     loss_d = -mean_true + mean_fake
-    loss_g = -mean_fake
+    loss = -mean_fake
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-    var_list_g = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES, scope="Gen")
-    if var_list is not None:
-      var_list_d = list(set(var_list_d) & set(var_list))
-      var_list_g = list(set(var_list_g) & set(var_list))
+    if var_list is None:
+      var_list = [v for v in tf.trainable_variables() if v not in var_list_d]
 
     grads_d = tf.gradients(loss_d, var_list_d)
-    grads_g = tf.gradients(loss_g, var_list_g)
+    grads = tf.gradients(loss, var_list)
     grads_and_vars_d = list(zip(grads_d, var_list_d))
-    grads_and_vars_g = list(zip(grads_g, var_list_g))
-    return loss_g, grads_and_vars_g, loss_d, grads_and_vars_d
+    grads_and_vars = list(zip(grads, var_list))
+    return loss, grads_and_vars, loss_d, grads_and_vars_d
 
   def update(self, feed_dict=None, variables=None):
     info_dict = super(WGANInference, self).update(feed_dict, variables)

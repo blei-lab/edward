@@ -26,10 +26,9 @@ def generative_network(z):
 
 
 def discriminative_network(x):
-  """Outputs probability in logits."""
   h1 = slim.fully_connected(x, 128, activation_fn=tf.nn.relu)
-  logit = slim.fully_connected(h1, 1, activation_fn=None)
-  return logit
+  h2 = slim.fully_connected(h1, 1, activation_fn=None)
+  return h2
 
 
 def plot(samples):
@@ -101,5 +100,6 @@ for t in range(inference.n_iter):
     inference.update(feed_dict={x_ph: x_batch}, variables="Disc")
 
   info_dict = inference.update(feed_dict={x_ph: x_batch}, variables="Gen")
-  # note: not printing discriminative objective
+  # note: not printing discriminative objective; ``info_dict`` above
+  # does not store it since updating only "Gen"
   inference.print_progress(info_dict)

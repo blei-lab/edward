@@ -6,7 +6,7 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
-import os.path
+import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
@@ -29,25 +29,29 @@ ed.set_seed(42)
 M = 100  # batch size during training
 d = 2  # latent dimension
 
-# Probability model (subgraph)
+# DATA. MNIST batches are fed at training time.
+mnist = input_data.read_data_sets("data/mnist", one_hot=True)
+
+# MODEL
+# Define a subgraph of the full model, corresponding to a minibatch of
+# size M.
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
 hidden = Dense(256, activation='relu')(z.value())
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 
-# Variational model (subgraph)
+# INFERENCE
+# Define a subgraph of the variational model, corresponding to a
+# minibatch of size M.
 x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
 hidden = Dense(256, activation='relu')(x_ph)
 qz = Normal(mu=Dense(d)(hidden),
             sigma=Dense(d, activation='softplus')(hidden))
 
-mnist = input_data.read_data_sets("data/mnist", one_hot=True)
-
 sess = ed.get_session()
 K.set_session(sess)
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
-data = {x: x_ph}
-inference = ed.KLqp({z: qz}, data)
+inference = ed.KLqp({z: qz}, data={x: x_ph})
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)
 
