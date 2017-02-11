@@ -84,7 +84,7 @@ class SGHMC(MonteCarlo):
     v_sample = {}
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       qz = self.latent_vars[z]
-      event_shape = qz.get_event_shape()
+      event_shape = qz.event_shape
       normal = Normal(mu=tf.zeros(event_shape),
                       sigma=(tf.sqrt(learning_rate * friction) *
                              tf.ones(event_shape)))

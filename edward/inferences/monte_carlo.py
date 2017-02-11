@@ -75,14 +75,14 @@ class MonteCarlo(Inference):
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
         latent_vars = {rv: Empirical(params=tf.Variable(
-            tf.zeros([1e4] + rv.get_batch_shape().as_list())))
+            tf.zeros([1e4] + rv.batch_shape.as_list())))
             for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, Empirical):
           raise TypeError("Posterior approximation must consist of only "
                           "Empirical random variables.")
-        elif len(qz.get_sample_shape()) != 0:
+        elif len(qz.sample_shape) != 0:
           raise ValueError("Empirical posterior approximations must have "
                            "a scalar sample shape.")
 

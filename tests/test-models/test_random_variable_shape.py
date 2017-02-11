@@ -11,9 +11,9 @@ class test_random_variable_shape_class(tf.test.TestCase):
 
   def _test(self, rv, sample_shape, batch_shape, event_shape):
     self.assertEqual(rv.shape, sample_shape + batch_shape + event_shape)
-    self.assertEqual(rv.get_sample_shape(), sample_shape)
-    self.assertEqual(rv.get_batch_shape(), batch_shape)
-    self.assertEqual(rv.get_event_shape(), event_shape)
+    self.assertEqual(rv.sample_shape, sample_shape)
+    self.assertEqual(rv.batch_shape, batch_shape)
+    self.assertEqual(rv.event_shape, event_shape)
 
   def test_bernoulli(self):
     with self.test_session():

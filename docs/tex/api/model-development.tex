@@ -60,7 +60,7 @@ def _sample_n(self, n=1, seed=None):
   # wrap python function as tensorflow op
   val = tf.py_func(np_sample, [self.lam, n], [tf.float32])[0]
   # set shape from unknown shape
-  batch_event_shape = self.get_batch_shape().concatenate(self.get_event_shape())
+  batch_event_shape = self.batch_shape.concatenate(self.event_shape)
   shape = tf.concat(
       [tf.expand_dims(n, 0), tf.convert_to_tensor(batch_event_shape)], 0)
   val = tf.reshape(val, shape)

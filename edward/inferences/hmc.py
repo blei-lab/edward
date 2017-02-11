@@ -80,7 +80,7 @@ class HMC(MonteCarlo):
     # Sample momentum.
     old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars):
-      event_shape = qz.get_event_shape()
+      event_shape = qz.event_shape
       normal = Normal(mu=tf.zeros(event_shape), sigma=tf.ones(event_shape))
       old_r_sample[z] = normal.sample()
 

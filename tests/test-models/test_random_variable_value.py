@@ -14,8 +14,8 @@ class test_random_variable_value_class(tf.test.TestCase):
   def _test_sample(self, RV, value, *args, **kwargs):
     rv = RV(*args, value=value, **kwargs)
     value_shape = rv.value().shape
-    expected_shape = rv.get_sample_shape().concatenate(
-        rv.get_batch_shape()).concatenate(rv.get_event_shape())
+    expected_shape = rv.sample_shape.concatenate(
+        rv.batch_shape).concatenate(rv.event_shape)
     self.assertEqual(value_shape, expected_shape)
     self.assertEqual(rv.dtype, rv.value().dtype)
 

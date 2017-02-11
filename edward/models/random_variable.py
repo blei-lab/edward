@@ -104,8 +104,8 @@ class RandomVariable(object):
     if value is not None:
       t_value = tf.convert_to_tensor(value, self.dtype)
       value_shape = t_value.shape
-      expected_shape = self.get_sample_shape().concatenate(
-          self.get_batch_shape()).concatenate(self.get_event_shape())
+      expected_shape = self._sample_shape.concatenate(
+          self.batch_shape).concatenate(self.event_shape)
       if not value_shape.is_compatible_with(expected_shape):
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
@@ -123,6 +123,11 @@ class RandomVariable(object):
 
     for collection in collections:
       tf.add_to_collection(collection, self)
+
+  @property
+  def sample_shape(self):
+    """Sample shape of random variable."""
+    return self._sample_shape
 
   @property
   def shape(self):
@@ -328,10 +333,6 @@ class RandomVariable(object):
   def get_shape(self):
     """Get shape of random variable."""
     return self.shape
-
-  def get_sample_shape(self):
-    """Sample shape of random variable."""
-    return self._sample_shape
 
   @staticmethod
   def _session_run_conversion_fetch_function(tensor):

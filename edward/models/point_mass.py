@@ -85,5 +85,5 @@ class PointMass(RandomVariable, Distribution):
     input_tensor = self.params
     input_tensor = tf.expand_dims(input_tensor, 0)
     multiples = tf.concat(
-        [tf.expand_dims(n, 0), [1] * len(self.get_event_shape())], 0)
+        [tf.expand_dims(n, 0), [1] * len(self.event_shape)], 0)
     return tf.tile(input_tensor, multiples)
