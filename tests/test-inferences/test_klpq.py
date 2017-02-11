@@ -27,7 +27,7 @@ class test_klpq_class(tf.test.TestCase):
       inference.run(n_samples=25, n_iter=100)
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-1, atol=1e-1)
-      self.assertAllClose(qmu.std().eval(), np.sqrt(1 / 51),
+      self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
                           rtol=1e-1, atol=1e-1)
 
 if __name__ == '__main__':

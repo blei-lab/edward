@@ -25,8 +25,8 @@ inference.run()
 
 # CRITICISM
 sess = ed.get_session()
-mean, std = sess.run([qz.mean(), qz.std()])
+mean, stddev = sess.run([qz.mean(), qz.stddev()])
 print("Inferred posterior mean:")
 print(mean)
-print("Inferred posterior std:")
-print(std)
+print("Inferred posterior stddev:")
+print(stddev)

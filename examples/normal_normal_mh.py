@@ -33,11 +33,11 @@ inference.run()
 # CRITICISM
 # Check convergence with visual diagnostics.
 sess = ed.get_session()
-mean, std = sess.run([qmu.mean(), qmu.std()])
+mean, stddev = sess.run([qmu.mean(), qmu.stddev()])
 print("Inferred posterior mean:")
 print(mean)
-print("Inferred posterior std:")
-print(std)
+print("Inferred posterior stddev:")
+print(stddev)
 
 # Check convergence with visual diagnostics.
 samples = sess.run(qmu.params)

@@ -110,7 +110,7 @@ for _ in range(inference.n_iter):
   inference.print_progress(info_dict)
   if t == 1 or t % inference.n_print == 0:
     # Check inferred posterior parameters.
-    mean, std = sess.run([qw.mean(), qw.std()])
+    mean, std = sess.run([qw.mean(), qw.stddev()])
     print("\nInferred mean & std:")
     print(mean)
     print(std)

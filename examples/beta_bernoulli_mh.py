@@ -31,8 +31,8 @@ inference.run()
 # CRITICISM
 # exact posterior has mean 0.25 and std 0.12
 sess = ed.get_session()
-mean, std = sess.run([qp.mean(), qp.std()])
+mean, stddev = sess.run([qp.mean(), qp.stddev()])
 print("Inferred posterior mean:")
 print(mean)
-print("Inferred posterior std:")
-print(std)
+print("Inferred posterior stddev:")
+print(stddev)
