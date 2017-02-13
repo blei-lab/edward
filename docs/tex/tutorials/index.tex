@@ -3,101 +3,82 @@
 \subsection{Tutorials}
 
 Edward provides a testbed for rapid experimentation and research with
-probabilistic models. Here we show how this process is applied to
-capture complex machine learning tasks.
+probabilistic models. Here we show how to apply this process for
+complicated learning tasks.
 
-%\href{conjugate}{Conjugate models}
+% \href{#}{Conjugate models}
 
-% \href{supervised-regression}{Bayesian linear regression} \\
-% A fundamental model for supervised learning (regression).
+\href{supervised-regression}{Bayesian linear regression} \\
+A fundamental model for supervised learning.
 
-\href{#}{Hierarchical linear models} \\
-Sharing statistical strength across parallel experiments.
+% \href{#}{Hierarchical linear models} \\
+% \href{hierarchical-logistic}{Hierarchical logistic regression}
+% Sharing statistical strength across parallel experiments.
 
-%\href{hierarchical-logistic}{Hierarchical logistic regression}
+\href{supervised-classification}{Gaussian process classification} \\
+Learning a distribution over functions for supervised classification.
 
-% \href{supervised-classification}{Gaussian process classification} \\
-% Learning a distribution over functions for supervised learning (classification).
+\href{unsupervised}{Mixture models} \\
+Unsupervised learning by clustering data points.
 
-% \href{unsupervised}{Mixture models} \\
-% Unsupervised learning with clusters.
+% \href{#}{Latent Dirichlet allocation} \\
+% Discovering topics in 1.7 million New York Times articles.
 
-\href{unsupervised}{Latent Dirichlet allocation} \\
-Discovering topics in 1.7 million New York Times articles.
+% \href{#}{Cox process} \\
+% A spatial analysis of professional basketball players.
 
-\href{#}{Cox process} \\
-A spatial analysis of professional basketball players.
+% \href{#}{Stochastic variational inference} \\
+% With conjugate inferences.
 
-% \href{latent-space-models}{Latent space models} \\
-\href{#}{Exponential family embeddings} \\
-Analyzing connectivity patterns in neural data with embedding models.
+\href{bbvi}{Black box variational inference} [todo] \\
+...
 
-% \href{mixture-density-network}{Mixture density networks} \\
-% A supervised model for density estimation, leveraging neural networks.
+\href{latent-space-models}{Latent space models} \\
+Analyzing connectivity patterns in neural data.
 
-% \href{vae}{Variational auto-encoder} [todo] \\
+\href{mixture-density-network}{Mixture density networks} \\
+A neural density model for solving inverse problems.
+
+% \href{vae}{Variational auto-encoder} \\
 % Building a deep generative model of MNIST digits.
 
-% \href{#}{Variational models} \\
-% Using probabilistic models to design rich variational approximations.
+% \href{#}{Hamiltonian Monte Carlo} \\
+% Incorporating geometry of the parameter space for efficient exploration.
 
-% \href{#}{Operator variational inference} \\
-% How to trade computational and statistical tradeoffs in variational
-% inference.
-
-\href{#}{Hamiltonian Monte Carlo} \\
-Incorporating geometry of the parameter space for efficient exploration.
-
-\href{#}{Rejection sampling variational inference} \\
-Using reparameterization to take efficient gradients for
-difficult-to-sample distributions.
+% \href{#}{Rejection sampling variational inference} \\
+% Using reparameterization to take efficient gradients of
+% difficult-to-sample distributions.
 
 \href{gan}{Generative adversarial networks} \\
 Building a deep generative model of MNIST digits.
 
-% \href{decoder}{Probabilistic decoder} [todo] \\
-\href{#}{Probabilistic decoder} \\
+\href{decoder}{Probabilistic decoder} [todo] \\
 A model of latent codes in information theory.
 
-% \href{inference-networks}{Inference networks} [todo] \\
-\href{#}{Inference networks} \\
+\href{inference-networks}{Inference networks} \\
 How to amortize computation for training and testing models.
 
-\href{#}{Maximum mean discrepancy} \\
+\href{mmd}{Maximum mean discrepancy} [todo] \\
 A kernelized test statistic for comparing two distributions.
 
-\href{#}{Posterior dispersion indices} \\
-Analyzing posterior uncertainty at a per-datapoint level.
+% \href{#}{Posterior dispersion indices} \\
+% Checking posterior uncertainty at a per-datapoint level.
 
 % \href{bayesian-neural-network}{Bayesian neural network} [todo] \\
 % Bayesian analysis with neural networks.
 
-% For more background and notation, see the pages below.
-% \begin{itemize}
-%   \item \href{model}{Probabilistic models}
-%   \item \href{inference}{Bayesian inference}
-%   \begin{itemize}
-%    \item \href{variational-inference}{Variational inference}
-%    \item \href{klqp}{$\text{KL}(q\|p)$ minimization}
-%    \item \href{klpq}{$\text{KL}(p\|q)$ minimization}
-%    \item \href{map}{Maximum a posteriori estimation}
-%    \begin{itemize}
-%      \item \href{map-laplace}{Laplace approximation}
-%    \end{itemize}
-%    %\item \href{iwvi}{Importance-weighted variational inference}
-%    %\item \href{#}{Variational expectation maximization}
-%   \end{itemize}
-%   \item \href{criticism}{Model criticism}
-% \end{itemize}
-
-% Here we show how this process is applied to solve real-world applications.
-% \begin{itemize}
-%   \item \href{c-elegans}{Analyzing connectivity patterns in neural data}
-%   \item \href{new-york-times}{Discovering topics in New York Times articles}
-%   \item \href{genome}{Ancestral populations from human genomes}
-%   \item \href{taxi}{Analyzing taxi rides from the city of Porto}
-%   \item \href{basketball}{A spatial analysis of professional basketball}
-%   \item \href{mnist}{Building a generative model of MNIST digits}
-%   \item \href{text8}{Building a language model for text from Wikipedia}
-%   \item \href{eight-schools}{Meta-analysis of parallel experiments in 8 schools}
-% \end{itemize}
+If you're interested in contributing a tutorial, checking out the
+\href{/contributing}{contributing page}.
+For more background and notation, see the pages below.
+\begin{itemize}
+  \item \href{model}{Probabilistic models}
+  \item \href{inference}{Inference of probabilistic models}
+  \begin{itemize}
+   \item \href{variational-inference}{Variational inference}
+   \item \href{klqp}{$\text{KL}(q\|p)$ minimization}
+   \item \href{klpq}{$\text{KL}(p\|q)$ minimization}
+   \item \href{map}{Maximum a posteriori estimation}
+   \item \href{map-laplace}{Laplace approximation}
+  \end{itemize}
+  \item \href{criticism}{Model criticism}
+\end{itemize}
