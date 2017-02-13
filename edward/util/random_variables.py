@@ -724,59 +724,66 @@ def transform(x, *args, **kwargs):
   # TODO move import statements to top
   from edward.models import TransformedDistribution
   from tensorflow.contrib.distributions import bijector
-  import tensorflow.contrib.distributions as ds
+  import inspect
+
+  # import tensorflow.contrib.distributions as ds
   # check using ds instead of ed.models to account for random variable
   # subclasses which inherit from ds classes, e.g., BetaWithSoftplusAB
 
   # TODO try/except or something or use __all__ to avoid choosing
   # distributions not available in a specific version
-  zero_one = ()
-Beta
-Chi2
-  simplex = ()
-Dirichlet
-  positive = ()
-Exponential
-Gamma
-InverseGamma
-Laplace
-  unconstrained = ()
-Normal
-StudentT
 
-MultivariateNormalCholesky
-MultivariateNormalFull
-MultivariateNormalDiag
-MultivariateNormalDiagPlusVDVT
-MultivariateNormalDiagWithSoftplusStDev
-WishartCholesky
-WishartFull
+  rv_name = inspect.getattr_static(x, '_name')
 
-Mixture
-QuantizedDistribution
-TransformedDistribution
-Empirical
-Uniform  # arbitrary bounds; should also be true for > 0 or <0 supports
-PointMass
   if len(args) != 0:
     biject = args.pop(0)
   elif kwargs.get('bijector', None) is not None:
     biject = kwargs.pop('bijector')
-  # TODO how to check support? manually enumerate each distribution class?
-  elif isinstance(x, zero_one):  # support on [0, 1]
+  # support on [0, 1]
+  elif any(rv in rv_name for rv in ['Beta']):
     biject = bijector.Invert(bijector.SigmoidCentered())
-  elif isinstance(x, simplex):  # support on simplex
-    biject = bijector.Invert(bijector.SoftmaxCentered())
-  elif isinstance(x, positive):  # support on [0, infty)
+  # support on [0, infty)
+  elif any(rv in rv_name for rv in ['Chi2', 'Exponential',
+                                    'Gamma', 'InverseGamma']):
     biject = bijector.Invert(bijector.Softplus())
-  elif isinstance(x, unconstrained):  # support already on (-infty, infty)
+  # support on simplex
+  elif any(rv in rv_name for rv in ['Dirichlet']):
+    biject = bijector.Invert(bijector.SoftmaxCentered())
+  # support already on (-infty, infty)
+  elif any(rv in rv_name for rv in ['Gumbel', 'Laplace', 'Logistic',
+                                    'Normal', 'StudentT']):
+    msg = ('The random variable {} is already unconstrained. '
+           'Please do not apply `transform()` to it.').format(rv_name)
+    raise TypeError(msg)
     # TODO probably don't even want to return a transformed
     # distribution of identity if we just call this hapharzardly and
     # rewrite to self.latent_vars
-    biject = bijector.Identity
-  # TODO need one for support on [a, b] for any given a and b
-  # use chain(affine with the others)
+    # biject = bijector.Identity
   else:
     raise NotImplementedError()
 
   return TransformedDistribution(x, biject, *args, **kwargs)
+
+  # TODO: support these
+
+  # Uniform
+  # arbitrary bounds; should also be true for > 0 or <0 supports
+  # use chain(affine with the others)
+
+  # MultivariateNormalDiag
+  # MultivariateNormalDiagWithSoftplusStDev
+  # MultivariateNormalCholesky
+  # MultivariateNormalFull
+  # MultivariateNormalDiagPlusVDVT
+  # WishartCholesky
+  # WishartFull
+
+  # These are continous, but we will probably not support them:
+
+  # Mixture
+  # RelaxedBernoulli
+  # RelaxedOneHotCategorical
+  # TransformedDistribution
+
+  # Empirical
+  # PointMass
