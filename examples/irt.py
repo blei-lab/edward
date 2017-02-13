@@ -20,8 +20,9 @@ data = pd.read_csv('/Users/pfoley/irtexample.csv')
 ed.set_seed(42)
 
 n_students = 1000
-n_questions = 100
-n_obs = 10000
+n_questions = 200
+n_obs = 20000
+
 
 def make_toy_data(n_students, n_questions, n_obs,
                   sigma_students=1.0, sigma_questions=1.5, mu=0.0):
@@ -68,19 +69,20 @@ observation_logodds = tf.gather(student_etas, student_ids) + \
                       overall_mu
 outcomes = Bernoulli(logits=observation_logodds)
 
-# INFERENCE
-T = 5000
-qstudents = Normal(mu=tf.Variable(tf.random_normal([n_students])),
-                   sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_students]))))
-qquestions = Normal(mu=tf.Variable(tf.random_normal([n_questions])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_questions]))))
-qlnvarstudents = Normal(mu=tf.Variable(tf.random_normal([1])),
-                        sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-qlnvarquestions = Normal(mu=tf.Variable(tf.random_normal([1])),
-                         sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
-qmu = Normal(mu=tf.Variable(tf.random_normal([1])),
-             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+# INFERENCE
+def make_normal(n):
+    var = Normal(
+        mu=tf.Variable(tf.random_normal([n])),
+        sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n]))))
+    return var
+
+
+qstudents = make_normal(n_students)
+qquestions = make_normal(n_questions)
+qlnvarstudents = make_normal(1)
+qlnvarquestions = make_normal(1)
+qmu = make_normal(1)
 
 
 params_dict = {
@@ -94,9 +96,7 @@ params_dict = {
 data_dict = {outcomes: obs}
 
 inference = ed.KLqp(params_dict, data_dict)
-inference.initialize(n_print=20, n_iter=200)
-
-#inference.run(n_iter=1000)
+inference.initialize(n_print=10, n_iter=200)
 
 init = tf.global_variables_initializer()
 init.run()
@@ -114,11 +114,15 @@ for t in range(inference.n_iter):
         student_etas_post = qstudents.mean().eval()
         question_etas_post = qquestions.mean().eval()
 
-        plt.cla()
-        ax1.cla()
-        ax2.cla()
+        ax1.clear()
+        ax2.clear()
+        ax1.set_title('Student Intercepts')
+        ax2.set_title('Question Intercepts')
+        ax1.set_xlabel('True Student Random Intercepts')
+        ax1.set_ylabel('Estimated Student Random Intercepts')
+        ax2.set_xlabel('True Question Random Intercepts')
+        ax2.set_ylabel('Estimated Question Random Intercepts')
         ax1.scatter(true_s_etas, student_etas_post)
         ax2.scatter(true_q_etas, question_etas_post)
         plt.draw()
-        plt.pause(1.0 / 60.0)
-
+        plt.pause(2.0 / 60.0)
