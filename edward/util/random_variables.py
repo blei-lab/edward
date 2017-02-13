@@ -14,6 +14,15 @@ from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
 
 
+def copy_rv(value, dict_swap, scope, replace_itself, copy_q):
+  if isinstance(value, RandomVariable) or \
+     isinstance(value, tf.Variable) or \
+     isinstance(value, tf.Tensor) or \
+     isinstance(value, tf.Operation):
+      value = copy(value, dict_swap, scope, replace_itself, copy_q)
+  return value
+
+
 def copy(org_instance, dict_swap=None, scope="copied",
          replace_itself=False, copy_q=False):
   """Build a new node in the TensorFlow graph from `org_instance`,
@@ -23,7 +32,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
   The copying is done recursively, so any `Operation` whose output
   is required to evaluate `org_instance` is also copied (if it isn't
   already copied within the new scope). This is with the exception of
-  `tf.Variable`s and `tf.placeholder`s, which are reused and not newly copied.
+  `tf.Variable`s, `tf.placeholder`s, and nodes of type `Queue`, which
+  are reused and not newly copied.
 
   Parameters
   ----------
@@ -128,7 +138,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
   # Note we check variables via their name and not their type. This
   # is because if we get variables through an op's inputs, it has
   # type tf.Tensor: we can only tell it is a variable via its name.
-  variables = {x.name: x for x in graph.get_collection(tf.GraphKeys.VARIABLES)}
+  variables = {x.name: x for
+               x in graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)}
   if org_instance.name in variables:
     return graph.get_tensor_by_name(variables[org_instance.name].name)
 
@@ -153,13 +164,12 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     kwargs = {}
     for key, value in six.iteritems(rv._kwargs):
-      if isinstance(value, RandomVariable) or \
-         isinstance(value, tf.Variable) or \
-         isinstance(value, tf.Tensor) or \
-         isinstance(value, tf.Operation):
-         value = copy(value, dict_swap, scope, True, copy_q)
-
-      kwargs[key] = value
+      if isinstance(value, list):
+        kwargs[key] = [
+            copy_rv(v, dict_swap, scope, True, copy_q) for v in value
+        ]
+      else:
+        kwargs[key] = copy_rv(value, dict_swap, scope, True, copy_q)
 
     kwargs['name'] = new_name
     # Create new random variable with copied arguments.
@@ -182,8 +192,12 @@ def copy(org_instance, dict_swap=None, scope="copied",
         graph.add_to_collection(name, new_tensor)
 
     return new_tensor
-  else:  # tf.Operation
+  elif isinstance(org_instance, tf.Operation):
     op = org_instance
+
+    # Do not copy queue operations
+    if 'Queue' in op.type:
+      return op
 
     # If it has an original op, copy it.
     if op._original_op is not None:
@@ -282,6 +296,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
           attr_value_pb2.AttrValue(s=compat.as_bytes(graph._container)))
 
     return ret
+  else:
+    raise TypeError("Could not copy instance: " + str(org_instance))
 
 
 def get_ancestors(x, collection=None):
@@ -557,7 +573,7 @@ def get_variables(x, collection=None):
   True
   """
   if collection is None:
-    collection = tf.all_variables()
+    collection = tf.global_variables()
 
   node_dict = {node.name: node for node in collection}
 

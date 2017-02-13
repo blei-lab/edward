@@ -2,9 +2,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Categorical, Mixture, Normal
 from edward.util import copy, set_seed
 
 
@@ -24,8 +25,34 @@ class test_copy_class(tf.test.TestCase):
       y = tf.constant(3.0)
       z = x * y
       z_new = copy(z)
-      tf.initialize_variables([x]).run()
+      tf.variables_initializer([x]).run()
       self.assertEqual(z_new.eval(), 6.0)
+
+  def test_queue(self):
+    with self.test_session() as sess:
+      tensor = tf.constant([0.0, 1.0, 2.0, 3.0])
+      x = tf.train.batch([tensor], batch_size=2, enqueue_many=True,
+                         name='CustomName')
+      y = tf.constant(3.0)
+      z = x * y
+      z_new = copy(z)
+      coord = tf.train.Coordinator()
+      threads = tf.train.start_queue_runners(coord=coord)
+      self.assertAllEqual(sess.run(z_new), np.array([0.0, 3.0]))
+      self.assertAllEqual(sess.run(z_new), np.array([6.0, 9.0]))
+      coord.request_stop()
+      coord.join(threads)
+
+  def test_list(self):
+    with self.test_session() as sess:
+      x = Normal(mu=tf.constant(0.0), sigma=tf.constant(0.1))
+      y = Normal(mu=tf.constant(10.0), sigma=tf.constant(0.1))
+      cat = Categorical(logits=tf.zeros(5))
+      components = [Normal(mu=x, sigma=tf.constant(0.1))
+                    for _ in range(5)]
+      z = Mixture(cat=cat, components=components)
+      z_new = copy(z, {x: y.value()})
+      self.assertGreater(z_new.value().eval(), 5.0)
 
   def test_tensor_tensor(self):
     with self.test_session():
@@ -52,7 +79,7 @@ class test_copy_class(tf.test.TestCase):
       z = x * y
       qx = tf.Variable(4.0, name="CustomName")
       z_new = copy(z, {x: qx})
-      tf.initialize_variables([qx]).run()
+      tf.variables_initializer([qx]).run()
       self.assertEqual(z_new.eval(), 12.0)
 
   def test_placeholder_tensor(self):

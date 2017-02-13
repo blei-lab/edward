@@ -71,6 +71,6 @@ class PointMass(distribution.Distribution):
     return math_ops.square(self.std())
 
   def _sample_n(self, n, seed=None):
-    multiples = tf.concat(0, [tf.expand_dims(n, 0),
-                              [1] * len(self.get_event_shape())])
+    multiples = tf.concat(
+        [tf.expand_dims(n, 0), [1] * len(self.get_event_shape())], 0)
     return tile(self._params, multiples)

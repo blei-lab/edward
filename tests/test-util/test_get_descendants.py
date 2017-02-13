@@ -16,7 +16,7 @@ class test_get_descendants_class(tf.test.TestCase):
       b = Normal(mu=a, sigma=1.0)
       c = Normal(mu=0.0, sigma=1.0)
       d = Normal(mu=c, sigma=1.0)
-      e = Normal(mu=tf.mul(b, d), sigma=1.0)
+      e = Normal(mu=tf.multiply(b, d), sigma=1.0)
       self.assertEqual(set(get_descendants(a)), set([b, e]))
       self.assertEqual(get_descendants(b), [e])
       self.assertEqual(set(get_descendants(c)), set([d, e]))

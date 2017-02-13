@@ -13,10 +13,10 @@ from edward import util
 # Direct imports for convenience
 from edward.criticisms import evaluate, ppc
 from edward.inferences import Inference, MonteCarlo, VariationalInference, \
-    HMC, MetropolisHastings, SGLD, \
+    HMC, MetropolisHastings, SGLD, SGHMC, \
     KLpq, KLqp, MFVI, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
-    MAP, Laplace
+    GANInference, WGANInference, MAP, Laplace
 from edward.models import PyMC3Model, PythonModel, StanModel, \
     RandomVariable
 from edward.util import copy, dot, get_ancestors, get_children, \

@@ -82,7 +82,7 @@ def hessian(y, xs):
     # Calculate flattened vector grad_{xs} y.
     grads = tf.gradients(y, xs)
     grads = [tf.reshape(grad, [-1]) for grad in grads]
-    grads = tf.concat(0, grads)
+    grads = tf.concat(grads, 0)
     # Loop over each element in the vector.
     mat = []
     d = grads.get_shape()[0]
@@ -103,11 +103,11 @@ def hessian(y, xs):
         hij = tf.reshape(hij, [-1])
         hi.append(hij)
 
-      hi = tf.concat(0, hi)
+      hi = tf.concat(hi, 0)
       mat.append(hi)
 
     # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
-    return tf.pack(mat)
+    return tf.stack(mat)
 
 
 def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
@@ -173,15 +173,15 @@ def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
     return 0.5 * tf.reduce_sum(out, 1)
 
 
-def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
+def log_mean_exp(input_tensor, axis=None, keep_dims=False):
   """Compute the ``log_mean_exp`` of elements in a tensor, taking
-  the mean across axes given by ``reduction_indices``.
+  the mean across axes given by ``axis``.
 
   Parameters
   ----------
   input_tensor : tf.Tensor
     The tensor to reduce. Should have numeric type.
-  reduction_indices : int or list of int, optional
+  axis : int or list of int, optional
     The dimensions to reduce. If `None` (the default), reduces all
     dimensions.
   keep_dims : bool, optional
@@ -201,20 +201,20 @@ def log_mean_exp(input_tensor, reduction_indices=None, keep_dims=False):
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
 
-  x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
+  x_max = tf.reduce_max(input_tensor, axis, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
-      tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
+      tf.exp(input_tensor - x_max), axis, keep_dims))
 
 
-def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
+def log_sum_exp(input_tensor, axis=None, keep_dims=False):
   """Compute the ``log_sum_exp`` of elements in a tensor, taking
-  the sum across axes given by ``reduction_indices``.
+  the sum across axes given by ``axis``.
 
   Parameters
   ----------
   input_tensor : tf.Tensor
     The tensor to reduce. Should have numeric type.
-  reduction_indices : int or list of int, optional
+  axis : int or list of int, optional
     The dimensions to reduce. If `None` (the default), reduces all
     dimensions.
   keep_dims : bool, optional
@@ -234,9 +234,9 @@ def log_sum_exp(input_tensor, reduction_indices=None, keep_dims=False):
   dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
   input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
 
-  x_max = tf.reduce_max(input_tensor, reduction_indices, keep_dims=True)
+  x_max = tf.reduce_max(input_tensor, axis, keep_dims=True)
   return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
-      tf.exp(input_tensor - x_max), reduction_indices, keep_dims))
+      tf.exp(input_tensor - x_max), axis, keep_dims))
 
 
 def logit(x):
@@ -429,11 +429,11 @@ def tile(input, multiples, *args, **kwargs):
 
   >>> n = tf.constant([1])
   >>> tf.tile(tf.constant([[1.0]]),
-  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  ...         tf.concat([n, tf.constant([1.0]).get_shape()]), 0)
   <tf.Tensor 'Tile:0' shape=(1, 1) dtype=float32>
   >>> n = tf.reshape(tf.constant(1), [1])
   >>> tf.tile(tf.constant([[1.0]]),
-  ...         tf.concat(0, [n, tf.constant([1.0]).get_shape()]))
+  ...         tf.concat([n, tf.constant([1.0]).get_shape()]), 0)
   <tf.Tensor 'Tile_1:0' shape=(?, 1) dtype=float32>
 
   For this reason, we try to fetch ``multiples`` out of session if
@@ -462,7 +462,7 @@ def tile(input, multiples, *args, **kwargs):
   if diff < 0:
     input = tf.reshape(input, [1] * np.abs(diff) + get_dims(input))
   elif diff > 0:
-    multiples = tf.concat(0, [tf.ones(diff, dtype=tf.int32), multiples])
+    multiples = tf.concat([tf.ones(diff, dtype=tf.int32), multiples], 0)
 
   return tf.tile(input, multiples, *args, **kwargs)
 
@@ -505,8 +505,8 @@ def to_simplex(x):
     K_minus_one = shape[0]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
-    pil = tf.concat(0, [z, tf.constant([1.0])])
-    piu = tf.concat(0, [tf.constant([1.0]), 1.0 - z])
+    pil = tf.concat([z, tf.constant([1.0])], 0)
+    piu = tf.concat([tf.constant([1.0]), 1.0 - z], 0)
     S = tf.cumprod(piu)
     return S * pil
   else:
@@ -514,7 +514,7 @@ def to_simplex(x):
     K_minus_one = shape[1]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
-    pil = tf.concat(1, [z, tf.ones([n_rows, 1])])
-    piu = tf.concat(1, [tf.ones([n_rows, 1]), 1.0 - z])
+    pil = tf.concat([z, tf.ones([n_rows, 1])], 1)
+    piu = tf.concat([tf.ones([n_rows, 1]), 1.0 - z], 1)
     S = tf.cumprod(piu, axis=1)
     return S * pil

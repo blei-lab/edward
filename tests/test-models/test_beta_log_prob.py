@@ -18,7 +18,7 @@ def _test(a, b, n):
   a = a.eval()
   b = b.eval()
   assert np.allclose(rv.log_prob(x_tf).eval(),
-                     stats.beta.logpdf(x, a, b))
+                     stats.beta.logpdf(x, a, b), atol=1e-3)
 
 
 class test_beta_log_prob_class(tf.test.TestCase):

@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import inspect
-import tensorflow as tf
 
 from edward.models.empirical import Empirical as distributions_Empirical
 from edward.models.point_mass import PointMass as distributions_PointMass
@@ -30,12 +29,7 @@ for _name in sorted(dir(distributions)):
           _candidate != distributions.Distribution and
           issubclass(_candidate, distributions.Distribution)):
 
-    class _WrapperRandomVariable(RandomVariable, _candidate):
-      def __init__(self, *args, **kwargs):
-        RandomVariable.__init__(self, *args, **kwargs)
+    params = {'__doc__': _candidate.__doc__}
+    _globals[_name] = type(_name, (RandomVariable, _candidate), params)
 
-    _WrapperRandomVariable.__name__ = _name
-    _globals[_name] = _WrapperRandomVariable
-
-    del _WrapperRandomVariable
     del _candidate

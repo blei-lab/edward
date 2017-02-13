@@ -28,13 +28,13 @@ class MonteCarlo(Inference):
       random variable must be a ``Empirical`` random variable.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      `RandomVariable`) to their realizations (of type `tf.Tensor`).
-      It can also bind placeholders (of type `tf.Tensor`) used in the
-      model to their realizations.
+      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+      type ``tf.Tensor``). It can also bind placeholders (of type
+      ``tf.Tensor``) used in the model to their realizations.
     model_wrapper : ed.Model, optional
       A wrapper for the probability model. If specified, the random
-      variables in `latent_vars`' dictionary keys are strings used
-      accordingly by the wrapper. `data` is also changed. For
+      variables in ``latent_vars``' dictionary keys are strings used
+      accordingly by the wrapper. ``data`` is also changed. For
       TensorFlow, Python, and Stan models, the key type is a string;
       for PyMC3, the key type is a Theano shared variable. For
       TensorFlow, Python, and PyMC3 models, the value type is a NumPy
@@ -43,7 +43,7 @@ class MonteCarlo(Inference):
 
     Examples
     --------
-    Most explicitly, MonteCarlo is specified via a dictionary:
+    Most explicitly, ``MonteCarlo`` is specified via a dictionary:
 
     >>> qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
     >>> qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
@@ -58,18 +58,18 @@ class MonteCarlo(Inference):
     >>> MonteCarlo([beta], data)
     >>> MonteCarlo([pi, mu, sigma], data)
 
-    It defaults to Empirical random variables with 10,000 samples for
+    It defaults to ``Empirical`` random variables with 10,000 samples for
     each dimension.
 
     Notes
     -----
     The number of Monte Carlo iterations is set according to the
-    minimum of all Empirical sizes.
+    minimum of all ``Empirical`` sizes.
 
-    Initialization is assumed from params[0, :]. This generalizes
+    Initialization is assumed from ``params[0, :]``. This generalizes
     initializing randomly and initializing from user input. Updates
     are along this outer dimension, where iteration t updates
-    params[t, :] in each Empirical random variable.
+    ``params[t, :]`` in each ``Empirical`` random variable.
 
     No warm-up is implemented. Users must run MCMC for a long period
     of time, then manually burn in the Empirical random variable.
@@ -117,8 +117,8 @@ class MonteCarlo(Inference):
 
     Notes
     -----
-    We run the increment of t separately from other ops. Whether the
-    others op run with the t before incrementing or after incrementing
+    We run the increment of ``t`` separately from other ops. Whether the
+    others op run with the ``t`` before incrementing or after incrementing
     depends on which is run faster in the TensorFlow graph. Running it
     separately forces a consistent behavior.
     """
@@ -127,11 +127,21 @@ class MonteCarlo(Inference):
 
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor):
-        feed_dict[key] = value
+        if "Placeholder" in key.op.type:
+          feed_dict[key] = value
 
     sess = get_session()
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
     t = sess.run(self.increment_t)
+
+    if self.debug:
+      sess.run(self.op_check)
+
+    if self.logging and self.n_print != 0:
+      if t == 1 or t % self.n_print == 0:
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
+
     return {'t': t, 'accept_rate': accept_rate}
 
   def print_progress(self, info_dict):

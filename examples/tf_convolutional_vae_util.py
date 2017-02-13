@@ -92,7 +92,7 @@ class deconv2d(prettytensor.VarStoreMethod):
       elif stddev:
         init = tf.truncated_normal_initializer(stddev=stddev)
       else:
-        init = tf.zeros_initializer
+        init = tf.zeros_initializer()
     elif stddev is not None:
       raise ValueError('Do not set both init and stddev.')
     dtype = input_layer.tensor.dtype
@@ -118,7 +118,7 @@ class deconv2d(prettytensor.VarStoreMethod):
       y += self.variable(
           'bias',
           [size[-2]],
-          tf.zeros_initializer,
+          tf.zeros_initializer(),
           dt=dtype)
     books.add_scalar_summary(
         tf.reduce_mean(

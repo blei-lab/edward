@@ -97,10 +97,10 @@ D = 1  # number of features
 
 # DATA
 X_train, X_test, y_train, y_test = build_toy_dataset(N)
-print("Size of features in training data: {:s}".format(X_train.shape))
-print("Size of output in training data: {:s}".format(y_train.shape))
-print("Size of features in test data: {:s}".format(X_test.shape))
-print("Size of output in test data: {:s}".format(y_test.shape))
+print("Size of features in training data: {}".format(X_train.shape))
+print("Size of output in training data: {}".format(y_train.shape))
+print("Size of features in test data: {}".format(X_test.shape))
+print("Size of output in test data: {}".format(y_test.shape))
 sns.regplot(X_train, y_train, fit_reg=False)
 plt.show()
 
@@ -117,7 +117,7 @@ sess = ed.get_session()  # Start TF session
 K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 1000

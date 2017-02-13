@@ -4,16 +4,17 @@
 
 Interested in contributing to Edward? We appreciate all kinds of help!
 
-\subsubsection{Bug reports, feature requests, user-related questions}
+\subsubsection{Community}
 
-Report any bugs in Edward's
-\href{https://github.com/blei-lab/edward/issues}
-{Github issues}.
-We also appreciate feature requests so that we can prioritize
-development according to the users.
-We plan to have a
-mailing list for Edward users in the future,
-but for now also submit usage questions there.
+For general discussion about Edward, use Edward's
+\href{http://gitter.im/blei-lab/edward}{Gitter channel}.
+For example, it is used to get help with installation, coding and
+debugging in Edward, and probabilistic modeling.
+(We also plan to have a mailing list-like option in the future.)
+
+For development discussion about Edward, use Edward's
+\href{https://github.com/blei-lab/edward/issues}{Github issues tracker}.
+For example, it is used to submit bug reports and feature requests.
 
 \subsubsection{Pull requests}
 
@@ -155,37 +156,3 @@ git push origin pull_request_yourname
 Now simply create a pull request via the Github UI on the public repo.
 Once project owners review the pull request, they can merge it.
 \href{http://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private/30352360\#30352360}{Source}
-
-\subsubsection{Internal}
-
-\begin{itemize}
-\item
-  For developers with push permission to Edward's repo, see
-  \href{https://github.com/stan-dev/stan/wiki/Developer-Process#information-to-include-in-pull-request}{Stan's
-  process} for how to name branches. Do not merge your own pull
-  requests or ever push to master. Someone should always review your
-  code. After merging (or deciding to close the request without
-  merging), always delete the branch from the repo.
-\item
-  \textbf{Issue labeling system.} We use
-  \href{https://github.com/stan-dev/stan/issues}{Stan's labeling system}.
-  While several labels obviously don't apply to us, it's better than the
-  default labels.
-\item
-  \textbf{Packaging and submitting to PyPI.} First, update the version
-  number in \texttt{version.py}. Second, follow
-  \href{https://packaging.python.org/en/latest/distributing/\#packaging-your-project}{these
-  steps}. For shorthand, the sequence of commands is
-
-\begin{lstlisting}[class=JSON]
-python setup.py sdist
-python setup.py bdist_wheel
-twine upload dist/*
-\end{lstlisting}
-
-  Third, tag the release on Github and note the new additions when
-  tagging this release. You can do this by comparing commits from the
-  previous tagged release to master. A link that compares tagged commits
-  to master is available on the
-  \href{https://github.com/blei-lab/edward/releases}{releases page}.
-\end{itemize}

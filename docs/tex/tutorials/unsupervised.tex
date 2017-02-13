@@ -7,7 +7,7 @@ unlabeled data, comprised of training examples $\{x_n\}$.
 
 We demonstrate how to do this in Edward with an example.
 The script is available
-\href{https://github.com/blei-lab/edward/blob/master/examples/tf_mixture_gaussian.py}
+\href{https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_collapsed.py}
 {here}.
 
 
@@ -27,8 +27,10 @@ def build_toy_dataset(N):
 
   return x
 
-x_train = build_toy_dataset(500)
-data = {'x': x_train}
+N = 500  # number of data points
+D = 2  # dimensionality of data
+
+x_train = build_toy_dataset(N)
 \end{lstlisting}
 
 We visualize the generated data points.
@@ -41,76 +43,23 @@ plt.show()
 
 \subsubsection{Model}
 
-\textbf{Note: Model wrappers are deprecated since Edward v1.1.5.
-Reimplementing this under Edward's native language is currently in
-progress.}
-
 Posit the model as a mixture of Gaussians. For more details on the
 model, see the
 \href{/tutorials/mixture-gaussian}
 {Mixture of Gaussians tutorial}.
-
-Here we build the model in Edward using TensorFlow, and set the number
-of mixture components to be 2.
+We write it in collapsed form, marginalizing out
+the mixture assignments.
 \begin{lstlisting}[language=Python]
-class MixtureGaussian:
-  """
-  Mixture of Gaussians
+K = 2  # number of components
 
-  p(x, z) = [ prod_{n=1}^N sum_{k=1}^K pi_k N(x_n; mu_k, sigma_k) ]
-            [ prod_{k=1}^K N(mu_k; 0, cI) Inv-Gamma(sigma_k; a, b) ]
-            Dirichlet(pi; alpha)
-
-  where z = {pi, mu, sigma} and for known hyperparameters a, b, c, alpha.
-
-  Parameters
-  ----------
-  K : int
-    Number of mixture components.
-  D : float, optional
-    Dimension of the Gaussians.
-  """
-  def __init__(self, K, D):
-    self.K = K
-    self.D = D
-    self.n_vars = (2 * D + 1) * K
-
-    self.a = 1.0
-    self.b = 1.0
-    self.c = 3.0
-    self.alpha = tf.ones([K])
-
-  def log_prob(self, xs, zs):
-    """Return scalar, the log joint density log p(xs, zs)."""
-    x = xs['x']
-    pi, mus, sigmas = zs['pi'], zs['mu'], zs['sigma']
-    log_prior = dirichlet.logpdf(pi, self.alpha)
-    log_prior += tf.reduce_sum(norm.logpdf(mus, 0.0, self.c))
-    log_prior += tf.reduce_sum(invgamma.logpdf(sigmas, self.a, self.b))
-
-    # log-likelihood is
-    # sum_{n=1}^N log sum_{k=1}^K exp( log pi_k + log N(x_n; mu_k, sigma_k) )
-    # Create a K x N matrix, whose entry (k, n) is
-    # log pi_k + log N(x_n; mu_k, sigma_k).
-    N = get_dims(x)[0]
-    matrix = []
-    for k in range(self.K):
-      matrix += [tf.ones(N) * tf.log(pi[k]) +
-                 multivariate_normal_diag.logpdf(x,
-                 mus[(k * self.D):((k + 1) * self.D)],
-                 sigmas[(k * self.D):((k + 1) * self.D)])]
-
-    matrix = tf.pack(matrix)
-    # log_sum_exp() along the rows is a vector, whose nth
-    # element is the log-likelihood of data point x_n.
-    vector = log_sum_exp(matrix, 0)
-    # Sum over data points to get the full log-likelihood.
-    log_lik = tf.reduce_sum(vector)
-
-    return log_prior + log_lik
-
-
-model = MixtureGaussian(K=2, D=2)
+mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
+cat = Categorical(logits=tf.zeros([N, K]))
+components = [
+    MultivariateNormalDiag(mu=tf.ones([N, 1]) * tf.gather(mu, k),
+                           diag_stdev=tf.ones([N, 1]) * tf.gather(sigma, k))
+    for k in range(K)]
+x = Mixture(cat=cat, components=components)
 \end{lstlisting}
 
 
@@ -119,37 +68,30 @@ Perform variational inference.
 %
 The latent variables are the mixture probabilities,
 component means, and component variances.
-Define the variational model to be a Dirichlet $\times$ fully factorized normal
-$\times$ fully factorized inverse Gamma.
-%The latent variables are $\mathbf{z} = (\pi, \mu, \sigma)$.
-%\begin{align*}
-%  q(\mathbf{z} \;;\; \lambda)
-%  &=
-%  \text{Dirichlet}(\mathbf{z}_\pi)
-%  \times
-%  \text{Normal}(\mathbf{z}_\mu)
-%  \times
-%  \text{InverseGamma}(\mathbf{z}_\sigma)
-%\end{align*}
-%
-%The model in Edward is
+Define the variational model to be
+\begin{align*}
+ q(\mu, \sigma \;;\; \lambda)
+ &=
+ \prod_{k=1}^K
+ \text{Normal}(\mu_k; \lambda_{\mu_k})
+ ~
+ \text{InverseGamma}(\sigma_k; \lambda_{\sigma_k}).
+\end{align*}
+The model in Edward is
 \begin{lstlisting}[language=Python]
-qpi_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K])))
-qmu_mu = tf.Variable(tf.random_normal([K * D]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_alpha = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-qsigma_beta = tf.nn.softplus(tf.Variable(tf.random_normal([K * D])))
-
-qpi = Dirichlet(alpha=qpi_alpha)
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-qsigma = InverseGamma(alpha=qsigma_alpha, beta=qsigma_beta)
+qmu = Normal(
+    mu=tf.Variable(tf.random_normal([K, D])),
+    sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qsigma = InverseGamma(
+    alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
+    beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 \end{lstlisting}
 
-Run variational inference for 2500 iterations, using a batch
-of 20 datapoints and 10 latent variable samples per iteration.
+Run variational inference for 4000 iterations and 20 latent variable
+samples per iteration.
 \begin{lstlisting}[language=Python]
-inference = ed.KLqp({'pi': qpi, 'mu': qmu, 'sigma': qsigma}, data, model)
-inference.run(n_iter=2500, n_samples=10, n_minibatch=20)
+inference = ed.KLqp({mu: qmu, sigma: qsigma}, data={x: x_train})
+inference.run(n_iter=4000, n_samples=20)
 \end{lstlisting}
 In this case
 \texttt{KLqp} defaults to minimizing the
@@ -162,41 +104,33 @@ For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ 
 
 We visualize the predicted memberships of each data point.
 We pick the cluster assignment which produces
-the highest log-likelihood for each data point.
-First we output a K x N matrix of log-likelihoods, per
-per-cluster assignment $k$ and per data-point $\mathbf{x}_n$.
+the highest posterior predictive density for each data point.
 
-We do this by adding the \texttt{predict()} method in the
-probability model.
+To do this, we first draw a sample from the posterior and calculate a
+a K x N matrix of log-likelihoods, one for each cluster assignment $k$
+and data point $\mathbf{x}_n$. We perform this averaged over 100
+posterior samples.
 \begin{lstlisting}[language=Python]
-class MixtureGaussian:
-  ...
-  def predict(self, xs, zs):
-    """Calculate a K x N matrix of log-likelihoods, per-cluster and
-    per-data point."""
-    x = xs['x']
-    pi, mus, sigmas = zs['pi'], zs['mu'], zs['sigma']
-
-    matrix = []
-    for k in range(self.K):
-      matrix += [multivariate_normal_diag.logpdf(x,
-                 mus[(k * self.D):((k + 1) * self.D)],
-                 sigmas[(k * self.D):((k + 1) * self.D)])]
-
-    return tf.pack(matrix)
-\end{lstlisting}
-Then we evaluate the log-likelihood on the training data
-and take the $\arg\max$ along the rows.
-\begin{lstlisting}[language=Python]
+# Average per-cluster and per-data point likelihood over many posterior samples.
 log_liks = []
-for s in range(100):
-  zrep = {'pi': qpi.sample(()),
-          'mu': qmu.sample(()),
-          'sigma': qsigma.sample(())}
-  log_liks += [model.predict(data, zrep)]
+for _ in range(100):
+  mu_sample = qmu.sample()
+  sigma_sample = qsigma.sample()
+  # Take per-cluster and per-data point likelihood.
+  log_lik = []
+  for k in range(K):
+    x_post = Normal(mu=tf.ones([N, 1]) * tf.gather(mu_sample, k),
+                    sigma=tf.ones([N, 1]) * tf.gather(sigma_sample, k))
+    log_lik.append(tf.reduce_sum(x_post.log_prob(x_train), 1))
+
+  log_lik = tf.stack(log_lik)  # has shape (K, N)
+  log_liks.append(log_lik)
 
 log_liks = tf.reduce_mean(log_liks, 0)
+\end{lstlisting}
 
+We then take the $\arg\max$ along the rows (cluster assignments).
+\begin{lstlisting}[language=Python]
 clusters = tf.argmax(log_liks, 0).eval()
 \end{lstlisting}
 
@@ -204,6 +138,7 @@ Plot the data points, colored by their predicted membership.
 \begin{lstlisting}[language=Python]
 plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
+plt.title("Predicted cluster assignments")
 plt.show()
 \end{lstlisting}
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Mixture model using mean-field variational inference.
+"""Mixture model using variational inference.
 
 We posit a collapsed mixture of Gaussians.
 """
@@ -67,7 +67,7 @@ class MixtureGaussian:
                  mus[(k * self.D):((k + 1) * self.D)],
                  sigmas[(k * self.D):((k + 1) * self.D)])]
 
-    matrix = tf.pack(matrix)
+    matrix = tf.stack(matrix)
     # log_sum_exp() along the rows is a vector, whose nth
     # element is the log-likelihood of data point x_n.
     vector = log_sum_exp(matrix, 0)
@@ -88,7 +88,7 @@ class MixtureGaussian:
                  mus[(k * self.D):((k + 1) * self.D)],
                  sigmas[(k * self.D):((k + 1) * self.D)])]
 
-    return tf.pack(matrix)
+    return tf.stack(matrix)
 
 
 def build_toy_dataset(N):

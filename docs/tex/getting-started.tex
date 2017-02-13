@@ -4,9 +4,12 @@
 Getting started with Edward is easy.
 
 \subsubsection{Quick Installation}
-\textbf{Warning: TensorFlow v0.12.0rc0 and v0.12.0rc1 broke
-compatibility with Edward. Use at most
-\href{https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#download-and-setup}{TensorFlow v0.11.0} for now.}
+\textbf{Warning: TensorFlow v1.0.0 breaks
+compatibility with previous versions.
+Edward's latest version requires at least
+\href{https://www.tensorflow.org/versions/r1.0/get_started/os_setup}{TensorFlow
+v1.0.0} (see link for how to install it).
+}
 
 To install the latest stable version, run
 
@@ -93,9 +96,8 @@ We specify \texttt{1000} iterations.
 \begin{lstlisting}[language=Python]
 import edward as ed
 
-data = {y: y_train}
 inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
-                     W_1: qW_1, b_1: qb_1}, data)
+                     W_1: qW_1, b_1: qb_1}, data={y: y_train})
 inference.run(n_iter=1000)
 \end{lstlisting}
 

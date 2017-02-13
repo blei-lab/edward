@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using mean-field variational inference.
+"""Bayesian linear regression using variational inference.
 
 This version directly regresses on the data X, rather than regressing
 on a placeholder X. Note this prevents the model from conditioning on
@@ -45,6 +45,5 @@ qw = Normal(mu=tf.Variable(tf.random_normal([D])),
 qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
-data = {X: X_train, y: y_train}
-inference = ed.KLqp({w: qw, b: qb}, data)
+inference = ed.KLqp({w: qw, b: qb}, data={y: y_data})
 inference.run()

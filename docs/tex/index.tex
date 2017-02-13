@@ -17,7 +17,7 @@ It supports \textbf{modeling} with
   \href{http://keras.io}{Keras} and
   \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
   Slim})
-\item Conditionally specified undirected models
+\item Intractable likelihoods
 \item Bayesian nonparametrics and probabilistic programs
 \end{itemize}
 
@@ -28,7 +28,7 @@ It supports \textbf{inference} with
   \begin{itemize}
     \item Black box variational inference
     \item Stochastic variational inference
-    \item Inclusive KL divergence: $\text{KL}(p\|q)$
+    \item Generative adversarial networks
     \item Maximum a posteriori estimation
   \end{itemize}
 \item Monte Carlo
@@ -81,7 +81,11 @@ Research.
 
 \subsubsection{Citation}
 
-We appreciate citations for Edward.
+There are several articles to cite for Edward.
+
+The following article describes the API of Edward. It bundles the
+website's documentation as a PDF.
+We recommend citing this article as a general default.
 
 \begin{quote}
 Dustin Tran, Alp Kucukelbir, Adji B. Dieng, Maja Rudolph, Dawen Liang,
@@ -96,6 +100,27 @@ and David M. Blei.
   author = {Dustin Tran and Alp Kucukelbir and Adji B. Dieng and Maja Rudolph and Dawen Liang and David M. Blei},
   title = {{Edward: A library for probabilistic modeling, inference, and criticism}},
   journal = {arXiv preprint arXiv:1610.09787},
-  year = {2016},
+  year = {2016}
+}
+\end{lstlisting}
+
+The following article describes the algorithmic foundations of Edward.
+We recommend citing this article if you are discussing Edward's
+design and methodology.
+
+\begin{quote}
+Dustin Tran, Matthew D. Hoffman, Rif A. Saurous, Eugene Brevdo, Kevin
+Murphy, and David M. Blei.
+2017.
+\emph{Deep Probabilistic Programming.}
+\href{https://arxiv.org/abs/1701.03757}{arXiv preprint arXiv:1701.03757}.
+\end{quote}
+
+\begin{lstlisting}[class=JSON]
+@article{tran2017deep,
+  author = {Dustin Tran and Matthew D. Hoffman and Rif A. Saurous and Eugene Brevdo and Kevin Murphy and David M. Blei},
+  title = {Deep probabilistic programming},
+  journal = {arXiv preprint arXiv:1701.03757},
+  year = {2017}
 }
 \end{lstlisting}

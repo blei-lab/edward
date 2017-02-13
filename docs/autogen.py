@@ -37,11 +37,20 @@ PAGES = [
         'child_pages': [
             'model-compositionality.tex',
             'model-wrappers.tex',
+            'model-development.tex',
         ],
     },
     {
         'page': 'model-compositionality.tex',
         'title': 'Compositionality',
+        'parent_pages': [
+            'model.tex'
+        ],
+        'child_pages': [],
+    },
+    {
+        'page': 'model-development.tex',
+        'title': 'Development',
         'parent_pages': [
             'model.tex'
         ],

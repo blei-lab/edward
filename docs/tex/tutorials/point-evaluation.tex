@@ -3,7 +3,7 @@
 \subsection{Point-based evaluations}
 
 A point-based evaluation is a scalar-valued metric for assessing
-trained models \citep{gneiting2007strictly}.
+trained models \citep{winkler1996scoring,gneiting2007strictly}.
 For example, we can assess models for classification
 by predicting the label for each observation in the data and comparing
 it to their true labels. Edward implements a variety of metrics, such
@@ -57,6 +57,27 @@ unsupervised tasks. For example, we can evaluate the likelihood of
 observing the data.
 \begin{lstlisting}[language=Python]
 ed.evaluate('log_likelihood', data={x_post: x_train})
+\end{lstlisting}
+
+It is common practice to criticize models with data held-out from
+training. To do this, we first perform inference over any local latent
+variables of the held-out data, fixing the global variables.  Then we
+make predictions on the held-out data.
+
+\begin{lstlisting}[language=Python]
+from edward.models import Categorical
+
+# create local posterior factors for test data, assuming test data
+# has N_test many data points
+qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
+
+# run local inference conditional on global factors
+inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
+inference_test.run()
+
+# build posterior predictive on test data
+x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
+ed.evaluate('log_likelihood', data={x_post: x_test})
 \end{lstlisting}
 
 Point-based evaluations are formally known as scoring rules

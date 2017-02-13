@@ -15,36 +15,39 @@ class KLpq(VariationalInference):
 
   .. math::
 
-    KL( p(z |x) || q(z) ).
+    \\text{KL}( p(z \mid x) \| q(z) ).
 
   To perform the optimization, this class uses a technique from
   adaptive importance sampling (Cappe et al., 2008).
 
   Notes
   -----
-  KLqp also optimizes any model parameters p(z | x; \theta). It does
-  this by variational EM, minimizing
+  ``KLpq`` also optimizes any model parameters :math:`p(z | x;
+  \\theta)`. It does this by variational EM, minimizing
 
   .. math::
 
-    E_{p(z | x; \lambda)} [ \log p(x, z; \theta) ]
+    \mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]
 
-  with respect to \theta.
+  with respect to :math:`\\theta`.
 
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  During gradient calculation, instead of using the model's density
-
-  .. math::
-
-    \log p(x, z^{(s)}), where z^{(s)} ~ q(z; \lambda),
-
-  for each sample s=1,...,S, KLpq uses
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`. During gradient calculation, instead
+  of using the model's density
 
   .. math::
 
-    \log p(x, z^{(s)}, \beta^{(s)}), where
-    z^{(s)} ~ q(z; \lambda) and \beta^{(s)} ~ q(beta).
+    \log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),
+
+  for each sample :math:`s=1,\ldots,S`, ``KLpq`` uses
+
+  .. math::
+
+    \log p(x, z^{(s)}, \\beta^{(s)}),
+
+  where :math:`z^{(s)} \sim q(z; \lambda)` and :math:`\\beta^{(s)}
+  \sim q(\\beta)`.
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
@@ -65,32 +68,31 @@ class KLpq(VariationalInference):
     """Build loss function
 
     .. math::
-      KL( p(z |x) || q(z) )
-      =
-      E_{p(z | x)} [ \log p(z | x) - \log q(z; \lambda) ]
+      \\text{KL}( p(z \mid x) || q(z) )
+      = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]
 
     and stochastic gradients based on importance sampling.
 
     The loss function can be estimated as
 
     .. math::
-      1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
-                         (\log p(x, z^b) - \log q(z^b; \lambda) ],
+      \\frac{1}{B} \sum_{b=1}^B [
+        w_{norm}(z^b; \lambda) (\log p(x, z^b) - \log q(z^b; \lambda) ],
 
-    where
+    where for :math:`z^b \sim q(z^b; \lambda)`,
 
     .. math::
-      z^b \sim q(z^b; \lambda),
 
-      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B (w(z^b; \lambda)),
+      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B w(z^b; \lambda)
 
-      w(z^b; \lambda) = p(x, z^b) / q(z^b; \lambda).
+    normalizes the importance weights, :math:`w(z^b; \lambda) = p(x,
+    z^b) / q(z^b; \lambda)`.
 
     This provides a gradient,
 
     .. math::
-      - 1/B \sum_{b=1}^B [ w_{norm}(z^b; \lambda) *
-                           \partial_{\lambda} \log q(z^b; \lambda) ].
+      - \\frac{1}{B} \sum_{b=1}^B [
+        w_{norm}(z^b; \lambda) \\nabla_{\lambda} \log q(z^b; \lambda) ].
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples
@@ -102,7 +104,7 @@ class KLpq(VariationalInference):
         qz_copy = copy(qz, scope=scope)
         z_sample[z] = qz_copy.value()
         q_log_prob[s] += tf.reduce_sum(
-            qz.log_prob(tf.stop_gradient(z_sample[z])))
+            qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
 
       if self.model_wrapper is None:
         # Form dictionary in order to replace conditioning on prior or
@@ -128,8 +130,8 @@ class KLpq(VariationalInference):
         x = self.data
         p_log_prob[s] = self.model_wrapper.log_prob(x, z_sample)
 
-    p_log_prob = tf.pack(p_log_prob)
-    q_log_prob = tf.pack(q_log_prob)
+    p_log_prob = tf.stack(p_log_prob)
+    q_log_prob = tf.stack(q_log_prob)
 
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - log_sum_exp(log_w)
@@ -141,6 +143,6 @@ class KLpq(VariationalInference):
     loss = tf.reduce_mean(w_norm * log_w)
     grads = tf.gradients(
         -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
-        [v.ref() for v in var_list])
+        [v._ref() for v in var_list])
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars

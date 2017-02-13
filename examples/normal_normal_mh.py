@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Normal-normal model using Metropolis-Hastings."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -25,13 +26,20 @@ qmu = Empirical(params=tf.Variable(tf.zeros([1000])))
 proposal_mu = Normal(mu=0.0, sigma=tf.sqrt(1.0 / 51.0))
 
 # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
-data = {x: x_data}
-inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu}, data)
+inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu},
+                                  data={x: x_data})
 inference.run()
 
 # CRITICISM
 # Check convergence with visual diagnostics.
 sess = ed.get_session()
+mean, std = sess.run([qmu.mean(), qmu.std()])
+print("Inferred posterior mean:")
+print(mean)
+print("Inferred posterior std:")
+print(std)
+
+# Check convergence with visual diagnostics.
 samples = sess.run(qmu.params)
 
 # Plot histogram.

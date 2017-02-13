@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable, Uniform
 from edward.util import copy
@@ -15,19 +16,20 @@ class MetropolisHastings(MonteCarlo):
 
   Notes
   -----
-  In conditional inference, we infer z in p(z, \beta | x) while fixing
-  inference over \beta using another distribution q(\beta).
-  To calculate the acceptance ratio, MetropolisHastings uses an
+  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
+  \mid x)` while fixing inference over :math:`\\beta` using another
+  distribution :math:`q(\\beta)`.
+  To calculate the acceptance ratio, ``MetropolisHastings`` uses an
   estimate of the marginal density,
 
   .. math::
 
-    p(x, z) = E_{q(\beta)} [ p(x, z, \beta) ]
-            \approx p(x, z, \beta^*)
+    p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+            \\approx p(x, z, \\beta^*)
 
-  leveraging a single Monte Carlo sample, where \beta^* ~
-  q(\beta). This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if q(\beta) = p(\beta | x).
+  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
+  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
   def __init__(self, latent_vars, proposal_vars, data=None, model_wrapper=None):
     """
@@ -35,7 +37,7 @@ class MetropolisHastings(MonteCarlo):
     ----------
     proposal_vars : dict of RandomVariable to RandomVariable
       Collection of random variables to perform inference on; each is
-      binded to a proposal distribution p(z' | z).
+      binded to a proposal distribution :math:`g(z' \mid z)`.
 
     Examples
     --------
@@ -46,11 +48,6 @@ class MetropolisHastings(MonteCarlo):
     >>> proposal_z = Normal(mu=z, sigma=0.5)
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
-
-    Notes
-    -----
-    The updates assume each Empirical random variable is directly
-    parameterized by tf.Variables().
     """
     self.proposal_vars = proposal_vars
     super(MetropolisHastings, self).__init__(latent_vars, data, model_wrapper)
@@ -60,11 +57,18 @@ class MetropolisHastings(MonteCarlo):
     Draw sample from proposal conditional on last sample. Then accept
     or reject the sample based on the ratio,
 
-    ratio = log p(x, znew) - log p(x, zold) +
-            log g(znew | zold) - log g(zold | znew)
+    .. math::
+      \\text{ratio} = \log p(x, z^{new}) - \log p(x, z^{old}) +
+        \log g(z^{new} \mid z^{old}) - \log g(z^{old} \mid z^{new})
+
+    Notes
+    -----
+    The updates assume each Empirical random variable is directly
+    parameterized by tf.Variables().
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
+    old_sample = OrderedDict(old_sample)
 
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
@@ -83,7 +87,7 @@ class MetropolisHastings(MonteCarlo):
     scope_new = 'inference_' + str(id(self)) + '/new'
 
     # Draw proposed sample and calculate acceptance ratio.
-    new_sample = {}
+    new_sample = old_sample.copy()  # copy to ensure same order
     ratio = 0.0
     for z, proposal_z in six.iteritems(self.proposal_vars):
       # Build proposal g(znew | zold).
@@ -138,12 +142,10 @@ class MetropolisHastings(MonteCarlo):
 
     # Update Empirical random variables.
     assign_ops = []
-    variables = {x.name: x for x in
-                 tf.get_default_graph().get_collection(tf.GraphKeys.VARIABLES)}
     for z, qz in six.iteritems(self.latent_vars):
-      variable = variables[qz.params.op.inputs[0].op.inputs[0].name]
+      variable = qz.get_variables()[0]
       assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
 
     # Increment n_accept (if accepted).
-    assign_ops.append(self.n_accept.assign_add(tf.select(accept, 1, 0)))
+    assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
     return tf.group(*assign_ops)

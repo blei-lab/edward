@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using mean-field variational inference.
+"""Bayesian linear regression using variational inference.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -84,7 +84,7 @@ data = {'x': x_train, 'y': y_train}
 inference = ed.KLqp({'w': qw, 'b': qb}, data, model)
 inference.initialize(n_samples=5, n_iter=250, n_print=5)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
 for t in range(inference.n_iter):
