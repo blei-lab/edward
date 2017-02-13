@@ -2,6 +2,8 @@
 """Linear mixed effects model using lme4::InstEval instructor rating data.
 
 Fits y ~ 1 + (1|s) + (1|d) + service + (1|dept)
+
+Data described at https://cran.r-project.org/web/packages/lme4/lme4.pdf
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -94,7 +96,5 @@ params_dict = {
 
 data_dict = {y: ytrain}
 
-print('Making inference')
 inference = ed.KLqp(params_dict, data_dict)
-
 inference.run(n_iter=1000)
