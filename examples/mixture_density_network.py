@@ -71,7 +71,7 @@ def neural_network(X):
 
 ed.set_seed(42)
 
-N = 40000  # number of data points
+N = 5000  # number of data points
 D = 1  # number of features
 K = 20  # number of mixture components
 
@@ -94,6 +94,9 @@ components = [Normal(mu=mu, sigma=sigma) for mu, sigma
               in zip(tf.unstack(tf.transpose(mus)),
                      tf.unstack(tf.transpose(sigmas)))]
 y = Mixture(cat=cat, components=components, value=tf.zeros_like(y_ph))
+# Note: A bug exists in Mixture which prevents samples from it to have
+# a shape of [None]. For now fix it using the value argument, as
+# sampling is not necessary for MAP estimation anyways.
 
 # INFERENCE
 # There are no latent variables to infer. Thus inference is concerned
