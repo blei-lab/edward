@@ -11,9 +11,8 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
-from edward.stats import norm
-from keras import backend as K
-from keras.layers import Dense
+from edward.models import Categorical, Mixture, Normal
+from tensorflow.contrib import slim
 from scipy import stats
 from sklearn.model_selection import train_test_split
 
@@ -52,50 +51,29 @@ def sample_from_mixture(x, pred_weights, pred_means, pred_std, amount):
 
 
 def build_toy_dataset(N):
-  y_data = np.random.uniform(-10.5, 10.5, (N, 1)).astype(np.float32)
-  r_data = np.random.normal(size=(N, 1)).astype(np.float32)  # random noise
+  y_data = np.random.uniform(-10.5, 10.5, N).astype(np.float32)
+  r_data = np.random.normal(size=N).astype(np.float32)  # random noise
   x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
+  x_data = x_data.reshape((N, 1))
   return train_test_split(x_data, y_data, random_state=42)
 
 
-class MixtureDensityNetwork:
-  """
-  Mixture density network for outputs y on inputs x.
-
-  p((x,y), (z,theta))
-  = sum_{k=1}^K pi_k(x; theta) Normal(y; mu_k(x; theta), sigma_k(x; theta))
-
-  where pi, mu, sigma are the output of a neural network taking x
-  as input and with parameters theta. There are no latent variables
-  z, which are hidden variables we aim to be Bayesian about.
-  """
-  def __init__(self, K):
-    self.K = K
-
-  def neural_network(self, X):
-    """pi, mu, sigma = NN(x; theta)"""
-    # fully-connected layer with 15 hidden units
-    hidden1 = Dense(15, activation=K.relu)(X)
-    hidden2 = Dense(15, activation=K.relu)(hidden1)
-    self.mus = Dense(self.K)(hidden2)
-    self.sigmas = Dense(self.K, activation=K.exp)(hidden2)
-    self.pi = Dense(self.K, activation=K.softmax)(hidden2)
-
-  def log_prob(self, xs, zs):
-    """log p((xs,ys), (z,theta)) = sum_{n=1}^N log p((xs[n,:],ys[n]), theta)"""
-    # Note there are no parameters we're being Bayesian about. The
-    # parameters are baked into how we specify the neural networks.
-    X, y = xs['X'], xs['y']
-    self.neural_network(X)
-    result = self.pi * norm.prob(y, self.mus, self.sigmas)
-    result = tf.log(tf.reduce_sum(result, 1))
-    return tf.reduce_sum(result)
+def neural_network(X):
+  """mu, sigma, logits = NN(x; theta)"""
+  # 2 hidden layers with 15 hidden units
+  hidden1 = slim.fully_connected(X, 15)
+  hidden2 = slim.fully_connected(hidden1, 15)
+  mus = slim.fully_connected(hidden2, K, activation_fn=None)
+  sigmas = slim.fully_connected(hidden2, K, activation_fn=tf.exp)
+  logits = slim.fully_connected(hidden2, K, activation_fn=None)
+  return mus, sigmas, logits
 
 
 ed.set_seed(42)
 
 N = 40000  # number of data points
 D = 1  # number of features
+K = 20  # number of mixture components
 
 # DATA
 X_train, X_test, y_train, y_test = build_toy_dataset(N)
@@ -106,33 +84,39 @@ print("Size of output in test data: {}".format(y_test.shape))
 sns.regplot(X_train, y_train, fit_reg=False)
 plt.show()
 
-X = tf.placeholder(tf.float32, [None, D])
-y = tf.placeholder(tf.float32, [None, D])
-data = {'X': X, 'y': y}
+X_ph = tf.placeholder(tf.float32, [None, D])
+y_ph = tf.placeholder(tf.float32, [None])
 
 # MODEL
-model = MixtureDensityNetwork(20)
+mus, sigmas, logits = neural_network(X_ph)
+cat = Categorical(logits=logits)
+components = [Normal(mu=mu, sigma=sigma) for mu, sigma
+              in zip(tf.unstack(tf.transpose(mus)),
+                     tf.unstack(tf.transpose(sigmas)))]
+y = Mixture(cat=cat, components=components, value=tf.zeros_like(y_ph))
 
 # INFERENCE
-inference = ed.MAP([], data, model)
-sess = ed.get_session()  # Start TF session
-K.set_session(sess)  # Pass session info to Keras
-inference.initialize()
+# There are no latent variables to infer. Thus inference is concerned
+# with only training model parameters, which are baked into how we
+# specify the neural networks.
+inference = ed.MAP(data={y: y_ph})
+inference.initialize(var_list=tf.trainable_variables())
 
-init = tf.global_variables_initializer()
-init.run()
+sess = ed.get_session()
+tf.global_variables_initializer().run()
 
 n_epoch = 1000
 train_loss = np.zeros(n_epoch)
 test_loss = np.zeros(n_epoch)
 for i in range(n_epoch):
-  info_dict = inference.update(feed_dict={X: X_train, y: y_train})
+  info_dict = inference.update(feed_dict={X_ph: X_train, y_ph: y_train})
   train_loss[i] = info_dict['loss']
-  test_loss[i] = sess.run(inference.loss, feed_dict={X: X_test, y: y_test})
+  test_loss[i] = sess.run(inference.loss, feed_dict={X_ph: X_test, y_ph: y_test})
+  inference.print_progress(info_dict)
 
 # CRITICISM
 pred_weights, pred_means, pred_std = \
-    sess.run([model.pi, model.mus, model.sigmas], feed_dict={X: X_test})
+    sess.run([tf.nn.softmax(logits), mus, sigmas], feed_dict={X_ph: X_test})
 
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
 plt.plot(np.arange(n_epoch), -test_loss / len(X_test), label='Test')
