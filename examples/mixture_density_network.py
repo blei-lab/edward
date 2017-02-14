@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 """Mixture density network (Bishop, 1994).
+
+Note a common failure mode when training MDNs is that an individual
+mixture distribution collapses to a point, which forces the standard
+deviation of the normal to be close to 0. This produces NaN values
+(which you can prevent by thresholding the standard deviation if desired).
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -114,7 +119,8 @@ test_loss = np.zeros(n_epoch)
 for i in range(n_epoch):
   info_dict = inference.update(feed_dict={X_ph: X_train, y_ph: y_train})
   train_loss[i] = info_dict['loss']
-  test_loss[i] = sess.run(inference.loss, feed_dict={X_ph: X_test, y_ph: y_test})
+  test_loss[i] = sess.run(inference.loss,
+                          feed_dict={X_ph: X_test, y_ph: y_test})
   inference.print_progress(info_dict)
 
 # CRITICISM
