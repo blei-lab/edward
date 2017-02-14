@@ -78,10 +78,11 @@
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
-<a href="https://github.com/blei-lab/edward">
-<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
-<!-- </object> -->
+<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
+<span style="vertical-align:middle;">Github</span> 
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
+<!--</object> -->
 </a>
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
@@ -105,7 +106,7 @@
 <hr/>
 <span class="target" id="module-edward.criticisms"></span><dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em>, <em>output_key='y'</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
 <p>A metric, or scoring rule (Winkler, 1994), is a function of observed
 data under the posterior predictive distribution. For example in
@@ -207,7 +208,7 @@ the model wrapper is specified.</p>
 </dd></dl>
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/criticisms/ppc.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Posterior predictive check
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).</p>
 <p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior

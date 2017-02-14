@@ -78,53 +78,45 @@
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
-<a href="https://github.com/blei-lab/edward">
-<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
-<!-- </object> -->
+<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
+<span style="vertical-align:middle;">Github</span> 
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
+<!--</object> -->
 </a>
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
 <h2 id="tutorials">Tutorials</h2>
-<p>Edward provides a testbed for rapid experimentation and research with probabilistic models. Here we demonstrate examples from each of the three components defining Edward: <strong>Models</strong>, <strong>Inference</strong>, and <strong>Criticism</strong>. In the <strong>End-to-End</strong> section, we demonstrate examples that sweep through the whole process.</p>
-<h3 id="models">Models</h3>
+<p>Edward provides a testbed for rapid experimentation and research with probabilistic models. Here we show how to apply this process for complicated learning tasks.</p>
+<p><a href="supervised-regression">Bayesian linear regression</a><br/>
+A fundamental model for supervised learning.</p>
+<p><a href="supervised-classification">Gaussian process classification</a><br/>
+Learning a distribution over functions for supervised classification.</p>
+<p><a href="unsupervised">Mixture models</a><br/>
+Unsupervised learning by clustering data points.</p>
+<p><a href="latent-space-models">Latent space models</a><br/>
+Analyzing connectivity patterns in neural data.</p>
+<p><a href="mixture-density-network">Mixture density networks</a><br/>
+A neural density estimator for solving inverse problems.</p>
+<p><a href="decoder">Probabilistic decoder</a><br/>
+A model of latent codes in information theory.</p>
+<p><a href="inference-networks">Inference networks</a><br/>
+How to amortize computation for training and testing models.</p>
+<p><a href="bayesian-neural-network">Bayesian neural network</a><br/>
+Bayesian analysis with neural networks.</p>
+<p>If you’re interested in contributing a tutorial, checking out the <a href="/contributing">contributing page</a>. For more background and notation, see the pages below.</p>
 <ul>
-<li><a href="model">Probability models</a></li>
-<li><a href="bayesian-linear-regression">Bayesian linear regression</a></li>
-<li><a href="mixture-gaussian">Mixture of Gaussians</a></li>
-<li><a href="gp-classification">Gaussian process classification</a></li>
-<li><a href="bayesian-neural-network">Bayesian neural network</a></li>
-<li><a href="decoder">Probabilistic decoder</a></li>
-</ul>
-<h3 id="inference">Inference</h3>
+<li><a href="model">Probabilistic models</a></li>
+<li><a href="inference">Inference of probabilistic models</a>
 <ul>
-<li><a href="inference">Inference of probability models</a></li>
 <li><a href="variational-inference">Variational inference</a></li>
-<li><a href="klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a>
-<ul>
-<li><a href="klqp-score">Score function gradient</a></li>
-<li><a href="klqp-reparam">Reparameterization gradient</a></li>
-</ul></li>
+<li><a href="klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a></li>
 <li><a href="klpq"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization</a></li>
-<li><a href="map">Maximum a posteriori estimation</a>
-<ul>
+<li><a href="map">Maximum a posteriori estimation</a></li>
 <li><a href="map-laplace">Laplace approximation</a></li>
 </ul></li>
-<li><a href="inference-networks">Inference networks</a></li>
-</ul>
-<h3 id="criticism">Criticism</h3>
-<ul>
-<li><a href="point-evaluation">Point-based evaluations</a></li>
-<li><a href="ppc">Posterior predictive checks</a></li>
-</ul>
-<h3 id="end-to-end">End-to-end</h3>
-<ul>
-<li><a href="supervised-regression">Supervised learning (Regression)</a></li>
-<li><a href="supervised-classification">Supervised learning (Classification)</a></li>
-<li><a href="unsupervised">Unsupervised learning</a></li>
-<li><a href="latent-space-models">Latent space models for neural data</a></li>
-<li><a href="mixture-density-network">Mixture density networks</a></li>
+<li><a href="criticism">Model criticism</a></li>
 </ul>
 </div>
 </div>

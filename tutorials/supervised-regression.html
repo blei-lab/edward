@@ -82,11 +82,13 @@
     <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
     <a class="button2 u-full-width" href="/license">License</a>
     <div class="row" style="padding-bottom: 5%"> </div>
-    <a href="https://github.com/blei-lab/edward">
-    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-      <img src="/images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
-    alt="Edward on Github" />
-    <!-- </object> -->
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+      <!--</object> -->
     </a>
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
@@ -110,11 +112,28 @@ w_true = np.random.randn(D)
 X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(N, w_true)</code></pre>
 <h3 id="model">Model</h3>
-<p>Posit the model as Bayesian linear regression. For more details on the model, see the <a href="/tutorials/bayesian-linear-regression">Bayesian linear regression tutorial</a>.</p>
-<pre class="python" language="Python"><code>X = tf.placeholder(tf.float32, [N, D])
+<p>Posit the model as Bayesian linear regression <span class="citation">(Murphy, 2012)</span>. It assumes a linear relationship between the inputs <span class="math inline">\(\mathbf{x}\in\mathbb{R}^D\)</span> and the outputs <span class="math inline">\(y\in\mathbb{R}\)</span>.</p>
+<p>For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model posits the following distributions: <span class="math display">\[\begin{aligned}
+  p(\mathbf{w})
+  &amp;=
+  \text{Normal}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \\[1.5ex]
+  p(b)
+  &amp;=
+  \text{Normal}(b \mid 0, \sigma_b^2),
+  \\
+  p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
+  &amp;=
+  \prod_{n=1}^N
+  \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span> The latent variables are the linear model’s weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_w^2,\sigma_b^2\)</span> are known prior variances and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
+<p>Let’s build the model in Edward, fixing <span class="math inline">\(\sigma_w,\sigma_b,\sigma_y=1\)</span>.</p>
+<pre class="python" language="Python"><code>from edward.models import Normal
+
+X = tf.placeholder(tf.float32, [N, D])
 w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))</code></pre>
+<p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to data.</p>
 <h3 id="inference">Inference</h3>
 <p>We now turn to inferring the posterior using variational inference. Define the variational model to be a fully factorized normal across the weights.</p>
 <pre class="python" language="Python"><code>qw = Normal(mu=tf.Variable(tf.random_normal([D])),
@@ -135,6 +154,12 @@ inference.run()</code></pre>
 print(ed.evaluate(&#39;mean_absolute_error&#39;, data={X: X_test, y_post: y_test}))
 &gt; 0.0867875</code></pre>
 <p>The trained model makes predictions with low mean squared error (relative to the magnitude of the output).</p>
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
+<div id="ref-murphy2012machine">
+<p>Murphy, K. P. (2012). <em>Machine learning: A probabilistic perspective</em>. MIT Press.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

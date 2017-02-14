@@ -82,11 +82,13 @@
     <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
     <a class="button2 u-full-width" href="/license">License</a>
     <div class="row" style="padding-bottom: 5%"> </div>
-    <a href="https://github.com/blei-lab/edward">
-    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-      <img src="/images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
-    alt="Edward on Github" />
-    <!-- </object> -->
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+      <!--</object> -->
     </a>
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
@@ -118,8 +120,38 @@ plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
-<p>Posit the model as a mixture of Gaussians. For more details on the model, see the <a href="/tutorials/mixture-gaussian">Mixture of Gaussians tutorial</a>. We write it in collapsed form, marginalizing out the mixture assignments.</p>
-<pre class="python" language="Python"><code>K = 2  # number of components
+<p>A mixture model is a model typically used for clustering. It assigns a mixture component to each data point, and this mixture component determines the distribution that the data point is generated from. A mixture of Gaussians uses Gaussian distributions to generate this data <span class="citation">(Bishop, 2006)</span>.</p>
+<p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is <span class="math display">\[\begin{aligned}
+  p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &amp;=
+  \sum_{k=1}^K \pi_k \, \text{Normal}(\mathbf{x}_n \mid \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by a mean <span class="math inline">\(\mu_k\)</span> and standard deviation <span class="math inline">\(\sigma_k\)</span>.</p>
+<p>Define the prior on <span class="math inline">\(\pi\in[0,1]\)</span> such that <span class="math inline">\(\sum_{k=1}^K\pi_k=1\)</span> to be <span class="math display">\[\begin{aligned}
+  p(\pi)
+  &amp;=
+  \text{Dirichlet}(\pi \mid \alpha \mathbf{1}_{K}).\end{aligned}\]</span></p>
+<p>Define the prior on each component <span class="math inline">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
+  p(\mathbf{\mu}_k)
+  &amp;=
+  \text{Normal}(\mathbf{\mu}_k \mid \mathbf{0}, \sigma^2\mathbf{I}).\end{aligned}\]</span></p>
+<p>Define the prior on each component <span class="math inline">\(\mathbf{\sigma}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
+  p(\mathbf{\sigma}_k)
+  &amp;=
+  \text{InverseGamma}(\mathbf{\sigma}_k \mid a, b).\end{aligned}\]</span></p>
+<p>We build two versions of the model in Edward: one explicitly with the mixture assignments <span class="math inline">\(c_n\in\{0,\ldots,K-1\}\)</span> as latent variables, and another with them summed out.</p>
+<p>The explicit version is as follows:</p>
+<pre class="python" language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Normal
+
+K = 2  # number of components
+
+mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
+c = Categorical(logits=tf.zeros([N, K]))
+x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))</code></pre>
+<p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable.</p>
+<pre class="python" language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
+    MultivariateNormalDiag, Normal
+
+K = 2  # number of components
 
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
@@ -129,6 +161,7 @@ components = [
                            diag_stdev=tf.ones([N, 1]) * tf.gather(sigma, k))
     for k in range(K)]
 x = Mixture(cat=cat, components=components)</code></pre>
+<p>We will use the collapsed version in this analysis.</p>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be <span class="math display">\[\begin{aligned}
  q(\mu, \sigma \;;\; \lambda)
@@ -174,6 +207,38 @@ plt.axis([-3, 3, -3, 3])
 plt.title(&quot;Predicted cluster assignments&quot;)
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig1.png" alt="image" width="700" /></p>
+<h3 id="remarks-the-log-sum-exp-trick">Remarks: The log-sum-exp trick</h3>
+<p>For a collapsed mixture model, implementing the log density can be tricky. In general, the log density is <span class="math display">\[\begin{aligned}
+  \log p(\pi) +
+  \Big[ \sum_{k=1}^K \log p(\mathbf{\mu}_k) + \log
+  p(\mathbf{\sigma}_k) \Big] +
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma),\end{aligned}\]</span> where the likelihood is <span class="math display">\[\begin{aligned}
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &amp;=
+  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \text{Normal}(\mathbf{x}_n \mid
+  \mu_k, \sigma_k).\end{aligned}\]</span> To prevent numerical instability, we’d like to work on the log-scale, <span class="math display">\[\begin{aligned}
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &amp;=
+  \sum_{n=1}^N \log \sum_{k=1}^K \exp\Big(
+  \log \pi_k + \log \text{Normal}(\mathbf{x}_n \mid \mu_k, \sigma_k)\Big).\end{aligned}\]</span> This expression involves a log sum exp operation, which is numerically unstable as exponentiation will often lead to one value dominating the rest. Therefore we use the log-sum-exp trick. It is based on the identity <span class="math display">\[\begin{aligned}
+  \mathbf{x}_{\mathrm{max}}
+  &amp;=
+  \arg\max \mathbf{x},
+  \\
+  \log \sum_i \exp(\mathbf{x}_i)
+  &amp;=
+  \log \Big(\exp(\mathbf{x}_{\mathrm{max}}) \sum_i \exp(\mathbf{x}_i -
+  \mathbf{x}_{\mathrm{max}})\Big)
+  \\
+  &amp;=
+  \mathbf{x}_{\mathrm{max}} + \log \sum_i \exp(\mathbf{x}_i -
+  \mathbf{x}_{\mathrm{max}}).\end{aligned}\]</span> Subtracting the maximum value before taking the log-sum-exp leads to more numerically stable output. The <code>Mixture</code> random variable implements this trick for calculating the log-density.</p>
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
+<div id="ref-bishop2006pattern">
+<p>Bishop, C. M. (2006). <em>Pattern recognition and machine learning</em>. Springer New York.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

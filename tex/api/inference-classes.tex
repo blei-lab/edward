@@ -101,6 +101,25 @@ they can use gradients such as in Hamiltonian Monte Carlo
 \citep{neal2011mcmc} and graph
 structure such as in sequential Monte Carlo \citep{doucet2001introduction}.
 
+\subsubsection{Non-Bayesian Methods}
+
+As a library for probabilistic modeling (not necessarily Bayesian
+modeling), Edward is agnostic to the paradigm for inference.  This
+means Edward can use frequentist (population-based) inferences,
+strictly point estimation, and alternative foundations for parameter
+uncertainty.
+
+For example, Edward supports non-Bayesian methods such as generative
+adversarial networks (GANs)
+\citep{goodfellow2014generative}.
+For more details, see the \href{/tutorials/gan}{GAN tutorial}.
+
+In general, we think opening the door to non-Bayesian approaches is a
+crucial feature for probabilistic programming. This enables advances
+in other fields such as deep learning to be complementary: all is in
+service for probabilistic models and thus it makes sense to combine
+our efforts.
+
 \subsubsection{Exact Inference}
 
 This approach also extends to algorithms that usually require tedious
@@ -135,6 +154,12 @@ details.
 .. autoclass:: edward.inferences.ScoreKLKLqp
 
 .. autoclass:: edward.inferences.ScoreEntropyKLqp
+
+.. autoclass:: edward.inferences.GANInference
+   :members:
+
+.. autoclass:: edward.inferences.WGANInference
+   :members:
 
 .. autoclass:: edward.inferences.KLpq
    :members:

@@ -78,10 +78,11 @@
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
 <div class="row" style="padding-bottom: 5%"> </div>
-<a href="https://github.com/blei-lab/edward">
-<!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-<img alt="Edward on Github" class="u-pull-right" src="/images/github-mark.svg" style="padding-right:10%"/>
-<!-- </object> -->
+<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
+<span style="vertical-align:middle;">Github</span> 
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
+<!--</object> -->
 </a>
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
@@ -137,9 +138,95 @@
   - \mathbb{E}_{q(\mathbf{z} \;;\; \lambda)}[\log q(\mathbf{z}\;;\;\lambda)],\end{aligned}\]</span> where the first term represents an energy and the second term (including the minus sign) represents the entropy of <span class="math inline">\(q\)</span>. The energy encourages <span class="math inline">\(q\)</span> to focus probability mass where the model puts high probability, <span class="math inline">\(p(\mathbf{x}, \mathbf{z})\)</span>. The entropy encourages <span class="math inline">\(q\)</span> to spread probability mass to avoid concentrating to one location.</p>
 <p>Edward uses two generic strategies to obtain gradients for optimization.</p>
 <ul>
-<li><a href="/tutorials/klqp-score">Score function gradient</a></li>
-<li><a href="/tutorials/klqp-reparam">Reparameterization gradient</a></li>
+<li>Score function gradient;</li>
+<li>Reparameterization gradient.</li>
 </ul>
+<h2 id="score-function-gradient">Score function gradient</h2>
+<p>Gradient descent is a standard approach for optimizing complicated objectives like the ELBO. The idea is to calculate its gradient <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;=
+  \nabla_\lambda\;
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \big[
+  \log p(\mathbf{x}, \mathbf{z})
+  -
+  \log q(\mathbf{z}\;;\;\lambda)
+  \big],\end{aligned}\]</span> and update the current set of parameters proportional to the gradient.</p>
+<p>The score function gradient estimator leverages a property of logarithms to write the gradient as <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;=\;
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \big[
+  \nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)
+  \:
+  \big(
+  \log p(\mathbf{x}, \mathbf{z})
+  -
+  \log q(\mathbf{z}\;;\;\lambda)
+  \big)
+  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the variational model <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span>; the only new ingredient it requires is the <em>score function</em> <span class="math inline">\(\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)\)</span> <span class="citation">(Paisley, Blei, &amp; Jordan, 2012; Ranganath, Gerrish, &amp; Blei, 2014)</span>.</p>
+<p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
+<ol>
+<li>draw <span class="math inline">\(S\)</span> samples <span class="math inline">\(\{\mathbf{z}_s\}_1^S \sim q(\mathbf{z}\;;\;\lambda)\)</span>,</li>
+<li>evaluate the argument of the expectation using <span class="math inline">\(\{\mathbf{z}_s\}_1^S\)</span>, and</li>
+<li>compute the empirical mean of the evaluated quantities.</li>
+</ol>
+<p>A Monte Carlo estimate of the gradient is then <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;\approx\;
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \big(
+  \log p(\mathbf{x}, \mathbf{z}_s)
+  -
+  \log q(\mathbf{z}_s\;;\;\lambda)
+  \big)
+  \:
+  \nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)
+  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO.</p>
+<h2 id="reparameterization-gradient">Reparameterization gradient</h2>
+<p>If the model has differentiable latent variables, then it is generally advantageous to leverage gradient information from the model in order to better traverse the optimization space. One approach to doing this is the reparameterization gradient <span class="citation">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
+<p>Some variational distributions <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize a normal distribution <span class="math inline">\(\mathbf{z} \sim \text{Normal}(\mu, \Sigma)\)</span> as <span class="math inline">\(\mathbf{z} \sim \mu + L \text{Normal}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
+  \epsilon &amp;\sim q(\epsilon)\\
+  \mathbf{z} &amp;= \mathbf{z}(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(\mathbf{z}(\cdot;\lambda)\)</span> encapsulates the variational parameters instead, and following the process is equivalent to directly drawing <span class="math inline">\(\mathbf{z}\)</span> from the original distribution.</p>
+<p>The reparameterization gradient leverages this property of the variational distribution to write the gradient as <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;=\;
+  \mathbb{E}_{q(\epsilon)}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  -
+  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the base distribution <span class="math inline">\(q(\epsilon)\)</span>, and the gradient can be applied directly to the inner expression.</p>
+<p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
+<ol>
+<li>draw <span class="math inline">\(S\)</span> samples <span class="math inline">\(\{\epsilon_s\}_1^S \sim q(\epsilon)\)</span>,</li>
+<li>evaluate the argument of the expectation using <span class="math inline">\(\{\epsilon_s\}_1^S\)</span>, and</li>
+<li>compute the empirical mean of the evaluated quantities.</li>
+</ol>
+<p>A Monte Carlo estimate of the gradient is then <span class="math display">\[\begin{aligned}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &amp;\approx\;
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  -
+  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the score function gradient, leading to faster convergence in a large set of problems.</p>
+<p>For more details, see the <a href="/api/">API</a> as well as its implementation in Edward’s code base.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-hinton1993keeping">
@@ -147,6 +234,18 @@
 </div>
 <div id="ref-jordan1999introduction">
 <p>Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., &amp; Saul, L. K. (1999). An introduction to variational methods for graphical models. <em>Machine Learning</em>, <em>37</em>(2), 183–233.</p>
+</div>
+<div id="ref-kingma2014auto">
+<p>Kingma, D., &amp; Welling, M. (2014). Auto-encoding variational Bayes. In <em>International conference on learning representations</em>.</p>
+</div>
+<div id="ref-paisley2012variational">
+<p>Paisley, J., Blei, D. M., &amp; Jordan, M. I. (2012). Variational bayesian inference with stochastic search. In <em>International conference on machine learning</em> (pp. 1367–1374).</p>
+</div>
+<div id="ref-ranganath2014black">
+<p>Ranganath, R., Gerrish, S., &amp; Blei, D. (2014). Black box variational inference. In <em>Artificial intelligence and statistics</em>.</p>
+</div>
+<div id="ref-rezende2014stochastic">
+<p>Rezende, D. J., Mohamed, S., &amp; Wierstra, D. (2014). Stochastic backpropagation and approximate inference in deep generative models. In <em>ICML</em> (pp. 1278–1286).</p>
 </div>
 <div id="ref-waterhouse1996bayesian">
 <p>Waterhouse, S., MacKay, D., &amp; Robinson, T. (1996). Bayesian methods for mixtures of experts. <em>Advances in Neural Information Processing Systems</em>, 351–357.</p>

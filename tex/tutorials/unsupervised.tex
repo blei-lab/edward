@@ -43,13 +43,68 @@ plt.show()
 
 \subsubsection{Model}
 
-Posit the model as a mixture of Gaussians. For more details on the
-model, see the
-\href{/tutorials/mixture-gaussian}
-{Mixture of Gaussians tutorial}.
-We write it in collapsed form, marginalizing out
-the mixture assignments.
+A mixture model is a model typically used for clustering.
+It assigns a mixture component to each data point, and this mixture component
+determines the distribution that the data point is generated from. A
+mixture of Gaussians uses Gaussian distributions to generate this data
+\citep{bishop2006pattern}.
+
+For a set of $N$ data points,
+the likelihood of each observation $\mathbf{x}_n$ is
+\begin{align*}
+  p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &=
+  \sum_{k=1}^K \pi_k \, \text{Normal}(\mathbf{x}_n \mid \mu_k, \sigma_k).
+\end{align*}
+The latent variable $\pi$ is a $K$-dimensional probability vector
+which mixes individual Gaussian distributions, each
+characterized by a mean $\mu_k$ and standard deviation $\sigma_k$.
+
+Define the prior on $\pi\in[0,1]$ such that $\sum_{k=1}^K\pi_k=1$ to be
+\begin{align*}
+  p(\pi)
+  &=
+  \text{Dirichlet}(\pi \mid \alpha \mathbf{1}_{K}).
+\end{align*}
+
+Define the prior on each component $\mathbf{\mu}_k\in\mathbb{R}^D$ to be
+\begin{align*}
+  p(\mathbf{\mu}_k)
+  &=
+  \text{Normal}(\mathbf{\mu}_k \mid \mathbf{0}, \sigma^2\mathbf{I}).
+\end{align*}
+
+Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
+\begin{align*}
+  p(\mathbf{\sigma}_k)
+  &=
+  \text{InverseGamma}(\mathbf{\sigma}_k \mid a, b).
+\end{align*}
+
+We build two versions of the model in Edward: one explicitly with the
+mixture assignments $c_n\in\{0,\ldots,K-1\}$ as latent variables,
+and another with them summed out.
+
+The explicit version is as follows:
+
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, Dirichlet, InverseGamma, Normal
+
+K = 2  # number of components
+
+mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
+c = Categorical(logits=tf.zeros([N, K]))
+x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))
+\end{lstlisting}
+
+The collapsed version marginalizes out the mixture assignments. We
+implement this with the \texttt{Mixture} random variable.
+
+\begin{lstlisting}[language=Python]
+from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
+    MultivariateNormalDiag, Normal
+
 K = 2  # number of components
 
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
@@ -61,6 +116,8 @@ components = [
     for k in range(K)]
 x = Mixture(cat=cat, components=components)
 \end{lstlisting}
+
+We will use the collapsed version in this analysis.
 
 
 \subsubsection{Inference}
@@ -143,3 +200,51 @@ plt.show()
 \end{lstlisting}
 
 \includegraphics[width=700px]{/images/unsupervised-fig1.png}
+
+\subsubsection{Remarks: The log-sum-exp trick}
+
+For a collapsed mixture model, implementing the log density can be tricky.
+In general, the log density is
+\begin{align*}
+  \log p(\pi) +
+  \Big[ \sum_{k=1}^K \log p(\mathbf{\mu}_k) + \log
+  p(\mathbf{\sigma}_k) \Big] +
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma),
+\end{align*}
+where the likelihood is
+\begin{align*}
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &=
+  \sum_{n=1}^N \log \sum_{k=1}^K \pi_k \, \text{Normal}(\mathbf{x}_n \mid
+  \mu_k, \sigma_k).
+\end{align*}
+To prevent numerical instability, we'd like to work on the log-scale,
+\begin{align*}
+  \sum_{n=1}^N \log p(\mathbf{x}_n \mid \pi, \mu, \sigma)
+  &=
+  \sum_{n=1}^N \log \sum_{k=1}^K \exp\Big(
+  \log \pi_k + \log \text{Normal}(\mathbf{x}_n \mid \mu_k, \sigma_k)\Big).
+\end{align*}
+This expression involves a log sum exp operation, which is
+numerically unstable as exponentiation will often lead to one value
+dominating the rest. Therefore we use the log-sum-exp trick.
+It is based on the identity
+\begin{align*}
+  \mathbf{x}_{\mathrm{max}}
+  &=
+  \arg\max \mathbf{x},
+  \\
+  \log \sum_i \exp(\mathbf{x}_i)
+  &=
+  \log \Big(\exp(\mathbf{x}_{\mathrm{max}}) \sum_i \exp(\mathbf{x}_i -
+  \mathbf{x}_{\mathrm{max}})\Big)
+  \\
+  &=
+  \mathbf{x}_{\mathrm{max}} + \log \sum_i \exp(\mathbf{x}_i -
+  \mathbf{x}_{\mathrm{max}}).
+\end{align*}
+Subtracting the maximum value before taking the log-sum-exp leads to
+more numerically stable output. The \texttt{Mixture} random variable
+implements this trick for calculating the log-density.
+
+\subsubsection{References}\label{references}

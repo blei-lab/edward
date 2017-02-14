@@ -82,11 +82,13 @@
     <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
     <a class="button2 u-full-width" href="/license">License</a>
     <div class="row" style="padding-bottom: 5%"> </div>
-    <a href="https://github.com/blei-lab/edward">
-    <!-- <object data="images/github-mark.svg" type="image/svg+xml"> -->
-      <img src="/images/github-mark.svg" class="u-pull-right" style="padding-right:10%"
-    alt="Edward on Github" />
-    <!-- </object> -->
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+      <!--</object> -->
     </a>
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
@@ -138,21 +140,7 @@
 <p>To find the MAP estimate of the latent variables <span class="math inline">\(\mathbf{z}\)</span>, we simply calculate the gradient of the log joint density <span class="math display">\[\begin{aligned}
   \nabla_\mathbf{z}
   \log p(\mathbf{x}, \mathbf{z})\end{aligned}\]</span> and follow it to a (local) optima. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>
-<h3 id="implementation">Implementation</h3>
-<p><strong>Note: These details are outdated since Edward v1.1.3.</strong></p>
-<p>In Edward, we view MAP estimation as a special case of <a href="/tutorials/klqp"><span class="math inline">\(KL(q\|p)\)</span> minimization</a>, where the variational distribution is a point mass (delta function) distribution. This makes explicit the additional assumptions underlying MAP estimation from the viewpoint of variational inference: namely, it approximates the posterior using a point to summarize the full distribution.</p>
-<pre class="python" language="Python"><code>class MAP(VariationalInference):
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
-    ...
-    super(MAP, self).__init__(latent_vars, data, model_wrapper)
-
-  def build_loss(self):
-    x = self.data
-    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
-    self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
-    return -self.loss</code></pre>
-<p>The <code>MAP</code> class inherits from <code>VariationalInference</code> and initializes a point mass as the variational distribution. It requires defining only one method: <code>build_loss()</code>, which implicitly specifies the gradient of the log joint. TensorFlow’s automatic differentiation will apply to <code>z</code>, thus backpropagating (applying the chain rule of differentiation) to compute the gradient of the objective.</p>
-<p>There is a nuance here. TensorFlow’s optimizers are configured to <em>minimize</em> an objective function. So the gradient is set to be the negative of the log density’s gradient.</p>
+<p>For more details, see the <a href="/api/">API</a> as well as its implementation in Edward’s code base.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-murphy2012machine">
