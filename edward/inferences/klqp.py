@@ -53,7 +53,7 @@ class KLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, *args, **kwargs):
+  def initialize(self, n_samples=1, kl_scaling={}, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -61,8 +61,17 @@ class KLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
+    kl_scaling: dict of RandomVariable to float, optional
+      Provides option to scale terms when using ELBO with KL divergence.
+      If the KL divergence terms are:
+      .. math::
+        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
+
+      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
+      that specifies how much to scale the KL term.
     """
     self.n_samples = n_samples
+    self.kl_scaling = kl_scaling
     return super(KLqp, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
@@ -165,7 +174,7 @@ class ReparameterizationKLKLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(ReparameterizationKLKLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, *args, **kwargs):
+  def initialize(self, n_samples=1, kl_scaling={}, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -173,8 +182,17 @@ class ReparameterizationKLKLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
+    kl_scaling: dict of RandomVariable to float, optional
+      Provides option to scale terms when using ELBO with KL divergence.
+      If the KL divergence terms are:
+      .. math::
+        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
+
+      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
+      that specifies how much to scale the KL term.
     """
     self.n_samples = n_samples
+    self.kl_scaling = kl_scaling
     return super(ReparameterizationKLKLqp, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
@@ -253,7 +271,7 @@ class ScoreKLKLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(ScoreKLKLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, *args, **kwargs):
+  def initialize(self, n_samples=1, kl_scaling={}, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -261,8 +279,17 @@ class ScoreKLKLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
+    kl_scaling: dict of RandomVariable to float, optional
+      Provides option to scale terms when using ELBO with KL divergence.
+      If the KL divergence terms are:
+      .. math::
+        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
+
+      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
+      that specifies how much to scale the KL term.
     """
     self.n_samples = n_samples
+    self.kl_scaling = kl_scaling
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):

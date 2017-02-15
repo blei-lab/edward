@@ -19,22 +19,8 @@ except ImportError:
 class VariationalInference(Inference):
   """Base class for variational inference methods.
   """
-  def __init__(self, kl_scaling={}, *args, **kwargs):
-    """Set up VariationalInference class.
-
-    Parameters
-    ----------
-    kl_scaling: dict of RandomVariable to float, optional
-      Provides option to scale terms when using ELBO with KL divergence.
-      If the KL divergence terms are:
-      .. math::
-        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
-
-      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
-      that specifies how much to scale the KL term.
-      """
-      self.kl_scaling = kl_scaling
-      super(VariationalInference, self).__init__(*args, **kwargs)
+  def __init__(self,  *args, **kwargs):
+    super(VariationalInference, self).__init__(*args, **kwargs)
 
   def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
                  *args, **kwargs):
