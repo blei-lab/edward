@@ -15,13 +15,11 @@ import matplotlib.pyplot as plt
 from edward.models import Normal, Bernoulli
 
 
-data = pd.read_csv('/Users/pfoley/irtexample.csv')
-
 ed.set_seed(42)
 
-n_students = 1000
-n_questions = 200
-n_obs = 20000
+n_students = 50000
+n_questions = 2000
+n_obs = 200000
 
 
 def make_toy_data(n_students, n_questions, n_obs,
@@ -96,12 +94,16 @@ params_dict = {
 data_dict = {outcomes: obs}
 
 inference = ed.KLqp(params_dict, data_dict)
-inference.initialize(n_print=10, n_iter=200)
+inference.initialize(n_print=2, n_iter=50)
 
 init = tf.global_variables_initializer()
 init.run()
 
 f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+ax1.set_ylim([-3.0, 3.0])
+ax2.set_ylim([-3.0, 3.0])
+ax1.set_xlim([-3.0, 3.0])
+ax2.set_xlim([-3.0, 3.0])
 
 
 for t in range(inference.n_iter):
@@ -116,13 +118,19 @@ for t in range(inference.n_iter):
 
         ax1.clear()
         ax2.clear()
+        ax1.set_ylim([-3.0, 3.0])
+        ax2.set_ylim([-3.0, 3.0])
+        ax1.set_xlim([-3.0, 3.0])
+        ax2.set_xlim([-3.0, 3.0])
+
         ax1.set_title('Student Intercepts')
         ax2.set_title('Question Intercepts')
         ax1.set_xlabel('True Student Random Intercepts')
         ax1.set_ylabel('Estimated Student Random Intercepts')
         ax2.set_xlabel('True Question Random Intercepts')
         ax2.set_ylabel('Estimated Question Random Intercepts')
-        ax1.scatter(true_s_etas, student_etas_post)
-        ax2.scatter(true_q_etas, question_etas_post)
+
+        ax1.scatter(true_s_etas, student_etas_post, s=0.05)
+        ax2.scatter(true_q_etas, question_etas_post, s=0.05)
         plt.draw()
         plt.pause(2.0 / 60.0)

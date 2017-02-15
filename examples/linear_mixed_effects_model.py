@@ -13,31 +13,50 @@ import edward as ed
 import pandas as pd
 import tensorflow as tf
 
+import matplotlib.pyplot as plt
+
 from edward.models import Normal
 
-
 data = pd.read_csv('data/insteval.csv')
-
 ed.set_seed(42)
 
+
 # DATA
-ytrain = data['y'].values.astype(float)
 # s - students - 1:2972
-s = data['s'].values.astype(int) - 1
 # d - instructors - codes that need to be remapped
-data['dcodes'] = data['d'].astype('category').cat.codes
-d = data['dcodes'].values.astype(int)
 # dept also needs to be remapped
+data['dcodes'] = data['d'].astype('category').cat.codes
 data['deptcodes'] = data['dept'].astype('category').cat.codes
-dept = data['deptcodes'].values.astype(int)
-service = data['service'].values
+data['s'] = data['s'] - 1
+
+train = data.sample(frac=0.8)
+test = data.drop(train.index)
+
+s_train = train['s'].values.astype(int)
+d_train = train['dcodes'].values.astype(int)
+dept_train = train['deptcodes'].values.astype(int)
+y_train = train['y'].values.astype(float)
+service_train = train['service'].values.astype(int)
+n_obs_train = train.shape[0]
+service_train.shape = [n_obs_train, 1]
+
+
+s_test = test['s'].values.astype(int)
+d_test = test['dcodes'].values.astype(int)
+dept_test = test['deptcodes'].values.astype(int)
+y_test = test['y'].values.astype(float)
+service_test = test['service'].values.astype(int)
+n_obs_test = test.shape[0]
+service_test.shape = [n_obs_test, 1]
 
 n_s = 2972
 n_d = 1128
 n_dept = 14
-n_obs = data.shape[0]
+n_obs = train.shape[0]
 
 # MODEL
+service_X = tf.placeholder(tf.float32, [n_obs, 1])
+
 lnvar_s = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 lnvar_d = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 lnvar_dept = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
@@ -56,10 +75,10 @@ eta_d = Normal(mu=tf.zeros(n_d),
 eta_dept = Normal(mu=tf.zeros(n_dept),
                   sigma=sigma_dept*tf.ones(n_dept))
 
-yhat = tf.gather(eta_s, s) + \
-       tf.gather(eta_d, d) + \
-       tf.gather(eta_dept, dept) + \
-       mu + service
+yhat = tf.gather(eta_s, s_train) + \
+       tf.gather(eta_d, d_train) + \
+       tf.gather(eta_dept, dept_train) + \
+       mu + ed.dot(service_X, service)
 y = Normal(mu=yhat,
            sigma=tf.ones(n_obs))
 
@@ -94,7 +113,42 @@ params_dict = {
     eta_dept: q_eta_dept
 }
 
-data_dict = {y: ytrain}
+data_dict = {y: y_train, service_X: service_train}
 
 inference = ed.KLqp(params_dict, data_dict)
-inference.run(n_iter=1000)
+inference.initialize(n_print=1, n_iter=50)
+
+init = tf.global_variables_initializer()
+init.run()
+
+for t in range(inference.n_iter):
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
+
+    if t % inference.n_print == 0:
+        y_post = ed.copy(y, {mu: qmu.mean(),
+                         service: qservice.mean(),
+                         eta_s: q_eta_s.mean(),
+                         eta_d: q_eta_d.mean(),
+                         eta_dept: q_eta_dept.mean()})
+
+        eta_s_post = q_eta_s.mean().eval()
+        eta_d_post = q_eta_d.mean().eval()
+        eta_dept_post = q_eta_dept.mean().eval()
+        mu_post = qmu.mean().eval()
+        service_post = qservice.mean().eval()
+
+        service_X_test = tf.placeholder(tf.float32, [n_obs_test, 1])
+        yhat_test = tf.gather(eta_s_post, s_test) + \
+            tf.gather(eta_d_post, d_test) + \
+            tf.gather(eta_dept_post, dept_test) + \
+            mu_post + ed.dot(service_X_test, service_post)
+
+        yhat_vals = yhat_test.eval(feed_dict={service_X_test: service_test})
+        plt.cla()
+        plt.title("Residuals for Prediced Ratings on Test Set")
+        plt.xlim(-4, 4)
+        plt.ylim(0, 800)
+        plt.hist(yhat_vals - y_test, 75)
+        plt.draw()
+        plt.pause(1.0/60.0)
