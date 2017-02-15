@@ -18,7 +18,6 @@ import matplotlib.pyplot as plt
 
 from edward.models import Normal, Bernoulli
 
-
 ed.set_seed(42)
 
 n_students = 50000
@@ -116,11 +115,7 @@ for t in range(inference.n_iter):
   inference.print_progress(info_dict)
 
   if t % inference.n_print == 0:
-
     # CRITICISM
-    student_etas_post = qstudents_mean.eval()
-    question_etas_post = qquestions_mean.eval()
-
     ax1.clear()
     ax2.clear()
     ax1.set_ylim([-3.0, 3.0])
@@ -135,7 +130,7 @@ for t in range(inference.n_iter):
     ax2.set_xlabel('True Question Random Intercepts')
     ax2.set_ylabel('Estimated Question Random Intercepts')
 
-    ax1.scatter(true_s_etas, student_etas_post, s=0.05)
-    ax2.scatter(true_q_etas, question_etas_post, s=0.05)
+    ax1.scatter(true_s_etas, qstudents_mean.eval(), s=0.05)
+    ax2.scatter(true_q_etas, qquestions_mean.eval(), s=0.05)
     plt.draw()
     plt.pause(2.0 / 60.0)

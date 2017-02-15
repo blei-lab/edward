@@ -127,34 +127,29 @@ qdept_mean = q_eta_dept.mean()
 qmu_mean = qmu.mean()
 qservice_mean = qservice.mean()
 
+y_post = ed.copy(y, {mu: qmu_mean,
+                 service: qservice_mean,
+                 eta_s: qs_mean,
+                 eta_d: qd_mean,
+                 eta_dept: qdept_mean})
+
+service_X_test = tf.placeholder(tf.float32, [n_obs_test, 1])
+yhat_test = tf.gather(qs_mean, s_test) + \
+    tf.gather(qd_mean, d_test) + \
+    tf.gather(qd_mean, dept_test) + \
+    qmu_mean + ed.dot(service_X_test, qservice_mean)
+
+
 for t in range(inference.n_iter):
   info_dict = inference.update()
   inference.print_progress(info_dict)
+  yhat_vals = yhat_test.eval(feed_dict={service_X_test: service_test})
 
   if t % inference.n_print == 0:
-      y_post = ed.copy(y, {mu: qmu_mean,
-                       service: qservice_mean,
-                       eta_s: qs_mean,
-                       eta_d: qd_mean,
-                       eta_dept: qdept_mean})
-
-      eta_s_post = qs_mean.eval()
-      eta_d_post = qd_mean.eval()
-      eta_dept_post = qdept_mean.eval()
-      mu_post = qmu_mean.eval()
-      service_post = qservice_mean.eval()
-
-      service_X_test = tf.placeholder(tf.float32, [n_obs_test, 1])
-      yhat_test = tf.gather(eta_s_post, s_test) + \
-          tf.gather(eta_d_post, d_test) + \
-          tf.gather(eta_dept_post, dept_test) + \
-          mu_post + ed.dot(service_X_test, service_post)
-
-      yhat_vals = yhat_test.eval(feed_dict={service_X_test: service_test})
-      plt.cla()
-      plt.title("Residuals for Prediced Ratings on Test Set")
-      plt.xlim(-4, 4)
-      plt.ylim(0, 800)
-      plt.hist(yhat_vals - y_test, 75)
-      plt.draw()
-      plt.pause(1.0 / 60.0)
+    plt.cla()
+    plt.title("Residuals for Prediced Ratings on Test Set")
+    plt.xlim(-4, 4)
+    plt.ylim(0, 800)
+    plt.hist(yhat_vals - y_test, 75)
+    plt.draw()
+    plt.pause(1.0 / 60.0)
