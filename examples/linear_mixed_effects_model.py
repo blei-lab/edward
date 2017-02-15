@@ -69,26 +69,26 @@ mu = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 service = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
 eta_s = Normal(mu=tf.zeros(n_s),
-               sigma=sigma_s*tf.ones(n_s))
+               sigma=sigma_s * tf.ones(n_s))
 eta_d = Normal(mu=tf.zeros(n_d),
-               sigma=sigma_d*tf.ones(n_d))
+               sigma=sigma_d * tf.ones(n_d))
 eta_dept = Normal(mu=tf.zeros(n_dept),
-                  sigma=sigma_dept*tf.ones(n_dept))
+                  sigma=sigma_dept * tf.ones(n_dept))
 
 yhat = tf.gather(eta_s, s_train) + \
-       tf.gather(eta_d, d_train) + \
-       tf.gather(eta_dept, dept_train) + \
-       mu + ed.dot(service_X, service)
+    tf.gather(eta_d, d_train) + \
+    tf.gather(eta_dept, dept_train) + \
+    mu + ed.dot(service_X, service)
 y = Normal(mu=yhat,
            sigma=tf.ones(n_obs))
 
 
 # INFERENCE
 def make_normal(n):
-    var = Normal(
-        mu=tf.Variable(tf.random_normal([n])),
-        sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n]))))
-    return var
+  var = Normal(
+      mu=tf.Variable(tf.random_normal([n])),
+      sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n]))))
+  return var
 
 
 q_eta_s = make_normal(n_s)
@@ -121,34 +121,40 @@ inference.initialize(n_print=1, n_iter=50)
 init = tf.global_variables_initializer()
 init.run()
 
+qs_mean = q_eta_s.mean()
+qd_mean = q_eta_d.mean()
+qdept_mean = q_eta_dept.mean()
+qmu_mean = qmu.mean()
+qservice_mean = qservice.mean()
+
 for t in range(inference.n_iter):
-    info_dict = inference.update()
-    inference.print_progress(info_dict)
+  info_dict = inference.update()
+  inference.print_progress(info_dict)
 
-    if t % inference.n_print == 0:
-        y_post = ed.copy(y, {mu: qmu.mean(),
-                         service: qservice.mean(),
-                         eta_s: q_eta_s.mean(),
-                         eta_d: q_eta_d.mean(),
-                         eta_dept: q_eta_dept.mean()})
+  if t % inference.n_print == 0:
+      y_post = ed.copy(y, {mu: qmu_mean,
+                       service: qservice_mean,
+                       eta_s: qs_mean,
+                       eta_d: qd_mean,
+                       eta_dept: qdept_mean})
 
-        eta_s_post = q_eta_s.mean().eval()
-        eta_d_post = q_eta_d.mean().eval()
-        eta_dept_post = q_eta_dept.mean().eval()
-        mu_post = qmu.mean().eval()
-        service_post = qservice.mean().eval()
+      eta_s_post = qs_mean.eval()
+      eta_d_post = qd_mean.eval()
+      eta_dept_post = qdept_mean.eval()
+      mu_post = qmu_mean.eval()
+      service_post = qservice_mean.eval()
 
-        service_X_test = tf.placeholder(tf.float32, [n_obs_test, 1])
-        yhat_test = tf.gather(eta_s_post, s_test) + \
-            tf.gather(eta_d_post, d_test) + \
-            tf.gather(eta_dept_post, dept_test) + \
-            mu_post + ed.dot(service_X_test, service_post)
+      service_X_test = tf.placeholder(tf.float32, [n_obs_test, 1])
+      yhat_test = tf.gather(eta_s_post, s_test) + \
+          tf.gather(eta_d_post, d_test) + \
+          tf.gather(eta_dept_post, dept_test) + \
+          mu_post + ed.dot(service_X_test, service_post)
 
-        yhat_vals = yhat_test.eval(feed_dict={service_X_test: service_test})
-        plt.cla()
-        plt.title("Residuals for Prediced Ratings on Test Set")
-        plt.xlim(-4, 4)
-        plt.ylim(0, 800)
-        plt.hist(yhat_vals - y_test, 75)
-        plt.draw()
-        plt.pause(1.0/60.0)
+      yhat_vals = yhat_test.eval(feed_dict={service_X_test: service_test})
+      plt.cla()
+      plt.title("Residuals for Prediced Ratings on Test Set")
+      plt.xlim(-4, 4)
+      plt.ylim(0, 800)
+      plt.hist(yhat_vals - y_test, 75)
+      plt.draw()
+      plt.pause(1.0 / 60.0)
