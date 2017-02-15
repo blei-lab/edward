@@ -53,7 +53,7 @@ class KLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, kl_scaling={}, *args, **kwargs):
+  def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -70,6 +70,9 @@ class KLqp(VariationalInference):
       pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
       that specifies how much to scale the KL term.
     """
+    if kl_scaling is None:
+      kl_scaling = {}
+
     self.n_samples = n_samples
     self.kl_scaling = kl_scaling
     return super(KLqp, self).initialize(*args, **kwargs)
@@ -174,7 +177,7 @@ class ReparameterizationKLKLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(ReparameterizationKLKLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, kl_scaling={}, *args, **kwargs):
+  def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -191,6 +194,9 @@ class ReparameterizationKLKLqp(VariationalInference):
       pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
       that specifies how much to scale the KL term.
     """
+    if kl_scaling is None:
+      kl_scaling = {}
+
     self.n_samples = n_samples
     self.kl_scaling = kl_scaling
     return super(ReparameterizationKLKLqp, self).initialize(*args, **kwargs)
@@ -271,7 +277,7 @@ class ScoreKLKLqp(VariationalInference):
   def __init__(self, *args, **kwargs):
     super(ScoreKLKLqp, self).__init__(*args, **kwargs)
 
-  def initialize(self, n_samples=1, kl_scaling={}, *args, **kwargs):
+  def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
     """Initialization.
 
     Parameters
@@ -288,6 +294,9 @@ class ScoreKLKLqp(VariationalInference):
       pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
       that specifies how much to scale the KL term.
     """
+    if kl_scaling is None:
+      kl_scaling = {}
+
     self.n_samples = n_samples
     self.kl_scaling = kl_scaling
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
@@ -669,7 +678,6 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   if inference.model_wrapper is None:
-
     kl = tf.reduce_sum([inference.kl_scaling.get(z, 1.0) *
                         tf.reduce_sum(ds.kl(qz, z))
                         for z, qz in six.iteritems(inference.latent_vars)])

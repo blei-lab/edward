@@ -19,7 +19,7 @@ except ImportError:
 class VariationalInference(Inference):
   """Base class for variational inference methods.
   """
-  def __init__(self,  *args, **kwargs):
+  def __init__(self, *args, **kwargs):
     super(VariationalInference, self).__init__(*args, **kwargs)
 
   def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
