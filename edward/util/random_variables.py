@@ -756,19 +756,19 @@ def transform(x, *args, **kwargs):
   rv_name = inspect.getattr_static(x, '_name')
 
   if len(args) != 0:
-    biject = args.pop(0)
+    bijector = args.pop(0)
   elif kwargs.get('bijector', None) is not None:
-    biject = kwargs.pop('bijector')
+    bijector = kwargs.pop('bijector')
   # support on [0, 1]
   elif any(rv in rv_name for rv in ['Beta']):
-    biject = bijector.Invert(bijector.SigmoidCentered())
+    bijector = bijector.Invert(bijector.SigmoidCentered())
   # support on [0, infty)
   elif any(rv in rv_name for rv in ['Chi2', 'Exponential',
                                     'Gamma', 'InverseGamma']):
-    biject = bijector.Invert(bijector.Softplus())
+    bijector = bijector.Invert(bijector.Softplus())
   # support on simplex
   elif any(rv in rv_name for rv in ['Dirichlet']):
-    biject = bijector.Invert(bijector.SoftmaxCentered())
+    bijector = bijector.Invert(bijector.SoftmaxCentered())
   # support already on (-infty, infty)
   elif any(rv in rv_name for rv in ['Gumbel', 'Laplace', 'Logistic',
                                     'Normal', 'StudentT']):
@@ -778,11 +778,11 @@ def transform(x, *args, **kwargs):
     # TODO probably don't even want to return a transformed
     # distribution of identity if we just call this hapharzardly and
     # rewrite to self.latent_vars
-    # biject = bijector.Identity
+    # bijector = bijector.Identity
   else:
     raise NotImplementedError()
 
-  return TransformedDistribution(x, biject, *args, **kwargs)
+  return TransformedDistribution(x, bijector, *args, **kwargs)
 
   # TODO: support these
 
