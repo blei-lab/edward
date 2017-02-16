@@ -30,7 +30,7 @@ M = 100  # batch size during training
 d = 2  # latent dimension
 
 # DATA. MNIST batches are fed at training time.
-mnist = input_data.read_data_sets("data/mnist", one_hot=True)
+mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 
 # MODEL
 # Define a subgraph of the full model, corresponding to a minibatch of
@@ -81,4 +81,4 @@ for epoch in range(n_epoch):
   # Prior predictive check.
   imgs = sess.run(x.value())
   for m in range(M):
-    imsave("%s/%d.png" % IMG_DIR, m, imgs[m].reshape(28, 28))
+    imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))
