@@ -462,9 +462,10 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   p_log_lik = tf.stack(p_log_lik)
 
   if inference.model_wrapper is None:
-    kl = tf.reduce_sum([inference.kl_scaling.get(z, 1.0) *
-                        tf.reduce_sum(kl_multivariate_normal(qz, z))
-                        for z, qz in six.iteritems(inference.latent_vars)])
+    kl = tf.reduce_sum([
+        inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(
+            kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma))
+        for z, qz in six.iteritems(inference.latent_vars)])
   else:
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
@@ -678,9 +679,10 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   if inference.model_wrapper is None:
-    kl = tf.reduce_sum([inference.kl_scaling.get(z, 1.0) *
-                        tf.reduce_sum(kl_multivariate_normal(qz, z))
-                        for z, qz in six.iteritems(inference.latent_vars)])
+    kl = tf.reduce_sum([
+        inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(
+            kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma))
+        for z, qz in six.iteritems(inference.latent_vars)])
   else:
     kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
                         for qz in six.itervalues(inference.latent_vars)])
