@@ -6,10 +6,10 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Normal, Empirical
 
 
-class test_klqp_class(tf.test.TestCase):
+class test_mh_class(tf.test.TestCase):
 
   def test_normalnormal_run(self):
     with self.test_session() as sess:
@@ -18,13 +18,14 @@ class test_klqp_class(tf.test.TestCase):
       mu = Normal(mu=0.0, sigma=1.0)
       x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
 
-      qmu_mu = tf.Variable(tf.random_normal([]))
-      qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-      qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+      qmu = Empirical(params=tf.Variable(tf.ones([2000])))
+      proposal_mu = Normal(mu=0.0, sigma=1.0)
 
       # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
-      inference = ed.KLqp({mu: qmu}, data={x: x_data})
-      inference.run(n_iter=5000)
+      inference = ed.MetropolisHastings({mu: qmu},
+                                        {mu: proposal_mu},
+                                        data={x: x_data})
+      inference.run()
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
       self.assertAllClose(qmu.std().eval(), np.sqrt(1 / 51),

@@ -24,12 +24,11 @@ class test_klpq_class(tf.test.TestCase):
 
       # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
       inference = ed.KLpq({mu: qmu}, data={x: x_data})
-      inference.run(n_iter=10000)
+      inference.run(n_iter=5000)
 
-      qmu_mean, qmu_var = tf.nn.moments(qmu.sample(1000), axes=[0])
-
-      self.assertAllClose(qmu_mean.eval(), 0, rtol=1e-3, atol=1e-2)
-      self.assertAllClose(qmu_var.eval(), 1 / 51, rtol=1e-3, atol=1e-2)
+      self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
+      self.assertAllClose(qmu.std().eval(), np.sqrt(1 / 51),
+                          rtol=1e-2, atol=1e-2)
 
 if __name__ == '__main__':
   ed.set_seed(42)

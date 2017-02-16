@@ -24,10 +24,8 @@ class test_map_class(tf.test.TestCase):
       inference = ed.MAP({mu: qmu}, data={x: x_data})
       inference.run(n_iter=1000)
 
-      qmu_mean, qmu_var = tf.nn.moments(qmu.sample(100), axes=[0])
-
-      self.assertAllClose(qmu_mean.eval(), 0)
-      self.assertEqual(qmu_var.eval(), 0)  # delta function approx to posterior
+      self.assertAllClose(qmu.mean().eval(), 0)
+      self.assertEqual(qmu.var().eval(), 0)  # delta approximation to posterior
 
 if __name__ == '__main__':
   ed.set_seed(42)
