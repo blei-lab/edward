@@ -1,9 +1,13 @@
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 
 """
 Dirichlet-Categorical model
 Posterior inference with Edward BBVI
 """
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import edward as ed
 import numpy as np
