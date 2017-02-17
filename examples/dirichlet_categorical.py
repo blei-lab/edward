@@ -26,7 +26,7 @@ alpha_prior = tf.Variable(np.array([1., 1., 1., 1.]),
 # Posterior inference
 # Probabilistic model
 pi = Dirichlet(alpha=alpha_prior)
-zn = Categorical(p=tf.ones([N, 1])*pi)
+zn = Categorical(p=tf.ones([N, 1]) * pi)
 
 # Variational model
 qpi = Dirichlet(alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
