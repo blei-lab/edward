@@ -6,7 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences.gan_inference import GANInference
-from edward.util import get_session
+from edward.models import RandomVariable
+from edward.util import copy, get_session
 
 
 class AVB(GANInference):
