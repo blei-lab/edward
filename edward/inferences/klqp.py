@@ -357,8 +357,8 @@ def build_reparam_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += inference.scale.get(z, 1.0) * \
-          tf.reduce_sum(qz_copy.log_prob(z_sample[z]))
+      q_log_prob[s] += tf.reduce_sum(
+          inference.scale.get(z, 1.0) * qz_copy.log_prob(z_sample[z]))
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
@@ -374,14 +374,14 @@ def build_reparam_loss_and_gradients(inference, var_list):
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        p_log_prob[s] += inference.scale.get(z, 1.0) *  \
-            tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        p_log_prob[s] += tf.reduce_sum(
+            inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_prob[s] += inference.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          p_log_prob[s] += tf.reduce_sum(
+              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -441,8 +441,8 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_lik[s] += inference.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          p_log_lik[s] += tf.reduce_sum(
+              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
       p_log_lik[s] = inference.model_wrapper.log_lik(x, z_sample)
@@ -507,14 +507,14 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        p_log_prob[s] += inference.scale.get(z, 1.0) * \
-            tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        p_log_prob[s] += tf.reduce_sum(
+            inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_prob[s] += inference.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          p_log_prob[s] += tf.reduce_sum(
+              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -550,8 +550,9 @@ def build_score_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += inference.scale.get(z, 1.0) * \
-          tf.reduce_sum(qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
+      q_log_prob[s] += tf.reduce_sum(
+          inference.scale.get(z, 1.0) *
+          qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
@@ -567,14 +568,14 @@ def build_score_loss_and_gradients(inference, var_list):
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        p_log_prob[s] += inference.scale.get(z, 1.0) * \
-            tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        p_log_prob[s] += tf.reduce_sum(
+            inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_prob[s] += inference.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          p_log_prob[s] += tf.reduce_sum(
+              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)
@@ -616,8 +617,9 @@ def build_score_kl_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += inference.scale.get(z, 1.0) * \
-          tf.reduce_sum(qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
+      q_log_prob[s] += tf.reduce_sum(
+          inference.scale.get(z, 1.0) *
+          qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
@@ -634,8 +636,8 @@ def build_score_kl_loss_and_gradients(inference, var_list):
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_lik[s] += inference.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          p_log_lik[s] += tf.reduce_sum(
+              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
       p_log_lik[s] = inference.model_wrapper.log_lik(x, z_sample)
@@ -681,8 +683,9 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
       # Copy q(z) to obtain new set of posterior samples.
       qz_copy = copy(qz, scope=scope)
       z_sample[z] = qz_copy.value()
-      q_log_prob[s] += inference.scale.get(z, 1.0) * \
-          tf.reduce_sum(qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
+      q_log_prob[s] += tf.reduce_sum(
+          inference.scale.get(z, 1.0) *
+          qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
 
     if inference.model_wrapper is None:
       # Form dictionary in order to replace conditioning on prior or
@@ -698,14 +701,14 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        p_log_prob[s] += inference.scale.get(z, 1.0) * \
-            tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        p_log_prob[s] += tf.reduce_sum(
+            inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_prob[s] += inference.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          p_log_prob[s] += tf.reduce_sum(
+              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = inference.data
       p_log_prob[s] = inference.model_wrapper.log_prob(x, z_sample)

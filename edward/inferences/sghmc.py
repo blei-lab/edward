@@ -125,14 +125,14 @@ class SGHMC(MonteCarlo):
       log_joint = 0.0
       for z in six.iterkeys(self.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        log_joint += self.scale(z, 1.0) * \
-            tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+        log_joint += tf.reduce_sum(
+            self.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(self.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          log_joint += self.scale.get(x, 1.0) * \
-              tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+          log_joint += tf.reduce_sum(
+              self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
     else:
       x = self.data
       log_joint = self.model_wrapper.log_prob(x, z_sample)
