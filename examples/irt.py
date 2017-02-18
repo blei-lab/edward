@@ -9,20 +9,13 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy as sp
 import tensorflow as tf
 
-import matplotlib.pyplot as plt
-
 from edward.models import Normal, Bernoulli
-
-ed.set_seed(42)
-
-n_students = 50000
-n_questions = 2000
-n_obs = 200000
 
 
 def make_toy_data(n_students, n_questions, n_obs,
@@ -44,6 +37,12 @@ def make_toy_data(n_students, n_questions, n_obs,
 
   return data, student_etas, question_etas
 
+
+ed.set_seed(42)
+
+n_students = 50000
+n_questions = 2000
+n_obs = 200000
 
 # DATA
 data, true_s_etas, true_q_etas = make_toy_data(n_students, n_questions, n_obs)
@@ -85,21 +84,20 @@ qlnvarstudents = make_normal(1)
 qlnvarquestions = make_normal(1)
 qmu = make_normal(1)
 
-qstudents_mean = qstudents.mean()
-qquestions_mean = qquestions.mean()
-
-params_dict = {
+latent_dict = {
     overall_mu: qmu,
     lnvar_students: qlnvarstudents,
     lnvar_questions: qlnvarquestions,
     student_etas: qstudents,
     question_etas: qquestions
 }
-
 data_dict = {outcomes: obs}
 
-inference = ed.KLqp(params_dict, data_dict)
+inference = ed.KLqp(latent_dict, data_dict)
 inference.initialize(n_print=2, n_iter=50)
+
+qstudents_mean = qstudents.mean()
+qquestions_mean = qquestions.mean()
 
 init = tf.global_variables_initializer()
 init.run()

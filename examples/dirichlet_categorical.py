@@ -1,10 +1,8 @@
 #!/usr/bin/env python
+"""Dirichlet-Categorical model.
 
+Posterior inference with Edward's BBVI.
 """
-Dirichlet-Categorical model
-Posterior inference with Edward BBVI
-"""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -12,6 +10,7 @@ from __future__ import print_function
 import edward as ed
 import numpy as np
 import tensorflow as tf
+
 from edward.models import Categorical, Dirichlet
 
 N = 1000
