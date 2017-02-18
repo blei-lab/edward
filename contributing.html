@@ -110,24 +110,6 @@
 pip install -e edward</code></pre>
 <p>We recommend not installing with <code>sudo</code> but with <code>virtualenv</code>. In fact, we recommend <code>virtualenvwrapper</code>, which is a light wrapper on top of <code>virtualenv</code>. <a href="http://docs.python-guide.org/en/latest/starting/install/osx/">Here is a guide on how to set it up</a>.</p>
 <p>All code should be compatible with both Python 2 and 3. <code>virtualenvwrapper</code> makes it easy to develop in both Python versions and let them manage their own packages. If you set up <code>virtualenvwrapper</code> from the above guide, <a href="http://www.marinamele.com/2014/07/install-python3-on-mac-os-x-and-use-virtualenv-and-virtualenvwrapper.html">here is a guide on how to setup a virtualenv with Python 3</a>. Now we need only work on the corresponding virtualenv to ensure Python 2 and 3 compatibility.</p>
-<h3 id="suggested-private-workflow">Suggested private developer workflow</h3>
-<p>Sometimes it’s useful to work privately on Edward, such as for developing unpublished experiments. To do this, we suggest using a private repo that maintains the master branch from the Edward repo. Development happens on the private repo’s branch, and when it is finished, you can push it to a public repo’s branch and then submit a pull request. We describe this in detail.</p>
-<p>Clone the private repo so you can work on it (create a repo if it does not exist).</p>
-<pre class="JSON"><code>git clone https://github.com/blei-lab/edward-private.git</code></pre>
-<p>Pull changes from the public repo. This will let the private repo have the latest code from the public repo on its master branch.</p>
-<pre class="JSON"><code>cd edward-private
-git remote add public https://github.com/blei-lab/edward.git
-git pull public master # Creates a merge commit
-git push origin master</code></pre>
-<p>Now create your branch on the private repo, develop stuff, and pull any latest changes from the public repo as you develop (<code>git pull public master</code>).</p>
-<p>Finally, to create a pull request from a private repo’s branch to the public repo, push the private branch to the public repo.</p>
-<pre class="JSON"><code>git clone https://github.com/blei-lab/edward.git
-cd edward
-git remote add private https://github.com/blei-lab/edward-private.git
-git checkout -b pull_request_yourname
-git pull private master
-git push origin pull_request_yourname</code></pre>
-<p>Now simply create a pull request via the Github UI on the public repo. Once project owners review the pull request, they can merge it. <a href="http://stackoverflow.com/questions/10065526/github-how-to-make-a-fork-of-public-repository-private/30352360#30352360">Source</a></p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
