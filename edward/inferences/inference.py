@@ -266,9 +266,11 @@ class Inference(object):
       subsampling details, see ``tf.train.slice_input_producer`` and
       ``tf.train.batch``.
     scale : dict of RandomVariable to tf.Tensor, optional
-      A scalar value to scale computation for any random variable that
-      it is binded to. For example, this is useful for scaling
-      computations with respect to local latent variables.
+      A tensor to scale computation for any random variable that it is
+      binded to. Its shape must be broadcastable; it is multiplied
+      element-wise to the random variable. For example, this is useful
+      for mini-batch scaling when inferring global variables, or
+      applying masks on a random variable.
     logdir : str, optional
       Directory where event file will be written. For details,
       see ``tf.summary.FileWriter``. Default is to write nothing.
