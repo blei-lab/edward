@@ -19,7 +19,7 @@ K = 4
 # Data generation
 alpha = np.array([20., 30., 10., 10.])
 pi = np.random.dirichlet(alpha).astype(np.float32)
-zn_data = np.array([np.random.choice(K, 1, p=pi)[0] for n in xrange(N)])
+zn_data = np.array([np.random.choice(K, 1, p=pi)[0] for n in range(N)])
 print('pi={}'.format(pi))
 
 # Prior definition
