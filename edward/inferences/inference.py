@@ -151,6 +151,30 @@ class Inference(object):
                               "shape.")
 
             self.data[key] = value
+          elif isinstance(value, np.number):
+            if np.issubdtype(value.dtype, np.float):
+              ph_type = tf.float32
+            elif np.issubdtype(value.dtype, np.int):
+              ph_type = tf.int32
+            else:
+                raise TypeError("Data value as an invalid type.")
+            ph = tf.placeholder(ph_type, value.shape)
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            sess.run(var.initializer, {ph: value})
+          elif isinstance(value, float):
+            ph_type = tf.float32
+            ph = tf.placeholder(ph_type, ())
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            sess.run(var.initializer, {ph: value})
+          elif isinstance(value, int):
+            ph_type = tf.int32
+            ph = tf.placeholder(ph_type, ())
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            # handle if value is `bool` which this case catches
+            sess.run(var.initializer, {ph: int(value)})
           else:
             raise TypeError("Data value has an invalid type.")
         elif isinstance(key, str):
