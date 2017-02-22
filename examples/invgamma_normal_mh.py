@@ -16,8 +16,8 @@ from edward.models import InverseGamma, Normal, Empirical
 N = 1000
 
 # Data generation (known mean)
-mu = 7.
-sigma = 0.70
+mu = 7.0
+sigma = 0.7
 xn_data = np.random.normal(mu, sigma, N)
 print('sigma={}'.format(sigma))
 
@@ -31,9 +31,10 @@ ig = InverseGamma(alpha=alpha, beta=beta)
 xn = Normal(mu=mu, sigma=tf.ones([N]) * tf.sqrt(ig))
 
 # Inference
-qig = Empirical(params=tf.Variable(tf.zeros([1000]) + 0.5))
-proposal_ig = InverseGamma(alpha=2., beta=2.)
-inference = ed.MetropolisHastings({ig: qig}, {ig: proposal_ig}, data={xn: xn_data})
+qig = Empirical(params=tf.Variable(tf.zeros(1000) + 0.5))
+proposal_ig = InverseGamma(alpha=2.0, beta=2.0)
+inference = ed.MetropolisHastings({ig: qig}, 
+                                  {ig: proposal_ig}, data={xn: xn_data})
 inference.run()
 
 sess = ed.get_session()
