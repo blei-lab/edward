@@ -33,7 +33,7 @@ xn = Normal(mu=mu, sigma=tf.ones([N]) * tf.sqrt(ig))
 # Inference
 qig = Empirical(params=tf.Variable(tf.zeros(1000) + 0.5))
 proposal_ig = InverseGamma(alpha=2.0, beta=2.0)
-inference = ed.MetropolisHastings({ig: qig}, 
+inference = ed.MetropolisHastings({ig: qig},
                                   {ig: proposal_ig}, data={xn: xn_data})
 inference.run()
 
