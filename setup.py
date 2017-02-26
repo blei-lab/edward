@@ -12,7 +12,7 @@ setup(
     author_email="dustin@cs.columbia.edu",
     packages=['edward', 'edward.criticisms', 'edward.inferences',
               'edward.models', 'edward.stats', 'edward.util'],
-    install_requires=['tensorflow>=1.0.0a0',
+    install_requires=['tensorflow>=1.0.0rc0',
                       'numpy>=1.7',
                       'six>=1.10.0'],
     extras_require={'stan': ['pystan>=2.0.1.3'],
