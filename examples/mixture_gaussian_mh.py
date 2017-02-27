@@ -45,7 +45,7 @@ x_data = build_toy_dataset(N)
 pi = Dirichlet(alpha=tf.constant([1.0] * K))
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
-c = Categorical(logits=ed.tile(ed.logit(pi), [N, 1]))
+c = Categorical(logits=tf.tile(tf.reshape(ed.logit(pi), [1, K]), [N, 1]))
 x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))
 
 # INFERENCE
