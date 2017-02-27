@@ -133,7 +133,7 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
       y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
     else:
       y_pred = []
-      for s in range(n_samples):
+      for _ in range(n_samples):
         zrep = {key: qz.sample(())
                 for key, qz in six.iteritems(latent_vars)}
         y_pred += [model_wrapper.predict(data, zrep)]
@@ -217,7 +217,7 @@ def binary_accuracy(y_true, y_pred):
   Parameters
   ----------
   y_true : tf.Tensor
-    Tensor of 0s and 1s.
+    Tensor of 0s and 1s (most generally, any real values a and b).
   y_pred : tf.Tensor
     Tensor of probabilities.
   """

@@ -71,8 +71,8 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   Examples
   --------
   >>> # build posterior predictive after inference: it is
-  >>> # parameterized by posterior means
-  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>> # parameterized by a posterior sample
+  >>> x_post = copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # posterior predictive check
   >>> # T is a user-defined function of data, T(data)
@@ -126,12 +126,12 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   Tobs = T(data, zrep)
   Treps = []
   Ts = []
-  for s in range(n_samples):
+  for _ in range(n_samples):
     # Take a forward pass (session run) to get new samples for
     # each calculation of the discrepancy.
-    # Note that alternatively we can unroll the graph by registering
-    # this operation ``n_samples`` times, each for different parent
-    # nodes representing ``xrep`` and ``zrep``.
+    # Alternatively, we could unroll the graph by registering this
+    # operation ``n_samples`` times, each for different parent nodes
+    # representing ``xrep`` and ``zrep``. But it's expensive.
     Treps += [sess.run(Trep, feed_dict)]
     Ts += [sess.run(Tobs, feed_dict)]
 
