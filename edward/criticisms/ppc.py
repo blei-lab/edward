@@ -35,10 +35,10 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
     can also bind placeholders (of type ``tf.Tensor``) used in the model
     to their realizations.
-  latent_vars : dict of str to RandomVariable, optional
+  latent_vars : dict of RandomVariable to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
-    It is an optional argument, necessary for when the discrepancy is
-    a function of latent variables.
+    This argument is used when the discrepancy is a function of latent
+    variables.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
     ``sample_likelihood`` method. If ``latent_vars`` is not specified,
@@ -81,9 +81,9 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   >>>
   >>> # in general T is a discrepancy function of the data (both response and
   >>> # covariates) and latent variables, T(data, latent_vars)
-  >>> T = lambda xs, zs: tf.reduce_mean(zs['z'])
+  >>> T = lambda xs, zs: tf.reduce_mean(zs[z])
   >>> ppc(T, data={y_post: y_train, x_ph: x_train},
-  ...     latent_vars={'z': qz, 'beta': qbeta})
+  ...     latent_vars={z: qz, beta: qbeta})
   >>>
   >>> # prior predictive check
   >>> # running ppc on original x

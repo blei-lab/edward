@@ -141,10 +141,10 @@ The discrepancy can also take latent variables as input, which we pass
 into the PPC.
 \begin{lstlisting}[language=Python]
 def T(xs, zs):
-  return tf.reduce_mean(tf.cast(zs['z'], tf.float32))
+  return tf.reduce_mean(tf.cast(zs[z], tf.float32))
 
 ppc(T, data={y_post: y_train, x_ph: x_train},
-    latent_vars={'z': qz, 'beta': qbeta})
+    latent_vars={z: qz, beta: qbeta})
 \end{lstlisting}
 
 See the \href{/api/criticism}{criticism API} for further details.

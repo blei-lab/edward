@@ -11,7 +11,7 @@ from edward.util import logit, get_session
 
 
 def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
-             n_samples=100, output_key='y'):
+             n_samples=100, output_key=None):
   """Evaluate fitted model using a set of metrics.
 
   A metric, or scoring rule (Winkler, 1994), is a function of observed
@@ -62,7 +62,7 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     Number of posterior samples for making predictions,
     using the posterior predictive distribution. It is only used if
     the model wrapper is specified.
-  output_key : RandomVariable or str, optional
+  output_key : RandomVariable, optional
     It is the key in ``data`` which corresponds to the model's output.
 
   Returns
@@ -102,16 +102,14 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   if isinstance(metrics, str):
     metrics = [metrics]
 
-  # Set default for output_key if not using a model wrapper.
-  if model_wrapper is None:
-    if output_key == 'y':
-      # Try to default to the only one observed random variable.
-      keys = [key for key in six.iterkeys(data)
-              if isinstance(key, RandomVariable)]
-      if len(keys) == 1:
-        output_key = keys[0]
-      else:
-        raise KeyError("User must specify output_key.")
+  # Default output_key to the only one observed random variable.
+  if output_key is None:
+    keys = [key for key in six.iterkeys(data)
+            if isinstance(key, RandomVariable)]
+    if len(keys) == 1:
+      output_key = keys[0]
+    else:
+      raise KeyError("User must specify output_key.")
 
   # Form true data. (It is not required in the specific setting of the
   # log-likelihood metric with a model wrapper.)
