@@ -11,7 +11,7 @@ from edward.util import logit, get_session
 
 
 def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
-             n_samples=100, output_key=None):
+             n_samples=500, output_key=None):
   """Evaluate fitted model using a set of metrics.
 
   A metric, or scoring rule (Winkler, 1994), is a function of observed
@@ -59,9 +59,8 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     is a NumPy array or TensorFlow placeholder; for Stan, the value
     type is the type according to the Stan program's data block.
   n_samples : int, optional
-    Number of posterior samples for making predictions,
-    using the posterior predictive distribution. It is only used if
-    the model wrapper is specified.
+    Number of posterior samples for making predictions, using the
+    posterior predictive distribution.
   output_key : RandomVariable, optional
     It is the key in ``data`` which corresponds to the model's output.
 
@@ -78,8 +77,8 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   Examples
   --------
   >>> # build posterior predictive after inference: it is
-  >>> # parameterized by posterior means
-  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>> # parameterized by a posterior sample
+  >>> x_post = copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # log-likelihood performance
   >>> evaluate('log_likelihood', data={x_post: x_train})
@@ -119,10 +118,20 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
 
   # Form predicted data (if there are any supervised metrics).
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
+    # Monte Carlo estimate the mean of the posterior predictive.
     if model_wrapper is None:
-      y_pred = output_key.mean()
+      # Note the naive solution of taking the mean of
+      # ``y_pred.sample(n_samples)`` does not work: ``y_pred`` is
+      # parameterized by one posterior sample; this implies each
+      # sample call from ``y_pred`` depends on the same posterior
+      # sample. Instead, we fetch the sample tensor from the graph
+      # many times. Alternatively, we could copy ``y_pred``
+      # ``n_samples`` many times, so that each copy depends on a
+      # different posterior sample. But it's expensive.
+      tensor = tf.convert_to_tensor(output_key)
+      y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+      y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
     else:
-      # Monte Carlo estimate the mean of the posterior predictive.
       y_pred = []
       for s in range(n_samples):
         zrep = {key: qz.sample(())
@@ -175,17 +184,21 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     elif metric == 'cosine' or metric == 'cosine_proximity':
       evaluations += [cosine_proximity(y_true, y_pred)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
+      # Monte Carlo estimate the log-density of the posterior predictive.
       if model_wrapper is None:
-        evaluations += [tf.reduce_mean(output_key.log_prob(y_true))]
+        tensor = tf.reduce_mean(output_key.log_prob(y_true))
+        log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+        log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tf.float32)
+        evaluations += [log_pred]
       else:
-        # Monte Carlo estimate the log-density of the posterior predictive.
-        log_liks = []
-        for s in range(n_samples):
+        log_pred = []
+        for _ in range(n_samples):
           zrep = {key: qz.sample(())
                   for key, qz in six.iteritems(latent_vars)}
-          log_liks += [model_wrapper.log_lik(data, zrep)]
+          log_pred += [model_wrapper.log_lik(data, zrep)]
 
-        evaluations += [tf.reduce_mean(log_liks)]
+        log_pred = tf.reduce_mean(log_pred)
+        evaluations += [log_pred]
     else:
       raise NotImplementedError()
 
