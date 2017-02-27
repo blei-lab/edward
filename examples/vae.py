@@ -36,7 +36,7 @@ mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 # Define a subgraph of the full model, corresponding to a minibatch of
 # size M.
 z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
-hidden = Dense(256, activation='relu')(z.value())
+hidden = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 
 # INFERENCE
