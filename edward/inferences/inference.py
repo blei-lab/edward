@@ -249,9 +249,8 @@ class Inference(object):
     # Feed placeholders in case initialization depends on them.
     feed_dict = {}
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     init.run(feed_dict)
 
@@ -375,9 +374,8 @@ class Inference(object):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     sess = get_session()
     t = sess.run(self.increment_t)
