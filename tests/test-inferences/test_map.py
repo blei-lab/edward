@@ -25,7 +25,6 @@ class test_map_class(tf.test.TestCase):
       inference.run(n_iter=1000)
 
       self.assertAllClose(qmu.mean().eval(), 0)
-      self.assertEqual(qmu.var().eval(), 0)  # delta approximation to posterior
 
 if __name__ == '__main__':
   ed.set_seed(42)
