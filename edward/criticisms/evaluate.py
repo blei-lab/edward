@@ -102,7 +102,7 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
 
   # Default output_key to the only data key that isn't a placeholder.
   if output_key is None:
-    keys = [key for key in six.iterkeys(data) if not \
+    keys = [key for key in six.iterkeys(data) if not
             isinstance(key, tf.Tensor) or "Placeholder" not in key.op.type]
     if len(keys) == 1:
       output_key = keys[0]
