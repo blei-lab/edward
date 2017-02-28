@@ -18,7 +18,7 @@ class test_metropolishastings_class(tf.test.TestCase):
       mu = Normal(mu=0.0, sigma=1.0)
       x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
 
-      qmu = Empirical(params=tf.Variable(tf.ones([2000])))
+      qmu = Empirical(params=tf.Variable(tf.ones(2000)))
       proposal_mu = Normal(mu=0.0, sigma=1.0)
 
       # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
