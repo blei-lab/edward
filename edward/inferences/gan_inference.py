@@ -158,9 +158,8 @@ class GANInference(VariationalInference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     sess = get_session()
     if variables is None:

@@ -213,6 +213,10 @@ class RandomVariable(object):
     from edward.util.random_variables import get_variables
     return get_variables(self, collection)
 
+  def get_shape(self):
+    """Get shape of random variable."""
+    return self._value.get_shape()
+
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
     _ = name
     if dtype and not dtype.is_compatible_with(v.dtype):

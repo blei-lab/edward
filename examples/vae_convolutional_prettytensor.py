@@ -91,6 +91,8 @@ inference = ed.ReparameterizationKLKLqp({z: qz}, data)
 optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer, use_prettytensor=True)
 
+hidden_rep = tf.sigmoid(logits)
+
 init = tf.global_variables_initializer()
 init.run()
 
@@ -115,6 +117,6 @@ for epoch in range(n_epoch):
   print("log p(x) >= {:0.3f}".format(avg_loss))
 
   # Visualize hidden representations.
-  imgs = tf.sigmoid(logits).eval()
+  imgs = hidden_rep.eval()
   for m in range(M):
     imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))

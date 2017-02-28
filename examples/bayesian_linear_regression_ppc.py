@@ -49,9 +49,9 @@ inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
 inference.run()
 
 # CRITICISM
-y_post = ed.copy(y, {w: qw.mean(), b: qb.mean()})
+y_post = ed.copy(y, {w: qw, b: qb})
 # This is equivalent to
-# y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))
+# y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
 
 print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))

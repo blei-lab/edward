@@ -19,13 +19,13 @@ class MonteCarlo(Inference):
 
     Parameters
     ----------
-    latent_vars : list of RandomVariable or
-                  dict of RandomVariable to RandomVariable
-      Collection of random variables to perform inference on. If
-      list, each random variable will be implictly approximated
-      using a ``Empirical`` random variable that is defined
-      internally (with unconstrained support). If dictionary, each
-      random variable must be a ``Empirical`` random variable.
+    latent_vars : list or dict, optional
+      Collection of random variables (of type ``RandomVariable`` or
+      ``tf.Tensor``) to perform inference on. If list, each random
+      variable will be approximated using a ``Empirical`` random
+      variable that is defined internally (with unconstrained
+      support). If dictionary, each value in the dictionary must be a
+      ``Empirical`` random variable.
     data : dict, optional
       Data dictionary which binds observed variables (of type
       ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
@@ -126,9 +126,8 @@ class MonteCarlo(Inference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     sess = get_session()
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)

@@ -127,12 +127,6 @@ qdept_mean = q_eta_dept.mean()
 qmu_mean = qmu.mean()
 qservice_mean = qservice.mean()
 
-y_post = ed.copy(y, {mu: qmu_mean,
-                 service: qservice_mean,
-                 eta_s: qs_mean,
-                 eta_d: qd_mean,
-                 eta_dept: qdept_mean})
-
 service_X_test = tf.placeholder(tf.float32, [n_obs_test, 1])
 yhat_test = tf.gather(qs_mean, s_test) + \
     tf.gather(qd_mean, d_test) + \

@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.util import get_dims, logit, tile
+from edward.util import get_dims, logit
 from tensorflow.contrib.distributions.python.ops import \
     distribution
 from tensorflow.python.framework import dtypes
@@ -79,13 +79,15 @@ class Empirical(distribution.Distribution):
     return math_ops.square(self.std())
 
   def _sample_n(self, n, seed=None):
-    if self.n != 1:
-      logits = logit(tf.ones(self.n, dtype=tf.float32) /
-                     tf.cast(self.n, dtype=tf.float32))
-      cat = tf.contrib.distributions.Categorical(logits=logits)
-      indices = cat._sample_n(n, seed)
-      return tf.gather(self._params, indices)
-    else:
+    input_tensor = self._params
+    if len(input_tensor.get_shape()) == 0:
+      input_tensor = tf.expand_dims(input_tensor, 0)
       multiples = tf.concat(
           [tf.expand_dims(n, 0), [1] * len(self.get_event_shape())], 0)
-      return tile(self._params, multiples)
+      return tf.tile(input_tensor, multiples)
+    else:
+      p = tf.ones(self.n, dtype=tf.float32) / self.n
+      cat = tf.contrib.distributions.Categorical(p=p)
+      indices = cat._sample_n(n, seed)
+      tensor = tf.gather(input_tensor, indices)
+      return tensor

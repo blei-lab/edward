@@ -75,25 +75,22 @@ for _ in range(inference.n_iter):
     print("Inferred cluster means:")
     print(sess.run(qmu.value()))
 
-# Average per-cluster and per-data point likelihood over many posterior samples.
-log_liks = []
-for _ in range(100):
-  mu_sample = qmu.sample()
-  sigma_sample = qsigma.sample()
-  # Take per-cluster and per-data point likelihood.
-  log_lik = []
-  for k in range(K):
-    x_post = Normal(mu=tf.ones([N, 1]) * tf.gather(mu_sample, k),
-                    sigma=tf.ones([N, 1]) * tf.gather(sigma_sample, k))
-    log_lik.append(tf.reduce_sum(x_post.log_prob(x_train), 1))
+# Calculate likelihood for each data point and cluster assignment,
+# averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
+mu_sample = qmu.sample(100)
+sigma_sample = qsigma.sample(100)
+x_post = Normal(mu=tf.ones([N, 1, 1, 1]) * mu_sample,
+                sigma=tf.ones([N, 1, 1, 1]) * sigma_sample)
+x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, 100, K, 1])
 
-  log_lik = tf.stack(log_lik)  # has shape (K, N)
-  log_liks.append(log_lik)
-
-log_liks = tf.reduce_mean(log_liks, 0)
+# Sum over latent dimension, then average over posterior samples.
+# ``log_liks`` ends up with shape (N, K).
+log_liks = x_post.log_prob(x_broadcasted)
+log_liks = tf.reduce_sum(log_liks, 3)
+log_liks = tf.reduce_mean(log_liks, 1)
 
 # Choose the cluster with the highest likelihood for each data point.
-clusters = tf.argmax(log_liks, 0).eval()
+clusters = tf.argmax(log_liks, 1).eval()
 plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.title("Predicted cluster assignments")

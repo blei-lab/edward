@@ -6,7 +6,6 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.util import tile
 from tensorflow.contrib.distributions.python.ops import \
     distribution
 from tensorflow.python.framework import dtypes
@@ -71,6 +70,8 @@ class PointMass(distribution.Distribution):
     return math_ops.square(self.std())
 
   def _sample_n(self, n, seed=None):
+    input_tensor = self._params
+    input_tensor = tf.expand_dims(input_tensor, 0)
     multiples = tf.concat(
         [tf.expand_dims(n, 0), [1] * len(self.get_event_shape())], 0)
-    return tile(self._params, multiples)
+    return tf.tile(input_tensor, multiples)

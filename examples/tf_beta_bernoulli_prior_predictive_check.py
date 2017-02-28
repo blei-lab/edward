@@ -31,10 +31,6 @@ class BetaBernoulli:
     return {'x': bernoulli.sample(p=tf.ones(10) * zs['p'])}
 
 
-def T(xs, zs):
-  return tf.reduce_mean(tf.cast(xs['x'], tf.float32))
-
-
 ed.set_seed(42)
 data = {'x': np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])}
 
@@ -47,4 +43,5 @@ qp = Beta(a=qp_a, b=qp_b)
 inference = ed.KLqp({'p': qp}, data, model)
 inference.run(n_iter=200)
 
-print(ed.ppc(T, data, model_wrapper=model))
+print(ed.ppc(lambda xs, zs: tf.reduce_mean(tf.cast(xs['x'], tf.float32)),
+             data, model_wrapper=model))
