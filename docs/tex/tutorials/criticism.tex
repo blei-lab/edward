@@ -132,10 +132,7 @@ distribution.
 The \texttt{ed.ppc()} method provides a scaffold for studying
 various discrepancy functions.
 \begin{lstlisting}[language=Python]
-def T(xs, zs):
-  return tf.reduce_mean(xs[x_post])
-
-ed.ppc(T, data={x_post: x_train})
+ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x_post]), data={x_post: x_train})
 \end{lstlisting}
 The discrepancy can also take latent variables as input, which we pass
 into the PPC.
