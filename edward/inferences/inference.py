@@ -122,13 +122,20 @@ class Inference(object):
     else:
       self.data = {}
       for key, value in six.iteritems(data):
-        if isinstance(key, RandomVariable) or isinstance(key, tf.Tensor):
+        if isinstance(key, RandomVariable) or \
+           (isinstance(key, tf.Tensor) and "Placeholder" not in key.op.type):
           if isinstance(value, tf.Tensor):
             if not key.get_shape().is_compatible_with(value.get_shape()):
               raise TypeError("Observed variable bindings do not have same "
                               "shape.")
 
             self.data[key] = tf.cast(value, tf.float32)
+          elif isinstance(value, RandomVariable):
+            if not key.get_shape().is_compatible_with(value.get_shape()):
+              raise TypeError("Observed variable bindings do not have same "
+                              "shape.")
+
+            self.data[key] = value
           elif isinstance(value, np.ndarray):
             if not key.get_shape().is_compatible_with(value.shape):
               raise TypeError("Observed variable bindings do not have same "
@@ -146,12 +153,6 @@ class Inference(object):
             var = tf.Variable(ph, trainable=False, collections=[])
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
-          elif isinstance(value, RandomVariable):
-            if not key.get_shape().is_compatible_with(value.get_shape()):
-              raise TypeError("Observed variable bindings do not have same "
-                              "shape.")
-
-            self.data[key] = value
           elif isinstance(value, np.number):
             if np.issubdtype(value.dtype, np.float):
               ph_type = tf.float32
@@ -178,6 +179,12 @@ class Inference(object):
             sess.run(var.initializer, {ph: int(value)})
           else:
             raise TypeError("Data value has an invalid type.")
+        elif isinstance(key, tf.Tensor):
+          if isinstance(value, RandomVariable):
+            raise TypeError("Data placeholder cannot be bound to a "
+                            "RandomVariable.")
+
+          self.data[key] = value
         elif isinstance(key, str):
           if isinstance(value, tf.Tensor):
             self.data[key] = tf.cast(value, tf.float32)
@@ -190,12 +197,6 @@ class Inference(object):
             self.data[key] = value
         elif (have_theano and
                 isinstance(key, theano.tensor.sharedvar.TensorSharedVariable)):
-          self.data[key] = value
-        elif isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
-          if isinstance(value, RandomVariable):
-            raise TypeError("Data placeholder cannot be bound to a "
-                            "RandomVariable.")
-
           self.data[key] = value
         else:
           raise TypeError("Data key has an invalid type.")
