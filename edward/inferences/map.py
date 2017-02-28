@@ -55,7 +55,7 @@ class MAP(VariationalInference):
       list, each random variable will be implictly optimized
       using a ``PointMass`` random variable that is defined
       internally (with unconstrained support). If dictionary, each
-      random variable must be a ``PointMass`` random variable.
+      value in the dictionary must be a ``PointMass`` random variable.
 
     Examples
     --------
