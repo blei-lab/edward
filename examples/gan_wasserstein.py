@@ -77,7 +77,7 @@ inference = ed.WGANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
     optimizer=optimizer, optimizer_d=optimizer,
-    n_iter=15000 * 6, n_print=1000 * 6)
+    n_iter=15000, n_print=1000)
 
 sess = ed.get_session()
 tf.global_variables_initializer().run()
@@ -85,7 +85,7 @@ tf.global_variables_initializer().run()
 idx = np.random.randint(M, size=16)
 i = 0
 for t in range(inference.n_iter):
-  if (t * 6) % inference.n_print == 0:
+  if t % inference.n_print == 0:
     samples = sess.run(x)
     samples = samples[idx, ]
 
@@ -102,4 +102,5 @@ for t in range(inference.n_iter):
   info_dict = inference.update(feed_dict={x_ph: x_batch}, variables="Gen")
   # note: not printing discriminative objective; ``info_dict`` above
   # does not store it since updating only "Gen"
+  info_dict['t'] = info_dict['t'] // 6  # say set of 6 updates is 1 iteration
   inference.print_progress(info_dict)

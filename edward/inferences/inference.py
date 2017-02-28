@@ -24,12 +24,15 @@ class Inference(object):
 
   Attributes
   ----------
-  latent_vars : dict of RandomVariable to RandomVariable
-    Collection of random variables to perform inference on. Each
-    random variable is binded to another random variable; the latter
-    will infer the former conditional on data.
+  latent_vars : dict
+    Collection of latent variables (of type ``RandomVariable`` or
+    ``tf.Tensor``) to perform inference on. Each random variable is
+    binded to another random variable; the latter will infer the
+    former conditional on data.
   data : dict
-    Data dictionary whose values may vary at each session run.
+    Data dictionary which binds observed variables (of type
+    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+    type ``tf.Tensor``).
   model_wrapper : ed.Model or None
     An optional wrapper for the probability model. If specified, the
     random variables in ``latent_vars``' dictionary keys are strings
@@ -40,10 +43,11 @@ class Inference(object):
 
     Parameters
     ----------
-    latent_vars : dict of RandomVariable to RandomVariable, optional
-      Collection of random variables to perform inference on. Each
-      random variable is binded to another random variable; the latter
-      will infer the former conditional on data.
+    latent_vars : dict, optional
+      Collection of latent variables (of type ``RandomVariable`` or
+      ``tf.Tensor``) to perform inference on. Each random variable is
+      binded to another random variable; the latter will infer the
+      former conditional on data.
     data : dict, optional
       Data dictionary which binds observed variables (of type
       ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
@@ -92,10 +96,9 @@ class Inference(object):
       raise TypeError()
 
     for key, value in six.iteritems(latent_vars):
-      if isinstance(value, RandomVariable):
-        if isinstance(key, RandomVariable):
-          if not key.value().get_shape().is_compatible_with(
-                  value.value().get_shape()):
+      if isinstance(value, RandomVariable) or isinstance(value, tf.Tensor):
+        if isinstance(key, RandomVariable) or isinstance(key, tf.Tensor):
+          if not key.get_shape().is_compatible_with(value.get_shape()):
             raise TypeError("Latent variable bindings do not have same shape.")
         elif not isinstance(key, str):
           raise TypeError("Latent variable key has an invalid type.")
@@ -119,16 +122,15 @@ class Inference(object):
     else:
       self.data = {}
       for key, value in six.iteritems(data):
-        if isinstance(key, RandomVariable):
+        if isinstance(key, RandomVariable) or isinstance(key, tf.Tensor):
           if isinstance(value, tf.Tensor):
-            if not key.value().get_shape().is_compatible_with(
-                    value.get_shape()):
+            if not key.get_shape().is_compatible_with(value.get_shape()):
               raise TypeError("Observed variable bindings do not have same "
                               "shape.")
 
             self.data[key] = tf.cast(value, tf.float32)
           elif isinstance(value, np.ndarray):
-            if not key.value().get_shape().is_compatible_with(value.shape):
+            if not key.get_shape().is_compatible_with(value.shape):
               raise TypeError("Observed variable bindings do not have same "
                               "shape.")
 
@@ -145,8 +147,7 @@ class Inference(object):
             self.data[key] = var
             sess.run(var.initializer, {ph: value})
           elif isinstance(value, RandomVariable):
-            if not key.value().get_shape().is_compatible_with(
-                    value.value().get_shape()):
+            if not key.get_shape().is_compatible_with(value.get_shape()):
               raise TypeError("Observed variable bindings do not have same "
                               "shape.")
 
@@ -190,7 +191,7 @@ class Inference(object):
         elif (have_theano and
                 isinstance(key, theano.tensor.sharedvar.TensorSharedVariable)):
           self.data[key] = value
-        elif isinstance(key, tf.Tensor):
+        elif isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
           if isinstance(value, RandomVariable):
             raise TypeError("Data placeholder cannot be bound to a "
                             "RandomVariable.")
