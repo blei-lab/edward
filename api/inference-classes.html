@@ -217,12 +217,12 @@ loss function value after one iteration.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L152" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L151" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L164" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L163" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong> implement
 this method.</p>
@@ -503,7 +503,7 @@ parameters.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.GANInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L192" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L191" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 </dd></dl>
@@ -639,7 +639,7 @@ marginal density <span class="math">\(\log p(x, z)\)</span>, and it is exact if
 list, each random variable will be implictly optimized
 using a <code class="docutils literal"><span class="pre">PointMass</span></code> random variable that is defined
 internally (with unconstrained support). If dictionary, each
-random variable must be a <code class="docutils literal"><span class="pre">PointMass</span></code> random variable.</p>
+value in the dictionary must be a <code class="docutils literal"><span class="pre">PointMass</span></code> random variable.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -676,14 +676,14 @@ is the gradient of</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.Laplace">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L154" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L148" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Laplace approximation.</p>
 <p>It approximates the posterior distribution using a normal
 distribution centered at the mode of the posterior.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L163" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/map.py#L157" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 <p>Computes the Hessian at the mode.</p>
 </dd></dl>
@@ -698,16 +698,14 @@ distribution centered at the mode of the posterior.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : list of RandomVariable or</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : list or dict, optional</p>
 <blockquote>
-<div><blockquote>
-<div><p>dict of RandomVariable to RandomVariable</p>
-</div></blockquote>
-<p>Collection of random variables to perform inference on. If
-list, each random variable will be implictly approximated
-using a <code class="docutils literal"><span class="pre">Empirical</span></code> random variable that is defined
-internally (with unconstrained support). If dictionary, each
-random variable must be a <code class="docutils literal"><span class="pre">Empirical</span></code> random variable.</p>
+<div><p>Collection of random variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or
+<code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to perform inference on. If list, each random
+variable will be approximated using a <code class="docutils literal"><span class="pre">Empirical</span></code> random
+variable that is defined internally (with unconstrained
+support). If dictionary, each value in the dictionary must be a
+<code class="docutils literal"><span class="pre">Empirical</span></code> random variable.</p>
 </div></blockquote>
 <p><strong>data</strong> : dict, optional</p>
 <blockquote>
@@ -793,12 +791,12 @@ separately forces a consistent behavior.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L147" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L146" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L159" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L158" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build update, which returns an assign op for parameters in
 the Empirical random variables.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement

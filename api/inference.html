@@ -158,10 +158,10 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>latent_vars</td>
-<td>(dict of RandomVariable to RandomVariable) Collection of random variables to perform inference on. Each random variable is binded to another random variable; the latter will infer the former conditional on data.</td>
+<td>(dict) Collection of latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to perform inference on. Each random variable is binded to another random variable; the latter will infer the former conditional on data.</td>
 </tr>
 <tr class="row-even"><td>data</td>
-<td>(dict) Data dictionary whose values may vary at each session run.</td>
+<td>(dict) Data dictionary which binds observed variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to their realizations (of type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>).</td>
 </tr>
 <tr class="row-odd"><td>model_wrapper</td>
 <td>(ed.Model or None) An optional wrapper for the probability model. If specified, the random variables in <code class="docutils literal"><span class="pre">latent_vars</span></code>‘ dictionary keys are strings used accordingly by the wrapper.</td>
@@ -174,11 +174,12 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : dict of RandomVariable to RandomVariable, optional</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : dict, optional</p>
 <blockquote>
-<div><p>Collection of random variables to perform inference on. Each
-random variable is binded to another random variable; the latter
-will infer the former conditional on data.</p>
+<div><p>Collection of latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or
+<code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to perform inference on. Each random variable is
+binded to another random variable; the latter will infer the
+former conditional on data.</p>
 </div></blockquote>
 <p><strong>data</strong> : dict, optional</p>
 <blockquote>
@@ -230,7 +231,7 @@ which are the outputs of data readers.</li>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Inference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L186" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L212" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>A simple wrapper to run inference.</p>
 <ol class="arabic simple">
 <li>Initialize algorithm via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
@@ -277,7 +278,7 @@ file readers.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L250" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L275" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize inference algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -303,9 +304,11 @@ subsampling details, see <code class="docutils literal"><span class="pre">tf.tra
 </div></blockquote>
 <p><strong>scale</strong> : dict of RandomVariable to tf.Tensor, optional</p>
 <blockquote>
-<div><p>A scalar value to scale computation for any random variable that
-it is binded to. For example, this is useful for scaling
-computations with respect to local latent variables.</p>
+<div><p>A tensor to scale computation for any random variable that it is
+binded to. Its shape must be broadcastable; it is multiplied
+element-wise to the random variable. For example, this is useful
+for mini-batch scaling when inferring global variables, or
+applying masks on a random variable.</p>
 </div></blockquote>
 <p><strong>logdir</strong> : str, optional</p>
 <blockquote>
@@ -325,7 +328,7 @@ times.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L334" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L361" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -349,7 +352,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L369" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L395" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -366,7 +369,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L384" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L410" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>
