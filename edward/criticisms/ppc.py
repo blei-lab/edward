@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 import six
+import tensorflow as tf
 
 from edward.models import RandomVariable
 from edward.util import get_session
@@ -32,13 +33,13 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     dictionary of latent variables as input and outputs a ``tf.Tensor``.
   data : dict
     Data to compare to. It binds observed variables (of type
-    ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
-    can also bind placeholders (of type ``tf.Tensor``) used in the model
-    to their realizations.
-  latent_vars : dict of RandomVariable to RandomVariable, optional
-    Collection of random variables binded to their inferred posterior.
-    This argument is used when the discrepancy is a function of latent
-    variables.
+    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+    type ``tf.Tensor``). It can also bind placeholders (of type
+    ``tf.Tensor``) used in the model to their realizations.
+  latent_vars : dict, optional
+    Collection of random variables (of type ``RandomVariable`` or
+    ``tf.Tensor``) binded to their inferred posterior. This argument
+    is used when the discrepancy is a function of latent variables.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
     ``sample_likelihood`` method. If ``latent_vars`` is not specified,
@@ -95,7 +96,7 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     if latent_vars is None:
       zrep = None
     else:
-      zrep = {key: value.value()
+      zrep = {key: tf.convert_to_tensor(value)
               for key, value in six.iteritems(latent_vars)}
 
     xrep = {}
@@ -109,16 +110,15 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     if latent_vars is None:
       zrep = model_wrapper.sample_prior()
     else:
-      zrep = {key: value.value()
+      zrep = {key: tf.convert_to_tensor(value)
               for key, value in six.iteritems(latent_vars)}
 
     xrep = model_wrapper.sample_likelihood(zrep)
 
   # Create feed_dict for data placeholders that the model conditions
   # on; it is necessary for all session runs.
-  feed_dict = {x: obs for x, obs in six.iteritems(data)
-               if not isinstance(x, RandomVariable) and
-               not isinstance(x, str)}
+  feed_dict = {key: value for key, value in six.iteritems(data)
+               if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type}
 
   # Calculate discrepancy over many replicated data sets and latent
   # variables.

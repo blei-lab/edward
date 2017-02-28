@@ -43,9 +43,9 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     ``'log_lik'`` or ``'log_likelihood'``.
   data : dict
     Data to evaluate model with. It binds observed variables (of type
-    ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
-    can also bind placeholders (of type ``tf.Tensor``) used in the model
-    to their realizations.
+    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+    type ``tf.Tensor``). It can also bind placeholders (of type
+    ``tf.Tensor``) used in the model to their realizations.
   latent_vars : dict of str to RandomVariable, optional
     Collection of random variables binded to their inferred posterior.
     It is only used (and in fact required) if the model wrapper is
@@ -94,17 +94,16 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   sess = get_session()
   # Create feed_dict for data placeholders that the model conditions
   # on; it is necessary for all session runs.
-  feed_dict = {x: obs for x, obs in six.iteritems(data)
-               if not isinstance(x, RandomVariable) and
-               not isinstance(x, str)}
+  feed_dict = {key: value for key, value in six.iteritems(data)
+               if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type}
 
   if isinstance(metrics, str):
     metrics = [metrics]
 
-  # Default output_key to the only one observed random variable.
+  # Default output_key to the only data key that isn't a placeholder.
   if output_key is None:
-    keys = [key for key in six.iterkeys(data)
-            if isinstance(key, RandomVariable)]
+    keys = [key for key in six.iterkeys(data) if not \
+            isinstance(key, tf.Tensor) or "Placeholder" not in key.op.type]
     if len(keys) == 1:
       output_key = keys[0]
     else:
