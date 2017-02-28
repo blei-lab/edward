@@ -31,9 +31,5 @@ inference.run(n_iter=500)
 # CRITICISM
 x_post = ed.copy(x, {p: qp})
 
-
-def T(xs, zs):
-  return tf.reduce_mean(tf.cast(xs[x_post], tf.float32))
-
-
-print(ed.ppc(T, data={x_post: x_data}))
+print(ed.ppc(lambda xs, zs: tf.reduce_mean(tf.cast(xs[x_post], tf.float32)),
+             data={x_post: x_data}))
