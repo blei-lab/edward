@@ -13,9 +13,9 @@ from edward.util import get_session
 
 try:
   import theano
-  no_theano = False
+  have_theano = True
 except ImportError:
-  no_theano = True
+  have_theano = False
   pass
 
 
@@ -151,6 +151,30 @@ class Inference(object):
                               "shape.")
 
             self.data[key] = value
+          elif isinstance(value, np.number):
+            if np.issubdtype(value.dtype, np.float):
+              ph_type = tf.float32
+            elif np.issubdtype(value.dtype, np.int):
+              ph_type = tf.int32
+            else:
+                raise TypeError("Data value as an invalid type.")
+            ph = tf.placeholder(ph_type, value.shape)
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            sess.run(var.initializer, {ph: value})
+          elif isinstance(value, float):
+            ph_type = tf.float32
+            ph = tf.placeholder(ph_type, ())
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            sess.run(var.initializer, {ph: value})
+          elif isinstance(value, int):
+            ph_type = tf.int32
+            ph = tf.placeholder(ph_type, ())
+            var = tf.Variable(ph, trainable=False, collections=[])
+            self.data[key] = var
+            # handle if value is `bool` which this case catches
+            sess.run(var.initializer, {ph: int(value)})
           else:
             raise TypeError("Data value has an invalid type.")
         elif isinstance(key, str):
@@ -163,7 +187,7 @@ class Inference(object):
             sess.run(var.initializer, {ph: value})
           else:
             self.data[key] = value
-        elif ((not no_theano) and
+        elif (have_theano and
                 isinstance(key, theano.tensor.sharedvar.TensorSharedVariable)):
           self.data[key] = value
         elif isinstance(key, tf.Tensor):
@@ -225,9 +249,8 @@ class Inference(object):
     # Feed placeholders in case initialization depends on them.
     feed_dict = {}
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     init.run(feed_dict)
 
@@ -266,9 +289,11 @@ class Inference(object):
       subsampling details, see ``tf.train.slice_input_producer`` and
       ``tf.train.batch``.
     scale : dict of RandomVariable to tf.Tensor, optional
-      A scalar value to scale computation for any random variable that
-      it is binded to. For example, this is useful for scaling
-      computations with respect to local latent variables.
+      A tensor to scale computation for any random variable that it is
+      binded to. Its shape must be broadcastable; it is multiplied
+      element-wise to the random variable. For example, this is useful
+      for mini-batch scaling when inferring global variables, or
+      applying masks on a random variable.
     logdir : str, optional
       Directory where event file will be written. For details,
       see ``tf.summary.FileWriter``. Default is to write nothing.
@@ -349,9 +374,8 @@ class Inference(object):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     sess = get_session()
     t = sess.run(self.increment_t)

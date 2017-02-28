@@ -126,9 +126,8 @@ class MonteCarlo(Inference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
-        if "Placeholder" in key.op.type:
-          feed_dict[key] = value
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        feed_dict[key] = value
 
     sess = get_session()
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)

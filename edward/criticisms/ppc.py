@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 import six
+import tensorflow as tf
 
 from edward.models import RandomVariable
 from edward.util import get_session
@@ -32,13 +33,13 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     dictionary of latent variables as input and outputs a ``tf.Tensor``.
   data : dict
     Data to compare to. It binds observed variables (of type
-    ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
-    can also bind placeholders (of type ``tf.Tensor``) used in the model
-    to their realizations.
-  latent_vars : dict of str to RandomVariable, optional
-    Collection of random variables binded to their inferred posterior.
-    It is an optional argument, necessary for when the discrepancy is
-    a function of latent variables.
+    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+    type ``tf.Tensor``). It can also bind placeholders (of type
+    ``tf.Tensor``) used in the model to their realizations.
+  latent_vars : dict, optional
+    Collection of random variables (of type ``RandomVariable`` or
+    ``tf.Tensor``) binded to their inferred posterior. This argument
+    is used when the discrepancy is a function of latent variables.
   model_wrapper : ed.Model, optional
     An optional wrapper for the probability model. It must have a
     ``sample_likelihood`` method. If ``latent_vars`` is not specified,
@@ -71,8 +72,8 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   Examples
   --------
   >>> # build posterior predictive after inference: it is
-  >>> # parameterized by posterior means
-  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>> # parameterized by a posterior sample
+  >>> x_post = copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # posterior predictive check
   >>> # T is a user-defined function of data, T(data)
@@ -81,9 +82,9 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   >>>
   >>> # in general T is a discrepancy function of the data (both response and
   >>> # covariates) and latent variables, T(data, latent_vars)
-  >>> T = lambda xs, zs: tf.reduce_mean(zs['z'])
+  >>> T = lambda xs, zs: tf.reduce_mean(zs[z])
   >>> ppc(T, data={y_post: y_train, x_ph: x_train},
-  ...     latent_vars={'z': qz, 'beta': qbeta})
+  ...     latent_vars={z: qz, beta: qbeta})
   >>>
   >>> # prior predictive check
   >>> # running ppc on original x
@@ -95,7 +96,7 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     if latent_vars is None:
       zrep = None
     else:
-      zrep = {key: value.value()
+      zrep = {key: tf.convert_to_tensor(value)
               for key, value in six.iteritems(latent_vars)}
 
     xrep = {}
@@ -109,16 +110,15 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     if latent_vars is None:
       zrep = model_wrapper.sample_prior()
     else:
-      zrep = {key: value.value()
+      zrep = {key: tf.convert_to_tensor(value)
               for key, value in six.iteritems(latent_vars)}
 
     xrep = model_wrapper.sample_likelihood(zrep)
 
   # Create feed_dict for data placeholders that the model conditions
   # on; it is necessary for all session runs.
-  feed_dict = {x: obs for x, obs in six.iteritems(data)
-               if not isinstance(x, RandomVariable) and
-               not isinstance(x, str)}
+  feed_dict = {key: value for key, value in six.iteritems(data)
+               if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type}
 
   # Calculate discrepancy over many replicated data sets and latent
   # variables.
@@ -126,12 +126,12 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   Tobs = T(data, zrep)
   Treps = []
   Ts = []
-  for s in range(n_samples):
+  for _ in range(n_samples):
     # Take a forward pass (session run) to get new samples for
     # each calculation of the discrepancy.
-    # Note that alternatively we can unroll the graph by registering
-    # this operation ``n_samples`` times, each for different parent
-    # nodes representing ``xrep`` and ``zrep``.
+    # Alternatively, we could unroll the graph by registering this
+    # operation ``n_samples`` times, each for different parent nodes
+    # representing ``xrep`` and ``zrep``. But it's expensive.
     Treps += [sess.run(Trep, feed_dict)]
     Ts += [sess.run(Tobs, feed_dict)]
 
