@@ -66,6 +66,17 @@ class ImplicitKLqp(GANInference):
     # call grandparent's method; avoid parent (GANInference)
     super(GANInference, self).__init__(latent_vars, data, model_wrapper=None)
 
+  def initialize(self, loss_obj='log', *args, **kwargs):
+    """Initialization.
+
+    Parameters
+    ----------
+    loss_obj : str, optional
+      Ratio loss minimized for the ratio estimator. 'log' or 'hinge'.
+    """
+    self.loss_obj = loss_obj
+    return super(ImplicitKLqp, self).initialize(*args, **kwargs)
+
   def build_loss_and_gradients(self, var_list):
     """Build loss function
 
@@ -139,7 +150,7 @@ class ImplicitKLqp(GANInference):
     dict_swap.update(qz_sample)
     x_psample = {}
     x_qsample = {}
-    debug_with_true_ratio = True
+    debug_with_true_ratio = False
     if debug_with_true_ratio:
       p_log_lik = 0.0
     for x, x_data in six.iteritems(self.data):
@@ -181,7 +192,11 @@ class ImplicitKLqp(GANInference):
       self.ratio_true = scale * p_log_lik
       self.ratio_est = tf.reduce_sum(scale * r_qsample)
 
-    loss_d = log_loss(r_psample, r_qsample)
+    if self.loss_obj == 'log':
+      loss_d = log_loss(r_psample, r_qsample)
+    else:
+      loss_d = hinge_loss(r_psample, r_qsample)
+
     loss_d = tf.reduce_mean(loss_d)
 
     var_list_d = tf.get_collection(
