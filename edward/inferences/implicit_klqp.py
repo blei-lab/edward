@@ -10,7 +10,6 @@ from edward.models import RandomVariable
 from edward.util import copy, get_session
 
 
-# TODO what to call this?
 class ImplicitKLqp(GANInference):
   """Variational inference with implicit probabilistic models.
 
@@ -18,13 +17,15 @@ class ImplicitKLqp(GANInference):
 
   .. math::
 
-    \\text{KL}( q(z; \lambda) \| p(z \mid x) ).
+    \\text{KL}( q(z, \beta; \lambda) \| p(z, \beta \mid x) ),
+
+  where :math:`z` are local variables associated to a data point and
+  :math:`\beta` are global variables shared across data points.
 
   Global latent variables require ``log_prob()`` and need to return a
   random sample when fetched from the graph. Local latent variables
   and observed variables require only a random sample when fetched
-  from the graph. (This is true for both the probability model and
-  variational model.)
+  from the graph. (This is true for both :math:`p` and :math:`q`.)
   """
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
@@ -32,13 +33,13 @@ class ImplicitKLqp(GANInference):
     Parameters
     ----------
     discriminator : function
-      Function (with parameters) to discriminate samples. It should
-      output logit probabilities (real-valued) and not probabilities
-      in [0, 1]. Unlike ``GANInference``, it takes three arguments: a
-      data dict, local latent variable dict, and global latent
-      variable dict. As with GAN discriminators, it can take a batch
-      of data points and local variables, of size M, and output a
-      vector of length M.
+      Function (with parameters). Unlike ``GANInference``, it is
+      interpreted as a ratio estimator rather than a discriminator.
+      It takes three arguments: a data dict, local latent variable
+      dict, and global latent variable dict. As with GAN
+      discriminators, it can take a batch of data points and local
+      variables, of size :math:`M`, and output a vector of length
+      :math:`M`.
     global_vars : dict of RandomVariable to RandomVariable, optional
       Identifying which variables in ``latent_vars`` are global
       variables, shared across data points. These will not be
@@ -47,11 +48,11 @@ class ImplicitKLqp(GANInference):
 
     Notes
     -----
-    Unlike ``GANInference`` D takes dict's as input, and must subset
-    to the appropriate values through lexical scoping from the
-    previously defined model and latent variables. This is necessary
-    as the discriminator can take an arbitrary set of data, latent, and
-    global variables.
+    Unlike ``GANInference``, ``discriminator`` takes dict's as input,
+    and must subset to the appropriate values through lexical scoping
+    from the previously defined model and latent variables. This is
+    necessary as the discriminator can take an arbitrary set of data,
+    latent, and global variables.
     """
     if discriminator is None:
       raise NotImplementedError()
@@ -101,13 +102,8 @@ class ImplicitKLqp(GANInference):
       \log q(z_n | \beta) - \log p(x_n, z_n | \beta)
 
     Rather than explicit calculation, :math:`D*(x, z, \beta)` is the
-    solution to an estimation problem
-
-    .. math::
-
-      \\text{argmin}_D
-      \mathbb{E}_{p(x_n)q(z_n | \beta)} [ log D(x_n, z_n, \beta) ] +
-      \mathbb{E}_{p(x_n, z_n | \beta)} [ log (1 - D(x_n, z_n, \beta)) ].
+    solution to a ratio estimation problem, minimizing the specified
+    ``ratio_loss``.
 
     Gradients are taken using the reparameterization trick (Kingma and
     Welling, 2014).
@@ -116,8 +112,11 @@ class ImplicitKLqp(GANInference):
     and variational distributions with inference networks :math:`q(z |
     x)`.
 
+    Notes
+    -----
     There are a bunch of extensions we could easily do in this
     implementation:
+
     + further factorizations can be used to better leverage the
     graph structure for more complicated models;
     + use more samples; this would require the ``copy()`` utility
