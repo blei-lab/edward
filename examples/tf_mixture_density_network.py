@@ -77,10 +77,9 @@ model = MixtureDensityNetwork(10)
 
 # INFERENCE
 inference = ed.MAP([], data, model)
-sess = ed.get_session()
-K.set_session(sess)
 inference.initialize()
 
+sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
 

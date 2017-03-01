@@ -115,10 +115,9 @@ model = MixtureDensityNetwork(20)
 
 # INFERENCE
 inference = ed.MAP([], data, model)
-sess = ed.get_session()  # Start TF session
-K.set_session(sess)  # Pass session info to Keras
 inference.initialize()
 
+sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
 

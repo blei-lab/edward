@@ -8,6 +8,13 @@ import tensorflow as tf
 
 from edward.models.random_variable import RANDOM_VARIABLE_COLLECTION
 
+try:
+  from keras import backend as K
+  have_keras = True
+except ImportError:
+  have_keras = False
+  pass
+
 
 def get_session():
   """Get the globally defined TensorFlow session.
@@ -24,6 +31,9 @@ def get_session():
     _ED_SESSION = tf.InteractiveSession()
   else:
     _ED_SESSION = tf.get_default_session()
+
+  if have_keras:
+    K.set_session(_ED_SESSION)
 
   return _ED_SESSION
 
