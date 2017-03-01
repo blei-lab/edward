@@ -2,8 +2,8 @@
 """Linear model. Inference uses data subsampling and scales the
 log-likelihood.
 
-This produces an inferred posterior mean of about [-4.8 4.0], implying
-this is some weird symmetry happening that causes the opposite
+This produces an inferred posterior mean of about [-4.6 4.9], implying
+there is some weird symmetry happening that causes the opposite
 direction to be an optima. Changing the seed, sometimes both
 dimensions are around negative 5. This also happens in
 linear_model.py, using ``ed.set_seed(231555)``. Therefore it's not an
@@ -79,8 +79,8 @@ qw = Normal(mu=tf.Variable(tf.random_normal([D])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
 
 inference = ed.ImplicitKLqp(
-  {w: qw}, data={y: y_ph},
-  discriminator=ratio_estimator, global_vars={w: qw})
+    {w: qw}, data={y: y_ph},
+    discriminator=ratio_estimator, global_vars={w: qw})
 inference.initialize(n_iter=5000, n_print=100, scale={y: float(N) / M})
 
 sess = ed.get_session()

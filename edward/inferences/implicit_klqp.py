@@ -130,7 +130,8 @@ class ImplicitKLqp(GANInference):
     pbeta_log_prob = 0.0
     qbeta_log_prob = 0.0
     for beta, qbeta in six.iteritems(self.global_vars):
-      # Draw a sample beta' ~ q(beta) and calculate log p(beta') and log q(beta').
+      # Draw a sample beta' ~ q(beta) and calculate
+      # log p(beta') and log q(beta').
       qbeta_sample[beta] = qbeta.value()
       pbeta_log_prob += tf.reduce_sum(beta.log_prob(qbeta_sample[beta]))
       qbeta_log_prob += tf.reduce_sum(qbeta.log_prob(qbeta_sample[beta]))
@@ -218,6 +219,7 @@ def log_loss(psample, qsample):
       tf.nn.sigmoid_cross_entropy_with_logits(
           labels=tf.zeros_like(qsample), logits=qsample)
   return loss
+
 
 def hinge_loss(psample, qsample):
   """Point-wise hinge loss."""
