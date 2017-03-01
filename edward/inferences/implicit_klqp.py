@@ -54,7 +54,7 @@ class ImplicitKLqp(GANInference):
     necessary as the discriminator can take an arbitrary set of data,
     latent, and global variables.
 
-    Note the type for ``discriminator``'s output change when one
+    Note the type for ``discriminator``'s output changes when one
     passes in the ``scale`` argument to ``initialize()``.
 
     + If ``scale`` has at most one item, then ``discriminator``
