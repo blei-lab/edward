@@ -31,7 +31,8 @@ def build_toy_dataset(N, w, noise_std=0.1):
 def ratio_estimator(data, local_vars, global_vars):
   """Takes as input a dict of data x, local variable samples z, and
   global variable samples beta; outputs real values of shape
-  (x.shape[0] + z.shape[0],).
+  (x.shape[0] + z.shape[0],). In this example, there are no local
+  variables.
   """
   # data[y] has shape (M,); global_vars[w] has shape (D,)
   # we concatenate w to each data point y, so input has shape (M, 1 + D)

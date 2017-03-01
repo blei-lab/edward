@@ -53,6 +53,17 @@ class ImplicitKLqp(GANInference):
     from the previously defined model and latent variables. This is
     necessary as the discriminator can take an arbitrary set of data,
     latent, and global variables.
+
+    Note the type for ``discriminator``'s output change when one
+    passes in the ``scale`` argument to ``initialize()``.
+
+    + If ``scale`` has at most one item, then ``discriminator``
+    outputs a tensor whose multiplication with that element is
+    broadcastable. (For example, the output is a tensor and the single
+    scale factor is a scalar.)
+    + If ``scale`` has more than one item, then in order to scale
+    its corresponding output, ``discriminator`` must output a
+    dictionary of same size and keys as ``scale``.
     """
     if discriminator is None:
       raise NotImplementedError()
@@ -87,33 +98,35 @@ class ImplicitKLqp(GANInference):
     .. math::
 
       -[ \mathbb{E}_{q(\beta)} [
-           \sum_{n=1}^N \mathbb{E}_{q(z_n | \beta)} [ -D*(x_n, z_n, \beta) ] ] +
+           \sum_{n=1}^N \mathbb{E}_{q(z_n | \beta)} [ r*(x_n, z_n, \beta) ] ] +
          \mathbb{E}_{q(\beta)} [ log p(\beta) - log q(\beta) ] ].
 
     We minimize it with respect to parameterized variational
     families :math:`q(z, beta; \lambda)`.
 
-    :math:`D*(x_n, z_n, beta)` is a function of a single data point
+    :math:`r*(x_n, z_n, beta)` is a function of a single data point
     :math:`x_n`, single local variable :math:`z_n`, and all global
     variables :math:`\beta`. It is equal to the log-ratio
 
     .. math::
 
-      \log q(z_n | \beta) - \log p(x_n, z_n | \beta)
+      \log p(x_n, z_n | \beta) - \log q(z_n | \beta).
 
-    Rather than explicit calculation, :math:`D*(x, z, \beta)` is the
+    Rather than explicit calculation, :math:`r*(x, z, \beta)` is the
     solution to a ratio estimation problem, minimizing the specified
     ``ratio_loss``.
 
     Gradients are taken using the reparameterization trick (Kingma and
     Welling, 2014).
 
-    This also includes model parameters :math:`p(x, z, beta; theta)`
-    and variational distributions with inference networks :math:`q(z |
-    x)`.
-
     Notes
     -----
+    This also includes model parameters :math:`p(x, z, beta; theta)`
+    and variational distributions with inference networks :math:`q(z |
+    x)`. This requires all variational distributions to be
+    reparameterizable: each random variable ``rv`` satisfies
+    ``rv.is_reparameterized`` and ``rv.is_continuous``.
+
     There are a bunch of extensions we could easily do in this
     implementation:
 
@@ -148,14 +161,11 @@ class ImplicitKLqp(GANInference):
         pz_sample[z] = pz_copy.value()
         qz_sample[z] = qz.value()
 
-    # Collect x' ~ p(x | z', beta') and x' ~ p^*(x).
+    # Collect x' ~ p(x | z', beta') and x' ~ q(x).
     dict_swap = qbeta_sample.copy()
     dict_swap.update(qz_sample)
     x_psample = {}
     x_qsample = {}
-    debug_with_true_ratio = False
-    if debug_with_true_ratio:
-      p_log_lik = 0.0
     for x, x_data in six.iteritems(self.data):
       if isinstance(x, tf.Tensor):
         if "Placeholder" not in x.op.type:
@@ -166,9 +176,6 @@ class ImplicitKLqp(GANInference):
       elif isinstance(x, RandomVariable):
         # Copy p(x | z, beta) to get draw p(x | z', beta').
         x_copy = copy(x, dict_swap=dict_swap, scope=scope)
-        if debug_with_true_ratio:
-          p_log_lik = tf.reduce_sum(
-              self.scale.get(x, 1.0) * x_copy.log_prob(x_data))
         x_psample[x] = x_copy.value()
         x_qsample[x] = x_data
 
@@ -178,31 +185,29 @@ class ImplicitKLqp(GANInference):
     with tf.variable_scope("Disc", reuse=True):
       r_qsample = self.discriminator(x_qsample, qz_sample, qbeta_sample)
 
-    # Form variational objective and auxiliary log-ratio loss.
-    # TODO hard to know how to scale D if there is more than one
-    # thing being scaled; e.g, since it's scaling the f(x, z), it
-    # should be [scale[x], scale[z]] * f(x, z), assuming x, z have
-    # the same shape to begin with.
-    # + D should generally output a dict, of same size as its input
-    #   + this is impractical though
-    # + for now, scale all values with just the first scale
-    # argument, and hope it's a tensor broadcastable to all output
-    # (such as a scalar)
-    scale = list(six.itervalues(self.scale))
-    scale = scale[0] if scale else 1.0
-    loss = -(tf.reduce_sum(scale * r_qsample) + pbeta_log_prob - qbeta_log_prob)
-    if debug_with_true_ratio:
-      self.ratio_true = scale * p_log_lik
-      self.ratio_est = tf.reduce_sum(scale * r_qsample)
-
+    # Form ratio loss and ratio estimator.
     if callable(self.ratio_loss):
-      loss_d = self.ratio_loss(r_psample, r_qsample)
+      ratio_loss = self.ratio_loss
     elif self.ratio_loss == 'log':
-      loss_d = log_loss(r_psample, r_qsample)
+      ratio_loss = log_loss
     else:
-      loss_d = hinge_loss(r_psample, r_qsample)
+      ratio_loss = hinge_loss
 
-    loss_d = tf.reduce_mean(loss_d)
+    if len(self.scale) <= 1:
+      loss_d = tf.reduce_mean(ratio_loss(r_psample, r_qsample))
+      scale = list(six.itervalues(self.scale))
+      scale = scale[0] if scale else 1.0
+      scaled_ratio = tf.reduce_sum(scale * r_qsample)
+    else:
+      loss_d = [tf.reduce_mean(ratio_loss(r_psample[key], r_qsample[key]))
+                for key in six.iterkeys(self.scale)]
+      loss_d = tf.reduce_sum(loss_d)
+      scaled_ratio = [tf.reduce_sum(self.scale[key] * r_qsample[key])
+                      for key in six.iterkeys(self.scale)]
+      scaled_ratio = tf.reduce_sum(scaled_ratio)
+
+    # Form variational objective.
+    loss = -(scaled_ratio + pbeta_log_prob - qbeta_log_prob)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
