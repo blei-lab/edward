@@ -66,15 +66,18 @@ class ImplicitKLqp(GANInference):
     # call grandparent's method; avoid parent (GANInference)
     super(GANInference, self).__init__(latent_vars, data, model_wrapper=None)
 
-  def initialize(self, loss_obj='log', *args, **kwargs):
+  def initialize(self, ratio_loss='log', *args, **kwargs):
     """Initialization.
 
     Parameters
     ----------
-    loss_obj : str, optional
+    ratio_loss : str or fn, optional
       Ratio loss minimized for the ratio estimator. 'log' or 'hinge'.
+      Alternatively, one can pass in a function of two inputs,
+      ``psamples`` and ``qsamples``, and output a point-wise value
+      with shape matching the shapes of the two inputs.
     """
-    self.loss_obj = loss_obj
+    self.ratio_loss = ratio_loss
     return super(ImplicitKLqp, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
@@ -193,7 +196,9 @@ class ImplicitKLqp(GANInference):
       self.ratio_true = scale * p_log_lik
       self.ratio_est = tf.reduce_sum(scale * r_qsample)
 
-    if self.loss_obj == 'log':
+    if callable(self.ratio_loss):
+      loss_d = self.ratio_loss(r_psample, r_qsample)
+    elif self.ratio_loss == 'log':
       loss_d = log_loss(r_psample, r_qsample)
     else:
       loss_d = hinge_loss(r_psample, r_qsample)
