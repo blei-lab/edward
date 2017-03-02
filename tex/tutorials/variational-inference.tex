@@ -14,8 +14,8 @@ The core idea involves two steps:
    optimizing over its parameters $\lambda$.
  \end{enumerate}
 This strategy converts the problem of computing the posterior
-$p(\mathbf{z} \mid \mathbf{x})$ into an optimization problem, which
-minimizes a divergence measure
+$p(\mathbf{z} \mid \mathbf{x})$ into an optimization problem:
+minimize a divergence measure
 \begin{align*}
   \lambda^*
   &=
@@ -25,7 +25,7 @@ minimizes a divergence measure
   q(\mathbf{z}\;;\;\lambda)
   ).
 \end{align*}
-The optimized distribution $q(\mathbf{z}\;;\;\lambda)$ is then used as
+The optimized distribution $q(\mathbf{z}\;;\;\lambda^*)$ is used as
 a proxy to the posterior $p(\mathbf{z}\mid \mathbf{x})$.
 
 Edward takes the perspective that the posterior is (typically)
@@ -35,9 +35,9 @@ It is analogous to the perspective
 that the true data generating process is unknown, and thus we build
 models of data to best approximate the true process.
 
-For details on the variational inference base class defined in Edward,
+For details on variational inference classes defined in Edward,
 see the \href{/api/inference}{inference API}.
-For examples of specific variational inference algorithms in
+For background on specific variational inference algorithms in
 Edward, see the other inference \href{/tutorials/}{tutorials}.
 
 \subsubsection{References}\label{references}

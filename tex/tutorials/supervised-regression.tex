@@ -104,7 +104,7 @@ A standard evaluation in regression is to calculate point-based evaluations on
 held-out ``testing'' data. We do this first by forming the posterior predictive
 distribution.
 \begin{lstlisting}[language=Python]
-y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))
+y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
 \end{lstlisting}
 
 With this we can evaluate various point-based quantities using the posterior

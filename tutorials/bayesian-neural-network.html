@@ -97,13 +97,13 @@
 <h2 id="bayesian-neural-network">Bayesian neural network</h2>
 <p>A Bayesian neural network is a neural network with a prior distribution on its weights <span class="citation">(Neal, 2012)</span>.</p>
 <p>Consider a data set <span class="math inline">\(\{(\mathbf{x}_n, y_n)\}\)</span>, where each data point comprises of features <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> and output <span class="math inline">\(y_n\in\mathbb{R}\)</span>. Define the likelihood for each data point as <span class="math display">\[\begin{aligned}
-  p(y_n \mid \mathbf{z}, \mathbf{x}_n, \sigma^2)
+  p(y_n \mid \mathbf{w}, \mathbf{x}_n, \sigma^2)
   &amp;=
-  \text{Normal}(y_n \mid \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{z}), \sigma^2),\end{aligned}\]</span> where <span class="math inline">\(\mathrm{NN}\)</span> is a neural network whose weights and biases form the latent variables <span class="math inline">\(\mathbf{z}\)</span>. Assume <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
-<p>Define the prior on the weights and biases <span class="math inline">\(\mathbf{z}\)</span> to be the standard normal <span class="math display">\[\begin{aligned}
-  p(\mathbf{z})
+  \text{Normal}(y_n \mid \mathrm{NN}(\mathbf{x}_n\;;\;\mathbf{w}), \sigma^2),\end{aligned}\]</span> where <span class="math inline">\(\mathrm{NN}\)</span> is a neural network whose weights and biases form the latent variables <span class="math inline">\(\mathbf{w}\)</span>. Assume <span class="math inline">\(\sigma^2\)</span> is a known variance.</p>
+<p>Define the prior on the weights and biases <span class="math inline">\(\mathbf{w}\)</span> to be the standard normal <span class="math display">\[\begin{aligned}
+  p(\mathbf{w})
   &amp;=
-  \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
+  \text{Normal}(\mathbf{w} \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward. We define a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
@@ -125,9 +125,9 @@ b_2 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
 x = tf.cast(x_train, dtype=tf.float32)
 y = Normal(mu=neural_network(x), sigma=0.1 * tf.ones(N))</code></pre>
-<p>This code builds the model assuming the features <code>x_train</code> already exists in the Python environment. Alternatively, one can also define a TensorFlow placeholder,</p>
+<p>This program builds the model assuming the features <code>x_train</code> already exists in the Python environment. Alternatively, one can also define a TensorFlow placeholder,</p>
 <pre><code>x = tf.placeholder(tf.float32, [N, D])</code></pre>
-<p>and feed the placeholder manually during inference.</p>
+<p>The placeholder must be fed with data later during inference.</p>
 <p>A toy demonstration is available in the <a href="/getting-started">Getting Started</a> section. Source code is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_nn.py">here</a>.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">

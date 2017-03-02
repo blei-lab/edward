@@ -146,7 +146,7 @@ inference.run()</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
 <p>A standard evaluation in regression is to calculate point-based evaluations on held-out “testing” data. We do this first by forming the posterior predictive distribution.</p>
-<pre class="python" language="Python"><code>y_post = Normal(mu=ed.dot(X, qw.mean()) + qb.mean(), sigma=tf.ones(N))</code></pre>
+<pre class="python" language="Python"><code>y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))</code></pre>
 <p>With this we can evaluate various point-based quantities using the posterior predictive.</p>
 <pre><code>print(ed.evaluate(&#39;mean_squared_error&#39;, data={X: X_test, y_post: y_test}))
 &gt; 0.012107

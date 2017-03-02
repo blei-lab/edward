@@ -111,10 +111,9 @@
 <p>The <code>ed.evaluate()</code> method takes as input a set of metrics to evaluate, and a data dictionary. As with inference, the data dictionary binds the observed random variables in the model to realizations: in this case, it is the posterior predictive random variable of outputs <code>y_post</code> to <code>y_train</code> and a placeholder for inputs <code>x</code> to <code>x_train</code>.</p>
 <pre class="python" language="Python"><code>ed.evaluate(&#39;categorical_accuracy&#39;, data={y_post: y_train, x: x_train})
 ed.evaluate(&#39;mean_absolute_error&#39;, data={y_post: y_train, x: x_train})</code></pre>
-<p>The <code>data</code> can be data held-out from training time, making it easy to implement cross-validated techniques.</p>
 <p>Point-based evaluation applies generally to any setting, including unsupervised tasks. For example, we can evaluate the likelihood of observing the data.</p>
 <pre class="python" language="Python"><code>ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_train})</code></pre>
-<p>It is common practice to criticize models with data held-out from training. To do this, we first perform inference over any local latent variables of the held-out data, fixing the global variables. Then we make predictions on the held-out data.</p>
+<p>It is common practice to criticize models with data held-out from training. To do this, we must first perform inference over any local latent variables of the held-out data, fixing the global variables; we demonstrate this below. Then we make predictions on the held-out data.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical
 
 # create local posterior factors for test data, assuming test data
@@ -139,14 +138,12 @@ ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_test})</code></pre>
 <p>The <code>ed.ppc()</code> method provides a scaffold for studying various discrepancy functions.</p>
 <pre class="python" language="Python"><code>ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x_post]), data={x_post: x_train})</code></pre>
 <p>The discrepancy can also take latent variables as input, which we pass into the PPC.</p>
-<pre class="python" language="Python"><code>def T(xs, zs):
-  return tf.reduce_mean(tf.cast(zs[z], tf.float32))
-
-ppc(T, data={y_post: y_train, x_ph: x_train},
-    latent_vars={z: qz, beta: qbeta})</code></pre>
+<pre class="python" language="Python"><code>ed.ppc(lambda xs, zs: tf.maximum(zs[z]),
+       data={y_post: y_train, x_ph: x_train},
+       latent_vars={z: qz, beta: qbeta})</code></pre>
 <p>See the <a href="/api/criticism">criticism API</a> for further details.</p>
-<p>PPCs are an excellent tool for revising models, simplifying or expanding the current model as one examines how well it fits the data. They are inspired by prior checks and classical hypothesis testing, under the philosophy that models should be criticized under the frequentist perspective of large sample assessment.</p>
-<p>PPCs can also be applied to tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while they can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended: binary decision making from a single test is not as common a use case as one might believe. We recommend performing many PPCs to get a holistic understanding of the model fit.</p>
+<p>PPCs are an excellent tool for revising models—simplifying or expanding the current model as one examines its fit to data. They are inspired by classical hypothesis testing; these methods criticize models under the frequentist perspective of large sample assessment.</p>
+<p>PPCs can also be applied to tasks such as hypothesis testing, model comparison, model selection, and model averaging. It’s important to note that while PPCs can be applied as a form of Bayesian hypothesis testing, hypothesis testing is generally not recommended: binary decision making from a single test is not as common a use case as one might believe. We recommend performing many PPCs to get a holistic understanding of the model fit.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-box1976science">
