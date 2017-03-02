@@ -4,25 +4,33 @@ help:
 DATA?="${HOME}/Data"
 GPU?=0
 DOCKER_FILE_GPU=Dockerfile-gpu
-DOCKER=GPU=$(GPU) nvidia-docker
+DOCKER_GPU=GPU=$(GPU) nvidia-docker
 BACKEND=tensorflow
 TEST=tests/
 SRC=$(shell dirname `pwd`)
+CUDA=/usr/local/cuda
+LD_LIBRARY=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64
 
 build:
 	docker build -t edward --build-arg python_version=3.5 -f $(DOCKER_FILE_GPU) .
 
 bash: build
-	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data --env EDWARD_BACKEND=$(BACKEND) edward bash
+	$(DOCKER_GPU) run -it -v $(SRC):/src -v $(DATA):/data --env CUDA_HOME=${CUDA} \
+	                                                  --env LD_LIBRARY_PATH=${LD_LIBRARY} \
+	                                                  edward bash
 
 ipython: build
-	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data --env EDWARD_BACKEND=$(BACKEND) edward ipython
+	$(DOCKER_GPU) run -it -v $(SRC):/src -v $(DATA):/data --env CUDA_HOME=${CUDA} \
+	                                                  --env LD_LIBRARY_PATH=${LD_LIBRARY} \
+	                                                  edward ipython
 
 notebook: build
-	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data --net=host --env EDWARD_BACKEND=$(BACKEND) edward
+	$(DOCKER_GPU) run -it -v $(SRC):/src -v $(DATA):/data --net=host --env CUDA_HOME=${CUDA} \
+	                                                  --env LD_LIBRARY_PATH=${LD_LIBRARY} \
+	                                                  edward
 
 test: build
-	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data --env CUDA_HOME=/usr/local/cuda \
-	                                                  --env LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64 \
+	$(DOCKER_GPU) run -it -v $(SRC):/src -v $(DATA):/data --env CUDA_HOME=${CUDA} \
+	                                                  --env LD_LIBRARY_PATH=${LD_LIBRARY} \
 	                                                  edward py.test $(TEST)
 
