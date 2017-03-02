@@ -21,6 +21,24 @@ General installation instructions are
 
 We are using `Makefile` to simplify docker commands within make commands.
 
+### CPU environment
+
+Build the container and start a jupyter notebook
+
+    $ make notebook
+
+Build the container and start an iPython shell
+
+    $ make ipython
+
+Build the container and start a bash
+
+    $ make bash
+
+Build the container and start a test
+
+    $ make test
+
 ### GPU environment
 
 Build the container and start a jupyter notebook

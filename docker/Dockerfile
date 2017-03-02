@@ -1,8 +1,7 @@
 #################################################################################################################
-# Reference
-#     https://github.com/NVIDIA/nvidia-docker
+# Base Images
 #################################################################################################################
-FROM nvidia/cuda:8.0-cudnn5-devel
+FROM ubuntu:14.04
 
 #################################################################################################################
 #           ENV Setting
@@ -40,10 +39,12 @@ USER edward
 #################################################################################################################
 # Python
 ARG python_version=3.5.3-0
+ARG python_qt_version=4
 RUN conda install -y python=${python_version} && \
-    pip install numpy six tensorflow-gpu keras prettytensor pystan pymc3 && \
+    pip install numpy six tensorflow keras prettytensor pystan pymc3 && \
     pip install ipdb pytest pytest-cov python-coveralls coverage==3.7.1 pytest-xdist pep8 pytest-pep8 pydot_ng && \
     conda install Pillow scikit-learn notebook pandas matplotlib nose pyyaml h5py && \
+    conda install -y pyqt=${python_qt_version} && \
     pip install edward && \
     conda clean -yt
 
