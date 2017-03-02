@@ -16,22 +16,28 @@ quick links here:
 
 We are using `Makefile` to simplify docker commands within make commands.
 
+### GPU environment
+
 Build the container and start a jupyter notebook
 
-    $ make notebook
+    $ make notebook-gpu
 
 Build the container and start an iPython shell
 
-    $ make ipython
+    $ make ipython-gpu
 
 Build the container and start a bash
 
-    $ make bash
+    $ make bash-gpu
+
+Build the container and start a test
+
+    $ make test-gpu
 
 For GPU support install NVidia drivers (ideally latest) and
 [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). Run using
 
-    $ make notebook GPU=0 # or [ipython, bash]
+    $ make notebook-gpu GPU=0 # or [ipython, bash]
 
 Mount a volume for external data sets
 
