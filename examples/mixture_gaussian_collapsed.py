@@ -73,7 +73,7 @@ for _ in range(inference.n_iter):
   t = info_dict['t']
   if t % inference.n_print == 0:
     print("Inferred cluster means:")
-    print(sess.run(qmu.value()))
+    print(sess.run(qmu.mean()))
 
 # Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
