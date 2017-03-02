@@ -12,6 +12,11 @@ quick links here:
 * [OSX](https://docs.docker.com/installation/mac/): [docker toolbox](https://www.docker.com/toolbox)
 * [ubuntu](https://docs.docker.com/installation/ubuntulinux/)
 
+## Installing NVIDIA Docker (GPU Environment)
+
+General installation instructions are
+[on the NVIDIA Docker site](https://github.com/NVIDIA/nvidia-docker)
+
 ## Running the container
 
 We are using `Makefile` to simplify docker commands within make commands.
