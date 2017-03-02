@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-"""Linear model. Inference uses data subsampling and scales the
-log-likelihood.
+"""Bayesian linear regression. Inference uses data subsampling and
+scales the log-likelihood.
 
-This produces an inferred posterior mean of about [-4.6 4.9], implying
-there is some weird symmetry happening that causes the opposite
-direction to be an optima. Changing the seed, sometimes both
-dimensions are around negative 5. This also happens in
-linear_model.py, using ``ed.set_seed(231555)``. Therefore it's not an
-issue with the data subsampling.
+One local optima is an inferred posterior mean of about [-5.0 5.0].
+This implies there is some weird symmetry happening; this result can
+be obtained by initializing the first coordinate to be negative.
+Similar occurs for the second coordinate.
+
+Note as with all GAN-style training, the algorithm is not stable. It
+is recommended to monitor training and halt manually according to some
+criterion (e.g., prediction accuracy on validation test, quality of
+samples).
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -76,7 +79,7 @@ w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
 y = Normal(mu=ed.dot(X, w), sigma=tf.ones(M))
 
 # INFERENCE
-qw = Normal(mu=tf.Variable(tf.random_normal([D])),
+qw = Normal(mu=tf.Variable(tf.random_normal([D]) + 1.0),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
 
 inference = ed.ImplicitKLqp(

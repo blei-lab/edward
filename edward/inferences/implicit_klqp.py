@@ -97,9 +97,8 @@ class ImplicitKLqp(GANInference):
 
     .. math::
 
-      -[ \mathbb{E}_{q(\beta)} [
-           \sum_{n=1}^N \mathbb{E}_{q(z_n | \beta)} [ r*(x_n, z_n, \beta) ] ] +
-         \mathbb{E}_{q(\beta)} [ log p(\beta) - log q(\beta) ] ].
+      -[\mathbb{E}_{q(\beta)} [ log p(\beta) - log q(\beta) ] +
+        \sum_{n=1}^N \mathbb{E}_{q(\beta)q(z_n|\beta)} [ r*(x_n, z_n, \beta) ] ]
 
     We minimize it with respect to parameterized variational
     families :math:`q(z, beta; \lambda)`.
@@ -207,7 +206,7 @@ class ImplicitKLqp(GANInference):
       scaled_ratio = tf.reduce_sum(scaled_ratio)
 
     # Form variational objective.
-    loss = -(scaled_ratio + pbeta_log_prob - qbeta_log_prob)
+    loss = -(pbeta_log_prob - qbeta_log_prob + scaled_ratio)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
