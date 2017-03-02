@@ -26,6 +26,10 @@ class ImplicitKLqp(GANInference):
   random sample when fetched from the graph. Local latent variables
   and observed variables require only a random sample when fetched
   from the graph. (This is true for both :math:`p` and :math:`q`.)
+
+  All variational factors must be reparameterizable: each of the
+  random variables (``rv``) satisfies ``rv.is_reparameterized`` and
+  ``rv.is_continuous``.
   """
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
@@ -84,12 +88,20 @@ class ImplicitKLqp(GANInference):
     Parameters
     ----------
     ratio_loss : str or fn, optional
-      Ratio loss minimized for the ratio estimator. 'log' or 'hinge'.
+      Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
       Alternatively, one can pass in a function of two inputs,
       ``psamples`` and ``qsamples``, and output a point-wise value
       with shape matching the shapes of the two inputs.
     """
-    self.ratio_loss = ratio_loss
+    if callable(ratio_loss):
+      self.ratio_loss = ratio_loss
+    elif ratio_loss == 'log':
+      self.ratio_loss = log_loss
+    elif ratio_loss == 'hinge':
+      self.ratio_loss = hinge_loss
+    else:
+      raise ValueError('Ratio loss not found:', ratio_loss)
+
     return super(ImplicitKLqp, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
@@ -122,21 +134,18 @@ class ImplicitKLqp(GANInference):
     -----
     This also includes model parameters :math:`p(x, z, beta; theta)`
     and variational distributions with inference networks :math:`q(z |
-    x)`. This requires all variational distributions to be
-    reparameterizable: each random variable ``rv`` satisfies
-    ``rv.is_reparameterized`` and ``rv.is_continuous``.
+    x)`.
 
     There are a bunch of extensions we could easily do in this
     implementation:
 
     + further factorizations can be used to better leverage the
     graph structure for more complicated models;
+    + score function gradients for global variables;
     + use more samples; this would require the ``copy()`` utility
     function for q's as well, and an additional loop. we opt not to
-    because it complicates the code.
+    because it complicates the code;
     + analytic KL/swapping out the penalty term for the globals.
-    + various extensions of hierarchical models, and not just an
-    explicit local and global var distinction.
     """
     # Collect tensors used in calculation of losses.
     scope = 'inference_' + str(id(self))
@@ -185,20 +194,13 @@ class ImplicitKLqp(GANInference):
       r_qsample = self.discriminator(x_qsample, qz_sample, qbeta_sample)
 
     # Form ratio loss and ratio estimator.
-    if callable(self.ratio_loss):
-      ratio_loss = self.ratio_loss
-    elif self.ratio_loss == 'log':
-      ratio_loss = log_loss
-    else:
-      ratio_loss = hinge_loss
-
     if len(self.scale) <= 1:
-      loss_d = tf.reduce_mean(ratio_loss(r_psample, r_qsample))
+      loss_d = tf.reduce_mean(self.ratio_loss(r_psample, r_qsample))
       scale = list(six.itervalues(self.scale))
       scale = scale[0] if scale else 1.0
       scaled_ratio = tf.reduce_sum(scale * r_qsample)
     else:
-      loss_d = [tf.reduce_mean(ratio_loss(r_psample[key], r_qsample[key]))
+      loss_d = [tf.reduce_mean(self.ratio_loss(r_psample[key], r_qsample[key]))
                 for key in six.iterkeys(self.scale)]
       loss_d = tf.reduce_sum(loss_d)
       scaled_ratio = [tf.reduce_sum(self.scale[key] * r_qsample[key])
