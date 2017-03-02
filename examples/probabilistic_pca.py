@@ -50,8 +50,6 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
 
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
-
-init = tf.global_variables_initializer()
 inference.run(n_iter=500, n_print=100, n_samples=10)
 
 sess = ed.get_session()

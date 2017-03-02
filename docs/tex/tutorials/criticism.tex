@@ -55,8 +55,6 @@ it is the posterior predictive random variable of outputs \texttt{y_post} to
 ed.evaluate('categorical_accuracy', data={y_post: y_train, x: x_train})
 ed.evaluate('mean_absolute_error', data={y_post: y_train, x: x_train})
 \end{lstlisting}
-The \texttt{data} can be data held-out from training time, making it
-easy to implement cross-validated techniques.
 
 Point-based evaluation applies generally to any setting, including
 unsupervised tasks. For example, we can evaluate the likelihood of
@@ -66,9 +64,9 @@ ed.evaluate('log_likelihood', data={x_post: x_train})
 \end{lstlisting}
 
 It is common practice to criticize models with data held-out from
-training. To do this, we first perform inference over any local latent
-variables of the held-out data, fixing the global variables.  Then we
-make predictions on the held-out data.
+training. To do this, we must first perform inference over any local
+latent variables of the held-out data, fixing the global variables; we
+demonstrate this below. Then we make predictions on the held-out data.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Categorical
@@ -137,25 +135,22 @@ ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x_post]), data={x_post: x_train})
 The discrepancy can also take latent variables as input, which we pass
 into the PPC.
 \begin{lstlisting}[language=Python]
-def T(xs, zs):
-  return tf.reduce_mean(tf.cast(zs[z], tf.float32))
-
-ppc(T, data={y_post: y_train, x_ph: x_train},
-    latent_vars={z: qz, beta: qbeta})
+ed.ppc(lambda xs, zs: tf.maximum(zs[z]),
+       data={y_post: y_train, x_ph: x_train},
+       latent_vars={z: qz, beta: qbeta})
 \end{lstlisting}
 
 See the \href{/api/criticism}{criticism API} for further details.
 
-PPCs are an excellent tool for revising models, simplifying or
-expanding the current model as one examines how well it fits the data.
-They are inspired by prior checks and classical hypothesis
-testing, under the philosophy that models should be
-criticized under the frequentist perspective of large sample
+PPCs are an excellent tool for revising models---simplifying or
+expanding the current model as one examines its fit to data.
+They are inspired by classical hypothesis testing; these methods
+criticize models under the frequentist perspective of large sample
 assessment.
 
 PPCs can also be applied to tasks such as hypothesis testing, model
 comparison, model selection, and model averaging.  It's important to
-note that while they can be applied as a form of Bayesian hypothesis
+note that while PPCs can be applied as a form of Bayesian hypothesis
 testing, hypothesis testing is generally not recommended: binary
 decision making from a single test is not as common a use case as one
 might believe. We recommend performing many PPCs to get a holistic

@@ -51,3 +51,4 @@ visualization with TensorBoard.
 + [Edward website](http://edwardlib.org)
 + [Edward Gitter channel](http://gitter.im/blei-lab/edward)
 + [Edward releases](https://github.com/blei-lab/edward/releases)
++ [Edward papers, posters, and slides](https://github.com/edwardlib/papers)

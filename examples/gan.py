@@ -17,8 +17,8 @@ from tensorflow.contrib import slim
 from tensorflow.examples.tutorials.mnist import input_data
 
 
-def generative_network(z):
-  h1 = slim.fully_connected(z, 128, activation_fn=tf.nn.relu)
+def generative_network(eps):
+  h1 = slim.fully_connected(eps, 128, activation_fn=tf.nn.relu)
   x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
   return x
 
@@ -65,8 +65,8 @@ x_ph = tf.placeholder(tf.float32, [M, 784])
 
 # MODEL
 with tf.variable_scope("Gen"):
-  z = Uniform(a=tf.zeros([M, d]) - 1.0, b=tf.ones([M, d]))
-  x = generative_network(z)
+  eps = Uniform(a=tf.zeros([M, d]) - 1.0, b=tf.ones([M, d]))
+  x = generative_network(eps)
 
 # INFERENCE
 optimizer = tf.train.AdamOptimizer()
