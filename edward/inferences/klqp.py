@@ -8,7 +8,8 @@ import warnings
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, Normal
-from edward.util import copy, kl_multivariate_normal
+from edward.util import copy
+from tensorflow.contrib import distributions as ds
 
 
 class KLqp(VariationalInference):
@@ -92,8 +93,8 @@ class KLqp(VariationalInference):
 
     of the loss function.
 
-    If the variational model is a normal distribution and the prior is
-    standard normal, then loss function can be written as
+    If the KL divergence between the variational model and the prior
+    is tractable, then the loss function can be written as
 
     .. math::
 
@@ -101,16 +102,14 @@ class KLqp(VariationalInference):
         \\text{KL}( q(z; \lambda) \| p(z) ),
 
     where the KL term is computed analytically (Kingma and Welling,
-    2014).
+    2014). We compute this automatically when :math:`p(z)` and
+    :math:`q(z; \lambda)` are Normal.
     """
     is_reparameterizable = all([rv.is_reparameterized and rv.is_continuous
                                 for rv in six.itervalues(self.latent_vars)])
-    qz_is_normal = all([isinstance(rv, Normal) for
-                       rv in six.itervalues(self.latent_vars)])
-    z_is_normal = all([isinstance(rv, Normal) for
-                       rv in six.iterkeys(self.latent_vars)])
-    is_analytic_kl = qz_is_normal and \
-        (z_is_normal or hasattr(self.model_wrapper, 'log_lik'))
+    is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
+                          for z, qz in six.iteritems(self.latent_vars)]) or \
+        hasattr(self.model_wrapper, 'log_lik')
     if is_reparameterizable:
       if is_analytic_kl:
         return build_reparam_kl_loss_and_gradients(self, var_list)
@@ -451,12 +450,12 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
 
   if inference.model_wrapper is None:
     kl = tf.reduce_sum([
-        inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(
-            kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma))
+        inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
         for z, qz in six.iteritems(inference.latent_vars)])
   else:
-    kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
-                        for qz in six.itervalues(inference.latent_vars)])
+    kl = tf.reduce_sum([tf.reduce_sum(
+        ds.kl(qz, Normal(mu=tf.zeros_like(qz), sigma=tf.ones_like(qz))))
+        for qz in six.itervalues(inference.latent_vars)])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl)
 
@@ -521,8 +520,8 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
 
   p_log_prob = tf.stack(p_log_prob)
 
-  q_entropy = tf.reduce_sum([inference.data.get(z, 1.0) * qz.entropy()
-                             for z, qz in six.iteritems(inference.latent_vars)])
+  q_entropy = tf.reduce_sum([
+      qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
 
@@ -647,12 +646,12 @@ def build_score_kl_loss_and_gradients(inference, var_list):
 
   if inference.model_wrapper is None:
     kl = tf.reduce_sum([
-        inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(
-            kl_multivariate_normal(qz.mu, qz.sigma, z.mu, z.sigma))
+        inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
         for z, qz in six.iteritems(inference.latent_vars)])
   else:
-    kl = tf.reduce_sum([tf.reduce_sum(kl_multivariate_normal(qz.mu, qz.sigma))
-                        for qz in six.itervalues(inference.latent_vars)])
+    kl = tf.reduce_sum([tf.reduce_sum(
+        ds.kl(qz, Normal(mu=tf.zeros_like(qz), sigma=tf.ones_like(qz))))
+        for qz in six.itervalues(inference.latent_vars)])
 
   if var_list is None:
     var_list = tf.trainable_variables()
@@ -716,8 +715,8 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   p_log_prob = tf.stack(p_log_prob)
   q_log_prob = tf.stack(q_log_prob)
 
-  q_entropy = tf.reduce_sum([inference.data.get(z, 1.0) * qz.entropy()
-                             for z, qz in six.iteritems(inference.latent_vars)])
+  q_entropy = tf.reduce_sum([
+      qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
 
   if var_list is None:
     var_list = tf.trainable_variables()
