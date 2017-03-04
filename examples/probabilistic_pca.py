@@ -38,7 +38,7 @@ x_train = build_toy_dataset(N, D, K)
 
 # MODEL
 
-w = Normal(mu=tf.zeros([D, K]), sigma=10.0 * tf.ones([D, K]))
+w = Normal(mu=tf.zeros([D, K]), sigma=2.0 * tf.ones([D, K]))
 z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
 x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))
 
