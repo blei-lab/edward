@@ -579,9 +579,15 @@ def get_variables(x, collection=None):
 
   # Traverse the graph. Add each node to the set if it's in the collection.
   output = set([])
+  visited = set()
   nodes = set([x])
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
