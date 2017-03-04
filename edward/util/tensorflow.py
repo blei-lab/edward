@@ -110,69 +110,6 @@ def hessian(y, xs):
     return tf.stack(mat)
 
 
-def kl_multivariate_normal(loc_one, scale_one, loc_two=0.0, scale_two=1.0):
-  """Calculate the KL of multivariate normal distributions with
-  diagonal covariances.
-
-  Parameters
-  ----------
-  loc_one : tf.Tensor
-    A 0-D tensor, 1-D tensor of length n, or 2-D tensor of shape M
-    x n where each row represents the mean of a n-dimensional
-    Gaussian.
-  scale_one : tf.Tensor
-    A tensor of same shape as ``loc_one``, representing the
-    standard deviation.
-  loc_two : tf.Tensor, optional
-    A tensor of same shape as ``loc_one``, representing the
-    mean of another Gaussian.
-  scale_two : tf.Tensor, optional
-    A tensor of same shape as ``loc_one``, representing the
-    standard deviation of another Gaussian.
-
-  Returns
-  -------
-  tf.Tensor
-    For 0-D or 1-D tensor inputs, outputs the 0-D tensor
-    ``KL( N(z; loc_one, scale_one) || N(z; loc_two, scale_two) )``
-    For 2-D tensor inputs, outputs the 1-D tensor
-    ``[KL( N(z; loc_one[m,:], scale_one[m,:]) || ``
-    ``N(z; loc_two[m,:], scale_two[m,:]) )]_{m=1}^M``
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the location variables have Inf or NaN values, or if the scale
-    variables are not positive.
-  """
-  loc_one = tf.convert_to_tensor(loc_one)
-  scale_one = tf.convert_to_tensor(scale_one)
-  loc_two = tf.convert_to_tensor(loc_two)
-  scale_two = tf.convert_to_tensor(scale_two)
-  dependencies = [tf.verify_tensor_all_finite(loc_one, msg=''),
-                  tf.verify_tensor_all_finite(loc_two, msg=''),
-                  tf.assert_positive(scale_one),
-                  tf.assert_positive(scale_two)]
-  loc_one = control_flow_ops.with_dependencies(dependencies, loc_one)
-  scale_one = control_flow_ops.with_dependencies(dependencies, scale_one)
-
-  if loc_two == 0.0 and scale_two == 1.0:
-    # With default arguments, we can avoid some intermediate computation.
-    out = tf.square(scale_one) + tf.square(loc_one) - \
-        1.0 - 2.0 * tf.log(scale_one)
-  else:
-    loc_two = control_flow_ops.with_dependencies(dependencies, loc_two)
-    scale_two = control_flow_ops.with_dependencies(dependencies, scale_two)
-    out = tf.square(scale_one / scale_two) + \
-        tf.square((loc_two - loc_one) / scale_two) - \
-        1.0 + 2.0 * tf.log(scale_two) - 2.0 * tf.log(scale_one)
-
-  if len(out.get_shape()) <= 1:  # scalar or vector
-    return 0.5 * tf.reduce_sum(out)
-  else:  # matrix
-    return 0.5 * tf.reduce_sum(out, 1)
-
-
 def log_mean_exp(input_tensor, axis=None, keep_dims=False):
   """Compute the ``log_mean_exp`` of elements in a tensor, taking
   the mean across axes given by ``axis``.
