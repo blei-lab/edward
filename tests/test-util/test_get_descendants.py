@@ -73,5 +73,22 @@ class test_get_descendants_class(tf.test.TestCase):
       self.assertEqual(get_descendants(d), [e])
       self.assertEqual(get_descendants(e), [])
 
+  def test_scan(self):
+    """copied form test_chain_structure"""
+    def cumsum(x):
+      return tf.scan(lambda a, x: a + x, x)
+
+    with self.test_session():
+      a = Normal(mu=tf.ones([3]), sigma=tf.ones([3]))
+      b = Normal(mu=cumsum(a), sigma=tf.ones([3]))
+      c = Normal(mu=cumsum(b), sigma=tf.ones([3]))
+      d = Normal(mu=cumsum(c), sigma=tf.ones([3]))
+      e = Normal(mu=cumsum(d), sigma=tf.ones([3]))
+      self.assertEqual(set(get_descendants(a)), set([b, c, d, e]))
+      self.assertEqual(set(get_descendants(b)), set([c, d, e]))
+      self.assertEqual(set(get_descendants(c)), set([d, e]))
+      self.assertEqual(get_descendants(d), [e])
+      self.assertEqual(get_descendants(e), [])
+
 if __name__ == '__main__':
   tf.test.main()
