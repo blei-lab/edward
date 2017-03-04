@@ -66,5 +66,13 @@ class test_get_variables_class(tf.test.TestCase):
       self.assertEqual(get_variables(d), [b])
       self.assertEqual(get_variables(e), [b])
 
+  def test_scan(self):
+    with self.test_session():
+      b = tf.Variable(0.0)
+      op = tf.scan(lambda a, x: a + b + x, tf.constant([2.0, 3.0, 1.0]))
+
+      self.assertEqual(get_variables(op), [b])
+
+
 if __name__ == '__main__':
   tf.test.main()
