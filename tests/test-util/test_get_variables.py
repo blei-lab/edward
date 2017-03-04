@@ -73,6 +73,22 @@ class test_get_variables_class(tf.test.TestCase):
 
       self.assertEqual(get_variables(op), [b])
 
+  def test_scan_with_a_structure(self):
+    """copied from test_a_structure"""
+    def cumsum(x):
+      return tf.scan(lambda a, x: a + x, x)
+
+    with self.test_session():
+      a = tf.Variable([1.0, 1.0, 1.0])
+      b = Normal(mu=cumsum(a), sigma=tf.ones([3]))
+      c = Normal(mu=cumsum(b), sigma=tf.ones([3]))
+      d = Normal(mu=cumsum(a), sigma=tf.ones([3]))
+      e = Normal(mu=cumsum(d), sigma=tf.ones([3]))
+      self.assertEqual(get_variables(a), [])
+      self.assertEqual(get_variables(b), [a])
+      self.assertEqual(get_variables(c), [a])
+      self.assertEqual(get_variables(d), [a])
+      self.assertEqual(get_variables(e), [a])
 
 if __name__ == '__main__':
   tf.test.main()
