@@ -149,9 +149,9 @@ class test_copy_class(tf.test.TestCase):
       self.assertAllClose(result[2], result[3])
 
       # currently set_seed does seem to prevent variate generation to work
-      #self.assertNotAlmostEquals(result[0][0], result[2][0])
-      #self.assertNotAlmostEquals(result[0][1], result[2][1])
-      #self.assertNotAlmostEquals(result[0][2], result[2][2])
+      # self.assertNotAlmostEquals(result[0][0], result[2][0])
+      # self.assertNotAlmostEquals(result[0][1], result[2][1])
+      # self.assertNotAlmostEquals(result[0][2], result[2][2])
 
 
 if __name__ == '__main__':
