@@ -333,10 +333,16 @@ def get_ancestors(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -380,10 +386,16 @@ def get_children(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -428,10 +440,16 @@ def get_descendants(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -501,10 +519,16 @@ def get_parents(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -542,7 +566,7 @@ def get_siblings(x, collection=None):
   True
   """
   parents = get_parents(x, collection)
-  siblings = set([])
+  siblings = set()
   for parent in parents:
     siblings.update(get_children(parent, collection))
 
@@ -580,9 +604,9 @@ def get_variables(x, collection=None):
   node_dict = {node.name: node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
+  output = set()
   visited = set()
-  nodes = set([x])
+  nodes = {x}
   while nodes:
     node = nodes.pop()
 
