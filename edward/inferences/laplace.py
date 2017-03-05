@@ -44,6 +44,17 @@ class Laplace(MAP):
     the diagonal. This does not capture correlation among the
     variables but it does not require a potentially expensive matrix
     inversion.
+
+    Examples
+    --------
+    >>> X = tf.placeholder(tf.float32, [N, D])
+    >>> w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+    >>> y = Normal(mu=ed.dot(X, w), sigma=tf.ones(N))
+    >>>
+    >>> qw = MultivariateNormalFull(mu=tf.Variable(tf.random_normal([D])),
+    >>>                             sigma=tf.Variable(tf.random_normal([D, D])))
+    >>>
+    >>> inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):

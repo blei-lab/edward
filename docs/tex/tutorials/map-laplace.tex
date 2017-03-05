@@ -22,8 +22,10 @@ estimate
 \end{align*}
 This requires computing a precision matrix $\Lambda$. Derived from a
 Taylor expansion, the Laplace approximation uses the Hessian of the
-negative log joint density at the MAP estimate.  It is defined
-component-wise as
+negative log joint density at the MAP estimate. For flat priors
+(equivalent to maximum likelihood), the precision matrix is known
+as the observed Fisher information \citep{fisher1925theory}.
+It is defined component-wise as
 \begin{align*}
   \Lambda_{ij}
   &=
@@ -38,4 +40,3 @@ For more details, see the \href{/api/}{API} as well as its
 implementation in Edward's code base.
 
 \subsubsection{References}\label{references}
-
