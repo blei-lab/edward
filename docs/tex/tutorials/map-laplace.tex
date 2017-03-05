@@ -20,13 +20,14 @@ estimate
   &\approx
   \text{Normal}(\mathbf{z}\;;\; \mathbf{z}_\text{MAP}, \Lambda^{-1}).
 \end{align*}
-This requires computing a precision matrix $\Lambda$. The Laplace approximation
-uses the Hessian of the log joint density at the MAP estimate,
-defined component-wise as
+This requires computing a precision matrix $\Lambda$. Derived from a
+Taylor expansion, the Laplace approximation uses the Hessian of the
+negative log joint density at the MAP estimate.  It is defined
+component-wise as
 \begin{align*}
   \Lambda_{ij}
   &=
-  \frac{\partial^2 \log p(\mathbf{x}, \mathbf{z})}{\partial z_i \partial z_j}.
+  \frac{\partial^2}{\partial z_i \partial z_j} -\log p(\mathbf{x}, \mathbf{z}).
 \end{align*}
 Edward uses automatic differentiation, specifically with TensorFlow's
 computational graphs, making this gradient computation both simple and
