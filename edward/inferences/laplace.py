@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.map import MAP
 from edward.models import RandomVariable, Normal
-from edward.util import copy, hessian
+from edward.util import copy
 
 
 class Laplace(MAP):
@@ -34,7 +34,7 @@ class Laplace(MAP):
     z = {z: qz.value() for z, qz in six.iteritems(self.latent_vars)}
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                  scope='posterior')
-    inv_cov = hessian(self.model_wrapper.log_prob(x, z), var_list)
+    inv_cov = tf.hessians(self.model_wrapper.log_prob(x, z), var_list)
     print("Precision matrix:")
     print(inv_cov.eval())
     super(Laplace, self).finalize()
