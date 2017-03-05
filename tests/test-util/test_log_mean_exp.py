@@ -31,14 +31,5 @@ class test_log_mean_exp_class(tf.test.TestCase):
                           np.array([-1.3798854930417224,
                                     -3.3798854930417224]))
 
-  def test_all_finite_raises(self):
-    with self.test_session():
-      x = np.inf * tf.constant([-1.0, -2.0, -3.0, -4.0])
-      with self.assertRaisesOpError('Inf'):
-        log_mean_exp(x).eval()
-      x = tf.constant([-1.0, np.nan, -3.0, -4.0])
-      with self.assertRaisesOpError('NaN'):
-        log_mean_exp(x).eval()
-
 if __name__ == '__main__':
   tf.test.main()

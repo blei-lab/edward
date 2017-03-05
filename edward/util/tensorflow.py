@@ -111,8 +111,7 @@ def hessian(y, xs):
 
 
 def log_mean_exp(input_tensor, axis=None, keep_dims=False):
-  """Compute the ``log_mean_exp`` of elements in a tensor, taking
-  the mean across axes given by ``axis``.
+  """Computes log(mean(exp(elements across dimensions of a tensor))).
 
   Parameters
   ----------
@@ -128,22 +127,19 @@ def log_mean_exp(input_tensor, axis=None, keep_dims=False):
   -------
   tf.Tensor
     The reduced tensor.
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the input has Inf or NaN values.
   """
+  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
   input_tensor = tf.convert_to_tensor(input_tensor)
-  dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
-  input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
+  n = input_tensor.get_shape().as_list()
+  if axis is None:
+    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
+  else:
+    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
 
-  x_max = tf.reduce_max(input_tensor, axis, keep_dims=True)
-  return tf.squeeze(x_max) + tf.log(tf.reduce_mean(
-      tf.exp(input_tensor - x_max), axis, keep_dims))
+  return -tf.log(n) + logsumexp
 
 
-def log_sum_exp(input_tensor, axis=None, keep_dims=False):
+def log_sum_exp(input_tensor, axis=None, keep_dims=False, name=None):
   """Compute the ``log_sum_exp`` of elements in a tensor, taking
   the sum across axes given by ``axis``.
 
@@ -161,19 +157,8 @@ def log_sum_exp(input_tensor, axis=None, keep_dims=False):
   -------
   tf.Tensor
     The reduced tensor.
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the input has Inf or NaN values.
   """
-  input_tensor = tf.convert_to_tensor(input_tensor)
-  dependencies = [tf.verify_tensor_all_finite(input_tensor, msg='')]
-  input_tensor = control_flow_ops.with_dependencies(dependencies, input_tensor)
-
-  x_max = tf.reduce_max(input_tensor, axis, keep_dims=True)
-  return tf.squeeze(x_max) + tf.log(tf.reduce_sum(
-      tf.exp(input_tensor - x_max), axis, keep_dims))
+  return tf.reduce_logsumexp(input_tensor, axis, keep_dims, name)
 
 
 def logit(x):
