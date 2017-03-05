@@ -44,28 +44,25 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
 
-    if var_list is None:
-      if self.model_wrapper is None:
-        # Traverse random variable graphs to get default list of variables.
-        var_list = set([])
-        trainables = tf.trainable_variables()
-        for z, qz in six.iteritems(self.latent_vars):
-          if isinstance(z, RandomVariable):
-            var_list.update(get_variables(z, collection=trainables))
+    # Variables may not be instantiated for model wrappers until
+    # their methods are first called. For now, hard-code
+    # ``var_list`` inside ``build_loss_and_gradients``.
+    if var_list is None and self.model_wrapper is None:
+      # Traverse random variable graphs to get default list of variables.
+      var_list = set()
+      trainables = tf.trainable_variables()
+      for z, qz in six.iteritems(self.latent_vars):
+        if isinstance(z, RandomVariable):
+          var_list.update(get_variables(z, collection=trainables))
 
-          var_list.update(get_variables(qz, collection=trainables))
+        var_list.update(get_variables(qz, collection=trainables))
 
-        for x, qx in six.iteritems(self.data):
-          if isinstance(x, RandomVariable) and \
-                  not isinstance(qx, RandomVariable):
-            var_list.update(get_variables(x, collection=trainables))
+      for x, qx in six.iteritems(self.data):
+        if isinstance(x, RandomVariable) and \
+                not isinstance(qx, RandomVariable):
+          var_list.update(get_variables(x, collection=trainables))
 
-        var_list = list(var_list)
-      else:
-        # Variables may not be instantiated for model wrappers until
-        # their methods are first called. For now, hard-code
-        # ``var_list`` inside build_losses.
-        var_list = None
+      var_list = list(var_list)
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 

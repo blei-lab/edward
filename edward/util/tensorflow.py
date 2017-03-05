@@ -52,64 +52,6 @@ def dot(x, y):
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
-def hessian(y, xs):
-  """Calculate Hessian of y with respect to each x in xs.
-
-  Parameters
-  ----------
-  y : tf.Tensor
-    Tensor to calculate Hessian of.
-  xs : list of tf.Variable
-    List of TensorFlow variables to calculate with respect to.
-    The variables can have different shapes.
-
-  Returns
-  -------
-  tf.Tensor
-    A 2-D tensor where each row is
-    .. math:: \partial_{xs} ( [ \partial_{xs} y ]_j ).
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the inputs have Inf or NaN values.
-  """
-  y = tf.convert_to_tensor(y)
-  dependencies = [tf.verify_tensor_all_finite(y, msg='')]
-  dependencies.extend([tf.verify_tensor_all_finite(x, msg='') for x in xs])
-
-  with tf.control_dependencies(dependencies):
-    # Calculate flattened vector grad_{xs} y.
-    grads = tf.gradients(y, xs)
-    grads = [tf.reshape(grad, [-1]) for grad in grads]
-    grads = tf.concat(grads, 0)
-    # Loop over each element in the vector.
-    mat = []
-    d = grads.get_shape()[0]
-    if not isinstance(d, int):
-      d = grads.eval().shape[0]
-
-    for j in range(d):
-      # Calculate grad_{xs} ( [ grad_{xs} y ]_j ).
-      gradjgrads = tf.gradients(grads[j], xs)
-      # Flatten into vector.
-      hi = []
-      for l in range(len(xs)):
-        hij = gradjgrads[l]
-        # return 0 if gradient doesn't exist; TensorFlow returns None
-        if hij is None:
-          hij = tf.zeros(xs[l].get_shape(), dtype=tf.float32)
-
-        hij = tf.reshape(hij, [-1])
-        hi.append(hij)
-
-      hi = tf.concat(hi, 0)
-      mat.append(hi)
-
-    # Form matrix where each row is grad_{xs} ( [ grad_{xs} y ]_j ).
-    return tf.stack(mat)
-
-
 def logit(x):
   """Evaluate :math:`\log(x / (1 - x))` elementwise.
 
