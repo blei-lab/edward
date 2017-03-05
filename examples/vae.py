@@ -10,7 +10,6 @@ import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
-from keras import backend as K
 from keras.layers import Dense
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave

@@ -80,7 +80,13 @@ class RandomVariable(object):
       else:
         self._value = t_value
     else:
-      self._value = self.sample()
+      try:
+        self._value = self.sample()
+      except:
+        raise NotImplementedError(
+            "sample is not implemented for {0}. You must either pass in the "
+            "value argument or implement sample for {0}."
+            .format(self.__class__.__name__))
 
   def __str__(self):
     return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
