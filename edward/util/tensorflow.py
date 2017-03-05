@@ -110,57 +110,6 @@ def hessian(y, xs):
     return tf.stack(mat)
 
 
-def log_mean_exp(input_tensor, axis=None, keep_dims=False):
-  """Computes log(mean(exp(elements across dimensions of a tensor))).
-
-  Parameters
-  ----------
-  input_tensor : tf.Tensor
-    The tensor to reduce. Should have numeric type.
-  axis : int or list of int, optional
-    The dimensions to reduce. If `None` (the default), reduces all
-    dimensions.
-  keep_dims : bool, optional
-    If true, retains reduced dimensions with length 1.
-
-  Returns
-  -------
-  tf.Tensor
-    The reduced tensor.
-  """
-  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
-  input_tensor = tf.convert_to_tensor(input_tensor)
-  n = input_tensor.get_shape().as_list()
-  if axis is None:
-    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
-  else:
-    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
-
-  return -tf.log(n) + logsumexp
-
-
-def log_sum_exp(input_tensor, axis=None, keep_dims=False, name=None):
-  """Compute the ``log_sum_exp`` of elements in a tensor, taking
-  the sum across axes given by ``axis``.
-
-  Parameters
-  ----------
-  input_tensor : tf.Tensor
-    The tensor to reduce. Should have numeric type.
-  axis : int or list of int, optional
-    The dimensions to reduce. If `None` (the default), reduces all
-    dimensions.
-  keep_dims : bool, optional
-    If true, retains reduced dimensions with length 1.
-
-  Returns
-  -------
-  tf.Tensor
-    The reduced tensor.
-  """
-  return tf.reduce_logsumexp(input_tensor, axis, keep_dims, name)
-
-
 def logit(x):
   """Evaluate :math:`\log(x / (1 - x))` elementwise.
 
@@ -288,6 +237,35 @@ def rbf(x, y=0.0, sigma=1.0, l=1.0):
 
   return tf.pow(sigma, 2.0) * \
       tf.exp(-1.0 / (2.0 * tf.pow(l, 2.0)) * tf.pow(x - y, 2.0))
+
+
+def reduce_logmeanexp(input_tensor, axis=None, keep_dims=False):
+  """Computes log(mean(exp(elements across dimensions of a tensor))).
+
+  Parameters
+  ----------
+  input_tensor : tf.Tensor
+    The tensor to reduce. Should have numeric type.
+  axis : int or list of int, optional
+    The dimensions to reduce. If `None` (the default), reduces all
+    dimensions.
+  keep_dims : bool, optional
+    If true, retains reduced dimensions with length 1.
+
+  Returns
+  -------
+  tf.Tensor
+    The reduced tensor.
+  """
+  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
+  input_tensor = tf.convert_to_tensor(input_tensor)
+  n = input_tensor.get_shape().as_list()
+  if axis is None:
+    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
+  else:
+    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
+
+  return -tf.log(n) + logsumexp
 
 
 def to_simplex(x):

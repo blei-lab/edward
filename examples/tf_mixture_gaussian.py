@@ -15,7 +15,7 @@ import tensorflow as tf
 
 from edward.models import Dirichlet, Normal, InverseGamma
 from edward.stats import dirichlet, invgamma, multivariate_normal_diag, norm
-from edward.util import get_dims, log_sum_exp
+from edward.util import get_dims
 
 plt.style.use('ggplot')
 
@@ -68,9 +68,9 @@ class MixtureGaussian:
                  sigmas[(k * self.D):((k + 1) * self.D)])]
 
     matrix = tf.stack(matrix)
-    # log_sum_exp() along the rows is a vector, whose nth
+    # log sum exp along the rows is a vector, whose nth
     # element is the log-likelihood of data point x_n.
-    vector = log_sum_exp(matrix, 0)
+    vector = tf.reduce_logsumexp(matrix, 0)
     # Sum over data points to get the full log-likelihood.
     log_lik = tf.reduce_sum(vector)
 

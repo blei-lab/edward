@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, Normal
-from edward.util import copy, log_sum_exp
+from edward.util import copy
 
 
 class KLpq(VariationalInference):
@@ -134,7 +134,7 @@ class KLpq(VariationalInference):
     q_log_prob = tf.stack(q_log_prob)
 
     log_w = p_log_prob - q_log_prob
-    log_w_norm = log_w - log_sum_exp(log_w)
+    log_w_norm = log_w - tf.reduce_logsumexp(log_w)
     w_norm = tf.exp(log_w_norm)
 
     if var_list is None:
