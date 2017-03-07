@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+
 def get_control_variate_scalar(f, h):
   """Returns scalar used by control variates method for variance reduction in
   MCMC methods.
