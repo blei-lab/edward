@@ -85,4 +85,3 @@ for t in range(inference.n_iter):
         ax.set_ylim([-0.5, 1.5])
         plt.draw()
         plt.pause(1.0 / 60.0)
-
