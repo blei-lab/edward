@@ -1,0 +1,343 @@
+\title{Deep Probabilistic Programming}
+
+\subsection{Deep Probabilistic Programming}
+
+This webpage is a companion to the article,
+\href{https://arxiv.org/abs/1701.03757}{Deep Probabilistic Programming}
+\citep{tran2017deep}.
+Here we provide more details for plug-and-play with the code snippets.
+
+The code snippets assume the following versions.
+
+\begin{lstlisting}[language=bash]
+pip install edward==1.2.3
+pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
+\end{lstlisting}
+
+\subsubsection{Section 3. Compositional Representations for Probabilistic Models}
+
+\textbf{Figure 1}. Beta-Bernoulli program.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Bernoulli, Beta
+
+theta = Beta(a=1.0, b=1.0)
+x = Bernoulli(p=tf.ones(50) * theta)
+\end{lstlisting}
+For an example of it in use, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli.py}{\texttt{examples/beta_bernoulli.py}}
+in the Github repository.
+
+\textbf{Figure 2}. Variational auto-encoder for a data set of 28 x 28 pixel images
+\citep{kingma2014auto,rezende2014stochastic}.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Bernoulli, Normal
+from keras.layers import Dense
+
+N = 55000  # number of data points
+d = 50  # latent dimension
+
+# Probabilistic model
+z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+h = Dense(256, activation='relu')(z)
+x = Bernoulli(logits=Dense(28 * 28, activation=None)(h))
+
+# Variational model
+qx = tf.placeholder(tf.float32, [N, 28 * 28])
+qh = Dense(256, activation='relu')(qx)
+qz = Normal(mu=Dense(d, activation=None)(qh),
+            sigma=Dense(d, activation='softplus')(qh))
+\end{lstlisting}
+For an example of it in use, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}{\texttt{examples/vae.py}}
+in the Github repository.
+
+\textbf{Figure 3}. Bayesian recurrent neural network \citep{neal2012bayesian}.
+The program has an unspecified number of time steps; it uses a
+symbolic for loop (\texttt{tf.scan}).
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Normal
+
+H = 50  # number of hidden units
+D = 10  # number of features
+
+def rnn_cell(hprev, xt):
+  return tf.tanh(ed.dot(hprev, Wh) + ed.dot(xt, Wx) + bh)
+
+Wh = Normal(mu=tf.zeros([H, H]), sigma=tf.ones([H, H]))
+Wx = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
+Wy = Normal(mu=tf.zeros([H, 1]), sigma=tf.ones([H, 1]))
+bh = Normal(mu=tf.zeros(H), sigma=tf.ones(H))
+by = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+x = tf.placeholder(tf.float32, [None, D])
+h = tf.scan(rnn_cell, x, initializer=tf.zeros(H))
+y = Normal(mu=tf.matmul(h, Wy) + by, sigma=1.0)
+\end{lstlisting}
+
+\subsubsection{Section 4. Compositional Representations for Inference}
+
+\textbf{Figure 5}. Hierarchical model \citep{gelman2006data}.
+  It is a mixture of Gaussians over
+  $D$-dimensional data $\{x_n\}\in\mathbb{R}^{N\times D}$. There are
+  $K$ latent cluster means $\beta\in\mathbb{R}^{K\times D}$.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Categorical, Normal
+
+N = 10000  # number of data points
+D = 2  # data dimension
+K = 5  # number of clusters
+
+beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+z = Categorical(logits=tf.zeros([N, K]))
+x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
+\end{lstlisting}
+It is used below in Figure * (Inference), Figure 6 (left/right),
+Figure * (variational EM), and Figure * (data subsampling).
+
+\textbf{Figure 6} \textbf{(left)}. Variational inference
+\citep{jordan1999introduction}.
+It performs inference on the model defined in Figure 5.
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Categorical, Normal
+
+x_train = np.zeros([N, D], dtype=np.float32)
+
+qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+  sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+
+inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
+\end{lstlisting}
+
+\textbf{Figure 6} \textbf{(right)}. Monte Carlo \citep{robert1999monte}.
+It performs inference on the model defined in Figure 5.
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Empirical
+
+x_train = np.zeros([N, D], dtype=np.float32)
+
+T = 10000  # number of samples
+qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
+qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
+
+inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
+\end{lstlisting}
+
+\textbf{Figure 7}. Generative adversarial network
+\citep{goodfellow2014generative}.
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Normal
+from keras.layers import Dense
+
+def generative_network(eps):
+  h = Dense(256, activation='relu')(eps)
+  return Dense(28 * 28, activation=None)(h)
+
+def discriminative_network(x):
+  h = Dense(28 * 28, activation='relu')(x)
+  return Dense(h, activation=None)(1)
+
+# Probabilistic model
+eps = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
+x = generative_network(eps)
+
+inference = ed.GANInference(data={x: x_train},
+    discriminator=discriminative_network)
+\end{lstlisting}
+For an example of it in use, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}{\texttt{examples/gan.py}}
+in the Github repository.
+
+\textbf{Figure *}. Variational EM \citep{neal1993new}.
+It performs inference on the model defined in Figure 5.
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Categorical, PointMass
+
+qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+
+inference_e = ed.VariationalInference({z: qz}, data={x: x_data, beta: qbeta})
+inference_m = ed.MAP({beta: qbeta}, data={x: x_data, z: qz})
+
+inference_e.initialize()
+inference_m.initialize()
+
+tf.initialize_all_variables().run()
+
+for _ in range(10000):
+  inference_e.update()
+  inference_m.update()
+\end{lstlisting}
+For more details, see the
+\href{/api/inference-compositionality}{inference compositionality} webpage.
+See
+\href{https://github.com/blei-lab/edward/blob/master/examples/factor_analysis.py}{\texttt{examples/factor_analysis.py}} for
+a version performing Monte Carlo EM for logistic factor analysis
+in the Github repository.
+It leverages Hamiltonian Monte Carlo for the E-step to perform maximum
+marginal a posteriori.
+
+\textbf{Figure *}. Data subsampling.
+It performs inference on the model defined in Figure 5.
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Categorical, Normal
+
+N = 10000  # number of data points
+M = 128  # batch size during training
+D = 2  # data dimension
+K = 5  # number of clusters
+
+# DATA
+x_batch = tf.placeholder(tf.float32, [M, D])
+
+# MODEL
+beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+z = Categorical(logits=tf.zeros([M, K]))
+x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([M, D]))
+
+# INFERENCE
+qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
+               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros[M, D]))
+
+inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_batch})
+inference.initialize(scale={x: float(N) / M, z: float(N) / M})
+\end{lstlisting}
+For more details, see the
+\href{/api/data-subsampling}{data subsampling} webpage.
+
+\subsubsection{Section 5. Experiments}
+
+\textbf{Figure 9}. Bayesian logistic regression with Hamiltonian Monte Carlo.
+\begin{lstlisting}[language=python]
+import edward as ed
+import tensorflow as tf
+from edward.models import Bernoulli, Empirical, Normal
+
+N = 581012  # number of data points
+D = 54  # number of features
+T = 100  # number of empirical samples
+
+# DATA
+x_data = np.zeros([N, D], dtype=np.float32)
+y_data = np.zeros([N], dtype=np.float32)
+
+# MODEL
+x = tf.Variable(x_data, trainable=False)
+beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+y = Bernoulli(logits=ed.dot(x, beta))
+
+# INFERENCE
+qbeta = Empirical(params=tf.Variable(tf.zeros([T, D])))
+inference = ed.HMC({beta: qbeta}, data={y: y_data})
+inference.run(step_size=0.5 / N, n_steps=10)
+\end{lstlisting}
+For an example of it in use, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py}{\texttt{examples/hierarchical_logistic_regression.py}}
+in the Github repository.
+
+\subsubsection{Appendix A. Model Examples}
+
+\textbf{Figure 10}. Bayesian neural network for classification \citep{denker1987large}.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Bernoulli, Normal
+
+W_0 = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
+W_1 = Normal(mu=tf.zeros([H, 1]), sigma=tf.ones([H, 1]))
+b_0 = Normal(mu=tf.zeros(H), sigma=tf.ones(L))
+b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+x = tf.placeholder(tf.float32, [N, D])
+y = Bernoulli(logits=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1)
+\end{lstlisting}
+For an example of it in use, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/getting_started.py}{\texttt{examples/getting_started.py}}
+in the Github repository.
+
+\textbf{Figure 11}. Latent Dirichlet allocation \citep{blei2003latent}.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Categorical, Dirichlet
+
+D = 50  # number of documents
+N = [11502, 213, 1523, 1351, ...]  # words per doc
+K = 10  # number of topics
+V = 100000  # vocabulary size
+
+theta = Dirichlet(alpha=tf.zeros([D, K]) + 0.1)
+phi = Dirichlet(alpha=tf.zeros([K, V]) + 0.05)
+z = [[0] * N] * D
+w = [[0] * N] * D
+for d in range(D):
+  for n in range(N[d]):
+    z[d][n] = Categorical(pi=theta[d, :])
+    w[d][n] = Categorical(pi=phi[z[d][n], :])
+\end{lstlisting}
+
+\textbf{Figure 12}. Gaussian matrix factorization
+\citep{salakhutdinov2011probabilistic}.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Normal
+
+N = 10
+M = 10
+K = 5  # latent dimension
+
+U = Normal(mu=tf.zeros([M, K]), sigma=tf.ones([M, K]))
+V = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
+Y = Normal(mu=tf.matmul(U, V, transpose_b=True), sigma=tf.ones([N, M]))
+\end{lstlisting}
+
+\textbf{Figure 13}. Dirichlet process mixture model \citep{antoniak1974mixtures}.
+\begin{lstlisting}[language=python]
+import tensorflow as tf
+from edward.models import Normal
+
+mu = DirichletProcess(
+    alpha=0.1, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D), sample_n=N)
+x = Normal(mu=mu, sigma=tf.ones([N, D]))
+\end{lstlisting}
+To see the essential component defining the \texttt{DirichletProcess}
+random variable, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}
+in the Github repository.
+A more involved version with a base distribution is available at
+\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process_base.py}{\texttt{examples/pp_dirichlet_process_base.py}}
+in the Github repository.
+
+\subsubsection{Appendix B. Inference Examples}
+
+\textbf{Figure *}. Stochastic variational inference \citep{hoffman2013stochastic}.
+For more details, see the
+\href{/api/data-subsampling}{data subsampling} webpage.
+
+\subsubsection{Appendix C. Complete Examples}
+
+\textbf{Figure 15}. Variational auto-encoder
+\citep{kingma2014auto,rezende2014stochastic}.
+See the script
+\href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}{\texttt{examples/vae.py}}
+in the Github repository.
+
+\textbf{Figure 16}. Exponential family embedding \citep{rudolph2016exponential}.
+A Github repository with comprehensive features is available at
+\href{https://github.com/mariru/exponential_family_embeddings}{mariru/exponential_family_embeddings}.
+
+\subsubsection{References}\label{references}
