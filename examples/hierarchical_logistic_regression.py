@@ -15,14 +15,14 @@ from edward.stats import bernoulli, norm
 
 
 def build_toy_dataset(N, noise_std=0.1):
-  D = 1
-  x = np.linspace(-6, 6, num=N)
-  y = np.tanh(x) + np.random.normal(0, noise_std, size=N)
-  y[y < 0.5] = 0
-  y[y >= 0.5] = 1
-  x = (x - 4.0) / 4.0
-  x = x.reshape((N, D))
-  return x, y
+    D = 1
+    x = np.linspace(-6, 6, num=N)
+    y = np.tanh(x) + np.random.normal(0, noise_std, size=N)
+    y[y < 0.5] = 0
+    y[y >= 0.5] = 1
+    x = (x - 4.0) / 4.0
+    x = x.reshape((N, D))
+    return x, y
 
 
 ed.set_seed(42)
@@ -70,18 +70,19 @@ for s in range(S):
 mus = tf.stack(mus)
 
 for t in range(inference.n_iter):
-  info_dict = inference.update()
-  inference.print_progress(info_dict)
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
 
-  if t % inference.n_print == 0:
-    outputs = mus.eval()
+    if t % inference.n_print == 0:
+        outputs = mus.eval()
 
-    # Plot data and functions
-    plt.cla()
-    ax.plot(x_train[:], y_train, 'bx')
-    for s in range(S):
-         ax.plot(inputs, outputs[s], alpha=0.2)
-    ax.set_xlim([-5, 3])
-    ax.set_ylim([-0.5, 1.5])
-    plt.draw()
-    plt.pause(1.0 / 60.0)
+        # Plot data and functions
+        plt.cla()
+        ax.plot(x_train[:], y_train, 'bx')
+        for s in range(S):
+            ax.plot(inputs, outputs[s], alpha=0.2)
+        ax.set_xlim([-5, 3])
+        ax.set_ylim([-0.5, 1.5])
+        plt.draw()
+        plt.pause(1.0 / 60.0)
+
