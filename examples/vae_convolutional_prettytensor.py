@@ -12,7 +12,7 @@ import os
 import prettytensor as pt
 import tensorflow as tf
 
-from tf_convolutional_vae_util import deconv2d
+from vae_convolutional_util import deconv2d
 from edward.models import Bernoulli, Normal
 from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
