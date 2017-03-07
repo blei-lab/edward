@@ -24,7 +24,6 @@ def build_toy_dataset(N, noise_std=0.1):
     x = x.reshape((N, D))
     return x, y
 
-
 ed.set_seed(42)
 
 N = 40  # number of data points
