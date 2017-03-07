@@ -6,6 +6,8 @@ This webpage is a companion to the article,
 \href{https://arxiv.org/abs/1701.03757}{Deep Probabilistic Programming}
 \citep{tran2017deep}.
 Here we provide more details for plug-and-play with the code snippets.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/iclr2017.ipynb}{here}.
 
 The code snippets assume the following versions.
 
@@ -104,14 +106,15 @@ Figure * (variational EM), and Figure * (data subsampling).
 It performs inference on the model defined in Figure 5.
 \begin{lstlisting}[language=python]
 import edward as ed
+import numpy as np
 import tensorflow as tf
 from edward.models import Categorical, Normal
 
 x_train = np.zeros([N, D], dtype=np.float32)
 
 qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-  sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
-qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+               sigma=tf.exp(tf.Variable(tf.zeros([K, D]))))
+qz = Categorical(logits=tf.Variable(tf.zeros([N, K])))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
 \end{lstlisting}
@@ -120,14 +123,15 @@ inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
 It performs inference on the model defined in Figure 5.
 \begin{lstlisting}[language=python]
 import edward as ed
+import numpy as np
 import tensorflow as tf
 from edward.models import Empirical
 
 x_train = np.zeros([N, D], dtype=np.float32)
 
 T = 10000  # number of samples
-qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
-qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
+qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D])))
+qz = Empirical(params=tf.Variable(tf.zeros([T, N])))
 
 inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
 \end{lstlisting}
@@ -136,9 +140,13 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
 \citep{goodfellow2014generative}.
 \begin{lstlisting}[language=python]
 import edward as ed
+import numpy as np
 import tensorflow as tf
 from edward.models import Normal
 from keras.layers import Dense
+
+N = 55000  # number of data points
+d = 50  # latent dimension
 
 def generative_network(eps):
   h = Dense(256, activation='relu')(eps)
@@ -148,10 +156,14 @@ def discriminative_network(x):
   h = Dense(28 * 28, activation='relu')(x)
   return Dense(h, activation=None)(1)
 
-# Probabilistic model
-eps = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
+# DATA
+x_train = np.zeros([N, 28 * 28], dtype=np.float32)
+
+# MODEL
+eps = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
 x = generative_network(eps)
 
+# INFERENCE
 inference = ed.GANInference(data={x: x_train},
     discriminator=discriminative_network)
 \end{lstlisting}
@@ -163,14 +175,19 @@ in the Github repository.
 It performs inference on the model defined in Figure 5.
 \begin{lstlisting}[language=python]
 import edward as ed
+import numpy as np
 import tensorflow as tf
 from edward.models import Categorical, PointMass
 
-qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
-qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
+# DATA
+x_train = np.zeros([N, D], dtype=np.float32)
 
-inference_e = ed.VariationalInference({z: qz}, data={x: x_data, beta: qbeta})
-inference_m = ed.MAP({beta: qbeta}, data={x: x_data, z: qz})
+# INFERENCE
+qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
+qz = Categorical(logits=tf.Variable(tf.zeros([N, K])))
+
+inference_e = ed.VariationalInference({z: qz}, data={x: x_train, beta: qbeta})
+inference_m = ed.MAP({beta: qbeta}, data={x: x_train, z: qz})
 
 inference_e.initialize()
 inference_m.initialize()
@@ -212,8 +229,8 @@ x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([M, D]))
 
 # INFERENCE
 qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
-qz = Categorical(logits=tf.Variable(tf.zeros[M, D]))
+               sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qz = Categorical(logits=tf.Variable(tf.zeros([M, D])))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_batch})
 inference.initialize(scale={x: float(N) / M, z: float(N) / M})
@@ -226,6 +243,7 @@ For more details, see the
 \textbf{Figure 9}. Bayesian logistic regression with Hamiltonian Monte Carlo.
 \begin{lstlisting}[language=python]
 import edward as ed
+import numpy as np
 import tensorflow as tf
 from edward.models import Bernoulli, Empirical, Normal
 
@@ -258,9 +276,13 @@ in the Github repository.
 import tensorflow as tf
 from edward.models import Bernoulli, Normal
 
+N = 1000  # number of data points
+D = 528  # number of features
+H = 256  # hidden layer size
+
 W_0 = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
 W_1 = Normal(mu=tf.zeros([H, 1]), sigma=tf.ones([H, 1]))
-b_0 = Normal(mu=tf.zeros(H), sigma=tf.ones(L))
+b_0 = Normal(mu=tf.zeros(H), sigma=tf.ones(H))
 b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
 x = tf.placeholder(tf.float32, [N, D])
@@ -275,8 +297,8 @@ in the Github repository.
 import tensorflow as tf
 from edward.models import Categorical, Dirichlet
 
-D = 50  # number of documents
-N = [11502, 213, 1523, 1351, ...]  # words per doc
+D = 4  # number of documents
+N = [11502, 213, 1523, 1351]  # words per doc
 K = 10  # number of topics
 V = 100000  # vocabulary size
 
@@ -310,7 +332,7 @@ Y = Normal(mu=tf.matmul(U, V, transpose_b=True), sigma=tf.ones([N, M]))
 import tensorflow as tf
 from edward.models import Normal
 
-mu = DirichletProcess(
+mu = DirichletProcess(  # see script for implementation
     alpha=0.1, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D), sample_n=N)
 x = Normal(mu=mu, sigma=tf.ones([N, D]))
 \end{lstlisting}
