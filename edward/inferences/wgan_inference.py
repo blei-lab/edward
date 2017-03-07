@@ -39,12 +39,8 @@ class WGANInference(GANInference):
   def initialize(self, *args, **kwargs):
     super(WGANInference, self).initialize(*args, **kwargs)
 
-    var_list = kwargs.get('var_list', None)
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-    if var_list is not None:
-      var_list_d = list(set(var_list_d) & set(var_list))
-
     clip_d = [w.assign(tf.clip_by_value(w, -0.01, 0.01)) for w in var_list_d]
     self.clip_d = clip_d
 
