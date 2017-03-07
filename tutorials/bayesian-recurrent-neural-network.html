@@ -1,33 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"$if(lang)$ lang="$lang$" xml:lang="$lang$"$endif$$if(dir)$ dir="$dir$"$endif$>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-$for(author-meta)$
-  <meta name="author" content="$author-meta$" />
-$endfor$
-$if(date-meta)$
-  <meta name="date" content="$date-meta$" />
-$endif$
-$if(keywords)$
-  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
-$endif$
-  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
-$if(quotes)$
-  <style type="text/css">q { quotes: "“" "”" "‘" "’"; }</style>
-$endif$
-$if(highlighting-css)$
-  <style type="text/css">
-$highlighting-css$
-  </style>
-$endif$
-$for(css)$
-  <link rel="stylesheet" href="$css$" type="text/css" />
-$endfor$
-$for(header-includes)$
-  $header-includes$
-$endfor$
+  <title>Edward – Bayesian recurrent neural network</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -86,9 +63,6 @@ $endfor$
   <meta name="theme-color" content="#ffffff">
 </head>
 <body>
-$for(include-before)$
-$include-before$
-$endfor$
 <div class="container">
   <div class="row" style="margin-top: 5%">
     <div class="three columns">
@@ -119,15 +93,29 @@ $endfor$
     <div class="row" style="padding-bottom: 5%"> </div>
     </div>
     <div class="nine columns">
-$abstract$
-$body$
+
+<h2 id="bayesian-recurrent-neural-network">Bayesian recurrent neural network</h2>
+<p>Random variables can also be composed with control flow operations. As an example, we show a Bayesian recurrent neural network (RNN) with variable length. The data is a sequence <span class="math inline">\(\{\mathbf{x}_1,\ldots,\mathbf{x}_T\}\)</span> of length <span class="math inline">\(T\)</span> with <span class="math inline">\(D\)</span> inputs <span class="math inline">\(\mathbf{x}_t\in\mathbb{R}^{D}\)</span> per time step. A RNN applies the update <span class="math display">\[\mathbf{h}_t = \text{tanh}(\mathbf{W}_h \mathbf{h}_{t-1} +
+\mathbf{W}_x \mathbf{x}_t + \mathbf{b})\]</span> for <span class="math inline">\(t=1,\ldots,T\)</span>, and where the previous hidden state is <span class="math inline">\(\mathbf{h}_{t-1}\in\mathbb{R}^H\)</span>. We place a standard normal prior over its parameters <span class="math inline">\(\{\mathbf{W}_h\in\mathbb{R}^{H\times H}, \mathbf{W}_x\in\mathbb{R}^{D\times H},
+\mathbf{b}\in\mathbb{R}^H\}\)</span>.</p>
+<p><img src="/images/bayesian_rnn.png" alt="image" width="250" /></p>
+<p><span><em>Graphical model of a Bayesian recurrent neural network.</em></span></p>
+<pre language="python"><code>from edward.models import Normal
+
+def rnn_cell(h, x):
+  return tf.tanh(tf.dot(h, Wh) + tf.dot(x, Wx) + b)
+
+Wh = Normal(mu=tf.zeros([H, H]), sigma=tf.ones([H, H]))
+Wx = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
+b = Normal(mu=tf.zeros(H), sigma=tf.ones(H))
+
+inputs = tf.placeholder(tf.float32, [None, D])
+outputs = tf.scan(rnn_cell, inputs, initializer=tf.zeros(H))</code></pre>
+<p>The program has an unspecified length, leveraging a symbolic for loop (<code>tf.scan</code>).</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
 </div>
-$for(include-after)$
-$include-after$
-$endfor$
 <script>
   hljs.initHighlightingOnLoad();
   renderMathInElement(document.body);

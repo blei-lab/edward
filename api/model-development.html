@@ -73,7 +73,7 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
@@ -142,9 +142,9 @@ Poisson._sample_n = _sample_n
 
 sess = ed.get_session()
 x = Poisson(lam=1.0)
-sess.run(x.value())
+sess.run(x)
 ## 1.0
-sess.run(x.value())
+sess.run(x)
 ## 4.0</code></pre>
 <p>(Note the function <code>np_sample</code> should broadcast correctly if you’d like to work with non-scalar parameters; it is not correct in this toy implementation.)</p>
 <p>Sometimes the random variable you’d like to work with does not even admit (easy) sampling, and you’re only using it as a likelihood “node” rather than as some prior to parameters of another random variable. You can avoid having to implement <code>_sample_n</code> altogether: after creating <code>CustomRandomVariable</code>, instantiate it with the <code>value</code> argument:</p>

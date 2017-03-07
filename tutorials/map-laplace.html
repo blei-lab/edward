@@ -77,7 +77,7 @@
     <a class="button u-full-width" href="/tutorials/">Tutorials</a>
     <a class="button u-full-width" href="/api/">API</a>
     <a class="button u-full-width" href="#">Advanced</a>
-    <a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+    <a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
     <a class="button2 u-full-width" href="/contributing">Contributing</a>
     <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
     <a class="button2 u-full-width" href="/license">License</a>
@@ -100,13 +100,16 @@
 <p>The Laplace approximation <span class="citation">(Laplace, 1986)</span> is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}
   p(\mathbf{z} \mid \mathbf{x})
   &amp;\approx
-  \text{Normal}(\mathbf{z}\;;\; \mathbf{z}_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. The Laplace approximation uses the Hessian of the log joint density at the MAP estimate, defined component-wise as <span class="math display">\[\begin{aligned}
+  \text{Normal}(\mathbf{z}\;;\; \mathbf{z}_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. Derived from a Taylor expansion, the Laplace approximation uses the Hessian of the negative log joint density at the MAP estimate. For flat priors (equivalent to maximum likelihood), the precision matrix is known as the observed Fisher information <span class="citation">(Fisher, 1925)</span>. It is defined component-wise as <span class="math display">\[\begin{aligned}
   \Lambda_{ij}
   &amp;=
-  \frac{\partial^2 \log p(\mathbf{x}, \mathbf{z})}{\partial z_i \partial z_j}.\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
+  \frac{\partial^2}{\partial z_i \partial z_j} -\log p(\mathbf{x}, \mathbf{z}).\end{aligned}\]</span> Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute (although more expensive than a first-order gradient).</p>
 <p>For more details, see the <a href="/api/">API</a> as well as its implementation in Edward’s code base.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
+<div id="ref-fisher1925theory">
+<p>Fisher, R. A. (1925). Theory of statistical estimation. <em>Mathematical Proceedings of the Cambridge Philosophical Society</em>, <em>22</em>(5).</p>
+</div>
 <div id="ref-laplace1986memoir">
 <p>Laplace, P. S. (1986). Memoir on the probability of the causes of events. <em>Statistical Science</em>, <em>1</em>(3), 364–378.</p>
 </div>

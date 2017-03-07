@@ -73,7 +73,7 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<a class="button2 u-full-width" href="/design-philosophy">Design Philosophy</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
 <a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
 <a class="button2 u-full-width" href="/license">License</a>
@@ -114,7 +114,7 @@ theta = Beta(a=1.0, b=1.0)
 x = Bernoulli(p=tf.ones(50) * theta)</code></pre>
 <p><img alt="image" src="/images/beta_bernoulli.png" width="450"/><br/>
 <span><em>Computational graph for a Beta-Bernoulli program.</em> </span></p>
-<p>The random variable <code>x</code> (<span class="math inline">\(\mathbf{x}\)</span>) is 50-dimensional, parameterized by the random tensor <span class="math inline">\(\theta^*\)</span>. Fetching the object <code>x.value()</code> (<span class="math inline">\(\mathbf{x}^*\)</span>) from session runs the graph: it simulates from the generative process and outputs a binary vector of <span class="math inline">\(50\)</span> elements.</p>
+<p>The random variable <code>x</code> (<span class="math inline">\(\mathbf{x}\)</span>) is 50-dimensional, parameterized by the random tensor <span class="math inline">\(\theta^*\)</span>. Fetching <code>x</code> from a session runs the graph: it simulates from the generative process and outputs a binary vector (<span class="math inline">\(\mathbf{x}^*\)</span>) of <span class="math inline">\(50\)</span> elements.</p>
 <p>With computational graphs, it is also natural to build mutable states within the probabilistic program. As a typical use of computational graphs, such states can define model parameters, that is, parameters that we will always compute point estimates for and not be uncertain about. In TensorFlow, this is given by a <code>tf.Variable</code>.</p>
 <pre language="python"><code>from edward.models import Bernoulli
 
@@ -142,7 +142,7 @@ x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))</code
 from keras.layers import Dense
 
 z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
-h = Dense(256, activation='relu')(z.value())
+h = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
 <p>Keras and TensorFlow Slim automatically manage TensorFlow variables, which serve as parameters of the high-level neural network layers. This saves the trouble of having to manage them manually. However, note that neural network parameters defined this way always serve as model parameters. That is, the parameters are not exposed to the user so we cannot be Bayesian about them with prior distributions.</p>
 <h3 id="bayesian-nonparametrics">Bayesian Nonparametrics</h3>
