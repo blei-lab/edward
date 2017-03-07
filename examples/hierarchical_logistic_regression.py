@@ -32,13 +32,13 @@ D = 1  # number of features
 x_train, y_train = build_toy_dataset(N)
 
 x = tf.placeholder(tf.float32, [N, D])
-w = Normal(mu=tf.zeros(D), sigma=3.0*tf.ones(D))
-b = Normal(mu=tf.zeros([]), sigma=3.0*tf.ones([]))
+w = Normal(mu=tf.zeros(D), sigma=3.0 * tf.ones(D))
+b = Normal(mu=tf.zeros([]), sigma=3.0 * tf.ones([]))
 y = Bernoulli(logits=ed.dot(x, w) + b)
 
 qw_mu = tf.Variable(tf.random_normal([D]))
 qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
-qb_mu = tf.Variable(tf.random_normal([])+10)
+qb_mu = tf.Variable(tf.random_normal([]) + 10)
 qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 
 qw = Normal(mu=qw_mu, sigma=qw_sigma)
@@ -65,7 +65,7 @@ inputs = np.linspace(-5, 3, num=400, dtype=np.float32)
 x_in = tf.expand_dims(inputs, 1)
 mus = []
 for s in range(S):
-    mus += [tf.sigmoid(ed.dot(x_in,qw.sample()) + qb.sample())]
+    mus += [tf.sigmoid(ed.dot(x_in, qw.sample()) + qb.sample())]
 mus = tf.stack(mus)
 
 for t in range(inference.n_iter):
