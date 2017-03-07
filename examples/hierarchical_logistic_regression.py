@@ -13,6 +13,7 @@ import tensorflow as tf
 from edward.models import Normal, Bernoulli
 from edward.stats import bernoulli, norm
 
+
 def build_toy_dataset(N, noise_std=0.1):
   D = 1
   x = np.linspace(-6, 6, num=N)
