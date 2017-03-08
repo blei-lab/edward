@@ -97,18 +97,10 @@ class KLpq(VariationalInference):
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
-      scope = 'inference_' + str(id(self)) + '/' + str(s)
-      z_sample = {}
-      for z, qz in six.iteritems(self.latent_vars):
-        # Copy q(z) to obtain new set of posterior samples.
-        qz_copy = copy(qz, scope=scope)
-        z_sample[z] = qz_copy.value()
-        q_log_prob[s] += tf.reduce_sum(
-            qz_copy.log_prob(tf.stop_gradient(z_sample[z])))
-
       # Form dictionary in order to replace conditioning on prior or
       # observed variable with conditioning on a specific value.
-      dict_swap = z_sample
+      scope = 'inference_' + str(id(self)) + '/' + str(s)
+      dict_swap = {}
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
@@ -116,6 +108,13 @@ class KLpq(VariationalInference):
             dict_swap[x] = qx_copy.value()
           else:
             dict_swap[x] = qx
+
+      for z, qz in six.iteritems(self.latent_vars):
+        # Copy q(z) to obtain new set of posterior samples.
+        qz_copy = copy(qz, scope=scope)
+        dict_swap[z] = qz_copy.value()
+        q_log_prob[s] += tf.reduce_sum(
+            qz_copy.log_prob(tf.stop_gradient(dict_swap[z])))
 
       for z in six.iterkeys(self.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)

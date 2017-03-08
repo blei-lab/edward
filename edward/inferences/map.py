@@ -96,11 +96,11 @@ class MAP(VariationalInference):
     .. math::
       - \log p(x,z)
     """
-    z_mode = {z: qz.value()
-              for z, qz in six.iteritems(self.latent_vars)}
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    dict_swap = z_mode
+    scope = 'inference_' + str(id(self))
+    dict_swap = {z: qz.value()
+                 for z, qz in six.iteritems(self.latent_vars)}
     for x, qx in six.iteritems(self.data):
       if isinstance(x, RandomVariable):
         if isinstance(qx, RandomVariable):
@@ -108,7 +108,6 @@ class MAP(VariationalInference):
         else:
           dict_swap[x] = qx
 
-    scope = 'inference_' + str(id(self))
     p_log_prob = 0.0
     for z in six.iterkeys(self.latent_vars):
       z_copy = copy(z, dict_swap, scope=scope)
