@@ -6,9 +6,10 @@ Mixture density networks (MDN) \citep{bishop1994mixture} are a class
 of models obtained by combining a conventional neural network with a
 mixture density model.
 
-We demonstrate how to use MDNs in Edward, leveraging TensorFlow Slim
-to construct neural networks.
-The script is available at
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/mixture_density_network.ipynb}{here},
+or as a script available at
 \href{https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py}
 {\texttt{examples/mixture_density_network.py}} in the Github repository.
 
@@ -62,8 +63,10 @@ y_ph = tf.placeholder(tf.float32, [None])
 We use a mixture of 20 normal distributions parameterized by a
 feedforward network. That is, the membership probabilities and
 per-component mean and standard deviation are given by the output of a
-feedforward network.  We specify a three-layer network with 15 hidden
-units for each hidden layer.
+feedforward network.
+
+We leverage TensorFlow Slim to construct neural networks. We specify
+a three-layer network with 15 hidden units for each hidden layer.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Categorical, Mixture, Normal
