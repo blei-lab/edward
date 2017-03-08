@@ -60,10 +60,6 @@ qb_0 = Normal(mu=tf.Variable(tf.random_normal([2])),
 qb_1 = Normal(mu=tf.Variable(tf.random_normal([1])),
               sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
-inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
-                     W_1: qW_1, b_1: qb_1}, data={y: y_train})
-
-
 # Sample functions from variational model to visualize fits.
 rs = np.random.RandomState(0)
 inputs = np.linspace(-5, 5, num=400, dtype=np.float32)
@@ -75,13 +71,10 @@ for s in range(10):
 
 mus = tf.stack(mus)
 
-sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
-
-
 # FIRST VISUALIZATION (prior)
 
+sess = ed.get_session()
+tf.global_variables_initializer().run()
 outputs = mus.eval()
 
 fig = plt.figure(figsize=(10, 6))
@@ -97,6 +90,8 @@ plt.show()
 
 
 # RUN VARIATIONAL INFERENCE
+inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
+                     W_1: qW_1, b_1: qb_1}, data={y: y_train})
 inference.run(n_iter=500, n_samples=5)
 
 

@@ -6,8 +6,10 @@ In supervised learning, the task is to infer hidden structure from
 labeled data, comprised of training examples $\{(x_n, y_n)\}$.
 Classification means the output $y$ takes discrete values.
 
-We demonstrate how to do this in Edward with an example.
-The script is available at
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/supervised_classification.ipynb}{here},
+or as a script available at
 \href{https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py}
 {\texttt{examples/gp_classification.py}} in the Github repository.
 
@@ -110,17 +112,19 @@ X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)
 \end{lstlisting}
+Here, we define a placeholder \texttt{X}. During inference, we pass in
+the value for this placeholder according to data.
 
 \subsubsection{Inference}
 
 Perform variational inference.
-Define the variational model to be a fully factorized normal
+Define the variational model to be a fully factorized normal.
 \begin{lstlisting}[language=Python]
 qf = Normal(mu=tf.Variable(tf.random_normal([N])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
 \end{lstlisting}
 
-Run variational inference for 500 iterations.
+Run variational inference for \texttt{500} iterations.
 \begin{lstlisting}[language=Python]
 inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
 inference.run(n_iter=500)

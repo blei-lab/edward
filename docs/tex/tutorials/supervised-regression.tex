@@ -4,10 +4,12 @@
 
 In supervised learning, the task is to infer hidden structure from
 labeled data, comprised of training examples $\{(x_n, y_n)\}$.
-Regression (typically) means the output $y$ takes continuous values.
+Regression typically means the output $y$ takes continuous values.
 
-We demonstrate how to do this in Edward with an example.
-The script is available at
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/supervised_regression.ipynb}{here},
+or as a script available at
 \href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
 {\texttt{examples/bayesian_linear_regression.py}} in the Github repository.
 
@@ -32,7 +34,6 @@ w_true = np.random.randn(D)
 X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(N, w_true)
 \end{lstlisting}
-
 
 \subsubsection{Model}
 
@@ -108,15 +109,51 @@ y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
 
 With this we can evaluate various point-based quantities using the posterior
 predictive.
-\begin{lstlisting}
+\begin{lstlisting}[language=Python]
+print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
-> 0.012107
 
+print("Mean absolute error on test data:")
 print(ed.evaluate('mean_absolute_error', data={X: X_test, y_post: y_test}))
-> 0.0867875
 \end{lstlisting}
 
-The trained model makes predictions with low mean squared error
+\begin{lstlisting}
+Mean squared error on test data:
+0.0352619
+Mean absolute error on test data:
+0.162354
+\end{lstlisting}
+
+The trained model makes predictions with low error
 (relative to the magnitude of the output).
+
+We can also visualize the fit by comparing data generated with the
+prior to data generated with the posterior (on the first input
+dimension).
+
+\begin{lstlisting}[language=Python]
+def visualise(X_data, y_data, w, b, n_samples=10):
+  w_samples = w.sample(n_samples).eval()
+  b_samples = b.sample(n_samples).eval()
+  plt.scatter(X_data, y_data)
+  inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+  for ns in range(n_samples):
+    output = inputs * w_samples[ns] + b_samples[ns]
+    plt.plot(inputs, output)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+# Visualize samples from the prior.
+visualise(X_train, y_train, w, b)
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/supervised-regression-fig0.png}
+
+\begin{lstlisting}[language=Python]
+# Visualize samples from the posterior.
+visualise(X_train, y_train, qw, qb)
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/supervised-regression-fig1.png}
 
 \subsubsection{References}\label{references}
