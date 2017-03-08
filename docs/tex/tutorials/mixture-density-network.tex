@@ -48,7 +48,7 @@ sns.regplot(X_train, y_train, fit_reg=False)
 ## Size of output in test data: (1250,)
 \end{lstlisting}
 
-\includegraphics[width=650px]{/images/mdn-fig0.png}
+\includegraphics[width=650px]{/images/mixture-density-network-fig0.png}
 
 We define TensorFlow placeholders, which will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
 
@@ -168,7 +168,7 @@ plt.ylabel('Log-likelihood', fontsize=15)
 plt.show()
 \end{lstlisting}
 
-\includegraphics[width=700px]{/images/mdn-fig1.png}
+\includegraphics[width=700px]{/images/mixture-density-network-fig1.png}
 
 We see that it converges after 400 iterations.
 
@@ -195,7 +195,7 @@ plot_normal_mix(pred_weights[obj][1], pred_means[obj][1], pred_std[obj][1], axes
 axes[2].axvline(x=y_test[obj][1], color='black', alpha=0.5)
 \end{lstlisting}
 
-\includegraphics[width=700px]{/images/mdn-fig2.png}
+\includegraphics[width=700px]{/images/mixture-density-network-fig2.png}
 
 We can check the ensemble by drawing samples of the prediction and
 plotting the density of those. The MDN has learned what we'd like it
@@ -206,7 +206,7 @@ a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X
 sns.jointplot(a[:,0], a[:,1], kind="hex", color="#4CB391", ylim=(-10,10), xlim=(-14,14))
 \end{lstlisting}
 
-\includegraphics[width=700px]{/images/mdn-fig3.png}
+\includegraphics[width=700px]{/images/mixture-density-network-fig3.png}
 
 \subsubsection{Acknowledgments}
 
