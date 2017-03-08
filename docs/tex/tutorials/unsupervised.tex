@@ -1,6 +1,6 @@
-\title{Unsupervised learning}
+\title{Unsupervised Learning}
 
-\subsection{Unsupervised learning}
+\subsection{Unsupervised Learning}
 
 In unsupervised learning, the task is to infer hidden structure from
 unlabeled data, comprised of training examples $\{x_n\}$.
@@ -96,7 +96,7 @@ K = 2  # number of components
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 c = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=mu[c], sigma=sigma[c])
+x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))
 \end{lstlisting}
 
 The collapsed version marginalizes out the mixture assignments. We
@@ -123,7 +123,6 @@ We will use the collapsed version in this analysis.
 
 \subsubsection{Inference}
 Perform variational inference.
-%
 The latent variables are the mixture probabilities,
 component means, and component variances.
 Define the variational model to be
