@@ -7,15 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
-
-
-class NormalNormal:
-  """p(x, mu) = Normal(x | mu, 1) Normal(mu | 1, 1)"""
-  def log_prob(self, xs, zs):
-    log_prior = norm.logpdf(zs['mu'], 1.0, 1.0)
-    log_lik = tf.reduce_sum(norm.logpdf(xs['x'], zs['mu'], 1.0))
-    return log_lik + log_prior
 
 
 class test_inference_class(tf.test.TestCase):
@@ -54,13 +45,6 @@ class test_inference_class(tf.test.TestCase):
     self.assertRaises(TypeError, ed.Inference, data={x: tf.zeros(5)})
     self.assertRaises(TypeError, ed.Inference, data={x_ph: x})
     self.assertRaises(TypeError, ed.Inference, data={x: qx_misshape})
-
-  def test_model_wrapper(self):
-    tf.InteractiveSession()
-    model = NormalNormal()
-    qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
-
-    ed.Inference({'mu': qmu}, model_wrapper=model)
 
 if __name__ == '__main__':
   tf.test.main()

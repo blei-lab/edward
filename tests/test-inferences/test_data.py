@@ -8,113 +8,81 @@ import six
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.stats import norm
-
-
-class NormalNormal:
-  """p(x, mu) = Normal(x | mu, 1) Normal(mu | 1, 1)"""
-  def log_prob(self, xs, zs):
-    log_prior = norm.logpdf(zs['mu'], 1.0, 1.0)
-    log_lik = tf.reduce_sum(norm.logpdf(xs['x'], zs['mu'], 1.0))
-    return log_lik + log_prior
 
 
 class test_inference_data_class(tf.test.TestCase):
 
-  def read_and_decode_single_example(self, filename):
-    # Construct a queue containing a list of filenames.
-    filename_queue = tf.train.string_input_producer([filename])
-    # Read a single serialized example from a filename.
-    # `serialized_example` is a Tensor of type str.
-    reader = tf.TFRecordReader()
-    _, serialized_example = reader.read(filename_queue)
-    # Convert serialized example back to actual values,
-    # describing format of the objects to be returned.
-    features = tf.parse_single_example(
-        serialized_example,
-        features={'outcome': tf.FixedLenFeature([], tf.int64)})
-    return features['outcome']
-
-  def _test(self, sess, x_data, n_minibatch, x_val=None, is_file=False):
-    model = NormalNormal()
-
-    qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
-
-    data = {'x': x_data}
-    inference = ed.KLqp({'mu': qmu}, data, model_wrapper=model)
-    inference.initialize(n_minibatch=n_minibatch)
-
-    init = tf.global_variables_initializer()
-    init.run()
-
-    # Start input enqueue threads.
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(coord=coord)
-
-    if x_val is not None:
-      # Placeholder setting.
-      # Check data is same as data fed to it.
-      feed_dict = {inference.data['x']: x_val}
-      # avoid directly fetching placeholder
-      data_id = [tf.identity(v) for v in six.itervalues(inference.data)]
-      val = sess.run(data_id, feed_dict)
-      assert np.all(val == x_val)
-    elif is_file:
-      # File reader setting.
-      # Check data varies by session run.
-      val = sess.run(inference.data['x'])
-      val_1 = sess.run(inference.data['x'])
-      assert not np.all(val == val_1)
-    elif n_minibatch is None:
-      # Preloaded full setting.
-      # Check data is full data.
-      val = sess.run(inference.data['x'])
-      assert np.all(val == data['x'])
-    elif n_minibatch == 1:
-      # Preloaded batch setting, with n_minibatch=1.
-      # Check data is randomly shuffled.
-      assert not np.all([sess.run(inference.data)['x'] == data['x'][i]
-                         for i in range(10)])
-    else:
-      # Preloaded batch setting.
-      # Check data is randomly shuffled.
-      val = sess.run(inference.data)
-      assert not np.all(val['x'] == data['x'][:n_minibatch])
-      # Check data varies by session run.
-      val_1 = sess.run(inference.data)
-      assert not np.all(val['x'] == val_1['x'])
-
-    inference.finalize()
-
-    coord.request_stop()
-    coord.join(threads)
-
   def test_preloaded_full(self):
     with self.test_session() as sess:
-      x_data = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-      self._test(sess, x_data, None)
+      x_data = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
 
-  def test_preloaded_batch_1(self):
-    with self.test_session() as sess:
-      x_data = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-      self._test(sess, x_data, 1)
+      mu = Normal(mu=0.0, sigma=1.0)
+      x = Normal(mu=tf.ones(10) * mu, sigma=tf.ones(1))
 
-  def test_preloaded_batch_5(self):
-    with self.test_session() as sess:
-      x_data = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-      self._test(sess, x_data, 5)
+      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+
+      inference = ed.KLqp({mu: qmu}, data={x: x_data})
+      inference.initialize()
+      tf.global_variables_initializer().run()
+
+      val = sess.run(inference.data[x])
+      self.assertAllEqual(val, x_data)
 
   def test_feeding(self):
     with self.test_session() as sess:
-      x_val = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-      x_data = tf.placeholder(tf.float32)
-      self._test(sess, x_data, None, x_val)
+      x_data = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
+      x_ph = tf.placeholder(tf.float32, [10])
+
+      mu = Normal(mu=0.0, sigma=1.0)
+      x = Normal(mu=tf.ones(10) * mu, sigma=tf.ones(10))
+
+      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+
+      inference = ed.KLqp({mu: qmu}, data={x: x_ph})
+      inference.initialize()
+      tf.global_variables_initializer().run()
+
+      val = sess.run(  # avoid directly fetching placeholder
+          tf.identity(list(six.itervalues(inference.data))[0]),
+          feed_dict={inference.data[x]: x_data})
+      self.assertAllEqual(val, x_data)
 
   def test_read_file(self):
     with self.test_session() as sess:
-      x_data = self.read_and_decode_single_example(
-          "tests/data/toy_data.tfrecords")
-      self._test(sess, x_data, None, is_file=True)
+      # Construct a queue containing a list of filenames.
+      filename_queue = tf.train.string_input_producer(
+          ["tests/data/toy_data.tfrecords"])
+      # Read a single serialized example from a filename.
+      # `serialized_example` is a Tensor of type str.
+      reader = tf.TFRecordReader()
+      _, serialized_example = reader.read(filename_queue)
+      # Convert serialized example back to actual values,
+      # describing format of the objects to be returned.
+      features = tf.parse_single_example(
+          serialized_example,
+          features={'outcome': tf.FixedLenFeature([], tf.float32)})
+      x_batch = features['outcome']
+
+      mu = Normal(mu=0.0, sigma=1.0)
+      x = Normal(mu=tf.ones([]) * mu, sigma=tf.ones([]))
+
+      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+
+      inference = ed.KLqp({mu: qmu}, data={x: x_batch})
+      inference.initialize(scale={x: 10.0})
+
+      tf.global_variables_initializer().run()
+
+      coord = tf.train.Coordinator()
+      threads = tf.train.start_queue_runners(coord=coord)
+
+      # Check data varies by session run.
+      val = sess.run(inference.data[x])
+      val_1 = sess.run(inference.data[x])
+      self.assertNotEqual(val, val_1)
+
+      coord.request_stop()
+      coord.join(threads)
 
 if __name__ == '__main__':
   ed.set_seed(1512351)
