@@ -14,7 +14,7 @@ from edward.util import get_session
 class MonteCarlo(Inference):
   """Base class for Monte Carlo inference methods.
   """
-  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None):
     """Initialization.
 
     Parameters
@@ -31,15 +31,6 @@ class MonteCarlo(Inference):
       ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
       type ``tf.Tensor``). It can also bind placeholders (of type
       ``tf.Tensor``) used in the model to their realizations.
-    model_wrapper : ed.Model, optional
-      A wrapper for the probability model. If specified, the random
-      variables in ``latent_vars``' dictionary keys are strings used
-      accordingly by the wrapper. ``data`` is also changed. For
-      TensorFlow, Python, and Stan models, the key type is a string;
-      for PyMC3, the key type is a Theano shared variable. For
-      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
-      array or TensorFlow tensor; for Stan, the value type is the
-      type according to the Stan program's data block.
 
     Examples
     --------
@@ -76,20 +67,16 @@ class MonteCarlo(Inference):
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
-        if model_wrapper is None:
-          latent_vars = {rv: Empirical(params=tf.Variable(
-              tf.zeros([1e4] + rv.get_batch_shape().as_list())))
-              for rv in latent_vars}
-        else:
-          raise NotImplementedError("A list is not supported for model "
-                                    "wrappers. See documentation.")
+        latent_vars = {rv: Empirical(params=tf.Variable(
+            tf.zeros([1e4] + rv.get_batch_shape().as_list())))
+            for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, Empirical):
           raise TypeError("Posterior approximation must consist of only "
                           "Empirical random variables.")
 
-    super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
+    super(MonteCarlo, self).__init__(latent_vars, data)
 
   def initialize(self, *args, **kwargs):
     kwargs['n_iter'] = np.amin([qz.n for

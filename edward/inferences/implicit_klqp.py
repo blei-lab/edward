@@ -80,7 +80,7 @@ class ImplicitKLqp(GANInference):
     self.discriminator = discriminator
     self.global_vars = global_vars
     # call grandparent's method; avoid parent (GANInference)
-    super(GANInference, self).__init__(latent_vars, data, model_wrapper=None)
+    super(GANInference, self).__init__(latent_vars, data)
 
   def initialize(self, ratio_loss='log', *args, **kwargs):
     """Initialization.

@@ -7,7 +7,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences.inference import Inference
-from edward.models import RandomVariable, StanModel
+from edward.models import RandomVariable
 from edward.util import get_session, get_variables
 
 try:
@@ -44,10 +44,7 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
 
-    # Variables may not be instantiated for model wrappers until
-    # their methods are first called. For now, hard-code
-    # ``var_list`` inside ``build_loss_and_gradients``.
-    if var_list is None and self.model_wrapper is None:
+    if var_list is None:
       # Traverse random variable graphs to get default list of variables.
       var_list = set()
       trainables = tf.trainable_variables()
