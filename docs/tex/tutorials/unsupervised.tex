@@ -94,7 +94,7 @@ K = 2  # number of components
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 c = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))
+x = Normal(mu=mu[c], sigma=sigma[c])
 \end{lstlisting}
 
 The collapsed version marginalizes out the mixture assignments. We
@@ -110,8 +110,8 @@ mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 cat = Categorical(logits=tf.zeros([N, K]))
 components = [
-    MultivariateNormalDiag(mu=tf.ones([N, 1]) * tf.gather(mu, k),
-                           diag_stdev=tf.ones([N, 1]) * tf.gather(sigma, k))
+    MultivariateNormalDiag(mu=tf.ones([N, 1]) * mu[k],
+                           diag_stdev=tf.ones([N, 1]) * sigma[k])
     for k in range(K)]
 x = Mixture(cat=cat, components=components)
 \end{lstlisting}

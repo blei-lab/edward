@@ -12,14 +12,14 @@ import edward as ed
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy as sp
 import tensorflow as tf
 
 from edward.models import Normal, Bernoulli
+from scipy.special import expit
 
 
-def make_toy_data(n_students, n_questions, n_obs,
-                  sigma_students=1.0, sigma_questions=1.5, mu=0.0):
+def build_toy_dataset(n_students, n_questions, n_obs,
+                      sigma_students=1.0, sigma_questions=1.5, mu=0.0):
   student_etas = np.random.normal(0.0, sigma_students,
                                   size=n_students)
   question_etas = np.random.normal(0.0, sigma_questions,
@@ -29,7 +29,7 @@ def make_toy_data(n_students, n_questions, n_obs,
   question_ids = np.random.choice(range(n_questions), n_obs)
 
   logits = student_etas[student_ids] + question_etas[question_ids] + mu
-  outcomes = np.random.binomial(1, sp.special.expit(logits), n_obs)
+  outcomes = np.random.binomial(1, expit(logits), n_obs)
 
   data = pd.DataFrame({'question_id': question_ids,
                        'student_id': student_ids,
@@ -45,7 +45,8 @@ n_questions = 2000
 n_obs = 200000
 
 # DATA
-data, true_s_etas, true_q_etas = make_toy_data(n_students, n_questions, n_obs)
+data, true_s_etas, true_q_etas = build_toy_dataset(
+    n_students, n_questions, n_obs)
 obs = data['outcomes'].values
 student_ids = data['student_id'].values.astype(int)
 question_ids = data['question_id'].values.astype(int)
