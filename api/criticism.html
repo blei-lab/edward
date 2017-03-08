@@ -106,7 +106,7 @@
 <hr/>
 <span class="target" id="module-edward.criticisms"></span><dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=500</em>, <em>output_key=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>n_samples=500</em>, <em>output_key=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
 <p>A metric, or scoring rule (Winkler, 1994), is a function of observed
 data under the posterior predictive distribution. For example in
@@ -144,22 +144,6 @@ posterior predictive’s log-density.</p>
 <code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to their realizations (of
 type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). It can also bind placeholders (of type
 <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) used in the model to their realizations.</p>
-</div></blockquote>
-<p><strong>latent_vars</strong> : dict of str to RandomVariable, optional</p>
-<blockquote>
-<div><p>Collection of random variables binded to their inferred posterior.
-It is only used (and in fact required) if the model wrapper is
-specified.</p>
-</div></blockquote>
-<p><strong>model_wrapper</strong> : ed.Model, optional</p>
-<blockquote>
-<div><p>An optional wrapper for the probability model. It must have a
-<code class="docutils literal"><span class="pre">predict</span></code> method, and <code class="docutils literal"><span class="pre">latent_vars</span></code> must be specified. <code class="docutils literal"><span class="pre">data</span></code> is
-also changed. For TensorFlow, Python, and Stan models, the key
-type is a string; for PyMC3, the key type is a Theano shared
-variable. For TensorFlow, Python, and PyMC3 models, the value type
-is a NumPy array or TensorFlow placeholder; for Stan, the value
-type is the type according to the Stan program’s data block.</p>
 </div></blockquote>
 <p><strong>n_samples</strong> : int, optional</p>
 <blockquote>
@@ -207,7 +191,7 @@ posterior predictive distribution.</p>
 </dd></dl>
 <dl class="function">
 <dt id="edward.criticisms.ppc">
-<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>model_wrapper=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Posterior predictive check
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).</p>
 <p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior
@@ -239,18 +223,6 @@ type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). 
 <div><p>Collection of random variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or
 <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) binded to their inferred posterior. This argument
 is used when the discrepancy is a function of latent variables.</p>
-</div></blockquote>
-<p><strong>model_wrapper</strong> : ed.Model, optional</p>
-<blockquote>
-<div><p>An optional wrapper for the probability model. It must have a
-<code class="docutils literal"><span class="pre">sample_likelihood</span></code> method. If <code class="docutils literal"><span class="pre">latent_vars</span></code> is not specified,
-it must also have a <code class="docutils literal"><span class="pre">sample_prior</span></code> method, as <code class="docutils literal"><span class="pre">ppc</span></code> will
-default to a prior predictive check. <code class="docutils literal"><span class="pre">data</span></code> is also changed. For
-TensorFlow, Python, and Stan models, the key type is a string; for
-PyMC3, the key type is a Theano shared variable. For TensorFlow,
-Python, and PyMC3 models, the value type is a NumPy array or
-TensorFlow placeholder; for Stan, the value type is the type
-according to the Stan program’s data block.</p>
 </div></blockquote>
 <p><strong>n_samples</strong> : int, optional</p>
 <blockquote>

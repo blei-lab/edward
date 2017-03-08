@@ -116,8 +116,8 @@ x_ph = tf.placeholder(tf.float32, [M, 784])</code></pre>
 \mathbf{\epsilon} &amp;\sim p(\mathbf{\epsilon}), \\
 \mathbf{x} &amp;= G(\mathbf{\epsilon}; \theta),\end{aligned}\]</span> where <span class="math inline">\(G(\cdot; \theta)\)</span> is a neural network that takes the samples <span class="math inline">\(\mathbf{\epsilon}\)</span> as input. The distribution <span class="math inline">\(p(\mathbf{\epsilon})\)</span> is interpreted as random noise injected to produce stochasticity in a physical system; it is typically a fixed uniform or normal distribution with some latent dimensionality.</p>
 <p>In Edward, we build the model as follows, using TensorFlow Slim to specify the neural network. It defines a 2-layer fully connected neural network and outputs a vector of length <span class="math inline">\(28\times28\)</span> with values in <span class="math inline">\([0,1]\)</span>.</p>
-<pre class="python" language="Python"><code>def generative_network(z):
-  h1 = slim.fully_connected(z, 128, activation_fn=tf.nn.relu)
+<pre class="python" language="Python"><code>def generative_network(eps):
+  h1 = slim.fully_connected(eps, 128, activation_fn=tf.nn.relu)
   x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
   return x
 
@@ -150,7 +150,7 @@ with tf.variable_scope(&quot;Gen&quot;):
 optimizer_d = tf.train.AdamOptimizer()
 
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer,
+    optimizer=optimizer, optimizer_d=optimizer_d,
     n_iter=15000, n_print=1000)</code></pre>
 <p>We now form the main loop which trains the GAN. At each iteration, it takes a minibatch and updates the parameters according to the algorithm. At every 1000 iterations, it will print progress. It also saves a figure of generated samples from the model.</p>
 <pre class="python" language="Python"><code>sess = ed.get_session()

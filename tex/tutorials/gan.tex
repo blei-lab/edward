@@ -65,8 +65,8 @@ network and outputs a vector of length $28\times28$ with values in
 $[0,1]$.
 
 \begin{lstlisting}[language=Python]
-def generative_network(z):
-  h1 = slim.fully_connected(z, 128, activation_fn=tf.nn.relu)
+def generative_network(eps):
+  h1 = slim.fully_connected(eps, 128, activation_fn=tf.nn.relu)
   x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
   return x
 
@@ -171,7 +171,7 @@ optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
 
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer,
+    optimizer=optimizer, optimizer_d=optimizer_d,
     n_iter=15000, n_print=1000)
 \end{lstlisting}
 

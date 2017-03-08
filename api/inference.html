@@ -148,13 +148,13 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 <hr/>
 <dl class="class">
 <dt id="edward.inferences.Inference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em>, <em>model_wrapper=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L22" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Base class for Edward inference methods.</p>
 <p class="rubric">Attributes</p>
 <table class="docutils">
 <colgroup>
-<col width="6%"></col>
-<col width="94%"></col>
+<col width="5%"></col>
+<col width="95%"></col>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>latent_vars</td>
@@ -162,9 +162,6 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 </tr>
 <tr class="row-even"><td>data</td>
 <td>(dict) Data dictionary which binds observed variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to their realizations (of type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>).</td>
-</tr>
-<tr class="row-odd"><td>model_wrapper</td>
-<td>(ed.Model or None) An optional wrapper for the probability model. If specified, the random variables in <code class="docutils literal"><span class="pre">latent_vars</span></code>‘ dictionary keys are strings used accordingly by the wrapper.</td>
 </tr>
 </tbody>
 </table>
@@ -182,24 +179,13 @@ binded to another random variable; the latter will infer the
 former conditional on data.</p>
 </div></blockquote>
 <p><strong>data</strong> : dict, optional</p>
-<blockquote>
+<blockquote class="last">
 <div><p>Data dictionary which binds observed variables (of type
 <code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to their realizations (of
 type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). It can also bind placeholders (of type
 <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) used in the model to their realizations; and
 prior latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code>) to posterior
 latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code>).</p>
-</div></blockquote>
-<p><strong>model_wrapper</strong> : ed.Model, optional</p>
-<blockquote class="last">
-<div><p>A wrapper for the probability model. If specified, the random
-variables in <code class="docutils literal"><span class="pre">latent_vars</span></code>‘ dictionary keys are strings
-used accordingly by the wrapper. <code class="docutils literal"><span class="pre">data</span></code> is also changed. For
-TensorFlow, Python, and Stan models, the key type is a string;
-for PyMC3, the key type is a Theano shared variable. For
-TensorFlow, Python, and PyMC3 models, the value type is a NumPy
-array or TensorFlow tensor; for Stan, the value type is the
-type according to the Stan program’s data block.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -231,7 +217,7 @@ which are the outputs of data readers.</li>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Inference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L212" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L159" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>A simple wrapper to run inference.</p>
 <ol class="arabic simple">
 <li>Initialize algorithm via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
@@ -260,8 +246,7 @@ avoid initializing any variables, pass in an empty list.</p>
 <blockquote>
 <div><p>Whether to start and stop queue runners during inference using a
 TensorFlow coordinator. For example, queue runners are necessary
-for batch training with the <code class="docutils literal"><span class="pre">n_minibatch</span></code> argument or with
-file readers.</p>
+for batch training with file readers.</p>
 </div></blockquote>
 <p><strong>*args</strong></p>
 <blockquote>
@@ -278,7 +263,7 @@ file readers.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>n_minibatch=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L275" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L221" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize inference algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -292,15 +277,6 @@ file readers.</p>
 <blockquote>
 <div><p>Number of iterations for each print progress. To suppress print
 progress, then specify 0. Default is <code class="docutils literal"><span class="pre">int(n_iter</span> <span class="pre">/</span> <span class="pre">10)</span></code>.</p>
-</div></blockquote>
-<p><strong>n_minibatch</strong> : int, optional</p>
-<blockquote>
-<div><p>Number of samples for data subsampling. Default is to use all
-the data. <code class="docutils literal"><span class="pre">n_minibatch</span></code> is available only for TensorFlow,
-Python, and PyMC3 model wrappers; use <code class="docutils literal"><span class="pre">scale</span></code> for Edward’s
-language. All data must be passed in as NumPy arrays. For
-subsampling details, see <code class="docutils literal"><span class="pre">tf.train.slice_input_producer</span></code> and
-<code class="docutils literal"><span class="pre">tf.train.batch</span></code>.</p>
 </div></blockquote>
 <p><strong>scale</strong> : dict of RandomVariable to tf.Tensor, optional</p>
 <blockquote>
@@ -328,7 +304,7 @@ times.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L361" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L273" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -352,7 +328,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L395" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L307" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -369,7 +345,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L410" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L322" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>

@@ -97,7 +97,6 @@
 </div>
 <div class="row">
 <a class="button4" href="/api/model-compositionality">Compositionality</a>
-<a class="button4" href="/api/model-wrappers">Wrappers</a>
 <a class="button4" href="/api/model-development">Development</a>
 </div>
 </div>
@@ -185,7 +184,7 @@ populate the namespace of the child class. Methods from
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.models.RandomVariable.eval">
-<code class="descname">eval</code><span class="sig-paren">(</span><em>session=None</em>, <em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L191" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">eval</code><span class="sig-paren">(</span><em>session=None</em>, <em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L218" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>In a session, computes and returns the value of this random variable.</p>
 <p>This is not a graph construction method, it does not add ops to the graph.</p>
 <p>This convenience method requires a session where the graph
@@ -223,42 +222,42 @@ none, the default session is used.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.value">
-<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L221" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L248" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get tensor that the random variable corresponds to.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_ancestors">
-<code class="descname">get_ancestors</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L225" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_ancestors</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L252" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get ancestor random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_children">
-<code class="descname">get_children</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L230" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_children</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L257" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get child random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_descendants">
-<code class="descname">get_descendants</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L235" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_descendants</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L262" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get descendant random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_parents">
-<code class="descname">get_parents</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L240" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_parents</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L267" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get parent random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_siblings">
-<code class="descname">get_siblings</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L245" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_siblings</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L272" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get sibling random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_variables">
-<code class="descname">get_variables</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L250" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_variables</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L277" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get TensorFlow variables that the random variable depends on.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_shape">
-<code class="descname">get_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L255" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L282" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get shape of random variable.</p>
 </dd></dl>
 </dd></dl>

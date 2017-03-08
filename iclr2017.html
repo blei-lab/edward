@@ -201,7 +201,7 @@ def generative_network(eps):
 
 def discriminative_network(x):
   h = Dense(28 * 28, activation=&#39;relu&#39;)(x)
-  return Dense(h, activation=None)(1)
+  return Dense(1, activation=None)(h)
 
 # DATA
 x_train = np.zeros([N, 28 * 28], dtype=np.float32)
@@ -306,7 +306,7 @@ b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
 x = tf.placeholder(tf.float32, [N, D])
 y = Bernoulli(logits=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1)</code></pre>
-<p>For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started.py"><code>examples/getting_started.py</code></a> in the Github repository.</p>
+<p>For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py"><code>examples/getting_started_example.py</code></a> in the Github repository.</p>
 <p><strong>Figure 11</strong>. Latent Dirichlet allocation <span class="citation">(D. M. Blei, Ng, &amp; Jordan, 2003)</span>.</p>
 <pre language="python"><code>import tensorflow as tf
 from edward.models import Categorical, Dirichlet
