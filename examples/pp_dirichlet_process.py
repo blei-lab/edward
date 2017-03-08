@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Dirichlet process.
 
-We sample from a Dirichlet process (with no base distribution) by
-using its stick breaking construction.
+We sample from a Dirichlet process (with no base distribution) via its
+stick breaking construction.
 
 References
 ----------

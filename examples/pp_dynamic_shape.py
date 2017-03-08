@@ -25,8 +25,8 @@ n = 1 + tf.cast(Exponential(lam=0.5), tf.int32)
 p = Dirichlet(alpha=tf.ones([n]) * alpha)
 
 sess = ed.get_session()
-print(sess.run(p.value()))
+print(sess.run(p))
 # [ 0.01012419  0.02939712  0.05036638  0.51287931  0.31020424  0.0485355
 #   0.0384932 ]
-print(sess.run(p.value()))
+print(sess.run(p))
 # [ 0.12836078  0.23335715  0.63828212]

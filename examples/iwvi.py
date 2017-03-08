@@ -14,7 +14,7 @@ import tensorflow as tf
 
 from edward.inferences import VariationalInference
 from edward.models import Bernoulli, Normal, RandomVariable
-from edward.util import copy, log_mean_exp
+from edward.util import copy, reduce_logmeanexp
 from scipy.special import expit
 
 
@@ -78,7 +78,7 @@ class IWVI(VariationalInference):
 
       log_w += [p_log_prob - q_log_prob]
 
-    loss = -log_mean_exp(log_w)
+    loss = -reduce_logmeanexp(log_w)
     grads = tf.gradients(loss, [v._ref() for v in var_list])
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars

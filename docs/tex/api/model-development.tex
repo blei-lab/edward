@@ -67,9 +67,9 @@ Poisson._sample_n = _sample_n
 
 sess = ed.get_session()
 x = Poisson(lam=1.0)
-sess.run(x.value())
+sess.run(x)
 ## 1.0
-sess.run(x.value())
+sess.run(x)
 ## 4.0
 \end{lstlisting}
 

@@ -205,24 +205,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
     else:
       new_original_op = None
 
-    # If it has control inputs, copy them.
-    new_control_inputs = []
-    for x in op.control_inputs:
-      elem = copy(x, dict_swap, scope, True, copy_q)
-      if not isinstance(elem, tf.Operation):
-        elem = tf.convert_to_tensor(elem)
-
-      new_control_inputs += [elem]
-
-    # If it has inputs, copy them.
-    new_inputs = []
-    for x in op.inputs:
-      elem = copy(x, dict_swap, scope, True, copy_q)
-      if not isinstance(elem, tf.Operation):
-        elem = tf.convert_to_tensor(elem)
-
-      new_inputs += [elem]
-
     # Make a copy of the node def.
     # As an instance of tensorflow.core.framework.graph_pb2.NodeDef, it
     # stores string-based info such as name, device, and type of the op.
@@ -232,7 +214,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     # Copy the other inputs needed for initialization.
     output_types = op._output_types[:]
-    input_types = op._input_types[:]
 
     # Make a copy of the op def.
     # It is unique to every Operation type.
@@ -240,12 +221,34 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     ret = tf.Operation(new_node_def,
                        graph,
-                       new_inputs,
+                       [],
                        output_types,
-                       new_control_inputs,
-                       input_types,
+                       [],
+                       [],
                        new_original_op,
                        op_def)
+
+    # advertise op early to break recursions
+    graph._add_op(ret)
+
+    # If it has control inputs, copy them.
+    elems = []
+    for x in op.control_inputs:
+      elem = copy(x, dict_swap, scope, True, copy_q)
+      if not isinstance(elem, tf.Operation):
+        elem = tf.convert_to_tensor(elem)
+
+      elems += [elem]
+
+    ret._add_control_inputs(elems)
+
+    # If it has inputs, copy them.
+    for x in op.inputs:
+      elem = copy(x, dict_swap, scope, True, copy_q)
+      if not isinstance(elem, tf.Operation):
+        elem = tf.convert_to_tensor(elem)
+
+      ret._add_input(elem)
 
     # Use Graph's private methods to add the op, following
     # implementation of `tf.Graph().create_op()`.
@@ -255,7 +258,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     if compute_shapes:
       set_shapes_for_outputs(ret)
-    graph._add_op(ret)
     graph._record_op_seen_by_control_dependencies(ret)
 
     if compute_device:
@@ -331,10 +333,16 @@ def get_ancestors(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -378,10 +386,16 @@ def get_children(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -426,10 +440,16 @@ def get_descendants(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -499,10 +519,16 @@ def get_parents(x, collection=None):
   node_dict = {node.value(): node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
@@ -540,7 +566,7 @@ def get_siblings(x, collection=None):
   True
   """
   parents = get_parents(x, collection)
-  siblings = set([])
+  siblings = set()
   for parent in parents:
     siblings.update(get_children(parent, collection))
 
@@ -578,10 +604,16 @@ def get_variables(x, collection=None):
   node_dict = {node.name: node for node in collection}
 
   # Traverse the graph. Add each node to the set if it's in the collection.
-  output = set([])
-  nodes = set([x])
+  output = set()
+  visited = set()
+  nodes = {x}
   while nodes:
     node = nodes.pop()
+
+    if node in visited:
+      continue
+    visited.add(node)
+
     if isinstance(node, RandomVariable):
       node = node.value()
 
