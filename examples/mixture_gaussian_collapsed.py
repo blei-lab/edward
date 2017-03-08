@@ -64,8 +64,7 @@ inference = ed.KLqp({mu: qmu, sigma: qsigma}, data={x: x_train})
 inference.initialize(n_samples=20, n_iter=4000)
 
 sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
   info_dict = inference.update()
