@@ -10,7 +10,7 @@ from edward.models import RandomVariable
 from edward.util import get_session
 
 
-def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
+def ppc(T, data, latent_vars=None, n_samples=100):
   """Posterior predictive check
   (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).
 
@@ -40,16 +40,6 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
     Collection of random variables (of type ``RandomVariable`` or
     ``tf.Tensor``) binded to their inferred posterior. This argument
     is used when the discrepancy is a function of latent variables.
-  model_wrapper : ed.Model, optional
-    An optional wrapper for the probability model. It must have a
-    ``sample_likelihood`` method. If ``latent_vars`` is not specified,
-    it must also have a ``sample_prior`` method, as ``ppc`` will
-    default to a prior predictive check. ``data`` is also changed. For
-    TensorFlow, Python, and Stan models, the key type is a string; for
-    PyMC3, the key type is a Theano shared variable. For TensorFlow,
-    Python, and PyMC3 models, the value type is a NumPy array or
-    TensorFlow placeholder; for Stan, the value type is the type
-    according to the Stan program's data block.
   n_samples : int, optional
     Number of replicated data sets.
 
@@ -92,28 +82,15 @@ def ppc(T, data, latent_vars=None, model_wrapper=None, n_samples=100):
   """
   sess = get_session()
   # Sample to get replicated data sets and latent variables.
-  if model_wrapper is None:
-    if latent_vars is None:
-      zrep = None
-    else:
-      zrep = {key: tf.convert_to_tensor(value)
-              for key, value in six.iteritems(latent_vars)}
-
-    xrep = {}
-    for x, obs in six.iteritems(data):
-      if isinstance(x, RandomVariable):
-        # Replace observed data with replicated data.
-        xrep[x] = x.value()
-      else:
-        xrep[x] = obs
+  if latent_vars is None:
+    zrep = None
   else:
-    if latent_vars is None:
-      zrep = model_wrapper.sample_prior()
-    else:
-      zrep = {key: tf.convert_to_tensor(value)
-              for key, value in six.iteritems(latent_vars)}
+    zrep = {key: tf.convert_to_tensor(value)
+            for key, value in six.iteritems(latent_vars)}
 
-    xrep = model_wrapper.sample_likelihood(zrep)
+  # Replace observed data with replicated data.
+  xrep = {x: (x.value() if isinstance(x, RandomVariable) else obs)
+          for x, obs in six.iteritems(data)}
 
   # Create feed_dict for data placeholders that the model conditions
   # on; it is necessary for all session runs.

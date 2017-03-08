@@ -10,8 +10,7 @@ from edward.models import RandomVariable
 from edward.util import logit, get_session
 
 
-def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
-             n_samples=500, output_key=None):
+def evaluate(metrics, data, n_samples=500, output_key=None):
   """Evaluate fitted model using a set of metrics.
 
   A metric, or scoring rule (Winkler, 1994), is a function of observed
@@ -46,18 +45,6 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
     type ``tf.Tensor``). It can also bind placeholders (of type
     ``tf.Tensor``) used in the model to their realizations.
-  latent_vars : dict of str to RandomVariable, optional
-    Collection of random variables binded to their inferred posterior.
-    It is only used (and in fact required) if the model wrapper is
-    specified.
-  model_wrapper : ed.Model, optional
-    An optional wrapper for the probability model. It must have a
-    ``predict`` method, and ``latent_vars`` must be specified. ``data`` is
-    also changed. For TensorFlow, Python, and Stan models, the key
-    type is a string; for PyMC3, the key type is a Theano shared
-    variable. For TensorFlow, Python, and PyMC3 models, the value type
-    is a NumPy array or TensorFlow placeholder; for Stan, the value
-    type is the type according to the Stan program's data block.
   n_samples : int, optional
     Number of posterior samples for making predictions, using the
     posterior predictive distribution.
@@ -109,35 +96,25 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     else:
       raise KeyError("User must specify output_key.")
 
-  # Form true data. (It is not required in the specific setting of the
-  # log-likelihood metric with a model wrapper.)
-  if (metrics != ['log_lik'] and metrics != ['log_likelihood']) or \
-          model_wrapper is None:
+  # Form true data. (It is required for all metrics excluding the
+  # log-likelihood.)
+  if metrics != ['log_lik'] and metrics != ['log_likelihood']:
     y_true = data[output_key]
 
   # Form predicted data (if there are any supervised metrics).
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
     # Monte Carlo estimate the mean of the posterior predictive.
-    if model_wrapper is None:
-      # Note the naive solution of taking the mean of
-      # ``y_pred.sample(n_samples)`` does not work: ``y_pred`` is
-      # parameterized by one posterior sample; this implies each
-      # sample call from ``y_pred`` depends on the same posterior
-      # sample. Instead, we fetch the sample tensor from the graph
-      # many times. Alternatively, we could copy ``y_pred``
-      # ``n_samples`` many times, so that each copy depends on a
-      # different posterior sample. But it's expensive.
-      tensor = tf.convert_to_tensor(output_key)
-      y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
-      y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
-    else:
-      y_pred = []
-      for _ in range(n_samples):
-        zrep = {key: qz.sample(())
-                for key, qz in six.iteritems(latent_vars)}
-        y_pred += [model_wrapper.predict(data, zrep)]
-
-      y_pred = tf.reduce_mean(y_pred, 0)
+    # Note the naive solution of taking the mean of
+    # ``y_pred.sample(n_samples)`` does not work: ``y_pred`` is
+    # parameterized by one posterior sample; this implies each
+    # sample call from ``y_pred`` depends on the same posterior
+    # sample. Instead, we fetch the sample tensor from the graph
+    # many times. Alternatively, we could copy ``y_pred``
+    # ``n_samples`` many times, so that each copy depends on a
+    # different posterior sample. But it's expensive.
+    tensor = tf.convert_to_tensor(output_key)
+    y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+    y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
@@ -184,20 +161,10 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
       evaluations += [cosine_proximity(y_true, y_pred)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
       # Monte Carlo estimate the log-density of the posterior predictive.
-      if model_wrapper is None:
-        tensor = tf.reduce_mean(output_key.log_prob(y_true))
-        log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
-        log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tf.float32)
-        evaluations += [log_pred]
-      else:
-        log_pred = []
-        for _ in range(n_samples):
-          zrep = {key: qz.sample(())
-                  for key, qz in six.iteritems(latent_vars)}
-          log_pred += [model_wrapper.log_lik(data, zrep)]
-
-        log_pred = tf.reduce_mean(log_pred)
-        evaluations += [log_pred]
+      tensor = tf.reduce_mean(output_key.log_prob(y_true))
+      log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+      log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tf.float32)
+      evaluations += [log_pred]
     else:
       raise NotImplementedError()
 
