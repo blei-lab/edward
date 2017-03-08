@@ -46,6 +46,8 @@ membership assignment $z_n\in\{0,\ldots,K-1\}$ for each data point
 $x_n$.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, Normal
+
 N = 10000000  # data set size
 M = 128  # minibatch size
 D = 2  # data dimensionality

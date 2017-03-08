@@ -79,6 +79,8 @@ We set up our model below, forming creating a prior distribution over
 our variables of interest.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 w = Normal(mu=tf.zeros([D, K]), sigma=2.0 * tf.ones([D, K]))
 z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
 x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))

@@ -69,6 +69,8 @@ Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).
 
 In Edward, the model is written as follows:
 \begin{lstlisting}[language=Python]
+from edward.models import Normal, Poisson
+
 N = x_train.shape[0]  # number of data points
 K = 3  # latent dimensionality
 
