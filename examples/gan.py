@@ -75,7 +75,7 @@ optimizer_d = tf.train.AdamOptimizer()
 inference = ed.GANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer,
+    optimizer=optimizer, optimizer_d=optimizer_d,
     n_iter=15000, n_print=1000)
 
 sess = ed.get_session()
