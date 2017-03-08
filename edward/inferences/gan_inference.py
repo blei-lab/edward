@@ -33,10 +33,10 @@ class GANInference(VariationalInference):
 
     Notes
     -----
-    ``GANInference`` does not support model wrappers or latent
-    variable inference. Note that GAN-style training also samples from
-    the prior: this does not work well for latent variables that are
-    shared across many data points (global variables).
+    ``GANInference`` does not support latent variable inference. Note
+    that GAN-style training also samples from the prior: this does not
+    work well for latent variables that are shared across many data
+    points (global variables).
 
     In building the computation graph for inference, the
     discriminator's parameters can be accessed with the variable scope
@@ -55,7 +55,7 @@ class GANInference(VariationalInference):
       raise NotImplementedError()
 
     self.discriminator = discriminator
-    super(GANInference, self).__init__(None, data, model_wrapper=None)
+    super(GANInference, self).__init__(None, data)
 
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,

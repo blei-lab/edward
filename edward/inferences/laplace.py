@@ -23,7 +23,7 @@ class Laplace(MAP):
   inverse Hessian at the mode of the posterior. This forms the
   covariance of the normal approximation.
   """
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars, data=None):
     """
     Parameters
     ----------
@@ -58,21 +58,11 @@ class Laplace(MAP):
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
-        if model_wrapper is None:
-          latent_vars = {rv: MultivariateNormalCholesky(
-              mu=tf.Variable(tf.random_normal(rv.batch_shape())),
-              chol=tf.Variable(tf.random_normal(
-                  rv.get_batch_shape().concatenate(rv.get_batch_shape()[-1]))))
-              for rv in latent_vars}
-        elif len(latent_vars) == 1:
-          latent_vars = {latent_vars[0]: MultivariateNormalCholesky(
-              mu=tf.Variable(tf.random_normal([model_wrapper.n_vars])),
-              chol=tf.Variable(tf.random_normal([model_wrapper.n_vars] * 2)))}
-        elif len(latent_vars) == 0:
-          latent_vars = {}
-        else:
-          raise NotImplementedError("A list of more than one element is "
-                                    "not supported. See documentation.")
+        latent_vars = {rv: MultivariateNormalCholesky(
+            mu=tf.Variable(tf.random_normal(rv.batch_shape())),
+            chol=tf.Variable(tf.random_normal(
+                rv.get_batch_shape().concatenate(rv.get_batch_shape()[-1]))))
+            for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(
@@ -83,7 +73,7 @@ class Laplace(MAP):
                           "or MultivariateNormalFull random variables.")
 
     # call grandparent's method; avoid parent (MAP)
-    super(MAP, self).__init__(latent_vars, data, model_wrapper)
+    super(MAP, self).__init__(latent_vars, data)
 
   def initialize(self, var_list=None, *args, **kwargs):
     # Store latent variables in a temporary attribute; MAP will

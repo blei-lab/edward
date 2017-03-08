@@ -31,7 +31,7 @@ class MetropolisHastings(MonteCarlo):
   q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
   pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
   """
-  def __init__(self, latent_vars, proposal_vars, data=None, model_wrapper=None):
+  def __init__(self, latent_vars, proposal_vars, data=None):
     """
     Parameters
     ----------
@@ -50,7 +50,7 @@ class MetropolisHastings(MonteCarlo):
     >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
     """
     self.proposal_vars = proposal_vars
-    super(MetropolisHastings, self).__init__(latent_vars, data, model_wrapper)
+    super(MetropolisHastings, self).__init__(latent_vars, data)
 
   def build_update(self):
     """
@@ -106,27 +106,22 @@ class MetropolisHastings(MonteCarlo):
       # Increment ratio.
       ratio -= tf.reduce_sum(proposal_zold.log_prob(dict_swap_old[z]))
 
-    if self.model_wrapper is None:
-      for z in six.iterkeys(self.latent_vars):
-        # Build priors p(znew) and p(zold).
-        znew = copy(z, dict_swap_new, scope=scope_new)
-        zold = copy(z, dict_swap_old, scope=scope_old)
-        # Increment ratio.
-        ratio += tf.reduce_sum(znew.log_prob(dict_swap_new[z]))
-        ratio -= tf.reduce_sum(zold.log_prob(dict_swap_old[z]))
+    for z in six.iterkeys(self.latent_vars):
+      # Build priors p(znew) and p(zold).
+      znew = copy(z, dict_swap_new, scope=scope_new)
+      zold = copy(z, dict_swap_old, scope=scope_old)
+      # Increment ratio.
+      ratio += tf.reduce_sum(znew.log_prob(dict_swap_new[z]))
+      ratio -= tf.reduce_sum(zold.log_prob(dict_swap_old[z]))
 
-      for x in six.iterkeys(self.data):
-        if isinstance(x, RandomVariable):
-          # Build likelihoods p(x | znew) and p(x | zold).
-          x_znew = copy(x, dict_swap_new, scope=scope_new)
-          x_zold = copy(x, dict_swap_old, scope=scope_old)
-          # Increment ratio.
-          ratio += tf.reduce_sum(x_znew.log_prob(dict_swap[x]))
-          ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
-    else:
-        x = self.data
-        ratio += self.model_wrapper.log_prob(x, new_sample)
-        ratio -= self.model_wrapper.log_prob(x, old_sample)
+    for x in six.iterkeys(self.data):
+      if isinstance(x, RandomVariable):
+        # Build likelihoods p(x | znew) and p(x | zold).
+        x_znew = copy(x, dict_swap_new, scope=scope_new)
+        x_zold = copy(x, dict_swap_old, scope=scope_old)
+        # Increment ratio.
+        ratio += tf.reduce_sum(x_znew.log_prob(dict_swap[x]))
+        ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
 
     # Accept or reject sample.
     u = Uniform().sample()
