@@ -131,7 +131,7 @@ x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
 tf.tanh(x * y)
-tf.gather(x, 2)  # 3rd normal rv in the vector</code></pre>
+x[2]  # 3rd normal rv in the vector</code></pre>
 <p>In the <a href="/api/model-compositionality">compositionality page</a>, we describe how to build models by composing random variables.</p>
 <hr/>
 <p>For a list of random variables supported in Edward, see the <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html">TensorFlow distributions API</a>. Edward random variables build on top of them, inheriting the same arguments and class methods. Additional methods are also available, detailed below.</p>

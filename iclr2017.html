@@ -98,7 +98,8 @@
 <p>This webpage is a companion to the article, <a href="https://arxiv.org/abs/1701.03757">Deep Probabilistic Programming</a> <span class="citation">(Tran et al., 2017)</span>. Here we provide more details for plug-and-play with the code snippets. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/iclr2017.ipynb">here</a>.</p>
 <p>The code snippets assume the following versions.</p>
 <pre class="bash" language="bash"><code>pip install edward==1.2.3
-pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0</code></pre>
+pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
+pip install keras==1.0.0</code></pre>
 <h3 id="section-3.-compositional-representations-for-probabilistic-models">Section 3. Compositional Representations for Probabilistic Models</h3>
 <p><strong>Figure 1</strong>. Beta-Bernoulli program.</p>
 <pre language="python"><code>import tensorflow as tf
@@ -158,7 +159,7 @@ K = 5  # number of clusters
 beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([N, K]))
 x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))</code></pre>
-<p>It is used below in Figure * (Inference), Figure 6 (left/right), Figure * (variational EM), and Figure * (data subsampling).</p>
+<p>It is used below in Figure 6 (left/right), Figure * (variational EM), and Figure * (data subsampling).</p>
 <p><strong>Figure 6</strong> <strong>(left)</strong>. Variational inference <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. It performs inference on the model defined in Figure 5.</p>
 <pre language="python"><code>import edward as ed
 import numpy as np
