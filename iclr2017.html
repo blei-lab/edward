@@ -264,7 +264,7 @@ qz = Categorical(logits=tf.Variable(tf.zeros([M, D])))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_batch})
 inference.initialize(scale={x: float(N) / M, z: float(N) / M})</code></pre>
-<p>For more details, see the <a href="/api/data-subsampling">data subsampling</a> webpage.</p>
+<p>For more details, see the <a href="/api/inference-data-subsampling">data subsampling</a> webpage.</p>
 <h3 id="section-5.-experiments">Section 5. Experiments</h3>
 <p><strong>Figure 9</strong>. Bayesian logistic regression with Hamiltonian Monte Carlo.</p>
 <pre language="python"><code>import edward as ed
@@ -344,7 +344,7 @@ mu = DirichletProcess(  # see script for implementation
 x = Normal(mu=mu, sigma=tf.ones([N, D]))</code></pre>
 <p>To see the essential component defining the <code>DirichletProcess</code> random variable, see <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py"><code>examples/pp_dirichlet_process.py</code></a> in the Github repository. A more involved version with a base distribution is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process_base.py"><code>examples/pp_dirichlet_process_base.py</code></a> in the Github repository.</p>
 <h3 id="appendix-b.-inference-examples">Appendix B. Inference Examples</h3>
-<p><strong>Figure *</strong>. Stochastic variational inference <span class="citation">(M. D. Hoffman, Blei, Wang, &amp; Paisley, 2013)</span>. For more details, see the <a href="/api/data-subsampling">data subsampling</a> webpage.</p>
+<p><strong>Figure *</strong>. Stochastic variational inference <span class="citation">(M. D. Hoffman, Blei, Wang, &amp; Paisley, 2013)</span>. For more details, see the <a href="/api/inference-data-subsampling">data subsampling</a> webpage.</p>
 <h3 id="appendix-c.-complete-examples">Appendix C. Complete Examples</h3>
 <p><strong>Figure 15</strong>. Variational auto-encoder <span class="citation">(Kingma &amp; Welling, 2014; Rezende et al., 2014)</span>. See the script <a href="https://github.com/blei-lab/edward/blob/master/examples/vae.py"><code>examples/vae.py</code></a> in the Github repository.</p>
 <p><strong>Figure 16</strong>. Exponential family embedding <span class="citation">(Rudolph, Ruiz, Mandt, &amp; Blei, 2016)</span>. A Github repository with comprehensive features is available at <a href="https://github.com/mariru/exponential_family_embeddings">mariru/exponential_family_embeddings</a>.</p>
