@@ -16,7 +16,7 @@ setup(
                       'six>=1.10.0'],
     extras_require={'tensorflow': ['tensorflow>=1.0.0a0'],
                     'tensorflow with gpu': ['tensorflow-gpu>=1.0.0a0'],
-                    'neural networks': ['keras>=1.0.0', 'prettytensor>=0.5.3'],
+                    'neural networks': ['keras>=1.0.0', 'prettytensor>=0.7.4'],
                     'visualization': ['progressbar>=2.0', 'pillow>=3.4.2']},
     url='http://edwardlib.org',
     license='Apache License 2.0',
