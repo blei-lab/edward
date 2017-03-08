@@ -347,7 +347,7 @@ def get_ancestors(x, collection=None):
       node = node.value()
 
     candidate_node = node_dict.get(node, None)
-    if candidate_node and candidate_node != x:
+    if candidate_node is not None and candidate_node != x:
       output.add(candidate_node)
 
     nodes.update(node.op.inputs)
@@ -400,7 +400,7 @@ def get_children(x, collection=None):
       node = node.value()
 
     candidate_node = node_dict.get(node, None)
-    if candidate_node and candidate_node != x:
+    if candidate_node is not None and candidate_node != x:
       output.add(candidate_node)
     else:
       for op in node.consumers():
@@ -454,7 +454,7 @@ def get_descendants(x, collection=None):
       node = node.value()
 
     candidate_node = node_dict.get(node, None)
-    if candidate_node and candidate_node != x:
+    if candidate_node is not None and candidate_node != x:
       output.add(candidate_node)
 
     for op in node.consumers():
@@ -533,7 +533,7 @@ def get_parents(x, collection=None):
       node = node.value()
 
     candidate_node = node_dict.get(node, None)
-    if candidate_node and candidate_node != x:
+    if candidate_node is not None and candidate_node != x:
       output.add(candidate_node)
     else:
       nodes.update(node.op.inputs)
@@ -618,7 +618,7 @@ def get_variables(x, collection=None):
       node = node.value()
 
     candidate_node = node_dict.get(node.name, None)
-    if candidate_node and candidate_node != x:
+    if candidate_node is not None and candidate_node != x:
       output.add(candidate_node)
 
     nodes.update(node.op.inputs)

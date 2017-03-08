@@ -89,13 +89,16 @@ class RandomVariable(object):
             .format(self.__class__.__name__))
 
   def __str__(self):
-    return '<ed.RandomVariable \'' + self.name.__str__() + '\' ' + \
-           'shape=' + self._value.get_shape().__str__() + ' ' \
-           'dtype=' + self.dtype.__repr__() + \
-           '>'
+    return "RandomVariable(\"%s\"%s%s%s)" % (
+        self.name,
+        (", shape=%s" % self.get_shape())
+        if self.get_shape().ndims is not None else "",
+        (", dtype=%s" % self.dtype.name) if self.dtype else "",
+        (", device=%s" % self.value().device) if self.value().device else "")
 
   def __repr__(self):
-    return self.__str__()
+    return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
+        self.name, self.get_shape(), self.dtype.name)
 
   def __add__(self, other):
     return tf.add(self, other)
@@ -167,6 +170,11 @@ class RandomVariable(object):
   def __rxor__(self, other):
     return tf.logical_xor(other, self)
 
+  def __getitem__(self, key):
+    """Subset the tensor associated to the random variable, not the
+    random variable itself."""
+    return self.value()[key]
+
   def __pow__(self, other):
     return tf.pow(self, other)
 
@@ -187,6 +195,25 @@ class RandomVariable(object):
 
   def __eq__(self, other):
     return id(self) == id(other)
+
+  def __iter__(self):
+    raise TypeError("'RandomVariable' object is not iterable.")
+
+  def __bool__(self):
+    raise TypeError(
+        "Using a `ed.RandomVariable` as a Python `bool` is not allowed. "
+        "Use `if t is not None:` instead of `if t:` to test if a "
+        "random variable is defined, and use TensorFlow ops such as "
+        "tf.cond to execute subgraphs conditioned on a draw from "
+        "a random variable.")
+
+  def __nonzero__(self):
+    raise TypeError(
+        "Using a `ed.RandomVariable` as a Python `bool` is not allowed. "
+        "Use `if t is not None:` instead of `if t:` to test if a "
+        "random variable is defined, and use TensorFlow ops such as "
+        "tf.cond to execute subgraphs conditioned on a draw from "
+        "a random variable.")
 
   def eval(self, session=None, feed_dict=None):
     """In a session, computes and returns the value of this random variable.
