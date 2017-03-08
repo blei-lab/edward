@@ -17,14 +17,13 @@ import matplotlib.pyplot as plt
 
 from edward.models import Normal
 
-data = pd.read_csv('data/insteval.csv')
 ed.set_seed(42)
-
 
 # DATA
 # s - students - 1:2972
 # d - instructors - codes that need to be remapped
 # dept also needs to be remapped
+data = pd.read_csv('data/insteval.csv')
 data['dcodes'] = data['d'].astype('category').cat.codes
 data['deptcodes'] = data['dept'].astype('category').cat.codes
 data['s'] = data['s'] - 1
@@ -68,19 +67,15 @@ sigma_dept = tf.sqrt(tf.exp(lnvar_dept))
 mu = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 service = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
 
-eta_s = Normal(mu=tf.zeros(n_s),
-               sigma=sigma_s * tf.ones(n_s))
-eta_d = Normal(mu=tf.zeros(n_d),
-               sigma=sigma_d * tf.ones(n_d))
-eta_dept = Normal(mu=tf.zeros(n_dept),
-                  sigma=sigma_dept * tf.ones(n_dept))
+eta_s = Normal(mu=tf.zeros(n_s), sigma=sigma_s * tf.ones(n_s))
+eta_d = Normal(mu=tf.zeros(n_d), sigma=sigma_d * tf.ones(n_d))
+eta_dept = Normal(mu=tf.zeros(n_dept), sigma=sigma_dept * tf.ones(n_dept))
 
 yhat = tf.gather(eta_s, s_train) + \
     tf.gather(eta_d, d_train) + \
     tf.gather(eta_dept, dept_train) + \
     mu + ed.dot(service_X, service)
-y = Normal(mu=yhat,
-           sigma=tf.ones(n_obs))
+y = Normal(mu=yhat, sigma=tf.ones(n_obs))
 
 
 # INFERENCE
@@ -112,7 +107,6 @@ params_dict = {
     eta_d: q_eta_d,
     eta_dept: q_eta_dept
 }
-
 data_dict = {y: y_train, service_X: service_train}
 
 inference = ed.KLqp(params_dict, data_dict)

@@ -47,8 +47,8 @@ mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 cat = Categorical(logits=tf.zeros([N, K]))
 components = [
-    MultivariateNormalDiag(mu=tf.ones([N, 1]) * tf.gather(mu, k),
-                           diag_stdev=tf.ones([N, 1]) * tf.gather(sigma, k))
+    MultivariateNormalDiag(mu=tf.ones([N, 1]) * mu[k],
+                           diag_stdev=tf.ones([N, 1]) * sigma[k])
     for k in range(K)]
 x = Mixture(cat=cat, components=components)
 

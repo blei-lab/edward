@@ -31,8 +31,8 @@ def next_batch(N):
   return samples
 
 
-def generative_network(z):
-  h0 = slim.fully_connected(z, H, activation_fn=tf.nn.relu)
+def generative_network(eps):
+  h0 = slim.fully_connected(eps, H, activation_fn=tf.nn.relu)
   h1 = slim.fully_connected(h0, 1, activation_fn=None)
   return h1
 
@@ -70,15 +70,15 @@ def get_samples(num_points=10000, num_bins=100):
   pd, _ = np.histogram(d, bins=bins, density=True)
 
   # Generated samples
-  z_ph = tf.placeholder(tf.float32, [M, 1])
+  eps_ph = tf.placeholder(tf.float32, [M, 1])
   with tf.variable_scope("Gen", reuse=True):
-    G = generative_network(z_ph)
+    G = generative_network(eps_ph)
 
-  zs = np.linspace(-8, 8, num_points)
+  epss = np.linspace(-8, 8, num_points)
   g = np.zeros((num_points, 1))
   for i in range(num_points // M):
     g[M * i:M * (i + 1)] = sess.run(
-        G, {z_ph: np.reshape(zs[M * i:M * (i + 1)], (M, 1))})
+        G, {eps_ph: np.reshape(epss[M * i:M * (i + 1)], (M, 1))})
   pg, _ = np.histogram(g, bins=bins, density=True)
 
   return db, pd, pg
@@ -96,9 +96,9 @@ x_ph = tf.placeholder(tf.float32, [M, 1])
 
 # MODEL
 with tf.variable_scope("Gen"):
-  z = tf.linspace(-8.0, 8.0, M) + 0.01 * tf.random_normal([M])
-  z = tf.reshape(z, [M, 1])
-  x = generative_network(z)
+  eps = tf.linspace(-8.0, 8.0, M) + 0.01 * tf.random_normal([M])
+  eps = tf.reshape(eps, [M, 1])
+  x = generative_network(eps)
 
 # INFERENCE
 optimizer = tf.train.GradientDescentOptimizer(0.03)

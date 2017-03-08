@@ -46,7 +46,7 @@ pi = Dirichlet(alpha=tf.constant([1.0] * K))
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 c = Categorical(logits=tf.tile(tf.reshape(ed.logit(pi), [1, K]), [N, 1]))
-x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))
+x = Normal(mu=mu[c], sigma=sigma[c])
 
 # INFERENCE
 T = 5000
