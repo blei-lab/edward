@@ -49,7 +49,7 @@ from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
 z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
-hidden = Dense(256, activation='relu')(z.value())
+hidden = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 \end{lstlisting}
 It starts with a $d$-dimensional standard normal prior, one for each

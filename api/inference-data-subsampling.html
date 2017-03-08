@@ -112,7 +112,9 @@
 = p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),\]</span> where there are latent variables <span class="math inline">\(z_n\)</span> for each data point <span class="math inline">\(x_n\)</span> (local variables) and latent variables <span class="math inline">\(\beta\)</span> which are shared across data points (global variables).</p>
 <p>To avoid memory issues, we work on only a subgraph of the model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta).\]</span> More concretely, we define a mixture of Gaussians over <span class="math inline">\(D\)</span>-dimensional data <span class="math inline">\(\{x_n\}\in\mathbb{R}^{N\times D}\)</span>. There are <span class="math inline">\(K\)</span> latent cluster means <span class="math inline">\(\{\beta_k\}\in\mathbb{R}^{K\times D}\)</span> and a membership assignment <span class="math inline">\(z_n\in\{0,\ldots,K-1\}\)</span> for each data point <span class="math inline">\(x_n\)</span>.</p>
-<pre class="python" language="Python"><code>N = 10000000  # data set size
+<pre class="python" language="Python"><code>from edward.models import Categorical, Normal
+
+N = 10000000  # data set size
 M = 128  # minibatch size
 D = 2  # data dimensionality
 K = 5  # number of clusters

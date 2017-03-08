@@ -20,6 +20,8 @@ Ha's blog post}, where he explains MDNs. It is an inverse problem where
 for every input $x_n$ there are multiple outputs $y_n$.
 
 \begin{lstlisting}[language=Python]
+from sklearn.model_selection import train_test_split
+
 def build_toy_dataset(N):
   y_data = np.random.uniform(-10.5, 10.5, N).astype(np.float32)
   r_data = np.random.normal(size=N).astype(np.float32)  # random noise
@@ -64,6 +66,9 @@ feedforward network.  We specify a three-layer network with 15 hidden
 units for each hidden layer.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Categorical, Mixture, Normal
+from tensorflow.contrib import slim
+
 def neural_network(X):
   """mu, sigma, logits = NN(x; theta)"""
   # 2 hidden layers with 15 hidden units

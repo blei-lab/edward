@@ -118,8 +118,7 @@ class CustomRandomVariable(RandomVariable, Distribution):
 <p>For other methods and attributes one can implement, see the API documentation in TensorFlow’s <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions/base_classes#Distribution"><code>Distribution</code> class</a>.</p>
 <h3 id="advanced-settings">Advanced settings</h3>
 <p>Sometimes the random variable you’d like to work with already exists in Edward, but it is missing a particular feature. One hack is to implement and overwrite the missing method. For example, to implement your own sampling for <code>Poisson</code>:</p>
-<pre class="python" language="Python"><code>import edward as ed
-from edward.models import Poisson
+<pre class="python" language="Python"><code>from edward.models import Poisson
 from scipy.stats import poisson
 
 def _sample_n(self, n=1, seed=None):

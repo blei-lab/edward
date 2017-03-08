@@ -37,6 +37,8 @@ During training we will feed batches of MNIST digits. We instantiate a
 TensorFlow placeholder with a fixed batch size of $M$ images.
 
 \begin{lstlisting}[language=Python]
+from tensorflow.examples.tutorials.mnist import input_data
+
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 x_ph = tf.placeholder(tf.float32, [M, 784])
 \end{lstlisting}
@@ -65,6 +67,9 @@ network and outputs a vector of length $28\times28$ with values in
 $[0,1]$.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Uniform
+from tensorflow.contrib import slim
+
 def generative_network(eps):
   h1 = slim.fully_connected(eps, 128, activation_fn=tf.nn.relu)
   x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
@@ -171,7 +176,7 @@ optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
 
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer_d,
+    optimizer=optimizer, optimizer_d=optimizer,
     n_iter=15000, n_print=1000)
 \end{lstlisting}
 

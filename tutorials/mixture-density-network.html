@@ -99,7 +99,9 @@
 <p>We demonstrate how to use MDNs in Edward, leveraging TensorFlow Slim to construct neural networks. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py"><code>examples/mixture_density_network.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">David Ha’s blog post</a>, where he explains MDNs. It is an inverse problem where for every input <span class="math inline">\(x_n\)</span> there are multiple outputs <span class="math inline">\(y_n\)</span>.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N):
+<pre class="python" language="Python"><code>from sklearn.model_selection import train_test_split
+
+def build_toy_dataset(N):
   y_data = np.random.uniform(-10.5, 10.5, N).astype(np.float32)
   r_data = np.random.normal(size=N).astype(np.float32)  # random noise
   x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
@@ -126,7 +128,10 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 y_ph = tf.placeholder(tf.float32, [None])</code></pre>
 <h3 id="model">Model</h3>
 <p>We use a mixture of 20 normal distributions parameterized by a feedforward network. That is, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network. We specify a three-layer network with 15 hidden units for each hidden layer.</p>
-<pre class="python" language="Python"><code>def neural_network(X):
+<pre class="python" language="Python"><code>from edward.models import Categorical, Mixture, Normal
+from tensorflow.contrib import slim
+
+def neural_network(X):
   &quot;&quot;&quot;mu, sigma, logits = NN(x; theta)&quot;&quot;&quot;
   # 2 hidden layers with 15 hidden units
   hidden1 = slim.fully_connected(X, 15)

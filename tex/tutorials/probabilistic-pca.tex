@@ -47,12 +47,12 @@ This generates a dataset that looks like this:
 Consider a set of $N$ data points, $X = \{\mathbf{x}_n\}$, where each
 data point is $d$-dimensional, $\mathbf{x}_n \in \mathbb{R}^D$.
 
-While our data operates in dimension $D$, we will use latent variables
+While our data operates in $D$ dimensions, we will use latent variables
 $\mathbf{z}_n \in \mathbb{R}^K$ for each data point $\mathbf{x}_n$
-with lower latent dimension, $K < D$. The set of principal axes
+with lower dimension, $K < D$. The set of principal axes
 $\mathbf{W}$ relates our latent variables to our actual data.
 
-Thus, we have that
+Specifically, we have that
 \begin{equation*}
 \mathbf{z} \sim N(0, \mathbf{I}),
 \end{equation*}
@@ -79,6 +79,8 @@ We set up our model below, forming creating a prior distribution over
 our variables of interest.
 
 \begin{lstlisting}[language=Python]
+from edward.models import Normal
+
 w = Normal(mu=tf.zeros([D, K]), sigma=2.0 * tf.ones([D, K]))
 z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
 x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))
@@ -99,7 +101,6 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
 
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
-
 inference.run(n_iter=500, n_print=100, n_samples=10)
 \end{lstlisting}
 
