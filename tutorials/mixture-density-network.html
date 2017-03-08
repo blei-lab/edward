@@ -96,7 +96,7 @@
 
 <h2 id="mixture-density-networks">Mixture density networks</h2>
 <p>Mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span> are a class of models obtained by combining a conventional neural network with a mixture density model.</p>
-<p>We demonstrate how to use MDNs in Edward, leveraging TensorFlow Slim to construct neural networks. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py">here</a>.</p>
+<p>We demonstrate how to use MDNs in Edward, leveraging TensorFlow Slim to construct neural networks. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py"><code>examples/mixture_density_network.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">David Ha’s blog post</a>, where he explains MDNs. It is an inverse problem where for every input <span class="math inline">\(x_n\)</span> there are multiple outputs <span class="math inline">\(y_n\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N):

@@ -96,7 +96,7 @@
 
 <h2 id="supervised-learning-regression">Supervised learning (Regression)</h2>
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Regression (typically) means the output <span class="math inline">\(y\)</span> takes continuous values.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py">here</a>.</p>
+<p>We demonstrate how to do this in Edward with an example. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py"><code>examples/bayesian_linear_regression.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>Simulate training and test sets of <span class="math inline">\(40\)</span> data points. They comprise of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N, w, noise_std=0.1):

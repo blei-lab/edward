@@ -1,19 +1,24 @@
-\newcommand{\R}{ \mbox{${\Bbb R}$}}
-
-
 \title{Probabilistic PCA}
 
 \subsection{Probabilistic PCA}
 
-Probabilistic PCA is useful when dealing with data that is dependent on both principal axes and latent variables \citep{tipping1999probabilistic}. It is often used when there are missing values in the data.
+Probabilistic principal components analysis (probabilistic PCA) is
+useful for analyzing data via a lower dimensional latent space
+\citep{tipping1999probabilistic}. It is often
+used when there are missing values in the data or for multidimensional
+scaling.
 
-We'll run through a quick tutorial to implement it in Edward below. The full script can be accessed
+We'll run through a quick tutorial to implement it in Edward below.
+The full script can be accessed at
 \href{https://github.com/blei-lab/edward/blob/master/examples/probabilistic_pca.py}
-{here}.
+{\texttt{examples/probabilistic_pca.py}} in the Github repository.
 
 \subsubsection{Data}
 
-We simulate our data points below. We'll talk about the individual variables and what they stand for in the next section. For this example, each point is 2-dimensional, $\mathbf{x}_n\in\mathbb{R}^2$.
+We use simulated data. We'll talk about the individual variables and
+what they stand for in the next section. For this example, each data
+point is 2-dimensional, $\mathbf{x}_n\in\mathbb{R}^2$.
+
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N, D, K, sigma=1):
   x_train = np.zeros((D, N))
@@ -39,19 +44,39 @@ This generates a dataset that looks like this:
 
 \subsubsection{Model}
 
-Consider a set of $N$ data points, $X = \{\mathbf{x}_n\}$ where $\mathbf{x}_n \in \Bbb{R}^D$.
+Consider a set of $N$ data points, $X = \{\mathbf{x}_n\}$, where each
+data point is $d$-dimensional, $\mathbf{x}_n \in \mathbb{R}^D$.
 
-While our data operates in dimension $D$, we will have latent variables $\mathbf{z}_n \in \Bbb{R}^K$ for every $\mathbf{x}_n$ such that $K < D$. The set of principal axes $\mathbf{W}$ relates our latent variables to our actual data.
+While our data operates in dimension $D$, we will use latent variables
+$\mathbf{z}_n \in \mathbb{R}^K$ for each data point $\mathbf{x}_n$
+with lower latent dimension, $K < D$. The set of principal axes
+$\mathbf{W}$ relates our latent variables to our actual data.
 
-Thus, we have that $$\mathbf{z} \sim N(0, \mathbf{I})$$ and that $$\mathbf{x} \vert \mathbf{z} \sim N(\mathbf{Wz} + \mu, \sigma^2\mathbf{I})$$ where $\mathbf{\epsilon} \sim N(0, \sigma^2\mathbf{I})$.
+Thus, we have that
+\begin{equation*}
+\mathbf{z} \sim N(0, \mathbf{I}),
+\end{equation*}
+and that
+\begin{equation*}
+\mathbf{x} \mid \mathbf{z} \sim N(\mathbf{Wz} + \mu, \sigma^2\mathbf{I}),
+\end{equation*}
+where $\mathbf{\epsilon} \sim N(0, \sigma^2\mathbf{I})$.
 
-Because of the dependence on $\mathbf{Wz}$, we don't want to solely want to infer the original principal axes (as would be done in the vanilla PCA model). Rather, we aim to model the principal axes with respect to the latent variables.
+Because of the dependence on $\mathbf{Wz}$, we don't want to solely
+want to infer the original principal axes (as would be done in the
+vanilla PCA model). Rather, we aim to model the principal axes with
+respect to the latent variables.
 
-For our marginal distribution, we get that $$x \sim N(0, \mathbf{W}\mathbf{W}^Y + \sigma^2\mathbf{I})$$
+For our marginal distribution, we get that
+\begin{equation*}
+x \sim N(0, \mathbf{W}\mathbf{W}^Y + \sigma^2\mathbf{I}).
+\end{equation*}
 
-Note here that regular PCA is simply the specific case of Probabilistic PCA, as $\sigma^2 \to 0$.
+Note here that regular PCA is simply the specific case of
+Probabilistic PCA, as $\sigma^2 \to 0$.
 
-We set up our model below by creating a prior distribution over our variables of interest so that we can infer the posterior.
+We set up our model below, forming creating a prior distribution over
+our variables of interest.
 
 \begin{lstlisting}[language=Python]
 w = Normal(mu=tf.zeros([D, K]), sigma=2.0 * tf.ones([D, K]))
@@ -62,7 +87,10 @@ x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))
 
 \subsubsection{Inference}
 
-Since $\mathbf{W}$ cannot be analytically determined, we must use some inference method. Below, we set up our inference variables and then run an approximation algorithm. For this example, our method is to minimize the $\text{KL}(q\|p)$ divergence measure.
+Since the principal axes $\mathbf{W}$ cannot be analytically
+determined, we must use some inference method. Below, we set up our
+inference variables and then run a chosen algorithm. For this
+example, we minimize the $\text{KL}(q\|p)$ divergence measure.
 
 \begin{lstlisting}[language=Python]
 qw = Normal(mu=tf.Variable(tf.random_normal([D, K])),
@@ -72,13 +100,14 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
 
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 
-init = tf.global_variables_initializer()
 inference.run(n_iter=500, n_print=100, n_samples=10)
 \end{lstlisting}
 
 \subsubsection{Criticism}
 
-One way to criticize the model is to visually compare our actual data to data produced by our inferred values. The blue dots represent the original data, while the red is the inferred.
+One way to criticize the model is to visually compare our actual data
+to data produced by our inferred values. The blue dots represent the
+original data, while the red is the inferred.
 
 \includegraphics[width=450px]{/images/ppca-fig0.png}
 

@@ -96,7 +96,7 @@
 
 <h2 id="supervised-learning-classification">Supervised learning (Classification)</h2>
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math inline">\(y\)</span> takes discrete values.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available <a href="https://github.com/blei-lab/edward/blob/master/examples/tf_gp_classification.py">here</a>.</p>
+<p>We demonstrate how to do this in Edward with an example. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py"><code>examples/gp_classification.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>Use 25 data points from the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>.</p>
 <pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)
