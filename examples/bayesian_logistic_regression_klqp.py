@@ -63,15 +63,15 @@ plt.show(block=False)
 # Build samples from inferred posterior.
 n_samples = 50
 inputs = np.linspace(-5, 3, num=400, dtype=np.float32).reshape((400, 1))
-mus = tf.stack([tf.sigmoid(ed.dot(inputs, qw.sample()) + qb.sample())
-                for _ in range(n_samples)])
+probs = tf.stack([tf.sigmoid(ed.dot(inputs, qw.sample()) + qb.sample())
+                  for _ in range(n_samples)])
 
 for t in range(inference.n_iter):
   info_dict = inference.update()
   inference.print_progress(info_dict)
 
   if t % inference.n_print == 0:
-    outputs = mus.eval()
+    outputs = probs.eval()
 
     # Plot data and functions
     plt.cla()
