@@ -10,12 +10,13 @@ from edward.models.random_variable import RandomVariable
 from edward.models import random_variables as rv
 
 
+# TODO(mhoffman): _suff_stat_registry should probably be a tf collection
 _suff_stat_registry = {}
 _conj_log_prob_registry = {}
 _suff_stat_to_dist = {}
 
 # TODO(mhoffman): Support (discrete/continuous mostly) also matters.
-_suff_stat_to_dist['_log1m|log'] = lambda p1, p2: rv.Beta(p2, p1)
+_suff_stat_to_dist['_log1m|log'] = lambda p1, p2: rv.Beta(p2+1, p1+1)
 
 def complete_conditional(rv, blanket):
   log_joint = 0
