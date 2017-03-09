@@ -59,11 +59,8 @@ plt.show(block=False)
 # Build samples from inferred posterior.
 n_samples = 50
 inputs = np.linspace(-5, 3, num=400, dtype=np.float32).reshape((400, 1))
-mus = []
-for s in range(n_samples):
-  mus += [tf.sigmoid(ed.dot(inputs, qw.sample()) + qb.sample())]
-
-mus = tf.stack(mus)
+mus = tf.stack([tf.sigmoid(ed.dot(inputs, qw.sample()) + qb.sample())
+                for _ in range(n_samples)])
 
 for t in range(inference.n_iter):
   info_dict = inference.update()
