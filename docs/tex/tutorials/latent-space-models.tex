@@ -1,6 +1,6 @@
-\title{Latent space models for neural data}
+\title{Latent Space Models for Neural Data}
 
-\subsection{Latent space models for neural data}
+\subsection{Latent Space Models for Neural Data}
 
 Many scientific fields involve the study of network data, including
 social networks, networks in statistical physics, biological
@@ -14,7 +14,9 @@ where the likelihood of forming an edge between two nodes depends on
 their distance in the latent space.
 
 We will analyze network data from neuroscience.
-The full script can be found at
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/latent_space_models.ipynb}{here},
+or as a script available at
 \href{https://github.com/blei-lab/edward/blob/master/examples/latent_space_model.py}
 {\texttt{examples/latent_space_model.py}} in the Github repository.
 
@@ -32,7 +34,7 @@ between neurons
 is associated with a weight (positive integer) capturing the strength
 of the connection.
 
-We load the data with
+First, we load the data.
 \begin{lstlisting}[language=Python]
 x_train = np.load('data/celegans_brain.npy')
 \end{lstlisting}
@@ -67,7 +69,7 @@ Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).
 \end{align}
 \end{enumerate}
 
-In Edward, the model is written as follows:
+In Edward, we write the model as follows.
 \begin{lstlisting}[language=Python]
 from edward.models import Normal, Poisson
 
@@ -113,13 +115,18 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N * K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
 inference = ed.KLqp({z: qz}, data={x: x_train})
 \end{lstlisting}
+See this extended tutorial about
+\href{/tutorials/variational-inference}{variational inference in Edward}.
+
 Finally, the following line runs the inference procedure for 2500
 iterations.
 \begin{lstlisting}[language=Python]
 inference.run(n_iter=2500)
 \end{lstlisting}
-See this extended tutorial about
-\href{/tutorials/variational-inference}{variational inference in Edward}.
+
+\subsubsection{Acknowledgments}
+
+We thank Maja Rudolph for writing the initial version of this
+tutorial.
 
 \subsubsection{References}
-

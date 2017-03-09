@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 """Mixture density network (Bishop, 1994).
-
-Note a common failure mode when training MDNs is that an individual
-mixture distribution collapses to a point, which forces the standard
-deviation of the normal to be close to 0. This produces NaN values
-(which you can prevent by thresholding the standard deviation if desired).
 """
 from __future__ import absolute_import
 from __future__ import division

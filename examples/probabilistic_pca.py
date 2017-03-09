@@ -6,10 +6,13 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
+
+plt.style.use('ggplot')
 
 
 def build_toy_dataset(N, D, K, sigma=1):
@@ -35,6 +38,10 @@ K = 1  # latent dimensionality
 # DATA
 
 x_train = build_toy_dataset(N, D, K)
+plt.scatter(x_train[0, :], x_train[1, :], color='blue', alpha=0.1)
+plt.axis([-10, 10, -10, 10])
+plt.title("Simulated data set")
+plt.show()
 
 # MODEL
 
@@ -52,6 +59,17 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 inference.run(n_iter=500, n_print=100, n_samples=10)
 
+# CRITICISM
+
 sess = ed.get_session()
 print("Inferred principal axes:")
 print(sess.run(qw.mean()))
+
+# Build and then generate data from the posterior predictive distribution.
+x_post = ed.copy(x, {w: qw, z: qz})
+x_gen = sess.run(x_post)
+
+plt.scatter(x_gen[0, :], x_gen[1, :], color='red', alpha=0.1)
+plt.axis([-10, 10, -10, 10])
+plt.title("Data generated from model")
+plt.show()

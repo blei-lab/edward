@@ -1,14 +1,15 @@
-\title{Mixture density networks}
+\title{Mixture Density Networks}
 
-\subsection{Mixture density networks}
+\subsection{Mixture Density Networks}
 
 Mixture density networks (MDN) \citep{bishop1994mixture} are a class
 of models obtained by combining a conventional neural network with a
 mixture density model.
 
-We demonstrate how to use MDNs in Edward, leveraging TensorFlow Slim
-to construct neural networks.
-The script is available at
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/mixture_density_network.ipynb}{here},
+or as a script available at
 \href{https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py}
 {\texttt{examples/mixture_density_network.py}} in the Github repository.
 
@@ -48,7 +49,7 @@ sns.regplot(X_train, y_train, fit_reg=False)
 ## Size of output in test data: (1250,)
 \end{lstlisting}
 
-\includegraphics[width=650px]{/images/mdn-fig0.png}
+\includegraphics[width=650px]{/images/mixture-density-network-fig0.png}
 
 We define TensorFlow placeholders, which will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
 
@@ -62,8 +63,10 @@ y_ph = tf.placeholder(tf.float32, [None])
 We use a mixture of 20 normal distributions parameterized by a
 feedforward network. That is, the membership probabilities and
 per-component mean and standard deviation are given by the output of a
-feedforward network.  We specify a three-layer network with 15 hidden
-units for each hidden layer.
+feedforward network.
+
+We leverage TensorFlow Slim to construct neural networks. We specify
+a three-layer network with 15 hidden units for each hidden layer.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Categorical, Mixture, Normal
@@ -140,6 +143,11 @@ for i in range(n_epoch):
   inference.print_progress(info_dict)
 \end{lstlisting}
 
+Note a common failure mode when training MDNs is that an individual
+mixture distribution collapses to a point. This forces the standard
+deviation of the normal to be close to 0 and produces NaN values.
+We can prevent this by thresholding the standard deviation if desired.
+
 After training for a number of iterations, we get out the predictions
 we are interested in from the model: the predicted mixture weights,
 cluster means, and cluster standard deviations.
@@ -154,8 +162,8 @@ pred_weights, pred_means, pred_std = \
 
 Let's plot the log-likelihood of the training and test data as
 functions of the training epoch. The quantity \texttt{inference.loss}
-is the total log-likelihood, not the loss per data point.  In the
-plotting routine we get the latter by dividing by the size of the
+is the total log-likelihood, not the loss per data point. Below we
+plot the per-data point log-likelihood by dividing by the size of the
 train and test data respectively.
 
 \begin{lstlisting}[language=Python]
@@ -168,18 +176,19 @@ plt.ylabel('Log-likelihood', fontsize=15)
 plt.show()
 \end{lstlisting}
 
-\includegraphics[width=700px]{/images/mdn-fig1.png}
+\includegraphics[width=700px]{/images/mixture-density-network-fig1.png}
 
-We see that it converges after 400 iterations.
+We see that it converges after roughly 400 iterations.
 
 \subsubsection{Criticism}
 
-Let's look at how a few individual examples perform. Note that as this
-is an inverse problem we can't get the answer correct, but we can hope
-that the truth lies in area where the model has high probability. This code relies on helper functions
-available in the full script above.
+Let's look at how individual examples perform. Note that as this is an
+inverse problem we can't get the answer correct, but we can hope that
+the truth lies in area where the model has high probability.
 
-In this plot the truth is the vertical grey line while the blue line is the prediction of the mixture density network. As you can see, we didn't do too bad.
+In this plot the truth is the vertical grey line while the blue line
+is the prediction of the mixture density network. As you can see, we
+didn't do too bad.
 
 \begin{lstlisting}[language=Python]
 obj = [0, 4, 6]
@@ -195,7 +204,7 @@ plot_normal_mix(pred_weights[obj][1], pred_means[obj][1], pred_std[obj][1], axes
 axes[2].axvline(x=y_test[obj][1], color='black', alpha=0.5)
 \end{lstlisting}
 
-\includegraphics[width=700px]{/images/mdn-fig2.png}
+\includegraphics[width=700px]{/images/mixture-density-network-fig2.png}
 
 We can check the ensemble by drawing samples of the prediction and
 plotting the density of those. The MDN has learned what we'd like it
@@ -206,11 +215,11 @@ a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X
 sns.jointplot(a[:,0], a[:,1], kind="hex", color="#4CB391", ylim=(-10,10), xlim=(-14,14))
 \end{lstlisting}
 
-\includegraphics[width=700px]{/images/mdn-fig3.png}
+\includegraphics[width=700px]{/images/mixture-density-network-fig3.png}
 
 \subsubsection{Acknowledgments}
 
-We are grateful to Christopher Bonnett for writing the initial version
+We thank Christopher Bonnett for writing the initial version
 of this tutorial. More generally, we thank Chris for pushing forward
 momentum to have Edward tutorials be accessible and easy-to-learn.
 
