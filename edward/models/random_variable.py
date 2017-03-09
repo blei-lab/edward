@@ -60,7 +60,7 @@ class RandomVariable(object):
     self._args = args
     self._kwargs = kwargs
 
-    # need to temporarily pop value before __init__
+    # need to temporarily pop things before __init__
     value = kwargs.pop('value', None)
     sample_shape = kwargs.pop('sample_shape', ())
     super(RandomVariable, self).__init__(*args, **kwargs)
