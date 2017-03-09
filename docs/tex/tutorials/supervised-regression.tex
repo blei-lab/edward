@@ -87,11 +87,11 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 \end{lstlisting}
 
-Run variational inference with the Kullback-Leibler divergence, using a
-default of $1000$ iterations.
+Run variational inference with the Kullback-Leibler divergence, using
+$250$ iterations and $5$ latent variable samples in the algorithm.
 \begin{lstlisting}[language=Python]
 inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.run()
+inference.run(n_samples=5, n_iter=250)
 \end{lstlisting}
 In this case \texttt{KLqp} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the reparameterization
@@ -100,15 +100,17 @@ For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ 
 
 \subsubsection{Criticism}
 
-A standard evaluation in regression is to calculate point-based evaluations on
-held-out ``testing'' data. We do this first by forming the posterior predictive
+A standard evaluation for regression is to compare prediction accuracy on
+held-out ``testing'' data. We do this by first forming the posterior predictive
 distribution.
 \begin{lstlisting}[language=Python]
-y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
+y_post = ed.copy(y, {w: qw, b: qb})
+# This is equivalent to
+# y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
 \end{lstlisting}
 
-With this we can evaluate various point-based quantities using the posterior
-predictive.
+With this we can evaluate various quantities using predictions from
+the model (posterior predictive).
 \begin{lstlisting}[language=Python]
 print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
@@ -119,16 +121,16 @@ print(ed.evaluate('mean_absolute_error', data={X: X_test, y_post: y_test}))
 
 \begin{lstlisting}
 Mean squared error on test data:
-0.0352619
+0.0300492
 Mean absolute error on test data:
-0.162354
+0.123616
 \end{lstlisting}
 
 The trained model makes predictions with low error
 (relative to the magnitude of the output).
 
 We can also visualize the fit by comparing data generated with the
-prior to data generated with the posterior (on the first input
+prior to data generated with the posterior (on the first feature
 dimension).
 
 \begin{lstlisting}[language=Python]
@@ -155,5 +157,9 @@ visualise(X_train, y_train, qw, qb)
 \end{lstlisting}
 
 \includegraphics[width=450px]{/images/supervised-regression-fig1.png}
+
+The model has learned a linear relationship between the
+first dimension of $\mathbf{x}\in\mathbb{R}^D$ and the outputs
+$y\in\mathbb{R}$.
 
 \subsubsection{References}\label{references}

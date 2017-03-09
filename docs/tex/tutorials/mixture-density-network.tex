@@ -143,6 +143,11 @@ for i in range(n_epoch):
   inference.print_progress(info_dict)
 \end{lstlisting}
 
+Note a common failure mode when training MDNs is that an individual
+mixture distribution collapses to a point. This forces the standard
+deviation of the normal to be close to 0 and produces NaN values.
+We can prevent this by thresholding the standard deviation if desired.
+
 After training for a number of iterations, we get out the predictions
 we are interested in from the model: the predicted mixture weights,
 cluster means, and cluster standard deviations.
@@ -157,8 +162,8 @@ pred_weights, pred_means, pred_std = \
 
 Let's plot the log-likelihood of the training and test data as
 functions of the training epoch. The quantity \texttt{inference.loss}
-is the total log-likelihood, not the loss per data point.  In the
-plotting routine we get the latter by dividing by the size of the
+is the total log-likelihood, not the loss per data point. Below we
+plot the per-data point log-likelihood by dividing by the size of the
 train and test data respectively.
 
 \begin{lstlisting}[language=Python]
@@ -173,16 +178,17 @@ plt.show()
 
 \includegraphics[width=700px]{/images/mixture-density-network-fig1.png}
 
-We see that it converges after 400 iterations.
+We see that it converges after roughly 400 iterations.
 
 \subsubsection{Criticism}
 
-Let's look at how a few individual examples perform. Note that as this
-is an inverse problem we can't get the answer correct, but we can hope
-that the truth lies in area where the model has high probability. This code relies on helper functions
-available in the full script above.
+Let's look at how individual examples perform. Note that as this is an
+inverse problem we can't get the answer correct, but we can hope that
+the truth lies in area where the model has high probability.
 
-In this plot the truth is the vertical grey line while the blue line is the prediction of the mixture density network. As you can see, we didn't do too bad.
+In this plot the truth is the vertical grey line while the blue line
+is the prediction of the mixture density network. As you can see, we
+didn't do too bad.
 
 \begin{lstlisting}[language=Python]
 obj = [0, 4, 6]
@@ -213,7 +219,7 @@ sns.jointplot(a[:,0], a[:,1], kind="hex", color="#4CB391", ylim=(-10,10), xlim=(
 
 \subsubsection{Acknowledgments}
 
-We are grateful to Christopher Bonnett for writing the initial version
+We thank Christopher Bonnett for writing the initial version
 of this tutorial. More generally, we thank Chris for pushing forward
 momentum to have Edward tutorials be accessible and easy-to-learn.
 

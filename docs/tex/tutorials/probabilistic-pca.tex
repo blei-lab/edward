@@ -2,7 +2,7 @@
 
 \subsection{Probabilistic PCA}
 
-Probabilistic principal components analysis (probabilistic PCA) is
+Probabilistic principal components analysis (PCA) is
 useful for analyzing data via a lower dimensional latent space
 \citep{tipping1999probabilistic}. It is often
 used when there are missing values in the data or for multidimensional
@@ -31,6 +31,8 @@ def build_toy_dataset(N, D, K, sigma=1):
     for n in range(N):
       x_train[d, n] = np.random.normal(mean[d, n], sigma)
 
+  print("True principal axes:")
+  print(w)
   return x_train
 
 N = 5000  # number of data points
@@ -40,9 +42,22 @@ K = 1  # latent dimensionality
 x_train = build_toy_dataset(N, D, K)
 \end{lstlisting}
 
-This generates a dataset that looks like the following.
+\begin{lstlisting}
+## True principal axes:
+## [[ 0.25947927]
+##  [ 1.80472372]]
+\end{lstlisting}
 
-\includegraphics[width=450px]{/images/ppca-fig0.png}
+We visualize the data set.
+
+\begin{lstlisting}[language=Python]
+plt.scatter(x_train[0, :], x_train[1, :], color='blue', alpha=0.1)
+plt.axis([-10, 10, -10, 10])
+plt.title("Simulated data set")
+plt.show()
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/probabilistic-pca-fig0.png}
 
 \subsubsection{Model}
 
@@ -108,12 +123,44 @@ inference.run(n_iter=500, n_print=100, n_samples=10)
 
 \subsubsection{Criticism}
 
-One way to criticize the model is to visually compare our actual data
-to data produced by our inferred values. The blue dots represent the
-original data, while the red is the inferred.
+We first inspect the model's inferred principal axes.
 
-\includegraphics[width=450px]{/images/probabilistic-pca-fig0.png}
+\begin{lstlisting}[language=Python]
+sess = ed.get_session()
+print("Inferred principal axes:")
+print(sess.run(qw.mean()))
+\end{lstlisting}
+
+\begin{lstlisting}
+## Inferred principal axes:
+## [[-0.24093632]
+##  [-1.76468039]]
+\end{lstlisting}
+
+The model has recovered the true principal axes up to finite data and
+also up to identifiability (there's a symmetry in the
+parameterization).
+
+Another way to criticize the model is to visualize the observed data
+against data generated from our fitted model.
+
+\begin{lstlisting}[language=Python]
+x_post = ed.copy(x, {w: qw, z: qz})
+x_gen = sess.run(x_post)
+
+plt.scatter(x_gen[0, :], x_gen[1, :], color='red', alpha=0.1)
+plt.axis([-10, 10, -10, 10])
+plt.title("Data generated from model")
+plt.show()
+\end{lstlisting}
 
 \includegraphics[width=450px]{/images/probabilistic-pca-fig1.png}
+
+The generated data looks close to the true data.
+
+\subsubsection{Acknowledgments}
+
+We thank Mayank Agrawal for writing the initial version of this
+tutorial.
 
 \subsubsection{References}\label{references}
