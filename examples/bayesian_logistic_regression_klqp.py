@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Bayesian logistic regression using Hamiltonian Monte Carlo.
+"""Bayesian logistic regression using variational inference.
 
 We visualize the fit.
 """
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal, Empirical
+from edward.models import Bernoulli, Normal
 
 
 def build_toy_dataset(N, noise_std=0.1):
@@ -41,12 +41,16 @@ b = Normal(mu=tf.zeros([]), sigma=3.0 * tf.ones([]))
 y = Bernoulli(logits=ed.dot(X, w) + b)
 
 # INFERENCE
-T = 5000  # number of samples
-qw = Empirical(params=tf.Variable(tf.random_normal([T, D])))
-qb = Empirical(params=tf.Variable(tf.random_normal([T])))
+qw_mu = tf.Variable(tf.random_normal([D]))
+qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
+qb_mu = tf.Variable(tf.random_normal([]) + 10)
+qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 
-inference = ed.HMC({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.initialize(n_print=10, step_size=0.6)
+qw = Normal(mu=qw_mu, sigma=qw_sigma)
+qb = Normal(mu=qb_mu, sigma=qb_sigma)
+
+inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
+inference.initialize(n_print=10, n_iter=600)
 
 tf.global_variables_initializer().run()
 
