@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Supervised learning (Classification)</title>
+  <title>Edward – Supervised Learning (Classification)</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,9 +94,9 @@
     </div>
     <div class="nine columns">
 
-<h2 id="supervised-learning-classification">Supervised learning (Classification)</h2>
+<h2 id="supervised-learning-classification">Supervised Learning (Classification)</h2>
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math inline">\(y\)</span> takes discrete values.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py"><code>examples/gp_classification.py</code></a> in the Github repository.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/supervised_classification.ipynb">here</a>, or as a script available at <a href="https://github.com/blei-lab/edward/blob/master/examples/gp_classification.py"><code>examples/gp_classification.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>Use 25 data points from the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>.</p>
 <pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, dtype=&#39;float32&#39;, delimiter=&#39;,&#39;)
@@ -150,11 +150,12 @@ def kernel(x):
 X = tf.placeholder(tf.float32, [N, D])
 f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
 y = Bernoulli(logits=f)</code></pre>
+<p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to data.</p>
 <h3 id="inference">Inference</h3>
-<p>Perform variational inference. Define the variational model to be a fully factorized normal</p>
+<p>Perform variational inference. Define the variational model to be a fully factorized normal.</p>
 <pre class="python" language="Python"><code>qf = Normal(mu=tf.Variable(tf.random_normal([N])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))</code></pre>
-<p>Run variational inference for 500 iterations.</p>
+<p>Run variational inference for <code>500</code> iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
 inference.run(n_iter=500)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>

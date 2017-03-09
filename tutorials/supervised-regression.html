@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Supervised learning (Regression)</title>
+  <title>Edward – Supervised Learning (Regression)</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,9 +94,9 @@
     </div>
     <div class="nine columns">
 
-<h2 id="supervised-learning-regression">Supervised learning (Regression)</h2>
-<p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Regression (typically) means the output <span class="math inline">\(y\)</span> takes continuous values.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py"><code>examples/bayesian_linear_regression.py</code></a> in the Github repository.</p>
+<h2 id="supervised-learning-regression">Supervised Learning (Regression)</h2>
+<p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Regression typically means the output <span class="math inline">\(y\)</span> takes continuous values.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/supervised_regression.ipynb">here</a>, or as a script available at <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py"><code>examples/bayesian_linear_regression.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>Simulate training and test sets of <span class="math inline">\(40\)</span> data points. They comprise of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N, w, noise_std=0.1):
@@ -140,20 +140,42 @@ y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))</code></pre>
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
 qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))</code></pre>
-<p>Run variational inference with the Kullback-Leibler divergence, using a default of <span class="math inline">\(1000\)</span> iterations.</p>
+<p>Run variational inference with the Kullback-Leibler divergence, using <span class="math inline">\(250\)</span> iterations and <span class="math inline">\(5\)</span> latent variable samples in the algorithm.</p>
 <pre class="python" language="Python"><code>inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.run()</code></pre>
+inference.run(n_samples=5, n_iter=250)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
 <h3 id="criticism">Criticism</h3>
-<p>A standard evaluation in regression is to calculate point-based evaluations on held-out “testing” data. We do this first by forming the posterior predictive distribution.</p>
-<pre class="python" language="Python"><code>y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))</code></pre>
-<p>With this we can evaluate various point-based quantities using the posterior predictive.</p>
-<pre><code>print(ed.evaluate(&#39;mean_squared_error&#39;, data={X: X_test, y_post: y_test}))
-&gt; 0.012107
+<p>A standard evaluation for regression is to compare prediction accuracy on held-out “testing” data. We do this by first forming the posterior predictive distribution.</p>
+<pre class="python" language="Python"><code>y_post = ed.copy(y, {w: qw, b: qb})
+# This is equivalent to
+# y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))</code></pre>
+<p>With this we can evaluate various quantities using predictions from the model (posterior predictive).</p>
+<pre class="python" language="Python"><code>print(&quot;Mean squared error on test data:&quot;)
+print(ed.evaluate(&#39;mean_squared_error&#39;, data={X: X_test, y_post: y_test}))
 
-print(ed.evaluate(&#39;mean_absolute_error&#39;, data={X: X_test, y_post: y_test}))
-&gt; 0.0867875</code></pre>
-<p>The trained model makes predictions with low mean squared error (relative to the magnitude of the output).</p>
+print(&quot;Mean absolute error on test data:&quot;)
+print(ed.evaluate(&#39;mean_absolute_error&#39;, data={X: X_test, y_post: y_test}))</code></pre>
+<pre><code>Mean squared error on test data:
+0.0300492
+Mean absolute error on test data:
+0.123616</code></pre>
+<p>The trained model makes predictions with low error (relative to the magnitude of the output).</p>
+<p>We can also visualize the fit by comparing data generated with the prior to data generated with the posterior (on the first feature dimension).</p>
+<pre class="python" language="Python"><code>def visualise(X_data, y_data, w, b, n_samples=10):
+  w_samples = w.sample(n_samples).eval()
+  b_samples = b.sample(n_samples).eval()
+  plt.scatter(X_data, y_data)
+  inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+  for ns in range(n_samples):
+    output = inputs * w_samples[ns] + b_samples[ns]
+    plt.plot(inputs, output)</code></pre>
+<pre class="python" language="Python"><code># Visualize samples from the prior.
+visualise(X_train, y_train, w, b)</code></pre>
+<p><img src="/images/supervised-regression-fig0.png" alt="image" width="450" /></p>
+<pre class="python" language="Python"><code># Visualize samples from the posterior.
+visualise(X_train, y_train, qw, qb)</code></pre>
+<p><img src="/images/supervised-regression-fig1.png" alt="image" width="450" /></p>
+<p>The model has learned a linear relationship between the first dimension of <span class="math inline">\(\mathbf{x}\in\mathbb{R}^D\)</span> and the outputs <span class="math inline">\(y\in\mathbb{R}\)</span>.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-murphy2012machine">

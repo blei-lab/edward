@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Laplace approximation</title>
+  <title>Edward – Laplace Approximation</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="nine columns">
 
-<h2 id="laplace-approximation">Laplace approximation</h2>
+<h2 id="laplace-approximation">Laplace Approximation</h2>
 <p>(This tutorial follows the <a href="/tutorials/map">Maximum a posteriori estimation</a> tutorial.)</p>
 <p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
 <p>The Laplace approximation <span class="citation">(Laplace, 1986)</span> is one way of improving on an MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate <span class="math display">\[\begin{aligned}

@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Mixture density networks</title>
+  <title>Edward – Mixture Density Networks</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,9 +94,9 @@
     </div>
     <div class="nine columns">
 
-<h2 id="mixture-density-networks">Mixture density networks</h2>
+<h2 id="mixture-density-networks">Mixture Density Networks</h2>
 <p>Mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span> are a class of models obtained by combining a conventional neural network with a mixture density model.</p>
-<p>We demonstrate how to use MDNs in Edward, leveraging TensorFlow Slim to construct neural networks. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py"><code>examples/mixture_density_network.py</code></a> in the Github repository.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/mixture_density_network.ipynb">here</a>, or as a script available at <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_density_network.py"><code>examples/mixture_density_network.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from the <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">David Ha’s blog post</a>, where he explains MDNs. It is an inverse problem where for every input <span class="math inline">\(x_n\)</span> there are multiple outputs <span class="math inline">\(y_n\)</span>.</p>
 <pre class="python" language="Python"><code>from sklearn.model_selection import train_test_split
@@ -122,12 +122,13 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 ## Size of output in training data: (3750,)
 ## Size of features in test data: (1250, 1)
 ## Size of output in test data: (1250,)</code></pre>
-<p><img src="/images/mdn-fig0.png" alt="image" width="650" /></p>
+<p><img src="/images/mixture-density-network-fig0.png" alt="image" width="650" /></p>
 <p>We define TensorFlow placeholders, which will be used to manually feed batches of data during inference. This is <a href="http://edwardlib.org/api/data">one of many ways</a> to train models with data in Edward.</p>
 <pre class="python" language="Python"><code>X_ph = tf.placeholder(tf.float32, [None, D])
 y_ph = tf.placeholder(tf.float32, [None])</code></pre>
 <h3 id="model">Model</h3>
-<p>We use a mixture of 20 normal distributions parameterized by a feedforward network. That is, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network. We specify a three-layer network with 15 hidden units for each hidden layer.</p>
+<p>We use a mixture of 20 normal distributions parameterized by a feedforward network. That is, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network.</p>
+<p>We leverage TensorFlow Slim to construct neural networks. We specify a three-layer network with 15 hidden units for each hidden layer.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, Mixture, Normal
 from tensorflow.contrib import slim
 
@@ -168,11 +169,12 @@ for i in range(n_epoch):
   train_loss[i] = info_dict[&#39;loss&#39;]
   test_loss[i] = sess.run(inference.loss, feed_dict={X_ph: X_test, y_ph: y_test})
   inference.print_progress(info_dict)</code></pre>
+<p>Note a common failure mode when training MDNs is that an individual mixture distribution collapses to a point. This forces the standard deviation of the normal to be close to 0 and produces NaN values. We can prevent this by thresholding the standard deviation if desired.</p>
 <p>After training for a number of iterations, we get out the predictions we are interested in from the model: the predicted mixture weights, cluster means, and cluster standard deviations.</p>
 <p>To do this, we fetch their values from session, feeding test data <code>X_test</code> to the placeholder <code>X_ph</code>.</p>
 <pre class="python" language="Python"><code>pred_weights, pred_means, pred_std = \
     sess.run([tf.nn.softmax(logits), mus, sigmas], feed_dict={X_ph: X_test})</code></pre>
-<p>Let’s plot the log-likelihood of the training and test data as functions of the training epoch. The quantity <code>inference.loss</code> is the total log-likelihood, not the loss per data point. In the plotting routine we get the latter by dividing by the size of the train and test data respectively.</p>
+<p>Let’s plot the log-likelihood of the training and test data as functions of the training epoch. The quantity <code>inference.loss</code> is the total log-likelihood, not the loss per data point. Below we plot the per-data point log-likelihood by dividing by the size of the train and test data respectively.</p>
 <pre class="python" language="Python"><code>fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
 plt.plot(np.arange(n_epoch), -test_loss / len(X_test), label=&#39;Test&#39;)
 plt.plot(np.arange(n_epoch), -train_loss / len(X_train), label=&#39;Train&#39;)
@@ -180,10 +182,10 @@ plt.legend(fontsize=20)
 plt.xlabel(&#39;Epoch&#39;, fontsize=15)
 plt.ylabel(&#39;Log-likelihood&#39;, fontsize=15)
 plt.show()</code></pre>
-<p><img src="/images/mdn-fig1.png" alt="image" width="700" /></p>
-<p>We see that it converges after 400 iterations.</p>
+<p><img src="/images/mixture-density-network-fig1.png" alt="image" width="700" /></p>
+<p>We see that it converges after roughly 400 iterations.</p>
 <h3 id="criticism">Criticism</h3>
-<p>Let’s look at how a few individual examples perform. Note that as this is an inverse problem we can’t get the answer correct, but we can hope that the truth lies in area where the model has high probability. This code relies on helper functions available in the full script above.</p>
+<p>Let’s look at how individual examples perform. Note that as this is an inverse problem we can’t get the answer correct, but we can hope that the truth lies in area where the model has high probability.</p>
 <p>In this plot the truth is the vertical grey line while the blue line is the prediction of the mixture density network. As you can see, we didn’t do too bad.</p>
 <pre class="python" language="Python"><code>obj = [0, 4, 6]
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(16, 6))
@@ -196,13 +198,13 @@ axes[1].axvline(x=y_test[obj][2], color=&#39;black&#39;, alpha=0.5)
 
 plot_normal_mix(pred_weights[obj][1], pred_means[obj][1], pred_std[obj][1], axes[2], comp=False)
 axes[2].axvline(x=y_test[obj][1], color=&#39;black&#39;, alpha=0.5)</code></pre>
-<p><img src="/images/mdn-fig2.png" alt="image" width="700" /></p>
+<p><img src="/images/mixture-density-network-fig2.png" alt="image" width="700" /></p>
 <p>We can check the ensemble by drawing samples of the prediction and plotting the density of those. The MDN has learned what we’d like it to learn.</p>
 <pre class="python" language="Python"><code>a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X_test))
 sns.jointplot(a[:,0], a[:,1], kind=&quot;hex&quot;, color=&quot;#4CB391&quot;, ylim=(-10,10), xlim=(-14,14))</code></pre>
-<p><img src="/images/mdn-fig3.png" alt="image" width="700" /></p>
+<p><img src="/images/mixture-density-network-fig3.png" alt="image" width="700" /></p>
 <h3 id="acknowledgments">Acknowledgments</h3>
-<p>We are grateful to Christopher Bonnett for writing the initial version of this tutorial. More generally, we thank Chris for pushing forward momentum to have Edward tutorials be accessible and easy-to-learn.</p>
+<p>We thank Christopher Bonnett for writing the initial version of this tutorial. More generally, we thank Chris for pushing forward momentum to have Edward tutorials be accessible and easy-to-learn.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-bishop1994mixture">

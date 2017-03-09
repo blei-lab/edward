@@ -95,8 +95,8 @@
     <div class="nine columns">
 
 <h2 id="probabilistic-pca">Probabilistic PCA</h2>
-<p>Probabilistic principal components analysis (probabilistic PCA) is useful for analyzing data via a lower dimensional latent space <span class="citation">(Tipping &amp; Bishop, 1999)</span>. It is often used when there are missing values in the data or for multidimensional scaling.</p>
-<p>We’ll run through a quick tutorial to implement it in Edward below. The full script can be accessed at <a href="https://github.com/blei-lab/edward/blob/master/examples/probabilistic_pca.py"><code>examples/probabilistic_pca.py</code></a> in the Github repository.</p>
+<p>Probabilistic principal components analysis (PCA) is useful for analyzing data via a lower dimensional latent space <span class="citation">(Tipping &amp; Bishop, 1999)</span>. It is often used when there are missing values in the data or for multidimensional scaling.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/probabilistic_pca.ipynb">here</a>, or as a script available at <a href="https://github.com/blei-lab/edward/blob/master/examples/probabilistic_pca.py"><code>examples/probabilistic_pca.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
 <p>We use simulated data. We’ll talk about the individual variables and what they stand for in the next section. For this example, each data point is 2-dimensional, <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N, D, K, sigma=1):
@@ -108,6 +108,8 @@
     for n in range(N):
       x_train[d, n] = np.random.normal(mean[d, n], sigma)
 
+  print(&quot;True principal axes:&quot;)
+  print(w)
   return x_train
 
 N = 5000  # number of data points
@@ -115,8 +117,15 @@ D = 2  # data dimensionality
 K = 1  # latent dimensionality
 
 x_train = build_toy_dataset(N, D, K)</code></pre>
-<p>This generates a dataset that looks like this:</p>
-<p><img src="/images/ppca-fig0.png" alt="image" width="450" /></p>
+<pre><code>## True principal axes:
+## [[ 0.25947927]
+##  [ 1.80472372]]</code></pre>
+<p>We visualize the data set.</p>
+<pre class="python" language="Python"><code>plt.scatter(x_train[0, :], x_train[1, :], color=&#39;blue&#39;, alpha=0.1)
+plt.axis([-10, 10, -10, 10])
+plt.title(&quot;Simulated data set&quot;)
+plt.show()</code></pre>
+<p><img src="/images/probabilistic-pca-fig0.png" alt="image" width="450" /></p>
 <h3 id="model">Model</h3>
 <p>Consider a set of <span class="math inline">\(N\)</span> data points, <span class="math inline">\(X = \{\mathbf{x}_n\}\)</span>, where each data point is <span class="math inline">\(d\)</span>-dimensional, <span class="math inline">\(\mathbf{x}_n \in \mathbb{R}^D\)</span>.</p>
 <p>While our data operates in <span class="math inline">\(D\)</span> dimensions, we will use latent variables <span class="math inline">\(\mathbf{z}_n \in \mathbb{R}^K\)</span> for each data point <span class="math inline">\(\mathbf{x}_n\)</span> with lower dimension, <span class="math inline">\(K &lt; D\)</span>. The set of principal axes <span class="math inline">\(\mathbf{W}\)</span> relates our latent variables to our actual data.</p>
@@ -140,9 +149,26 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 inference.run(n_iter=500, n_print=100, n_samples=10)</code></pre>
 <h3 id="criticism">Criticism</h3>
-<p>One way to criticize the model is to visually compare our actual data to data produced by our inferred values. The blue dots represent the original data, while the red is the inferred.</p>
-<p><img src="/images/ppca-fig0.png" alt="image" width="450" /></p>
-<p><img src="/images/ppca-fig1.png" alt="image" width="450" /></p>
+<p>We first inspect the model’s inferred principal axes.</p>
+<pre class="python" language="Python"><code>sess = ed.get_session()
+print(&quot;Inferred principal axes:&quot;)
+print(sess.run(qw.mean()))</code></pre>
+<pre><code>## Inferred principal axes:
+## [[-0.24093632]
+##  [-1.76468039]]</code></pre>
+<p>The model has recovered the true principal axes up to finite data and also up to identifiability (there’s a symmetry in the parameterization).</p>
+<p>Another way to criticize the model is to visualize the observed data against data generated from our fitted model.</p>
+<pre class="python" language="Python"><code>x_post = ed.copy(x, {w: qw, z: qz})
+x_gen = sess.run(x_post)
+
+plt.scatter(x_gen[0, :], x_gen[1, :], color=&#39;red&#39;, alpha=0.1)
+plt.axis([-10, 10, -10, 10])
+plt.title(&quot;Data generated from model&quot;)
+plt.show()</code></pre>
+<p><img src="/images/probabilistic-pca-fig1.png" alt="image" width="450" /></p>
+<p>The generated data looks close to the true data.</p>
+<h3 id="acknowledgments">Acknowledgments</h3>
+<p>We thank Mayank Agrawal for writing the initial version of this tutorial.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-tipping1999probabilistic">

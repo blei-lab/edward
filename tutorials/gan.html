@@ -96,7 +96,7 @@
 
 <h2 id="generative-adversarial-networks">Generative Adversarial Networks</h2>
 <p>Generative adversarial networks (GANs) are a powerful approach for probabilistic modeling <span class="citation">(I. Goodfellow, 2016; I. Goodfellow et al., 2014)</span>. They posit a deep generative model and they enable fast and accurate inferences.</p>
-<p>We demonstrate how to use GANs in Edward. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/gan.py"><code>examples/gan.py</code></a> in the Github repository.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/gan.ipynb">here</a>, or as a script available at <a href="https://github.com/blei-lab/edward/blob/master/examples/gan.py"><code>examples/gan.py</code></a> in the Github repository.</p>
 <pre class="python" language="Python"><code>M = 128  # batch size during training
 d = 100  # latent dimension
 
@@ -105,7 +105,7 @@ IMG_DIR = &quot;img&quot;</code></pre>
 <h3 id="data">Data</h3>
 <p>We use training data from MNIST, which consists of 55,000 <span class="math inline">\(28\times
 28\)</span> pixel images <span class="citation">(LeCun, Bottou, Bengio, &amp; Haffner, 1998)</span>. Each image is represented as a flattened vector of 784 elements, and each element is a pixel intensity between 0 and 1.</p>
-<p><img src="/images/mnist-train-xs.png" alt="image" width="450" /></p>
+<p><img src="/images/gan-fig0.png" alt="image" width="450" /></p>
 <p>The goal is to build and infer a model that can generate high quality images of handwritten digits.</p>
 <p>During training we will feed batches of MNIST digits. We instantiate a TensorFlow placeholder with a fixed batch size of <span class="math inline">\(M\)</span> images.</p>
 <pre class="python" language="Python"><code>from tensorflow.examples.tutorials.mnist import input_data
@@ -157,7 +157,7 @@ optimizer_d = tf.train.AdamOptimizer()
 inference.initialize(
     optimizer=optimizer, optimizer_d=optimizer,
     n_iter=15000, n_print=1000)</code></pre>
-<p>We now form the main loop which trains the GAN. At each iteration, it takes a minibatch and updates the parameters according to the algorithm. At every 1000 iterations, it will print progress. It also saves a figure of generated samples from the model.</p>
+<p>We now form the main loop which trains the GAN. At each iteration, it takes a minibatch and updates the parameters according to the algorithm. At every 1000 iterations, it will print progress and also saves a figure of generated samples from the model.</p>
 <pre class="python" language="Python"><code>sess = ed.get_session()
 tf.global_variables_initializer().run()
 
@@ -181,7 +181,7 @@ for t in range(inference.n_iter):
 <h3 id="criticism">Criticism</h3>
 <p>Evaluation of GANs remains an open problem—both in criticizing their fit to data and in assessing convergence. Recent advances have considered alternative objectives and heuristics to stabilize training (see also Soumith Chintala’s <a href="https://github.com/soumith/ganhacks">GAN hacks repo</a>).</p>
 <p>As one approach to criticize the model, we simply look at generated images during training. Below we show generations after 14,000 iterations (that is, 14,000 gradient updates of both the generator and the discriminator).</p>
-<p><img src="/images/mnist_gan.png" alt="image" width="500" /></p>
+<p><img src="/images/gan-fig1.png" alt="image" width="500" /></p>
 <p>The images are meaningful albeit a little blurry. Suggestions for further improvements would be to tune the hyperparameters in the optimization, to improve the capacity of the discriminative and generative networks, and to leverage more prior information (such as convolutional architectures).</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">

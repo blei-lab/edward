@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Unsupervised learning</title>
+  <title>Edward – Unsupervised Learning</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,11 +94,11 @@
     </div>
     <div class="nine columns">
 
-<h2 id="unsupervised-learning">Unsupervised learning</h2>
+<h2 id="unsupervised-learning">Unsupervised Learning</h2>
 <p>In unsupervised learning, the task is to infer hidden structure from unlabeled data, comprised of training examples <span class="math inline">\(\{x_n\}\)</span>.</p>
-<p>We demonstrate how to do this in Edward with an example. The script is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_collapsed.py"><code>examples/mixture_gaussian_collapsed.py</code></a> in the Github repository.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/unsupervised.ipynb">here</a>, or as a script available at <a href="https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_collapsed.py"><code>examples/mixture_gaussian_collapsed.py</code></a> in the Github repository.</p>
 <h3 id="data">Data</h3>
-<p>Use a simulated dataset of 2-dimensional datapoints <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
+<p>Use a simulated data set of 2-dimensional data points <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
 <pre class="python" language="Python"><code>def build_toy_dataset(N):
   pi = np.array([0.4, 0.6])
   mus = [[1, 1], [-1, -1]]
@@ -137,18 +137,18 @@ plt.show()</code></pre>
   p(\mathbf{\sigma}_k)
   &amp;=
   \text{InverseGamma}(\mathbf{\sigma}_k \mid a, b).\end{aligned}\]</span></p>
-<p>We build two versions of the model in Edward: one explicitly with the mixture assignments <span class="math inline">\(c_n\in\{0,\ldots,K-1\}\)</span> as latent variables, and another with them summed out.</p>
-<p>The explicit version is as follows:</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Normal
+<p>We build two versions of the model in Edward: one jointly with the mixture assignments <span class="math inline">\(c_n\in\{0,\ldots,K-1\}\)</span> as latent variables, and another with them summed out.</p>
+<p>The joint version is written as follows.</p>
+<pre class="python" language="Python"><code>from edward.models import Categorical, InverseGamma, Normal
 
 K = 2  # number of components
 
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 c = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=mu[c], sigma=sigma[c])</code></pre>
+x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))</code></pre>
 <p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
+<pre class="python" language="Python"><code>from edward.models import Categorical, InverseGamma, Mixture, \
     MultivariateNormalDiag, Normal
 
 K = 2  # number of components
@@ -163,7 +163,7 @@ components = [
 x = Mixture(cat=cat, components=components)</code></pre>
 <p>We will use the collapsed version in this analysis.</p>
 <h3 id="inference">Inference</h3>
-<p>Perform variational inference. The latent variables are the mixture probabilities, component means, and component variances. Define the variational model to be <span class="math display">\[\begin{aligned}
+<p>Perform variational inference. The latent variables are the component means and component variances. Define the variational model to be <span class="math display">\[\begin{aligned}
  q(\mu, \sigma \;;\; \lambda)
  &amp;=
  \prod_{k=1}^K
@@ -204,6 +204,7 @@ plt.axis([-3, 3, -3, 3])
 plt.title(&quot;Predicted cluster assignments&quot;)
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig1.png" alt="image" width="700" /></p>
+<p>The model has correctly clustered the data.</p>
 <h3 id="remarks-the-log-sum-exp-trick">Remarks: The log-sum-exp trick</h3>
 <p>For a collapsed mixture model, implementing the log density can be tricky. In general, the log density is <span class="math display">\[\begin{aligned}
   \log p(\pi) +

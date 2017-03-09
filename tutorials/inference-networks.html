@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – Inference networks</title>
+  <title>Edward – Inference Networks</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="nine columns">
 
-<h2 id="inference-networks">Inference networks</h2>
+<h2 id="inference-networks">Inference Networks</h2>
 <p>An inference network is a flexible construction for parameterizing approximating distributions during inference. They are used in Helmholtz machines <span class="citation">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>, deep Boltzmann machines <span class="citation">(Salakhutdinov &amp; Larochelle, 2010)</span>, and variational auto-encoders <span class="citation">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
 <p>Recall that probabilistic models often have <em>local</em> latent variables, that is, latent variables associated with a data point; for example, the latent cluster assignment of a data point or the hidden representation of a text or image. Variational inference on models with local latent variables requires optimizing over each variational factor, <span class="math display">\[q(\mathbf{z}; \mathbf{\lambda}) = \prod_{n=1}^N q(z_n; \lambda_n),\]</span> where <span class="math inline">\(z_n\)</span> are the latent variables associated to a data point <span class="math inline">\(x_n\)</span>. The set of parameters <span class="math inline">\(\mathbf{\lambda}=\{\lambda_n\}\)</span> grows with the size of data. This makes computation difficult when the data does not fit in memory. Further, a new set of parameters <span class="math inline">\(\mathbf{\lambda}&#39;=\{\lambda_n&#39;\}\)</span> must be optimized at test time, where there may be a new set of data points <span class="math inline">\(\{x_n&#39;\}\)</span>.</p>
 <p>An inference network replaces local variational parameters with global parameters. It is a neural network which takes <span class="math inline">\(x_n\)</span> as input and which outputs its local variational parameters <span class="math inline">\(\lambda_n\)</span>, <span class="math display">\[q(\mathbf{z}\mid \mathbf{x}; \theta)
