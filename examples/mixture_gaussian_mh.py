@@ -6,6 +6,10 @@ because we are proposing a sample in a high-dimensional space. The
 acceptance ratio is so small that it is unlikely we'll ever accept a
 proposed sample. A Gibbs-like extension ("MH within Gibbs"), which
 does a separate MH in each dimension, may succeed.
+
+References
+----------
+http://edwardlib.org/tutorials/unsupervised
 """
 from __future__ import absolute_import
 from __future__ import division

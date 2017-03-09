@@ -8,10 +8,7 @@ Regression typically means the output $y$ takes continuous values.
 
 We demonstrate with an example in Edward.
 An interactive version with Jupyter notebook is available
-\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/supervised_regression.ipynb}{here},
-or as a script available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
-{\texttt{examples/bayesian_linear_regression.py}} in the Github repository.
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/supervised_regression.ipynb}{here}.
 
 \subsubsection{Data}
 
@@ -120,10 +117,10 @@ print(ed.evaluate('mean_absolute_error', data={X: X_test, y_post: y_test}))
 \end{lstlisting}
 
 \begin{lstlisting}
-Mean squared error on test data:
-0.0300492
-Mean absolute error on test data:
-0.123616
+## Mean squared error on test data:
+## 0.0300492
+## Mean absolute error on test data:
+## 0.123616
 \end{lstlisting}
 
 The trained model makes predictions with low error

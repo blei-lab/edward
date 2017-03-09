@@ -4,6 +4,10 @@
 This version directly regresses on the data X, rather than regressing
 on a placeholder X. Note this prevents the model from conditioning on
 other values of X.
+
+References
+----------
+http://edwardlib.org/tutorials/supervised-regression
 """
 from __future__ import absolute_import
 from __future__ import division

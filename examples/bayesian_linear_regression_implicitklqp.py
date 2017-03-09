@@ -11,6 +11,10 @@ Note as with all GAN-style training, the algorithm is not stable. It
 is recommended to monitor training and halt manually according to some
 criterion (e.g., prediction accuracy on validation test, quality of
 samples).
+
+References
+----------
+http://edwardlib.org/tutorials/supervised-regression
 """
 from __future__ import absolute_import
 from __future__ import division
