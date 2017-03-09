@@ -9,10 +9,7 @@ inferences.
 
 We demonstrate with an example in Edward.
 An interactive version with Jupyter notebook is available
-\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/gan.ipynb}{here},
-or as a script available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}
-{\texttt{examples/gan.py}} in the Github repository.
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/gan.ipynb}{here}.
 
 \begin{lstlisting}[language=Python]
 M = 128  # batch size during training
@@ -177,7 +174,7 @@ optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
 
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer,
+    optimizer=optimizer, optimizer_d=optimizer_d,
     n_iter=15000, n_print=1000)
 \end{lstlisting}
 
