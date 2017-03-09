@@ -77,6 +77,8 @@ K = 20  # number of mixture components
 
 # DATA
 X_train, X_test, y_train, y_test = build_toy_dataset(N)
+y_train = y_train.reshape(-1)
+y_test = y_test.reshape(-1)
 print("Size of features in training data: {}".format(X_train.shape))
 print("Size of output in training data: {}".format(y_train.shape))
 print("Size of features in test data: {}".format(X_test.shape))
