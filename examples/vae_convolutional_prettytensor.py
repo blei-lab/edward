@@ -2,6 +2,11 @@
 """Convolutional variational auto-encoder for binarized MNIST.
 
 The neural networks are written with Pretty Tensor.
+
+References
+----------
+http://edwardlib.org/tutorials/decoder
+http://edwardlib.org/tutorials/inference-networks
 """
 from __future__ import absolute_import
 from __future__ import division

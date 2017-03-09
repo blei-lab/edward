@@ -2,6 +2,10 @@
 """Bayesian linear regression using variational inference.
 
 This version visualizes additional fits of the model.
+
+References
+----------
+http://edwardlib.org/tutorials/supervised-regression
 """
 from __future__ import absolute_import
 from __future__ import division

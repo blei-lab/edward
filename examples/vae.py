@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 """Variational auto-encoder for MNIST data.
+
+References
+----------
+http://edwardlib.org/tutorials/decoder
+http://edwardlib.org/tutorials/inference-networks
 """
 from __future__ import absolute_import
 from __future__ import division
