@@ -91,7 +91,7 @@ for _ in range(10000):
 
 We alternate updates for each local inference, where the global
 posterior factor $q(\beta)$ is shared across both inferences
-\citep{gelman2014expectation}.
+\citep{gelman2017expectation}.
 
 With TensorFlow's distributed training, compositionality
 enables \emph{distributed} message passing over a cluster with many
@@ -109,7 +109,7 @@ approximation, which performs local Laplace approximations
 \citep{rue2009approximate};
 and
 all the instantiations of EP-like algorithms in
-\citet{gelman2014expectation}.
+\citet{gelman2017expectation}.
 
 In the above, we perform local inferences split over individual random
 variables. At the moment, Edward does not support local inferences

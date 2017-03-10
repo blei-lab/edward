@@ -64,7 +64,7 @@ x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
 tf.tanh(x * y)
-tf.gather(x, 2)  # 3rd normal rv in the vector
+x[2]  # 3rd normal rv in the vector
 \end{lstlisting}
 
 In the \href{/api/model-compositionality}{compositionality page}, we

@@ -12,7 +12,7 @@ implementation (`tf.py_func`), and a CPS-style formulation.
 
 References
 ----------
-https://probmods.org/generative-models.html#stochastic-recursion
+https://probmods.org/chapters/02-generative-models.html#stochastic-recursion
 """
 from __future__ import absolute_import
 from __future__ import division
