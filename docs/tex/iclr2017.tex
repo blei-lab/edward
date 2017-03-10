@@ -14,6 +14,7 @@ The code snippets assume the following versions.
 \begin{lstlisting}[language=bash]
 pip install edward==1.2.3
 pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
+pip install keras==1.0.0
 \end{lstlisting}
 
 \subsubsection{Section 3. Compositional Representations for Probabilistic Models}
@@ -98,8 +99,8 @@ beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([N, K]))
 x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
 \end{lstlisting}
-It is used below in Figure * (Inference), Figure 6 (left/right),
-Figure * (variational EM), and Figure * (data subsampling).
+It is used below in Figure 6 (left/right), Figure * (variational EM),
+and Figure * (data subsampling).
 
 \textbf{Figure 6} \textbf{(left)}. Variational inference
 \citep{jordan1999introduction}.
