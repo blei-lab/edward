@@ -28,7 +28,7 @@ notebook: build
 	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data --net=host edward
 
 test: build
-	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data edward py.test $(TEST)
+	$(DOCKER) run -it -v $(SRC):/src -v $(DATA):/data edward pytest $(TEST)
 
 # GPU environment
 
@@ -53,5 +53,5 @@ notebook-gpu: build-gpu
 test-gpu: build-gpu
 	$(DOCKER_GPU) run -it -v $(SRC):/src -v $(DATA):/data --env CUDA_HOME=${CUDA} \
 	                                                  --env LD_LIBRARY_PATH=${LD_LIBRARY} \
-	                                                  edward-gpu py.test $(TEST)
+	                                                  edward-gpu pytest $(TEST)
 
