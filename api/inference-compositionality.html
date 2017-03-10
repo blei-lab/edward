@@ -148,17 +148,17 @@ inference_z2 = ed.KLpq({beta: qbeta, z2: qz2}, {x2: x2_train})
 for _ in range(10000):
   inference_z1.update()
   inference_z2.update()</code></pre>
-<p>We alternate updates for each local inference, where the global posterior factor <span class="math inline">\(q(\beta)\)</span> is shared across both inferences <span class="citation">(Gelman et al., 2014)</span>.</p>
+<p>We alternate updates for each local inference, where the global posterior factor <span class="math inline">\(q(\beta)\)</span> is shared across both inferences <span class="citation">(Gelman et al., 2017)</span>.</p>
 <p>With TensorFlow’s distributed training, compositionality enables <em>distributed</em> message passing over a cluster with many workers. The computation can be further sped up with the use of GPUs via data and model parallelism.</p>
-<p>This extends to many algorithms: for example, classical message passing, which performs exact local inferences; Gibbs sampling, which draws samples from conditionally conjugate inferences <span class="citation">(S. Geman &amp; Geman, 1984)</span>; expectation propagation, which locally minimizes <span class="math inline">\(\text{KL}(p || q)\)</span> over exponential families <span class="citation">(Minka, 2001)</span>; integrated nested Laplace approximation, which performs local Laplace approximations <span class="citation">(Rue, Martino, &amp; Chopin, 2009)</span>; and all the instantiations of EP-like algorithms in <span class="citation">Gelman et al. (2014)</span>.</p>
+<p>This extends to many algorithms: for example, classical message passing, which performs exact local inferences; Gibbs sampling, which draws samples from conditionally conjugate inferences <span class="citation">(S. Geman &amp; Geman, 1984)</span>; expectation propagation, which locally minimizes <span class="math inline">\(\text{KL}(p || q)\)</span> over exponential families <span class="citation">(Minka, 2001)</span>; integrated nested Laplace approximation, which performs local Laplace approximations <span class="citation">(Rue, Martino, &amp; Chopin, 2009)</span>; and all the instantiations of EP-like algorithms in <span class="citation">(<span class="citeproc-not-found" data-reference-id="gelman2014expectation"><strong>???</strong></span>)</span>.</p>
 <p>In the above, we perform local inferences split over individual random variables. At the moment, Edward does not support local inferences within a random variable itself. We cannot do local inferences when representing the random variable for all data points and their cluster membership as <code>x</code> and <code>z</code> rather than <code>x1</code>, <code>x2</code>, <code>z1</code>, and <code>z2</code>.</p>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-andrieu2009pseudo">
-<p>Andrieu, C., &amp; Roberts, G. O. (2009). The pseudo-marginal approach for efficient monte carlo computations. <em>The Annals of Statistics</em>, 697–725.</p>
+<p>Andrieu, C., &amp; Roberts, G. O. (2009). The pseudo-marginal approach for efficient Monte Carlo computations. <em>The Annals of Statistics</em>, 697–725.</p>
 </div>
-<div id="ref-gelman2014expectation">
-<p>Gelman, A., Vehtari, A., Jylänki, P., Robert, C., Chopin, N., &amp; Cunningham, J. P. (2014). Expectation propagation as a way of life. <em>ArXiv Preprint ArXiv:1412.4869</em>.</p>
+<div id="ref-gelman2017expectation">
+<p>Gelman, A., Vehtari, A., Jylänki, P., Sivula, T., Tran, D., Sahai, S., … Robert, C. (2017). Expectation propagation as a way of life: A framework for Bayesian inference on partitioned data. <em>ArXiv Preprint ArXiv:1412.4869v2</em>.</p>
 </div>
 <div id="ref-geman1984stochastic">
 <p>Geman, S., &amp; Geman, D. (1984). Stochastic relaxation, gibbs distributions, and the bayesian restoration of images. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, (6), 721–741.</p>
@@ -173,16 +173,16 @@ for _ in range(10000):
 <p>Koller, D., &amp; Friedman, N. (2009). <em>Probabilistic graphical models: Principles and techniques</em>. MIT press.</p>
 </div>
 <div id="ref-minka2001expectation">
-<p>Minka, T. P. (2001). Expectation propagation for approximate bayesian inference. In <em>Proceedings of the seventeenth conference on uncertainty in artificial intelligence</em> (pp. 362–369). Morgan Kaufmann Publishers Inc.</p>
+<p>Minka, T. P. (2001). Expectation propagation for approximate Bayesian inference. In <em>Uncertainty in artificial intelligence</em>.</p>
 </div>
 <div id="ref-neal1993new">
-<p>Neal, R. M., &amp; Hinton, G. E. (1993). A new view of the em algorithm that justifies incremental and other variants. In <em>Learning in graphical models</em> (pp. 355–368).</p>
+<p>Neal, R. M., &amp; Hinton, G. E. (1993). A new view of the EM algorithm that justifies incremental and other variants. In <em>Learning in graphical models</em> (pp. 355–368).</p>
 </div>
 <div id="ref-rue2009approximate">
 <p>Rue, H., Martino, S., &amp; Chopin, N. (2009). Approximate bayesian inference for latent gaussian models by using integrated nested laplace approximations. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <em>71</em>(2), 319–392.</p>
 </div>
 <div id="ref-wang2012truncation">
-<p>Wang, C., &amp; Blei, D. M. (2012). Truncation-free online variational inference for bayesian nonparametric models. In <em>Neural information processing systems</em> (pp. 413–421).</p>
+<p>Wang, C., &amp; Blei, D. M. (2012). Truncation-free online variational inference for bayesian nonparametric models. In <em>Neural information processing systems</em>.</p>
 </div>
 <div id="ref-wang2013variational">
 <p>Wang, C., &amp; Blei, D. M. (2013). Variational inference in nonconjugate models. <em>Journal of Machine Learning Research</em>, <em>14</em>, 1005–1031.</p>
