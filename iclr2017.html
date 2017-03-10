@@ -290,7 +290,7 @@ y = Bernoulli(logits=ed.dot(x, beta))
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, D])))
 inference = ed.HMC({beta: qbeta}, data={y: y_data})
 inference.run(step_size=0.5 / N, n_steps=10)</code></pre>
-<p>For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py"><code>examples/hierarchical_logistic_regression.py</code></a> in the Github repository.</p>
+<p>For an example of it in use, see <a href="https://github.com/blei-lab/edward/blob/master/examples/bayesian_logistic_regression.py"><code>examples/bayesian_logistic_regression.py</code></a> in the Github repository.</p>
 <h3 id="appendix-a.-model-examples">Appendix A. Model Examples</h3>
 <p><strong>Figure 10</strong>. Bayesian neural network for classification <span class="citation">(Denker, Schwartz, Wittner, &amp; Solla, 1987)</span>.</p>
 <pre language="python"><code>import tensorflow as tf
