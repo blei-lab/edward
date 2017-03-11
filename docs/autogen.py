@@ -103,6 +103,12 @@ PAGES = [
         'parent_pages': [],
         'child_pages': [],
     },
+    {
+        'page': 'reference.tex',
+        'title': 'Reference',
+        'parent_pages': [],
+        'child_pages': [],
+    },
     # {
     #     'page': 'util.tex',
     #     'title': 'Utilities',

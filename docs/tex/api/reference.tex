@@ -1,0 +1,55 @@
+\title{Reference}
+
+{{navbar}}
+
+{{sphinx
+
+======
+Models
+======
+
+* :class:`edward.models.RandomVariable`
+* :class:`edward.models.Normal`
+
+=========
+Inference
+=========
+
+* :class:`edward.inferences.VariationalInference`
+
+    * :class:`edward.inferences.KLqp`
+
+        * :class:`edward.inferences.ReparameterizationKLqp`
+        * :class:`edward.inferences.ReparameterizationKLKLqp`
+        * :class:`edward.inferences.ReparameterizationEntropyKLqp`
+        * :class:`edward.inferences.ScoreKLqp`
+        * :class:`edward.inferences.ScoreKLKLqp`
+        * :class:`edward.inferences.ScoreEntropyKLqp`
+
+    * :class:`edward.inferences.ImplicitKLqp`
+    * :class:`edward.inferences.KLpq`
+    * Generative Adversial Network inferences:
+
+        * :class:`edward.inferences.GANInference`
+        * :class:`edward.inferences.WGANInference`
+
+    * :class:`edward.inferences.MAP`
+    * :class:`edward.inferences.Laplace`
+
+* :class:`edward.inferences.MonteCarlo`
+
+    * :class:`edward.inferences.MetropolisHastings`
+    * :class:`edward.inferences.HMC`
+    * :class:`edward.inferences.SGLD`
+    * :class:`edward.inferences.SGHMC`
+
+=========
+Criticism
+=========
+
+* :func:`edward.criticisms.evaluate`
+* :func:`edward.criticisms.ppc`
+
+}}
+
+
