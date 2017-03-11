@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Developing Inference Algorithms</title>
+<title>Edward – Community</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -86,27 +86,19 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
-<div class="row" style="padding-bottom: 5%">
-<div class="row" style="padding-bottom: 1%">
-<a class="button3" href="/api/data">Data</a>
-<a class="button3" href="/api/model">Model</a>
-<a class="button3 button-primary" href="/api/inference">Inference</a>
-<a class="button3" href="/api/criticism">Criticism</a>
-</div>
-<div class="row">
-<a class="button4" href="/api/inference-classes">Classes</a>
-<a class="button4" href="/api/inference-compositionality">Compositionality</a>
-<a class="button4" href="/api/inference-data-subsampling">Data Subsampling</a>
-<a class="button4 button-primary" href="/api/inference-development">Development</a>
-</div>
-</div>
-<h3 id="developing-inference-algorithms">Developing Inference Algorithms</h3>
-<p>Edward uses class inheritance to provide a hierarchy of inference methods. This enables fast experimentation on top of existing algorithms, whether it be developing new black box algorithms or new model-specific algorithms. For examples of algorithms developed in Edward, see the inference <a href="/tutorials/">tutorials</a>.</p>
-<p><img alt="image" src="/images/inference_structure.png" width="700"/> <span><em>Dependency graph of several inference methods. Nodes are classes in Edward and arrows represent class inheritance.</em></span></p>
-<p>There is a base class <code>Inference</code>, from which all inference methods are derived from. Note that <code>Inference</code> says nothing about the class of models that an algorithm must work with. One can build inference algorithms which are tailored to a restricted class of models available in Edward (such as differentiable models or conditionally conjugate models), or even tailor it to a single model. The algorithm can raise an error if the model is outside this class.</p>
-<p>We organize inference under two paradigms: <code>VariationalInference</code> and <code>MonteCarlo</code> (or more plainly, optimization and sampling). These inherit from <code>Inference</code> and each have their own default methods.</p>
-<p>For example, developing a new variational inference algorithm is as simple as inheriting from <code>VariationalInference</code> and writing a <code>build_loss_and_gradients()</code> method. <code>VariationalInference</code> implements many default methods such as <code>initialize()</code> with options for an optimizer. For example, see the <a href="https://github.com/blei-lab/edward/blob/master/examples/iwvi.py">importance weighted variational inference</a> script.</p>
+<h2 id="community">Community</h2>
+<p>Edward’s community is a key asset. We work together to make Edward a rewarding experience both in its usage and development.</p>
+<h3 id="general">General</h3>
+<p>The most important community resources for Edward are:</p>
+<ul>
+<li>The <a href="http://discuss.edwardlib.org">Forum</a>, for any discussion of Edward. The Forum includes user and development discussion, as well as announcements.</li>
+<li>The <a href="http://gitter.im/blei-lab/edward">Gitter channel</a>, for any discussion at real time.</li>
+</ul>
+<p>Both can be used to get help with installation, coding and debugging in Edward, and any discussion about probabilistic modeling.</p>
+<p>You can also find help on the question and answer site, <a href="http://stackoverflow.com">Stack Overflow</a>.</p>
+<h3 id="bug-reports-feature-requests">Bug reports &amp; feature requests</h3>
+<p>To submit bug reports or feature requests, use Edward’s <a href="https://github.com/blei-lab/edward/issues">Github issues tracker</a>.</p>
+<p>Check out our <a href="/contributing">contributing page</a> if you’d like to help improve Edward.</p>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

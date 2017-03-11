@@ -73,10 +73,9 @@
 <a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
 <a class="button u-full-width" href="#">Advanced</a>
-<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<a class="button2 u-full-width" href="/community">Community</a>
 <a class="button2 u-full-width" href="/contributing">Contributing</a>
-<a class="button2 u-full-width" href="/troubleshooting">Troubleshooting</a>
-<a class="button2 u-full-width" href="/license">License</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
 <span style="vertical-align:middle;">Github</span> 
@@ -89,9 +88,6 @@
 <div class="nine columns">
 <h2 id="contributing">Contributing</h2>
 <p>Interested in contributing to Edward? We appreciate all kinds of help!</p>
-<h3 id="community">Community</h3>
-<p>For general discussion about Edward, use Edward’s <a href="http://gitter.im/blei-lab/edward">Gitter channel</a>. For example, it is used to get help with installation, coding and debugging in Edward, and probabilistic modeling. (We also plan to have a mailing list-like option in the future.)</p>
-<p>For development discussion about Edward, use Edward’s <a href="https://github.com/blei-lab/edward/issues">Github issues tracker</a>. For example, it is used to submit bug reports and feature requests.</p>
 <h3 id="pull-requests">Pull requests</h3>
 <p>We gladly welcome pull requests.</p>
 <p>Before making any changes, we recommend opening an issue (if it doesn’t already exist) and discussing your proposed changes. This will let us give you advice on the proposed changes. If the changes are minor, then feel free to make them without discussion.</p>
@@ -102,7 +98,7 @@
 <li>Add a new algorithm (or improve existing algorithms). They are located in the <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences"><code>edward/inferences/</code></a> directory on Github.</li>
 <li>Solve <a href="https://github.com/blei-lab/edward/issues">existing issues</a> in Edward. They range from low-level software bugs to higher-level design problems. Check out the label “<a href="https://github.com/blei-lab/edward/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+first+contribution%22">Good first contribution</a>”.</li>
 </ol>
-<p>To make changes, <a href="https://help.github.com/articles/working-with-forks/">fork the repo</a>. Write code in this fork with the following guidelines in mind.</p>
+<p>To make changes, <a href="https://help.github.com/articles/working-with-forks/">fork the repo</a>. Write code in this fork with the following guidelines.</p>
 <p><strong>Style guide.</strong> Follow <a href="https://www.tensorflow.org/versions/master/how_tos/style_guide.html">TensorFlow’s style guide</a> for writing code, which more or less follows PEP 8. Follow <a href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">NumPy’s documentation guide</a> for writing documention, and follow <a href="https://www.tensorflow.org/versions/master/how_tos/documentation/index.html">TensorFlow’s documentation guide</a> for describing TensorFlow tensors in the documentation.</p>
 <p><strong>Unit testing.</strong> Unit testing is awesome. It’s useful not only for checking code after having written it, but also in checking code as you are developing it. Most pull requests require unit tests. Follow <a href="https://www.tensorflow.org/versions/master/api_docs/python/test.html">TensorFlow’s testing guide</a>. To run the unit tests, we use <a href="http://doc.pytest.org/">pytest</a>: run <code>pytest tests/</code> in command line. To run specific unit tests, call <code>pytest</code> individually, e.g., <code>pytest tests/test_metrics.py</code>.</p>
 <p>Submit the pull request whenever you’re ready. You can also submit an incomplete pull request to get intermediate feedback.</p>
