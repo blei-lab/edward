@@ -2,18 +2,25 @@
 
 \subsection{Linear Mixed Effects Models}
 
-In linear mixed effects models, we wish to model a linear relation between categorical input variables and a continuous output variable. The data is not drawn independently. Oftentimes, we see clusters in subgroups.
+In linear mixed effects models, we wish to model a linear relationship for data points with inputs of varying type, categorized into subgroups, and associated to a continuous output.
 
 We demonstrate with an example in Edward.
 An interactive version with Jupyter notebook is available
-\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb}{here},
-or as a script available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/linear_mixed_effects_models.py}
-{\texttt{examples/linear_mixed_effects_models.py}} in the Github repository.
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb}{here}.
 
 \subsubsection{Data}
 
-We use the \texttt{InstEval} dataset located \href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb}{here}. It's a dataset of instructor evaluation ratings where our inputs include categories such as \texttt{students} and \texttt{departments}, while our observed variable is the actual rating.
+We use the \texttt{InstEval} dataset located \href{https://github.com/blei-lab/edward/blob/master/examples/data/insteval.csv}{here}. It's a dataset of instructor evaluation ratings where our inputs include categories such as \texttt{students} and \texttt{departments}, while our observed variable is the actual rating.
+
+\begin{lstlisting}[language=Python]
+data = pd.read_csv('../../examples/data/insteval.csv')
+data['dcodes'] = data['d'].astype('category').cat.codes
+data['deptcodes'] = data['dept'].astype('category').cat.codes
+data['s'] = data['s'] - 1
+
+train = data.sample(frac=0.8)
+test = data.drop(train.index)
+\end{lstlisting}
 
 \subsubsection{Model}
 
@@ -40,7 +47,7 @@ Note that all random variables are Normal distributions centered around the orig
 
 Therefore, given the variables corresponding to \texttt{students}, \texttt{teachers}, \texttt{departments}, and \texttt{service}, we want to predict the rating given for the lecturer. Once we make te mixed effects' distinction, we can summarize our model as
 
-$$y \sim 1 + (1|students) + (1|instructor) + service + (1|dept)$$ where (1|x) denotes that x is a random effect, not fixed.
+$$y \sim 1 + (1|students) + (1|instructor) + service + (1|dept)$$ where $(1|x)$ denotes that x is a random effect, not fixed. This syntax is taken from R's 'lme4' package.
 
 For the code below, we denote:
 \begin{itemize}
@@ -101,4 +108,4 @@ plt.show()
 
 \includegraphics[width=450px]{/images/linear-mixed-effects-models.png}
 
-
+Here, we see that the residuals have Normal error with mean around 0.
