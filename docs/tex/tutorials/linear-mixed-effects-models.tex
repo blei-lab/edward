@@ -24,13 +24,13 @@ test = data.drop(train.index)
 
 \subsubsection{Model}
 
-The main reason we use a mixed model rather than regular linear regression is because we cannot make the independence assumption. Rather, our observations come from sets of groups which can different slopes and intercepts.
+The main reason we use a mixed model rather than regular linear regression is because we cannot make the independence assumption. Rather, our observations come from sets of groups which can have varying slopes and intercepts \citep{gelman2006data}.
 
 For example:
 \begin{itemize}
 \item The observations from a single student are not independent of each other. Rather, some students may systematically give low (or high) lecture ratings.
-\item The observations of a single teachers are not independent from one another. We'd expect good teachers to get generally good ratings and bad teachers to get generally bad ratings.
-\item The observations of a department are not independent from one another. One department may generally have dry material and thus be rated lower than others.
+\item TThe observations from a single teacher are not independent of each other. We expect good teachers to get generally good ratings and bad teachers to get generally bad ratings.
+\item The observations from a single department are not independent of each other. One department may generally have dry material and thus be rated lower than others.
 \end{itemize}
 
 Normal linear regression takes the form $$ y = X\beta + \epsilon $$ where $X$ corresponds to fixed effects with coefficients $\beta$.
@@ -109,3 +109,5 @@ plt.show()
 \includegraphics[width=450px]{/images/linear-mixed-effects-models.png}
 
 Here, we see that the residuals have Normal error with mean around 0.
+
+\subsubsection{References}\label{references}
