@@ -2,6 +2,10 @@
 """Probabilistic principal components analysis (Tipping and Bishop, 1999).
 
 Inference uses data subsampling.
+
+References
+----------
+http://edwardlib.org/tutorials/probabilistic-pca
 """
 from __future__ import absolute_import
 from __future__ import division

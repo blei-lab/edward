@@ -3,6 +3,10 @@
 (see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016)).
 
 Inspired by autograd's Bayesian neural network example.
+
+References
+----------
+http://edwardlib.org/tutorials/bayesian-neural-network
 """
 from __future__ import absolute_import
 from __future__ import division

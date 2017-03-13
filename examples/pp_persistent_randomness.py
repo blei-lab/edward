@@ -10,7 +10,7 @@ randomness, simply define another random variable to work with.
 
 References
 ----------
-https://probmods.org/generative-models.html#persistent-randomness-mem
+https://probmods.org/chapters/02-generative-models.html#persistent-randomness-mem
 """
 import edward as ed
 import tensorflow as tf

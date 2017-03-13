@@ -94,7 +94,7 @@ class VariationalInference(Inference):
       # Custom optimizers have no control over global_step.
       global_step = None
     else:
-      raise TypeError()
+      raise TypeError("Optimizer must be str or tf.train.Optimizer.")
 
     if not use_prettytensor:
       self.train = optimizer.apply_gradients(grads_and_vars,

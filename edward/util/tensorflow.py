@@ -249,3 +249,44 @@ def to_simplex(x):
     piu = tf.concat([tf.ones([n_rows, 1]), 1.0 - z], 1)
     S = tf.cumprod(piu, axis=1)
     return S * pil
+
+
+def get_control_variate_coef(f, h):
+  """Returns scalar used by control variates method for variance reduction in
+  MCMC methods.
+
+  If we have a statistic :math:`m` unbiased estimator of :math:`\mu` and
+  and another statistic :math:`t` which is an unbiased estimator of
+  :math:`\tau` then :math:`m^* = m + c(t - \tau)` is also an unbiased
+  estimator of :math:`\mu' for any coefficient :math:`c`.
+
+  This function calculates the optimal coefficient
+  .. math::
+
+    \c^* = \frac{Cov(m,t)}{Var(t)}
+
+  for minimizing the variance of :math:`m^*`.
+
+  Parameters
+  ----------
+  f : tf.Tensor
+    A 1-D tensor.
+  h : tf.Tensor
+    A 1-D tensor.
+
+  Returns
+  -------
+  tf.Tensor
+    A 0 rank tensor
+  """
+  f_mu = tf.reduce_mean(f)
+  h_mu = tf.reduce_mean(h)
+
+  n = f.get_shape()[0].value
+
+  cov_fh = tf.reduce_sum((f - f_mu) * (h - h_mu)) / (n - 1)
+  var_h = tf.reduce_sum(tf.square(h - h_mu)) / (n - 1)
+
+  a = cov_fh / var_h
+
+  return a
