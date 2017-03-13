@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Linear Mixed Effects Models</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/community">Community</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
+<span style="vertical-align:middle;">Github</span> 
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
+<!--</object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="linear-mixed-effects-models">Linear Mixed Effects Models</h2>
+<p>In linear mixed effects models, we wish to model a linear relationship for data points with inputs of varying type, categorized into subgroups, and associated to a continuous output.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb">here</a>.</p>
+<h3 id="data">Data</h3>
+<p>We use the <code>InstEval</code> dataset located <a href="https://github.com/blei-lab/edward/blob/master/examples/data/insteval.csv">here</a>. It’s a dataset of instructor evaluation ratings where our inputs include categories such as <code>students</code> and <code>departments</code>, while our observed variable is the actual rating.</p>
+<pre class="python" language="Python"><code>data = pd.read_csv('../../examples/data/insteval.csv')
+data['dcodes'] = data['d'].astype('category').cat.codes
+data['deptcodes'] = data['dept'].astype('category').cat.codes
+data['s'] = data['s'] - 1
+
+train = data.sample(frac=0.8)
+test = data.drop(train.index)</code></pre>
+<h3 id="model">Model</h3>
+<p>The main reason we use a mixed model rather than regular linear regression is because we cannot make the independence assumption. Rather, our observations come from sets of groups which can have varying slopes and intercepts <span class="citation">(Gelman &amp; Hill, 2006)</span>.</p>
+<p>For example:</p>
+<ul>
+<li>The observations from a single student are not independent of each other. Rather, some students may systematically give low (or high) lecture ratings.</li>
+<li>TThe observations from a single teacher are not independent of each other. We expect good teachers to get generally good ratings and bad teachers to get generally bad ratings.</li>
+<li>The observations from a single department are not independent of each other. One department may generally have dry material and thus be rated lower than others.</li>
+</ul>
+<p>Normal linear regression takes the form <span class="math display">\[y = X\beta + \epsilon\]</span> where <span class="math inline">\(X\)</span> corresponds to fixed effects with coefficients <span class="math inline">\(\beta\)</span>.</p>
+<p>However, our linear mixed model effects will add a new term, <span class="math inline">\(Z\eta\)</span>, where <span class="math inline">\(Z\)</span> corresponds to random effects with coefficients <span class="math inline">\(\eta\)</span>. Thus, our model now takes the form <span class="math display">\[y = X\beta + Z\eta + \epsilon\]</span> Our goal will be to infer both <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\eta\)</span>.</p>
+<p>This obviously brings about the question on what is the difference between fixed variables <span class="math inline">\(X\)</span> and random variables <span class="math inline">\(Z\)</span>. A fixed variable has a fixed set of categories, while random variables don’t. This is better illustrated below with our example.</p>
+<p>Our ’fixed’ effect for this dataset is <code>service</code>, which is a binary variable corresponding to whether the lecture belongs to the lecturer’s main department or not. No matter how much additional data we use, it can only take on the values of <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>.</p>
+<p>On the other hand, our ’random’ effects are the categories of <code>students</code>, <code>teachers</code>, and <code>departments</code>. Given more data, we might be looking at new students, teachers, or departments. For example, we are not required to use the Statistics Department ratings in our model. But, we have the flexibility to do so.</p>
+<p>Note that all random variables are Normal distributions centered around the origin. This means our mean is captured by <span class="math inline">\(X\beta\)</span>, while <span class="math inline">\(Z\eta\)</span> encapsulates the deviation (e.g. Instructor #54 is rated 1.4 points higher than the mean).</p>
+<p>Therefore, given the variables corresponding to <code>students</code>, <code>teachers</code>, <code>departments</code>, and <code>service</code>, we want to predict the rating given for the lecturer. Once we make te mixed effects’ distinction, we can summarize our model as</p>
+<p><span class="math display">\[y \sim 1 + (1|students) + (1|instructor) + service + (1|dept)\]</span> where <span class="math inline">\((1|x)\)</span> denotes that x is a random effect, not fixed. This syntax is taken from R’s ’lme4’ package.</p>
+<p>For the code below, we denote:</p>
+<ul>
+<li><code>students</code><span class="math inline">\( as \)</span><code>s</code></li>
+<li><code>instructors</code><span class="math inline">\( as \)</span><code>d</code></li>
+<li><code>departments</code><span class="math inline">\( as \)</span><code>dept</code></li>
+<li><code>service</code><span class="math inline">\( as \)</span><code>service</code></li>
+</ul>
+<pre class="python" language="Python"><code>service_X = tf.placeholder(tf.float32, [n_obs, 1])
+
+lnvar_s = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+lnvar_d = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+lnvar_dept = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+sigma_s = tf.sqrt(tf.exp(lnvar_s))
+sigma_d = tf.sqrt(tf.exp(lnvar_d))
+sigma_dept = tf.sqrt(tf.exp(lnvar_dept))
+
+mu = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+service = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+eta_s = Normal(mu=tf.zeros(n_s), sigma=sigma_s * tf.ones(n_s))
+eta_d = Normal(mu=tf.zeros(n_d), sigma=sigma_d * tf.ones(n_d))
+eta_dept = Normal(mu=tf.zeros(n_dept), sigma=sigma_dept * tf.ones(n_dept))
+
+yhat = tf.gather(eta_s, s_train) + \
+    tf.gather(eta_d, d_train) + \
+    tf.gather(eta_dept, dept_train) + \
+    mu + ed.dot(service_X, service)
+y = Normal(mu=yhat, sigma=tf.ones(n_obs))</code></pre>
+<h3 id="inference">Inference</h3>
+<p>We’ll use an inference method to estimate the effects of each category. For this example, we minimize the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure.</p>
+<pre class="python" language="Python"><code>inference = ed.KLqp(params_dict, data_dict)
+inference.initialize(n_print=5, n_iter=50)
+
+init = tf.global_variables_initializer()
+init.run()</code></pre>
+<h3 id="criticism">Criticism</h3>
+<p>One way to visually critique our model is to plot the residual, i.e. the difference between the predicted value and the observed value.</p>
+<pre class="python" language="Python"><code>plt.title("Residuals for Prediced Ratings on Test Set")
+plt.xlim(-4, 4)
+plt.ylim(0, 800)
+plt.hist(yhat_vals - y_test, 75)
+plt.show()</code></pre>
+<p><img alt="image" src="/images/linear-mixed-effects-models.png" width="450"/></p>
+<p>Here, we see that the residuals have Normal error with mean around 0.</p>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-gelman2006data">
+<p>Gelman, A., &amp; Hill, J. L. (2006). <em>Data analysis using regression and multilevel/hierarchical models</em>. Cambridge University Press.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
