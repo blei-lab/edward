@@ -1,0 +1,104 @@
+\title{Linear Mixed Effects Models}
+
+\subsection{Linear Mixed Effects Models}
+
+In linear mixed effects models, we wish to model a linear relation between categorical input variables and a continuous output variable. The data is not drawn independently. Oftentimes, we see clusters in subgroups.
+
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb}{here},
+or as a script available at
+\href{https://github.com/blei-lab/edward/blob/master/examples/linear_mixed_effects_models.py}
+{\texttt{examples/linear_mixed_effects_models.py}} in the Github repository.
+
+\subsubsection{Data}
+
+We use the \texttt{InstEval} dataset located \href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb}{here}. It's a dataset of instructor evaluation ratings where our inputs include categories such as \texttt{students} and \texttt{departments}, while our observed variable is the actual rating.
+
+\subsubsection{Model}
+
+The main reason we use a mixed model rather than regular linear regression is because we cannot make the independence assumption. Rather, our observations come from sets of groups which can different slopes and intercepts.
+
+For example:
+\begin{itemize}
+\item The observations from a single student are not independent of each other. Rather, some students may systematically give low (or high) lecture ratings.
+\item The observations of a single teachers are not independent from one another. We'd expect good teachers to get generally good ratings and bad teachers to get generally bad ratings.
+\item The observations of a department are not independent from one another. One department may generally have dry material and thus be rated lower than others.
+\end{itemize}
+
+Normal linear regression takes the form $$ y = X\beta + \epsilon $$ where $X$ corresponds to fixed effects with coefficients $\beta$.
+
+However, our linear mixed model effects will add a new term, $Z\eta$, where $Z$ corresponds to random effects with coefficients $\eta$. Thus, our model now takes the form $$ y = X\beta + Z\eta + \epsilon $$ Our goal will be to infer both $\beta$ and $\eta$.
+
+This obviously brings about the question on what is the difference between fixed variables $X$ and random variables $Z$. A fixed variable has a fixed set of categories, while random variables don't. This is better illustrated below with our example.
+
+Our 'fixed' effect for this dataset is \texttt{service}, which is a binary variable corresponding to whether the lecture belongs to the lecturer's main department or not. No matter how much additional data we use, it can only take on the values of $0$ and $1$.
+
+On the other hand, our 'random' effects are the categories of \texttt{students}, \texttt{teachers}, and \texttt{departments}. Given more data, we might be looking at new students, teachers, or departments. For example, we are not required to use the Statistics Department ratings in our model. But, we have the flexibility to do so.
+
+Note that all random variables are Normal distributions centered around the origin. This means our mean is captured by $X\beta$, while $Z\eta$ encapsulates the deviation (e.g. Instructor #54 is rated 1.4 points higher than the mean).
+
+Therefore, given the variables corresponding to \texttt{students}, \texttt{teachers}, \texttt{departments}, and \texttt{service}, we want to predict the rating given for the lecturer. Once we make te mixed effects' distinction, we can summarize our model as
+
+$$y \sim 1 + (1|students) + (1|instructor) + service + (1|dept)$$ where (1|x) denotes that x is a random effect, not fixed.
+
+For the code below, we denote:
+\begin{itemize}
+\item \texttt{students}$ as $\texttt{s}
+\item \texttt{instructors}$ as $\texttt{d}
+\item \texttt{departments}$ as $\texttt{dept}
+\item \texttt{service}$ as $\texttt{service}
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+service_X = tf.placeholder(tf.float32, [n_obs, 1])
+
+lnvar_s = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+lnvar_d = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+lnvar_dept = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+sigma_s = tf.sqrt(tf.exp(lnvar_s))
+sigma_d = tf.sqrt(tf.exp(lnvar_d))
+sigma_dept = tf.sqrt(tf.exp(lnvar_dept))
+
+mu = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+service = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+
+eta_s = Normal(mu=tf.zeros(n_s), sigma=sigma_s * tf.ones(n_s))
+eta_d = Normal(mu=tf.zeros(n_d), sigma=sigma_d * tf.ones(n_d))
+eta_dept = Normal(mu=tf.zeros(n_dept), sigma=sigma_dept * tf.ones(n_dept))
+
+yhat = tf.gather(eta_s, s_train) + \
+    tf.gather(eta_d, d_train) + \
+    tf.gather(eta_dept, dept_train) + \
+    mu + ed.dot(service_X, service)
+y = Normal(mu=yhat, sigma=tf.ones(n_obs))
+\end{lstlisting}
+
+\subsubsection{Inference}
+
+We'll use an inference method to estimate the effects of each category. For this example, we minimize the $\text{KL}(q\|p)$ divergence measure.
+
+\begin{lstlisting}[language=Python]
+inference = ed.KLqp(params_dict, data_dict)
+inference.initialize(n_print=5, n_iter=50)
+
+init = tf.global_variables_initializer()
+init.run()
+\end{lstlisting}
+
+\subsubsection{Criticism}
+
+One way to visually critique our model is to plot the residual, i.e. the difference between the predicted value and the observed value.
+
+\begin{lstlisting}[language=Python]
+plt.title("Residuals for Prediced Ratings on Test Set")
+plt.xlim(-4, 4)
+plt.ylim(0, 800)
+plt.hist(yhat_vals - y_test, 75)
+plt.show()
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/linear-mixed-effects-models.png}
+
+
