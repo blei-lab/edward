@@ -80,7 +80,7 @@ class RandomVariable(object):
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
             "Expected innermost shapes to be %s, got %s."
-          % (expected_shape, value_shape))
+            % (expected_shape, value_shape))
       else:
         self._value = t_value
     else:
