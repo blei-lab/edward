@@ -76,12 +76,21 @@ def sufficient_statistic(f, x):
 
 
 def identity(x):
-  # This function just registers x for conjugacy algebra.
-  return sufficient_statistic(tf.identity, x)
+  # This function registers x as a sufficient statistic.
+  # If x is a sum or product, its parents are registered instead.
+  return _wrap_leaves(x, {'Add': tf.add, 'Mul': tf.multiply},
+                      lambda y: sufficient_statistic(tf.identity, y))
 
 
 def log(x):
-  return sufficient_statistic(tf.log, x)
+  x_op = getattr(x, 'op', None)
+  if x_op is None or x_op.type != 'Mul':
+    return sufficient_statistic(tf.log, x)
+
+  # Rewrite log(x * y) as log(x) + log(y)
+  multiplicands = _unpack_mul(x_op)
+  log_multiplicands = [log(i) for i in multiplicands]
+  return tf.add_n(log_multiplicands)
 
 
 def square(x):
@@ -100,11 +109,53 @@ def log1m(x):
   return sufficient_statistic(_log1m, x)
 
 
+# TODO(mhoffman): Automate the process of adding these s.stat functions.
+def lgamma(x):
+  return sufficient_statistic(tf.lgamma, x)
+
+
 def _canonical_value(x):
   if isinstance(x, RandomVariable):
     return x.value()
   else:
     return x
+
+
+def _unpack_op(x_op, types_to_unpack):
+  results = []
+  for parent in x_op.inputs:
+    if parent.op.type in types_to_unpack:
+      results += _unpack_op(parent.op, types_to_unpack)
+    else:
+      results += [parent]
+  return results
+
+
+def _unpack_mul(x_op):
+  return _unpack_op(x_op, set(['Mul']))
+
+
+def _wrap_leaves(x, non_leaf_types, wrapper):
+  '''Walks up from x_op and wraps any nodes not in a whitelist with wrapper().
+
+  Args:
+    x: The Tensor whose parents we want to wrap up.
+    non_leaf_types: A dict mapping from names (e.g., "Add") to functions
+      (e.g., tf.add).
+    wrapper: The function to wrap leaf nodes with.
+  '''
+  x_op = getattr(x, 'op', None)
+  if x_op is None or x_op.type not in non_leaf_types:
+    return wrapper(x)
+  else:
+    inputs = []
+    for parent in x_op.inputs:
+      inputs.append(_wrap_leaves(parent, non_leaf_types, wrapper))
+    return non_leaf_types[x_op.type](*inputs)
+
+
+def _unpack_mul_add(x_op):
+  return _unpack_op(x_op, set(['Mul', 'Add']))
 
 
 def beta_log_prob(self):
@@ -130,7 +181,7 @@ def gamma_log_prob(self):
   alpha = _canonical_value(self.parameters['alpha'])
   beta = _canonical_value(self.parameters['beta'])
   result = (identity(alpha) - 1) * log(val) - identity(beta) * identity(val)
-  result += -tf.lgamma(alpha) + identity(alpha) * log(beta)
+  result += -lgamma(alpha) + identity(alpha) * log(beta)
   return result
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 
