@@ -65,6 +65,7 @@ def neural_network_slim(X, weight_decay=0.005):
       logits = slim.fully_connected(hidden, K, activation_fn=None)
   return mus, sigmas, logits
 
+
 def get_weights(shape, weight_decay):
     W = tf.get_variable('w', shape=shape, dtype=tf.float32,
                         initializer=tf.contrib.layers.xavier_initializer(),
@@ -78,6 +79,7 @@ def get_biases(shape, weight_decay):
                         regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
                         trainable=True)
     return b
+
 
 def neural_network_verbose(X, weight_decay=0.005):
     with tf.variable_scope('fc1') as scope:
