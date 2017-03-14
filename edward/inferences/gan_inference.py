@@ -194,13 +194,8 @@ class GANInference(VariationalInference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        loss = info_dict['loss']
-        loss_d = info_dict['loss_d']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Gen Loss = {0:.3f}'.format(loss)
-        string += ': Disc Loss = {0:.3f}'.format(loss_d)
-        print(string)
+        self.progbar.update(t, {'Gen Loss': info_dict['loss'],
+                                'Disc Loss': info_dict['loss_d']})
 
 
 def _build_optimizer(optimizer, global_step):
