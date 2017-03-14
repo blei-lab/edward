@@ -12,17 +12,21 @@ from edward.models import Normal, PointMass
 class test_map_loss_class(tf.test.TestCase):
 
   def test_normal_loss_run(self):
-    with self.test_session() as sess:
-      x_data = np.array([0.0] * 50, dtype=np.float32)
-      print('Without regularization\n-------------------')
-      mu = Normal(mu=0.0, sigma=1.0)
+    def run_test(mu, x_data):
+      mu = Normal(mu=mu, sigma=1.0)
       x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
       qmu = PointMass(params=tf.Variable(tf.ones([])))
 
       # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
       inference = ed.MAP({mu: qmu}, data={x: x_data})
       inference.run(n_iter=1000)
-      qmu_no_reg = qmu.eval()
+      qmu = qmu.eval()
+      return qmu
+
+    with self.test_session() as sess:
+      x_data = np.array([0.0] * 50, dtype=np.float32)
+      print('Without regularization\n-------------------')
+      qmu_no_reg = run_test(mu=0.0, x_data=x_data)
 
       # Add regularization on mu
       print('\nWith regularization\n-------------------')
@@ -31,12 +35,7 @@ class test_map_loss_class(tf.test.TestCase):
                           initializer=tf.random_normal_initializer(mean=0.0, stddev=1.0),
                           regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
                           trainable=True)
-      mu = Normal(mu=mu, sigma=1.0)
-      x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
-      qmu = PointMass(params=tf.Variable(tf.ones([])))
-      inference = ed.MAP({mu: qmu}, data={x: x_data})
-      inference.run(n_iter=1000)
-      qmu_reg = qmu.eval()
+      qmu_reg = run_test(mu=mu, x_data=x_data)
 
       self.assertAllClose(qmu_no_reg, qmu_reg)
 
