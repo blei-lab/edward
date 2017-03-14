@@ -32,10 +32,8 @@ class test_map_loss_class(tf.test.TestCase):
       print('\nWith regularization\n-------------------')
       weight_decay = 0.005
       mu = tf.get_variable('mu', shape=(), dtype=tf.float32,
-                           initializer=
-                           tf.random_normal_initializer(mean=0.0, stddev=1.0),
-                           regularizer=
-                           tf.contrib.layers.l2_regularizer(weight_decay),
+                           initializer=tf.random_normal_initializer(mean=0.0, stddev=1.0),
+                           regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
                            trainable=True)
       qmu_reg = run_test(mu=mu, x_data=x_data)
 
