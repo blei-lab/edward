@@ -126,20 +126,21 @@ plt.title(&quot;Simulated data set&quot;)
 plt.show()</code></pre>
 <p><img src="/images/probabilistic-pca-fig0.png" alt="image" width="450" /></p>
 <h3 id="model">Model</h3>
-<p>Consider a set of <span class="math inline">\(N\)</span> data points, <span class="math inline">\(X = \{\mathbf{x}_n\}\)</span>, where each data point is <span class="math inline">\(d\)</span>-dimensional, <span class="math inline">\(\mathbf{x}_n \in \mathbb{R}^D\)</span>.</p>
-<p>While our data operates in <span class="math inline">\(D\)</span> dimensions, we will use latent variables <span class="math inline">\(\mathbf{z}_n \in \mathbb{R}^K\)</span> for each data point <span class="math inline">\(\mathbf{x}_n\)</span> with lower dimension, <span class="math inline">\(K &lt; D\)</span>. The set of principal axes <span class="math inline">\(\mathbf{W}\)</span> relates our latent variables to our actual data.</p>
-<p>Specifically, we have that <span class="math display">\[\mathbf{z} \sim N(0, \mathbf{I}),\]</span> and that <span class="math display">\[\mathbf{x} \mid \mathbf{z} \sim N(\mathbf{Wz} + \mu, \sigma^2\mathbf{I}),\]</span> where <span class="math inline">\(\mathbf{\epsilon} \sim N(0, \sigma^2\mathbf{I})\)</span>.</p>
-<p>Because of the dependence on <span class="math inline">\(\mathbf{Wz}\)</span>, we don’t want to solely want to infer the original principal axes (as would be done in the vanilla PCA model). Rather, we aim to model the principal axes with respect to the latent variables.</p>
-<p>For our marginal distribution, we get that <span class="math display">\[x \sim N(0, \mathbf{W}\mathbf{W}^Y + \sigma^2\mathbf{I}).\]</span></p>
-<p>Note here that regular PCA is simply the specific case of Probabilistic PCA, as <span class="math inline">\(\sigma^2 \to 0\)</span>.</p>
-<p>We set up our model below, forming creating a prior distribution over our variables of interest.</p>
+<p>Consider a data set <span class="math inline">\(\mathbf{X} = \{\mathbf{x}_n\}\)</span> of <span class="math inline">\(N\)</span> data points, where each data point is <span class="math inline">\(D\)</span>-dimensional, <span class="math inline">\(\mathbf{x}_n \in
+\mathbb{R}^D\)</span>. We aim to represent each <span class="math inline">\(\mathbf{x}_n\)</span> under a latent variable <span class="math inline">\(\mathbf{z}_n \in \mathbb{R}^K\)</span> with lower dimension, <span class="math inline">\(K &lt;
+D\)</span>. The set of principal axes <span class="math inline">\(\mathbf{W}\)</span> relates the latent variables to the data.</p>
+<p>Specifically, we assume that each latent variable is normally distributed, <span class="math display">\[\mathbf{z}_n \sim N(\mathbf{0}, \mathbf{I}).\]</span> The corresponding data point is generated via a projection, <span class="math display">\[\mathbf{x}_n \mid \mathbf{z}_n
+\sim N(\mathbf{W}\mathbf{z}_n, \sigma^2\mathbf{I}),\]</span> where the matrix <span class="math inline">\(\mathbf{W}\in\mathbb{R}^{D\times K}\)</span> are known as the principal axes. In probabilistic PCA, we are typically interested in estimating the principal axes <span class="math inline">\(\mathbf{W}\)</span> and the noise term <span class="math inline">\(\sigma^2\)</span>.</p>
+<p>Probabilistic PCA generalizes classical PCA. Marginalizing out the the latent variable, the distribution of each data point is <span class="math display">\[\mathbf{x}_n \sim N(\mathbf{0}, \mathbf{W}\mathbf{W}^Y + \sigma^2\mathbf{I}).\]</span> Classical PCA is the specific case of probabilistic PCA when the covariance of the noise becomes infinitesimally small, <span class="math inline">\(\sigma^2 \to
+0\)</span>.</p>
+<p>We set up our model below. In our analysis, we fix <span class="math inline">\(\sigma=2.0\)</span>, and instead of point estimating <span class="math inline">\(\mathbf{W}\)</span> as a model parameter, we place a prior over it in order to infer a distribution over principal axes.</p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
 w = Normal(mu=tf.zeros([D, K]), sigma=2.0 * tf.ones([D, K]))
 z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
 x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))</code></pre>
 <h3 id="inference">Inference</h3>
-<p>Since the principal axes <span class="math inline">\(\mathbf{W}\)</span> cannot be analytically determined, we must use some inference method. Below, we set up our inference variables and then run a chosen algorithm. For this example, we minimize the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure.</p>
+<p>The posterior distribution over the principal axes <span class="math inline">\(\mathbf{W}\)</span> cannot be analytically determined. Below, we set up our inference variables and then run a chosen algorithm to infer <span class="math inline">\(\mathbf{W}\)</span>. Below we use variational inference to minimize the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure.</p>
 <pre class="python" language="Python"><code>qw = Normal(mu=tf.Variable(tf.random_normal([D, K])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, K]))))
 qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
@@ -148,7 +149,7 @@ qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 inference.run(n_iter=500, n_print=100, n_samples=10)</code></pre>
 <h3 id="criticism">Criticism</h3>
-<p>We first inspect the model’s inferred principal axes.</p>
+<p>To check our inferences, we first inspect the model’s learned principal axes.</p>
 <pre class="python" language="Python"><code>sess = ed.get_session()
 print(&quot;Inferred principal axes:&quot;)
 print(sess.run(qw.mean()))</code></pre>
