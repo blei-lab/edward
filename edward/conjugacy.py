@@ -7,21 +7,22 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models.random_variable import RandomVariable
-from edward.models import random_variables as rv
+from edward.models import random_variables as rvs
 
 
 # TODO(mhoffman): _suff_stat_registry should probably be a tf collection
 _suff_stat_registry = {}
-_conj_log_prob_registry = {}
 _suff_stat_to_dist = {}
 
 # TODO(mhoffman): Support (discrete/continuous mostly) also matters.
-_suff_stat_to_dist['_log1m|log'] = lambda p1, p2: rv.Beta(p2+1, p1+1)
+_suff_stat_to_dist['_log1m|log'] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 
 def complete_conditional(rv, blanket):
   log_joint = 0
   for b in blanket:
-    log_joint += tf.reduce_sum(_conj_log_prob_registry[type(b)](b))
+    if getattr(b, "conjugate_log_prob", None) is None:
+      raise NotImplementedError("conjugate_log_prob not implemented for {}".format(type(b)))
+    log_joint += tf.reduce_sum(b.conjugate_log_prob())
 
   s_stats = []
   for i, j in _suff_stat_registry.iteritems():
@@ -98,23 +99,23 @@ def _canonical_value(x):
     return x
 
 
-def beta_log_prob(x):
-  val = x.value()
-  a = _canonical_value(x.parameters['a'])
-  b = _canonical_value(x.parameters['b'])
+def beta_log_prob(self):
+  val = self.value()
+  a = _canonical_value(self.parameters['a'])
+  b = _canonical_value(self.parameters['b'])
   result = (a - 1) * log(val) + (b - 1) * log1m(val)
   result += -tf.lgamma(a) - tf.lgamma(b) + tf.lgamma(a + b)
   return result
-_conj_log_prob_registry[rv.Beta] = beta_log_prob
+rvs.Beta.conjugate_log_prob = beta_log_prob
+print(rvs.Beta.conjugate_log_prob)
 
 
-def bernoulli_log_prob(x):
-  val = x.value()
-  p = _canonical_value(x.parameters['p'])
+def bernoulli_log_prob(self):
+  val = self.value()
+  p = _canonical_value(self.parameters['p'])
   return (tf.cast(val, np.float32) * log(p)
           + (1 - tf.cast(val, np.float32)) * log1m(p))
-_conj_log_prob_registry[rv.Bernoulli] = bernoulli_log_prob
-
+rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
 
 
 #### CRUFT
