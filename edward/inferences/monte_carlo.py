@@ -136,11 +136,7 @@ class MonteCarlo(Inference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        accept_rate = info_dict['accept_rate']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Acceptance Rate = {0:.2f}'.format(accept_rate)
-        print(string)
+        self.progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
 
   def build_update(self):
     """Build update, which returns an assign op for parameters in

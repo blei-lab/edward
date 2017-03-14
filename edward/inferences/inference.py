@@ -7,7 +7,7 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import get_session
+from edward.util import get_session, Progbar
 
 
 class Inference(object):
@@ -249,6 +249,7 @@ class Inference(object):
     else:
       self.n_print = n_print
 
+    self.progbar = Progbar(self.n_iter)
     self.t = tf.Variable(0, trainable=False)
     self.increment_t = self.t.assign_add(1)
 
@@ -315,9 +316,7 @@ class Inference(object):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        print(string)
+        self.progbar.update(t)
 
   def finalize(self):
     """Function to call after convergence.

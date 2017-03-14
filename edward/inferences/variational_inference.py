@@ -148,11 +148,7 @@ class VariationalInference(Inference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        loss = info_dict['loss']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Loss = {0:.3f}'.format(loss)
-        print(string)
+        self.progbar.update(t, {'Loss': info_dict['loss']})
 
   def build_loss_and_gradients(self, var_list):
     """Build loss function.
