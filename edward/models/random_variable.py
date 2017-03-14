@@ -76,10 +76,11 @@ class RandomVariable(object):
       expected_shape = (self.get_batch_shape().as_list() +
                         self.get_event_shape().as_list())
       value_shape = t_value.get_shape().as_list()
-      if value_shape[:len(expected_shape)] != expected_shape:
+      if value_shape[-len(expected_shape):] != expected_shape:
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
-            "Expected %s, got %s." % (expected_shape, value_shape))
+            "Expected innermost shapes to be %s, got %s."
+          % (expected_shape, value_shape))
       else:
         self._value = t_value
     else:
