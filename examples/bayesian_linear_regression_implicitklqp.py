@@ -111,6 +111,6 @@ for _ in range(inference.n_iter):
   if t == 1 or t % inference.n_print == 0:
     # Check inferred posterior parameters.
     mean, std = sess.run([qw.mean(), qw.std()])
-    print("Inferred mean & std")
+    print("\nInferred mean & std:")
     print(mean)
     print(std)

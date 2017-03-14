@@ -15,8 +15,8 @@ import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
+from edward.util import Progbar
 from keras.layers import Dense
-from progressbar import ETA, Bar, Percentage, ProgressBar
 from scipy.misc import imsave
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -65,10 +65,8 @@ n_iter_per_epoch = 1000
 for epoch in range(n_epoch):
   avg_loss = 0.0
 
-  widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-  pbar = ProgressBar(n_iter_per_epoch, widgets=widgets)
-  pbar.start()
-  for t in range(n_iter_per_epoch):
+  pbar = Progbar(n_iter_per_epoch)
+  for t in range(1, n_iter_per_epoch + 1):
     pbar.update(t)
     x_train, _ = mnist.train.next_batch(M)
     info_dict = inference.update(feed_dict={x_ph: x_train})

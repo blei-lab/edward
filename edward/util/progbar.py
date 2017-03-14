@@ -38,8 +38,8 @@ class Progbar(object):
 
   def update(self, current, values=None, force=False):
     """Update progress bar, and print to standard output if ``force``
-    is True, or the last update was completed for longer than
-    ``interval`` amount of time.
+    is True, or the last update was completed longer than ``interval``
+    amount of time ago, or ``current`` >= ``target``.
 
     The written output is the progress bar and all unique values.
 
@@ -63,7 +63,8 @@ class Progbar(object):
 
     now = time.time()
     if self.verbose == 1:
-      if not force and (now - self.last_update) < self.interval:
+      if not force and (now - self.last_update) < self.interval and \
+          current < self.target:
         return
 
       prev_total_width = self.total_width

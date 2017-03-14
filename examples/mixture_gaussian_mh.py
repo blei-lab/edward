@@ -74,16 +74,17 @@ inference = ed.MetropolisHastings(
 inference.initialize()
 
 sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
-for _ in range(T):
+for _ in range(inference.n_iter):
   info_dict = inference.update()
+  inference.print_progress(info_dict)
+
   t = info_dict['t']
   if t == 1 or t % inference.n_print == 0:
-    accept_rate = info_dict['accept_rate']
-    print("iter {:d} accept rate {:.2f}".format(t, accept_rate))
+    qpi_mean, qmu_mean = sess.run([qpi.mean(), qmu.mean()])
+    print("")
     print("Inferred membership probabilities:")
-    print(sess.run(qpi.mean()))
+    print(qpi_mean)
     print("Inferred cluster means:")
-    print(sess.run(qmu.mean()))
+    print(qmu_mean)
