@@ -48,11 +48,11 @@ n_obs = train.shape[0]  # number of observations
 
 \subsubsection{Model}
 
-With linear regression, one makes an independence assumption among data
-points, where each data point regresses with a constant slope among
-each other. In our setting, the observations come from sets of
-groups which may have varying slopes and intercepts. Thus we'd like to
-build a model that can capture this behavior \citep{gelman2006data}.
+With linear regression, one makes an independence assumption where
+each data point regresses with a constant slope among each other. In
+our setting, the observations come from sets of groups which may have
+varying slopes and intercepts. Thus we'd like to build a model that
+can capture this behavior \citep{gelman2006data}.
 
 For examples of this phenomena:
 \begin{itemize}
@@ -84,7 +84,7 @@ with coefficients $\eta$. The model takes the form
 \end{align*}
 Given data, the goal is to infer $\beta$, $\eta$, and $\sigma^2$,
 where $\beta$ are model parameters (``fixed effects''), $\eta$ are
-latent variables (``random effects''), and $\sigma^2$ is variance
+latent variables (``random effects''), and $\sigma^2$ is a variance
 component parameter.
 
 Because the random effects have mean 0, the data's mean is captured by

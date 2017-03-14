@@ -21,18 +21,6 @@ class RandomVariable(object):
   graph, allowing random variables to be used in conjunction with
   other TensorFlow ops.
 
-  Examples
-  --------
-  >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p=p)
-  >>>
-  >>> z1 = tf.constant([[2.0, 8.0]])
-  >>> z2 = tf.constant([[1.0, 2.0]])
-  >>> x = Bernoulli(p=tf.matmul(z1, z2))
-  >>>
-  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
-
   Notes
   -----
   ``RandomVariable`` assumes use in a multiple inheritance setting. The
@@ -54,6 +42,18 @@ class RandomVariable(object):
   Methods from both ``RandomVariable`` and ``distributions.Bernoulli``
   populate the namespace of the child class. Methods from
   ``RandomVariable`` will take higher priority if there are conflicts.
+
+  Examples
+  --------
+  >>> p = tf.constant(0.5)
+  >>> x = Bernoulli(p=p)
+  >>>
+  >>> z1 = tf.constant([[2.0, 8.0]])
+  >>> z2 = tf.constant([[1.0, 2.0]])
+  >>> x = Bernoulli(p=tf.matmul(z1, z2))
+  >>>
+  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
   """
   def __init__(self, *args, **kwargs):
     # storing args, kwargs for easy graph copying
