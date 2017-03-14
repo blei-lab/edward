@@ -16,6 +16,7 @@ _suff_stat_to_dist = {}
 
 # TODO(mhoffman): Support (discrete/continuous mostly) also matters.
 _suff_stat_to_dist[('_log1m', 'log')] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
+_suff_stat_to_dist[('identity', 'log')] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
 
 def complete_conditional(rv, blanket):
   log_joint = 0
@@ -32,11 +33,11 @@ def complete_conditional(rv, blanket):
   order = np.argsort(s_stat_names)
   s_stat_names = tuple(s_stat_names[i] for i in order)
   s_stat_nodes = [s_stats[i][1] for i in order]
-  print(s_stat_names)
-  print(_suff_stat_to_dist.keys())
 
-#   s_stat_names = '|'.join(s_stat_names)
-  # TODO(mhoffman): Make a nicer exception.
+  if s_stat_names not in _suff_stat_to_dist:
+    raise NotImplementedError(
+      "No available exponential-family distribution with sufficient statistics "
+      + ', '.join(s_stat_names))
   assert(s_stat_names in _suff_stat_to_dist)
 
   n_params = tf.gradients(log_joint, s_stat_nodes)
@@ -74,6 +75,11 @@ def sufficient_statistic(f, x):
     return result
 
 
+def identity(x):
+  # This function just registers x for conjugacy algebra.
+  return sufficient_statistic(tf.identity, x)
+
+
 def log(x):
   return sufficient_statistic(tf.log, x)
 
@@ -109,7 +115,6 @@ def beta_log_prob(self):
   result += -tf.lgamma(a) - tf.lgamma(b) + tf.lgamma(a + b)
   return result
 rvs.Beta.conjugate_log_prob = beta_log_prob
-print(rvs.Beta.conjugate_log_prob)
 
 
 def bernoulli_log_prob(self):
@@ -118,6 +123,25 @@ def bernoulli_log_prob(self):
   return (tf.cast(val, np.float32) * log(p)
           + (1 - tf.cast(val, np.float32)) * log1m(p))
 rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
+
+
+def gamma_log_prob(self):
+  val = self.value()
+  alpha = _canonical_value(self.parameters['alpha'])
+  beta = _canonical_value(self.parameters['beta'])
+  result = (identity(alpha) - 1) * log(val) - identity(beta) * identity(val)
+  result += -tf.lgamma(alpha) + identity(alpha) * log(beta)
+  return result
+rvs.Gamma.conjugate_log_prob = gamma_log_prob
+
+
+def poisson_log_prob(self):
+  val = self.value()
+  lam = _canonical_value(self.parameters['lam'])
+  result = identity(tf.cast(val, np.float32)) * log(lam)
+  result += - identity(lam) - tf.lgamma(val+1)
+  return result
+rvs.Poisson.conjugate_log_prob = poisson_log_prob
 
 
 #### CRUFT
