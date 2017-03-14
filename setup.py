@@ -17,7 +17,7 @@ setup(
     extras_require={'tensorflow': ['tensorflow>=1.0.0a0'],
                     'tensorflow with gpu': ['tensorflow-gpu>=1.0.0a0'],
                     'neural networks': ['keras>=1.0.0', 'prettytensor>=0.7.4'],
-                    'visualization': ['progressbar>=2.0', 'pillow>=3.4.2']},
+                    'visualization': ['pillow>=3.4.2']},
     tests_require=['pytest', 'pytest-pep8'],
     url='http://edwardlib.org',
     license='Apache License 2.0',
