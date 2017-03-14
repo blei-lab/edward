@@ -15,7 +15,7 @@ _suff_stat_registry = {}
 _suff_stat_to_dist = {}
 
 # TODO(mhoffman): Support (discrete/continuous mostly) also matters.
-_suff_stat_to_dist['_log1m|log'] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
+_suff_stat_to_dist[('_log1m', 'log')] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 
 def complete_conditional(rv, blanket):
   log_joint = 0
@@ -30,10 +30,12 @@ def complete_conditional(rv, blanket):
       s_stats.append((i[1], j))
   s_stat_names = [i[0] for i in s_stats]
   order = np.argsort(s_stat_names)
-  s_stat_names = [s_stat_names[i] for i in order]
+  s_stat_names = tuple(s_stat_names[i] for i in order)
   s_stat_nodes = [s_stats[i][1] for i in order]
+  print(s_stat_names)
+  print(_suff_stat_to_dist.keys())
 
-  s_stat_names = '|'.join(s_stat_names)
+#   s_stat_names = '|'.join(s_stat_names)
   # TODO(mhoffman): Make a nicer exception.
   assert(s_stat_names in _suff_stat_to_dist)
 
