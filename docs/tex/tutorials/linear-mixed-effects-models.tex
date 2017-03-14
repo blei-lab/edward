@@ -4,7 +4,7 @@
 
 With linear mixed effects models, we wish to model a linear
 relationship for data points with inputs of varying type, categorized
-into subgroups, and associated to a continuous output.
+into subgroups, and associated to a real-valued output.
 
 We demonstrate with an example in Edward.
 An interactive version with Jupyter notebook is available
@@ -49,11 +49,12 @@ n_obs = train.shape[0]  # number of observations
 \subsubsection{Model}
 
 With linear regression, one makes an independence assumption among data
-points. In our setting, the observations come from sets of
+points, where each data point regresses with a constant slope among
+each other. In our setting, the observations come from sets of
 groups which may have varying slopes and intercepts. Thus we'd like to
 build a model that can capture this behavior \citep{gelman2006data}.
 
-For example:
+For examples of this phenomena:
 \begin{itemize}
 \item The observations from a single student are not independent of
 each other. Rather, some students may systematically give low (or
@@ -81,14 +82,15 @@ with coefficients $\eta$. The model takes the form
 \eta &\sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I}), \\
 \mathbf{y} &= \mathbf{X}\beta + \mathbf{Z}\eta + \epsilon.
 \end{align*}
-Our goal is to infer $\beta$, $\eta$, and $\sigma^2$, where $\beta$
-are model parameters (``fixed effects''), $\eta$ are latent
-variables (``random effects''), and $\sigma^2$ is variance component
-parameter.
+Given data, the goal is to infer $\beta$, $\eta$, and $\sigma^2$,
+where $\beta$ are model parameters (``fixed effects''), $\eta$ are
+latent variables (``random effects''), and $\sigma^2$ is variance
+component parameter.
 
 Because the random effects have mean 0, the data's mean is captured by
-$\mathbf{X}\beta$, and $\mathbf{Z}\eta$ captures variation (e.g.
-Instructor \#54 is rated 1.4 points higher than the mean).
+$\mathbf{X}\beta$. The random effects component $\mathbf{Z}\eta$
+captures variations in the data (e.g.  Instructor \#54 is rated 1.4
+points higher than the mean).
 
 A natural question is the difference between fixed and random effects.
 A fixed effect is an effect that is constant for a given population. A
@@ -98,27 +100,25 @@ population). We illustrate below in our example:
 
 \begin{itemize}
 \item
-Let the fixed effects be for \texttt{service}, which is a binary
-covariate corresponding to whether the lecture belongs to the
-lecturer's main department or not. No matter how much additional data
-we collect, it can only take on the values in $0$ and $1$.
+Select \texttt{service} as the fixed effect. It is a binary covariate
+corresponding to whether the lecture belongs to the lecturer's main
+department or not. No matter how much additional data we collect, it
+can only take on the values in $0$ and $1$.
 \item
-Let the random effects be for the categorical values of
-\texttt{students}, \texttt{teachers}, and \texttt{departments}. Given
-more data, we may be looking at new students, teachers, or
-departments.
+Selct the categorical values of \texttt{students}, \texttt{teachers},
+and \texttt{departments} as the random effects. Given more
+observations from the population of instructor evaluation ratings, we
+may be looking at new students, teachers, or departments.
 \end{itemize}
 
-In summary, given covariates \texttt{students}, \texttt{teachers},
-\texttt{departments}, and \texttt{service}, we aim to analyze the
-instructor's evaluation ratings. In the syntax of R's lme4 package
-\citep{bates2015fitting}, this can be written as
+In the syntax of R's lme4 package \citep{bates2015fitting}, the model
+can be summarized as
 
 \begin{lstlisting}[language=JSON]
 y ~ 1 + (1|students) + (1|instructor) + (1|dept) + service
 \end{lstlisting}
-where \texttt{(1|x)} denotes that \texttt{x} is a random effect and not
-fixed.
+where \texttt{1} denotes an intercept term, \texttt{(1|x)} denotes a
+random effect for  \texttt{x}, and \texttt{x} denotes a fixed effect.
 
 \begin{lstlisting}[language=Python]
 # Set up placeholders for the data inputs.
@@ -149,14 +149,12 @@ y = Normal(mu=yhat, sigma=tf.ones(n_obs))
 
 \subsubsection{Inference}
 
-Given data, we aim to infer the random effects of each category as
-well as estimates of the model's fixed effects.
-
+Given data, we aim to infer the model's fixed and random effects.
 In this analysis, we use variational inference with the
 $\text{KL}(q\|p)$ divergence measure. We specify fully factorized
 normal approximations for the random effects and pass in all training
 data for inference. Under the algorithm, the fixed effects will be
-optimized in a variational EM scheme.
+estimated under a variational EM scheme.
 
 \begin{lstlisting}[language=Python]
 q_eta_s = Normal(
@@ -182,7 +180,7 @@ data = {
 inference = ed.KLqp(latent_vars, data)
 \end{lstlisting}
 
-One way to critique our inferred model is a residual plot, i.e., a
+One way to critique the fitted model is a residual plot, i.e., a
 plot of the difference between the predicted value and the observed
 value for each data point. Below we manually run inference,
 initializing the algorithm and performing individual updates within a
