@@ -1,4 +1,4 @@
-"""Format Sphinx code blocks as Python."""
+"""Format Sphinx code blocks as Python; remove '>>>' text."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -19,6 +19,8 @@ for filename in filenames:
     snippet["class"] = "python"
     snippet["language"] = "Python"
     raw_snippet = snippet.get_text()
+    raw_snippet = re.sub('>>> ', '', raw_snippet)
+    raw_snippet = re.sub('>>>', '', raw_snippet)
     tag_snippet = soup.new_tag("code")
     tag_snippet.string = raw_snippet
     snippet.find_all("div", class_="highlight")[0].replace_with(tag_snippet)
