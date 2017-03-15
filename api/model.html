@@ -188,12 +188,9 @@ order, this implies the following during initialization (using
 <li>This in turn passes all <code class="docutils literal"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code> to
 <code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>, completing the <code class="docutils literal"><span class="pre">__init__()</span></code> of
 <code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</li>
-<li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of <code class="docutils literal"><span class="pre">RandomVariable</span></code>, which calls</li>
-</ol>
-<blockquote>
-<div><code class="docutils literal"><span class="pre">self.sample()</span></code>, relying on the method from
-<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</div></blockquote>
-<ol class="arabic simple" start="4">
+<li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of <code class="docutils literal"><span class="pre">RandomVariable</span></code>, which calls
+<code class="docutils literal"><span class="pre">self.sample()</span></code>, relying on the method from
+<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</li>
 <li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of the child class.</li>
 </ol>
 <p>Methods from both <code class="docutils literal"><span class="pre">RandomVariable</span></code> and <code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>

@@ -204,15 +204,15 @@ posterior predictive distribution.</p>
 <p class="rubric">Examples</p>
 <pre class="python" language="Python"><code># build posterior predictive after inference: it is
 # parameterized by a posterior sample
-x_post = copy(x, {z: qz, beta: qbeta})
+x_post = ed.copy(x, {z: qz, beta: qbeta})
 
 # log-likelihood performance
-evaluate('log_likelihood', data={x_post: x_train})
+ed.evaluate('log_likelihood', data={x_post: x_train})
 
 # classification accuracy
 # here, ``x_ph`` is any features the model is defined with respect to,
 # and ``y_post`` is the posterior predictive distribution
-evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
 
 # mean squared error
 ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
@@ -229,10 +229,10 @@ ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
 predictive check (Box, 1980).</p>
 <p>PPC’s form an empirical distribution for the predictive discrepancy,</p>
 <div class="math">
-\[p(T) = \int p(T(x^{rep}) | z) p(z | x) dz\]</div>
-<p>by drawing replicated data sets xrep and calculating
-<span class="math">\(T(x^{rep})\)</span> for each data set. Then it compares it to
-<span class="math">\(T(x)\)</span>.</p>
+\[p(T\mid x) = \int p(T(x^{\text{rep}})\mid z) p(z\mid x) dz\]</div>
+<p>by drawing replicated data sets <span class="math">\(x^{\text{rep}}\)</span> and
+calculating <span class="math">\(T(x^{\text{rep}})\)</span> for each data set. Then it
+compares it to <span class="math">\(T(x)\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -266,35 +266,36 @@ is used when the discrepancy is a function of latent variables.</p>
 <div><p>List containing the reference distribution, which is a NumPy
 array of size elements,</p>
 <div class="math">
-\[(T(x^{rep,1}, z^{1}), ..., T(x^{rep,size}, z^{size}))\]</div>
+\[(T(x^{{\text{rep}},1}, z^{1}), ...,
+ T(x^{\text{rep,size}}, z^{\text{size}}))\]</div>
 <p>and the realized discrepancy, which is a NumPy array of size
 elements,</p>
 <div class="math">
-\[(T(x, z^{1}), ..., T(x, z^{size})).\]</div>
+\[(T(x, z^{1}), ..., T(x, z^{\text{size}})).\]</div>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code># build posterior predictive after inference: it is
-# parameterized by a posterior sample
-x_post = copy(x, {z: qz, beta: qbeta})
+<pre class="python" language="Python"><code># build posterior predictive after inference:
+# it is parameterized by a posterior sample
+x_post = ed.copy(x, {z: qz, beta: qbeta})
 
 # posterior predictive check
 # T is a user-defined function of data, T(data)
 T = lambda xs, zs: tf.reduce_mean(xs[x_post])
-ppc(T, data={x_post: x_train})
+ed.ppc(T, data={x_post: x_train})
 
 # in general T is a discrepancy function of the data (both response and
 # covariates) and latent variables, T(data, latent_vars)
 T = lambda xs, zs: tf.reduce_mean(zs[z])
-ppc(T, data={y_post: y_train, x_ph: x_train},
-...     latent_vars={z: qz, beta: qbeta})
+ed.ppc(T, data={y_post: y_train, x_ph: x_train},
+       latent_vars={z: qz, beta: qbeta})
 
 # prior predictive check
-# running ppc on original x
-ppc(T, data={x: x_train})
+# run ppc on original x
+ed.ppc(T, data={x: x_train})
 
 </code>
 </pre>

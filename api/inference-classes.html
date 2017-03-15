@@ -306,17 +306,16 @@ of using the model’s density</p>
 <div><p>Number of samples from variational model for calculating
 stochastic gradients.</p>
 </div></blockquote>
-<p><strong>kl_scaling: dict of RandomVariable to float, optional</strong></p>
+<p><strong>kl_scaling</strong> : dict of RandomVariable to float, optional</p>
 <blockquote class="last">
 <div><p>Provides option to scale terms when using ELBO with KL divergence.
-If the KL divergence terms are:
-.. math:</p>
-<pre class="python" language="Python"><code>lpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
-
-</code>
-</pre>
-<p>pass {p(z): lpha_p} as kl_scaling, where lpha_p is a float
-that specifies how much to scale the KL term.</p>
+If the KL divergence terms are</p>
+<div class="math">
+\[\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+    \log q(z\mid x, \lambda) - \log p(z)],\]</div>
+<p>then pass {<span class="math">\(p(z)\)</span>: <span class="math">\(\alpha_p\)</span>} as <code class="docutils literal"><span class="pre">kl_scaling</span></code>,
+where <span class="math">\(\alpha_p\)</span> is a float that specifies how much to
+scale the KL term.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -325,7 +324,7 @@ that specifies how much to scale the KL term.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.KLqp.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L80" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L83" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Wrapper for the <code class="docutils literal"><span class="pre">KLqp</span></code> loss function.</p>
 <div class="math">
 \[-\text{ELBO} =
@@ -348,7 +347,7 @@ is tractable, then the loss function can be written as</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L129" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L132" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -358,7 +357,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L158" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L161" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -368,7 +367,7 @@ gradient and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L199" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L205" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -378,7 +377,7 @@ gradient and an analytic entropy term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L229" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L235" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -388,7 +387,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L258" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L264" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -398,7 +397,7 @@ and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L299" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L308" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -567,12 +566,13 @@ inference = ed.WGANInference({x: x_data}, discriminator)
 <dl class="class">
 <dt id="edward.inferences.ImplicitKLqp">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ImplicitKLqp</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>data=None</em>, <em>discriminator=None</em>, <em>global_vars=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Variational inference with implicit probabilistic models.</p>
+<dd><p>Variational inference with implicit probabilistic models
+(Tran et al., 2017).</p>
 <p>It minimizes the KL divergence</p>
 <div class="math">
-\[\text{KL}( q(z, eta; \lambda) \| p(z, eta \mid x) ),\]</div>
+\[\text{KL}( q(z, \beta; \lambda) \| p(z, \beta \mid x) ),\]</div>
 <p>where <span class="math">\(z\)</span> are local variables associated to a data point and
-<span class="math">\(eta\)</span> are global variables shared across data points.</p>
+<span class="math">\(\beta\)</span> are global variables shared across data points.</p>
 <p>Global latent variables require <code class="docutils literal"><span class="pre">log_prob()</span></code> and need to return a
 random sample when fetched from the graph. Local latent variables
 and observed variables require only a random sample when fetched
@@ -626,7 +626,7 @@ dictionary of same size and keys as <code class="docutils literal"><span class="
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.ImplicitKLqp.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>ratio_loss='log'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L85" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>ratio_loss='log'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L86" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -646,38 +646,40 @@ with shape matching the shapes of the two inputs.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.ImplicitKLqp.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L107" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L108" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function</p>
 <div class="math">
-\[-[\mathbb{E}_{q(eta)} [ log p(eta) - log q(eta) ] +
-  \sum_{n=1}^N \mathbb{E}_{q(eta)q(z_n|eta)} [ r*(x_n, z_n, eta) ] ]\]</div>
+\[-\Big(\mathbb{E}_{q(\beta)} [\log p(\beta) - \log q(\beta) ] +
+  \sum_{n=1}^N \mathbb{E}_{q(\beta)q(z_n\mid\beta)} [
+      r^*(x_n, z_n, \beta) ] \Big).\]</div>
 <p>We minimize it with respect to parameterized variational
-families <span class="math">\(q(z, beta; \lambda)\)</span>.</p>
-<p><span class="math">\(r*(x_n, z_n, beta)\)</span> is a function of a single data point
+families <span class="math">\(q(z, \beta; \lambda)\)</span>.</p>
+<p><span class="math">\(r^*(x_n, z_n, \beta)\)</span> is a function of a single data point
 <span class="math">\(x_n\)</span>, single local variable <span class="math">\(z_n\)</span>, and all global
-variables <span class="math">\(eta\)</span>. It is equal to the log-ratio</p>
+variables <span class="math">\(\beta\)</span>. It is equal to the log-ratio</p>
 <div class="math">
-\[\log p(x_n, z_n | eta) - \log q(z_n | eta).\]</div>
-<p>Rather than explicit calculation, <span class="math">\(r*(x, z, eta)\)</span> is the
+\[\log p(x_n, z_n\mid \beta) - \log q(x_n, z_n\mid \beta),\]</div>
+<p>where <span class="math">\(q(x_n)\)</span> is the empirical data distribution. Rather
+than explicit calculation, <span class="math">\(r^*(x, z, \beta)\)</span> is the
 solution to a ratio estimation problem, minimizing the specified
 <code class="docutils literal"><span class="pre">ratio_loss</span></code>.</p>
 <p>Gradients are taken using the reparameterization trick (Kingma and
 Welling, 2014).</p>
 <p class="rubric">Notes</p>
-<p>This also includes model parameters <span class="math">\(p(x, z, beta; theta)\)</span>
-and variational distributions with inference networks <span class="math">\(q(z |
-x)\)</span>.</p>
+<p>This also includes model parameters <span class="math">\(p(x, z, \beta; \theta)\)</span>
+and variational distributions with inference networks
+<span class="math">\(q(z\mid x)\)</span>.</p>
 <p>There are a bunch of extensions we could easily do in this
 implementation:</p>
 <ul class="simple">
-<li>further factorizations can be used to better leverage the</li>
-</ul>
-<p>graph structure for more complicated models;
-+ score function gradients for global variables;
-+ use more samples; this would require the <code class="docutils literal"><span class="pre">copy()</span></code> utility
+<li>further factorizations can be used to better leverage the
+graph structure for more complicated models;</li>
+<li>score function gradients for global variables;</li>
+<li>use more samples; this would require the <code class="docutils literal"><span class="pre">copy()</span></code> utility
 function for q’s as well, and an additional loop. we opt not to
-because it complicates the code;
-+ analytic KL/swapping out the penalty term for the globals.</p>
+because it complicates the code;</li>
+<li>analytic KL/swapping out the penalty term for the globals.</li>
+</ul>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -689,7 +691,7 @@ because it complicates the code;
 <p>To perform the optimization, this class uses a technique from
 adaptive importance sampling (Cappe et al., 2008).</p>
 <p class="rubric">Notes</p>
-<p><code class="docutils literal"><span class="pre">KLpq</span></code> also optimizes any model parameters <span class="math">\(p(z | x;
+<p><code class="docutils literal"><span class="pre">KLpq</span></code> also optimizes any model parameters <span class="math">\(p(z\mid x;
 \theta)\)</span>. It does this by variational EM, minimizing</p>
 <div class="math">
 \[\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \theta) ]\]</div>
@@ -729,22 +731,23 @@ stochastic gradients.</p>
 <code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klpq.py#L67" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function</p>
 <div class="math">
-\[\text{KL}( p(z \mid x) || q(z) )
+\[\text{KL}( p(z \mid x) \| q(z) )
 = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]\]</div>
 <p>and stochastic gradients based on importance sampling.</p>
 <p>The loss function can be estimated as</p>
 <div class="math">
-\[\frac{1}{B} \sum_{b=1}^B [
-  w_{norm}(z^b; \lambda) (\log p(x, z^b) - \log q(z^b; \lambda) ],\]</div>
-<p>where for <span class="math">\(z^b \sim q(z^b; \lambda)\)</span>,</p>
+\[\frac{1}{S} \sum_{s=1}^S [
+  w_{\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],\]</div>
+<p>where for <span class="math">\(z^s \sim q(z; \lambda)\)</span>,</p>
 <div class="math">
-\[w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B w(z^b; \lambda)\]</div>
-<p>normalizes the importance weights, <span class="math">\(w(z^b; \lambda) = p(x,
-z^b) / q(z^b; \lambda)\)</span>.</p>
+\[w_{\text{norm}}(z^s; \lambda) =
+    w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)\]</div>
+<p>normalizes the importance weights, <span class="math">\(w(z^s; \lambda) = p(x,
+z^s) / q(z^s; \lambda)\)</span>.</p>
 <p>This provides a gradient,</p>
 <div class="math">
-\[- \frac{1}{B} \sum_{b=1}^B [
-  w_{norm}(z^b; \lambda) \nabla_{\lambda} \log q(z^b; \lambda) ].\]</div>
+\[- \frac{1}{S} \sum_{s=1}^S [
+  w_{\text{norm}}(z^s; \lambda) \nabla_{\lambda} \log q(z^s; \lambda) ].\]</div>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -764,7 +767,7 @@ and minimizing the unnormalized objective,</p>
 differentiable latent variables. For example, it does not solve
 discrete optimization.</p>
 <p>This class also minimizes the loss with respect to any model
-parameters <span class="math">\(p(z \mid x;         heta)\)</span>.</p>
+parameters <span class="math">\(p(z \mid x; \theta)\)</span>.</p>
 <p>In conditional inference, we infer <span class="math">\(z\)</span> in <span class="math">\(p(z, \beta
 \mid x)\)</span> while fixing inference over <span class="math">\(\beta\)</span> using another
 distribution <span class="math">\(q(\beta)\)</span>. <code class="docutils literal"><span class="pre">MAP</span></code> optimizes
@@ -798,14 +801,14 @@ value in the dictionary must be a <code class="docutils literal"><span class="pr
 <pre class="python" language="Python"><code>qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
 qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
 qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
 </code>
 </pre>
 <p>We also automate the specification of <code class="docutils literal"><span class="pre">PointMass</span></code> distributions,
 so one can pass in a list of latent variables instead:</p>
-<pre class="python" language="Python"><code>MAP([beta], data)
-MAP([pi, mu, sigma], data)
+<pre class="python" language="Python"><code>ed.MAP([beta], data)
+ed.MAP([pi, mu, sigma], data)
 
 </code>
 </pre>
@@ -938,7 +941,7 @@ of time, then manually burn in the Empirical random variable.</p>
 <pre class="python" language="Python"><code>qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
 qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
 qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
 </code>
 </pre>
@@ -946,8 +949,8 @@ MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
 variables with <code class="docutils literal"><span class="pre">T</span></code> samples. We also automate the specification
 of <code class="docutils literal"><span class="pre">Empirical</span></code> random variables. One can pass in a list of
 latent variables instead:</p>
-<pre class="python" language="Python"><code>MonteCarlo([beta], data)
-MonteCarlo([pi, mu, sigma], data)
+<pre class="python" language="Python"><code>ed.MonteCarlo([beta], data)
+ed.MonteCarlo([pi, mu, sigma], data)
 
 </code>
 </pre>
@@ -1009,7 +1012,7 @@ this method.</p>
 <dl class="class">
 <dt id="edward.inferences.MetropolisHastings">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MetropolisHastings</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>proposal_vars</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Metropolis-Hastings.</p>
+<dd><p>Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).</p>
 <p class="rubric">Notes</p>
 <p>In conditional inference, we infer <span class="math">\(z\)</span> in <span class="math">\(p(z, \beta
 \mid x)\)</span> while fixing inference over <span class="math">\(\beta\)</span> using another
@@ -1040,7 +1043,7 @@ binded to a proposal distribution <span class="math">\(g(z' \mid z)\)</span>.</p
 <pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
 x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 
-qz = Empirical(tf.Variable(tf.zeros([500])))
+qz = Empirical(tf.Variable(tf.zeros(500)))
 proposal_z = Normal(mu=z, sigma=0.5)
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
@@ -1051,14 +1054,16 @@ inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
 <dl class="method">
 <dt id="edward.inferences.MetropolisHastings.build_update">
 <code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Draw sample from proposal conditional on last sample. Then accept
-or reject the sample based on the ratio,</p>
+<dd><p>Draw sample from proposal conditional on last sample. Then
+accept or reject the sample based on the ratio,</p>
 <div class="math">
-\[\text{ratio} = \log p(x, z^{new}) - \log p(x, z^{old}) +
-  \log g(z^{new} \mid z^{old}) - \log g(z^{old} \mid z^{new})\]</div>
+\[\text{ratio} =
+    \log p(x, z^{\text{new}}) - \log p(x, z^{\text{old}}) +
+    \log g(z^{\text{new}} \mid z^{\text{old}}) -
+    \log g(z^{\text{old}} \mid z^{\text{new}})\]</div>
 <p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
-parameterized by tf.Variables().</p>
+parameterized by <a href="#id1"><span class="problematic" id="id2">``</span></a>tf.Variable``s.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -1082,7 +1087,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
 x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 
-qz = Empirical(tf.Variable(tf.zeros([500])))
+qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.HMC({z: qz}, data)
 
@@ -1117,7 +1122,7 @@ Correct for the integrator’s discretization error using an
 acceptance ratio.</p>
 <p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
-parameterized by tf.Variables().</p>
+parameterized by <a href="#id3"><span class="problematic" id="id4">``</span></a>tf.Variable``s.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -1140,7 +1145,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
 x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 
-qz = Empirical(tf.Variable(tf.zeros([500])))
+qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.SGLD({z: qz}, data)
 
@@ -1170,7 +1175,7 @@ inference = ed.SGLD({z: qz}, data)
 discretization error goes to zero as the learning rate decreases.</p>
 <p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
-parameterized by tf.Variables().</p>
+parameterized by <a href="#id5"><span class="problematic" id="id6">``</span></a>tf.Variable``s.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -1193,7 +1198,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
 x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 
-qz = Empirical(tf.Variable(tf.zeros([500])))
+qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.SGHMC({z: qz}, data)
 
@@ -1224,8 +1229,8 @@ inference = ed.SGHMC({z: qz}, data)
 <dt id="edward.inferences.SGHMC.build_update">
 <code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Simulate Hamiltonian dynamics with friction using a discretized
-integrator. Its discretization error goes to zero as the learning rate
-decreases.</p>
+integrator. Its discretization error goes to zero as the learning
+rate decreases.</p>
 <p>Implements the update equations from (15) of Chen et al. (2014).</p>
 </dd></dl>
 </dd></dl>

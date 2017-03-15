@@ -222,33 +222,22 @@ latent variables (of type <code class="docutils literal"><span class="pre">Rando
 </tr>
 </tbody>
 </table>
-<p class="rubric">Notes</p>
-<p>If <code class="docutils literal"><span class="pre">data</span></code> is not passed in, the dictionary is empty.</p>
-<p>Three options are available for batch training:</p>
-<ol class="arabic simple">
-<li>internally if user passes in data as a dictionary of NumPy
-arrays;</li>
-<li>externally if user passes in data as a dictionary of
-TensorFlow placeholders (and manually feeds them);</li>
-<li>externally if user passes in data as TensorFlow tensors
-which are the outputs of data readers.</li>
-</ol>
 <p class="rubric">Examples</p>
 <pre class="python" language="Python"><code>mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant(1.0))
+x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant(1.0))
 
 qmu_mu = tf.Variable(tf.random_normal([1]))
 qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
 qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
 
-Inference({mu: qmu}, {x: tf.constant([0.0] * N)})
+inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
 
 </code>
 </pre>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Inference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L159" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L146" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>A simple wrapper to run inference.</p>
 <ol class="arabic simple">
 <li>Initialize algorithm via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
@@ -294,7 +283,7 @@ for batch training with file readers.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L221" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L208" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize inference algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -335,7 +324,7 @@ times.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L274" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L261" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -359,7 +348,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L308" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L295" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -376,7 +365,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L321" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L308" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>
