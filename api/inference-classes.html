@@ -29,8 +29,12 @@
     }
   }
   /* Docstrings. */
-  dl.class, dl.function { /* Add border to each docstring. */
-    border-bottom: 1px solid #E1E1E1;
+  dl.class + dl.class, dl.function + dl.function {
+    /* Add border inbetween docstrings. */
+    border-top: 1px solid #E1E1E1;
+  }
+  dt { /* Add spacing for top border. */
+    margin-top: 1.0rem;
   }
   dd { /* Remove overall indenting in an entry. */
     margin-left: 0.0rem;
@@ -39,7 +43,8 @@
     padding: 0 15px 0 0;
     border: none;
   }
-  dt em { /* Keep 'class' consistent in style with rest of def. */
+  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
+    font-family: monospace, monospace;
     font-style: normal;
     font-size: 14px !important;
   }
@@ -353,7 +358,6 @@ is tractable, then the loss function can be written as</p>
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
 <p>This class minimizes the objective using the reparameterization
 gradient.</p>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLKLqp">
@@ -363,7 +367,6 @@ gradient.</p>
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
 <p>This class minimizes the objective using the reparameterization
 gradient and an analytic KL term.</p>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationEntropyKLqp">
@@ -373,7 +376,6 @@ gradient and an analytic KL term.</p>
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
 <p>This class minimizes the objective using the reparameterization
 gradient and an analytic entropy term.</p>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLqp">
@@ -383,7 +385,6 @@ gradient and an analytic entropy term.</p>
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
 <p>This class minimizes the objective using the score function
 gradient.</p>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLKLqp">
@@ -393,7 +394,6 @@ gradient.</p>
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
 <p>This class minimizes the objective using the score function gradient
 and an analytic KL term.</p>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreEntropyKLqp">
@@ -403,7 +403,6 @@ and an analytic KL term.</p>
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
 <p>This class minimizes the objective using the score function gradient
 and an analytic entropy term.</p>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.GANInference">
@@ -449,7 +448,6 @@ discriminator’s parameters can be accessed with the variable scope
 x = generative_network(z)
 
 inference = ed.GANInference({x: x_data}, discriminator)
-
 </code>
 </pre>
 <p class="rubric">Methods</p>
@@ -558,10 +556,8 @@ function or critic. <code class="docutils literal"><span class="pre">WGANInferen
 x = generative_network(z)
 
 inference = ed.WGANInference({x: x_data}, discriminator)
-
 </code>
 </pre>
-<p class="rubric">Methods</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ImplicitKLqp">
@@ -802,14 +798,12 @@ value in the dictionary must be a <code class="docutils literal"><span class="pr
 qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
 qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
 ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
-
 </code>
 </pre>
 <p>We also automate the specification of <code class="docutils literal"><span class="pre">PointMass</span></code> distributions,
 so one can pass in a list of latent variables instead:</p>
 <pre class="python" language="Python"><code>ed.MAP([beta], data)
 ed.MAP([pi, mu, sigma], data)
-
 </code>
 </pre>
 <p>Currently, <code class="docutils literal"><span class="pre">MAP</span></code> can only instantiate <code class="docutils literal"><span class="pre">PointMass</span></code> random variables
@@ -872,7 +866,6 @@ qw = MultivariateNormalFull(mu=tf.Variable(tf.random_normal([D])),
                             sigma=tf.Variable(tf.random_normal([D, D])))
 
 inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
-
 </code>
 </pre>
 <p class="rubric">Methods</p>
@@ -942,7 +935,6 @@ of time, then manually burn in the Empirical random variable.</p>
 qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
 qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
 ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
-
 </code>
 </pre>
 <p>The inferred posterior is comprised of <code class="docutils literal"><span class="pre">Empirical</span></code> random
@@ -951,7 +943,6 @@ of <code class="docutils literal"><span class="pre">Empirical</span></code> rand
 latent variables instead:</p>
 <pre class="python" language="Python"><code>ed.MonteCarlo([beta], data)
 ed.MonteCarlo([pi, mu, sigma], data)
-
 </code>
 </pre>
 <p>It defaults to <code class="docutils literal"><span class="pre">Empirical</span></code> random variables with 10,000 samples for
@@ -1047,7 +1038,6 @@ qz = Empirical(tf.Variable(tf.zeros(500)))
 proposal_z = Normal(mu=z, sigma=0.5)
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
-
 </code>
 </pre>
 <p class="rubric">Methods</p>
@@ -1090,7 +1080,6 @@ x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.HMC({z: qz}, data)
-
 </code>
 </pre>
 <p class="rubric">Methods</p>
@@ -1148,7 +1137,6 @@ x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.SGLD({z: qz}, data)
-
 </code>
 </pre>
 <p class="rubric">Methods</p>
@@ -1201,7 +1189,6 @@ x = Normal(mu=tf.ones(10) * z, sigma=1.0)
 qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.SGHMC({z: qz}, data)
-
 </code>
 </pre>
 <p class="rubric">Methods</p>

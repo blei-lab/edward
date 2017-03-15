@@ -29,8 +29,12 @@
     }
   }
   /* Docstrings. */
-  dl.class, dl.function { /* Add border to each docstring. */
-    border-bottom: 1px solid #E1E1E1;
+  dl.class + dl.class, dl.function + dl.function {
+    /* Add border inbetween docstrings. */
+    border-top: 1px solid #E1E1E1;
+  }
+  dt { /* Add spacing for top border. */
+    margin-top: 1.0rem;
   }
   dd { /* Remove overall indenting in an entry. */
     margin-left: 0.0rem;
@@ -39,7 +43,8 @@
     padding: 0 15px 0 0;
     border: none;
   }
-  dt em { /* Keep 'class' consistent in style with rest of def. */
+  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
+    font-family: monospace, monospace;
     font-style: normal;
     font-size: 14px !important;
   }
@@ -206,7 +211,6 @@ x = Bernoulli(p=tf.matmul(z1, z2))
 
 mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
 x = Normal(mu=mu, sigma=tf.constant(1.0))
-
 </code>
 </pre>
 <p class="rubric">Methods</p>
@@ -229,7 +233,7 @@ none, the default session is used.</p>
 </div></blockquote>
 <p><strong>feed_dict</strong> : dict, optional</p>
 <blockquote class="last">
-<div><p>A dictionary that maps <cite>Tensor</cite> objects to feed values. See
+<div><p>A dictionary that maps <code class="docutils literal"><span class="pre">tf.Tensor</span></code> objects to feed values. See
 <code class="docutils literal"><span class="pre">tf.Session.run()</span></code> for a description of the valid feed values.</p>
 </div></blockquote>
 </td>
@@ -244,7 +248,6 @@ with tf.Session() as sess:
   # Usage with the default session.  The 'with' block
   # above makes 'sess' the default session.
   print(x.eval())
-
 </code>
 </pre>
 </dd></dl>

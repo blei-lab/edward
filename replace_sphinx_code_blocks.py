@@ -1,4 +1,4 @@
-"""Format Sphinx code blocks as Python; remove '>>>' and '...' text."""
+"""Format Sphinx code blocks as Python; trim '>>>', '...', and last '\n'."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -12,7 +12,6 @@ path = ("api/*.html")
 filenames = glob.glob(path)
 
 for filename in filenames:
-  print(filename)
   soup = BeautifulSoup(open(filename), 'html.parser')
   for snippet in soup.find_all("div", class_="highlight-default"):
     snippet.name = "pre"
@@ -23,6 +22,9 @@ for filename in filenames:
     raw_snippet = re.sub('>>>', '', raw_snippet)
     raw_snippet = re.sub('\.\.\. ', '', raw_snippet)
     raw_snippet = re.sub('\.\.\.', '', raw_snippet)
+    if raw_snippet[-2:] == '\n\n':
+      raw_snippet = raw_snippet[:-1]
+
     tag_snippet = soup.new_tag("code")
     tag_snippet.string = raw_snippet
     snippet.find_all("div", class_="highlight")[0].replace_with(tag_snippet)
