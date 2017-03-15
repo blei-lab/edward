@@ -21,18 +21,6 @@ class RandomVariable(object):
   graph, allowing random variables to be used in conjunction with
   other TensorFlow ops.
 
-  Examples
-  --------
-  >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p=p)
-  >>>
-  >>> z1 = tf.constant([[2.0, 8.0]])
-  >>> z2 = tf.constant([[1.0, 2.0]])
-  >>> x = Bernoulli(p=tf.matmul(z1, z2))
-  >>>
-  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
-
   Notes
   -----
   ``RandomVariable`` assumes use in a multiple inheritance setting. The
@@ -47,13 +35,25 @@ class RandomVariable(object):
      ``distributions.Bernoulli``, completing the ``__init__()`` of
      ``distributions.Bernoulli``.
   3. Complete the ``__init__()`` of ``RandomVariable``, which calls
-    ``self.sample()``, relying on the method from
-    ``distributions.Bernoulli``.
+     ``self.sample()``, relying on the method from
+     ``distributions.Bernoulli``.
   4. Complete the ``__init__()`` of the child class.
 
   Methods from both ``RandomVariable`` and ``distributions.Bernoulli``
   populate the namespace of the child class. Methods from
   ``RandomVariable`` will take higher priority if there are conflicts.
+
+  Examples
+  --------
+  >>> p = tf.constant(0.5)
+  >>> x = Bernoulli(p=p)
+  >>>
+  >>> z1 = tf.constant([[2.0, 8.0]])
+  >>> z2 = tf.constant([[1.0, 2.0]])
+  >>> x = Bernoulli(p=tf.matmul(z1, z2))
+  >>>
+  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
   """
   def __init__(self, *args, **kwargs):
     # storing args, kwargs for easy graph copying
@@ -230,7 +230,7 @@ class RandomVariable(object):
       The ``tf.Session`` to use to evaluate this random variable. If
       none, the default session is used.
     feed_dict : dict, optional
-      A dictionary that maps `Tensor` objects to feed values. See
+      A dictionary that maps ``tf.Tensor`` objects to feed values. See
       ``tf.Session.run()`` for a description of the valid feed values.
 
     Examples

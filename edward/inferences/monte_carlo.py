@@ -39,15 +39,15 @@ class MonteCarlo(Inference):
     >>> qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
     >>> qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
     >>> qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    >>> MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+    >>> ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
     The inferred posterior is comprised of ``Empirical`` random
     variables with ``T`` samples. We also automate the specification
     of ``Empirical`` random variables. One can pass in a list of
     latent variables instead:
 
-    >>> MonteCarlo([beta], data)
-    >>> MonteCarlo([pi, mu, sigma], data)
+    >>> ed.MonteCarlo([beta], data)
+    >>> ed.MonteCarlo([pi, mu, sigma], data)
 
     It defaults to ``Empirical`` random variables with 10,000 samples for
     each dimension.

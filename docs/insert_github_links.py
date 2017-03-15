@@ -31,7 +31,6 @@ path = ("api/*.html")
 filenames = glob.glob(path)
 
 for filename in filenames:
-  print(filename)
   soup = BeautifulSoup(open(filename), 'html.parser')
   github = "https://github.com/blei-lab/edward/blob/master/"
   for a in soup.find_all("a", "headerlink"):

@@ -48,20 +48,17 @@ done
 printf "Done.\n\n"
 
 cd ..
-echo "Running 'strip_p_in_li.py'"
-python strip_p_in_li.py
-printf "Done.\n\n"
-
-echo "Running 'insert_github_links.py'"
+echo "Begin postprocessing scripts."
+echo "./insert_github_links.py"
 python insert_github_links.py
-printf "Done.\n\n"
-
-echo "Running 'replace_sphinx_code_blocks.py'"
-python replace_sphinx_code_blocks.py
-printf "Done.\n\n"
-
-echo "Running 'rearrange_attribute_rows.py'"
+echo "./rearrange_attribute_rows.py"
 python rearrange_attribute_rows.py
+echo "./remove_orphan_methods.py"
+python remove_orphan_methods.py
+echo "./replace_sphinx_code_blocks.py"
+python replace_sphinx_code_blocks.py
+echo "./strip_p_in_li.py"
+python strip_p_in_li.py
 printf "Done.\n\n"
 
 # Clear intermediate docstring-generated files

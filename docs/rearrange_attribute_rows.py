@@ -12,7 +12,6 @@ path = ("api/*.html")
 filenames = glob.glob(path)
 
 for filename in filenames:
-  print(filename)
   soup = BeautifulSoup(open(filename), 'html.parser')
   for tr in soup.find_all("tr", {'class': 'field'}):
     th = tr.find("th", {'class': 'field-name'})

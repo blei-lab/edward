@@ -77,7 +77,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   >>>
   >>> # This adds a subgraph with newly copied nodes,
   >>> # `copied/qx` -> `copied/z` <- `copied/y`
-  >>> z_new = copy(z, {x: qx})
+  >>> z_new = ed.copy(z, {x: qx})
   >>>
   >>> sess = tf.Session()
   >>> sess.run(z)

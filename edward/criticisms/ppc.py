@@ -20,11 +20,11 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   PPC's form an empirical distribution for the predictive discrepancy,
 
   .. math::
-    p(T) = \int p(T(x^{rep}) | z) p(z | x) dz
+    p(T\mid x) = \int p(T(x^{\\text{rep}})\mid z) p(z\mid x) dz
 
-  by drawing replicated data sets xrep and calculating
-  :math:`T(x^{rep})` for each data set. Then it compares it to
-  :math:`T(x)`.
+  by drawing replicated data sets :math:`x^{\\text{rep}}` and
+  calculating :math:`T(x^{\\text{rep}})` for each data set. Then it
+  compares it to :math:`T(x)`.
 
   Parameters
   ----------
@@ -50,35 +50,36 @@ def ppc(T, data, latent_vars=None, n_samples=100):
     array of size elements,
 
     .. math::
-      (T(x^{rep,1}, z^{1}), ..., T(x^{rep,size}, z^{size}))
+      (T(x^{{\\text{rep}},1}, z^{1}), ...,
+       T(x^{\\text{rep,size}}, z^{\\text{size}}))
 
     and the realized discrepancy, which is a NumPy array of size
     elements,
 
     .. math::
-      (T(x, z^{1}), ..., T(x, z^{size})).
+      (T(x, z^{1}), ..., T(x, z^{\\text{size}})).
 
 
   Examples
   --------
-  >>> # build posterior predictive after inference: it is
-  >>> # parameterized by a posterior sample
-  >>> x_post = copy(x, {z: qz, beta: qbeta})
+  >>> # build posterior predictive after inference:
+  >>> # it is parameterized by a posterior sample
+  >>> x_post = ed.copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # posterior predictive check
   >>> # T is a user-defined function of data, T(data)
   >>> T = lambda xs, zs: tf.reduce_mean(xs[x_post])
-  >>> ppc(T, data={x_post: x_train})
+  >>> ed.ppc(T, data={x_post: x_train})
   >>>
   >>> # in general T is a discrepancy function of the data (both response and
   >>> # covariates) and latent variables, T(data, latent_vars)
   >>> T = lambda xs, zs: tf.reduce_mean(zs[z])
-  >>> ppc(T, data={y_post: y_train, x_ph: x_train},
-  ...     latent_vars={z: qz, beta: qbeta})
+  >>> ed.ppc(T, data={y_post: y_train, x_ph: x_train},
+  ...        latent_vars={z: qz, beta: qbeta})
   >>>
   >>> # prior predictive check
-  >>> # running ppc on original x
-  >>> ppc(T, data={x: x_train})
+  >>> # run ppc on original x
+  >>> ed.ppc(T, data={x: x_train})
   """
   sess = get_session()
   # Sample to get replicated data sets and latent variables.
