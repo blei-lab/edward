@@ -4,47 +4,17 @@
 
 \subsubsection{Models}
 
+Most edward models are wrappers around tensorflow distrbutions. Therefore, the
+list of available models depends on the tensorflow version installed. For
+tensorflow {{tensorflow_version}}, the following models are available:
+
 {{sphinx
 
 * :class:`edward.models.RandomVariable`
-  
-  * :class:`edward.models.Bernoulli`
-  * :class:`edward.models.BernoulliWithSigmoidP`
-  * :class:`edward.models.Beta`
-  * :class:`edward.models.BetaWithSoftplusAB`
-  * :class:`edward.models.Binomial`
-  * :class:`edward.models.Categorical`
-  * :class:`edward.models.Chi2`
-  * :class:`edward.models.Chi2WithAbsDf`
-  * :class:`edward.models.Dirichlet`
-  * :class:`edward.models.DirichletMultinomial`
+
   * :class:`edward.models.Empirical`
-  * :class:`edward.models.Exponential`
-  * :class:`edward.models.ExponentialWithSoftplusLam`
-  * :class:`edward.models.Gamma`
-  * :class:`edward.models.GammaWithSoftplusAlphaBeta`
-  * :class:`edward.models.InverseGamma`
-  * :class:`edward.models.InverseGammaWithSoftplusAlphaBeta`
-  * :class:`edward.models.Laplace`
-  * :class:`edward.models.LaplaceWithSoftplusScale`
-  * :class:`edward.models.Mixture`
-  * :class:`edward.models.Multinomial`
-  * :class:`edward.models.MultivariateNormalCholesky`
-  * :class:`edward.models.MultivariateNormalDiag`
-  * :class:`edward.models.MultivariateNormalDiagPlusVDVT`
-  * :class:`edward.models.MultivariateNormalDiagWithSoftplusStDev`
-  * :class:`edward.models.MultivariateNormalFull`
-  * :class:`edward.models.Normal`
-  * :class:`edward.models.NormalWithSoftplusSigma`
   * :class:`edward.models.PointMass`
-  * :class:`edward.models.Poisson`
-  * :class:`edward.models.QuantizedDistribution`
-  * :class:`edward.models.StudentT`
-  * :class:`edward.models.StudentTWithAbsDfSoftplusSigma`
-  * :class:`edward.models.TransformedDistribution`
-  * :class:`edward.models.Uniform`
-  * :class:`edward.models.WishartCholesky`
-  * :class:`edward.models.WishartFull`
+  * {tensorflow_distributions}
 
 }}
 
@@ -52,6 +22,7 @@
 
 {{sphinx
 
+* :class:`edward.inferences.Inference`
 * :class:`edward.inferences.VariationalInference`
 
   * :class:`edward.inferences.KLqp`
@@ -63,15 +34,17 @@
     * :class:`edward.inferences.ScoreKLKLqp`
     * :class:`edward.inferences.ScoreEntropyKLqp`
 
-  * :class:`edward.inferences.ImplicitKLqp`
-  * :class:`edward.inferences.KLpq`
-  * Generative Adversial Network inferences:
 
-    * :class:`edward.inferences.GANInference`
+  * :class:`edward.inferences.KLpq`
+
+  * :class:`edward.inferences.GANInference`
+
+    * :class:`edward.inferences.ImplicitKLqp`
     * :class:`edward.inferences.WGANInference`
 
   * :class:`edward.inferences.MAP`
-  * :class:`edward.inferences.Laplace`
+
+    * :class:`edward.inferences.Laplace`
 
 * :class:`edward.inferences.MonteCarlo`
 
@@ -90,4 +63,3 @@
 * :func:`edward.criticisms.ppc`
 
 }}
-
