@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/css" http-equiv="Content-Style-Type"/>
+<meta content="pandoc" name="generator"/>
+<title>Edward – Reference</title>
+<!-- Mobile Specific Metas -->
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+<!-- CSS -->
+<link href="/css/normalize.css" rel="stylesheet">
+<link href="/css/skeleton.css" rel="stylesheet">
+<!-- Dynamically resize logo for mobile -->
+<style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  /* Docstrings. */
+  dl.class + dl.class, dl.function + dl.function {
+    /* Add border inbetween docstrings. */
+    border-top: 1px solid #E1E1E1;
+  }
+  dt { /* Add spacing for top border. */
+    margin-top: 1.0rem;
+  }
+  dd { /* Remove overall indenting in an entry. */
+    margin-left: 0.0rem;
+  }
+  dl th, dl td { /* Remove extraneous padding and decorations. */
+    padding: 0 15px 0 0;
+    border: none;
+  }
+  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
+    font-family: monospace, monospace;
+    font-style: normal;
+    font-size: 14px !important;
+  }
+  /* Attribute contents within a docstring. */
+  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
+    margin-left: 0.0rem;
+    margin-top: 0.0rem;
+    margin-bottom: 0.0rem;
+  }
+  dl td p { /* Reduce spacing. */
+    margin-bottom: 0.75rem;
+  }
+  dl td.field-body { /* Add indenting. */
+    padding-top: 0.75rem;
+    padding-left: 2.0rem;
+    display: block;
+  }
+  dl code { /* Keep code font size consistent with rest of contents. */
+    font-size: 90%;
+  }
+  </style>
+<!-- KaTeX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
+<!-- Favicon -->
+<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
+<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+<link href="/icons/manifest.json" rel="manifest">
+<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
+<link href="/icons/favicon.ico" rel="shortcut icon">
+<meta content="#da532c" name="msapplication-TileColor">
+<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
+<meta content="/icons/browserconfig.xml" name="msapplication-config">
+<meta content="#ffffff" name="theme-color">
+</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+<body>
+<div class="container">
+<div class="row" style="margin-top: 5%">
+<div class="three columns">
+<h1><a href="/">Edward</a></h1>
+<a href="/">
+<center>
+<img alt="Edward" class="logo-width" src="/images/edward.png"/>
+</center>
+</a>
+<a class="button u-full-width" href="/">Home</a>
+<a class="button u-full-width" href="/getting-started">Getting Started</a>
+<a class="button u-full-width" href="/tutorials/">Tutorials</a>
+<a class="button u-full-width" href="/api/">API</a>
+<a class="button u-full-width" href="#">Advanced</a>
+<a class="button2 u-full-width" href="/community">Community</a>
+<a class="button2 u-full-width" href="/contributing">Contributing</a>
+<a class="button2 u-full-width" href="/zoo">Probability Zoo</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
+<span style="vertical-align:middle;">Github</span> 
+      <!--<object data="images/github-mark.svg" type="image/svg+xml"> -->
+<img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
+<!--</object> -->
+</a>
+<div class="row" style="padding-bottom: 5%"> </div>
+</div>
+<div class="nine columns">
+<h2 id="api-and-documentation">API and Documentation</h2>
+<div class="row" style="padding-bottom: 5%">
+<div class="row" style="padding-bottom: 1%">
+<a class="button3" href="/api/data">Data</a>
+<a class="button3" href="/api/model">Model</a>
+<a class="button3" href="/api/inference">Inference</a>
+<a class="button3" href="/api/criticism">Criticism</a>
+<a class="button3 button-primary" href="/api/reference">Reference</a>
+</div>
+</div>
+<h3 id="models">Models</h3>
+<p>Most Edward random variables are wrappers around TensorFlow distributions. Therefore the list of available models depends on the TensorFlow version installed. For TensorFlow 1.0.1, the following models are available:</p>
+<ul class="simple">
+<li><a class="reference internal" href="model.html#edward.models.RandomVariable" title="edward.models.RandomVariable"><code class="xref py py-class docutils literal"><span class="pre">edward.models.RandomVariable</span></code></a></li>
+<li><a class="reference internal" href="model.html#edward.models.Empirical" title="edward.models.Empirical"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Empirical</span></code></a></li>
+<li><a class="reference internal" href="model.html#edward.models.PointMass" title="edward.models.PointMass"><code class="xref py py-class docutils literal"><span class="pre">edward.models.PointMass</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Bernoulli" title="edward.models.Bernoulli"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Bernoulli</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/BernoulliWithSigmoidP" title="edward.models.BernoulliWithSigmoidP"><code class="xref py py-class docutils literal"><span class="pre">edward.models.BernoulliWithSigmoidP</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Beta" title="edward.models.Beta"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Beta</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/BetaWithSoftplusAB" title="edward.models.BetaWithSoftplusAB"><code class="xref py py-class docutils literal"><span class="pre">edward.models.BetaWithSoftplusAB</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Binomial" title="edward.models.Binomial"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Binomial</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Categorical" title="edward.models.Categorical"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Categorical</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Chi2" title="edward.models.Chi2"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Chi2</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Chi2WithAbsDf" title="edward.models.Chi2WithAbsDf"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Chi2WithAbsDf</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Dirichlet" title="edward.models.Dirichlet"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Dirichlet</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/DirichletMultinomial" title="edward.models.DirichletMultinomial"><code class="xref py py-class docutils literal"><span class="pre">edward.models.DirichletMultinomial</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Exponential" title="edward.models.Exponential"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Exponential</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/ExponentialWithSoftplusLam" title="edward.models.ExponentialWithSoftplusLam"><code class="xref py py-class docutils literal"><span class="pre">edward.models.ExponentialWithSoftplusLam</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Gamma" title="edward.models.Gamma"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Gamma</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/GammaWithSoftplusAlphaBeta" title="edward.models.GammaWithSoftplusAlphaBeta"><code class="xref py py-class docutils literal"><span class="pre">edward.models.GammaWithSoftplusAlphaBeta</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/InverseGamma" title="edward.models.InverseGamma"><code class="xref py py-class docutils literal"><span class="pre">edward.models.InverseGamma</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/InverseGammaWithSoftplusAlphaBeta" title="edward.models.InverseGammaWithSoftplusAlphaBeta"><code class="xref py py-class docutils literal"><span class="pre">edward.models.InverseGammaWithSoftplusAlphaBeta</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Laplace" title="edward.models.Laplace"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Laplace</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/LaplaceWithSoftplusScale" title="edward.models.LaplaceWithSoftplusScale"><code class="xref py py-class docutils literal"><span class="pre">edward.models.LaplaceWithSoftplusScale</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Mixture" title="edward.models.Mixture"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Mixture</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Multinomial" title="edward.models.Multinomial"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Multinomial</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/MultivariateNormalCholesky" title="edward.models.MultivariateNormalCholesky"><code class="xref py py-class docutils literal"><span class="pre">edward.models.MultivariateNormalCholesky</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/MultivariateNormalDiag" title="edward.models.MultivariateNormalDiag"><code class="xref py py-class docutils literal"><span class="pre">edward.models.MultivariateNormalDiag</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/MultivariateNormalDiagPlusVDVT" title="edward.models.MultivariateNormalDiagPlusVDVT"><code class="xref py py-class docutils literal"><span class="pre">edward.models.MultivariateNormalDiagPlusVDVT</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/MultivariateNormalDiagWithSoftplusStDev" title="edward.models.MultivariateNormalDiagWithSoftplusStDev"><code class="xref py py-class docutils literal"><span class="pre">edward.models.MultivariateNormalDiagWithSoftplusStDev</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/MultivariateNormalFull" title="edward.models.MultivariateNormalFull"><code class="xref py py-class docutils literal"><span class="pre">edward.models.MultivariateNormalFull</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Normal" title="edward.models.Normal"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Normal</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/NormalWithSoftplusSigma" title="edward.models.NormalWithSoftplusSigma"><code class="xref py py-class docutils literal"><span class="pre">edward.models.NormalWithSoftplusSigma</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Poisson" title="edward.models.Poisson"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Poisson</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/QuantizedDistribution" title="edward.models.QuantizedDistribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.QuantizedDistribution</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/StudentT" title="edward.models.StudentT"><code class="xref py py-class docutils literal"><span class="pre">edward.models.StudentT</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/StudentTWithAbsDfSoftplusSigma" title="edward.models.StudentTWithAbsDfSoftplusSigma"><code class="xref py py-class docutils literal"><span class="pre">edward.models.StudentTWithAbsDfSoftplusSigma</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/TransformedDistribution" title="edward.models.TransformedDistribution"><code class="xref py py-class docutils literal"><span class="pre">edward.models.TransformedDistribution</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Uniform" title="edward.models.Uniform"><code class="xref py py-class docutils literal"><span class="pre">edward.models.Uniform</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/WishartCholesky" title="edward.models.WishartCholesky"><code class="xref py py-class docutils literal"><span class="pre">edward.models.WishartCholesky</span></code></a></li>
+<li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/WishartFull" title="edward.models.WishartFull"><code class="xref py py-class docutils literal"><span class="pre">edward.models.WishartFull</span></code></a></li>
+</ul>
+<h3 id="inference">Inference</h3>
+<ul class="simple">
+<li><a class="reference internal" href="inference.html#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a><ul>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.KLqp" title="edward.inferences.KLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.KLqp</span></code></a><ul>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ReparameterizationKLqp" title="edward.inferences.ReparameterizationKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ReparameterizationKLqp</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ReparameterizationKLKLqp" title="edward.inferences.ReparameterizationKLKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ReparameterizationKLKLqp</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ReparameterizationEntropyKLqp" title="edward.inferences.ReparameterizationEntropyKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ReparameterizationEntropyKLqp</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ScoreKLqp" title="edward.inferences.ScoreKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ScoreKLqp</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ScoreKLKLqp" title="edward.inferences.ScoreKLKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ScoreKLKLqp</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ScoreEntropyKLqp" title="edward.inferences.ScoreEntropyKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ScoreEntropyKLqp</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.KLpq" title="edward.inferences.KLpq"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.KLpq</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.GANInference" title="edward.inferences.GANInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.GANInference</span></code></a><ul>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.ImplicitKLqp" title="edward.inferences.ImplicitKLqp"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.ImplicitKLqp</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.WGANInference" title="edward.inferences.WGANInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.WGANInference</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.MAP" title="edward.inferences.MAP"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.MAP</span></code></a><ul>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.Laplace" title="edward.inferences.Laplace"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Laplace</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.MonteCarlo" title="edward.inferences.MonteCarlo"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.MonteCarlo</span></code></a><ul>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.MetropolisHastings" title="edward.inferences.MetropolisHastings"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.MetropolisHastings</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.HMC" title="edward.inferences.HMC"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.HMC</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.SGLD" title="edward.inferences.SGLD"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.SGLD</span></code></a></li>
+<li><a class="reference internal" href="inference-classes.html#edward.inferences.SGHMC" title="edward.inferences.SGHMC"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.SGHMC</span></code></a></li>
+</ul>
+</li>
+</ul>
+<h3 id="criticism">Criticism</h3>
+<ul class="simple">
+<li><a class="reference internal" href="criticism.html#edward.criticisms.evaluate" title="edward.criticisms.evaluate"><code class="xref py py-func docutils literal"><span class="pre">edward.criticisms.evaluate()</span></code></a></li>
+<li><a class="reference internal" href="criticism.html#edward.criticisms.ppc" title="edward.criticisms.ppc"><code class="xref py py-func docutils literal"><span class="pre">edward.criticisms.ppc()</span></code></a></li>
+</ul>
+</div>
+</div>
+<div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
