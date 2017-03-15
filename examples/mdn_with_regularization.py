@@ -67,17 +67,21 @@ def neural_network_slim(X, weight_decay=0.005):
 
 
 def get_weights(shape, weight_decay):
+    initializer = tf.contrib.layers.xavier_initializer()
+    regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
     W = tf.get_variable('w', shape=shape, dtype=tf.float32,
-                        initializer=tf.contrib.layers.xavier_initializer(),
-                        regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
+                        initializer=initializer,
+                        regularizer=regularizer,
                         trainable=True)
     return W
 
 
 def get_biases(shape, weight_decay):
+    initializer = tf.constant_initializer(value=0.0)
+    regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
     b = tf.get_variable('b', shape=shape, dtype=tf.float32,
-                        initializer=tf.constant_initializer(value=0.0),
-                        regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
+                        initializer=initializer,
+                        regularizer=regularizer,
                         trainable=True)
     return b
 
