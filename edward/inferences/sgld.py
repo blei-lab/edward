@@ -53,14 +53,13 @@ class SGLD(MonteCarlo):
     return super(SGLD, self).initialize(*args, **kwargs)
 
   def build_update(self):
-    """
-    Simulate Langevin dynamics using a discretized integrator. Its
+    """Simulate Langevin dynamics using a discretized integrator. Its
     discretization error goes to zero as the learning rate decreases.
 
     Notes
     -----
     The updates assume each Empirical random variable is directly
-    parameterized by tf.Variables().
+    parameterized by ``tf.Variable``s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -89,8 +88,7 @@ class SGLD(MonteCarlo):
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):
-    """
-    Utility function to calculate model's log joint density,
+    """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
     Parameters

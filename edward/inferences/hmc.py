@@ -59,15 +59,14 @@ class HMC(MonteCarlo):
     return super(HMC, self).initialize(*args, **kwargs)
 
   def build_update(self):
-    """
-    Simulate Hamiltonian dynamics using a numerical integrator.
+    """Simulate Hamiltonian dynamics using a numerical integrator.
     Correct for the integrator's discretization error using an
     acceptance ratio.
 
     Notes
     -----
     The updates assume each Empirical random variable is directly
-    parameterized by tf.Variables().
+    parameterized by ``tf.Variable``s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -116,8 +115,7 @@ class HMC(MonteCarlo):
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):
-    """
-    Utility function to calculate model's log joint density,
+    """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
     Parameters

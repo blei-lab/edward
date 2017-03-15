@@ -58,10 +58,9 @@ class SGHMC(MonteCarlo):
     return super(SGHMC, self).initialize(*args, **kwargs)
 
   def build_update(self):
-    """
-    Simulate Hamiltonian dynamics with friction using a discretized
-    integrator. Its discretization error goes to zero as the learning rate
-    decreases.
+    """Simulate Hamiltonian dynamics with friction using a discretized
+    integrator. Its discretization error goes to zero as the learning
+    rate decreases.
 
     Implements the update equations from (15) of Chen et al. (2014).
     """
@@ -100,8 +99,7 @@ class SGHMC(MonteCarlo):
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):
-    """
-    Utility function to calculate model's log joint density,
+    """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
     Parameters

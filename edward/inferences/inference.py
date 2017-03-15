@@ -43,29 +43,16 @@ class Inference(object):
       prior latent variables (of type ``RandomVariable``) to posterior
       latent variables (of type ``RandomVariable``).
 
-    Notes
-    -----
-    If ``data`` is not passed in, the dictionary is empty.
-
-    Three options are available for batch training:
-
-    1. internally if user passes in data as a dictionary of NumPy
-       arrays;
-    2. externally if user passes in data as a dictionary of
-       TensorFlow placeholders (and manually feeds them);
-    3. externally if user passes in data as TensorFlow tensors
-       which are the outputs of data readers.
-
     Examples
     --------
     >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-    >>> x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant(1.0))
+    >>> x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant(1.0))
     >>>
     >>> qmu_mu = tf.Variable(tf.random_normal([1]))
     >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
     >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
     >>>
-    >>> Inference({mu: qmu}, {x: tf.constant([0.0] * N)})
+    >>> inference = Inference({mu: qmu}, data={x: tf.zeros(50)})
     """
     sess = get_session()
     if latent_vars is None:

@@ -34,7 +34,7 @@ class MAP(VariationalInference):
   discrete optimization.
 
   This class also minimizes the loss with respect to any model
-  parameters :math:`p(z \mid x; \theta)`.
+  parameters :math:`p(z \mid x; \\theta)`.
 
   In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
   \mid x)` while fixing inference over :math:`\\beta` using another

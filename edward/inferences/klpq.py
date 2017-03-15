@@ -76,23 +76,24 @@ class KLpq(VariationalInference):
     The loss function can be estimated as
 
     .. math::
-      \\frac{1}{B} \sum_{b=1}^B [
-        w_{norm}(z^b; \lambda) (\log p(x, z^b) - \log q(z^b; \lambda) ],
+      \\frac{1}{S} \sum_{s=1}^S [
+        w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],
 
-    where for :math:`z^b \sim q(z^b; \lambda)`,
+    where for :math:`z^s \sim q(z; \lambda)`,
 
     .. math::
 
-      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B w(z^b; \lambda)
+      w_{\\text{norm}}(z^s; \lambda) =
+          w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)
 
-    normalizes the importance weights, :math:`w(z^b; \lambda) = p(x,
-    z^b) / q(z^b; \lambda)`.
+    normalizes the importance weights, :math:`w(z^s; \lambda) = p(x,
+    z^s) / q(z^s; \lambda)`.
 
     This provides a gradient,
 
     .. math::
-      - \\frac{1}{B} \sum_{b=1}^B [
-        w_{norm}(z^b; \lambda) \\nabla_{\lambda} \log q(z^b; \lambda) ].
+      - \\frac{1}{S} \sum_{s=1}^S [
+        w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples

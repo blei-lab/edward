@@ -11,16 +11,17 @@ from edward.util import copy, get_session
 
 
 class ImplicitKLqp(GANInference):
-  """Variational inference with implicit probabilistic models.
+  """Variational inference with implicit probabilistic models
+  (Tran et al., 2017).
 
   It minimizes the KL divergence
 
   .. math::
 
-    \\text{KL}( q(z, \beta; \lambda) \| p(z, \beta \mid x) ),
+    \\text{KL}( q(z, \\beta; \lambda) \| p(z, \\beta \mid x) ),
 
   where :math:`z` are local variables associated to a data point and
-  :math:`\beta` are global variables shared across data points.
+  :math:`\\beta` are global variables shared across data points.
 
   Global latent variables require ``log_prob()`` and need to return a
   random sample when fetched from the graph. Local latent variables
@@ -109,21 +110,23 @@ class ImplicitKLqp(GANInference):
 
     .. math::
 
-      -[\mathbb{E}_{q(\beta)} [ log p(\beta) - log q(\beta) ] +
-        \sum_{n=1}^N \mathbb{E}_{q(\beta)q(z_n|\beta)} [ r*(x_n, z_n, \beta) ] ]
+      -\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
+        \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
+            r^*(x_n, z_n, \\beta) ] \Big).
 
     We minimize it with respect to parameterized variational
-    families :math:`q(z, beta; \lambda)`.
+    families :math:`q(z, \\beta; \lambda)`.
 
-    :math:`r*(x_n, z_n, beta)` is a function of a single data point
+    :math:`r^*(x_n, z_n, \\beta)` is a function of a single data point
     :math:`x_n`, single local variable :math:`z_n`, and all global
-    variables :math:`\beta`. It is equal to the log-ratio
+    variables :math:`\\beta`. It is equal to the log-ratio
 
     .. math::
 
-      \log p(x_n, z_n | \beta) - \log q(z_n | \beta).
+      \log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),
 
-    Rather than explicit calculation, :math:`r*(x, z, \beta)` is the
+    where :math:`q(x_n)` is the empirical data distribution. Rather
+    than explicit calculation, :math:`r^*(x, z, \\beta)` is the
     solution to a ratio estimation problem, minimizing the specified
     ``ratio_loss``.
 
@@ -132,19 +135,19 @@ class ImplicitKLqp(GANInference):
 
     Notes
     -----
-    This also includes model parameters :math:`p(x, z, beta; theta)`
-    and variational distributions with inference networks :math:`q(z |
-    x)`.
+    This also includes model parameters :math:`p(x, z, \\beta; \\theta)`
+    and variational distributions with inference networks
+    :math:`q(z\mid x)`.
 
     There are a bunch of extensions we could easily do in this
     implementation:
 
     + further factorizations can be used to better leverage the
-    graph structure for more complicated models;
+      graph structure for more complicated models;
     + score function gradients for global variables;
     + use more samples; this would require the ``copy()`` utility
-    function for q's as well, and an additional loop. we opt not to
-    because it complicates the code;
+      function for q's as well, and an additional loop. we opt not to
+      because it complicates the code;
     + analytic KL/swapping out the penalty term for the globals.
     """
     # Collect tensors used in calculation of losses.

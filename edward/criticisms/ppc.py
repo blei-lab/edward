@@ -20,11 +20,11 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   PPC's form an empirical distribution for the predictive discrepancy,
 
   .. math::
-    p(T) = \int p(T(x^{rep}) | z) p(z | x) dz
+    p(T | x) = \int p(T(x^{\\text{rep}}) | z) p(z | x) dz
 
-  by drawing replicated data sets xrep and calculating
-  :math:`T(x^{rep})` for each data set. Then it compares it to
-  :math:`T(x)`.
+  by drawing replicated data sets :math:`x^{\\text{rep}}` and
+  calculating :math:`T(x^{\\text{rep}})` for each data set. Then it
+  compares it to :math:`T(x)`.
 
   Parameters
   ----------
@@ -50,19 +50,20 @@ def ppc(T, data, latent_vars=None, n_samples=100):
     array of size elements,
 
     .. math::
-      (T(x^{rep,1}, z^{1}), ..., T(x^{rep,size}, z^{size}))
+      (T(x^{{\\text{rep}},1}, z^{1}), ...,
+       T(x^{\\text{rep,size}}, z^{\\text{size}}))
 
     and the realized discrepancy, which is a NumPy array of size
     elements,
 
     .. math::
-      (T(x, z^{1}), ..., T(x, z^{size})).
+      (T(x, z^{1}), ..., T(x, z^{\\text{size}})).
 
 
   Examples
   --------
-  >>> # build posterior predictive after inference: it is
-  >>> # parameterized by a posterior sample
+  >>> # build posterior predictive after inference:
+  >>> # it is parameterized by a posterior sample
   >>> x_post = copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # posterior predictive check
@@ -77,7 +78,7 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   ...     latent_vars={z: qz, beta: qbeta})
   >>>
   >>> # prior predictive check
-  >>> # running ppc on original x
+  >>> # run ppc on original x
   >>> ppc(T, data={x: x_train})
   """
   sess = get_session()
