@@ -22,7 +22,7 @@ class KLpq(VariationalInference):
 
   Notes
   -----
-  ``KLpq`` also optimizes any model parameters :math:`p(z | x;
+  ``KLpq`` also optimizes any model parameters :math:`p(z\mid x;
   \\theta)`. It does this by variational EM, minimizing
 
   .. math::
@@ -68,7 +68,7 @@ class KLpq(VariationalInference):
     """Build loss function
 
     .. math::
-      \\text{KL}( p(z \mid x) || q(z) )
+      \\text{KL}( p(z \mid x) \| q(z) )
       = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]
 
     and stochastic gradients based on importance sampling.

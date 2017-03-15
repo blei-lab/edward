@@ -66,8 +66,8 @@ class KLqp(VariationalInference):
       If the KL divergence terms are
 
       .. math::
-        \\alpha_p \mathbb{E}_{q(z|x, \lambda)} [
-            \log q(z|x, \lambda) - \log p(z)],
+        \\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+            \log q(z\mid x, \lambda) - \log p(z)],
 
       then pass {:math:`p(z)`: :math:`\\alpha_p`} as ``kl_scaling``,
       where :math:`\\alpha_p` is a float that specifies how much to
@@ -184,8 +184,8 @@ class ReparameterizationKLKLqp(VariationalInference):
       If the KL divergence terms are
 
       .. math::
-        \\alpha_p \mathbb{E}_{q(z|x, \lambda)} [
-            \log q(z|x, \lambda) - \log p(z)],
+        \\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+            \log q(z\mid x, \lambda) - \log p(z)],
 
       then pass {:math:`p(z)`: :math:`\\alpha_p`} as ``kl_scaling``,
       where :math:`\\alpha_p` is a float that specifies how much to
@@ -287,8 +287,8 @@ class ScoreKLKLqp(VariationalInference):
       If the KL divergence terms are
 
       .. math::
-        \\alpha_p \mathbb{E}_{q(z|x, \lambda)} [
-            \log q(z|x, \lambda) - \log p(z)],
+        \\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+            \log q(z\mid x, \lambda) - \log p(z)],
 
       then pass {:math:`p(z)`: :math:`\\alpha_p`} as ``kl_scaling``,
       where :math:`\\alpha_p` is a float that specifies how much to

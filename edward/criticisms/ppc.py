@@ -20,7 +20,7 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   PPC's form an empirical distribution for the predictive discrepancy,
 
   .. math::
-    p(T | x) = \int p(T(x^{\\text{rep}}) | z) p(z | x) dz
+    p(T\mid x) = \int p(T(x^{\\text{rep}})\mid z) p(z\mid x) dz
 
   by drawing replicated data sets :math:`x^{\\text{rep}}` and
   calculating :math:`T(x^{\\text{rep}})` for each data set. Then it
