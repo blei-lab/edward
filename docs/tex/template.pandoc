@@ -63,7 +63,8 @@ $endfor$
     padding: 0 15px 0 0;
     border: none;
   }
-  dt em { /* Keep 'class' consistent in style with rest of def. */
+  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
+    font-family: monospace, monospace;
     font-style: normal;
     font-size: 14px !important;
   }
