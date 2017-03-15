@@ -12,7 +12,6 @@ path = ("api/*.html")
 filenames = glob.glob(path)
 
 for filename in filenames:
-  print(filename)
   soup = BeautifulSoup(open(filename), 'html.parser')
   for snippet in soup.find_all("div", class_="highlight-default"):
     snippet.name = "pre"
