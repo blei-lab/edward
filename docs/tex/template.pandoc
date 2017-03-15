@@ -53,8 +53,12 @@ $endfor$
     }
   }
   /* Docstrings. */
-  dl.class, dl.function { /* Add border to each docstring. */
-    border-bottom: 1px solid #E1E1E1;
+  dl.class + dl.class, dl.function + dl.function {
+    /* Add border inbetween docstrings. */
+    border-top: 1px solid #E1E1E1;
+  }
+  dt { /* Add spacing for top border. */
+    margin-top: 1.0rem;
   }
   dd { /* Remove overall indenting in an entry. */
     margin-left: 0.0rem;
