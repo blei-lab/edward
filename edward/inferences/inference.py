@@ -12,18 +12,6 @@ from edward.util import get_session, Progbar
 
 class Inference(object):
   """Base class for Edward inference methods.
-
-  Attributes
-  ----------
-  latent_vars : dict
-    Collection of latent variables (of type ``RandomVariable`` or
-    ``tf.Tensor``) to perform inference on. Each random variable is
-    binded to another random variable; the latter will infer the
-    former conditional on data.
-  data : dict
-    Data dictionary which binds observed variables (of type
-    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
-    type ``tf.Tensor``).
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
