@@ -60,5 +60,9 @@ echo "Running 'replace_sphinx_code_blocks.py'"
 python replace_sphinx_code_blocks.py
 printf "Done.\n\n"
 
+echo "Running 'rearrange_attribute_rows.py'"
+python rearrange_attribute_rows.py
+printf "Done.\n\n"
+
 # Clear intermediate docstring-generated files
 rm -rf build
