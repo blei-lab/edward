@@ -103,6 +103,12 @@ PAGES = [
         'parent_pages': [],
         'child_pages': [],
     },
+    {
+        'page': 'reference.tex',
+        'title': 'Reference',
+        'parent_pages': [],
+        'child_pages': [],
+    },
     # {
     #     'page': 'util.tex',
     #     'title': 'Utilities',
@@ -203,6 +209,39 @@ def generate_docstrings(page_data):
   return docstrings
 
 
+def generate_tensorflow_distributions():
+  import edward.models
+  from tensorflow.contrib import distributions
+
+  models = [getattr(edward.models, name) for name in dir(edward.models)]
+  models = [model for model in models
+            if (isinstance(model, type) and
+                issubclass(model, distributions.Distribution) and
+                model.__name__ not in {'Empirical', 'PointMass'}
+                )
+            ]
+  models = sorted(models, key=lambda cls: cls.__name__)
+
+  stub = 'https://www.tensorflow.org/api_docs/python/tf/contrib/distributions'
+  fragment = ('<a class="reference" '
+              'href="{stub}/{name}" title="edward.models.{name}">'
+              '<code class="xref py py-class docutils literal">'
+              '<span class="pre">edward.models.{name}</span>'
+              '</code>'
+              '</a>')
+
+  links = [fragment.format(stub=stub, name=cls.__name__)
+           for cls in models]
+
+  # note the start and end li tag are provided from outside
+  return '</li>\n<li>'.join(links)
+
+
+def get_tensorflow_version():
+  import tensorflow
+  return str(getattr(tensorflow, '__version__', '<unknown verison>'))
+
+
 print("Starting autogeneration.")
 print("Populating build/ directory with files from tex/api/.")
 for subdir, dirs, fnames in os.walk('tex/api'):
@@ -232,10 +271,21 @@ for page_data in PAGES:
   assert '{{navbar}}' in document, \
          ("File found for " + path + " but missing {{navbar}} tag.")
   document = document.replace('{{navbar}}', navbar)
+
   for i in range(len(docstrings)):
     document = re.sub(r'(?<={{sphinx)(.*?)(?=}})', "",
                       document, count=1, flags=re.DOTALL)
     document = document.replace('{{sphinx}}', docstrings[i])
+
+  # note: this tag is part of the sphinx section,
+  #       use single quotes to avoid clash
+  if '{tensorflow_distributions}' in document:
+    document = document.replace('{tensorflow_distributions}',
+                                generate_tensorflow_distributions())
+
+  if '{{tensorflow_version}}' in document:
+    document = document.replace('{{tensorflow_version}}',
+                                get_tensorflow_version())
 
   subdir = os.path.dirname(path)
   if not os.path.exists(subdir):
