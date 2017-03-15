@@ -17,6 +17,11 @@ _suff_stat_to_dist = {}
 # TODO(mhoffman): Support (discrete/continuous mostly) also matters.
 _suff_stat_to_dist[('_log1m', 'log')] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 _suff_stat_to_dist[('identity', 'log')] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
+def normal_from_natural_params(p1, p2):
+  sigmasq = 0.5 * tf.reciprocal(-p2)
+  mu = sigmasq * p1
+  return rvs.Normal(mu, tf.sqrt(sigmasq))
+_suff_stat_to_dist[('identity', 'square')] = normal_from_natural_params
 
 def complete_conditional(rv, blanket):
   log_joint = 0
@@ -114,6 +119,18 @@ def lgamma(x):
   return sufficient_statistic(tf.lgamma, x)
 
 
+def square(x):
+  return sufficient_statistic(tf.square, x)
+
+
+def _squared_reciprocal(x):
+  return tf.reciprocal(tf.square(x))
+
+
+def squared_reciprocal(x):
+  return sufficient_statistic(_squared_reciprocal, x)
+
+
 def _canonical_value(x):
   if isinstance(x, RandomVariable):
     return x.value()
@@ -162,8 +179,9 @@ def beta_log_prob(self):
   val = self.value()
   a = _canonical_value(self.parameters['a'])
   b = _canonical_value(self.parameters['b'])
-  result = (a - 1) * log(val) + (b - 1) * log1m(val)
-  result += -tf.lgamma(a) - tf.lgamma(b) + tf.lgamma(a + b)
+  result = (identity(a) - 1) * log(val)
+  result += (identity(b) - 1) * log1m(val)
+  result += -lgamma(a) - lgamma(b) + lgamma(a + b)
   return result
 rvs.Beta.conjugate_log_prob = beta_log_prob
 
@@ -193,6 +211,18 @@ def poisson_log_prob(self):
   result += - identity(lam) - tf.lgamma(val+1)
   return result
 rvs.Poisson.conjugate_log_prob = poisson_log_prob
+
+
+def normal_log_prob(self):
+  val = self.value()
+  mu = _canonical_value(self.parameters['mu'])
+  sigma = _canonical_value(self.parameters['sigma'])
+  prec = squared_reciprocal(sigma)
+  result = prec * (-0.5 * square(val) - 0.5 * square(mu)
+                   + identity(val) * identity(mu))
+  result -= log(sigma) + 0.5 * np.log(2*np.pi)
+  return result
+rvs.Normal.conjugate_log_prob = normal_log_prob
 
 
 #### CRUFT
