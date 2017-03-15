@@ -28,6 +28,38 @@
       margin-bottom: 5%;
     }
   }
+  /* Docstrings. */
+  dl.class, dl.function { /* Add border to each docstring. */
+    border-bottom: 1px solid #E1E1E1;
+  }
+  dd { /* Remove overall indenting in an entry. */
+    margin-left: 0.0rem;
+  }
+  dl th, dl td { /* Remove extraneous padding and decorations. */
+    padding: 0 15px 0 0;
+    border: none;
+  }
+  dt em { /* Keep 'class' consistent in style with rest of def. */
+    font-style: normal;
+    font-size: 14px !important;
+  }
+  /* Attribute contents within a docstring. */
+  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
+    margin-left: 0.0rem;
+    margin-top: 0.0rem;
+    margin-bottom: 0.0rem;
+  }
+  dl td p { /* Reduce spacing. */
+    margin-bottom: 0.75rem;
+  }
+  dl td.field-body { /* Add indenting. */
+    padding-top: 0.75rem;
+    padding-left: 2.0rem;
+    display: block;
+  }
+  dl code { /* Keep code font size consistent with rest of contents. */
+    font-size: 90%;
+  }
   </style>
 <!-- KaTeX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
@@ -165,7 +197,7 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : str or tf.train.Optimizer, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>optimizer</strong> : str or tf.train.Optimizer, optional</p>
 <blockquote>
 <div><p>A TensorFlow optimizer, to use for optimizing the variational
 objective. Alternatively, one can pass in the name of a
@@ -197,14 +229,14 @@ Defaults to TensorFlow.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
 <blockquote>
 <div><p>Feed dictionary for a TensorFlow session run. It is used to feed
 placeholders that are not fed during initialization.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">dict</p>
 <blockquote class="last">
 <div><p>Dictionary of algorithm-specific information. In this case, the
 loss function value after one iteration.</p>
@@ -221,7 +253,7 @@ loss function value after one iteration.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L157" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L153" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong> implement
 this method.</p>
@@ -229,7 +261,7 @@ this method.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>NotImplementedError</strong></td>
+<tr class="field"><th class="field-name">Raises:</th></tr><tr class="field-odd field"><td class="field-body"><strong>NotImplementedError</strong></td>
 </tr>
 </tbody>
 </table>
@@ -269,7 +301,7 @@ of using the model’s density</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
 <blockquote>
 <div><p>Number of samples from variational model for calculating
 stochastic gradients.</p>
@@ -387,7 +419,7 @@ only a program that generates samples.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : dict</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>data</strong> : dict</p>
 <blockquote>
 <div><p>Data dictionary which binds observed variables (of type
 <code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to their realizations (of
@@ -414,10 +446,10 @@ discriminator’s parameters can be accessed with the variable scope
 “Disc”.</p>
 <p>GANs also only work for one observed random variable in <code class="docutils literal"><span class="pre">data</span></code>.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
-&gt;&gt;&gt; x = generative_network(z)
-&gt;&gt;&gt;
-&gt;&gt;&gt; inference = ed.GANInference({x: x_data}, discriminator)
+<pre class="python" language="Python"><code>z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+x = generative_network(z)
+
+inference = ed.GANInference({x: x_data}, discriminator)
 
 </code>
 </pre>
@@ -430,7 +462,7 @@ discriminator’s parameters can be accessed with the variable scope
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : str or tf.train.Optimizer, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>optimizer</strong> : str or tf.train.Optimizer, optional</p>
 <blockquote>
 <div><p>A TensorFlow optimizer, to use for optimizing the generator
 objective. Alternatively, one can pass in the name of a
@@ -475,7 +507,7 @@ and <code class="docutils literal"><span class="pre">data</span></code> depend o
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
 <blockquote>
 <div><p>Feed dictionary for a TensorFlow session run. It is used to feed
 placeholders that are not fed during initialization.</p>
@@ -487,7 +519,7 @@ Default is both.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">dict</p>
 <blockquote class="last">
 <div><p>Dictionary of algorithm-specific information. In this case, the
 iteration number and generative and discriminative losses.</p>
@@ -523,10 +555,10 @@ function or critic. <code class="docutils literal"><span class="pre">WGANInferen
 <code class="docutils literal"><span class="pre">discriminator</span></code> only to share methods and attributes with
 <code class="docutils literal"><span class="pre">GANInference</span></code>.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
-&gt;&gt;&gt; x = generative_network(z)
-&gt;&gt;&gt;
-&gt;&gt;&gt; inference = ed.WGANInference({x: x_data}, discriminator)
+<pre class="python" language="Python"><code>z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+x = generative_network(z)
+
+inference = ed.WGANInference({x: x_data}, discriminator)
 
 </code>
 </pre>
@@ -553,7 +585,7 @@ random variables (<code class="docutils literal"><span class="pre">rv</span></co
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>discriminator</strong> : function</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>discriminator</strong> : function</p>
 <blockquote>
 <div><p>Function (with parameters). Unlike <code class="docutils literal"><span class="pre">GANInference</span></code>, it is
 interpreted as a ratio estimator rather than a discriminator.
@@ -600,7 +632,7 @@ dictionary of same size and keys as <code class="docutils literal"><span class="
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ratio_loss</strong> : str or fn, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>ratio_loss</strong> : str or fn, optional</p>
 <blockquote class="last">
 <div><p>Loss function minimized to get the ratio estimator. ‘log’ or ‘hinge’.
 Alternatively, one can pass in a function of two inputs,
@@ -682,7 +714,7 @@ of using the model’s density</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>n_samples</strong> : int, optional</p>
 <blockquote class="last">
 <div><p>Number of samples from variational model for calculating
 stochastic gradients.</p>
@@ -746,7 +778,7 @@ marginal density <span class="math">\(\log p(x, z)\)</span>, and it is exact if
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : list of RandomVariable or</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>latent_vars</strong> : list of RandomVariable or</p>
 <blockquote class="last">
 <div><blockquote>
 <div><p>dict of RandomVariable to RandomVariable</p>
@@ -763,17 +795,17 @@ value in the dictionary must be a <code class="docutils literal"><span class="pr
 </table>
 <p class="rubric">Examples</p>
 <p>Most explicitly, <code class="docutils literal"><span class="pre">MAP</span></code> is specified via a dictionary:</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-&gt;&gt;&gt; qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
-&gt;&gt;&gt; qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-&gt;&gt;&gt; MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+<pre class="python" language="Python"><code>qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
+qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
 </code>
 </pre>
 <p>We also automate the specification of <code class="docutils literal"><span class="pre">PointMass</span></code> distributions,
 so one can pass in a list of latent variables instead:</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; MAP([beta], data)
-&gt;&gt;&gt; MAP([pi, mu, sigma], data)
+<pre class="python" language="Python"><code>MAP([beta], data)
+MAP([pi, mu, sigma], data)
 
 </code>
 </pre>
@@ -805,7 +837,7 @@ covariance of the normal approximation.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : list of RandomVariable or</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>latent_vars</strong> : list of RandomVariable or</p>
 <blockquote class="last">
 <div><blockquote>
 <div><p>dict of RandomVariable to RandomVariable</p>
@@ -829,14 +861,14 @@ the diagonal. This does not capture correlation among the
 variables but it does not require a potentially expensive matrix
 inversion.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; X = tf.placeholder(tf.float32, [N, D])
-&gt;&gt;&gt; w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-&gt;&gt;&gt; y = Normal(mu=ed.dot(X, w), sigma=tf.ones(N))
-&gt;&gt;&gt;
-&gt;&gt;&gt; qw = MultivariateNormalFull(mu=tf.Variable(tf.random_normal([D])),
-&gt;&gt;&gt;                             sigma=tf.Variable(tf.random_normal([D, D])))
-&gt;&gt;&gt;
-&gt;&gt;&gt; inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
+<pre class="python" language="Python"><code>X = tf.placeholder(tf.float32, [N, D])
+w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+y = Normal(mu=ed.dot(X, w), sigma=tf.ones(N))
+
+qw = MultivariateNormalFull(mu=tf.Variable(tf.random_normal([D])),
+                            sigma=tf.Variable(tf.random_normal([D, D])))
+
+inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
 
 </code>
 </pre>
@@ -850,7 +882,7 @@ inversion.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
 <blockquote class="last">
 <div><p>Feed dictionary for a TensorFlow session run during evaluation
 of Hessian. It is used to feed placeholders that are not fed
@@ -872,7 +904,7 @@ during initialization.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : list or dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>latent_vars</strong> : list or dict, optional</p>
 <blockquote>
 <div><p>Collection of random variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or
 <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to perform inference on. If list, each random
@@ -903,10 +935,10 @@ are along this outer dimension, where iteration t updates
 of time, then manually burn in the Empirical random variable.</p>
 <p class="rubric">Examples</p>
 <p>Most explicitly, <code class="docutils literal"><span class="pre">MonteCarlo</span></code> is specified via a dictionary:</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
-&gt;&gt;&gt; qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-&gt;&gt;&gt; qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-&gt;&gt;&gt; MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+<pre class="python" language="Python"><code>qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
+qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
+qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
+MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
 </code>
 </pre>
@@ -914,8 +946,8 @@ of time, then manually burn in the Empirical random variable.</p>
 variables with <code class="docutils literal"><span class="pre">T</span></code> samples. We also automate the specification
 of <code class="docutils literal"><span class="pre">Empirical</span></code> random variables. One can pass in a list of
 latent variables instead:</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; MonteCarlo([beta], data)
-&gt;&gt;&gt; MonteCarlo([pi, mu, sigma], data)
+<pre class="python" language="Python"><code>MonteCarlo([beta], data)
+MonteCarlo([pi, mu, sigma], data)
 
 </code>
 </pre>
@@ -930,14 +962,14 @@ each dimension.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
 <blockquote>
 <div><p>Feed dictionary for a TensorFlow session run. It is used to feed
 placeholders that are not fed during initialization.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">dict</p>
 <blockquote class="last">
 <div><p>Dictionary of algorithm-specific information. In this case, the
 acceptance rate of samples since (and including) this iteration.</p>
@@ -959,7 +991,7 @@ separately forces a consistent behavior.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L145" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L141" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build update, which returns an assign op for parameters in
 the Empirical random variables.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement
@@ -968,7 +1000,7 @@ this method.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>NotImplementedError</strong></td>
+<tr class="field"><th class="field-name">Raises:</th></tr><tr class="field-odd field"><td class="field-body"><strong>NotImplementedError</strong></td>
 </tr>
 </tbody>
 </table>
@@ -995,7 +1027,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>proposal_vars</strong> : dict of RandomVariable to RandomVariable</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>proposal_vars</strong> : dict of RandomVariable to RandomVariable</p>
 <blockquote class="last">
 <div><p>Collection of random variables to perform inference on; each is
 binded to a proposal distribution <span class="math">\(g(z' \mid z)\)</span>.</p>
@@ -1005,13 +1037,13 @@ binded to a proposal distribution <span class="math">\(g(z' \mid z)\)</span>.</p
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=0.0, sigma=1.0)
-&gt;&gt;&gt; x = Normal(mu=tf.ones(10) * z, sigma=1.0)
-&gt;&gt;&gt;
-&gt;&gt;&gt; qz = Empirical(tf.Variable(tf.zeros([500])))
-&gt;&gt;&gt; proposal_z = Normal(mu=z, sigma=0.5)
-&gt;&gt;&gt; data = {x: np.array([0.0] * 10, dtype=np.float32)}
-&gt;&gt;&gt; inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
+<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
+x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+
+qz = Empirical(tf.Variable(tf.zeros([500])))
+proposal_z = Normal(mu=z, sigma=0.5)
+data = {x: np.array([0.0] * 10, dtype=np.float32)}
+inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
 
 </code>
 </pre>
@@ -1047,12 +1079,12 @@ q(\beta)\)</span>. This is unbiased (and therefore asymptotically exact as a
 pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</span>.</p>
 <p class="rubric">Methods</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=0.0, sigma=1.0)
-&gt;&gt;&gt; x = Normal(mu=tf.ones(10) * z, sigma=1.0)
-&gt;&gt;&gt;
-&gt;&gt;&gt; qz = Empirical(tf.Variable(tf.zeros([500])))
-&gt;&gt;&gt; data = {x: np.array([0.0] * 10, dtype=np.float32)}
-&gt;&gt;&gt; inference = ed.HMC({z: qz}, data)
+<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
+x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+
+qz = Empirical(tf.Variable(tf.zeros([500])))
+data = {x: np.array([0.0] * 10, dtype=np.float32)}
+inference = ed.HMC({z: qz}, data)
 
 </code>
 </pre>
@@ -1064,7 +1096,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
 <blockquote>
 <div><p>Step size of numerical integrator.</p>
 </div></blockquote>
@@ -1105,12 +1137,12 @@ q(\beta)\)</span>. This is unbiased (and therefore asymptotically exact as a
 pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</span>.</p>
 <p class="rubric">Methods</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=0.0, sigma=1.0)
-&gt;&gt;&gt; x = Normal(mu=tf.ones(10) * z, sigma=1.0)
-&gt;&gt;&gt;
-&gt;&gt;&gt; qz = Empirical(tf.Variable(tf.zeros([500])))
-&gt;&gt;&gt; data = {x: np.array([0.0] * 10, dtype=np.float32)}
-&gt;&gt;&gt; inference = ed.SGLD({z: qz}, data)
+<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
+x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+
+qz = Empirical(tf.Variable(tf.zeros([500])))
+data = {x: np.array([0.0] * 10, dtype=np.float32)}
+inference = ed.SGLD({z: qz}, data)
 
 </code>
 </pre>
@@ -1122,7 +1154,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
 <blockquote class="last">
 <div><p>Constant scale factor of learning rate.</p>
 </div></blockquote>
@@ -1158,12 +1190,12 @@ q(\beta)\)</span>. This is unbiased (and therefore asymptotically exact as a
 pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</span>.</p>
 <p class="rubric">Methods</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; z = Normal(mu=0.0, sigma=1.0)
-&gt;&gt;&gt; x = Normal(mu=tf.ones(10) * z, sigma=1.0)
-&gt;&gt;&gt;
-&gt;&gt;&gt; qz = Empirical(tf.Variable(tf.zeros([500])))
-&gt;&gt;&gt; data = {x: np.array([0.0] * 10, dtype=np.float32)}
-&gt;&gt;&gt; inference = ed.SGHMC({z: qz}, data)
+<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
+x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+
+qz = Empirical(tf.Variable(tf.zeros([500])))
+data = {x: np.array([0.0] * 10, dtype=np.float32)}
+inference = ed.SGHMC({z: qz}, data)
 
 </code>
 </pre>
@@ -1175,7 +1207,7 @@ pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</sp
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>step_size</strong> : float, optional</p>
 <blockquote>
 <div><p>Constant scale factor of learning rate.</p>
 </div></blockquote>

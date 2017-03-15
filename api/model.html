@@ -28,6 +28,38 @@
       margin-bottom: 5%;
     }
   }
+  /* Docstrings. */
+  dl.class, dl.function { /* Add border to each docstring. */
+    border-bottom: 1px solid #E1E1E1;
+  }
+  dd { /* Remove overall indenting in an entry. */
+    margin-left: 0.0rem;
+  }
+  dl th, dl td { /* Remove extraneous padding and decorations. */
+    padding: 0 15px 0 0;
+    border: none;
+  }
+  dt em { /* Keep 'class' consistent in style with rest of def. */
+    font-style: normal;
+    font-size: 14px !important;
+  }
+  /* Attribute contents within a docstring. */
+  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
+    margin-left: 0.0rem;
+    margin-top: 0.0rem;
+    margin-bottom: 0.0rem;
+  }
+  dl td p { /* Reduce spacing. */
+    margin-bottom: 0.75rem;
+  }
+  dl td.field-body { /* Add indenting. */
+    padding-top: 0.75rem;
+    padding-left: 2.0rem;
+    display: block;
+  }
+  dl code { /* Keep code font size consistent with rest of contents. */
+    font-size: 90%;
+  }
   </style>
 <!-- KaTeX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
@@ -168,15 +200,15 @@ order, this implies the following during initialization (using
 populate the namespace of the child class. Methods from
 <code class="docutils literal"><span class="pre">RandomVariable</span></code> will take higher priority if there are conflicts.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; p = tf.constant(0.5)
-&gt;&gt;&gt; x = Bernoulli(p=p)
-&gt;&gt;&gt;
-&gt;&gt;&gt; z1 = tf.constant([[2.0, 8.0]])
-&gt;&gt;&gt; z2 = tf.constant([[1.0, 2.0]])
-&gt;&gt;&gt; x = Bernoulli(p=tf.matmul(z1, z2))
-&gt;&gt;&gt;
-&gt;&gt;&gt; mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-&gt;&gt;&gt; x = Normal(mu=mu, sigma=tf.constant(1.0))
+<pre class="python" language="Python"><code>p = tf.constant(0.5)
+x = Bernoulli(p=p)
+
+z1 = tf.constant([[2.0, 8.0]])
+z2 = tf.constant([[1.0, 2.0]])
+x = Bernoulli(p=tf.matmul(z1, z2))
+
+mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+x = Normal(mu=mu, sigma=tf.constant(1.0))
 
 </code>
 </pre>
@@ -193,7 +225,7 @@ passed, the default session is used.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>session</strong> : tf.BaseSession, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>session</strong> : tf.BaseSession, optional</p>
 <blockquote>
 <div><p>The <code class="docutils literal"><span class="pre">tf.Session</span></code> to use to evaluate this random variable. If
 none, the default session is used.</p>
@@ -208,13 +240,13 @@ none, the default session is used.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; x = Normal(0.0, 1.0)
-&gt;&gt;&gt; with tf.Session() as sess:
-&gt;&gt;&gt;   # Usage passing the session explicitly.
-&gt;&gt;&gt;   print(x.eval(sess))
-&gt;&gt;&gt;   # Usage with the default session.  The 'with' block
-&gt;&gt;&gt;   # above makes 'sess' the default session.
-&gt;&gt;&gt;   print(x.eval())
+<pre class="python" language="Python"><code>x = Normal(0.0, 1.0)
+with tf.Session() as sess:
+  # Usage passing the session explicitly.
+  print(x.eval(sess))
+  # Usage with the default session.  The 'with' block
+  # above makes 'sess' the default session.
+  print(x.eval())
 
 </code>
 </pre>

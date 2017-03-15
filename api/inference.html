@@ -28,6 +28,38 @@
       margin-bottom: 5%;
     }
   }
+  /* Docstrings. */
+  dl.class, dl.function { /* Add border to each docstring. */
+    border-bottom: 1px solid #E1E1E1;
+  }
+  dd { /* Remove overall indenting in an entry. */
+    margin-left: 0.0rem;
+  }
+  dl th, dl td { /* Remove extraneous padding and decorations. */
+    padding: 0 15px 0 0;
+    border: none;
+  }
+  dt em { /* Keep 'class' consistent in style with rest of def. */
+    font-style: normal;
+    font-size: 14px !important;
+  }
+  /* Attribute contents within a docstring. */
+  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
+    margin-left: 0.0rem;
+    margin-top: 0.0rem;
+    margin-bottom: 0.0rem;
+  }
+  dl td p { /* Reduce spacing. */
+    margin-bottom: 0.75rem;
+  }
+  dl td.field-body { /* Add indenting. */
+    padding-top: 0.75rem;
+    padding-left: 2.0rem;
+    display: block;
+  }
+  dl code { /* Keep code font size consistent with rest of contents. */
+    font-size: 90%;
+  }
   </style>
 <!-- KaTeX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
@@ -170,7 +202,7 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latent_vars</strong> : dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>latent_vars</strong> : dict, optional</p>
 <blockquote>
 <div><p>Collection of latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or
 <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to perform inference on. Each random variable is
@@ -202,14 +234,14 @@ TensorFlow placeholders (and manually feeds them);</li>
 which are the outputs of data readers.</li>
 </ol>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>&gt;&gt;&gt; mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-&gt;&gt;&gt; x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant(1.0))
-&gt;&gt;&gt;
-&gt;&gt;&gt; qmu_mu = tf.Variable(tf.random_normal([1]))
-&gt;&gt;&gt; qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
-&gt;&gt;&gt; qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
-&gt;&gt;&gt;
-&gt;&gt;&gt; Inference({mu: qmu}, {x: tf.constant([0.0] * N)})
+<pre class="python" language="Python"><code>mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant(1.0))
+
+qmu_mu = tf.Variable(tf.random_normal([1]))
+qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+
+Inference({mu: qmu}, {x: tf.constant([0.0] * N)})
 
 </code>
 </pre>
@@ -234,7 +266,7 @@ individually.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>variables</strong> : list, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>variables</strong> : list, optional</p>
 <blockquote>
 <div><p>A list of TensorFlow variables to initialize during inference.
 Default is to initialize all variables (this includes
@@ -268,7 +300,7 @@ for batch training with file readers.</p>
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n_iter</strong> : int, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>n_iter</strong> : int, optional</p>
 <blockquote>
 <div><p>Number of iterations for algorithm.</p>
 </div></blockquote>
@@ -303,20 +335,20 @@ times.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L273" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L274" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
 <blockquote>
 <div><p>Feed dictionary for a TensorFlow session run. It is used to feed
 placeholders that are not fed during initialization.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">dict</p>
 <blockquote class="last">
 <div><p>Dictionary of algorithm-specific information.</p>
 </div></blockquote>
@@ -327,13 +359,13 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L307" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L308" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>info_dict</strong> : dict</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>info_dict</strong> : dict</p>
 <blockquote class="last">
 <div><p>Dictionary of algorithm-specific information.</p>
 </div></blockquote>
@@ -344,7 +376,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L322" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L321" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>
