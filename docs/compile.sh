@@ -2,13 +2,7 @@
 printf "Compiling Edward website.\n\n"
 
 echo "Clearing all html files."
-rm -f *.html
-rm -rf api
-rm -rf tutorials
-printf "Done.\n\n"
-
-echo "Clear build directory"
-rm -rf build/*
+rm -f {./,api/,tutorials/}*.html
 printf "Done.\n\n"
 
 # Generate docstrings
