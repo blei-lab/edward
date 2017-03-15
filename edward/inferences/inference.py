@@ -52,7 +52,7 @@ class Inference(object):
     >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
     >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
     >>>
-    >>> inference = Inference({mu: qmu}, data={x: tf.zeros(50)})
+    >>> inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
     """
     sess = get_session()
     if latent_vars is None:

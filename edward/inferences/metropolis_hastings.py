@@ -44,7 +44,7 @@ class MetropolisHastings(MonteCarlo):
     >>> z = Normal(mu=0.0, sigma=1.0)
     >>> x = Normal(mu=tf.ones(10) * z, sigma=1.0)
     >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros([500])))
+    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
     >>> proposal_z = Normal(mu=z, sigma=0.5)
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)

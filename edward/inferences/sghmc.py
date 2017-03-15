@@ -36,7 +36,7 @@ class SGHMC(MonteCarlo):
     >>> z = Normal(mu=0.0, sigma=1.0)
     >>> x = Normal(mu=tf.ones(10) * z, sigma=1.0)
     >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros([500])))
+    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.SGHMC({z: qz}, data)
     """

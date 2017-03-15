@@ -65,15 +65,15 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   --------
   >>> # build posterior predictive after inference: it is
   >>> # parameterized by a posterior sample
-  >>> x_post = copy(x, {z: qz, beta: qbeta})
+  >>> x_post = ed.copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # log-likelihood performance
-  >>> evaluate('log_likelihood', data={x_post: x_train})
+  >>> ed.evaluate('log_likelihood', data={x_post: x_train})
   >>>
   >>> # classification accuracy
   >>> # here, ``x_ph`` is any features the model is defined with respect to,
   >>> # and ``y_post`` is the posterior predictive distribution
-  >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+  >>> ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
   >>>
   >>> # mean squared error
   >>> ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})

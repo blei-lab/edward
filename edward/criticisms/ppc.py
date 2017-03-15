@@ -64,22 +64,22 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   --------
   >>> # build posterior predictive after inference:
   >>> # it is parameterized by a posterior sample
-  >>> x_post = copy(x, {z: qz, beta: qbeta})
+  >>> x_post = ed.copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # posterior predictive check
   >>> # T is a user-defined function of data, T(data)
   >>> T = lambda xs, zs: tf.reduce_mean(xs[x_post])
-  >>> ppc(T, data={x_post: x_train})
+  >>> ed.ppc(T, data={x_post: x_train})
   >>>
   >>> # in general T is a discrepancy function of the data (both response and
   >>> # covariates) and latent variables, T(data, latent_vars)
   >>> T = lambda xs, zs: tf.reduce_mean(zs[z])
-  >>> ppc(T, data={y_post: y_train, x_ph: x_train},
-  ...     latent_vars={z: qz, beta: qbeta})
+  >>> ed.ppc(T, data={y_post: y_train, x_ph: x_train},
+  ...        latent_vars={z: qz, beta: qbeta})
   >>>
   >>> # prior predictive check
   >>> # run ppc on original x
-  >>> ppc(T, data={x: x_train})
+  >>> ed.ppc(T, data={x: x_train})
   """
   sess = get_session()
   # Sample to get replicated data sets and latent variables.
