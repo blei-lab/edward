@@ -1,8 +1,14 @@
-from bs4 import BeautifulSoup
-import glob
+"""Replace paragraph symbol with link to github with line numbering."""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward
 import inspect
+import glob
 import string
+
+from bs4 import BeautifulSoup
 
 
 def find_filename_and_line(method_name):
@@ -20,13 +26,12 @@ def find_filename_and_line(method_name):
   line_no = inspect.getsourcelines(method_obj)[-1]
   return rel_path, line_no
 
-print "Running `insert_github_links.py`"
 
 path = ("api/*.html")
 filenames = glob.glob(path)
 
 for filename in filenames:
-  print filename
+  print(filename)
   soup = BeautifulSoup(open(filename), 'html.parser')
   github = "https://github.com/blei-lab/edward/blob/master/"
   for a in soup.find_all("a", "headerlink"):
@@ -36,6 +41,7 @@ for filename in filenames:
     a['class'] = 'u-pull-right'
     a['title'] = "Link to definition on GitHub."
     a.string.replace_with("[source]")
+
   html = str(soup)
   with open(filename, 'wb') as file:
     file.write(html)

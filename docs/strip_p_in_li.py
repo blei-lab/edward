@@ -1,7 +1,11 @@
-from bs4 import BeautifulSoup
+"""Strip paragraphs in lists in pandoc's html output."""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import glob
 
-print "Running `strip_p_in_li.py`"
+from bs4 import BeautifulSoup
 
 paths = ("*.html", "api/*.html", "tutorials/*.html")
 filenames = []
