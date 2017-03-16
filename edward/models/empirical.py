@@ -7,7 +7,6 @@ import tensorflow as tf
 from edward.models.random_variable import RandomVariable
 from edward.util import get_dims
 from tensorflow.contrib.distributions import Distribution
-from tensorflow.python.framework import tensor_shape
 
 
 class Empirical(RandomVariable, Distribution):
@@ -48,10 +47,10 @@ class Empirical(RandomVariable, Distribution):
     return self._n
 
   def _batch_shape(self):
-    return tf.constant([], dtype=tf.int32)
+    return tf.convert_to_tensor(self.get_batch_shape())
 
   def _get_batch_shape(self):
-    return tensor_shape.scalar()
+    return tf.TensorShape([])
 
   def _event_shape(self):
     return tf.convert_to_tensor(self.get_event_shape())
