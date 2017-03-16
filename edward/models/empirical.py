@@ -1,31 +1,22 @@
-"""The Empirical distribution class."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.util import get_dims, logit
-from tensorflow.contrib.distributions.python.ops import \
-    distribution
-from tensorflow.python.framework import dtypes
-from tensorflow.python.framework import ops
+from edward.models.random_variable import RandomVariable
+from edward.util import get_dims
+from tensorflow.contrib.distributions import Distribution
 from tensorflow.python.framework import tensor_shape
-from tensorflow.python.ops import array_ops
-from tensorflow.python.ops import math_ops
 
 
-class Empirical(distribution.Distribution):
-  """Empirical distribution."""
-  def __init__(self,
-               params,
-               validate_args=False,
-               allow_nan_stats=True,
-               name="Empirical"):
-    with ops.name_scope(name, values=[params]) as ns:
-      with ops.control_dependencies([]):
-        self._params = array_ops.identity(params, name="params")
+class Empirical(RandomVariable, Distribution):
+  """Empirical random variable."""
+  def __init__(self, params, validate_args=False, allow_nan_stats=True,
+               name="Empirical", *args, **kwargs):
+    with tf.name_scope(name, values=[params]) as ns:
+      with tf.control_dependencies([]):
+        self._params = tf.identity(params, name="params")
         try:
           self._n = get_dims(self._params)[0]
         except:  # scalar params
@@ -39,11 +30,12 @@ class Empirical(distribution.Distribution):
             is_reparameterized=True,
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
-            name=ns)
+            name=ns,
+            *args, **kwargs)
 
   @staticmethod
   def _param_shapes(sample_shape):
-    return {"params": ops.convert_to_tensor(sample_shape, dtype=dtypes.int32)}
+    return {"params": tf.convert_to_tensor(sample_shape, dtype=tf.int32)}
 
   @property
   def params(self):
@@ -56,13 +48,13 @@ class Empirical(distribution.Distribution):
     return self._n
 
   def _batch_shape(self):
-    return array_ops.constant([], dtype=dtypes.int32)
+    return tf.constant([], dtype=tf.int32)
 
   def _get_batch_shape(self):
     return tensor_shape.scalar()
 
   def _event_shape(self):
-    return ops.convert_to_tensor(self.get_event_shape())
+    return tf.convert_to_tensor(self.get_event_shape())
 
   def _get_event_shape(self):
     return self._params.get_shape()[1:]
@@ -76,7 +68,7 @@ class Empirical(distribution.Distribution):
     return tf.sqrt(tf.reduce_mean(tf.square(r), 0))
 
   def _variance(self):
-    return math_ops.square(self.std())
+    return tf.square(self.std())
 
   def _sample_n(self, n, seed=None):
     input_tensor = self._params

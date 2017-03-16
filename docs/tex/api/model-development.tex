@@ -29,9 +29,12 @@ One method that all Edward random variables call during instantiation is
 \href{https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/distributions/python/ops/distribution.py#L557}{\texttt{_sample_n()}}.
 It takes an integer \texttt{n} as input and outputs a tensor of shape
 \href{https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/distributions/python/ops/distribution.py#L213}{\texttt{(n,) + batch_shape + event_shape}}.
-To implement it, you can for example wrap a NumPy/SciPy function
-inside the TensorFlow operation \texttt{tf.py_func()}.
 
+For examples of custom random variables developed in Edward, see
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py}{\texttt{empirical.py}}
+and
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py}{\texttt{point_mass.py}}
+in the Github repository.
 For other methods and attributes one can implement, see the API documentation in
 TensorFlow's
 \href{https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions/base_classes#Distribution}{\texttt{Distribution} class}.

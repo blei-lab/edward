@@ -1,34 +1,25 @@
-"""The Point Mass distribution class."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
 
-from tensorflow.contrib.distributions.python.ops import \
-    distribution
-from tensorflow.python.framework import dtypes
-from tensorflow.python.framework import ops
+from edward.models.random_variable import RandomVariable
+from tensorflow.contrib.distributions import Distribution
 from tensorflow.python.framework import tensor_shape
-from tensorflow.python.ops import array_ops
-from tensorflow.python.ops import math_ops
 
 
-class PointMass(distribution.Distribution):
-  """PointMass distribution.
+class PointMass(RandomVariable, Distribution):
+  """PointMass random variable.
 
   It is analogous to an Empirical random variable with one sample, but
   its parameter argument does not have an outer dimension.
   """
-  def __init__(self,
-               params,
-               validate_args=False,
-               allow_nan_stats=True,
-               name="PointMass"):
-    with ops.name_scope(name, values=[params]) as ns:
-      with ops.control_dependencies([]):
-        self._params = array_ops.identity(params, name="params")
+  def __init__(self, params, validate_args=False, allow_nan_stats=True,
+               name="PointMass", *args, **kwargs):
+    with tf.name_scope(name, values=[params]) as ns:
+      with tf.control_dependencies([]):
+        self._params = tf.identity(params, name="params")
         super(PointMass, self).__init__(
             dtype=self._params.dtype,
             parameters={"params": self._params},
@@ -36,12 +27,13 @@ class PointMass(distribution.Distribution):
             is_reparameterized=True,
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
-            name=ns)
+            name=ns,
+            *args, **kwargs)
 
   @staticmethod
   def _param_shapes(sample_shape):
     return {"params": tf.expand_dims(
-        ops.convert_to_tensor(sample_shape, dtype=dtypes.int32), 0)}
+        tf.convert_to_tensor(sample_shape, dtype=tf.int32), 0)}
 
   @property
   def params(self):
@@ -49,13 +41,13 @@ class PointMass(distribution.Distribution):
     return self._params
 
   def _batch_shape(self):
-    return array_ops.constant([], dtype=dtypes.int32)
+    return tf.constant([], dtype=tf.int32)
 
   def _get_batch_shape(self):
     return tensor_shape.scalar()
 
   def _event_shape(self):
-    return array_ops.shape(self._params)
+    return tf.shape(self._params)
 
   def _get_event_shape(self):
     return self._params.get_shape()
@@ -64,10 +56,10 @@ class PointMass(distribution.Distribution):
     return self._params
 
   def _std(self):
-    return 0.0 * array_ops.ones_like(self._params)
+    return 0.0 * tf.ones_like(self._params)
 
   def _variance(self):
-    return math_ops.square(self.std())
+    return tf.square(self.std())
 
   def _sample_n(self, n, seed=None):
     input_tensor = self._params
