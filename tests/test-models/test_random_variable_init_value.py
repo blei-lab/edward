@@ -16,7 +16,7 @@ def _test(RV, value, *args, **kwargs):
   value_shape = rv._value.get_shape().as_list()
   expected_shape = (rv.get_batch_shape().as_list() +
                     rv.get_event_shape().as_list())
-  assert value_shape == expected_shape
+  assert value_shape[-len(expected_shape):] == expected_shape
   assert rv.dtype == rv._value.dtype
 
 
@@ -34,12 +34,15 @@ class test_random_variable_init_value_class(tf.test.TestCase):
       _test(Normal, 2, mu=0.5, sigma=1.)
       _test(Normal, [2], mu=[0.5], sigma=[1.])
       _test(Poisson, 2, lam=0.5)
+      _test(Normal, np.zeros([10, 2], np.float32), mu=[0.5, 0.5], sigma=1.)
 
   def test_mismatch_raises(self):
     with self.test_session():
       self.assertRaises(ValueError, _test, Normal, 2, mu=[0.5, 0.5], sigma=1.)
       self.assertRaises(ValueError, _test, Normal, 2, mu=[0.5], sigma=[1.])
-      self.assertRaises(ValueError, _test, Normal, [2], mu=0.5, sigma=1.)
+      self.assertRaises(ValueError, _test, Normal,
+                        np.zeros([10, 3], np.float32),
+                        mu=[0.5, 0.5], sigma=1.)
 
   def test_copy(self):
     with self.test_session():
