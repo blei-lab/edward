@@ -48,24 +48,22 @@ def dirichlet_process(alpha, base_cls, sample_n=50, *args, **kwargs):
 
   def body(k, beta_k, draws, bools):
     k = k + 1
-    beta_k = beta_k * Beta(a=1.0, b=alpha)
-    theta_k = base_cls(*args, **kwargs)
+    beta_k = beta_k * Beta(a=1.0, b=alpha).sample(sample_n)
+    theta_k = base_cls(*args, **kwargs).sample(sample_n)
 
-    # Assign ongoing samples to the new theta_k.
-    indicator = tf.cast(bools, draws.dtype)
-    new = indicator * theta_k
-    draws = draws * (1.0 - indicator) + new
+    # Assign True samples to the new theta_k.
+    draws = tf.where(bools, theta_k, draws)
 
     flips = tf.cast(Bernoulli(p=beta_k), tf.bool)
     bools = tf.logical_and(flips, tf.equal(draws, theta_k))
     return k, beta_k, draws, bools
 
   k = 0
-  beta_k = Beta(a=tf.ones(sample_n), b=alpha * tf.ones(sample_n))
-  theta_k = base_cls(*args, **kwargs)
+  beta_k = Beta(a=1.0, b=alpha).sample(sample_n)
+  theta_k = base_cls(*args, **kwargs).sample(sample_n)
 
   # Initialize all samples as theta_k.
-  draws = tf.ones(sample_n) * theta_k
+  draws = theta_k
   # Flip ``sample_n`` coins, one for each sample.
   flips = tf.cast(Bernoulli(p=beta_k), tf.bool)
   # Get boolean tensor for samples that return heads
