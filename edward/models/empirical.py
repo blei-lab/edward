@@ -5,7 +5,6 @@ from __future__ import print_function
 import tensorflow as tf
 
 from edward.models.random_variable import RandomVariable
-from edward.util import get_dims
 from tensorflow.contrib.distributions import Distribution
 
 
@@ -17,8 +16,8 @@ class Empirical(RandomVariable, Distribution):
       with tf.control_dependencies([]):
         self._params = tf.identity(params, name="params")
         try:
-          self._n = get_dims(self._params)[0]
-        except:  # scalar params
+          self._n = self._params.get_shape().as_list()[0]
+        except IndexError:  # scalar params
           self._n = 1
 
         super(Empirical, self).__init__(
