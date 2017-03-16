@@ -82,7 +82,7 @@ class RandomVariable(object):
     else:
       try:
         self._value = self.sample()
-      except:
+      except NotImplementedError:
         raise NotImplementedError(
             "sample is not implemented for {0}. You must either pass in the "
             "value argument or implement sample for {0}."
