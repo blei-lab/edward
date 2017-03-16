@@ -121,7 +121,15 @@ class MAP(VariationalInference):
             self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
     loss = -p_log_prob
-
+    # Add user-defined losses in tf.GraphKeys.LOSSES and regularization
+    # losses in tf.GraphKeys.REGULARIZATION_LOSSES if these losses exist
+    try:
+      loss += tf.losses.get_total_loss()
+    except ValueError:
+      pass
     grads = tf.gradients(loss, [v._ref() for v in var_list])
     grads_and_vars = list(zip(grads, var_list))
+    # Clip the gradients to prevent gradient exploding
+    grads_and_vars = [(tf.clip_by_norm(grad, 10), var)
+                      for grad, var in grads_and_vars if grad is not None]
     return loss, grads_and_vars
