@@ -402,7 +402,7 @@ and an analytic entropy term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.GANInference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">GANInference</code><span class="sig-paren">(</span><em>data</em>, <em>discriminator</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L15" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">GANInference</code><span class="sig-paren">(</span><em>data</em>, <em>discriminator</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Parameter estimation with GAN-style training (Goodfellow et al.,
 2014).</p>
 <p>Works for the class of implicit (and differentiable) probabilistic
@@ -449,20 +449,13 @@ inference = ed.GANInference({x: x_data}, discriminator)
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.GANInference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>ratio_loss='log'</em>, <em>optimizer=None</em>, <em>optimizer_d=None</em>, <em>global_step=None</em>, <em>global_step_d=None</em>, <em>var_list=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L63" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>optimizer_d=None</em>, <em>global_step=None</em>, <em>global_step_d=None</em>, <em>var_list=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>ratio_loss</strong> : str or fn, optional</p>
-<blockquote>
-<div><p>Loss function minimized to get the ratio estimator. ‘log’ or ‘hinge’.
-Alternatively, one can pass in a function of two inputs,
-<code class="docutils literal"><span class="pre">psamples</span></code> and <code class="docutils literal"><span class="pre">qsamples</span></code>, and output a point-wise value
-with shape matching the shapes of the two inputs.</p>
-</div></blockquote>
-<p><strong>optimizer</strong> : str or tf.train.Optimizer, optional</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>optimizer</strong> : str or tf.train.Optimizer, optional</p>
 <blockquote>
 <div><p>A TensorFlow optimizer, to use for optimizing the generator
 objective. Alternatively, one can pass in the name of a
@@ -501,7 +494,7 @@ and <code class="docutils literal"><span class="pre">data</span></code> depend o
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.GANInference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em>, <em>variables=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L146" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em>, <em>variables=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L133" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of optimization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -535,7 +528,7 @@ parameters.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.GANInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L204" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L191" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 </dd></dl>
@@ -624,8 +617,28 @@ its corresponding output, <code class="docutils literal"><span class="pre">discr
 dictionary of same size and keys as <code class="docutils literal"><span class="pre">scale</span></code>.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
+<dt id="edward.inferences.ImplicitKLqp.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>ratio_loss='log'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L86" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>ratio_loss</strong> : str or fn, optional</p>
+<blockquote class="last">
+<div><p>Loss function minimized to get the ratio estimator. ‘log’ or ‘hinge’.
+Alternatively, one can pass in a function of two inputs,
+<code class="docutils literal"><span class="pre">psamples</span></code> and <code class="docutils literal"><span class="pre">qsamples</span></code>, and output a point-wise value
+with shape matching the shapes of the two inputs.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+<dl class="method">
 <dt id="edward.inferences.ImplicitKLqp.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L86" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/implicit_klqp.py#L108" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function</p>
 <div class="math">
 \[-\Big(\mathbb{E}_{q(\beta)} [\log p(\beta) - \log q(\beta) ] +
@@ -854,7 +867,7 @@ inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L109" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L87" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 <p>Computes the Hessian at the mode.</p>
 <table class="docutils field-list" frame="void" rules="none">

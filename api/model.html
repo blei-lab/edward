@@ -166,7 +166,7 @@ tf.tanh(x * y)
 x[2]  # 3rd normal rv in the vector</code></pre>
 <p>In the <a href="/api/model-compositionality">compositionality page</a>, we describe how to build models by composing random variables.</p>
 <hr/>
-<p>For a list of random variables supported in Edward, see the <a href="/api/reference">API reference page</a>. Edward random variables build on top of them, inheriting the same arguments and class methods. Additional methods are also available, detailed below.</p>
+<p>For a list of random variables supported in Edward, see the <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html">TensorFlow distributions API</a>. Edward random variables build on top of them, inheriting the same arguments and class methods. Additional methods are also available, detailed below.</p>
 <dl class="class">
 <dt id="edward.models.RandomVariable">
 <em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">RandomVariable</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
@@ -290,12 +290,18 @@ with tf.Session() as sess:
 </dd></dl>
 <dl class="class">
 <dt id="edward.models.Empirical">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variables.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
-<dd></dd></dl>
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='Empirical'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Empirical random variable.</p>
+<p class="rubric">Attributes</p>
+</dd></dl>
 <dl class="class">
 <dt id="edward.models.PointMass">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variables.py#L18" title="Link to definition on GitHub.">[source]</a></dt>
-<dd></dd></dl>
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='PointMass'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py#L11" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>PointMass random variable.</p>
+<p>It is analogous to an Empirical random variable with one sample, but
+its parameter argument does not have an outer dimension.</p>
+<p class="rubric">Attributes</p>
+</dd></dl>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>
