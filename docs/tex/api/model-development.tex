@@ -26,17 +26,19 @@ class CustomRandomVariable(RandomVariable, Distribution):
 \end{lstlisting}
 
 One method that all Edward random variables call during instantiation is
-\href{https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/distributions/python/ops/distribution.py#L557}{\texttt{_sample_n()}}.
+\texttt{_sample_n()}.
 It takes an integer \texttt{n} as input and outputs a tensor of shape
-\href{https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/distributions/python/ops/distribution.py#L213}{\texttt{(n,) + batch_shape + event_shape}}.
+\texttt{(n,) + batch_shape + event_shape}, where \texttt{batch_shape}
+is the number of independent distributions in the instantiated object
+and \texttt{event_shape} is the shape of an individual distribution.
 
 For examples of custom random variables developed in Edward, see
 \href{https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py}{\texttt{empirical.py}}
 and
 \href{https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py}{\texttt{point_mass.py}}
 in the Github repository.
-For other methods and attributes one can implement, see the API documentation in
-TensorFlow's
+For more details and more methods one can implement, see the API
+documentation in TensorFlow's
 \href{https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions/base_classes#Distribution}{\texttt{Distribution} class}.
 
 \subsubsection{Advanced settings}
