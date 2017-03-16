@@ -120,7 +120,7 @@
 <div class="nine columns">
 <h2 id="linear-mixed-effects-models">Linear Mixed Effects Models</h2>
 <p>With linear mixed effects models, we wish to model a linear relationship for data points with inputs of varying type, categorized into subgroups, and associated to a real-valued output.</p>
-<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/linear_mixed_effects_models.ipynb">here</a>.</p>
+<p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/linear_mixed_effects_models.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the <code>InstEval</code> data set from the popular <a href="http://lme4.r-forge.r-project.org">lme4 R package</a> <span class="citation">(Bates, Mächler, Bolker, &amp; Walker, 2015)</span>, located <a href="https://github.com/blei-lab/edward/blob/master/examples/data/insteval.csv">here</a>. It is a data set of instructor evaluation ratings, where the inputs (covariates) include categories such as <code>students</code> and <code>departments</code>, and our response variable of interest is the instructor evaluation rating.</p>
 <pre class="python" language="Python"><code>data = pd.read_csv('../../examples/data/insteval.csv')
