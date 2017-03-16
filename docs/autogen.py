@@ -196,7 +196,7 @@ def generate_docstrings(page_data):
   page_name = page_data['page'][:-4]
   path = os.path.join('build/html/', page_name + '.html')
   document = open(path).read()
-  docstrings = re.findall(r'(?<=<p>{{sphinx</p>)(.*?)(?=<p>}}</p>)',
+  docstrings = re.findall(r'(?<=<p>{%sphinx</p>)(.*?)(?=<p>%}</p>)',
                           document, flags=re.DOTALL)
   if docstrings is None:
     docstrings = []
@@ -273,14 +273,14 @@ for page_data in PAGES:
   document = document.replace('{{navbar}}', navbar)
 
   for i in range(len(docstrings)):
-    document = re.sub(r'(?<={{sphinx)(.*?)(?=}})', "",
+    document = re.sub(r'(?<={%sphinx)(.*?)(?=%})', "",
                       document, count=1, flags=re.DOTALL)
-    document = document.replace('{{sphinx}}', docstrings[i])
+    document = document.replace('{%sphinx%}', docstrings[i])
 
   # note: this tag is part of the sphinx section,
   #       use single quotes to avoid clash
-  if '{tensorflow_distributions}' in document:
-    document = document.replace('{tensorflow_distributions}',
+  if '{{tensorflow_distributions}}' in document:
+    document = document.replace('{{tensorflow_distributions}}',
                                 generate_tensorflow_distributions())
 
   if '{{tensorflow_version}}' in document:
