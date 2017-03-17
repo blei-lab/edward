@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """Dirichlet process.
 
-We sample from a Dirichlet process (with no base distribution) via its
-stick breaking construction.
+We implement sample generation from a Dirichlet process (with no base
+distribution) via its stick breaking construction. It is a streamlined
+implementation of the ``DirichletProcess`` random variable in Edward.
 
 References
 ----------
@@ -12,18 +13,23 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import matplotlib.pyplot as plt
 import tensorflow as tf
 
-from edward.models import Bernoulli, Beta
+from edward.models import Bernoulli, Beta, DirichletProcess, Exponential, Normal
+
+plt.style.use('ggplot')
 
 
 def dirichlet_process(alpha):
+  """Demo of stochastic while loop for stick breaking construction."""
   def cond(k, beta_k):
+    # End while loop (return False) when flip is heads.
     flip = Bernoulli(p=beta_k)
-    return tf.equal(flip, tf.constant(1))
+    return tf.cast(1 - flip, tf.bool)
 
   def body(k, beta_k):
-    beta_k = beta_k * Beta(a=1.0, b=alpha)
+    beta_k = Beta(a=1.0, b=alpha)
     return k + 1, beta_k
 
   k = tf.constant(0)
@@ -32,7 +38,46 @@ def dirichlet_process(alpha):
   return stick_num
 
 
-dp = dirichlet_process(alpha=1.0)
+dp = dirichlet_process(alpha=10.0)
 
+# The number of sticks broken is dynamic, changing across evaluations.
 sess = tf.Session()
 print(sess.run(dp))
+print(sess.run(dp))
+
+# Demo of the DirichletProcess random variable in Edward.
+# It is associated to a sample tensor, which in turn is associated to
+# one of its atoms (base distributions).
+base_cls = Normal
+kwargs = {'mu': 0.0, 'sigma': 1.0}
+
+# Highly concentrated DP.
+alpha = 1.0
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+x = dp.sample(1000)
+samples = sess.run(x)
+plt.hist(samples, bins=100, range=(-3.0, 3.0))
+plt.title("DP({0}, N(0, 1))".format(alpha))
+plt.show()
+
+# More spread out DP.
+alpha = 50.0
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+x = dp.sample(1000)
+samples = sess.run(x)
+plt.hist(samples, bins=100, range=(-3.0, 3.0))
+plt.title("DP({0}, N(0, 1))".format(alpha))
+plt.show()
+
+# ``theta`` is the distribution indirectly returned by the DP.
+# Fetching theta is the same as fetching the Dirichlet process.
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+theta = base_cls(value=tf.cast(dp, tf.float32), **kwargs)
+print(sess.run([dp, theta]))
+print(sess.run([dp, theta]))
+
+# DirichletProcess can also take in non-scalar concentrations and bases.
+base_cls = Exponential
+kwargs = {'lam': tf.ones([5, 2])}
+dp = DirichletProcess(tf.constant([0.1, 0.6, 0.4]), base_cls, **kwargs)
+print(dp)
