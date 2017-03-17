@@ -51,7 +51,7 @@ def poisson_log_prob(self):
   val = self
   lam = _canonical_value(self.parameters['lam'])
   f_val = tf.cast(val, np.float32)
-  result = (f_val) * log(lam)
+  result = (f_val) * tf.log(lam)
   result += -lam - tf.lgamma(f_val+1)
   return result
 rvs.Poisson.conjugate_log_prob = poisson_log_prob
