@@ -141,21 +141,57 @@ Edward supports the two typical approaches to handling these models:
 collapsing the infinite-dimensional space and lazily defining the
 infinite-dimensional space.
 
-For the collapsed approach, see the
-\href{/tutorials/supervised-classification}{Gaussian process classification}
-tutorial as an example. We specify distributions over the function
-evaluations of the Gaussian process, and the Gaussian process is
-implicitly marginalized out. This approach is also useful for Poisson
-process models.
+In the collapsed approach, we specify a distribution over its
+instantiation, and the stochastic process is implicitly marginalized
+out. For example, we can represent a distribution over the function
+evaluations of a Gaussian process, and not explicitly represent the
+function draw.
 
-To work directly on the infinite-dimensional space, one can leverage
-random variables with
+\begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Normal
+
+def kernel(X):
+  """Evaluate kernel over each pair of rows (data points) in the matrix."""
+  return
+
+X = tf.placeholder(tf.float32, [N, D])
+y = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+\end{lstlisting}
+
+For more details, see the
+\href{/tutorials/supervised-classification}{Gaussian process classification}
+tutorial. This approach is also useful for Poisson process models.
+
+In the lazy approach, we work directly on the infinite-dimensional space via
 \href{https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html}{control flow operations}
-in TensorFlow. At runtime, the control flow will lazily define any
-parameters in the space necessary in order to generate samples. As an
-example, we use a while loop to define a
-\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}
-{Dirichlet process} according to its stick breaking representation.
+in TensorFlow. At runtime, the control flow will execute only the
+necessary computation in order to terminate. As an example, Edward
+provides a \texttt{DirichletProcess} random variable.
+
+\begin{lstlisting}[language=Python]
+from edward.models import DirichletProcess, Normal
+
+def plot_dirichlet_process(alpha):
+  with tf.Session() as sess:
+    dp = DirichletProcess(alpha, Normal, mu=0.0, sigma=1.0)
+    samples = sess.run(dp.sample(1000))
+    plt.hist(samples, bins=100, range=(-3.0, 3.0))
+    plt.title("DP({0}, N(0, 1))".format(alpha))
+    plt.show()
+
+# Dirichlet process with high concentration
+plot_dirichlet_process(alpha=1.0)
+# Dirichlet process with low concentration (more spread out)
+plot_dirichlet_process(alpha=50.0)
+\end{lstlisting}
+
+\includegraphics[width=350px]{/images/dirichlet-process-fig0.png}
+\includegraphics[width=350px]{/images/dirichlet-process-fig1.png}
+
+To see the essential component defining the \texttt{DirichletProcess}, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}
+in the Github repository. Its source implementation can be found at
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py}{\texttt{edward/models/dirichlet_process.py}}.
 
 \subsubsection{Probabilistic Programs}
 
