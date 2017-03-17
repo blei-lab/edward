@@ -15,12 +15,12 @@ from edward.models import random_variables as rvs
 _suff_stat_to_dist = {}
 #_suff_stat_to_dist[('_log1m', 'log')] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 #_suff_stat_to_dist[('#Identity', '#Log')] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
-_suff_stat_to_dist[(('#Pow-1.0000e+00', ('#Identity',)), (u'#Log', ('#Identity',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
+_suff_stat_to_dist[(('#Pow-1.0000e+00', (u'#Identity', ('#x',))), (u'#Log', (u'#Identity', ('#x',))))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
   mu = sigmasq * p2
   return rvs.Normal(mu, tf.sqrt(sigmasq))
-_suff_stat_to_dist[(('#Pow2.0000e+00', ('#Identity',)), (u'#Identity', ('#Identity',)))] = normal_from_natural_params
+_suff_stat_to_dist[(('#Pow2.0000e+00', (u'#Identity', ('#x',))), (u'#Identity', ('#x',)))] = normal_from_natural_params
 
 
 def complete_conditional(rv, blanket):
@@ -69,7 +69,7 @@ def extract_s_stat_multipliers(expr):
   s_stats = []
   multipliers = []
   for i in expr[1:]:
-    if expr_contains(i, '#Identity'):
+    if expr_contains(i, '#x'):
       multiplier, s_stat = extract_s_stat_multipliers(i)
       multipliers += multiplier
       s_stats += s_stat
@@ -181,7 +181,7 @@ _extractable_nodes = {
 }
 def symbolic_suff_stat(node, base_node, stop_nodes):
   if node == base_node:
-    return ('#Identity',)
+    return ('#x',)
   elif node in stop_nodes:
     return (NodeWrapper(node),)
 
@@ -405,7 +405,7 @@ def add_const_simplify(expr):
   did_something = False
   new_args = []
   for i in xrange(1, len(expr)):
-    if expr_contains(expr[i], '#Identity'):
+    if expr_contains(expr[i], '#x'):
       new_args.append(expr[i])
     else:
       did_something = True
@@ -415,71 +415,72 @@ def add_const_simplify(expr):
 
 ### Conjugate log prob functions
 def _canonical_value(x):
-  if isinstance(x, RandomVariable):
-    return x.value()
-  else:
-    return x
+  return x
+#   if isinstance(x, RandomVariable):
+#     return x.value()
+#   else:
+#     return x
 
 
 def beta_log_prob(self):
-  val = self.value()
+  val = self
   a = _canonical_value(self.parameters['a'])
   b = _canonical_value(self.parameters['b'])
-  result = (tf.identity(a) - 1) * tf.log(val)
-  result += (tf.identity(b) - 1) * tf.log(1. - tf.identity(val))
+  result = ((a) - 1) * tf.log(val)
+  result += ((b) - 1) * tf.log(1. - (val))
   result += -tf.lgamma(a) - tf.lgamma(b) + tf.lgamma(a + b)
   return result
 rvs.Beta.conjugate_log_prob = beta_log_prob
 
 
 def bernoulli_log_prob(self):
-  val = self.value()
+  val = self
   p = _canonical_value(self.parameters['p'])
   f_val = tf.cast(val, np.float32)
-  return (tf.identity(f_val) * tf.log(p) +
-          (1. - tf.identity(f_val)) * tf.log(1. - p))
+  return ((f_val) * tf.log(p) +
+          (1. - (f_val)) * tf.log(1. - p))
 rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
 
 
 def gamma_log_prob(self):
-  val = self.value()
+  val = self
   alpha = _canonical_value(self.parameters['alpha'])
   beta = _canonical_value(self.parameters['beta'])
-  result = (tf.identity(alpha) - 1) * tf.log(val)
-  result -= tf.identity(beta) * tf.identity(val)
-  result += -tf.lgamma(alpha) + tf.identity(alpha) * tf.log(beta)
+  result = ((alpha) - 1) * tf.log(val)
+  result -= (beta) * (val)
+  result += -tf.lgamma(alpha) + (alpha) * tf.log(beta)
   return result
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 
 
 def poisson_log_prob(self):
-  val = self.value()
+  val = self
   lam = _canonical_value(self.parameters['lam'])
   f_val = tf.cast(val, np.float32)
-  result = tf.identity(f_val) * log(lam)
+  result = (f_val) * log(lam)
   result += -lam - tf.lgamma(f_val+1)
   return result
 rvs.Poisson.conjugate_log_prob = poisson_log_prob
 
 
 def normal_log_prob(self):
-  val = self.value()
+  val = self
   mu = _canonical_value(self.parameters['mu'])
   sigma = _canonical_value(self.parameters['sigma'])
   prec = tf.reciprocal(tf.square(sigma))
   result = prec * (-0.5 * tf.square(val) - 0.5 * tf.square(mu)
-                   + tf.identity(val) * tf.identity(mu))
+                   + (val) * (mu))
   result -= tf.log(sigma) + 0.5 * np.log(2*np.pi)
   return result
 rvs.Normal.conjugate_log_prob = normal_log_prob
 
 
 def inverse_gamma_log_prob(self):
-  val = self.value()
+  val = self
   alpha = _canonical_value(self.parameters['alpha'])
   beta = _canonical_value(self.parameters['beta'])
-  result = -(tf.identity(alpha) + 1) * tf.log(val)
-  result -= tf.identity(beta) * tf.reciprocal(val)
-  result += -tf.lgamma(alpha) + tf.identity(alpha) * tf.log(beta)
+  result = -((alpha) + 1) * tf.log(val)
+  result -= (beta) * tf.reciprocal(val)
+  result += -tf.lgamma(alpha) + (alpha) * tf.log(beta)
   return result
 rvs.InverseGamma.conjugate_log_prob = inverse_gamma_log_prob
