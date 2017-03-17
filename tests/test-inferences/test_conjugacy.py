@@ -28,6 +28,16 @@ class test_simplify_class(tf.test.TestCase):
     self.assertEquals(simplify.as_float(1), 1.)
     self.assertIsNone(simplify.as_float('one'))
 
+  def test_identity_op_simplify(self):
+    expr = ('#Identity', ('#Mul', ('#Identity', ('#x',)),
+                          ('#Identity', ('3.7',))))
+    did_something, new_expr = simplify.identity_op_simplify(expr)
+    self.assertTrue(did_something)
+    self.assertEquals(new_expr, ('#Mul', ('#x',), ('3.7',)))
+    did_something, new_expr = simplify.power_op_simplify(new_expr)
+    self.assertFalse(did_something)
+    
+
   def test_pow_simplify_and_power_op_simplify(self):
     expr = ('#Square', ('#Reciprocal', ('#Sqrt', ('#x',))))
     did_something, new_expr = simplify.power_op_simplify(expr)

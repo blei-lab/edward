@@ -128,6 +128,12 @@ def _register_simplify_fn(fn):
   return repeat_wrapped
 
 
+@_register_simplify_fn
+def identity_op_simplify(expr):
+  if expr[0] == '#Identity':
+    return expr[1]
+
+
 _power_ops = {
   '#Reciprocal': -1.,
   '#Square': 2.,

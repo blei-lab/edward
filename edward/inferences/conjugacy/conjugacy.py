@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import re
 from collections import defaultdict
+from pprint import pprint
 
 import numpy as np
 import tensorflow as tf
@@ -17,12 +18,12 @@ from edward.inferences.conjugacy.simplify import symbolic_suff_stat, full_simpli
 _suff_stat_to_dist = {}
 #_suff_stat_to_dist[('_log1m', 'log')] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 #_suff_stat_to_dist[('#Identity', '#Log')] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
-_suff_stat_to_dist[(('#Pow-1.0000e+00', (u'#Identity', ('#x',))), (u'#Log', (u'#Identity', ('#x',))))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
+_suff_stat_to_dist[(('#Pow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
   mu = sigmasq * p2
   return rvs.Normal(mu, tf.sqrt(sigmasq))
-_suff_stat_to_dist[(('#Pow2.0000e+00', (u'#Identity', ('#x',))), (u'#Identity', ('#x',)))] = normal_from_natural_params
+_suff_stat_to_dist[(('#Pow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
 
 
 def complete_conditional(rv, blanket):
@@ -35,6 +36,7 @@ def complete_conditional(rv, blanket):
   stop_nodes = set([i.value() for i in blanket])
   subgraph = extract_subgraph(log_joint, stop_nodes)
   s_stats = suff_stat_nodes(subgraph, rv.value(), blanket)
+  s_stats = list(set(s_stats))
 
   s_stat_exprs = defaultdict(list)
   for i in xrange(len(s_stats)):
@@ -60,9 +62,11 @@ def complete_conditional(rv, blanket):
     for pair in s_stat_type:
       s_stat_nodes.append(pair[0])
       s_stat_placeholders.append(tf.placeholder(np.float32, shape=pair[0].get_shape()))
-  swap_dict = {i: j for i, j in zip(s_stat_nodes, s_stat_placeholders)}
+  swap_dict = {}
   for i in blanket:
     swap_dict[i.value()] = tf.placeholder(np.float32)
+  for i, j in zip(s_stat_nodes, s_stat_placeholders):
+    swap_dict[i] = j
   swap_back = {j: i for i, j in swap_dict.iteritems()}
   log_joint_copy = edward.util.copy(log_joint, swap_dict)
   all_nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
@@ -156,7 +160,7 @@ def suff_stat_nodes(subgraph, node, stop_nodes):
       return (node,)
     else:
       return ()
-  if subgraph[0].op.type == 'Identity' and subgraph[1][0] == node:
+  if subgraph[0] == node:
     return (subgraph[0],)
   if subgraph[0].op.type in _linear_types:
     result = []
