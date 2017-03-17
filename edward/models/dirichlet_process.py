@@ -23,6 +23,19 @@ class DirichletProcess(RandomVariable, Distribution):
       determines the event shape of the DP.
     *args, **kwargs : optional
       Arguments passed into ``base_cls``.
+
+    Examples
+    --------
+    >>> # scalar concentration parameter, scalar base distribution
+    >>> dp = DirichletProcess(0.1, Normal, mu=0.0, sigma=1.0)
+    >>> dp.get_shape() == ()
+    True
+    >>>
+    >>> # vector of concentration parameters, matrix of Exponentials
+    >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
+    ...                       Exponential, lam=tf.ones([5, 3]))
+    >>> dp.get_shape() == (2, 5, 3)
+    True
     """
     with tf.name_scope(name, values=[alpha]) as ns:
       with tf.control_dependencies([]):
@@ -76,9 +89,10 @@ class DirichletProcess(RandomVariable, Distribution):
 
     Notes
     -----
-    The only inefficiency is in drawing (n, batch_shape) samples from
-    the base distribution at each iteration of the while loop. Ideally,
-    we would only draw new samples for those in the loop returning True.
+    The implementation has only one inefficiency, which is that it
+    draws (n, batch_shape) samples from the base distribution at each
+    iteration of the while loop. Ideally, we would only draw new
+    samples for those in the loop returning True.
     """
     if seed is not None:
       raise NotImplementedError("seed is not implemented.")
