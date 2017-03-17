@@ -26,13 +26,13 @@ V_true = np.random.randn(D, M).astype(np.float32)
 # DATA
 R_true = build_toy_dataset(U_true, V_true, N, M)
 I_train = get_indicators(N, M)
-I_test = 1-I_train
+I_test = 1 - I_train
 
 # MODEL
 I = tf.placeholder(tf.float32, [N, M])
 U = Normal(mu=tf.zeros([D, N]), sigma=tf.ones([D, N]))
 V = Normal(mu=tf.zeros([D, M]), sigma=tf.ones([D, M]))
-R = Normal(mu=tf.matmul(tf.transpose(U), V)*I, sigma=tf.ones([N, M]))
+R = Normal(mu=tf.matmul(tf.transpose(U), V) * I, sigma=tf.ones([N, M]))
 
 # INFERENCE
 qU = Normal(mu=tf.Variable(tf.random_normal([D, N])),
