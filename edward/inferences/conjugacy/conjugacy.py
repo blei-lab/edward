@@ -41,7 +41,8 @@ def complete_conditional(rv, blanket):
     expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
     expr = full_simplify(expr)
     multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
-    s_stat_exprs[s_stats_i].append((s_stats[i], reconstruct_multiplier(multipliers_i)))
+    s_stat_exprs[s_stats_i].append((s_stats[i],
+                                    reconstruct_multiplier(multipliers_i)))
 
   s_stat_keys = s_stat_exprs.keys()
   order = np.argsort([str(i) for i in s_stat_keys])
@@ -53,16 +54,40 @@ def complete_conditional(rv, blanket):
                               'exponential-family distribution has those '
                               'sufficient statistics.' % str(dist_key))
 
-  natural_parameters = []
-  for i in order:
-    param_i = 0.
-    node_multiplier_list = s_stat_exprs[s_stat_keys[i]]
-    for j in xrange(len(node_multiplier_list)):
-      nat_param = tf.gradients(log_joint, node_multiplier_list[j][0])[0]
-      param_i += nat_param * node_multiplier_list[j][1]
-    natural_parameters.append(param_i)
+  s_stat_nodes = []
+  s_stat_placeholders = []
+  for s_stat_type in s_stat_exprs.values():
+    for pair in s_stat_type:
+      s_stat_nodes.append(pair[0])
+      s_stat_placeholders.append(tf.placeholder(np.float32, shape=pair[0].get_shape()))
+  swap_dict = {i: j for i, j in zip(s_stat_nodes, s_stat_placeholders)}
+  for i in blanket:
+    swap_dict[i.value()] = tf.placeholder(np.float32)
+  swap_back = {j: i for i, j in swap_dict.iteritems()}
+  log_joint_copy = edward.util.copy(log_joint, swap_dict)
+  all_nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
-  return dist_constructor(*natural_parameters)
+  nat_params = []
+  i = 0
+  for s_stat_type in s_stat_exprs.values():
+    nat_params.append(0.)
+    for pair in s_stat_type:
+      nat_params[-1] += pair[1] * all_nat_params[i]
+      i += 1
+  for i in xrange(len(nat_params)):
+    nat_params[i] = edward.util.copy(nat_params[i], swap_back)
+  nat_params = [nat_params[i] for i in order]
+
+#   natural_parameters = []
+#   for i in order:
+#     param_i = 0.
+#     node_multiplier_list = s_stat_exprs[s_stat_keys[i]]
+#     for j in xrange(len(node_multiplier_list)):
+#       nat_param = tf.gradients(log_joint, node_multiplier_list[j][0])[0]
+#       param_i += nat_param * node_multiplier_list[j][1]
+#     natural_parameters.append(param_i)
+
+  return dist_constructor(*nat_params)
 
 
 def extract_s_stat_multipliers(expr):
@@ -124,6 +149,8 @@ _linear_types = ['Add', 'AddN', 'Sub', 'Mul', 'Neg', 'Identity', 'Sum',
                  'Assert', 'Reshape', 'Slice', 'StridedSlice', 'Gather',
                  'GatherNd', 'Squeeze', 'Concat', 'ExpandDims']
 def suff_stat_nodes(subgraph, node, stop_nodes):
+  '''Finds nonlinear nodes depending on `node`.
+  '''
   if len(subgraph) == 1:
     if subgraph[0] == node:
       return (node,)

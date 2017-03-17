@@ -36,6 +36,8 @@ _extractable_nodes = {
   'Identity': lambda x: x
 }
 def symbolic_suff_stat(node, base_node, stop_nodes):
+  '''Extracts a symbolic representation of the graph rooted at `node`.
+  '''
   if node == base_node:
     return ('#x',)
   elif node in stop_nodes:

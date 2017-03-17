@@ -258,52 +258,52 @@ class test_simplify_class(tf.test.TestCase):
 #     self.assertAllClose(alpha_val, alpha0 + alpha_likelihood * len(x_data))
 #     self.assertAllClose(beta_val, beta0 + alpha_likelihood * x_data.sum())
 
-#   def test_normal_normal(self):
-#     x_data = np.array([0.1, 0.5, 3.3, 2.7])
+  def test_normal_normal(self):
+    x_data = np.array([0.1, 0.5, 3.3, 2.7])
 
-#     mu0 = 0.3
-#     sigma0 = 2.1
-#     sigma_likelihood = 1.2
+    mu0 = 0.3
+    sigma0 = 2.1
+    sigma_likelihood = 1.2
 
-#     mu = rvs.Normal(mu0, sigma0)
-#     x = rvs.Normal(mu, sigma_likelihood, sample_shape=len(x_data))
+    mu = rvs.Normal(mu0, sigma0)
+    x = rvs.Normal(mu, sigma_likelihood, sample_shape=len(x_data))
 
-#     mu_cond = conj.complete_conditional(mu, [mu, x])
-#     self.assertIsInstance(mu_cond, rvs.Normal)
+    mu_cond = conj.complete_conditional(mu, [mu, x])
+    self.assertIsInstance(mu_cond, rvs.Normal)
 
-#     sess = tf.InteractiveSession()
-#     mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
+    sess = tf.InteractiveSession()
+    mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
 
-#     self.assertAllClose(sigma_val, (1. / sigma0**2 +
-#                                     len(x_data) / sigma_likelihood**2) ** -0.5)
-#     self.assertAllClose(mu_val,
-#                         sigma_val**2 * (mu0 / sigma0**2 +
-#                                         1./sigma_likelihood**2 * x_data.sum()))
+    self.assertAllClose(sigma_val, (1. / sigma0**2 +
+                                    len(x_data) / sigma_likelihood**2) ** -0.5)
+    self.assertAllClose(mu_val,
+                        sigma_val**2 * (mu0 / sigma0**2 +
+                                        1./sigma_likelihood**2 * x_data.sum()))
 
 
-#   def test_normal_normal_scaled(self):
-#     x_data = np.array([0.1, 0.5, 3.3, 2.7])
+  def test_normal_normal_scaled(self):
+    x_data = np.array([0.1, 0.5, 3.3, 2.7])
 
-#     mu0 = 0.3
-#     sigma0 = 2.1
-#     sigma_likelihood = 1.2
-#     c = 2.
+    mu0 = 0.3
+    sigma0 = 2.1
+    sigma_likelihood = 1.2
+    c = 2.
 
-#     mu = rvs.Normal(mu0, sigma0)
-#     x = rvs.Normal(c * mu, sigma_likelihood, sample_shape=len(x_data))
+    mu = rvs.Normal(mu0, sigma0)
+    x = rvs.Normal(c * mu, sigma_likelihood, sample_shape=len(x_data))
 
-#     mu_cond = conj.complete_conditional(mu, [mu, x])
-#     self.assertIsInstance(mu_cond, rvs.Normal)
+    mu_cond = conj.complete_conditional(mu, [mu, x])
+    self.assertIsInstance(mu_cond, rvs.Normal)
 
-#     sess = tf.InteractiveSession()
-#     mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
+    sess = tf.InteractiveSession()
+    mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
 
-#     self.assertAllClose(sigma_val,
-#                         (1. / sigma0**2 +
-#                          c**2 * len(x_data) / sigma_likelihood**2) ** -0.5)
-#     self.assertAllClose(mu_val,
-#                         sigma_val**2 * (mu0 / sigma0**2 +
-#                                         c/sigma_likelihood**2 * x_data.sum()))
+    self.assertAllClose(sigma_val,
+                        (1. / sigma0**2 +
+                         c**2 * len(x_data) / sigma_likelihood**2) ** -0.5)
+    self.assertAllClose(mu_val,
+                        sigma_val**2 * (mu0 / sigma0**2 +
+                                        c/sigma_likelihood**2 * x_data.sum()))
 
 
 if __name__ == '__main__':
