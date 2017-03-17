@@ -3,13 +3,15 @@ from edward.models import Normal
 import numpy as np
 import tensorflow as tf
 
+
 def build_toy_dataset(U, V, N, M, noise_std=0.1):
   R = np.dot(np.transpose(U), V) + np.random.normal(0, noise_std, size=(N, M))
   return R
 
-N = 30 # number of users
-M = 20 # number of movies
-D = 3 # number of latent factors
+
+N = 30  # number of users
+M = 20  # number of movies
+D = 3  # number of latent factors
 
 # true latent factors
 U_true = np.random.randn(D, N).astype(np.float32)
