@@ -12,7 +12,7 @@ from edward.models.random_variable import RandomVariable
 from edward.models import random_variables as rvs
 
 import edward.inferences.conjugacy.conjugate_log_probs
-from edward.inferences.conjugacy.simplify import symbolic_suff_stat, simplify, expr_contains, reconstruct_expr
+from edward.inferences.conjugacy.simplify import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 
 _suff_stat_to_dist = {}
 #_suff_stat_to_dist[('_log1m', 'log')] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
@@ -39,7 +39,7 @@ def complete_conditional(rv, blanket):
   s_stat_exprs = defaultdict(list)
   for i in xrange(len(s_stats)):
     expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
-    expr = simplify(expr)
+    expr = full_simplify(expr)
     multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
     s_stat_exprs[s_stats_i].append((s_stats[i], reconstruct_multiplier(multipliers_i)))
 

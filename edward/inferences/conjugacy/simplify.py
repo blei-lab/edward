@@ -19,15 +19,16 @@ class NodeWrapper:
 
 def _mul_n(x):
   if len(x) == 2:
-    return tf.mul(x[0], x[1])
+    return tf.multiply(x[0], x[1])
   else:
-    return tf.mul(x[0], _mul_n(x[1:]))
+    return tf.multiply(x[0], _mul_n(x[1:]))
 
 
 _extractable_nodes = {
   'Add': tf.add_n,
   'Mul': _mul_n,
   'Log': tf.log,
+  'Exp': tf.exp,
   'Pow': tf.pow,
   'Square': tf.square,
   'Reciprocal': tf.reciprocal,
@@ -62,6 +63,8 @@ def reconstruct_expr(expr):
   float_val = as_float(expr[0])
   if float_val is not None:
     return float_val
+  if expr[0] == '#x':
+    raise ValueError('#x cannot appear in expr to be reconstructed.')
   args = [reconstruct_expr(i) for i in expr[1:]]
   if expr[0][:4] == '#Pow':
     return tf.pow(args[0], np.float32(expr[0][4:]))
@@ -76,7 +79,7 @@ def reconstruct_expr(expr):
 
 
 _simplify_fns = []
-def simplify(expr, simplify_fns=_simplify_fns):
+def full_simplify(expr, simplify_fns=_simplify_fns):
   while True:
     did_something = False
     for fn in simplify_fns:
@@ -213,7 +216,7 @@ def identity_simplify(expr, op_name, identity_val):
   new_args = []
   did_something = False
   for i in expr[1:]:
-    if i[0] != identity_val:
+    if as_float(i[0]) != identity_val:
       new_args.append(i)
     else:
       did_something = True
@@ -239,8 +242,8 @@ def mul_zero_simplify(expr):
   if expr[0] != '#Mul':
     return None
   for i in expr[1:]:
-    if i[0] == 0:
-      return (0,)
+    if as_float(i[0]) == 0:
+      return ('0',)
 
 
 def expr_contains(expr, node_type):
@@ -254,7 +257,7 @@ def expr_contains(expr, node_type):
 
 @_register_simplify_fn
 def add_const_simplify(expr):
-  '''Prunes branches not containing any #Identity nodes.'''
+  '''Prunes branches not containing any #x nodes.'''
   if expr[0] != '#Add':
     return None
   did_something = False
