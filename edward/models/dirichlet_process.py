@@ -14,9 +14,6 @@ class DirichletProcess(RandomVariable, Distribution):
                name="DirichletProcess", value=None, *args, **kwargs):
     """Dirichlet process DP(``alpha``, ``base_cls(*args, **kwargs)``).
 
-    Only works for scalar ``alpha``;  the base distribution can have
-    arbitrary dimensions.
-
     Parameters
     ----------
     alpha : tf.Tensor
@@ -90,7 +87,7 @@ class DirichletProcess(RandomVariable, Distribution):
     event_shape = self._get_event_shape().as_list()
     rank = 1 + len(batch_shape) + len(event_shape)
     # Note this is for scoping within the while loop's body function.
-    self._temp_scope = [n, batch_shape, rank]
+    self._temp_scope = [n, batch_shape, event_shape, rank]
 
     k = 0
     beta_k = Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
@@ -121,18 +118,23 @@ class DirichletProcess(RandomVariable, Distribution):
     return tf.reduce_any(bools)
 
   def _sample_n_body(self, k, beta_k, draws, bools):
-    n, batch_shape, rank = self._temp_scope
+    n, batch_shape, event_shape, rank = self._temp_scope
 
     k += 1
     beta_k *= Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
     theta_k = self._base_cls(*self._base_args, **self._base_kwargs).sample(
         [n] + batch_shape)
 
+    if len(bools.get_shape()) > 1:
+      # ``tf.where`` only index subsets when ``bools`` is at most a
+      # vector. In general, ``bools`` has shape (n, batch_shape).
+      # Therefore we tile ``bools`` to be of shape
+      # (n, batch_shape, event_shape) in order to index per-element.
+      bools = tf.tile(tf.reshape(
+          bools, [n] + batch_shape + [1] * len(event_shape)),
+          [1] + [1] * len(batch_shape) + event_shape)
+
     # Assign True samples to the new theta_k.
-    # Note ``tf.where`` only works if ``bools`` is at most a vector.
-    # Since ``bools`` has shape (n, batch_shape), it only works
-    # with scalar batch shape.
-    # TODO broadcast bools
     draws = tf.where(bools, theta_k, draws)
 
     flips = Bernoulli(p=beta_k)

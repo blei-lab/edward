@@ -31,8 +31,8 @@ sess = tf.Session()
 print(sess.run([dp, theta]))
 print(sess.run([dp, theta]))
 
-# This also works for non-scalar base distributions.
+# This also works for non-scalar concentrations and base distributions.
 base_cls = Exponential
 kwargs = {'lam': tf.ones([5, 2])}
-dp = DirichletProcess(0.1, base_cls, **kwargs)
+dp = DirichletProcess(tf.constant([0.1, 0.6, 0.4]), base_cls, **kwargs)
 print(dp)
