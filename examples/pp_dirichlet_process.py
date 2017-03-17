@@ -16,7 +16,7 @@ from __future__ import print_function
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-from edward.models import Bernoulli, Beta, DirichletProcess, Normal
+from edward.models import Bernoulli, Beta, DirichletProcess, Exponential, Normal
 
 plt.style.use('ggplot')
 
@@ -24,11 +24,12 @@ plt.style.use('ggplot')
 def dirichlet_process(alpha):
   """Demo of stochastic while loop for stick breaking construction."""
   def cond(k, beta_k):
+    # End while loop (return False) when flip is heads.
     flip = Bernoulli(p=beta_k)
-    return tf.equal(flip, tf.constant(1))
+    return tf.cast(1 - flip, tf.bool)
 
   def body(k, beta_k):
-    beta_k = beta_k * Beta(a=1.0, b=alpha)
+    beta_k = Beta(a=1.0, b=alpha)
     return k + 1, beta_k
 
   k = tf.constant(0)
@@ -37,7 +38,7 @@ def dirichlet_process(alpha):
   return stick_num
 
 
-dp = dirichlet_process(alpha=0.1)
+dp = dirichlet_process(alpha=10.0)
 
 # The number of sticks broken is dynamic, changing across evaluations.
 sess = tf.Session()
@@ -51,7 +52,7 @@ base_cls = Normal
 kwargs = {'mu': 0.0, 'sigma': 1.0}
 
 # Highly concentrated DP.
-alpha = 0.1
+alpha = 1.0
 dp = DirichletProcess(alpha, base_cls, **kwargs)
 x = dp.sample(1000)
 samples = sess.run(x)
@@ -60,7 +61,7 @@ plt.title("DP({0}, N(0, 1))".format(alpha))
 plt.show()
 
 # More spread out DP.
-alpha = 100.0
+alpha = 50.0
 dp = DirichletProcess(alpha, base_cls, **kwargs)
 x = dp.sample(1000)
 samples = sess.run(x)
@@ -70,6 +71,7 @@ plt.show()
 
 # ``theta`` is the distribution indirectly returned by the DP.
 # Fetching theta is the same as fetching the Dirichlet process.
+dp = DirichletProcess(alpha, base_cls, **kwargs)
 theta = base_cls(value=tf.cast(dp, tf.float32), **kwargs)
 print(sess.run([dp, theta]))
 print(sess.run([dp, theta]))

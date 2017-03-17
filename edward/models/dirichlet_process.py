@@ -110,8 +110,6 @@ class DirichletProcess(RandomVariable, Distribution):
     # Note this is for scoping within the while loop's body function.
     self._temp_scope = [n, batch_shape, event_shape, rank]
 
-    # First stick index.
-    k = 0
     # First stick probability, one for each sample and each DP in the
     # batch shape. It has shape (n, batch_shape).
     beta_k = Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
@@ -126,28 +124,27 @@ class DirichletProcess(RandomVariable, Distribution):
     draws = theta_k
     # Flip coins for each stick probability.
     flips = Bernoulli(p=beta_k)
-    # Get boolean tensor, returning True for samples that return heads
+    # Get boolean tensor, returning True for samples that return tails
     # and are currently equal to theta_k.
     # It has shape (n, batch_shape).
     bools = tf.logical_and(
-        tf.cast(flips, tf.bool),
+        tf.cast(1 - flips, tf.bool),
         tf.reduce_all(tf.equal(draws, theta_k),  # reduce event_shape
                       [i for i in range(1 + len(batch_shape), rank)]))
 
-    _, _, samples, _ = tf.while_loop(
+    samples, _ = tf.while_loop(
         self._sample_n_cond, self._sample_n_body,
-        loop_vars=[k, beta_k, draws, bools])
+        loop_vars=[draws, bools])
     return samples
 
-  def _sample_n_cond(self, k, beta_k, draws, bools):
+  def _sample_n_cond(self, draws, bools):
     # Proceed if at least one bool is True.
     return tf.reduce_any(bools)
 
-  def _sample_n_body(self, k, beta_k, draws, bools):
+  def _sample_n_body(self, draws, bools):
     n, batch_shape, event_shape, rank = self._temp_scope
 
-    k += 1
-    beta_k *= Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
+    beta_k = Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
     theta_k = tf.tile(  # make (batch_shape, event_shape), then memoize across n
         tf.expand_dims(self._base_cls(*self._base_args, **self._base_kwargs).
                        sample(batch_shape), 0),
@@ -167,7 +164,7 @@ class DirichletProcess(RandomVariable, Distribution):
 
     flips = Bernoulli(p=beta_k)
     bools = tf.logical_and(
-        tf.cast(flips, tf.bool),
+        tf.cast(1 - flips, tf.bool),
         tf.reduce_all(tf.equal(draws, theta_k),  # reduce event_shape
                       [i for i in range(1 + len(batch_shape), rank)]))
-    return k, beta_k, draws, bools
+    return draws, bools
