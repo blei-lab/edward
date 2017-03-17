@@ -12,15 +12,20 @@ from tensorflow.contrib.distributions import Distribution
 class DirichletProcess(RandomVariable, Distribution):
   def __init__(self, alpha, base_cls, validate_args=False, allow_nan_stats=True,
                name="DirichletProcess", value=None, *args, **kwargs):
-    """Dirichlet process DP(``alpha``, ``base_cls(*args, **kwargs)``).
+    """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
+
+    It has two parameters: a positive real value :math:`\\alpha`,
+    known as the concentration parameter (``alpha``), and a base
+    distribution :math:`H` (``base_cls(*args, **kwargs)``).
 
     Parameters
     ----------
     alpha : tf.Tensor
-      Concentration parameter. Its shape determines the batch shape of the DP.
+      Concentration parameter. Must be positive real-valued. Its shape
+      determines the number of independent DPs (batch shape).
     base_cls : RandomVariable
       Class of base distribution. Its shape (when instantiated)
-      determines the event shape of the DP.
+      determines the shape of an individual DP (event shape).
     *args, **kwargs : optional
       Arguments passed into ``base_cls``.
 
@@ -28,14 +33,12 @@ class DirichletProcess(RandomVariable, Distribution):
     --------
     >>> # scalar concentration parameter, scalar base distribution
     >>> dp = DirichletProcess(0.1, Normal, mu=0.0, sigma=1.0)
-    >>> dp.get_shape() == ()
-    True
+    >>> assert dp.get_shape() == ()
     >>>
     >>> # vector of concentration parameters, matrix of Exponentials
     >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
     ...                       Exponential, lam=tf.ones([5, 3]))
-    >>> dp.get_shape() == (2, 5, 3)
-    True
+    >>> assert dp.get_shape() == (2, 5, 3)
     """
     with tf.name_scope(name, values=[alpha]) as ns:
       with tf.control_dependencies([]):
@@ -132,9 +135,8 @@ class DirichletProcess(RandomVariable, Distribution):
         tf.reduce_all(tf.equal(draws, theta_k),  # reduce event_shape
                       [i for i in range(1 + len(batch_shape), rank)]))
 
-    samples, _ = tf.while_loop(
-        self._sample_n_cond, self._sample_n_body,
-        loop_vars=[draws, bools])
+    samples, _ = tf.while_loop(self._sample_n_cond, self._sample_n_body,
+                               loop_vars=[draws, bools])
     return samples
 
   def _sample_n_cond(self, draws, bools):
