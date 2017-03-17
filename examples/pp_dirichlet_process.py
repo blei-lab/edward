@@ -13,9 +13,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import matplotlib.pyplot as plt
 import tensorflow as tf
 
 from edward.models import Bernoulli, Beta, DirichletProcess, Normal
+
+plt.style.use('ggplot')
 
 
 def dirichlet_process(alpha):
@@ -46,15 +49,28 @@ print(sess.run(dp))
 # one of its atoms (base distributions).
 base_cls = Normal
 kwargs = {'mu': 0.0, 'sigma': 1.0}
-dp = DirichletProcess(0.1, base_cls, **kwargs)
-print(dp)
+
+# Highly concentrated DP.
+alpha = 0.1
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+x = dp.sample(1000)
+samples = sess.run(x)
+plt.hist(samples, bins=100, range=(-3.0, 3.0))
+plt.title("DP({0}, N(0, 1))".format(alpha))
+plt.show()
+
+# More spread out DP.
+alpha = 100.0
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+x = dp.sample(1000)
+samples = sess.run(x)
+plt.hist(samples, bins=100, range=(-3.0, 3.0))
+plt.title("DP({0}, N(0, 1))".format(alpha))
+plt.show()
 
 # ``theta`` is the distribution indirectly returned by the DP.
-theta = base_cls(value=tf.cast(dp, tf.float32), **kwargs)
-print(theta)
-
 # Fetching theta is the same as fetching the Dirichlet process.
-sess = tf.Session()
+theta = base_cls(value=tf.cast(dp, tf.float32), **kwargs)
 print(sess.run([dp, theta]))
 print(sess.run([dp, theta]))
 

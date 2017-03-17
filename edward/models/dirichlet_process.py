@@ -78,7 +78,14 @@ class DirichletProcess(RandomVariable, Distribution):
     return self._base.get_shape()
 
   def _sample_n(self, n, seed=None):
-    """
+    """Sample ``n`` draws from the DP. Draws from the base
+    distribution are memoized across ``n``.
+
+    Draws from the base distribution are not memoized across the batch
+    shape: i.e., each independent DP in the batch shape has its own
+    memoized samples.  Similarly, draws are not memoized across calls
+    to ``sample()``.
+
     Returns
     -------
     tf.Tensor
@@ -103,16 +110,21 @@ class DirichletProcess(RandomVariable, Distribution):
     # Note this is for scoping within the while loop's body function.
     self._temp_scope = [n, batch_shape, event_shape, rank]
 
+    # First stick index.
     k = 0
+    # First stick probability, one for each sample and each DP in the
+    # batch shape. It has shape (n, batch_shape).
     beta_k = Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
-    theta_k = self._base_cls(*self._base_args, **self._base_kwargs).sample(
-        [n] + batch_shape)
-
-    # Initialize all samples as theta_k.
+    # First base distribution.
     # It has shape (n, batch_shape, event_shape).
+    theta_k = tf.tile(  # make (batch_shape, event_shape), then memoize across n
+        tf.expand_dims(self._base_cls(*self._base_args, **self._base_kwargs).
+                       sample(batch_shape), 0),
+        [n] + [1] * (rank - 1))
+
+    # Initialize all samples as the first base distribution.
     draws = theta_k
-    # Flip coins, one for each sample and each DP in the batch shape.
-    # It has shape (n, batch_shape).
+    # Flip coins for each stick probability.
     flips = Bernoulli(p=beta_k)
     # Get boolean tensor, returning True for samples that return heads
     # and are currently equal to theta_k.
@@ -136,8 +148,10 @@ class DirichletProcess(RandomVariable, Distribution):
 
     k += 1
     beta_k *= Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
-    theta_k = self._base_cls(*self._base_args, **self._base_kwargs).sample(
-        [n] + batch_shape)
+    theta_k = tf.tile(  # make (batch_shape, event_shape), then memoize across n
+        tf.expand_dims(self._base_cls(*self._base_args, **self._base_kwargs).
+                       sample(batch_shape), 0),
+        [n] + [1] * (rank - 1))
 
     if len(bools.get_shape()) > 1:
       # ``tf.where`` only index subsets when ``bools`` is at most a
