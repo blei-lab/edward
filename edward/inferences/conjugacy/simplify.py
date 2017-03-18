@@ -26,6 +26,7 @@ def _mul_n(x):
 
 _extractable_nodes = {
   'Add': tf.add_n,
+  'Sub': tf.subtract,
   'Mul': _mul_n,
   'Log': tf.log,
   'Exp': tf.exp,
@@ -277,3 +278,12 @@ def add_const_simplify(expr):
       did_something = True
   if did_something:
     return ('#Add',) + tuple(new_args)
+
+@_register_simplify_fn
+def one_m_simplify(expr):
+  '''Replaces ("#Sub", (<wrapped constant 1>,), (.)) with ("#One_minus", .).'''
+  if expr[0] != '#Sub' or not isinstance(expr[1][0], NodeWrapper):
+    return None
+  value = tf.contrib.util.constant_value(expr[1][0].node.op.outputs[0])
+  if value == 1.0:
+    return ('#One_minus', expr[2])

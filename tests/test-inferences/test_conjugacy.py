@@ -159,23 +159,23 @@ class test_simplify_class(tf.test.TestCase):
 
 class test_conjugacy_class(tf.test.TestCase):
 
-#   def test_beta_bernoulli(self):
-#     x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+  def test_beta_bernoulli(self):
+    x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
-#     a0 = 0.5
-#     b0 = 1.5
-#     pi = rvs.Beta(a=a0, b=b0)
-#     x = rvs.Bernoulli(p=pi, sample_shape=10)
+    a0 = 0.5
+    b0 = 1.5
+    pi = rvs.Beta(a=a0, b=b0)
+    x = rvs.Bernoulli(p=pi, sample_shape=10)
 
-#     pi_cond = conj.complete_conditional(pi, [pi, x])
+    pi_cond = conj.complete_conditional(pi, [pi, x])
 
-#     self.assertIsInstance(pi_cond, rvs.Beta)
+    self.assertIsInstance(pi_cond, rvs.Beta)
 
-#     sess = tf.InteractiveSession()
-#     a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
+    sess = tf.InteractiveSession()
+    a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
 
-#     self.assertAllClose(a_val, a0 + x_data.sum())
-#     self.assertAllClose(b_val, b0 + (1-x_data).sum())
+    self.assertAllClose(a_val, a0 + x_data.sum())
+    self.assertAllClose(b_val, b0 + (1-x_data).sum())
 
   def test_gamma_poisson(self):
     x_data = np.array([0, 1, 0, 7, 0, 0, 2, 0, 0, 1])
