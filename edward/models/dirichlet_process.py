@@ -125,15 +125,12 @@ class DirichletProcess(RandomVariable, Distribution):
 
     # Initialize all samples as the first base distribution.
     draws = theta_k
-    # Flip coins for each stick probability.
+    # Flip a coin for each sample.
     flips = Bernoulli(p=beta_k)
-    # Get boolean tensor, returning True for samples that return tails
-    # and are currently equal to theta_k.
-    # It has shape (n, batch_shape).
-    bools = tf.logical_and(
-        tf.cast(1 - flips, tf.bool),
-        tf.reduce_all(tf.equal(draws, theta_k),  # reduce event_shape
-                      [i for i in range(1 + len(batch_shape), rank)]))
+    # Define boolean tensor. It is True for samples that require continuing
+    # the while loop and False for samples that have already
+    # received their base distribution (coin lands heads).
+    bools = tf.cast(1 - flips, tf.bool)
 
     samples, _ = tf.while_loop(self._sample_n_cond, self._sample_n_body,
                                loop_vars=[draws, bools])
@@ -152,21 +149,22 @@ class DirichletProcess(RandomVariable, Distribution):
                        sample(batch_shape), 0),
         [n] + [1] * (rank - 1))
 
-    if len(bools.get_shape()) > 1:
+    if len(bools.get_shape()) <= 1:
+      bools_broadcast = bools
+    else:
       # ``tf.where`` only index subsets when ``bools`` is at most a
       # vector. In general, ``bools`` has shape (n, batch_shape).
       # Therefore we tile ``bools`` to be of shape
       # (n, batch_shape, event_shape) in order to index per-element.
-      bools = tf.tile(tf.reshape(
+      bools_broadcast = tf.tile(tf.reshape(
           bools, [n] + batch_shape + [1] * len(event_shape)),
           [1] + [1] * len(batch_shape) + event_shape)
 
     # Assign True samples to the new theta_k.
-    draws = tf.where(bools, theta_k, draws)
+    draws = tf.where(bools_broadcast, theta_k, draws)
 
+    # If coin lands heads, assign sample's corresponding bool to False
+    # (this ends its "while loop").
     flips = Bernoulli(p=beta_k)
-    bools = tf.logical_and(
-        tf.cast(1 - flips, tf.bool),
-        tf.reduce_all(tf.equal(draws, theta_k),  # reduce event_shape
-                      [i for i in range(1 + len(batch_shape), rank)]))
+    bools = tf.where(tf.cast(flips, tf.bool), tf.zeros_like(bools), bools)
     return draws, bools
