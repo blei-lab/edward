@@ -1,8 +1,18 @@
+#!/usr/bin/env python
+"""Probabilistic matrix factorization using variational inference.
+
+Visualizes the actual and the estimated rating matrices as heatmaps.
+"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import edward as ed
-from edward.models import Normal
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+
+from edward.models import Normal
 
 
 def build_toy_dataset(U, V, N, M, noise_std=0.1):
