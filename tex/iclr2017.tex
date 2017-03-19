@@ -12,7 +12,7 @@ An interactive version with Jupyter notebook is available
 The code snippets assume the following versions.
 
 \begin{lstlisting}[language=bash]
-pip install edward==1.2.3
+pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
 pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
 pip install keras==1.0.0
 \end{lstlisting}
@@ -331,19 +331,20 @@ Y = Normal(mu=tf.matmul(U, V, transpose_b=True), sigma=tf.ones([N, M]))
 \textbf{Figure 13}. Dirichlet process mixture model \citep{antoniak1974mixtures}.
 \begin{lstlisting}[language=python]
 import tensorflow as tf
-from edward.models import Normal
+from edward.models import DirichletProcess, Normal
 
-mu = DirichletProcess(  # see script for implementation
-    alpha=0.1, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D), sample_n=N)
+N = 1000  # number of data points
+D = 5  # data dimensionality
+
+dp = DirichletProcess(
+    alpha=1.0, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D))
+mu = dp.sample(N)
 x = Normal(mu=mu, sigma=tf.ones([N, D]))
 \end{lstlisting}
-To see the essential component defining the \texttt{DirichletProcess}
-random variable, see
+To see the essential component defining the \texttt{DirichletProcess}, see
 \href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}
-in the Github repository.
-A more involved version with a base distribution is available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process_base.py}{\texttt{examples/pp_dirichlet_process_base.py}}
-in the Github repository.
+in the Github repository. Its source implementation can be found at
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py}{\texttt{edward/models/dirichlet_process.py}}.
 
 \subsubsection{Appendix B. Inference Examples}
 

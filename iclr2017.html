@@ -128,7 +128,7 @@
 <h2 id="deep-probabilistic-programming">Deep Probabilistic Programming</h2>
 <p>This webpage is a companion to the article, <a href="https://arxiv.org/abs/1701.03757">Deep Probabilistic Programming</a> <span class="citation">(Tran et al., 2017)</span>. Here we provide more details for plug-and-play with the code snippets. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/iclr2017.ipynb">here</a>.</p>
 <p>The code snippets assume the following versions.</p>
-<pre class="bash" language="bash"><code>pip install edward==1.2.3
+<pre class="bash" language="bash"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;
 pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
 pip install keras==1.0.0</code></pre>
 <h3 id="section-3.-compositional-representations-for-probabilistic-models">Section 3. Compositional Representations for Probabilistic Models</h3>
@@ -369,12 +369,16 @@ V = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
 Y = Normal(mu=tf.matmul(U, V, transpose_b=True), sigma=tf.ones([N, M]))</code></pre>
 <p><strong>Figure 13</strong>. Dirichlet process mixture model <span class="citation">(Antoniak, 1974)</span>.</p>
 <pre language="python"><code>import tensorflow as tf
-from edward.models import Normal
+from edward.models import DirichletProcess, Normal
 
-mu = DirichletProcess(  # see script for implementation
-    alpha=0.1, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D), sample_n=N)
+N = 1000  # number of data points
+D = 5  # data dimensionality
+
+dp = DirichletProcess(
+    alpha=1.0, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D))
+mu = dp.sample(N)
 x = Normal(mu=mu, sigma=tf.ones([N, D]))</code></pre>
-<p>To see the essential component defining the <code>DirichletProcess</code> random variable, see <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py"><code>examples/pp_dirichlet_process.py</code></a> in the Github repository. A more involved version with a base distribution is available at <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process_base.py"><code>examples/pp_dirichlet_process_base.py</code></a> in the Github repository.</p>
+<p>To see the essential component defining the <code>DirichletProcess</code>, see <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py"><code>examples/pp_dirichlet_process.py</code></a> in the Github repository. Its source implementation can be found at <a href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py"><code>edward/models/dirichlet_process.py</code></a>.</p>
 <h3 id="appendix-b.-inference-examples">Appendix B. Inference Examples</h3>
 <p><strong>Figure *</strong>. Stochastic variational inference <span class="citation">(M. D. Hoffman, Blei, Wang, &amp; Paisley, 2013)</span>. For more details, see the <a href="/api/inference-data-subsampling">data subsampling</a> webpage.</p>
 <h3 id="appendix-c.-complete-examples">Appendix C. Complete Examples</h3>

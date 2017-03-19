@@ -178,8 +178,33 @@ x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
 <p>Keras and TensorFlow Slim automatically manage TensorFlow variables, which serve as parameters of the high-level neural network layers. This saves the trouble of having to manage them manually. However, note that neural network parameters defined this way always serve as model parameters. That is, the parameters are not exposed to the user so we cannot be Bayesian about them with prior distributions.</p>
 <h3 id="bayesian-nonparametrics">Bayesian Nonparametrics</h3>
 <p>Bayesian nonparametrics enable rich probability models by working over an infinite-dimensional parameter space <span class="citation">(Hjort, Holmes, Müller, &amp; Walker, 2010)</span>. Edward supports the two typical approaches to handling these models: collapsing the infinite-dimensional space and lazily defining the infinite-dimensional space.</p>
-<p>For the collapsed approach, see the <a href="/tutorials/supervised-classification">Gaussian process classification</a> tutorial as an example. We specify distributions over the function evaluations of the Gaussian process, and the Gaussian process is implicitly marginalized out. This approach is also useful for Poisson process models.</p>
-<p>To work directly on the infinite-dimensional space, one can leverage random variables with <a href="https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html">control flow operations</a> in TensorFlow. At runtime, the control flow will lazily define any parameters in the space necessary in order to generate samples. As an example, we use a while loop to define a <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py">Dirichlet process</a> according to its stick breaking representation.</p>
+<p>In the collapsed approach, we specify a distribution over its instantiation, and the stochastic process is implicitly marginalized out. For example, we can represent a distribution over the function evaluations of a Gaussian process, and not explicitly represent the function draw.</p>
+<pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
+
+def kernel(X):
+  """Evaluate kernel over each pair of rows (data points) in the matrix."""
+  return
+
+X = tf.placeholder(tf.float32, [N, D])
+y = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))</code></pre>
+<p>For more details, see the <a href="/tutorials/supervised-classification">Gaussian process classification</a> tutorial. This approach is also useful for Poisson process models.</p>
+<p>In the lazy approach, we work directly on the infinite-dimensional space via <a href="https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html">control flow operations</a> in TensorFlow. At runtime, the control flow will execute only the necessary computation in order to terminate. As an example, Edward provides a <code>DirichletProcess</code> random variable.</p>
+<pre class="python" language="Python"><code>from edward.models import DirichletProcess, Normal
+
+def plot_dirichlet_process(alpha):
+  with tf.Session() as sess:
+    dp = DirichletProcess(alpha, Normal, mu=0.0, sigma=1.0)
+    samples = sess.run(dp.sample(1000))
+    plt.hist(samples, bins=100, range=(-3.0, 3.0))
+    plt.title("DP({0}, N(0, 1))".format(alpha))
+    plt.show()
+
+# Dirichlet process with high concentration
+plot_dirichlet_process(alpha=1.0)
+# Dirichlet process with low concentration (more spread out)
+plot_dirichlet_process(alpha=50.0)</code></pre>
+<p><img alt="image" src="/images/dirichlet-process-fig0.png" width="350"/> <img alt="image" src="/images/dirichlet-process-fig1.png" width="350"/></p>
+<p>To see the essential component defining the <code>DirichletProcess</code>, see <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py"><code>examples/pp_dirichlet_process.py</code></a> in the Github repository. Its source implementation can be found at <a href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py"><code>edward/models/dirichlet_process.py</code></a>.</p>
 <h3 id="probabilistic-programs">Probabilistic Programs</h3>
 <p>Probabilistic programs greatly expand the scope of probabilistic models <span class="citation">(Goodman, Mansinghka, Roy, Bonawitz, &amp; Tenenbaum, 2012)</span>. Formally, Edward is a Turing-complete probabilistic programming language. This means that Edward can represent any computable probability distribution.</p>
 <p><img alt="image" src="/images/dynamic_graph.png" width="450"/></p>

@@ -166,7 +166,7 @@ tf.tanh(x * y)
 x[2]  # 3rd normal rv in the vector</code></pre>
 <p>In the <a href="/api/model-compositionality">compositionality page</a>, we describe how to build models by composing random variables.</p>
 <hr/>
-<p>For a list of random variables supported in Edward, see the <a href="https://www.tensorflow.org/versions/master/api_docs/python/contrib.distributions.html">TensorFlow distributions API</a>. Edward random variables build on top of them, inheriting the same arguments and class methods. Additional methods are also available, detailed below.</p>
+<p>For a list of random variables supported in Edward, see the <a href="/api/reference">API reference page</a>. Edward random variables build on top of them, inheriting the same arguments and class methods. Additional methods are also available, detailed below.</p>
 <dl class="class">
 <dt id="edward.models.RandomVariable">
 <em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">RandomVariable</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
@@ -289,8 +289,50 @@ with tf.Session() as sess:
 </dd></dl>
 </dd></dl>
 <dl class="class">
+<dt id="edward.models.DirichletProcess">
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">DirichletProcess</code><span class="sig-paren">(</span><em>alpha</em>, <em>base_cls</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='DirichletProcess'</em>, <em>value=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Dirichlet process <span class="math">\(\mathcal{DP}(\alpha, H)\)</span>.</p>
+<p>It has two parameters: a positive real value <span class="math">\(\alpha\)</span>,
+known as the concentration parameter (<code class="docutils literal"><span class="pre">alpha</span></code>), and a base
+distribution <span class="math">\(H\)</span> (<code class="docutils literal"><span class="pre">base_cls(*args,</span> <span class="pre">**kwargs)</span></code>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>alpha</strong> : tf.Tensor</p>
+<blockquote>
+<div><p>Concentration parameter. Must be positive real-valued. Its shape
+determines the number of independent DPs (batch shape).</p>
+</div></blockquote>
+<p><strong>base_cls</strong> : RandomVariable</p>
+<blockquote>
+<div><p>Class of base distribution. Its shape (when instantiated)
+determines the shape of an individual DP (event shape).</p>
+</div></blockquote>
+<p><strong>*args, **kwargs</strong> : optional</p>
+<blockquote class="last">
+<div><p>Arguments passed into <code class="docutils literal"><span class="pre">base_cls</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<pre class="python" language="Python"><code># scalar concentration parameter, scalar base distribution
+dp = DirichletProcess(0.1, Normal, mu=0.0, sigma=1.0)
+assert dp.get_shape() == ()
+
+# vector of concentration parameters, matrix of Exponentials
+dp = DirichletProcess(tf.constant([0.1, 0.4]),
+                      Exponential, lam=tf.ones([5, 3]))
+assert dp.get_shape() == (2, 5, 3)
+</code>
+</pre>
+<p class="rubric">Attributes</p>
+</dd></dl>
+<dl class="class">
 <dt id="edward.models.Empirical">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='Empirical'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='Empirical'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py#L11" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Empirical random variable.</p>
 <p class="rubric">Attributes</p>
 </dd></dl>
