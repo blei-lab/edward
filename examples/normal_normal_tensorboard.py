@@ -13,7 +13,7 @@ from edward.models import Normal
 ed.set_seed(42)
 
 # DATA
-x_data = np.array([0.0] * 50, dtype=np.float32)
+x_data = np.array([0.0] * 50)
 
 # MODEL: Normal-Normal with known variance
 mu = Normal(mu=0.0, sigma=1.0, name='mu')

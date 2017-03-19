@@ -20,7 +20,7 @@ distributed noise.
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N, w, noise_std=0.1):
   D = len(w)
-  x = np.random.randn(N, D).astype(np.float32)
+  x = np.random.randn(N, D)
   y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
   return x, y
 
@@ -135,7 +135,7 @@ def visualise(X_data, y_data, w, b, n_samples=10):
   w_samples = w.sample(n_samples).eval()
   b_samples = b.sample(n_samples).eval()
   plt.scatter(X_data, y_data)
-  inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+  inputs = np.linspace(-1, 10, num=400)
   for ns in range(n_samples):
     output = inputs * w_samples[ns] + b_samples[ns]
     plt.plot(inputs, output)
