@@ -59,15 +59,10 @@ class Inference(object):
       elif isinstance(key, (RandomVariable, tf.Tensor)):
         if isinstance(value, (RandomVariable, tf.Tensor)):
           self.data[key] = value
-        elif isinstance(value, (list, np.ndarray, np.number)):
-          # If value is a list or np.ndarray, store it in the graph.
+        elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
+          # If value is a Python type, store it in the graph.
           # Assign its placeholder with the key's data type.
           ph = tf.placeholder(key.dtype, np.shape(value))
-          var = tf.Variable(ph, trainable=False, collections=[])
-          sess.run(var.initializer, {ph: value})
-          self.data[key] = var
-        elif isinstance(value, (float, int, str)):
-          ph = tf.placeholder(key.dtype, ())
           var = tf.Variable(ph, trainable=False, collections=[])
           sess.run(var.initializer, {ph: value})
           self.data[key] = var

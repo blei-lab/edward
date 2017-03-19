@@ -22,33 +22,7 @@ def check_data(data):
     raise TypeError("data must have type dict.")
 
   for key, value in six.iteritems(data):
-    if isinstance(key, RandomVariable) or \
-       (isinstance(key, tf.Tensor) and "Placeholder" not in key.op.type):
-      if isinstance(value, (tf.Tensor, RandomVariable)):
-        if not key.get_shape().is_compatible_with(value.get_shape()):
-          raise TypeError("Key-value pair in data does not have same "
-                          "shape: {}, {}".format(key.get_shape(),
-                                                 value.get_shape()))
-        elif key.dtype != value.dtype:
-          raise TypeError("Key-value pair in data does not have same "
-                          "dtype: {}, {}".format(key.dtype, value.dtype))
-      elif isinstance(value, (list, np.ndarray, np.number)):
-        if not key.get_shape().is_compatible_with(np.shape(value)):
-          raise TypeError("Key-value pair in data does not have same "
-                          "shape: {}, {}".format(key.get_shape(),
-                                                 np.shape(value)))
-        elif not isinstance(value, list) and \
-                not np.issubdtype(value.dtype, np.float) and \
-                not np.issubdtype(value.dtype, np.int) and \
-                not np.issubdtype(value.dtype, np.str):
-          raise TypeError("Data value has an invalid dtype: "
-                          "{}".format(value.dtype))
-      elif isinstance(value, (float, int, str)):
-        pass
-      else:
-        raise TypeError("Data value has an invalid type: "
-                        "{}".format(type(value)))
-    elif isinstance(key, tf.Tensor):
+    if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
       if isinstance(value, RandomVariable):
         raise TypeError("The value of a feed cannot be a ed.RandomVariable "
                         "object. "
@@ -58,6 +32,29 @@ def check_data(data):
         raise TypeError("The value of a feed cannot be a tf.Tensor object. "
                         "Acceptable feed values include Python scalars, "
                         "strings, lists, numpy ndarrays, or TensorHandles.")
+    elif isinstance(key, (RandomVariable, tf.Tensor)):
+      if isinstance(value, (RandomVariable, tf.Tensor)):
+        if not key.get_shape().is_compatible_with(value.get_shape()):
+          raise TypeError("Key-value pair in data does not have same "
+                          "shape: {}, {}".format(key.get_shape(),
+                                                 value.get_shape()))
+        elif key.dtype != value.dtype:
+          raise TypeError("Key-value pair in data does not have same "
+                          "dtype: {}, {}".format(key.dtype, value.dtype))
+      elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
+        if not key.get_shape().is_compatible_with(np.shape(value)):
+          raise TypeError("Key-value pair in data does not have same "
+                          "shape: {}, {}".format(key.get_shape(),
+                                                 np.shape(value)))
+        elif isinstance(value, (np.ndarray, np.number)) and \
+                not np.issubdtype(value.dtype, np.float) and \
+                not np.issubdtype(value.dtype, np.int) and \
+                not np.issubdtype(value.dtype, np.str):
+          raise TypeError("Data value has an invalid dtype: "
+                          "{}".format(value.dtype))
+      else:
+        raise TypeError("Data value has an invalid type: "
+                        "{}".format(type(value)))
     else:
       raise TypeError("Data key has an invalid type: {}".format(type(key)))
 
