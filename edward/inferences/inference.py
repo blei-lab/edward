@@ -50,11 +50,18 @@ class Inference(object):
 
     for key, value in six.iteritems(latent_vars):
       if not isinstance(key, (RandomVariable, tf.Tensor)):
-        raise TypeError("Latent variable key has an invalid type.")
+        raise TypeError("Latent variable key has an invalid type: "
+                        "{}".format(type(key)))
       elif not isinstance(value, (RandomVariable, tf.Tensor)):
-        raise TypeError("Latent variable value has an invalid type.")
+        raise TypeError("Latent variable value has an invalid type: "
+                        "{}".format(type(value)))
       elif not key.get_shape().is_compatible_with(value.get_shape()):
-        raise TypeError("Latent variable bindings do not have same shape.")
+        raise TypeError("Key-value pair in latent_vars does not have same "
+                        "shape: {}, {}".format(key.get_shape(),
+                                               value.get_shape()))
+      elif key.dtype != value.dtype:
+        raise TypeError("Key-value pair in latent_vars does not have same "
+                        "dtype: {}, {}".format(key.dtype, value.dtype))
 
     self.latent_vars = latent_vars
 
@@ -67,69 +74,56 @@ class Inference(object):
     for key, value in six.iteritems(data):
       if isinstance(key, RandomVariable) or \
          (isinstance(key, tf.Tensor) and "Placeholder" not in key.op.type):
-        if isinstance(value, tf.Tensor):
+        if isinstance(value, (tf.Tensor, RandomVariable)):
           if not key.get_shape().is_compatible_with(value.get_shape()):
-            raise TypeError("Observed variable bindings do not have same "
-                            "shape.")
-
-          self.data[key] = tf.cast(value, tf.float32)
-        elif isinstance(value, RandomVariable):
-          if not key.get_shape().is_compatible_with(value.get_shape()):
-            raise TypeError("Observed variable bindings do not have same "
-                            "shape.")
+            raise TypeError("Key-value pair in data does not have same "
+                            "shape: {}, {}".format(key.get_shape(),
+                                                   value.get_shape()))
+          elif key.dtype != value.dtype:
+            raise TypeError("Key-value pair in data does not have same "
+                            "dtype: {}, {}".format(key.dtype, value.dtype))
 
           self.data[key] = value
-        elif isinstance(value, np.ndarray):
-          if not key.get_shape().is_compatible_with(value.shape):
-            raise TypeError("Observed variable bindings do not have same "
-                            "shape.")
+        elif isinstance(value, (list, np.ndarray, np.number)):
+          if not key.get_shape().is_compatible_with(np.shape(value)):
+            raise TypeError("Key-value pair in data does not have same "
+                            "shape: {}, {}".format(key.get_shape(),
+                                                   np.shape(value)))
+          elif not isinstance(value, list) and \
+                  not np.issubdtype(value.dtype, np.float) and \
+                  not np.issubdtype(value.dtype, np.int) and \
+                  not np.issubdtype(value.dtype, np.str):
+            raise TypeError("Data value has an invalid dtype: "
+                            "{}".format(value.dtype))
 
-          # If value is a np.ndarray, store it in the graph. Assign its
-          # placeholder to an appropriate data type.
-          if np.issubdtype(value.dtype, np.float):
-            ph_type = tf.float32
-          elif np.issubdtype(value.dtype, np.int):
-            ph_type = tf.int32
-          else:
-            raise TypeError("Data value has an unsupported type.")
-          ph = tf.placeholder(ph_type, value.shape)
+          # If value is a list or np.ndarray, store it in the graph.
+          # Assign its placeholder with the key's data type.
+          ph = tf.placeholder(key.dtype, np.shape(value))
           var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
           sess.run(var.initializer, {ph: value})
-        elif isinstance(value, np.number):
-          if np.issubdtype(value.dtype, np.float):
-            ph_type = tf.float32
-          elif np.issubdtype(value.dtype, np.int):
-            ph_type = tf.int32
-          else:
-              raise TypeError("Data value as an invalid type.")
-          ph = tf.placeholder(ph_type, value.shape)
-          var = tf.Variable(ph, trainable=False, collections=[])
           self.data[key] = var
+        elif isinstance(value, (float, int, str)):
+          ph = tf.placeholder(key.dtype, ())
+          var = tf.Variable(ph, trainable=False, collections=[])
           sess.run(var.initializer, {ph: value})
-        elif isinstance(value, float):
-          ph_type = tf.float32
-          ph = tf.placeholder(ph_type, ())
-          var = tf.Variable(ph, trainable=False, collections=[])
           self.data[key] = var
-          sess.run(var.initializer, {ph: value})
-        elif isinstance(value, int):
-          ph_type = tf.int32
-          ph = tf.placeholder(ph_type, ())
-          var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
-          # handle if value is `bool` which this case catches
-          sess.run(var.initializer, {ph: int(value)})
         else:
-          raise TypeError("Data value has an invalid type.")
+          raise TypeError("Data value has an invalid type: "
+                          "{}".format(type(value)))
       elif isinstance(key, tf.Tensor):
         if isinstance(value, RandomVariable):
-          raise TypeError("Data placeholder cannot be bound to a "
-                          "RandomVariable.")
+          raise TypeError("The value of a feed cannot be a ed.RandomVariable "
+                          "object. "
+                          "Acceptable feed values include Python scalars, "
+                          "strings, lists, numpy ndarrays, or TensorHandles.")
+        elif isinstance(value, tf.Tensor):
+          raise TypeError("The value of a feed cannot be a tf.Tensor object. "
+                          "Acceptable feed values include Python scalars, "
+                          "strings, lists, numpy ndarrays, or TensorHandles.")
 
         self.data[key] = value
       else:
-        raise TypeError("Data key has an invalid type.")
+        raise TypeError("Data key has an invalid type: {}".format(type(key)))
 
   def run(self, variables=None, use_coordinator=True, *args, **kwargs):
     """A simple wrapper to run inference.
