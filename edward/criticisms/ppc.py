@@ -7,7 +7,7 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import get_session
+from edward.util import check_data, check_latent_vars, get_session
 
 
 def ppc(T, data, latent_vars=None, n_samples=100):
@@ -82,14 +82,22 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   >>> ed.ppc(T, data={x: x_train})
   """
   sess = get_session()
-  # Sample to get replicated data sets and latent variables.
-  if latent_vars is None:
-    zrep = None
-  else:
-    zrep = {key: tf.convert_to_tensor(value)
-            for key, value in six.iteritems(latent_vars)}
+  if not callable(T):
+    raise TypeError("T must be a callable function.")
 
-  # Replace observed data with replicated data.
+  check_data(data)
+  if latent_vars is None:
+    latent_vars = {}
+
+  check_latent_vars(latent_vars)
+  if not isinstance(n_samples, int):
+    raise TypeError("n_samples must have type int.")
+
+  # Build replicated latent variables.
+  zrep = {key: tf.convert_to_tensor(value)
+          for key, value in six.iteritems(latent_vars)}
+
+  # Build replicated data.
   xrep = {x: (x.value() if isinstance(x, RandomVariable) else obs)
           for x, obs in six.iteritems(data)}
 

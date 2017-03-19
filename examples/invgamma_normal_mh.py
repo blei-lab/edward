@@ -22,8 +22,8 @@ xn_data = np.random.normal(mu, sigma, N)
 print('sigma={}'.format(sigma))
 
 # Prior definition
-alpha = tf.Variable(0.5, dtype=tf.float32, trainable=False)
-beta = tf.Variable(0.7, dtype=tf.float32, trainable=False)
+alpha = tf.Variable(0.5, trainable=False)
+beta = tf.Variable(0.7, trainable=False)
 
 # Posterior inference
 # Probabilistic model

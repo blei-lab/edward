@@ -30,7 +30,7 @@ from tensorflow.contrib import slim
 
 def build_toy_dataset(N, w, noise_std=0.1):
   D = len(w)
-  x = np.random.randn(N, D).astype(np.float32)
+  x = np.random.randn(N, D)
   y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
   return x, y
 

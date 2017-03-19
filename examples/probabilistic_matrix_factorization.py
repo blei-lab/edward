@@ -30,8 +30,8 @@ M = 60  # number of movies
 D = 3  # number of latent factors
 
 # true latent factors
-U_true = np.random.randn(D, N).astype(np.float32)
-V_true = np.random.randn(D, M).astype(np.float32)
+U_true = np.random.randn(D, N)
+V_true = np.random.randn(D, M)
 
 # DATA
 R_true = build_toy_dataset(U_true, V_true, N, M)

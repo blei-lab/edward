@@ -29,7 +29,7 @@ def build_toy_dataset(N):
   pi = np.array([0.4, 0.6])
   mus = [[1, 1], [-1, -1]]
   stds = [[0.1, 0.1], [0.1, 0.1]]
-  x = np.zeros((N, 2), dtype=np.float32)
+  x = np.zeros((N, 2))
   for n in range(N):
     k = np.argmax(np.random.multinomial(1, pi))
     x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
