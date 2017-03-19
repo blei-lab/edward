@@ -7,7 +7,7 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import logit, get_session
+from edward.util import check_data, get_session, logit
 
 
 def evaluate(metrics, data, n_samples=500, output_key=None):
@@ -79,29 +79,34 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   >>> ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
   """
   sess = get_session()
-  # Create feed_dict for data placeholders that the model conditions
-  # on; it is necessary for all session runs.
-  feed_dict = {key: value for key, value in six.iteritems(data)
-               if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type}
-
   if isinstance(metrics, str):
     metrics = [metrics]
+  elif not isinstance(metrics, list):
+    raise TypeError("metrics must have type str or list.")
 
-  # Default output_key to the only data key that isn't a placeholder.
+  check_data(data)
+  if not isinstance(n_samples, int):
+    raise TypeError("n_samples must have type int.")
+
   if output_key is None:
+    # Default output_key to the only data key that isn't a placeholder.
     keys = [key for key in six.iterkeys(data) if not
             isinstance(key, tf.Tensor) or "Placeholder" not in key.op.type]
     if len(keys) == 1:
       output_key = keys[0]
     else:
       raise KeyError("User must specify output_key.")
+  elif not isinstance(output_key, RandomVariable):
+    raise TypeError("output_key must have type RandomVariable.")
 
-  # Form true data. (It is required for all metrics excluding the
-  # log-likelihood.)
-  if metrics != ['log_lik'] and metrics != ['log_likelihood']:
-    y_true = data[output_key]
+  # Create feed_dict for data placeholders that the model conditions
+  # on; it is necessary for all session runs.
+  feed_dict = {key: value for key, value in six.iteritems(data)
+               if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type}
 
-  # Form predicted data (if there are any supervised metrics).
+  # Form true data.
+  y_true = data[output_key]
+  # Make predictions (if there are any supervised metrics).
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
     # Monte Carlo estimate the mean of the posterior predictive.
     # Note the naive solution of taking the mean of
@@ -166,7 +171,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tf.float32)
       evaluations += [log_pred]
     else:
-      raise NotImplementedError()
+      raise NotImplementedError("Metric is not implemented: {}".format(metric))
 
   if len(evaluations) == 1:
     return sess.run(evaluations[0], feed_dict)
