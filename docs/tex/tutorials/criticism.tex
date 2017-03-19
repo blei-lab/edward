@@ -36,9 +36,9 @@ Here, we copy the likelihood node \texttt{x} in the graph and replace dependence
 on the prior \texttt{z} with dependence on the inferred posterior \texttt{qz}.
 We describe several techniques for model criticism.
 
-\subsubsection{Point-based Evaluation}
+\subsubsection{Point Evaluation}
 
-A point-based evaluation is a scalar-valued metric for assessing
+A point evaluation is a scalar-valued metric for assessing
 trained models \citep{winkler1996scoring,gneiting2007strictly}.
 For example, we can assess models for classification
 by predicting the label for each observation in the data and comparing
@@ -56,9 +56,8 @@ ed.evaluate('categorical_accuracy', data={y_post: y_train, x: x_train})
 ed.evaluate('mean_absolute_error', data={y_post: y_train, x: x_train})
 \end{lstlisting}
 
-Point-based evaluation applies generally to any setting, including
-unsupervised tasks. For example, we can evaluate the likelihood of
-observing the data.
+Point evaluation also applies to unsupervised tasks. For example, we
+can evaluate the likelihood of observing the data.
 \begin{lstlisting}[language=Python]
 ed.evaluate('log_likelihood', data={x_post: x_train})
 \end{lstlisting}
@@ -84,12 +83,12 @@ x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
 ed.evaluate('log_likelihood', data={x_post: x_test})
 \end{lstlisting}
 
-Point-based evaluations are formally known as scoring rules
+Point evaluations are formally known as scoring rules
 in decision theory. Scoring rules are useful for model comparison, model
 selection, and model averaging.
 
 See the \href{/api/criticism}{criticism API} for further details.
-An example of point-based evaluation is in the
+An example of point evaluation is in the
 \href{/tutorials/supervised-regression}{supervised learning
 (regression)} tutorial.
 
@@ -100,7 +99,7 @@ analyze the degree to which data generated from the model deviate from
 data generated from the true distribution. They can be used either
 numerically to quantify this degree, or graphically to visualize this
 degree. PPCs can be thought of as a probabilistic generalization of
-point-based evaluations
+point evaluation
 \citep{box1980sampling,rubin1984bayesianly,meng1994posterior,gelman1996posterior}.
 
 The simplest PPC works by applying a test statistic on new data
@@ -120,8 +119,8 @@ improvement for the model.
 More generally, the test statistic can also be a function of the
 model's latent variables $T(\mathbf{x}, \mathbf{z})$, known as a
 discrepancy function.  Examples of discrepancy functions are the
-metrics used for point-based evaluation. We can now interpret the
-point-based evaluation as a special case of PPCs: it simply calculates
+metrics used for point evaluation. We can now interpret the
+point evaluation as a special case of PPCs: it simply calculates
 $T(\mathbf{x}, \mathbf{z})$ over the real data and without a reference
 distribution in mind. A reference distribution allows us to make
 probabilistic statements about the point, in reference to an overall
