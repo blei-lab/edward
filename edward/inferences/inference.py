@@ -54,8 +54,10 @@ class Inference(object):
     check_data(data)
     self.data = {}
     for key, value in six.iteritems(data):
-      if isinstance(key, (RandomVariable, tf.Tensor)):
-        if isinstance(value, (tf.Tensor, RandomVariable)):
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
+        self.data[key] = value
+      elif isinstance(key, (RandomVariable, tf.Tensor)):
+        if isinstance(value, (RandomVariable, tf.Tensor)):
           self.data[key] = value
         elif isinstance(value, (list, np.ndarray, np.number)):
           # If value is a list or np.ndarray, store it in the graph.
