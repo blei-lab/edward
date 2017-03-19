@@ -107,16 +107,17 @@ generated from the posterior predictive, such as
 $T(\mathbf{x}_\text{new}) = \max(\mathbf{x}_\text{new})$.  Applying
 $T(\mathbf{x}_\text{new})$ to new data over many data replications
 induces a distribution. We compare this distribution to the test
-statistic applied to the real data $T(\mathbf{x})$.
+statistic on the real data $T(\mathbf{x})$.
 
 \includegraphics{/images/ppc.png}
 
 In the figure, $T(\mathbf{x})$ falls in a low probability region of
-this reference distribution. This indicates that the model fits the
-data poorly according to this check; this suggests an area of
-improvement for the model.
+this reference distribution: if the model were true, the probability
+of observing the test statistic is very low. This indicates that the
+model fits the data poorly according to this check; this suggests an
+area of improvement for the model.
 
-More generally, the test statistic can also be a function of the
+More generally, the test statistic can be a function of the
 model's latent variables $T(\mathbf{x}, \mathbf{z})$, known as a
 discrepancy function.  Examples of discrepancy functions are the
 metrics used for point evaluation. We can now interpret the
@@ -126,8 +127,9 @@ distribution in mind. A reference distribution allows us to make
 probabilistic statements about the point, in reference to an overall
 distribution.
 
-The \texttt{ed.ppc()} method provides a scaffold for studying
-various discrepancy functions.
+The \texttt{ed.ppc()} method provides a scaffold for studying various
+discrepancy functions. It takes as input a user-defined discrepancy
+function, and a data dictionary.
 \begin{lstlisting}[language=Python]
 ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x_post]), data={x_post: x_train})
 \end{lstlisting}
