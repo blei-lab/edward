@@ -46,8 +46,6 @@ print(sess.run(dp))
 print(sess.run(dp))
 
 # Demo of the DirichletProcess random variable in Edward.
-# It is associated to a sample tensor, which in turn is associated to
-# one of its atoms (base distributions).
 base_cls = Normal
 kwargs = {'mu': 0.0, 'sigma': 1.0}
 
