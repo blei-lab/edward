@@ -53,7 +53,7 @@ def complete_conditional(rv, blanket, log_joint=None):
   s_stats = suff_stat_nodes(subgraph, rv.value(), blanket)
   s_stats = list(set(s_stats))
 
-  # Simplify those nodes, and extract any new linear terms into multipliers_i
+  # Simplify those nodes, and extract any new linear terms into multipliers_i.
   s_stat_exprs = defaultdict(list)
   for i in xrange(len(s_stats)):
     expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
@@ -62,6 +62,7 @@ def complete_conditional(rv, blanket, log_joint=None):
     s_stat_exprs[s_stats_i].append((s_stats[i],
                                     reconstruct_multiplier(multipliers_i)))
 
+  # Sort out the sufficient statistics to identify this conditional's family.
   s_stat_keys = s_stat_exprs.keys()
   order = np.argsort([str(i) for i in s_stat_keys])
   dist_key = tuple((s_stat_keys[i] for i in order))
@@ -72,31 +73,38 @@ def complete_conditional(rv, blanket, log_joint=None):
                               'exponential-family distribution has those '
                               'sufficient statistics.' % str(dist_key))
 
+  # Swap sufficient statistics for placeholders, then take gradients
+  # w.r.t.  those placeholders to get natural parameters. The original
+  # nodes involving the sufficient statistic nodes are swapped for new
+  # nodes that depend linearly on the sufficient statistic placeholders.
   s_stat_nodes = []
+  s_stat_replacements = []
   s_stat_placeholders = []
-  for s_stat_type in s_stat_exprs.values():
-    for pair in s_stat_type:
-      s_stat_nodes.append(pair[0])
-      s_stat_placeholders.append(tf.placeholder(pair[0].dtype, shape=pair[0].get_shape()))
+  for s_stat in s_stat_exprs.keys():
+    # TODO(mhoffman): This shape assumption won't work for MVNs or Wisharts.
+    s_stat_placeholder = tf.placeholder(np.float32,
+                                        shape=rv.value().get_shape())
+    s_stat_placeholders.append(s_stat_placeholder)
+    for s_stat_node, multiplier in s_stat_exprs[s_stat]:
+      fake_node = s_stat_placeholder * multiplier    
+      s_stat_nodes.append(s_stat_node)
+      s_stat_replacements.append(fake_node)
+
   swap_dict = {}
+  swap_back = {}
   for i in blanket:
     if i == rv:
       continue
     val = i.value()
     swap_dict[val] = tf.placeholder(val.dtype)
-  for i, j in zip(s_stat_nodes, s_stat_placeholders):
+    swap_back[swap_dict[val]] = val
+  for i, j in zip(s_stat_nodes, s_stat_replacements):
     swap_dict[i] = j
-  swap_back = {j: i for i, j in swap_dict.iteritems()}
+    swap_back[j] = i
   log_joint_copy = edward.util.copy(log_joint, swap_dict)
-  all_nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
+  nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
-  nat_params = []
-  i = 0
-  for s_stat_type in s_stat_exprs.values():
-    nat_params.append(0.)
-    for pair in s_stat_type:
-      nat_params[-1] += pair[1] * all_nat_params[i]
-      i += 1
+  # Removes any dependencies on those old placeholders.
   for i in xrange(len(nat_params)):
     nat_params[i] = edward.util.copy(nat_params[i], swap_back)
   nat_params = [nat_params[i] for i in order]
