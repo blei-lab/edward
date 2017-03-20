@@ -159,6 +159,17 @@ class test_simplify_class(tf.test.TestCase):
 
 class test_conjugacy_class(tf.test.TestCase):
 
+  def test_basic_bernoulli(self):
+    N = 10
+    z = rvs.Bernoulli(p=0.75, sample_shape=N)
+    z_cond = conj.complete_conditional(z, [z])
+    self.assertIsInstance(z_cond, rvs.Bernoulli)
+
+    sess = tf.InteractiveSession()
+    p_val = sess.run(z_cond.p)
+
+    self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
+
   def test_beta_bernoulli(self):
     x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
@@ -280,7 +291,7 @@ class test_conjugacy_class(tf.test.TestCase):
                         sigma_val**2 * (mu0 / sigma0**2 +
                                         c/sigma_likelihood**2 * x_data.sum()))
 
-  def test_dirichlet_multinomial(self):
+  def test_dirichlet_categorical(self):
     x_data = np.array([0, 0, 0, 0, 1, 1, 1, 2, 2, 3], np.int32)
     N = x_data.shape[0]
     D = x_data.max() + 1

@@ -15,6 +15,8 @@ from edward.models import random_variables as rvs
 import edward.inferences.conjugacy.conjugate_log_probs
 from edward.inferences.conjugacy.simplify import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 
+#TODO(mhoffman): Support for slicing, tf.gather, etc.
+
 rvs.Bernoulli.support = 'binary'
 rvs.Categorical.support = 'onehot'
 rvs.Beta.support = '01'
@@ -24,6 +26,7 @@ rvs.InverseGamma.support = 'nonnegative'
 rvs.Normal.support = 'real'
 
 _suff_stat_to_dist = defaultdict(dict)
+_suff_stat_to_dist['binary'][(('#x',),)] = lambda p1: rvs.Bernoulli(p=tf.sigmoid(p1))
 _suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 _suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = lambda p1: rvs.Dirichlet(p1+1)
 _suff_stat_to_dist['nonnegative'][(('#x',), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
@@ -36,6 +39,7 @@ _suff_stat_to_dist['real'][(('#Pow2.0000e+00', ('#x',)), ('#x',))] = normal_from
 
 
 def complete_conditional(rv, blanket, log_joint=None):
+  # log_joint holds all the information we need to get a conditional.
   if log_joint is None:
     log_joint = 0
     for b in blanket:
@@ -43,11 +47,13 @@ def complete_conditional(rv, blanket, log_joint=None):
         raise NotImplementedError("conjugate_log_prob not implemented for {}".format(type(b)))
       log_joint += tf.reduce_sum(b.conjugate_log_prob())
 
+  # Pull out the nodes that are nonlinear functions of rv into s_stats.
   stop_nodes = set([i.value() for i in blanket])
   subgraph = extract_subgraph(log_joint, stop_nodes)
   s_stats = suff_stat_nodes(subgraph, rv.value(), blanket)
   s_stats = list(set(s_stats))
 
+  # Simplify those nodes, and extract any new linear terms into multipliers_i
   s_stat_exprs = defaultdict(list)
   for i in xrange(len(s_stats)):
     expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
@@ -74,6 +80,8 @@ def complete_conditional(rv, blanket, log_joint=None):
       s_stat_placeholders.append(tf.placeholder(pair[0].dtype, shape=pair[0].get_shape()))
   swap_dict = {}
   for i in blanket:
+    if i == rv:
+      continue
     val = i.value()
     swap_dict[val] = tf.placeholder(val.dtype)
   for i, j in zip(s_stat_nodes, s_stat_placeholders):
@@ -92,15 +100,6 @@ def complete_conditional(rv, blanket, log_joint=None):
   for i in xrange(len(nat_params)):
     nat_params[i] = edward.util.copy(nat_params[i], swap_back)
   nat_params = [nat_params[i] for i in order]
-
-#   natural_parameters = []
-#   for i in order:
-#     param_i = 0.
-#     node_multiplier_list = s_stat_exprs[s_stat_keys[i]]
-#     for j in xrange(len(node_multiplier_list)):
-#       nat_param = tf.gradients(log_joint, node_multiplier_list[j][0])[0]
-#       param_i += nat_param * node_multiplier_list[j][1]
-#     natural_parameters.append(param_i)
 
   return dist_constructor(*nat_params)
 
@@ -162,7 +161,7 @@ def is_child(subgraph, node, stop_nodes):
 
 _linear_types = ['Add', 'AddN', 'Sub', 'Mul', 'Neg', 'Identity', 'Sum',
                  'Assert', 'Reshape', 'Slice', 'StridedSlice', 'Gather',
-                 'GatherNd', 'Squeeze', 'Concat', 'ExpandDims']
+                 'GatherNd', 'Squeeze', 'Concat', 'ExpandDims', 'OneHot']
 def suff_stat_nodes(subgraph, node, stop_nodes):
   '''Finds nonlinear nodes depending on `node`.
   '''

@@ -16,7 +16,6 @@ class NodeWrapper:
   def __str__(self):
     return str(self.node)
 
-
 def _mul_n(x):
   if len(x) == 2:
     return tf.multiply(x[0], x[1])
@@ -55,6 +54,13 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
 
 
 def as_float(x):
+  if isinstance(x, NodeWrapper):
+    # TODO(mhoffman): Worry about complex numbers?
+    if x.node.dtype in [np.float16, np.float32, np.float64,
+                        np.float128]:
+      return x.node
+    else:
+      return tf.cast(x.node, np.float32)
   try:
     result = float(x)
     return result
@@ -75,9 +81,9 @@ def reconstruct_expr(expr):
     tf_fn = _extractable_nodes.get(expr[0][1:], None)
     assert(tf_fn is not None)
     return tf_fn(*args)
-  assert(len(expr) == 1)
-  assert(isinstance(expr[0], NodeWrapper))
-  return expr[0].node
+  assert(False)
+#   assert(isinstance(expr[0], NodeWrapper))
+#   return expr[0].node
 
 
 
@@ -279,6 +285,7 @@ def add_const_simplify(expr):
   if did_something:
     return ('#Add',) + tuple(new_args)
 
+
 @_register_simplify_fn
 def one_m_simplify(expr):
   '''Replaces ("#Sub", (<wrapped constant 1>,), (.)) with ("#One_minus", .).'''
@@ -287,3 +294,10 @@ def one_m_simplify(expr):
   value = tf.contrib.util.constant_value(expr[1][0].node.op.outputs[0])
   if value == 1.0:
     return ('#One_minus', expr[2])
+
+
+@_register_simplify_fn
+def cast_simplify(expr):
+  '''Replaces (<wrapped cast>, (.)) with (.).'''
+  if isinstance(expr[0], NodeWrapper) and expr[0].node.op.type == 'Cast':
+    return expr[1]

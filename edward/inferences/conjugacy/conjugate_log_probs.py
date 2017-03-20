@@ -33,6 +33,7 @@ rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
 def bernoulli_log_prob(self):
   val = self
   p = self.parameters['p']
+#   f_val = as_float(val)
   f_val = tf.cast(val, np.float32)
   return (f_val * tf.log(p) +
           (1. - f_val) * tf.log(1. - p))
@@ -42,9 +43,8 @@ rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
 def categorical_log_prob(self):
   val = self
   p = self.parameters['p']
-  one_hot = tf.one_hot(val, p.get_shape()[-1])
-  f_val = tf.cast(one_hot, np.float32)
-  return tf.reduce_sum(tf.log(p) * f_val, -1)
+  one_hot = tf.one_hot(val, p.get_shape()[-1], dtype=np.float32)
+  return tf.reduce_sum(tf.log(p) * one_hot, -1)
 rvs.Categorical.conjugate_log_prob = categorical_log_prob
 
 
