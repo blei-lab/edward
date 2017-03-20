@@ -47,5 +47,16 @@ class test_dirichletprocess_sample_class(tf.test.TestCase):
       _test([5], tf.constant([0.2, 1.5]), Normal,
             mu=tf.zeros([3, 4]), sigma=tf.ones([3, 4]))
 
+  def test_persistent_state(self):
+    with self.test_session() as sess:
+      dp = DirichletProcess(0.1, Normal, mu=0.0, sigma=1.0)
+      x = dp.sample(5)
+      y = dp.sample(5)
+      x_data, y_data, theta = sess.run([x, y, dp.theta])
+      for sample in x_data:
+        self.assertTrue(sample in theta)
+      for sample in y_data:
+        self.assertTrue(sample in theta)
+
 if __name__ == '__main__':
   tf.test.main()
