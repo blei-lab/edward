@@ -167,7 +167,7 @@ class Inference(object):
     if scale is None:
       scale = {}
     elif not isinstance(scale, dict):
-      raise TypeError()
+      raise TypeError("scale must be a dict object.")
 
     self.scale = scale
 

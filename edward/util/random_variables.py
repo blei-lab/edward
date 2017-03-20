@@ -553,7 +553,7 @@ def get_dims(x):
   elif isinstance(x, RandomVariable):
     return x.get_batch_shape().as_list()
   else:
-    raise NotImplementedError()
+    raise TypeError("Input has invalid type: {}".format(type(x)))
 
 
 def get_parents(x, collection=None):
