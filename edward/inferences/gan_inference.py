@@ -51,8 +51,8 @@ class GANInference(VariationalInference):
     >>>
     >>> inference = ed.GANInference({x: x_data}, discriminator)
     """
-    if discriminator is None:
-      raise NotImplementedError()
+    if not callable(discriminator):
+      raise TypeError("discriminator must be a callable function.")
 
     self.discriminator = discriminator
     super(GANInference, self).__init__(None, data)
@@ -175,7 +175,7 @@ class GANInference(VariationalInference):
           [self.train_d, self.increment_t, self.loss_d], feed_dict)
       loss = 0.0
     else:
-      raise NotImplementedError()
+      raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     if self.debug:
       sess.run(self.op_check)
@@ -225,6 +225,6 @@ def _build_optimizer(optimizer, global_step):
     else:
       raise ValueError('Optimizer class not found:', optimizer)
   elif not isinstance(optimizer, tf.train.Optimizer):
-    raise TypeError()
+    raise TypeError("Optimizer must be a tf.train.Optimizer object.")
 
   return optimizer, global_step

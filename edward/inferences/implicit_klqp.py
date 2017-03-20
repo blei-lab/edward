@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.gan_inference import GANInference
 from edward.models import RandomVariable
-from edward.util import copy, get_session
+from edward.util import check_latent_vars, copy, get_session
 
 
 class ImplicitKLqp(GANInference):
@@ -70,15 +70,14 @@ class ImplicitKLqp(GANInference):
     its corresponding output, ``discriminator`` must output a
     dictionary of same size and keys as ``scale``.
     """
-    if discriminator is None:
-      raise NotImplementedError()
-
-    if global_vars is None:
-      global_vars = {}
-    elif not isinstance(latent_vars, dict):
-      raise TypeError()
+    if not callable(discriminator):
+      raise TypeError("discriminator must be a callable function.")
 
     self.discriminator = discriminator
+    if global_vars is None:
+      global_vars = {}
+
+    check_latent_vars(global_vars)
     self.global_vars = global_vars
     # call grandparent's method; avoid parent (GANInference)
     super(GANInference, self).__init__(latent_vars, data)
