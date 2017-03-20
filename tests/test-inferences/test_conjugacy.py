@@ -256,7 +256,6 @@ class test_conjugacy_class(tf.test.TestCase):
                         sigma_val**2 * (mu0 / sigma0**2 +
                                         1./sigma_likelihood**2 * x_data.sum()))
 
-
   def test_normal_normal_scaled(self):
     x_data = np.array([0.1, 0.5, 3.3, 2.7])
 
@@ -280,6 +279,25 @@ class test_conjugacy_class(tf.test.TestCase):
     self.assertAllClose(mu_val,
                         sigma_val**2 * (mu0 / sigma0**2 +
                                         c/sigma_likelihood**2 * x_data.sum()))
+
+  def test_dirichlet_multinomial(self):
+    x_data = np.array([0, 0, 0, 0, 1, 1, 1, 2, 2, 3], np.int32)
+    N = x_data.shape[0]
+    D = x_data.max() + 1
+
+    alpha = np.zeros([D]).astype(np.float32) + 2.
+    sample_shape = (N,)
+
+    theta = rvs.Dirichlet(alpha)
+    x = rvs.Categorical(p=theta, sample_shape=sample_shape)
+
+    blanket = [theta, x]
+    theta_cond = conj.complete_conditional(theta, blanket)
+
+    sess = tf.InteractiveSession()
+    alpha_val = sess.run(theta_cond.alpha, {x: x_data})
+
+    self.assertAllClose(alpha_val, np.array([6., 5., 4., 3.], np.float32))
 
 
 if __name__ == '__main__':

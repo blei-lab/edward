@@ -20,6 +20,16 @@ def beta_log_prob(self):
 rvs.Beta.conjugate_log_prob = beta_log_prob
 
 
+def dirichlet_log_prob(self):
+  val = self
+  alpha = self.parameters['alpha']
+  result = tf.reduce_sum((alpha - 1.) * tf.log(val), -1)
+  result += tf.reduce_sum(-tf.lgamma(alpha), -1)
+  result += tf.lgamma(tf.reduce_sum(alpha, -1))
+  return result
+rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
+
+
 def bernoulli_log_prob(self):
   val = self
   p = self.parameters['p']
@@ -27,6 +37,15 @@ def bernoulli_log_prob(self):
   return (f_val * tf.log(p) +
           (1. - f_val) * tf.log(1. - p))
 rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
+
+
+def categorical_log_prob(self):
+  val = self
+  p = self.parameters['p']
+  one_hot = tf.one_hot(val, p.get_shape()[-1])
+  f_val = tf.cast(one_hot, np.float32)
+  return tf.reduce_sum(tf.log(p) * f_val, -1)
+rvs.Categorical.conjugate_log_prob = categorical_log_prob
 
 
 def gamma_log_prob(self):

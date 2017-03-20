@@ -17,6 +17,7 @@ from edward.inferences.conjugacy.simplify import symbolic_suff_stat, full_simpli
 
 _suff_stat_to_dist = {}
 _suff_stat_to_dist[((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
+_suff_stat_to_dist[((u'#Log', ('#x',)),)] = lambda p1: rvs.Dirichlet(p1+1)
 _suff_stat_to_dist[(('#x',), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
 _suff_stat_to_dist[(('#Pow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
 def normal_from_natural_params(p1, p2):
