@@ -49,6 +49,11 @@ class DirichletProcess(RandomVariable, Distribution):
 
         # Instantiate base for use in other methods such as `_get_event_shape`.
         self._base = self._base_cls(*self._base_args, **self._base_kwargs)
+        # Store persistent states of base distribution. It has shape
+        # [None] + batch_shape + event_shape, where the first dimension is
+        # the number of persistent states, instantiated only as needed.
+        self.theta = tf.expand_dims(  # store the first state as default
+            self._base.sample(self.get_batch_shape()), 0)
 
         super(DirichletProcess, self).__init__(
             dtype=tf.int32,
@@ -107,47 +112,57 @@ class DirichletProcess(RandomVariable, Distribution):
     if seed is not None:
       raise NotImplementedError("seed is not implemented.")
 
-    batch_shape = self._get_batch_shape().as_list()
-    event_shape = self._get_event_shape().as_list()
+    batch_shape = self.get_batch_shape().as_list()
+    event_shape = self.get_event_shape().as_list()
     rank = 1 + len(batch_shape) + len(event_shape)
     # Note this is for scoping within the while loop's body function.
     self._temp_scope = [n, batch_shape, event_shape, rank]
 
-    # First stick probability, one for each sample and each DP in the
-    # batch shape. It has shape (n, batch_shape).
-    beta_k = Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
-    # First base distribution.
-    # It has shape (n, batch_shape, event_shape).
-    theta_k = tf.tile(  # make (batch_shape, event_shape), then memoize across n
-        tf.expand_dims(self._base_cls(*self._base_args, **self._base_kwargs).
-                       sample(batch_shape), 0),
-        [n] + [1] * (rank - 1))
+    k = tf.constant(0)
 
-    # Initialize all samples as the first base distribution.
-    draws = theta_k
-    # Flip a coin for each sample.
+    # Draw stick probability, then flip coin; perform this for each
+    # sample and each DP in the batch shape. It has shape (n, batch_shape).
+    beta_k = Beta(a=tf.ones_like(self.alpha), b=self.alpha).sample(n)
     flips = Bernoulli(p=beta_k)
     # Define boolean tensor. It is True for samples that require continuing
-    # the while loop and False for samples that have already
-    # received their base distribution (coin lands heads).
+    # the while loop and False for samples that can receive their base
+    # distribution (coin lands heads).
     bools = tf.cast(1 - flips, tf.bool)
 
-    samples, _ = tf.while_loop(self._sample_n_cond, self._sample_n_body,
-                               loop_vars=[draws, bools])
+    # Extract base distribution. It has shape (batch_shape, event_shape).
+    theta = self.theta
+    theta_k = tf.gather(theta, k)
+
+    # Initialize all samples as the first base distribution.
+    draws = tf.tile(tf.expand_dims(theta_k, 0), [n] + [1] * (rank - 1))
+
+    theta_shape = tf.TensorShape([None])
+    if len(theta.shape) > 1:
+      theta_shape = theta_shape.concatenate(theta.shape[1:])
+
+    _, _, self.theta, samples = tf.while_loop(
+        self._sample_n_cond, self._sample_n_body,
+        loop_vars=[k, bools, theta, draws],
+        shape_invariants=[k.shape, bools.shape, theta_shape, draws.shape])
+
     return samples
 
-  def _sample_n_cond(self, draws, bools):
+  def _sample_n_cond(self, k, bools, theta, draws):
     # Proceed if at least one bool is True.
     return tf.reduce_any(bools)
 
-  def _sample_n_body(self, draws, bools):
+  def _sample_n_body(self, k, bools, theta, draws):
     n, batch_shape, event_shape, rank = self._temp_scope
+    k += 1
 
-    beta_k = Beta(a=tf.ones_like(self._alpha), b=self._alpha).sample(n)
-    theta_k = tf.tile(  # make (batch_shape, event_shape), then memoize across n
-        tf.expand_dims(self._base_cls(*self._base_args, **self._base_kwargs).
-                       sample(batch_shape), 0),
-        [n] + [1] * (rank - 1))
+    def fn():
+      theta_k = self._base_cls(
+          *self._base_args, **self._base_kwargs).sample(batch_shape)
+      return tf.concat([theta, tf.expand_dims(theta_k, 0)], 0)
+
+    # If necessary, add a new persistent state to theta.
+    theta = tf.cond(tf.shape(theta)[0] - 1 >= k, lambda: theta, fn)
+    theta_k = tf.gather(theta, k)
 
     if len(bools.get_shape()) <= 1:
       bools_broadcast = bools
@@ -161,10 +176,13 @@ class DirichletProcess(RandomVariable, Distribution):
           [1] + [1] * len(batch_shape) + event_shape)
 
     # Assign True samples to the new theta_k.
-    draws = tf.where(bools_broadcast, theta_k, draws)
+    theta_k_broadcast = tf.tile(tf.expand_dims(theta_k, 0), [n] + [1] * (rank - 1))
+    draws = tf.where(bools_broadcast, theta_k_broadcast, draws)
 
+    # Draw new stick probability, then flip coin.
+    beta_k = Beta(a=tf.ones_like(self.alpha), b=self.alpha).sample(n)
+    flips = Bernoulli(p=beta_k)
     # If coin lands heads, assign sample's corresponding bool to False
     # (this ends its "while loop").
-    flips = Bernoulli(p=beta_k)
     bools = tf.where(tf.cast(flips, tf.bool), tf.zeros_like(bools), bools)
-    return draws, bools
+    return k, bools, theta, draws

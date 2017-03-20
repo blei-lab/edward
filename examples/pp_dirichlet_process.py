@@ -69,6 +69,19 @@ plt.hist(samples, bins=100, range=(-3.0, 3.0))
 plt.title("DP({0}, N(0, 1))".format(alpha))
 plt.show()
 
+# States persist across calls to sample() in a DP.
+alpha = 1.0
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+x = dp.sample(50)
+y = dp.sample(75)
+samples_x, samples_y = sess.run([x, y])
+plt.subplot(211)
+plt.hist(samples_x, bins=100, range=(-3.0, 3.0))
+plt.title("DP({0}, N(0, 1)) across two calls to sample()".format(alpha))
+plt.subplot(212)
+plt.hist(samples_y, bins=100, range=(-3.0, 3.0))
+plt.show()
+
 # ``theta`` is the distribution indirectly returned by the DP.
 # Fetching theta is the same as fetching the Dirichlet process.
 dp = DirichletProcess(alpha, base_cls, **kwargs)
