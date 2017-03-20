@@ -26,12 +26,13 @@ def normal_from_natural_params(p1, p2):
 _suff_stat_to_dist[(('#Pow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
 
 
-def complete_conditional(rv, blanket):
-  log_joint = 0
-  for b in blanket:
-    if getattr(b, "conjugate_log_prob", None) is None:
-      raise NotImplementedError("conjugate_log_prob not implemented for {}".format(type(b)))
-    log_joint += tf.reduce_sum(b.conjugate_log_prob())
+def complete_conditional(rv, blanket, log_joint=None):
+  if log_joint is None:
+    log_joint = 0
+    for b in blanket:
+      if getattr(b, "conjugate_log_prob", None) is None:
+        raise NotImplementedError("conjugate_log_prob not implemented for {}".format(type(b)))
+      log_joint += tf.reduce_sum(b.conjugate_log_prob())
 
   stop_nodes = set([i.value() for i in blanket])
   subgraph = extract_subgraph(log_joint, stop_nodes)
