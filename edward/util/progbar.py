@@ -79,8 +79,7 @@ class Progbar(object):
       bar += ' '
       prog_width = int(self.width * float(current) / self.target)
       if prog_width > 0:
-        bar += ('█' * (prog_width - 1))
-        bar += '█'
+        bar += ('█' * prog_width)
 
       bar += (' ' * (self.width - prog_width))
       sys.stdout.write(bar)

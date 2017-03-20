@@ -1,6 +1,6 @@
 from setuptools import setup
 
-# import `__version__` from code base
+# import ``__version__`` from code base
 exec(open('edward/version.py').read())
 
 setup(
@@ -17,11 +17,21 @@ setup(
     extras_require={'tensorflow': ['tensorflow>=1.0.0a0'],
                     'tensorflow with gpu': ['tensorflow-gpu>=1.0.0a0'],
                     'neural networks': ['keras>=1.0.0', 'prettytensor>=0.7.4'],
-                    'visualization': ['pillow>=3.4.2']},
+                    'notebooks': ['jupyter>=1.0.0'],
+                    'visualization': ['matplotlib>=1.3',
+                                      'pillow>=3.4.2',
+                                      'seaborn>=0.3.1']},
     tests_require=['pytest', 'pytest-pep8'],
     url='http://edwardlib.org',
+    keywords='machine learning statistics probabilistic programming tensorflow',
     license='Apache License 2.0',
-    classifiers=['License :: OSI Approved :: Apache Software License',
+    classifiers=['Intended Audience :: Developers',
+                 'Intended Audience :: Education',
+                 'Intended Audience :: Science/Research',
+                 'License :: OSI Approved :: Apache Software License',
+                 'Operating System :: POSIX :: Linux',
+                 'Operating System :: MacOS :: MacOS X',
+                 'Operating System :: Microsoft :: Windows',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.4'],
 )

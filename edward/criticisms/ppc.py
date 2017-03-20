@@ -14,9 +14,6 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   """Posterior predictive check
   (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).
 
-  If ``latent_vars`` is inputted as ``None``, then it is a prior
-  predictive check (Box, 1980).
-
   PPC's form an empirical distribution for the predictive discrepancy,
 
   .. math::
@@ -25,6 +22,9 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   by drawing replicated data sets :math:`x^{\\text{rep}}` and
   calculating :math:`T(x^{\\text{rep}})` for each data set. Then it
   compares it to :math:`T(x)`.
+
+  If ``data`` is inputted with the prior predictive distribution, then
+  it is a prior predictive check (Box, 1980).
 
   Parameters
   ----------
@@ -46,18 +46,18 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   Returns
   -------
   list of np.ndarray
-    List containing the reference distribution, which is a NumPy
-    array of size elements,
+    List containing the reference distribution, which is a NumPy array
+    with ``n_samples`` elements,
 
     .. math::
       (T(x^{{\\text{rep}},1}, z^{1}), ...,
-       T(x^{\\text{rep,size}}, z^{\\text{size}}))
+       T(x^{\\text{rep,nsamples}}, z^{\\text{nsamples}}))
 
-    and the realized discrepancy, which is a NumPy array of size
-    elements,
+    and the realized discrepancy, which is a NumPy array with
+    ``n_samples`` elements,
 
     .. math::
-      (T(x, z^{1}), ..., T(x, z^{\\text{size}})).
+      (T(x, z^{1}), ..., T(x, z^{\\text{nsamples}})).
 
 
   Examples

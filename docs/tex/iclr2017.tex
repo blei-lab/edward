@@ -99,8 +99,7 @@ beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([N, K]))
 x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
 \end{lstlisting}
-It is used below in Figure 6 (left/right), Figure * (variational EM),
-and Figure * (data subsampling).
+It is used below in Figure 6 (left/right) and Figure * (variational EM).
 
 \textbf{Figure 6} \textbf{(left)}. Variational inference
 \citep{jordan1999introduction}.
@@ -168,9 +167,8 @@ x = generative_network(eps)
 inference = ed.GANInference(data={x: x_train},
     discriminator=discriminative_network)
 \end{lstlisting}
-For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}{\texttt{examples/gan.py}}
-in the Github repository.
+For an example of it in use, see the
+\href{/tutorials/gan}{generative adversarial networks} tutorial.
 
 \textbf{Figure *}. Variational EM \citep{neal1993new}.
 It performs inference on the model defined in Figure 5.
@@ -209,7 +207,6 @@ It leverages Hamiltonian Monte Carlo for the E-step to perform maximum
 marginal a posteriori.
 
 \textbf{Figure *}. Data subsampling.
-It performs inference on the model defined in Figure 5.
 \begin{lstlisting}[language=python]
 import edward as ed
 import tensorflow as tf

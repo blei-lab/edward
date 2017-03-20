@@ -21,14 +21,16 @@ from edward.models import Bernoulli
 
 def geometric(p):
   i = tf.constant(0)
-  sample = tf.while_loop(cond=lambda i: tf.cast(Bernoulli(p=p), tf.bool),
+  sample = tf.while_loop(cond=lambda i: tf.cast(1 - Bernoulli(p=p), tf.bool),
                          body=lambda i: i + 1, loop_vars=[i])
   return sample
 
 
-geom = geometric(p=0.9)
+p = 0.1
+geom = geometric(p)
 
 sess = tf.Session()
 samples = [sess.run(geom) for _ in range(1000)]
 plt.hist(samples, bins='auto')
+plt.title("Geometric({0})".format(p))
 plt.show()
