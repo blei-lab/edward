@@ -15,16 +15,24 @@ from edward.models import random_variables as rvs
 import edward.inferences.conjugacy.conjugate_log_probs
 from edward.inferences.conjugacy.simplify import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 
-_suff_stat_to_dist = {}
-_suff_stat_to_dist[((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
-_suff_stat_to_dist[((u'#Log', ('#x',)),)] = lambda p1: rvs.Dirichlet(p1+1)
-_suff_stat_to_dist[(('#x',), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
-_suff_stat_to_dist[(('#Pow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
+rvs.Bernoulli.support = 'binary'
+rvs.Categorical.support = 'onehot'
+rvs.Beta.support = '01'
+rvs.Dirichlet.support = 'simplex'
+rvs.Gamma.support = 'nonnegative'
+rvs.InverseGamma.support = 'nonnegative'
+rvs.Normal.support = 'real'
+
+_suff_stat_to_dist = defaultdict(dict)
+_suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
+_suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = lambda p1: rvs.Dirichlet(p1+1)
+_suff_stat_to_dist['nonnegative'][(('#x',), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
+_suff_stat_to_dist['nonnegative'][(('#Pow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
   mu = sigmasq * p2
   return rvs.Normal(mu, tf.sqrt(sigmasq))
-_suff_stat_to_dist[(('#Pow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
+_suff_stat_to_dist['real'][(('#Pow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
 
 
 def complete_conditional(rv, blanket, log_joint=None):
@@ -51,7 +59,7 @@ def complete_conditional(rv, blanket, log_joint=None):
   s_stat_keys = s_stat_exprs.keys()
   order = np.argsort([str(i) for i in s_stat_keys])
   dist_key = tuple((s_stat_keys[i] for i in order))
-  dist_constructor = _suff_stat_to_dist.get(dist_key, None)
+  dist_constructor = _suff_stat_to_dist[rv.support].get(dist_key, None)
   if dist_constructor is None:
     raise NotImplementedError('Conditional distribution has sufficient '
                               'statistics %s, but no available '
