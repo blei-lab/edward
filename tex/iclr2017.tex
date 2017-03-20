@@ -12,7 +12,7 @@ An interactive version with Jupyter notebook is available
 The code snippets assume the following versions.
 
 \begin{lstlisting}[language=bash]
-pip install -e "git+https://github.com/blei-lab/edward.git#egg=edward"
+pip install edward==1.2.4
 pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
 pip install keras==1.0.0
 \end{lstlisting}
@@ -99,8 +99,7 @@ beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([N, K]))
 x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
 \end{lstlisting}
-It is used below in Figure 6 (left/right), Figure * (variational EM),
-and Figure * (data subsampling).
+It is used below in Figure 6 (left/right) and Figure * (variational EM).
 
 \textbf{Figure 6} \textbf{(left)}. Variational inference
 \citep{jordan1999introduction}.
@@ -111,7 +110,7 @@ import numpy as np
 import tensorflow as tf
 from edward.models import Categorical, Normal
 
-x_train = np.zeros([N, D], dtype=np.float32)
+x_train = np.zeros([N, D])
 
 qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
                sigma=tf.exp(tf.Variable(tf.zeros([K, D]))))
@@ -128,7 +127,7 @@ import numpy as np
 import tensorflow as tf
 from edward.models import Empirical
 
-x_train = np.zeros([N, D], dtype=np.float32)
+x_train = np.zeros([N, D])
 
 T = 10000  # number of samples
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D])))
@@ -158,7 +157,7 @@ def discriminative_network(x):
   return Dense(1, activation=None)(h)
 
 # DATA
-x_train = np.zeros([N, 28 * 28], dtype=np.float32)
+x_train = np.zeros([N, 28 * 28])
 
 # MODEL
 eps = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
@@ -168,9 +167,8 @@ x = generative_network(eps)
 inference = ed.GANInference(data={x: x_train},
     discriminator=discriminative_network)
 \end{lstlisting}
-For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}{\texttt{examples/gan.py}}
-in the Github repository.
+For an example of it in use, see the
+\href{/tutorials/gan}{generative adversarial networks} tutorial.
 
 \textbf{Figure *}. Variational EM \citep{neal1993new}.
 It performs inference on the model defined in Figure 5.
@@ -181,7 +179,7 @@ import tensorflow as tf
 from edward.models import Categorical, PointMass
 
 # DATA
-x_train = np.zeros([N, D], dtype=np.float32)
+x_train = np.zeros([N, D])
 
 # INFERENCE
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
@@ -209,7 +207,6 @@ It leverages Hamiltonian Monte Carlo for the E-step to perform maximum
 marginal a posteriori.
 
 \textbf{Figure *}. Data subsampling.
-It performs inference on the model defined in Figure 5.
 \begin{lstlisting}[language=python]
 import edward as ed
 import tensorflow as tf
@@ -253,8 +250,8 @@ D = 54  # number of features
 T = 100  # number of empirical samples
 
 # DATA
-x_data = np.zeros([N, D], dtype=np.float32)
-y_data = np.zeros([N], dtype=np.float32)
+x_data = np.zeros([N, D])
+y_data = np.zeros([N])
 
 # MODEL
 x = tf.Variable(x_data, trainable=False)

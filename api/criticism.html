@@ -132,7 +132,7 @@
 <p>We can never validate whether a model is true. In practice, “all models are wrong” <span class="citation">(Box, 1976)</span>. However, we can try to uncover where the model goes wrong. Model criticism helps justify the model as an approximation or point to good directions for revising the model. For background, see the criticism <a href="/tutorials/criticism">tutorial</a>.</p>
 <p>Edward explores model criticism using</p>
 <ul>
-<li>point-based evaluations, such as mean squared error or classification accuracy;</li>
+<li>point evaluations, such as mean squared error or classification accuracy;</li>
 <li>posterior predictive checks, for making probabilistic assessments of the model fit using discrepancy functions.</li>
 </ul>
 <hr/>
@@ -225,14 +225,14 @@ ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
 <code class="descclassname">edward.criticisms.</code><code class="descname">ppc</code><span class="sig-paren">(</span><em>T</em>, <em>data</em>, <em>latent_vars=None</em>, <em>n_samples=100</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Posterior predictive check
 (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).</p>
-<p>If <code class="docutils literal"><span class="pre">latent_vars</span></code> is inputted as <code class="docutils literal"><span class="pre">None</span></code>, then it is a prior
-predictive check (Box, 1980).</p>
 <p>PPC’s form an empirical distribution for the predictive discrepancy,</p>
 <div class="math">
 \[p(T\mid x) = \int p(T(x^{\text{rep}})\mid z) p(z\mid x) dz\]</div>
 <p>by drawing replicated data sets <span class="math">\(x^{\text{rep}}\)</span> and
 calculating <span class="math">\(T(x^{\text{rep}})\)</span> for each data set. Then it
 compares it to <span class="math">\(T(x)\)</span>.</p>
+<p>If <code class="docutils literal"><span class="pre">data</span></code> is inputted with the prior predictive distribution, then
+it is a prior predictive check (Box, 1980).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -263,15 +263,15 @@ is used when the discrepancy is a function of latent variables.</p>
 </tr>
 <tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">list of np.ndarray</p>
 <blockquote class="last">
-<div><p>List containing the reference distribution, which is a NumPy
-array of size elements,</p>
+<div><p>List containing the reference distribution, which is a NumPy array
+with <code class="docutils literal"><span class="pre">n_samples</span></code> elements,</p>
 <div class="math">
 \[(T(x^{{\text{rep}},1}, z^{1}), ...,
- T(x^{\text{rep,size}}, z^{\text{size}}))\]</div>
-<p>and the realized discrepancy, which is a NumPy array of size
-elements,</p>
+ T(x^{\text{rep,nsamples}}, z^{\text{nsamples}}))\]</div>
+<p>and the realized discrepancy, which is a NumPy array with
+<code class="docutils literal"><span class="pre">n_samples</span></code> elements,</p>
 <div class="math">
-\[(T(x, z^{1}), ..., T(x, z^{\text{size}})).\]</div>
+\[(T(x, z^{1}), ..., T(x, z^{\text{nsamples}})).\]</div>
 </div></blockquote>
 </td>
 </tr>

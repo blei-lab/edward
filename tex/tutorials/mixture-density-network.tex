@@ -21,8 +21,8 @@ for every input $x_n$ there are multiple outputs $y_n$.
 from sklearn.model_selection import train_test_split
 
 def build_toy_dataset(N):
-  y_data = np.random.uniform(-10.5, 10.5, N).astype(np.float32)
-  r_data = np.random.normal(size=N).astype(np.float32)  # random noise
+  y_data = np.random.uniform(-10.5, 10.5, N)
+  r_data = np.random.normal(size=N)  # random noise
   x_data = np.sin(0.75 * y_data) * 7.0 + y_data * 0.5 + r_data * 1.0
   x_data = x_data.reshape((N, 1))
   return train_test_split(x_data, y_data, random_state=42)

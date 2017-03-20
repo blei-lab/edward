@@ -16,7 +16,7 @@ Use 25 data points from the \href
 {https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html}
 {crabs data set}.
 \begin{lstlisting}[language=Python]
-df = np.loadtxt('data/crabs_train.txt', dtype='float32', delimiter=',')
+df = np.loadtxt('data/crabs_train.txt', delimiter=',')
 df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
 
 N = 25  # number of data points
