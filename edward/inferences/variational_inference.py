@@ -65,7 +65,7 @@ class VariationalInference(Inference):
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
-      global_step = tf.Variable(0, trainable=False)
+      global_step = tf.Variable(0, trainable=False, name="global_step")
       starter_learning_rate = 0.1
       learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                                  global_step,

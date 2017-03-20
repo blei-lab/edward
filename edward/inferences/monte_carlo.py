@@ -83,7 +83,7 @@ class MonteCarlo(Inference):
                                 qz in six.itervalues(self.latent_vars)])
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
-    self.n_accept = tf.Variable(0, trainable=False)
+    self.n_accept = tf.Variable(0, trainable=False, name="n_accept")
     self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 

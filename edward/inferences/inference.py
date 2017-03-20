@@ -62,10 +62,11 @@ class Inference(object):
         elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
           # If value is a Python type, store it in the graph.
           # Assign its placeholder with the key's data type.
-          ph = tf.placeholder(key.dtype, np.shape(value))
-          var = tf.Variable(ph, trainable=False, collections=[])
-          sess.run(var.initializer, {ph: value})
-          self.data[key] = var
+          with tf.variable_scope("data"):
+            ph = tf.placeholder(key.dtype, np.shape(value))
+            var = tf.Variable(ph, trainable=False, collections=[])
+            sess.run(var.initializer, {ph: value})
+            self.data[key] = var
 
   def run(self, variables=None, use_coordinator=True, *args, **kwargs):
     """A simple wrapper to run inference.
@@ -163,7 +164,8 @@ class Inference(object):
       self.n_print = n_print
 
     self.progbar = Progbar(self.n_iter)
-    self.t = tf.Variable(0, trainable=False)
+    self.t = tf.Variable(0, trainable=False, name="iteration")
+
     self.increment_t = self.t.assign_add(1)
 
     if scale is None:
