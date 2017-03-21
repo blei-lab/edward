@@ -46,8 +46,6 @@ print(sess.run(dp))
 print(sess.run(dp))
 
 # Demo of the DirichletProcess random variable in Edward.
-# It is associated to a sample tensor, which in turn is associated to
-# one of its atoms (base distributions).
 base_cls = Normal
 kwargs = {'mu': 0.0, 'sigma': 1.0}
 
@@ -67,6 +65,19 @@ x = dp.sample(1000)
 samples = sess.run(x)
 plt.hist(samples, bins=100, range=(-3.0, 3.0))
 plt.title("DP({0}, N(0, 1))".format(alpha))
+plt.show()
+
+# States persist across calls to sample() in a DP.
+alpha = 1.0
+dp = DirichletProcess(alpha, base_cls, **kwargs)
+x = dp.sample(50)
+y = dp.sample(75)
+samples_x, samples_y = sess.run([x, y])
+plt.subplot(211)
+plt.hist(samples_x, bins=100, range=(-3.0, 3.0))
+plt.title("DP({0}, N(0, 1)) across two calls to sample()".format(alpha))
+plt.subplot(212)
+plt.hist(samples_y, bins=100, range=(-3.0, 3.0))
 plt.show()
 
 # ``theta`` is the distribution indirectly returned by the DP.
