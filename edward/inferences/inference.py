@@ -131,7 +131,9 @@ class Inference(object):
 
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
                  debug=False):
-    """Initialize inference algorithm.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computational graph. No ops
+    should be created outside the call to ``initialize()``.
 
     Parameters
     ----------
