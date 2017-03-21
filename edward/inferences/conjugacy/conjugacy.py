@@ -30,12 +30,12 @@ _suff_stat_to_dist['binary'][(('#x',),)] = lambda p1: rvs.Bernoulli(p=tf.sigmoid
 _suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
 _suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = lambda p1: rvs.Dirichlet(p1+1)
 _suff_stat_to_dist['nonnegative'][(('#x',), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
-_suff_stat_to_dist['nonnegative'][(('#Pow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
+_suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
   mu = sigmasq * p2
   return rvs.Normal(mu, tf.sqrt(sigmasq))
-_suff_stat_to_dist['real'][(('#Pow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
+_suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
 
 
 def complete_conditional(rv, blanket, log_joint=None):

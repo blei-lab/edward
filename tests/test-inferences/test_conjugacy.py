@@ -43,19 +43,19 @@ class test_simplify_class(tf.test.TestCase):
     did_something, new_expr = simplify.power_op_simplify(expr)
     self.assertTrue(did_something)
     self.assertEquals(new_expr,
-                      ('#Pow2.0000e+00',
-                       ('#Pow-1.0000e+00', ('#Pow5.0000e-01', ('#x',)))))
+                      ('#CPow2.0000e+00',
+                       ('#CPow-1.0000e+00', ('#CPow5.0000e-01', ('#x',)))))
     did_something, new_expr = simplify.power_op_simplify(new_expr)
     self.assertFalse(did_something)
 
     did_something, new_expr = simplify.pow_simplify(new_expr)
     self.assertTrue(did_something)
-    self.assertEquals(new_expr, ('#Pow-1.0000e+00', ('#x',)))
+    self.assertEquals(new_expr, ('#CPow-1.0000e+00', ('#x',)))
     did_something, new_expr = simplify.pow_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_log_pow_simplify(self):
-    expr = ('#Log', ('#Pow2.3000e+01', ('#x',)))
+    expr = ('#Log', ('#CPow2.3000e+01', ('#x',)))
     did_something, new_expr = simplify.log_pow_simplify(expr)
     self.assertTrue(did_something)
     self.assertEquals(new_expr, ('#Mul', ('2.3000e+01',), ('#Log', ('#x',))))
@@ -73,12 +73,12 @@ class test_simplify_class(tf.test.TestCase):
     self.assertFalse(did_something)
 
   def test_pow_mul_simplify(self):
-    expr = ('#Pow2.1', ('#Mul', ('3',), ('4.',), ('1.2e+01',)))
+    expr = ('#CPow2.1', ('#Mul', ('3',), ('4.',), ('1.2e+01',)))
     did_something, new_expr = simplify.pow_mul_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEquals(new_expr, ('#Mul', ('#Pow2.1', ('3',)),
-                                 ('#Pow2.1', ('4.',)),
-                                 ('#Pow2.1', ('1.2e+01',))))
+    self.assertEquals(new_expr, ('#Mul', ('#CPow2.1', ('3',)),
+                                 ('#CPow2.1', ('4.',)),
+                                 ('#CPow2.1', ('1.2e+01',))))
     did_something, new_expr = simplify.pow_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
@@ -135,24 +135,24 @@ class test_simplify_class(tf.test.TestCase):
     self.assertFalse(did_something)
 
   def test_expr_contains(self):
-    expr = ('#Add', ('#Mul', ('1.5', ('#Pow1.2000e+00', ('#x',)))),
+    expr = ('#Add', ('#Mul', ('1.5', ('#CPow1.2000e+00', ('#x',)))),
             ('#Mul', ('1.2',), ('7',)))
     self.assertTrue(simplify.expr_contains(expr, '#x'))
-    self.assertFalse(simplify.expr_contains(expr, '#Pow'))
-    self.assertTrue(simplify.expr_contains(expr, '#Pow1.2000e+00'))
+    self.assertFalse(simplify.expr_contains(expr, '#CPow'))
+    self.assertTrue(simplify.expr_contains(expr, '#CPow1.2000e+00'))
     self.assertTrue(simplify.expr_contains(expr, '#Mul'))
     self.assertTrue(simplify.expr_contains(expr, '#Add'))
     self.assertTrue(simplify.expr_contains(expr[1], '#x'))
     self.assertFalse(simplify.expr_contains(expr[2], '#x'))
 
   def test_add_const_simplify(self):
-    expr = ('#Add', ('#Mul', ('1.5', ('#Pow1.2000e+00', ('#x',)))),
+    expr = ('#Add', ('#Mul', ('1.5', ('#CPow1.2000e+00', ('#x',)))),
             ('#Mul', ('1.2',), ('7',)))
     did_something, new_expr = simplify.add_const_simplify(expr)
     self.assertTrue(did_something)
     self.assertEquals(new_expr, ('#Add', ('#Mul',
                                           ('1.5',
-                                           ('#Pow1.2000e+00', ('#x',))))))
+                                           ('#CPow1.2000e+00', ('#x',))))))
     did_something, new_expr = simplify.add_const_simplify(new_expr)
     self.assertFalse(did_something)
 

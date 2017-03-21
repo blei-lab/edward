@@ -75,8 +75,8 @@ def reconstruct_expr(expr):
   if expr[0] == '#x':
     raise ValueError('#x cannot appear in expr to be reconstructed.')
   args = [reconstruct_expr(i) for i in expr[1:]]
-  if expr[0][:4] == '#Pow':
-    return tf.pow(args[0], np.float32(expr[0][4:]))
+  if expr[0][:5] == '#CPow':
+    return tf.pow(args[0], np.float32(expr[0][5:]))
   if expr[0][0] == '#':
     tf_fn = _extractable_nodes.get(expr[0][1:], None)
     assert(tf_fn is not None)
@@ -148,33 +148,31 @@ _power_ops = {
 }
 @_register_simplify_fn
 def power_op_simplify(expr):
-#   if expr[0] == '#Pow':
-#     print(expr)
   op_power = _power_ops.get(expr[0], None)
   if op_power:
-    return ('#Pow%.4e' % op_power,) + expr[1:]
+    return ('#CPow%.4e' % op_power,) + expr[1:]
 
 
 @_register_simplify_fn
 def pow_simplify(expr):
-  if expr[0][:4] != '#Pow':
+  if expr[0][:5] != '#CPow':
     return None
-  if expr[1][0][:4] != '#Pow':
+  if expr[1][0][:5] != '#CPow':
     return None
 
-  op_power = float(expr[0][4:])
-  sub_power = float(expr[1][0][4:])
+  op_power = float(expr[0][5:])
+  sub_power = float(expr[1][0][5:])
   new_power = sub_power * op_power
   if new_power == 1.:
     return expr[1][1]
   else:
-    return ('#Pow%.4e' % new_power, expr[1][1])
+    return ('#CPow%.4e' % new_power, expr[1][1])
 
 
 @_register_simplify_fn
 def log_pow_simplify(expr):
-  if expr[0] == '#Log' and expr[1][0][:4] == '#Pow':
-    return ('#Mul', (expr[1][0][4:],), ('#Log', expr[1][1]))
+  if expr[0] == '#Log' and expr[1][0][:5] == '#CPow':
+    return ('#Mul', (expr[1][0][5:],), ('#Log', expr[1][1]))
 
 
 @_register_simplify_fn
@@ -185,7 +183,7 @@ def log_mul_simplify(expr):
 
 @_register_simplify_fn
 def pow_mul_simplify(expr):
-  if expr[0][:4] == '#Pow' and expr[1][0] == '#Mul':
+  if expr[0][:5] == '#CPow' and expr[1][0] == '#Mul':
     return ('#Mul',) + tuple(((expr[0], i) for i in expr[1][1:]))
 
 
