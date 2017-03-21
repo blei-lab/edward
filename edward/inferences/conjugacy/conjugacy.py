@@ -86,10 +86,9 @@ def complete_conditional(rv, blanket, log_joint=None):
                                         shape=rv.value().get_shape())
     s_stat_placeholders.append(s_stat_placeholder)
     for s_stat_node, multiplier in s_stat_exprs[s_stat]:
-      fake_node = s_stat_placeholder * multiplier    
+      fake_node = s_stat_placeholder * multiplier
       s_stat_nodes.append(s_stat_node)
       s_stat_replacements.append(fake_node)
-
   swap_dict = {}
   swap_back = {}
   for i in blanket:
@@ -98,15 +97,19 @@ def complete_conditional(rv, blanket, log_joint=None):
     val = i.value()
     swap_dict[val] = tf.placeholder(val.dtype)
     swap_back[swap_dict[val]] = val
+    # This prevents random variable nodes from being copied.
+    swap_back[val] = val
   for i, j in zip(s_stat_nodes, s_stat_replacements):
     swap_dict[i] = j
     swap_back[j] = i
+
   log_joint_copy = edward.util.copy(log_joint, swap_dict)
   nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
   # Removes any dependencies on those old placeholders.
   for i in xrange(len(nat_params)):
-    nat_params[i] = edward.util.copy(nat_params[i], swap_back)
+    print('calling copy on', nat_params[i])
+    nat_params[i] = edward.util.copy(nat_params[i], swap_back, scope='copyback')
   nat_params = [nat_params[i] for i in order]
 
   return dist_constructor(*nat_params)

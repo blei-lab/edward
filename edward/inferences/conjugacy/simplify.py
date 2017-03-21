@@ -148,6 +148,8 @@ _power_ops = {
 }
 @_register_simplify_fn
 def power_op_simplify(expr):
+#   if expr[0] == '#Pow':
+#     print(expr)
   op_power = _power_ops.get(expr[0], None)
   if op_power:
     return ('#Pow%.4e' % op_power,) + expr[1:]
@@ -301,3 +303,10 @@ def cast_simplify(expr):
   '''Replaces (<wrapped cast>, (.)) with (.).'''
   if isinstance(expr[0], NodeWrapper) and expr[0].node.op.type == 'Cast':
     return expr[1]
+
+
+# @_register_simplify_fn
+# def stop_gradient_simplify(expr):
+#   '''Replaces (<wrapped stop_gradient>, (.)) with (.).'''
+#   if isinstance(expr[0], NodeWrapper) and expr[0].node.op.type == 'StopGradient':
+#     return expr[1]
