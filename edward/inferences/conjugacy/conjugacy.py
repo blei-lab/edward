@@ -108,7 +108,6 @@ def complete_conditional(rv, blanket, log_joint=None):
 
   # Removes any dependencies on those old placeholders.
   for i in xrange(len(nat_params)):
-    print('calling copy on', nat_params[i])
     nat_params[i] = edward.util.copy(nat_params[i], swap_back, scope='copyback')
   nat_params = [nat_params[i] for i in order]
 
