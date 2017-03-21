@@ -6,10 +6,14 @@ import six
 import tensorflow as tf
 
 from edward.inferences.map import MAP
-from edward.models import \
-    MultivariateNormalCholesky, MultivariateNormalDiag, \
-    MultivariateNormalFull, PointMass, RandomVariable
+from edward.models import PointMass, RandomVariable
 from edward.util import get_session, get_variables
+
+try:
+  from edward.models import \
+      MultivariateNormalCholesky, MultivariateNormalDiag, MultivariateNormalFull
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class Laplace(MAP):

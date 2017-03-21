@@ -6,8 +6,13 @@ import six
 import tensorflow as tf
 
 from edward.inferences.monte_carlo import MonteCarlo
-from edward.models import Normal, RandomVariable
+from edward.models import RandomVariable
 from edward.util import copy
+
+try:
+  from edward.models import Normal
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class SGLD(MonteCarlo):

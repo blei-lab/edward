@@ -7,8 +7,13 @@ import tensorflow as tf
 
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
-from edward.models import RandomVariable, Uniform
+from edward.models import RandomVariable
 from edward.util import copy
+
+try:
+  from edward.models import Uniform
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class MetropolisHastings(MonteCarlo):

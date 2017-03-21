@@ -5,8 +5,12 @@ from __future__ import print_function
 import tensorflow as tf
 
 from edward.models.random_variable import RandomVariable
-from edward.models.random_variables import Bernoulli, Beta
 from tensorflow.contrib.distributions import Distribution
+
+try:
+  from edward.models.random_variables import Bernoulli, Beta
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class DirichletProcess(RandomVariable, Distribution):
