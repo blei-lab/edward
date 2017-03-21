@@ -79,13 +79,11 @@ def check_latent_vars(latent_vars):
                       "dtype: {}, {}".format(key.dtype, value.dtype))
 
 
-def copy_rv(value, dict_swap, scope, replace_itself, copy_q):
-  if isinstance(value, RandomVariable) or \
-     isinstance(value, tf.Variable) or \
-     isinstance(value, tf.Tensor) or \
-     isinstance(value, tf.Operation):
-      value = copy(value, dict_swap, scope, replace_itself, copy_q)
-  return value
+def copy_default(x, *args, **kwargs):
+  if isinstance(x, (RandomVariable, tf.Operation, tf.Tensor, tf.Variable)):
+    x = copy(x, *args, **kwargs)
+
+  return x
 
 
 def copy(org_instance, dict_swap=None, scope="copied",
@@ -102,7 +100,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
   Parameters
   ----------
-  org_instance : RandomVariable, tf.Variable, tf.Tensor, or tf.Operation
+  org_instance : RandomVariable, tf.Operation, tf.Tensor, or tf.Variable
     Node to add in graph with replaced ancestors.
   dict_swap : dict, optional
     Random variables, variables, tensors, or operations to swap with.
@@ -150,10 +148,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
   >>> sess.run(z_new)
   12.0
   """
-  if not isinstance(org_instance, RandomVariable) and \
-     not isinstance(org_instance, tf.Variable) and \
-     not isinstance(org_instance, tf.Tensor) and \
-     not isinstance(org_instance, tf.Operation):
+  if not isinstance(org_instance,
+                    (RandomVariable, tf.Operation, tf.Tensor, tf.Variable)):
     raise TypeError("Could not copy instance: " + str(org_instance))
 
   if dict_swap is None:
@@ -175,7 +171,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
             org_instance = value.value()
           else:
             org_instance = value
-
           if not copy_q:
             return org_instance
           break
@@ -184,13 +179,13 @@ def copy(org_instance, dict_swap=None, scope="copied",
   new_name = scope + '/' + org_instance.name
 
   # If an instance of the same name exists, return appropriately.
-  # Do this for random variables.
+  # Do this for ed.RandomVariable.
   random_variables = {x.name: x for x in
                       graph.get_collection('_random_variable_collection_')}
   if new_name in random_variables:
     return random_variables[new_name]
 
-  # Do this for tensors and operations.
+  # Do this for tf.Tensor and tf.Operation.
   try:
     already_present = graph.as_graph_element(new_name,
                                              allow_tensor=True,
@@ -199,16 +194,16 @@ def copy(org_instance, dict_swap=None, scope="copied",
   except:
     pass
 
-  # If instance is a variable, return it; do not re-copy any.
+  # If instance is a tf.Variable, return it; do not re-copy any.
   # Note we check variables via their name and not their type. This
   # is because if we get variables through an op's inputs, it has
-  # type tf.Tensor: we can only tell it is a variable via its name.
+  # type tf.Tensor: we can only tell it is a Variable via its name.
   variables = {x.name: x for
                x in graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)}
   if org_instance.name in variables:
     return graph.get_tensor_by_name(variables[org_instance.name].name)
 
-  # Do the same for placeholders. Determine via its op's type.
+  # Do the same for tf.placeholders.
   if isinstance(org_instance, tf.Tensor) and \
           "Placeholder" in org_instance.op.type:
     return org_instance
@@ -217,28 +212,20 @@ def copy(org_instance, dict_swap=None, scope="copied",
     rv = org_instance
 
     # If it has copiable arguments, copy them.
-    args = []
-    for arg in rv._args:
-      if isinstance(arg, RandomVariable) or \
-         isinstance(arg, tf.Variable) or \
-         isinstance(arg, tf.Tensor) or \
-         isinstance(arg, tf.Operation):
-         arg = copy(arg, dict_swap, scope, True, copy_q)
-
-      args.append(arg)
+    args = [copy_default(arg, dict_swap, scope, True, copy_q)
+            for arg in rv._args]
 
     kwargs = {}
     for key, value in six.iteritems(rv._kwargs):
       if isinstance(value, list):
-        kwargs[key] = [
-            copy_rv(v, dict_swap, scope, True, copy_q) for v in value
-        ]
+        kwargs[key] = [copy_default(v, dict_swap, scope, True, copy_q)
+                       for v in value]
       else:
-        kwargs[key] = copy_rv(value, dict_swap, scope, True, copy_q)
+        kwargs[key] = copy_default(value, dict_swap, scope, True, copy_q)
 
     kwargs['name'] = new_name
     # Create new random variable with copied arguments.
-    new_rv = rv.__class__(*args, **kwargs)
+    new_rv = type(rv)(*args, **kwargs)
     return new_rv
   elif isinstance(org_instance, tf.Tensor):
     tensor = org_instance
@@ -260,7 +247,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   elif isinstance(org_instance, tf.Operation):
     op = org_instance
 
-    # Do not copy queue operations
+    # Do not copy queue operations.
     if 'Queue' in op.type:
       return op
 
@@ -303,7 +290,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
       if not isinstance(elem, tf.Operation):
         elem = tf.convert_to_tensor(elem)
 
-      elems += [elem]
+      elems.append(elem)
 
     ret._add_control_inputs(elems)
 
