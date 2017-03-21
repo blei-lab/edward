@@ -82,7 +82,7 @@ class DirichletProcess(RandomVariable, Distribution):
     return tf.convert_to_tensor(self.get_batch_shape())
 
   def _get_batch_shape(self):
-    return self._alpha.get_shape()
+    return self.alpha.get_shape()
 
   def _event_shape(self):
     return tf.convert_to_tensor(self.get_event_shape())

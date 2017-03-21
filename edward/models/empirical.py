@@ -57,21 +57,21 @@ class Empirical(RandomVariable, Distribution):
     return tf.convert_to_tensor(self.get_event_shape())
 
   def _get_event_shape(self):
-    return self._params.get_shape()[1:]
+    return self.params.get_shape()[1:]
 
   def _mean(self):
-    return tf.reduce_mean(self._params, 0)
+    return tf.reduce_mean(self.params, 0)
 
   def _std(self):
-    # broadcasting T x shape - shape = T x shape
-    r = self._params - self.mean()
+    # broadcasting n x shape - shape = n x shape
+    r = self.params - self.mean()
     return tf.sqrt(tf.reduce_mean(tf.square(r), 0))
 
   def _variance(self):
     return tf.square(self.std())
 
   def _sample_n(self, n, seed=None):
-    input_tensor = self._params
+    input_tensor = self.params
     if len(input_tensor.get_shape()) == 0:
       input_tensor = tf.expand_dims(input_tensor, 0)
       multiples = tf.concat(
