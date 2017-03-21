@@ -87,12 +87,12 @@ class DirichletProcess(RandomVariable, Distribution):
 
   def _sample_n(self, n, seed=None):
     """Sample ``n`` draws from the DP. Draws from the base
-    distribution are memoized across ``n``.
+    distribution are memoized across ``n`` and across calls to
+    ``sample()``.
 
     Draws from the base distribution are not memoized across the batch
-    shape: i.e., each independent DP in the batch shape has its own
-    memoized samples.  Similarly, draws are not memoized across calls
-    to ``sample()``.
+    shape, i.e., each independent DP in the batch shape has its own
+    memoized samples.
 
     Returns
     -------
@@ -105,9 +105,9 @@ class DirichletProcess(RandomVariable, Distribution):
     Notes
     -----
     The implementation has only one inefficiency, which is that it
-    draws (n, batch_shape) samples from the base distribution at each
-    iteration of the while loop. Ideally, we would only draw new
-    samples for those in the loop returning True.
+    draws (batch_shape,) samples from the base distribution when
+    adding a new persistent state. Ideally, we would only draw new
+    samples for those in the loop which require it.
     """
     if seed is not None:
       raise NotImplementedError("seed is not implemented.")
