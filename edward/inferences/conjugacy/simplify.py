@@ -173,6 +173,8 @@ def pow_simplify(expr):
 def log_pow_simplify(expr):
   if expr[0] == '#Log' and expr[1][0][:5] == '#CPow':
     return ('#Mul', (expr[1][0][5:],), ('#Log', expr[1][1]))
+  if expr[0] == '#Log' and expr[1][0] == '#Pow':
+    return ('#Mul', expr[1][2], ('#Log', expr[1][1]))
 
 
 @_register_simplify_fn
@@ -185,6 +187,8 @@ def log_mul_simplify(expr):
 def pow_mul_simplify(expr):
   if expr[0][:5] == '#CPow' and expr[1][0] == '#Mul':
     return ('#Mul',) + tuple(((expr[0], i) for i in expr[1][1:]))
+  if expr[0] == '#Pow' and expr[1][0] == '#Mul':
+    return ('#Mul',) + tuple((('#Pow', i, expr[2]) for i in expr[1][1:]))
 
 
 @_register_simplify_fn

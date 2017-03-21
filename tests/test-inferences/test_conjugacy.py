@@ -54,11 +54,20 @@ class test_simplify_class(tf.test.TestCase):
     did_something, new_expr = simplify.pow_simplify(new_expr)
     self.assertFalse(did_something)
 
-  def test_log_pow_simplify(self):
+  def test_log_cpow_simplify(self):
     expr = ('#Log', ('#CPow2.3000e+01', ('#x',)))
     did_something, new_expr = simplify.log_pow_simplify(expr)
     self.assertTrue(did_something)
     self.assertEquals(new_expr, ('#Mul', ('2.3000e+01',), ('#Log', ('#x',))))
+    did_something, new_expr = simplify.log_pow_simplify(new_expr)
+    self.assertFalse(did_something)
+
+  def test_log_pow_simplify(self):
+    expr = ('#Mul', ('3.3',), ('#Log', ('#Pow', ('2.3',), ('1.3',))))
+    did_something, new_expr = simplify.log_pow_simplify(expr)
+    self.assertTrue(did_something)
+    self.assertEquals(new_expr, ('#Mul', ('3.3',), ('#Mul', ('1.3',),
+                                                    ('#Log', ('2.3',)))))
     did_something, new_expr = simplify.log_pow_simplify(new_expr)
     self.assertFalse(did_something)
 
@@ -72,13 +81,23 @@ class test_simplify_class(tf.test.TestCase):
     did_something, new_expr = simplify.log_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
-  def test_pow_mul_simplify(self):
+  def test_cpow_mul_simplify(self):
     expr = ('#CPow2.1', ('#Mul', ('3',), ('4.',), ('1.2e+01',)))
     did_something, new_expr = simplify.pow_mul_simplify(expr)
     self.assertTrue(did_something)
     self.assertEquals(new_expr, ('#Mul', ('#CPow2.1', ('3',)),
                                  ('#CPow2.1', ('4.',)),
                                  ('#CPow2.1', ('1.2e+01',))))
+    did_something, new_expr = simplify.pow_mul_simplify(new_expr)
+    self.assertFalse(did_something)
+
+  def test_pow_mul_simplify(self):
+    expr = ('#Pow', ('#Mul', ('3',), ('4.',), ('1.2e+01',)), ('2.1',))
+    did_something, new_expr = simplify.pow_mul_simplify(expr)
+    self.assertTrue(did_something)
+    self.assertEquals(new_expr, ('#Mul', ('#Pow', ('3',), ('2.1',)),
+                                 ('#Pow', ('4.',), ('2.1',)),
+                                 ('#Pow', ('1.2e+01',), ('2.1',))))
     did_something, new_expr = simplify.pow_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
