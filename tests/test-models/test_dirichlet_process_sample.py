@@ -6,14 +6,14 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import DirichletProcess, Normal
-from edward.util import get_dims
 
 
 def _test(n, alpha, base_cls, *args, **kwargs):
   x = DirichletProcess(alpha=alpha, base_cls=base_cls, *args, **kwargs)
   base = base_cls(*args, **kwargs)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(alpha) + get_dims(base)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(alpha).shape.as_list() + \
+      tf.convert_to_tensor(base).shape.as_list()
   assert val_est == val_true
 
 

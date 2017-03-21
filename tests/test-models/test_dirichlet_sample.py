@@ -6,13 +6,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Dirichlet
-from edward.util import get_dims
 
 
 def _test(alpha, n):
   x = Dirichlet(alpha=alpha)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(alpha)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(alpha).shape.as_list()
   assert val_est == val_true
 
 

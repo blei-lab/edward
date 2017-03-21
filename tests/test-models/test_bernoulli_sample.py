@@ -6,13 +6,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Bernoulli
-from edward.util import get_dims
 
 
 def _test(p, n):
   x = Bernoulli(p=p)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(p)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(p).shape.as_list()
   assert val_est == val_true
 
 

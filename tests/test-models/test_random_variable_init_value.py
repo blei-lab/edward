@@ -7,8 +7,8 @@ import tensorflow as tf
 
 from edward.models import RandomVariable
 
-from edward.models import *
-from edward.util import get_dims, copy
+from edward.models import Normal, Poisson
+from edward.util import copy
 
 
 def _test(RV, value, *args, **kwargs):

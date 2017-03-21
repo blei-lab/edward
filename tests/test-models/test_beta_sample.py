@@ -6,13 +6,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Beta
-from edward.util import get_dims
 
 
 def _test(a, b, n):
   x = Beta(a=a, b=b)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(a)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(a).shape.as_list()
   assert val_est == val_true
 
 

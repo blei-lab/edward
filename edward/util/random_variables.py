@@ -528,31 +528,6 @@ def get_descendants(x, collection=None):
   return list(output)
 
 
-def get_dims(x):
-  """Get values of each dimension.
-
-  Parameters
-  ----------
-  x : float, int, tf.Tensor, np.ndarray, or RandomVariable
-    A n-D tensor.
-
-  Returns
-  -------
-  list of int
-    Python list containing dimensions of ``x``.
-  """
-  if isinstance(x, float) or isinstance(x, int):
-    return []
-  elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    return x.shape.as_list()
-  elif isinstance(x, np.ndarray):
-    return list(x.shape)
-  elif isinstance(x, RandomVariable):
-    return x.get_batch_shape().as_list()
-  else:
-    raise TypeError("Input has invalid type: {}".format(type(x)))
-
-
 def get_parents(x, collection=None):
   """Get parent random variables of input.
 

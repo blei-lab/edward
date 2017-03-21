@@ -6,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal, TransformedDistribution
-from edward.util import get_dims
 
 
 def _test(distribution, bijector, n):
@@ -14,8 +13,8 @@ def _test(distribution, bijector, n):
       distribution=distribution,
       bijector=bijector,
       validate_args=True)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(distribution.mean())
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(distribution.mean()).shape.as_list()
   assert val_est == val_true
 
 

@@ -6,13 +6,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import MultivariateNormalDiag
-from edward.util import get_dims
 
 
 def _test(mu, diag_stdev, n):
   x = MultivariateNormalDiag(mu=mu, diag_stdev=diag_stdev)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(mu)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(mu).shape.as_list()
   assert val_est == val_true
 
 

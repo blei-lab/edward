@@ -6,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal, QuantizedDistribution
-from edward.util import get_dims
 
 
 def _test(distribution, lower_cutoff, upper_cutoff, n):
@@ -15,8 +14,8 @@ def _test(distribution, lower_cutoff, upper_cutoff, n):
       lower_cutoff=lower_cutoff,
       upper_cutoff=upper_cutoff,
       validate_args=True)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(lower_cutoff)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(lower_cutoff).shape.as_list()
   assert val_est == val_true
 
 

@@ -6,13 +6,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Categorical
-from edward.util import get_dims
 
 
 def _test(logits, n):
   x = Categorical(logits=logits)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(logits)[:-1]
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(logits).shape.as_list()[:-1]
   assert val_est == val_true
 
 

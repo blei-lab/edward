@@ -5,7 +5,6 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.util.random_variables import get_dims
 from edward.util.graphs import get_session
 from tensorflow.python.ops import control_flow_ops
 
@@ -226,8 +225,8 @@ def to_simplex(x):
   dependencies = [tf.verify_tensor_all_finite(x, msg='')]
   x = control_flow_ops.with_dependencies(dependencies, x)
 
-  if isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    shape = get_dims(x)
+  if isinstance(x, (tf.Tensor, tf.Variable)):
+    shape = x.get_shape().as_list()
   else:
     shape = x.shape
 

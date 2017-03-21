@@ -6,13 +6,12 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import MultivariateNormalCholesky
-from edward.util import get_dims
 
 
 def _test(mu, chol, n):
   x = MultivariateNormalCholesky(mu=mu, chol=chol)
-  val_est = get_dims(x.sample(n))
-  val_true = n + get_dims(mu)
+  val_est = x.sample(n).shape.as_list()
+  val_true = n + tf.convert_to_tensor(mu).shape.as_list()
   assert val_est == val_true
 
 
