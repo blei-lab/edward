@@ -4,8 +4,11 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from tensorflow.python.client.session import \
-    register_session_run_conversion_functions
+try:
+  from tensorflow.python.client.session import \
+      register_session_run_conversion_functions
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 RANDOM_VARIABLE_COLLECTION = "_random_variable_collection_"
 

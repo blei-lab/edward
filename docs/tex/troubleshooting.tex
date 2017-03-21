@@ -12,11 +12,16 @@ Edward depends on
   \item TensorFlow (>=1.0.0a0)
 \end{itemize}
 
-We recommend using \texttt{pip} to install \texttt{numpy},
-\texttt{six}, and \texttt{tensorflow} as
+Installing \texttt{edward} by default also installs \texttt{numpy} and
+\texttt{six} if they are not available (or are out-of-date in your
+system).
+
+Installing \texttt{edward} does not automatically install TensorFlow
+(or update an existing TensorFlow version). We recommend installing
+it via
 
 \begin{lstlisting}[language=JSON]
-pip install numpy six tensorflow
+pip install tensorflow
 \end{lstlisting}
 
 To use Edward with GPUs, install \texttt{tensorflow-gpu} instead of
@@ -28,7 +33,7 @@ pip install tensorflow-gpu
 
 See TensorFlow's
 \href{https://www.tensorflow.org/install/}{installation instructions}
-for details on how to setup up NVIDIA software for TensorFlow with GPUs.
+for details, including how to setup up NVIDIA software for TensorFlow with GPUs.
 
 \subsubsection{Full Installation}
 
