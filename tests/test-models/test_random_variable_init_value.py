@@ -13,7 +13,7 @@ from edward.util import get_dims, copy
 
 def _test(RV, value, *args, **kwargs):
   rv = RV(*args, value=value, **kwargs)
-  value_shape = rv._value.get_shape().as_list()
+  value_shape = rv._value.shape.as_list()
   expected_shape = (rv.get_batch_shape().as_list() +
                     rv.get_event_shape().as_list())
   assert value_shape == expected_shape
@@ -23,8 +23,8 @@ def _test(RV, value, *args, **kwargs):
 def _test_copy(RV, value, *args, **kwargs):
   rv1 = RV(*args, value=value, **kwargs)
   rv2 = copy(rv1)
-  value_shape1 = rv1._value.get_shape().as_list()
-  value_shape2 = rv2._value.get_shape().as_list()
+  value_shape1 = rv1._value.shape.as_list()
+  value_shape2 = rv2._value.shape.as_list()
   assert value_shape1 == value_shape2
 
 

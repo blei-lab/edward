@@ -52,7 +52,7 @@ class PointMass(RandomVariable, Distribution):
     return tf.shape(self.params)
 
   def _get_event_shape(self):
-    return self.params.get_shape()
+    return self.params.shape
 
   def _mean(self):
     return self.params

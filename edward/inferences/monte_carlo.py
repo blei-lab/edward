@@ -79,7 +79,7 @@ class MonteCarlo(Inference):
     super(MonteCarlo, self).__init__(latent_vars, data)
 
   def initialize(self, *args, **kwargs):
-    kwargs['n_iter'] = np.amin([qz.params.get_shape().as_list()[0] for
+    kwargs['n_iter'] = np.amin([qz.params.shape.as_list()[0] for
                                 qz in six.itervalues(self.latent_vars)])
     super(MonteCarlo, self).initialize(*args, **kwargs)
 

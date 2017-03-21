@@ -57,7 +57,7 @@ class Empirical(RandomVariable, Distribution):
     return tf.shape(self.params)[1:]
 
   def _get_event_shape(self):
-    return self.params.get_shape()[1:]
+    return self.params.shape[1:]
 
   def _mean(self):
     return tf.reduce_mean(self.params, 0)
@@ -72,7 +72,7 @@ class Empirical(RandomVariable, Distribution):
 
   def _sample_n(self, n, seed=None):
     input_tensor = self.params
-    if len(input_tensor.get_shape()) == 0:
+    if len(input_tensor.shape) == 0:
       input_tensor = tf.expand_dims(input_tensor, 0)
       multiples = tf.concat(
           [tf.expand_dims(n, 0), [1] * len(self.get_event_shape())], 0)

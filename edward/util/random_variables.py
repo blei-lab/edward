@@ -34,18 +34,16 @@ def check_data(data):
                         "strings, lists, numpy ndarrays, or TensorHandles.")
     elif isinstance(key, (RandomVariable, tf.Tensor)):
       if isinstance(value, (RandomVariable, tf.Tensor)):
-        if not key.get_shape().is_compatible_with(value.get_shape()):
+        if not key.shape.is_compatible_with(value.shape):
           raise TypeError("Key-value pair in data does not have same "
-                          "shape: {}, {}".format(key.get_shape(),
-                                                 value.get_shape()))
+                          "shape: {}, {}".format(key.shape, value.shape))
         elif key.dtype != value.dtype:
           raise TypeError("Key-value pair in data does not have same "
                           "dtype: {}, {}".format(key.dtype, value.dtype))
       elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
-        if not key.get_shape().is_compatible_with(np.shape(value)):
+        if not key.shape.is_compatible_with(np.shape(value)):
           raise TypeError("Key-value pair in data does not have same "
-                          "shape: {}, {}".format(key.get_shape(),
-                                                 np.shape(value)))
+                          "shape: {}, {}".format(key.shape, np.shape(value)))
         elif isinstance(value, (np.ndarray, np.number)) and \
                 not np.issubdtype(value.dtype, np.float) and \
                 not np.issubdtype(value.dtype, np.int) and \
@@ -73,10 +71,9 @@ def check_latent_vars(latent_vars):
     elif not isinstance(value, (RandomVariable, tf.Tensor)):
       raise TypeError("Latent variable value has an invalid type: "
                       "{}".format(type(value)))
-    elif not key.get_shape().is_compatible_with(value.get_shape()):
+    elif not key.shape.is_compatible_with(value.shape):
       raise TypeError("Key-value pair in latent_vars does not have same "
-                      "shape: {}, {}".format(key.get_shape(),
-                                             value.get_shape()))
+                      "shape: {}, {}".format(key.shape, value.shape))
     elif key.dtype != value.dtype:
       raise TypeError("Key-value pair in latent_vars does not have same "
                       "dtype: {}, {}".format(key.dtype, value.dtype))
@@ -547,7 +544,7 @@ def get_dims(x):
   if isinstance(x, float) or isinstance(x, int):
     return []
   elif isinstance(x, tf.Tensor) or isinstance(x, tf.Variable):
-    return x.get_shape().as_list()
+    return x.shape.as_list()
   elif isinstance(x, np.ndarray):
     return list(x.shape)
   elif isinstance(x, RandomVariable):

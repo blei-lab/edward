@@ -75,7 +75,7 @@ class RandomVariable(object):
       t_value = tf.convert_to_tensor(value, self.dtype)
       expected_shape = (self.get_batch_shape().as_list() +
                         self.get_event_shape().as_list())
-      value_shape = t_value.get_shape().as_list()
+      value_shape = t_value.shape.as_list()
       if value_shape != expected_shape:
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
@@ -91,17 +91,22 @@ class RandomVariable(object):
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
+  @property
+  def shape(self):
+    """Get shape of random variable."""
+    return self._value.shape
+
   def __str__(self):
     return "RandomVariable(\"%s\"%s%s%s)" % (
         self.name,
-        (", shape=%s" % self.get_shape())
-        if self.get_shape().ndims is not None else "",
+        (", shape=%s" % self.shape)
+        if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
         (", device=%s" % self.value().device) if self.value().device else "")
 
   def __repr__(self):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
-        self.name, self.get_shape(), self.dtype.name)
+        self.name, self.shape, self.dtype.name)
 
   def __add__(self, other):
     return tf.add(self, other)
@@ -284,7 +289,7 @@ class RandomVariable(object):
 
   def get_shape(self):
     """Get shape of random variable."""
-    return self._value.get_shape()
+    return self.shape
 
   def _session_run_conversion_fetch_function(tensor):
     return ([tensor.value()], lambda val: val[0])

@@ -37,12 +37,12 @@ class DirichletProcess(RandomVariable, Distribution):
     --------
     >>> # scalar concentration parameter, scalar base distribution
     >>> dp = DirichletProcess(0.1, Normal, mu=0.0, sigma=1.0)
-    >>> assert dp.get_shape() == ()
+    >>> assert dp.shape == ()
     >>>
     >>> # vector of concentration parameters, matrix of Exponentials
     >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
     ...                       Exponential, lam=tf.ones([5, 3]))
-    >>> assert dp.get_shape() == (2, 5, 3)
+    >>> assert dp.shape == (2, 5, 3)
     """
     parameters = locals()
     parameters.pop("self")
@@ -86,13 +86,13 @@ class DirichletProcess(RandomVariable, Distribution):
     return tf.shape(self.alpha)
 
   def _get_batch_shape(self):
-    return self.alpha.get_shape()
+    return self.alpha.shape
 
   def _event_shape(self):
     return tf.shape(self._base)
 
   def _get_event_shape(self):
-    return self._base.get_shape()
+    return self._base.shape
 
   def _sample_n(self, n, seed=None):
     """Sample ``n`` draws from the DP. Draws from the base
@@ -173,7 +173,7 @@ class DirichletProcess(RandomVariable, Distribution):
     theta_k = tf.gather(theta, k)
 
     # Assign True samples to the new theta_k.
-    if len(bools.get_shape()) <= 1:
+    if len(bools.shape) <= 1:
       bools_tile = bools
     else:
       # ``tf.where`` only index subsets when ``bools`` is at most a

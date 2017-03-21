@@ -210,8 +210,8 @@ def categorical_accuracy(y_true, y_pred):
     The outermost dimension denote the categorical probabilities for
     that data point per row.
   """
-  y_true = tf.cast(tf.argmax(y_true, len(y_true.get_shape()) - 1), tf.float32)
-  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
+  y_true = tf.cast(tf.argmax(y_true, len(y_true.shape) - 1), tf.float32)
+  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.shape) - 1), tf.float32)
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
@@ -224,12 +224,12 @@ def sparse_categorical_accuracy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of integers {0, 1, ..., K-1}.
   y_pred : tf.Tensor
-    Tensor of probabilities, with shape ``(y_true.get_shape(), K)``.
+    Tensor of probabilities, with shape ``(y_true.shape, K)``.
     The outermost dimension are the categorical probabilities for
     that data point.
   """
   y_true = tf.cast(y_true, tf.float32)
-  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
+  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.shape) - 1), tf.float32)
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
@@ -277,7 +277,7 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of integers {0, 1, ..., K-1}.
   y_pred : tf.Tensor
-    Tensor of probabilities, with shape ``(y_true.get_shape(), K)``.
+    Tensor of probabilities, with shape ``(y_true.shape, K)``.
     The outermost dimension are the categorical probabilities for
     that data point.
   """
@@ -394,6 +394,6 @@ def cosine_proximity(y_true, y_pred):
   y_pred : tf.Tensor
     Tensors of same shape and type.
   """
-  y_true = tf.nn.l2_normalize(y_true, len(y_true.get_shape()) - 1)
-  y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.get_shape()) - 1)
+  y_true = tf.nn.l2_normalize(y_true, len(y_true.shape) - 1)
+  y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.shape) - 1)
   return tf.reduce_sum(y_true * y_pred)
