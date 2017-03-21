@@ -43,13 +43,13 @@ class PointMass(RandomVariable, Distribution):
     return self._params
 
   def _batch_shape(self):
-    return tf.convert_to_tensor(self.get_batch_shape())
+    return tf.constant([], dtype=tf.int32)
 
   def _get_batch_shape(self):
     return tf.TensorShape([])
 
   def _event_shape(self):
-    return tf.convert_to_tensor(self.get_event_shape())
+    return tf.shape(self.params)
 
   def _get_event_shape(self):
     return self.params.get_shape()
