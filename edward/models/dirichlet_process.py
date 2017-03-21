@@ -40,6 +40,8 @@ class DirichletProcess(RandomVariable, Distribution):
     ...                       Exponential, lam=tf.ones([5, 3]))
     >>> assert dp.get_shape() == (2, 5, 3)
     """
+    parameters = locals()
+    parameters.pop("self")
     with tf.name_scope(name, values=[alpha]) as ns:
       with tf.control_dependencies([]):
         self._alpha = tf.identity(alpha, name="alpha")
@@ -55,14 +57,12 @@ class DirichletProcess(RandomVariable, Distribution):
 
         super(DirichletProcess, self).__init__(
             dtype=tf.int32,
-            parameters={"alpha": self._alpha,
-                        "base_cls": self._base_cls,
-                        "args": self._base_args,
-                        "kwargs": self._base_kwargs},
             is_continuous=False,
             is_reparameterized=False,
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
+            parameters=parameters,
+            graph_parents=[self._alpha, self._theta],
             name=ns,
             value=value)
 
@@ -79,13 +79,13 @@ class DirichletProcess(RandomVariable, Distribution):
     return self._theta
 
   def _batch_shape(self):
-    return tf.convert_to_tensor(self.get_batch_shape())
+    return tf.shape(self.alpha)
 
   def _get_batch_shape(self):
-    return self._alpha.get_shape()
+    return self.alpha.get_shape()
 
   def _event_shape(self):
-    return tf.convert_to_tensor(self.get_event_shape())
+    return tf.shape(self._base)
 
   def _get_event_shape(self):
     return self._base.get_shape()
