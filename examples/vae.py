@@ -11,8 +11,8 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
-import os
 import numpy as np
+import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
