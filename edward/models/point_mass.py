@@ -16,16 +16,19 @@ class PointMass(RandomVariable, Distribution):
   """
   def __init__(self, params, validate_args=False, allow_nan_stats=True,
                name="PointMass", *args, **kwargs):
+    parameters = locals()
+    parameters.pop("self")
     with tf.name_scope(name, values=[params]) as ns:
       with tf.control_dependencies([]):
         self._params = tf.identity(params, name="params")
         super(PointMass, self).__init__(
             dtype=self._params.dtype,
-            parameters={"params": self._params},
             is_continuous=False,
             is_reparameterized=True,
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
+            parameters=parameters,
+            graph_parents=[self._params],
             name=ns,
             *args, **kwargs)
 

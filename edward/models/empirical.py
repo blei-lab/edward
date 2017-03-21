@@ -12,22 +12,24 @@ class Empirical(RandomVariable, Distribution):
   """Empirical random variable."""
   def __init__(self, params, validate_args=False, allow_nan_stats=True,
                name="Empirical", *args, **kwargs):
+    parameters = locals()
+    parameters.pop("self")
     with tf.name_scope(name, values=[params]) as ns:
       with tf.control_dependencies([]):
         self._params = tf.identity(params, name="params")
         try:
-          self._n = self._params.get_shape().as_list()[0]
-        except IndexError:  # scalar params
-          self._n = 1
+          self._n = tf.shape(self._params)[0]
+        except ValueError:  # scalar params
+          self._n = tf.constant(1)
 
         super(Empirical, self).__init__(
             dtype=self._params.dtype,
-            parameters={"params": self._params,
-                        "n": self._n},
             is_continuous=False,
             is_reparameterized=True,
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
+            parameters=parameters,
+            graph_parents=[self._params, self._n],
             name=ns,
             *args, **kwargs)
 
@@ -76,7 +78,7 @@ class Empirical(RandomVariable, Distribution):
           [tf.expand_dims(n, 0), [1] * len(self.get_event_shape())], 0)
       return tf.tile(input_tensor, multiples)
     else:
-      p = tf.ones(self.n, dtype=tf.float32) / self.n
+      p = tf.ones([self.n]) / tf.cast(self.n, dtype=tf.float32)
       cat = tf.contrib.distributions.Categorical(p=p)
       indices = cat._sample_n(n, seed)
       tensor = tf.gather(input_tensor, indices)
