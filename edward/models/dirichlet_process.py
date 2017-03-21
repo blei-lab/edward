@@ -47,12 +47,10 @@ class DirichletProcess(RandomVariable, Distribution):
         self._base_args = args
         self._base_kwargs = kwargs
 
-        # Instantiate base for use in other methods such as `_get_event_shape`.
+        # Instantiate base distribution.
         self._base = self._base_cls(*self._base_args, **self._base_kwargs)
-        # Store persistent states of base distribution. It has shape
-        # [None] + batch_shape + event_shape, where the first dimension is
-        # the number of persistent states, instantiated only as needed.
-        self.theta = tf.expand_dims(  # store the first state as default
+        # Define atoms of Dirichlet process, storing only the first as default.
+        self._theta = tf.expand_dims(
             self._base.sample(self.get_batch_shape()), 0)
 
         super(DirichletProcess, self).__init__(
@@ -72,6 +70,13 @@ class DirichletProcess(RandomVariable, Distribution):
   def alpha(self):
     """Concentration parameter."""
     return self._alpha
+
+  @property
+  def theta(self):
+    """Atoms. It has shape [None] + batch_shape + event_shape, where
+    the first dimension is the number of atoms, instantiated only as
+    needed."""
+    return self._theta
 
   def _batch_shape(self):
     return tf.convert_to_tensor(self.get_batch_shape())
@@ -104,10 +109,10 @@ class DirichletProcess(RandomVariable, Distribution):
 
     Notes
     -----
-    The implementation has only one inefficiency, which is that it
-    draws (batch_shape,) samples from the base distribution when
-    adding a new persistent state. Ideally, we would only draw new
-    samples for those in the loop which require it.
+    The implementation has one inefficiency, which is that it draws
+    (batch_shape,) samples from the base distribution when adding a
+    new persistent state. Ideally, we would only draw new samples for
+    those in the loop which require it.
     """
     if seed is not None:
       raise NotImplementedError("seed is not implemented.")
@@ -140,7 +145,7 @@ class DirichletProcess(RandomVariable, Distribution):
     if len(theta.shape) > 1:
       theta_shape = theta_shape.concatenate(theta.shape[1:])
 
-    _, _, self.theta, samples = tf.while_loop(
+    _, _, self._theta, samples = tf.while_loop(
         self._sample_n_cond, self._sample_n_body,
         loop_vars=[k, bools, theta, draws],
         shape_invariants=[k.shape, bools.shape, theta_shape, draws.shape])
@@ -156,12 +161,11 @@ class DirichletProcess(RandomVariable, Distribution):
     k += 1
 
     # If necessary, add a new persistent state to theta.
-    def fn():
-      theta_k = self._base_cls(
-          *self._base_args, **self._base_kwargs).sample(batch_shape)
-      return tf.concat([theta, tf.expand_dims(theta_k, 0)], 0)
-
-    theta = tf.cond(tf.shape(theta)[0] - 1 >= k, lambda: theta, fn)
+    theta = tf.cond(
+        tf.shape(theta)[0] - 1 >= k,
+        lambda: theta,
+        lambda: tf.concat(
+            [theta, tf.expand_dims(self._base.sample(batch_shape), 0)], 0))
     theta_k = tf.gather(theta, k)
 
     # Assign True samples to the new theta_k.
