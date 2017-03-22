@@ -10,8 +10,9 @@ from tensorflow.contrib.distributions import Distribution
 
 
 class DirichletProcess(RandomVariable, Distribution):
-  def __init__(self, alpha, base_cls, validate_args=False, allow_nan_stats=True,
-               name="DirichletProcess", value=None, *args, **kwargs):
+  def __init__(
+          self, alpha, base_cls, validate_args=False, allow_nan_stats=True,
+          name="DirichletProcess", value=None, *args, **kwargs):
     """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
 
     It has two parameters: a positive real value :math:`\\alpha`,
@@ -161,7 +162,8 @@ class DirichletProcess(RandomVariable, Distribution):
     _, _, self._theta, self._beta, samples = tf.while_loop(
         self._sample_n_cond, self._sample_n_body,
         loop_vars=[k, bools, self.theta, self.beta, draws],
-        shape_invariants=[k.shape, bools.shape, theta_shape, beta_shape, draws.shape])
+        shape_invariants=[
+            k.shape, bools.shape, theta_shape, beta_shape, draws.shape])
 
     return samples
 
@@ -178,10 +180,10 @@ class DirichletProcess(RandomVariable, Distribution):
         tf.shape(theta)[0] - 1 >= k,
         lambda: (theta, beta),
         lambda: (
-          tf.concat(
-            [theta, tf.expand_dims(self._base.sample(batch_shape), 0)], 0),
-          tf.concat(
-            [beta, tf.expand_dims(self._betadist.sample(), 0)], 0)))
+            tf.concat(
+                [theta, tf.expand_dims(self._base.sample(batch_shape), 0)], 0),
+            tf.concat(
+                [beta, tf.expand_dims(self._betadist.sample(), 0)], 0)))
     theta_k = tf.gather(theta, k)
     beta_k = tf.gather(beta, k)
 
@@ -194,8 +196,8 @@ class DirichletProcess(RandomVariable, Distribution):
       # Therefore we tile ``bools`` to be of shape
       # (n, batch_shape, event_shape) in order to index per-element.
       bools_tile = tf.tile(tf.reshape(
-        bools, [n] + batch_shape + [1] * len(event_shape)),
-        [1] + [1] * len(batch_shape) + event_shape)
+          bools, [n] + batch_shape + [1] * len(event_shape)),
+          [1] + [1] * len(batch_shape) + event_shape)
 
     theta_k_tile = tf.tile(tf.expand_dims(theta_k, 0), [n] + [1] * (rank - 1))
     draws = tf.where(bools_tile, theta_k_tile, draws)
