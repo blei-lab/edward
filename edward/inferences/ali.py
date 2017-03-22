@@ -44,7 +44,7 @@ class ALI(VariationalInference):
     mapping from latent variables to data through a joint
     discriminator. The encoder approximates the posterior p(z|x)
     when the network is stochastic.
-    
+
     In building the computation graph for inference, the
     discriminator's parameters can be accessed with the variable scope
     "Disc".
@@ -131,12 +131,12 @@ class ALI(VariationalInference):
         d_xfzt = self.discriminator(x_fake, z_true)
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(d_xfzt), logits=d_xfzt) + \
-    tf.nn.sigmoid_cross_entropy_with_logits(
+      labels=tf.ones_like(d_xfzt), logits=d_xfzt) + \
+      tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.zeros_like(d_xtzf), logits=d_xtzf)
     loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.zeros_like(d_xfzt), logits=d_xfzt) + \
-    tf.nn.sigmoid_cross_entropy_with_logits(
+      labels=tf.zeros_like(d_xfzt), logits=d_xfzt) + \
+      tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_xtzf), logits=d_xtzf)
     loss_d = tf.reduce_mean(loss_d)
     loss = tf.reduce_mean(loss)
