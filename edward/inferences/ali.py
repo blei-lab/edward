@@ -58,7 +58,7 @@ class ALI(VariationalInference):
     >>> xf = gen_data(zs)
     >>> xs = ed.models.Empirical(data)
     >>> zf = gen_latent(xs._sample_n(M))
-    >>> inference = ed.ALI({xf: x_data, zf: z_samples}, 
+    >>> inference = ed.ALI({xf: x_data, zf: z_samples},
                             discriminator, encoder, decoder)
     """
     if discriminator is None:
@@ -131,12 +131,12 @@ class ALI(VariationalInference):
         d_xfzt = self.discriminator(x_fake, z_true)
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
-      labels=tf.ones_like(d_xfzt), logits=d_xfzt) + \
-      tf.nn.sigmoid_cross_entropy_with_logits(
+        labels=tf.ones_like(d_xfzt), logits=d_xfzt) + \
+    tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.zeros_like(d_xtzf), logits=d_xtzf)
     loss = tf.nn.sigmoid_cross_entropy_with_logits(
-      labels=tf.zeros_like(d_xfzt), logits=d_xfzt) + \
-      tf.nn.sigmoid_cross_entropy_with_logits(
+        labels=tf.zeros_like(d_xfzt), logits=d_xfzt) + \
+    tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_xtzf), logits=d_xtzf)
     loss_d = tf.reduce_mean(loss_d)
     loss = tf.reduce_mean(loss)
