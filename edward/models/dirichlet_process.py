@@ -10,9 +10,8 @@ from tensorflow.contrib.distributions import Distribution
 
 
 class DirichletProcess(RandomVariable, Distribution):
-  def __init__(
-          self, alpha, base_cls, validate_args=False, allow_nan_stats=True,
-          name="DirichletProcess", value=None, *args, **kwargs):
+  def __init__(self, alpha, base_cls, validate_args=False, allow_nan_stats=True,
+               name="DirichletProcess", value=None, *args, **kwargs):
     """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
 
     It has two parameters: a positive real value :math:`\\alpha`,
@@ -64,7 +63,7 @@ class DirichletProcess(RandomVariable, Distribution):
         self._beta = tf.zeros([0] + self.get_batch_shape().as_list())
 
         super(DirichletProcess, self).__init__(
-            dtype=tf.float32,
+            dtype=tf.int32,
             is_continuous=False,
             is_reparameterized=False,
             validate_args=validate_args,
