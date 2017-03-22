@@ -201,7 +201,7 @@ class DirichletProcess(RandomVariable, Distribution):
     theta_k_tile = tf.tile(tf.expand_dims(theta_k, 0), [n] + [1] * (rank - 1))
     draws = tf.where(bools_tile, theta_k_tile, draws)
 
-    # Draw new stick probability, then flip coins.
+    # Flip coins according to stick probabilities.
     flips = Bernoulli(p=beta_k).sample(n)
     # If coin lands heads, assign sample's corresponding bool to False
     # (this ends its "while loop").
