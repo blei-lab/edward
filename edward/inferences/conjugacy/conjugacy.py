@@ -28,16 +28,16 @@ rvs.InverseGamma.support = 'nonnegative'
 rvs.Normal.support = 'real'
 
 _suff_stat_to_dist = defaultdict(dict)
-_suff_stat_to_dist['binary'][(('#x',),)] = lambda p1: rvs.Bernoulli(p=tf.sigmoid(p1))
-_suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Beta(p2+1, p1+1)
-_suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = lambda p1: rvs.Dirichlet(p1+1)
-_suff_stat_to_dist['nonnegative'][(('#x',), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.Gamma(p2+1, -p1)
-_suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = lambda p1, p2: rvs.InverseGamma(-p2-1, -p1)
+_suff_stat_to_dist['binary'][(('#x',),)] = (rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
+_suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = (rvs.Beta, lambda p1, p2: {'a': p2+1, 'b': p1+1})
+_suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = (rvs.Dirichlet, lambda p1: {'alpha': p1+1})
+_suff_stat_to_dist['nonnegative'][(('#x',), (u'#Log', ('#x',)))] = (rvs.Gamma, lambda p1, p2: {'alpha': p2+1, 'beta': -p1})
+_suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)), (u'#Log', ('#x',)))] = (rvs.InverseGamma, lambda p1, p2: {'alpha': -p2-1, 'beta': -p1})
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
   mu = sigmasq * p2
-  return rvs.Normal(mu, tf.sqrt(sigmasq))
-_suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
+  return {'mu': mu, 'sigma': tf.sqrt(sigmasq)}
+_suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)), ('#x',))] = (rvs.Normal, normal_from_natural_params)
 
 
 def _log_joint_name(blanket):
@@ -63,78 +63,79 @@ def get_log_joint(blanket):
 
 
 def complete_conditional(rv, blanket, log_joint=None):
-  # log_joint holds all the information we need to get a conditional.
-  if log_joint is None:
-    log_joint = get_log_joint(blanket)
-  else:
-    log_joint = log_joint(blanket)
+  with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
+    # log_joint holds all the information we need to get a conditional.
+    if log_joint is None:
+      log_joint = get_log_joint(blanket)
+    else:
+      log_joint = log_joint(blanket)
 
-  # Pull out the nodes that are nonlinear functions of rv into s_stats.
-  stop_nodes = set([i.value() for i in blanket])
-  subgraph = extract_subgraph(log_joint, stop_nodes)
-  s_stats = suff_stat_nodes(subgraph, rv.value(), blanket)
-  s_stats = list(set(s_stats))
+    # Pull out the nodes that are nonlinear functions of rv into s_stats.
+    stop_nodes = set([i.value() for i in blanket])
+    subgraph = extract_subgraph(log_joint, stop_nodes)
+    s_stats = suff_stat_nodes(subgraph, rv.value(), blanket)
+    s_stats = list(set(s_stats))
 
-  # Simplify those nodes, and extract any new linear terms into multipliers_i.
-  s_stat_exprs = defaultdict(list)
-  for i in xrange(len(s_stats)):
-    expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
-    expr = full_simplify(expr)
-    multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
-    s_stat_exprs[s_stats_i].append((s_stats[i],
-                                    reconstruct_multiplier(multipliers_i)))
+    # Simplify those nodes, and extract any new linear terms into multipliers_i.
+    s_stat_exprs = defaultdict(list)
+    for i in xrange(len(s_stats)):
+      expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
+      expr = full_simplify(expr)
+      multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
+      s_stat_exprs[s_stats_i].append((s_stats[i],
+                                      reconstruct_multiplier(multipliers_i)))
 
-  # Sort out the sufficient statistics to identify this conditional's family.
-  s_stat_keys = s_stat_exprs.keys()
-  order = np.argsort([str(i) for i in s_stat_keys])
-  dist_key = tuple((s_stat_keys[i] for i in order))
-  dist_constructor = _suff_stat_to_dist[rv.support].get(dist_key, None)
-  if dist_constructor is None:
-    raise NotImplementedError('Conditional distribution has sufficient '
-                              'statistics %s, but no available '
-                              'exponential-family distribution has those '
-                              'sufficient statistics.' % str(dist_key))
+    # Sort out the sufficient statistics to identify this conditional's family.
+    s_stat_keys = s_stat_exprs.keys()
+    order = np.argsort([str(i) for i in s_stat_keys])
+    dist_key = tuple((s_stat_keys[i] for i in order))
+    dist_constructor, constructor_params = _suff_stat_to_dist[rv.support].get(dist_key, (None, None))
+    if dist_constructor is None:
+      raise NotImplementedError('Conditional distribution has sufficient '
+                                'statistics %s, but no available '
+                                'exponential-family distribution has those '
+                                'sufficient statistics.' % str(dist_key))
 
-  # Swap sufficient statistics for placeholders, then take gradients
-  # w.r.t.  those placeholders to get natural parameters. The original
-  # nodes involving the sufficient statistic nodes are swapped for new
-  # nodes that depend linearly on the sufficient statistic placeholders.
-  s_stat_nodes = []
-  s_stat_replacements = []
-  s_stat_placeholders = []
-  swap_dict = {}
-  swap_back = {}
-  for s_stat in s_stat_exprs.keys():
-    # TODO(mhoffman): This shape assumption won't work for MVNs or Wisharts.
-    s_stat_placeholder = tf.placeholder(np.float32,
-                                        shape=rv.value().get_shape())
-    swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
-    s_stat_placeholders.append(s_stat_placeholder)
-    for s_stat_node, multiplier in s_stat_exprs[s_stat]:
-      fake_node = s_stat_placeholder * multiplier
-      s_stat_nodes.append(s_stat_node)
-      s_stat_replacements.append(fake_node)
-  for i in blanket:
-    if i == rv:
-      continue
-    val = i.value()
-    swap_dict[val] = tf.placeholder(val.dtype)
-    swap_back[swap_dict[val]] = val
-    # This prevents random variable nodes from being copied.
-    swap_back[val] = val
-  for i, j in zip(s_stat_nodes, s_stat_replacements):
-    swap_dict[i] = j
-    swap_back[j] = i
+    # Swap sufficient statistics for placeholders, then take gradients
+    # w.r.t.  those placeholders to get natural parameters. The original
+    # nodes involving the sufficient statistic nodes are swapped for new
+    # nodes that depend linearly on the sufficient statistic placeholders.
+    s_stat_nodes = []
+    s_stat_replacements = []
+    s_stat_placeholders = []
+    swap_dict = {}
+    swap_back = {}
+    for s_stat in s_stat_exprs.keys():
+      # TODO(mhoffman): This shape assumption won't work for MVNs or Wisharts.
+      s_stat_placeholder = tf.placeholder(np.float32,
+                                          shape=rv.value().get_shape())
+      swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
+      s_stat_placeholders.append(s_stat_placeholder)
+      for s_stat_node, multiplier in s_stat_exprs[s_stat]:
+        fake_node = s_stat_placeholder * multiplier
+        s_stat_nodes.append(s_stat_node)
+        s_stat_replacements.append(fake_node)
+    for i in blanket:
+      if i == rv:
+        continue
+      val = i.value()
+      swap_dict[val] = tf.placeholder(val.dtype)
+      swap_back[swap_dict[val]] = val
+      # This prevents random variable nodes from being copied.
+      swap_back[val] = val
+    for i, j in zip(s_stat_nodes, s_stat_replacements):
+      swap_dict[i] = j
+      swap_back[j] = i
 
-  log_joint_copy = edward.util.copy(log_joint, swap_dict)
-  nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
+    log_joint_copy = edward.util.copy(log_joint, swap_dict, scope=scope+'swap')
+    nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
-  # Removes any dependencies on those old placeholders.
-  for i in xrange(len(nat_params)):
-    nat_params[i] = edward.util.copy(nat_params[i], swap_back, scope='copyback')
-  nat_params = [nat_params[i] for i in order]
+    # Removes any dependencies on those old placeholders.
+    for i in xrange(len(nat_params)):
+      nat_params[i] = edward.util.copy(nat_params[i], swap_back, scope=scope+'swapback')
+    nat_params = [nat_params[i] for i in order]
 
-  return dist_constructor(*nat_params)
+    return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
 
 
 def extract_s_stat_multipliers(expr):
