@@ -266,6 +266,18 @@ def mul_zero_simplify(expr):
       return ('0',)
 
 
+@_register_simplify_fn
+def square_add_simplify(expr):
+  if not (expr[0] == '#CPow2.0000e+00' and expr[1][0] == '#Add'):
+    return None
+  terms = []
+  for i in xrange(1, len(expr[1])):
+    terms.append(('#CPow2.0000e+00', expr[1][i]))
+    for j in xrange(i+1, len(expr[1])):
+      terms.append(('#Mul', ('2.0',), expr[1][i], expr[1][j]))
+  return ('#Add',) +  tuple(terms)
+
+
 def expr_contains(expr, node_type):
   if expr[0] == node_type:
     return True
