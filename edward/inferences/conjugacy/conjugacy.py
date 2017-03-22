@@ -5,9 +5,11 @@ from __future__ import print_function
 import re
 from collections import defaultdict
 from pprint import pprint
+from copy import copy
 
 import numpy as np
 import tensorflow as tf
+copy_op_to_graph = tf.contrib.copy_graph.copy_op_to_graph
 
 from edward.models.random_variable import RandomVariable
 from edward.models import random_variables as rvs
@@ -38,14 +40,34 @@ def normal_from_natural_params(p1, p2):
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)), ('#x',))] = normal_from_natural_params
 
 
-def complete_conditional(rv, blanket, log_joint=None):
-  # log_joint holds all the information we need to get a conditional.
-  if log_joint is None:
-    log_joint = 0
+def _log_joint_name(blanket):
+  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in blanket])) + '_'
+
+
+def get_log_joint(blanket):
+  g = tf.get_default_graph()
+  blanket_name = _log_joint_name(blanket)
+  c = g.get_collection(blanket_name)
+  if len(c):
+    return c[0]
+
+  with tf.name_scope('conjugate_log_joint') as scope:
+    terms = []
     for b in blanket:
       if getattr(b, "conjugate_log_prob", None) is None:
         raise NotImplementedError("conjugate_log_prob not implemented for {}".format(type(b)))
-      log_joint += tf.reduce_sum(b.conjugate_log_prob())
+      terms.append(tf.reduce_sum(b.conjugate_log_prob()))
+    result = tf.add_n(terms, name=scope)
+    g.add_to_collection(blanket_name, result)
+    return result
+
+
+def complete_conditional(rv, blanket, log_joint=None):
+  # log_joint holds all the information we need to get a conditional.
+  if log_joint is None:
+    log_joint = get_log_joint(blanket)
+  else:
+    log_joint = log_joint(blanket)
 
   # Pull out the nodes that are nonlinear functions of rv into s_stats.
   stop_nodes = set([i.value() for i in blanket])
@@ -80,17 +102,18 @@ def complete_conditional(rv, blanket, log_joint=None):
   s_stat_nodes = []
   s_stat_replacements = []
   s_stat_placeholders = []
+  swap_dict = {}
+  swap_back = {}
   for s_stat in s_stat_exprs.keys():
     # TODO(mhoffman): This shape assumption won't work for MVNs or Wisharts.
     s_stat_placeholder = tf.placeholder(np.float32,
                                         shape=rv.value().get_shape())
+    swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
     s_stat_placeholders.append(s_stat_placeholder)
     for s_stat_node, multiplier in s_stat_exprs[s_stat]:
       fake_node = s_stat_placeholder * multiplier
       s_stat_nodes.append(s_stat_node)
       s_stat_replacements.append(fake_node)
-  swap_dict = {}
-  swap_back = {}
   for i in blanket:
     if i == rv:
       continue
@@ -172,6 +195,7 @@ def is_child(subgraph, node, stop_nodes):
 _linear_types = ['Add', 'AddN', 'Sub', 'Mul', 'Neg', 'Identity', 'Sum',
                  'Assert', 'Reshape', 'Slice', 'StridedSlice', 'Gather',
                  'GatherNd', 'Squeeze', 'Concat', 'ExpandDims', 'OneHot']
+_n_important_args = {'Sum': 1}
 def suff_stat_nodes(subgraph, node, stop_nodes):
   '''Finds nonlinear nodes depending on `node`.
   '''
@@ -182,9 +206,12 @@ def suff_stat_nodes(subgraph, node, stop_nodes):
       return ()
   if subgraph[0] == node:
     return (subgraph[0],)
-  if subgraph[0].op.type in _linear_types:
+  op_type = subgraph[0].op.type
+  if op_type in _linear_types:
     result = []
-    for input in subgraph[1:]:
+    stop_index = _n_important_args.get(op_type, None)
+    stop_index = stop_index + 1 if stop_index is not None else None
+    for input in subgraph[1:stop_index]:
       result += suff_stat_nodes(input, node, stop_nodes)
     return tuple(result)
   else:

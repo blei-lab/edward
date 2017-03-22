@@ -33,7 +33,8 @@ _extractable_nodes = {
   'Square': tf.square,
   'Reciprocal': tf.reciprocal,
   'Sqrt': tf.sqrt,
-  'Identity': lambda x: x
+  'Identity': lambda x: x,
+  'One_minus': lambda x: 1 - x
 }
 def symbolic_suff_stat(node, base_node, stop_nodes):
   '''Extracts a symbolic representation of the graph rooted at `node`.
