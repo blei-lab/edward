@@ -38,7 +38,7 @@ class DirichletProcess(RandomVariable, Distribution):
     >>>
     >>> # vector of concentration parameters, matrix of Exponentials
     >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
-        ...                       Exponential, lam=tf.ones([5, 3]))
+    ...                       Exponential, lam=tf.ones([5, 3]))
     >>> assert dp.get_shape() == (2, 5, 3)
     """
     parameters = locals()
@@ -52,15 +52,15 @@ class DirichletProcess(RandomVariable, Distribution):
 
         # Instantiate base distribution.
         self._base = self._base_cls(*self._base_args, **self._base_kwargs)
-        # Create empty tensor to store future atoms
+        # Create empty tensor to store future atoms.
         self._theta = tf.zeros(
             [0] +
             self.get_batch_shape().as_list() +
             self.get_event_shape().as_list())
 
-        # Instantiate beta distribution for stick breaking proportions
+        # Instantiate beta distribution for stick breaking proportions.
         self._betadist = Beta(a=tf.ones_like(self.alpha), b=self.alpha)
-        # Create empty tensor to store stick breaking proportions
+        # Create empty tensor to store stick breaking proportions.
         self._beta = tf.zeros([0] + self.get_batch_shape().as_list())
 
         super(DirichletProcess, self).__init__(
