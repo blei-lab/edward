@@ -55,6 +55,11 @@ class DirichletProcess(RandomVariable, Distribution):
         self._theta = tf.expand_dims(
             self._base.sample(self.get_batch_shape()), 0)
 
+        # Instantiate beta distribution for stick breaking proportions
+        self._betadist = Beta(a=tf.ones_like(self.alpha), b=self.alpha)
+        # Define atoms of Dirichlet process, storing only the first as default.
+        self._beta = tf.expand_dims(self._betadist.sample(), 0)
+
         super(DirichletProcess, self).__init__(
             dtype=tf.int32,
             is_continuous=False,
@@ -62,7 +67,7 @@ class DirichletProcess(RandomVariable, Distribution):
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
             parameters=parameters,
-            graph_parents=[self._alpha, self._theta],
+            graph_parents=[self._alpha, self._theta, self._beta],
             name=ns,
             value=value)
 
@@ -70,6 +75,13 @@ class DirichletProcess(RandomVariable, Distribution):
   def alpha(self):
     """Concentration parameter."""
     return self._alpha
+
+  @property
+  def beta(self):
+    """Stick breaking proportions. It has shape [None] + batch_shape, where
+    the first dimension is the number of atoms, instantiated only as
+    needed."""
+    return self._beta
 
   @property
   def theta(self):
