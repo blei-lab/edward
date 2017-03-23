@@ -76,7 +76,7 @@ class DirichletProcess(RandomVariable, Distribution):
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats,
             parameters=parameters,
-            graph_parents=[self._alpha, self._theta, self._beta],
+            graph_parents=[self._alpha, self._beta, self._theta],
             name=ns,
             value=value)
 

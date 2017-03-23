@@ -24,7 +24,7 @@ def eye_color(person):
   if person + '/' in random_variables:
     return random_variables[person + '/']
   else:
-    return Categorical(logits=ed.logit(tf.constant([1.0 / 3] * 3)), name=person)
+    return Categorical(p=tf.ones(3) / 3, name=person)
 
 
 # Only two categorical random variables are created.

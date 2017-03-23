@@ -16,6 +16,5 @@ class test_get_control_variate_coef(tf.test.TestCase):
       self.assertAllClose(get_control_variate_coef(f, h).eval(),
                           0.03448276)
 
-
 if __name__ == '__main__':
   tf.test.main()
