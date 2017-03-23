@@ -54,13 +54,16 @@ class DirichletProcess(RandomVariable, Distribution):
         # Create empty tensor to store future atoms.
         self._theta = tf.zeros(
             [0] +
-            self.get_batch_shape().as_list() +
-            self.get_event_shape().as_list())
+              self.get_batch_shape().as_list() +
+              self.get_event_shape().as_list(),
+            dtype=self._base.dtype)
 
         # Instantiate beta distribution for stick breaking proportions.
         self._betadist = Beta(a=tf.ones_like(self.alpha), b=self.alpha)
         # Create empty tensor to store stick breaking proportions.
-        self._beta = tf.zeros([0] + self.get_batch_shape().as_list())
+        self._beta = tf.zeros(
+            [0] + self.get_batch_shape().as_list(),
+            dtype=self._betadist.dtype)
 
         super(DirichletProcess, self).__init__(
             dtype=tf.int32,
@@ -147,7 +150,7 @@ class DirichletProcess(RandomVariable, Distribution):
     bools = tf.ones([n] + self.get_batch_shape().as_list(), dtype=tf.bool)
 
     # Initialize all samples as zero, they will be overwritten in any case
-    draws = tf.zeros([n] + batch_shape + event_shape)
+    draws = tf.zeros([n] + batch_shape + event_shape, dtype=self._base.dtype)
 
     # Calculate shape invariance conditions for theta and beta as these
     # can change shape between loop iterations.
