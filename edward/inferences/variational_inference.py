@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
@@ -16,6 +17,7 @@ except ImportError:
   pass
 
 
+@six.add_metaclass(abc.ABCMeta)
 class VariationalInference(Inference):
   """Base class for variational inference methods.
   """
@@ -150,8 +152,10 @@ class VariationalInference(Inference):
       if t == 1 or t % self.n_print == 0:
         self.progbar.update(t, {'Loss': info_dict['loss']})
 
+  @abc.abstractmethod
   def build_loss_and_gradients(self, var_list):
-    """Build loss function.
+    """Build loss function and its gradients. They will be leveraged
+    in an optimizer to update model and variational parameters.
 
     Any derived class of ``VariationalInference`` **must** implement
     this method.

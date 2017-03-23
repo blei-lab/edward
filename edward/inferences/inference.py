@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
@@ -10,6 +11,7 @@ from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, Progbar
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Inference(object):
   """Base class for Edward inference methods.
   """
@@ -130,11 +132,14 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
+  @abc.abstractmethod
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
                  debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computational graph. No ops
     should be created outside the call to ``initialize()``.
+
+    Any derived class of ``Inference`` **must** implement this method.
 
     Parameters
     ----------
@@ -186,8 +191,11 @@ class Inference(object):
     if self.debug:
       self.op_check = tf.add_check_numerics_ops()
 
+  @abc.abstractmethod
   def update(self, feed_dict=None):
     """Run one iteration of inference.
+
+    Any derived class of ``Inference`` **must** implement this method.
 
     Parameters
     ----------
