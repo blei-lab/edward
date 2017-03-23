@@ -85,27 +85,29 @@ Let's build the model in Edward. We use a radial basis function (RBF)
 kernel, also known as the squared exponential or exponentiated
 quadratic.
 \begin{lstlisting}[language=Python]
-from edward.models import Bernoulli, Normal
+from edward.models import Bernoulli, MultivariateNormalCholesky
 from edward.util import multivariate_rbf
 
 def kernel(x):
+  """Compute lower triangular matrix, where entry (i, j) for i <= j is
+  the kernel over the ith and jth data points."""
   mat = []
   for i in range(N):
-    mat += [[]]
+    mat.append([])
     xi = x[i, :]
     for j in range(N):
-      if j == i:
-        mat[i] += [multivariate_rbf(xi, xi)]
+      xj = x[j, :]
+      if i <= j:
+        mat[i].append(multivariate_rbf(xi, xj))
       else:
-        xj = x[j, :]
-        mat[i] += [multivariate_rbf(xi, xj)]
+        mat[i].append(0.0)
 
     mat[i] = tf.stack(mat[i])
 
   return tf.stack(mat)
 
 X = tf.placeholder(tf.float32, [N, D])
-f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+f = MultivariateNormalCholesky(mu=tf.zeros(N), chol=kernel(X))
 y = Bernoulli(logits=f)
 \end{lstlisting}
 Here, we define a placeholder \texttt{X}. During inference, we pass in

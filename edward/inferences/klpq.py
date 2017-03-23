@@ -9,11 +9,6 @@ from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
 from edward.util import copy
 
-try:
-  from edward.models import Normal
-except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
-
 
 class KLpq(VariationalInference):
   """Variational inference with the KL divergence

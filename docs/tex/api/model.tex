@@ -32,11 +32,11 @@ innermost (right-most) dimension of the parameters.
 from edward.models import Dirichlet, MultivariateNormalFull
 
 # K-dimensional Dirichlet
-Dirichlet(alpha=tf.constant([0.1] * K)
+Dirichlet(alpha=tf.constant([0.1] * K))
 # vector of 5 K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=...)
+MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=tf.ones([5, K, K]))
 # 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=...)
+MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=tf.ones([2, 5, K, K]))
 \end{lstlisting}
 
 Random variables are equipped with methods such as

@@ -18,7 +18,7 @@ class test_map_class(tf.test.TestCase):
       mu = Normal(mu=0.0, sigma=1.0)
       x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
 
-      qmu = PointMass(params=tf.Variable(tf.ones([])))
+      qmu = PointMass(params=tf.Variable(1.0))
 
       # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
       inference = ed.MAP({mu: qmu}, data={x: x_data})

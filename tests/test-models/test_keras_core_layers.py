@@ -27,25 +27,25 @@ class test_keras_core_layers_class(tf.test.TestCase):
     x = Normal(mu=tf.zeros([100, 10, 5]), sigma=tf.ones([100, 10, 5]))
     y = layers.Flatten()(x)
     with self.test_session():
-      assert y.eval().shape == (100, 50)
+      self.assertEqual(y.eval().shape, (100, 50))
 
   def test_reshape(self):
     x = Normal(mu=tf.zeros([100, 10, 5]), sigma=tf.ones([100, 10, 5]))
     y = layers.Reshape((5, 10))(x)
     with self.test_session():
-      assert y.eval().shape == (100, 5, 10)
+      self.assertEqual(y.eval().shape, (100, 5, 10))
 
   def test_permute(self):
     x = Normal(mu=tf.zeros([100, 10, 5]), sigma=tf.ones([100, 10, 5]))
     y = layers.Permute((2, 1))(x)
     with self.test_session():
-      assert y.eval().shape == (100, 5, 10)
+      self.assertEqual(y.eval().shape, (100, 5, 10))
 
   def test_repeat_vector(self):
     x = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
     y = layers.RepeatVector(2)(x)
     with self.test_session():
-      assert y.eval().shape == (100, 2, 10)
+      self.assertEqual(y.eval().shape, (100, 2, 10))
 
   def test_merge(self):
     shared_dense = layers.Dense(32)
