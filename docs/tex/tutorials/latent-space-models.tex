@@ -86,13 +86,8 @@ xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
 # be close to zero.
 xp = 1.0 / tf.sqrt(xp + tf.diag(tf.zeros(N) + 1e3))
 
-x = Poisson(lam=xp, value=tf.zeros_like(xp))
+x = Poisson(rate=xp)
 \end{lstlisting}
-
-Note Edward doesn't currently support sampling for \texttt{Poisson}
-random variables. For now, we hard-code its associated tensor to be
-full of 0's via the \texttt{value} argument. It is required only for
-instantiating the random variable and is not used in the experiment.
 
 \subsubsection{Inference}
 
