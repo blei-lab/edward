@@ -14,7 +14,12 @@ from edward.util import get_session
 
 @six.add_metaclass(abc.ABCMeta)
 class MonteCarlo(Inference):
-  """Base class for Monte Carlo inference methods.
+  """Abstract base class for Monte Carlo. Specific Monte Carlo methods
+  inherit from ``MonteCarlo``, sharing methods in this class.
+
+  To build an algorithm inheriting from ``MonteCarlo``, one must at the
+  minimum implement ``build_update``: it determines how to assign
+  the samples in the ``Empirical`` approximations.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
@@ -143,7 +148,7 @@ class MonteCarlo(Inference):
   @abc.abstractmethod
   def build_update(self):
     """Build update rules, returning an assign op for parameters in
-    the Empirical random variables.
+    the ``Empirical`` random variables.
 
     Any derived class of ``MonteCarlo`` **must** implement this method.
 

@@ -13,7 +13,19 @@ from edward.util import check_data, check_latent_vars, get_session, Progbar
 
 @six.add_metaclass(abc.ABCMeta)
 class Inference(object):
-  """Base class for Edward inference methods.
+  """Abstract base class for inference. All inference algorithms in
+  Edward inherit from ``Inference``, sharing common methods and
+  properties via a class hierarchy.
+
+  Specific algorithms typically inherit from other subclasses of
+  ``Inference`` rather than ``Inference`` directly. For example, one
+  might inherit from the abstract classes ``MonteCarlo`` or
+  ``VariationalInference``.
+
+  To build an algorithm inheriting from ``Inference``, one must at the
+  minimum implement ``initialize`` and ``update``: the former builds
+  the computational graph for the algorithm; the latter runs the
+  computational graph for the algorithm.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
