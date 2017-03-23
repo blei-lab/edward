@@ -54,8 +54,8 @@ class DirichletProcess(RandomVariable, Distribution):
         # Create empty tensor to store future atoms.
         self._theta = tf.zeros(
             [0] +
-              self.get_batch_shape().as_list() +
-              self.get_event_shape().as_list(),
+            self.get_batch_shape().as_list() +
+            self.get_event_shape().as_list(),
             dtype=self._base.dtype)
 
         # Instantiate beta distribution for stick breaking proportions.
