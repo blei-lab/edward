@@ -17,13 +17,13 @@ ed.set_seed(42)
 x_data = np.array([0.0] * 50)
 
 # MODEL: Normal-Normal with known variance
-mu = Normal(mu=0.0, sigma=1.0)
-x = Normal(mu=tf.ones(50) * mu, sigma=1.0)
+mu = Normal(loc=0.0, scale=1.0)
+x = Normal(loc=tf.ones(50) * mu, scale=1.0)
 
 # INFERENCE
 qmu = Empirical(params=tf.Variable(tf.zeros(1000)))
 
-# analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
+# analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
 inference = ed.HMC({mu: qmu}, data={x: x_data})
 inference.run()
 

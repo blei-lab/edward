@@ -22,11 +22,11 @@ z_data = np.array([np.random.choice(K, 1, p=pi_true)[0] for n in range(N)])
 print('pi={}'.format(pi_true))
 
 # MODEL
-pi = Dirichlet(alpha=tf.ones(4))
-z = Categorical(p=tf.ones([N, 1]) * pi)
+pi = Dirichlet(tf.ones(4))
+z = Categorical(probs=tf.ones([N, 1]) * pi)
 
 # INFERENCE
-qpi = Dirichlet(alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
+qpi = Dirichlet(tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
 
 inference = ed.KLqp({pi: qpi}, data={z: z_data})
 inference.run(n_iter=1500, n_samples=30)

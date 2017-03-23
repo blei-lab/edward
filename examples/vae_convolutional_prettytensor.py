@@ -47,7 +47,7 @@ def inference_network(x):
   """Inference network to parameterize variational model. It takes
   data as input and outputs the variational parameters.
 
-  mu, sigma = neural_network(x)
+  loc, scale = neural_network(x)
   """
   with pt.defaults_scope(activation_fn=tf.nn.elu,
                          batch_normalize=True,
@@ -61,9 +61,9 @@ def inference_network(x):
               flatten().
               fully_connected(d * 2, activation_fn=None)).tensor
 
-  mu = params[:, :d]
-  sigma = tf.nn.softplus(params[:, d:])
-  return mu, sigma
+  loc = params[:, :d]
+  scale = tf.nn.softplus(params[:, d:])
+  return loc, scale
 
 
 ed.set_seed(42)
@@ -82,14 +82,14 @@ if not os.path.exists(IMG_DIR):
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 
 # MODEL
-z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
+z = Normal(loc=tf.zeros([M, d]), scale=tf.ones([M, d]))
 logits = generative_network(z)
 x = Bernoulli(logits=logits)
 
 # INFERENCE
 x_ph = tf.placeholder(tf.int32, [M, 28 * 28])
-mu, sigma = inference_network(tf.cast(x_ph, tf.float32))
-qz = Normal(mu=mu, sigma=sigma)
+loc, scale = inference_network(tf.cast(x_ph, tf.float32))
+qz = Normal(loc=loc, scale=scale)
 
 # Bind p(x, z) and q(z | x) to the same placeholder for x.
 data = {x: x_ph}

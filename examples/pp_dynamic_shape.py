@@ -16,13 +16,13 @@ from edward.models import Exponential, Dirichlet, Gamma
 ed.set_seed(42)
 
 # Prior on scalar hyperparameter to Dirichlet.
-alpha = Gamma(alpha=1.0, beta=1.0)
+alpha = Gamma(1.0, 1.0)
 
 # Prior on size of Dirichlet.
-n = 1 + tf.cast(Exponential(lam=0.5), tf.int32)
+n = 1 + tf.cast(Exponential(0.5), tf.int32)
 
 # Build a vector of ones whose size is n; multiply it by alpha.
-p = Dirichlet(alpha=tf.ones([n]) * alpha)
+p = Dirichlet(tf.ones([n]) * alpha)
 
 sess = ed.get_session()
 print(sess.run(p))

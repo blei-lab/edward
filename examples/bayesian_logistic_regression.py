@@ -36,8 +36,8 @@ X_train, y_train = build_toy_dataset(N)
 
 # MODEL
 X = tf.placeholder(tf.float32, [N, D])
-w = Normal(mu=tf.zeros(D), sigma=3.0 * tf.ones(D))
-b = Normal(mu=tf.zeros([]), sigma=3.0 * tf.ones([]))
+w = Normal(loc=tf.zeros(D), scale=3.0 * tf.ones(D))
+b = Normal(loc=tf.zeros([]), scale=3.0 * tf.ones([]))
 y = Bernoulli(logits=ed.dot(X, w) + b)
 
 # INFERENCE

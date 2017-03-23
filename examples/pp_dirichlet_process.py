@@ -25,15 +25,15 @@ def dirichlet_process(alpha):
   """Demo of stochastic while loop for stick breaking construction."""
   def cond(k, beta_k):
     # End while loop (return False) when flip is heads.
-    flip = Bernoulli(p=beta_k)
+    flip = Bernoulli(beta_k)
     return tf.cast(1 - flip, tf.bool)
 
   def body(k, beta_k):
-    beta_k = Beta(a=1.0, b=alpha)
+    beta_k = Beta(1.0, alpha)
     return k + 1, beta_k
 
   k = tf.constant(0)
-  beta_k = Beta(a=1.0, b=alpha)
+  beta_k = Beta(1.0, alpha)
   stick_num, stick_beta = tf.while_loop(cond, body, loop_vars=[k, beta_k])
   return stick_num
 

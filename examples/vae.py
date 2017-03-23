@@ -40,7 +40,7 @@ mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 # MODEL
 # Define a subgraph of the full model, corresponding to a minibatch of
 # size M.
-z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
+z = Normal(loc=tf.zeros([M, d]), scale=tf.ones([M, d]))
 hidden = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(hidden))
 
@@ -49,8 +49,8 @@ x = Bernoulli(logits=Dense(28 * 28)(hidden))
 # minibatch of size M.
 x_ph = tf.placeholder(tf.int32, [M, 28 * 28])
 hidden = Dense(256, activation='relu')(tf.cast(x_ph, tf.float32))
-qz = Normal(mu=Dense(d)(hidden),
-            sigma=Dense(d, activation='softplus')(hidden))
+qz = Normal(loc=Dense(d)(hidden),
+            scale=Dense(d, activation='softplus')(hidden))
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
 inference = ed.KLqp({z: qz}, data={x: x_ph})
