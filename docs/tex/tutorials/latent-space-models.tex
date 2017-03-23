@@ -73,7 +73,7 @@ from edward.models import Normal, Poisson
 N = x_train.shape[0]  # number of data points
 K = 3  # latent dimensionality
 
-z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
+z = Normal(loc=tf.zeros([N, K]), scale=tf.ones([N, K]))
 
 # Calculate N x N distance matrix.
 # 1. Create a vector, [||z_1||^2, ||z_2||^2, ..., ||z_N||^2], and tile
@@ -103,8 +103,8 @@ See this extended tutorial about
 One could instead run variational inference. This requires specifying
 a variational model and instantiating \texttt{KLqp}.
 \begin{lstlisting}[language=Python]
-qz = Normal(mu=tf.Variable(tf.random_normal([N * K])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
+qz = Normal(loc=tf.Variable(tf.random_normal([N * K])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
 inference = ed.KLqp({z: qz}, data={x: x_train})
 \end{lstlisting}
 See this extended tutorial about

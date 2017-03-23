@@ -70,22 +70,22 @@ from edward.models import Categorical, Mixture, Normal
 from tensorflow.contrib import slim
 
 def neural_network(X):
-  """mu, sigma, logits = NN(x; theta)"""
+  """loc, scale, logits = NN(x; theta)"""
   # 2 hidden layers with 15 hidden units
   hidden1 = slim.fully_connected(X, 15)
   hidden2 = slim.fully_connected(hidden1, 15)
-  mus = slim.fully_connected(hidden2, K, activation_fn=None)
-  sigmas = slim.fully_connected(hidden2, K, activation_fn=tf.exp)
+  locs = slim.fully_connected(hidden2, K, activation_fn=None)
+  scales = slim.fully_connected(hidden2, K, activation_fn=tf.exp)
   logits = slim.fully_connected(hidden2, K, activation_fn=None)
-  return mus, sigmas, logits
+  return locs, scales, logits
 
 K = 20  # number of mixture components
 
-mus, sigmas, logits = neural_network(X_ph)
+locs, scales, logits = neural_network(X_ph)
 cat = Categorical(logits=logits)
-components = [Normal(mu=mu, sigma=sigma) for mu, sigma
-              in zip(tf.unstack(tf.transpose(mus)),
-                     tf.unstack(tf.transpose(sigmas)))]
+components = [Normal(loc=loc, scale=scale) for loc, scale
+              in zip(tf.unstack(tf.transpose(locs)),
+                     tf.unstack(tf.transpose(scales)))]
 y = Mixture(cat=cat, components=components, value=tf.zeros_like(y_ph))
 \end{lstlisting}
 
@@ -154,7 +154,7 @@ To do this, we fetch their values from session, feeding test data
 
 \begin{lstlisting}[language=Python]
 pred_weights, pred_means, pred_std = \
-    sess.run([tf.nn.softmax(logits), mus, sigmas], feed_dict={X_ph: X_test})
+    sess.run([tf.nn.softmax(logits), locs, scales], feed_dict={X_ph: X_test})
 \end{lstlisting}
 
 Let's plot the log-likelihood of the training and test data as
