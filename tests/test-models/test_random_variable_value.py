@@ -13,17 +13,16 @@ class test_random_variable_value_class(tf.test.TestCase):
 
   def _test_sample(self, RV, value, *args, **kwargs):
     rv = RV(*args, value=value, **kwargs)
-    value_shape = rv.value().shape.as_list()
-    expected_shape = (rv.get_batch_shape().as_list() +
-                      rv.get_event_shape().as_list())
+    value_shape = rv.value().shape
+    expected_shape = rv.get_batch_shape().concatenate(rv.get_event_shape())
     self.assertEqual(value_shape, expected_shape)
     self.assertEqual(rv.dtype, rv.value().dtype)
 
   def _test_copy(self, RV, value, *args, **kwargs):
     rv1 = RV(*args, value=value, **kwargs)
     rv2 = copy(rv1)
-    value_shape1 = rv1.value().shape.as_list()
-    value_shape2 = rv2.value().shape.as_list()
+    value_shape1 = rv1.value().shape
+    value_shape2 = rv2.value().shape
     self.assertEqual(value_shape1, value_shape2)
 
   def test_shape_and_dtype(self):

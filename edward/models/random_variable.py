@@ -73,9 +73,9 @@ class RandomVariable(object):
 
     if value is not None:
       t_value = tf.convert_to_tensor(value, self.dtype)
-      expected_shape = (self.get_batch_shape().as_list() +
-                        self.get_event_shape().as_list())
-      value_shape = t_value.shape.as_list()
+      value_shape = t_value.shape
+      expected_shape = self.get_batch_shape().concatenate(
+          self.get_event_shape())
       if value_shape != expected_shape:
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
