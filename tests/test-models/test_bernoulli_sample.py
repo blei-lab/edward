@@ -5,16 +5,16 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.models import PointMass
+from edward.models import Bernoulli
+from tensorflow.contrib import distributions as ds
 
 
-class test_pointmass_sample_class(tf.test.TestCase):
+class test_bernoulli_sample_class(tf.test.TestCase):
 
-  def _test(self, params, n):
-    x = PointMass(params=params)
-    val_est = x.sample(n).shape.as_list()
-    val_true = n + tf.convert_to_tensor(params).shape.as_list()
-    self.assertEqual(val_est, val_true)
+  def _test(self, p, n):
+    rv = Bernoulli(p=p)
+    dist = ds.Bernoulli(p=p)
+    self.assertEqual(rv.sample(n).shape, dist.sample(n).shape)
 
   def test_0d(self):
     with self.test_session():
