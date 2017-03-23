@@ -21,7 +21,6 @@ class test_random_variable_init_value_class(tf.test.TestCase):
     self.assertEqual(value_shape, expected_shape)
     self.assertEqual(rv.dtype, rv._value.dtype)
 
-
   def _test_copy(self, RV, value, *args, **kwargs):
     rv1 = RV(*args, value=value, **kwargs)
     rv2 = copy(rv1)
