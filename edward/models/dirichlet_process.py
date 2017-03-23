@@ -151,7 +151,7 @@ class DirichletProcess(RandomVariable, Distribution):
     # the while loop and False for samples that can receive their base
     # distribution (coin lands heads). Also note that we need one bool for
     # each sample
-    bools = tf.ones([n] + self.get_batch_shape().as_list(), dtype=tf.bool)
+    bools = tf.ones([n] + batch_shape, dtype=tf.bool)
 
     # Initialize all samples as zero, they will be overwritten in any case
     draws = tf.zeros([n] + batch_shape + event_shape, dtype=self._base.dtype)
