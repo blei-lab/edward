@@ -12,9 +12,9 @@ class test_check_latent_vars_class(tf.test.TestCase):
 
   def test(self):
     with self.test_session():
-      mu = Normal(mu=0.0, sigma=1.0)
-      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
-      qmu_vec = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
+      mu = Normal(0.0, 1.0)
+      qmu = Normal(tf.Variable(0.0), tf.constant(1.0))
+      qmu_vec = Normal(tf.constant([0.0]), tf.constant([1.0]))
 
       check_latent_vars({mu: qmu})
       check_latent_vars({mu: tf.constant(0.0)})

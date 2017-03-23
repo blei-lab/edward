@@ -19,10 +19,10 @@ class test_implicit_klqp_class(tf.test.TestCase):
       return z.log_prob(local_vars[z]) + w
 
     with self.test_session() as sess:
-      z = Normal(mu=5.0, sigma=1.0)
+      z = Normal(loc=5.0, scale=1.0)
 
-      qz = Normal(mu=tf.Variable(tf.random_normal([])),
-                  sigma=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
+      qz = Normal(loc=tf.Variable(tf.random_normal([])),
+                  scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
 
       inference = ed.ImplicitKLqp({z: qz}, discriminator=ratio_estimator)
       inference.run(n_iter=200)

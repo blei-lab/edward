@@ -12,7 +12,7 @@ class test_ppc_class(tf.test.TestCase):
 
   def test_data(self):
     with self.test_session():
-      x = Normal(mu=0.0, sigma=1.0)
+      x = Normal(loc=0.0, scale=1.0)
       y = 2.0 * x
       x_data = tf.constant(0.0)
       y_data = tf.constant(0.0)
@@ -23,9 +23,9 @@ class test_ppc_class(tf.test.TestCase):
 
   def test_latent_vars(self):
     with self.test_session():
-      x = Normal(mu=0.0, sigma=1.0)
+      x = Normal(loc=0.0, scale=1.0)
       y = 2.0 * x
-      z = Normal(mu=0.0, sigma=1.0)
+      z = Normal(loc=0.0, scale=1.0)
       x_data = tf.constant(0.0)
       y_data = tf.constant(0.0)
       ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x]) + tf.reduce_mean(zs[z]),
@@ -41,7 +41,7 @@ class test_ppc_class(tf.test.TestCase):
 
   def test_n_samples(self):
     with self.test_session():
-      x = Normal(mu=0.0, sigma=1.0)
+      x = Normal(loc=0.0, scale=1.0)
       x_data = tf.constant(0.0)
       ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x]), {x: x_data}, n_samples=1)
       ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x]), {x: x_data}, n_samples=5)

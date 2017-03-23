@@ -27,25 +27,25 @@ class test_integer_init(tf.test.TestCase):
       H = 10  # number of hidden units
       K = 10  # number of classes
 
-      W_0 = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
-      W_1 = Normal(mu=tf.zeros([H, K]), sigma=tf.ones([H, K]))
-      b_0 = Normal(mu=tf.zeros(H), sigma=tf.ones(H))
-      b_1 = Normal(mu=tf.zeros(K), sigma=tf.ones(K))
+      W_0 = Normal(loc=tf.zeros([D, H]), scale=tf.ones([D, H]))
+      W_1 = Normal(loc=tf.zeros([H, K]), scale=tf.ones([H, K]))
+      b_0 = Normal(loc=tf.zeros(H), scale=tf.ones(H))
+      b_1 = Normal(loc=tf.zeros(K), scale=tf.ones(K))
 
       y = Categorical(logits=neural_network(X_train, W_0, W_1, b_0, b_1))
 
       qW_0 = Normal(
-          mu=tf.Variable(tf.random_normal([D, H])),
-          sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, H]))))
+          loc=tf.Variable(tf.random_normal([D, H])),
+          scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, H]))))
       qW_1 = Normal(
-          mu=tf.Variable(tf.random_normal([H, K])),
-          sigma=tf.nn.softplus(tf.Variable(tf.random_normal([H, K]))))
+          loc=tf.Variable(tf.random_normal([H, K])),
+          scale=tf.nn.softplus(tf.Variable(tf.random_normal([H, K]))))
       qb_0 = Normal(
-          mu=tf.Variable(tf.random_normal([H])),
-          sigma=tf.nn.softplus(tf.Variable(tf.random_normal([H]))))
+          loc=tf.Variable(tf.random_normal([H])),
+          scale=tf.nn.softplus(tf.Variable(tf.random_normal([H]))))
       qb_1 = Normal(
-          mu=tf.Variable(tf.random_normal([K])),
-          sigma=tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
+          loc=tf.Variable(tf.random_normal([K])),
+          scale=tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
 
       inference = ed.KLqp({W_0: qW_0, b_0: qb_0, W_1: qW_1, b_1: qb_1},
                           data={y: y_train})

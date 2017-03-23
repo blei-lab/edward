@@ -16,10 +16,10 @@ class test_inference_data_class(tf.test.TestCase):
     with self.test_session() as sess:
       x_data = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
 
-      mu = Normal(mu=0.0, sigma=1.0)
-      x = Normal(mu=tf.ones(10) * mu, sigma=tf.ones(1))
+      mu = Normal(loc=0.0, scale=1.0)
+      x = Normal(loc=tf.ones(10) * mu, scale=tf.ones(1))
 
-      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+      qmu = Normal(loc=tf.Variable(0.0), scale=tf.constant(1.0))
 
       inference = ed.KLqp({mu: qmu}, data={x: x_data})
       inference.initialize()
@@ -33,10 +33,10 @@ class test_inference_data_class(tf.test.TestCase):
       x_data = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
       x_ph = tf.placeholder(tf.float32, [10])
 
-      mu = Normal(mu=0.0, sigma=1.0)
-      x = Normal(mu=tf.ones(10) * mu, sigma=tf.ones(10))
+      mu = Normal(loc=0.0, scale=1.0)
+      x = Normal(loc=tf.ones(10) * mu, scale=tf.ones(10))
 
-      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+      qmu = Normal(loc=tf.Variable(0.0), scale=tf.constant(1.0))
 
       inference = ed.KLqp({mu: qmu}, data={x: x_ph})
       inference.initialize()
@@ -63,10 +63,10 @@ class test_inference_data_class(tf.test.TestCase):
           features={'outcome': tf.FixedLenFeature([], tf.float32)})
       x_batch = features['outcome']
 
-      mu = Normal(mu=0.0, sigma=1.0)
-      x = Normal(mu=tf.ones([]) * mu, sigma=tf.ones([]))
+      mu = Normal(loc=0.0, scale=1.0)
+      x = Normal(loc=tf.ones([]) * mu, scale=tf.ones([]))
 
-      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+      qmu = Normal(loc=tf.Variable(0.0), scale=tf.constant(1.0))
 
       inference = ed.KLqp({mu: qmu}, data={x: x_batch})
       inference.initialize(scale={x: 10.0})
