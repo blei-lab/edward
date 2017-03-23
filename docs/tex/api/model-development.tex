@@ -54,11 +54,11 @@ from scipy.stats import poisson
 
 def _sample_n(self, n=1, seed=None):
   # define Python function which returns samples as a Numpy array
-  def np_sample(lam, n):
-    return poisson.rvs(mu=lam, size=n, random_state=seed).astype(np.float32)
+  def np_sample(rate, n):
+    return poisson.rvs(mu=rate, size=n, random_state=seed).astype(np.float32)
 
   # wrap python function as tensorflow op
-  val = tf.py_func(np_sample, [self.lam, n], [tf.float32])[0]
+  val = tf.py_func(np_sample, [self.rate, n], [tf.float32])[0]
   # set shape from unknown shape
   batch_event_shape = self.batch_shape.concatenate(self.event_shape)
   shape = tf.concat(
@@ -69,7 +69,7 @@ def _sample_n(self, n=1, seed=None):
 Poisson._sample_n = _sample_n
 
 sess = ed.get_session()
-x = Poisson(lam=1.0)
+x = Poisson(rate=1.0)
 sess.run(x)
 ## 1.0
 sess.run(x)
