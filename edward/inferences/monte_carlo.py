@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
@@ -11,8 +12,14 @@ from edward.models import Empirical, RandomVariable
 from edward.util import get_session
 
 
+@six.add_metaclass(abc.ABCMeta)
 class MonteCarlo(Inference):
-  """Base class for Monte Carlo inference methods.
+  """Abstract base class for Monte Carlo. Specific Monte Carlo methods
+  inherit from ``MonteCarlo``, sharing methods in this class.
+
+  To build an algorithm inheriting from ``MonteCarlo``, one must at the
+  minimum implement ``build_update``: it determines how to assign
+  the samples in the ``Empirical`` approximations.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
@@ -138,12 +145,12 @@ class MonteCarlo(Inference):
       if t == 1 or t % self.n_print == 0:
         self.progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
 
+  @abc.abstractmethod
   def build_update(self):
-    """Build update, which returns an assign op for parameters in
-    the Empirical random variables.
+    """Build update rules, returning an assign op for parameters in
+    the ``Empirical`` random variables.
 
-    Any derived class of ``MonteCarlo`` **must** implement
-    this method.
+    Any derived class of ``MonteCarlo`` **must** implement this method.
 
     Raises
     ------
