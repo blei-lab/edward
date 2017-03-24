@@ -16,21 +16,39 @@ class PointMass(RandomVariable, Distribution):
   """
   def __init__(self, params, validate_args=False, allow_nan_stats=True,
                name="PointMass", *args, **kwargs):
+    """Initialize a ``PointMass`` random variable.
+
+    Parameters
+    ----------
+    params : tf.Tensor
+      The location with all probability mass.
+
+    Examples
+    --------
+    >>> # scalar
+    >>> x = PointMass(params=28.3)
+    >>> assert x.shape == ()
+    >>>
+    >>> # 5 x 2 x 3 tensor
+    >>> dp = PointMass(params=tf.zeros([5, 2, 3]))
+    >>> assert x.shape == (5, 2, 3)
+    """
     parameters = locals()
     parameters.pop("self")
-    with tf.name_scope(name, values=[params]) as ns:
+    with tf.name_scope(name, values=[params]):
       with tf.control_dependencies([]):
         self._params = tf.identity(params, name="params")
-        super(PointMass, self).__init__(
-            dtype=self._params.dtype,
-            is_continuous=False,
-            is_reparameterized=True,
-            validate_args=validate_args,
-            allow_nan_stats=allow_nan_stats,
-            parameters=parameters,
-            graph_parents=[self._params],
-            name=ns,
-            *args, **kwargs)
+
+    super(PointMass, self).__init__(
+        dtype=self._params.dtype,
+        is_continuous=False,
+        is_reparameterized=True,
+        validate_args=validate_args,
+        allow_nan_stats=allow_nan_stats,
+        parameters=parameters,
+        graph_parents=[self._params],
+        name=name,
+        *args, **kwargs)
 
   @staticmethod
   def _param_shapes(sample_shape):
