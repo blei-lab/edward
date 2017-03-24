@@ -9,8 +9,17 @@ from edward.models.random_variable import RandomVariable
 from edward.models import random_variables as rvs
 
 
-def beta_log_prob(self):
-  val = self
+def _val_wrapper(f):
+  def wrapped(self, val=None):
+    if val is None:
+      return f(self, self)
+    else:
+      return f(self, val)
+  return wrapped
+
+
+@_val_wrapper
+def beta_log_prob(self, val):
   a = self.parameters['a']
   b = self.parameters['b']
   result = (a - 1.) * tf.log(val)
@@ -20,8 +29,8 @@ def beta_log_prob(self):
 rvs.Beta.conjugate_log_prob = beta_log_prob
 
 
-def dirichlet_log_prob(self):
-  val = self
+@_val_wrapper
+def dirichlet_log_prob(self, val):
   alpha = self.parameters['alpha']
   result = tf.reduce_sum((alpha - 1.) * tf.log(val), -1)
   result += tf.reduce_sum(-tf.lgamma(alpha), -1)
@@ -30,8 +39,8 @@ def dirichlet_log_prob(self):
 rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
 
 
-def bernoulli_log_prob(self):
-  val = self
+@_val_wrapper
+def bernoulli_log_prob(self, val):
   p = self.parameters['p']
 #   f_val = as_float(val)
   f_val = tf.cast(val, np.float32)
@@ -40,16 +49,16 @@ def bernoulli_log_prob(self):
 rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
 
 
-def categorical_log_prob(self):
-  val = self
+@_val_wrapper
+def categorical_log_prob(self, val):
   p = self.parameters['p']
   one_hot = tf.one_hot(val, p.get_shape()[-1], dtype=np.float32)
   return tf.reduce_sum(tf.log(p) * one_hot, -1)
 rvs.Categorical.conjugate_log_prob = categorical_log_prob
 
 
-def gamma_log_prob(self):
-  val = self
+@_val_wrapper
+def gamma_log_prob(self, val):
   alpha = self.parameters['alpha']
   beta = self.parameters['beta']
   result = (alpha - 1.) * tf.log(val)
@@ -59,8 +68,8 @@ def gamma_log_prob(self):
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 
 
-def poisson_log_prob(self):
-  val = self
+@_val_wrapper
+def poisson_log_prob(self, val):
   lam = self.parameters['lam']
   f_val = tf.cast(val, np.float32)
   result = f_val * tf.log(lam)
@@ -69,8 +78,8 @@ def poisson_log_prob(self):
 rvs.Poisson.conjugate_log_prob = poisson_log_prob
 
 
-def normal_log_prob(self):
-  val = self
+@_val_wrapper
+def normal_log_prob(self, val):
   mu = self.parameters['mu']
   sigma = self.parameters['sigma']
   prec = tf.reciprocal(tf.square(sigma))
@@ -81,8 +90,8 @@ def normal_log_prob(self):
 rvs.Normal.conjugate_log_prob = normal_log_prob
 
 
-def inverse_gamma_log_prob(self):
-  val = self
+@_val_wrapper
+def inverse_gamma_log_prob(self, val):
   alpha = self.parameters['alpha']
   beta = self.parameters['beta']
   result = -(alpha + 1) * tf.log(val)
