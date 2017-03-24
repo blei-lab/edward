@@ -12,9 +12,26 @@ class Empirical(RandomVariable, Distribution):
   """Empirical random variable."""
   def __init__(self, params, validate_args=False, allow_nan_stats=True,
                name="Empirical", *args, **kwargs):
+    """
+    Parameters
+    ----------
+    params : tf.Tensor
+      Collection of samples. Its outer (left-most) dimension
+      determines the number of samples.
+
+    Examples
+    --------
+    >>> # 100 samples of a scalar
+    >>> x = Empirical(params=tf.zeros(100))
+    >>> assert x.shape == ()
+    >>>
+    >>> # 5 samples of a 2 x 3 matrix
+    >>> dp = Empirical(params=tf.zeros([5, 2, 3]))
+    >>> assert x.shape == (2, 3)
+    """
     parameters = locals()
     parameters.pop("self")
-    with tf.name_scope(name, values=[params]) as ns:
+    with tf.name_scope(name, values=[params]):
       with tf.control_dependencies([]):
         self._params = tf.identity(params, name="params")
         try:
@@ -22,16 +39,16 @@ class Empirical(RandomVariable, Distribution):
         except ValueError:  # scalar params
           self._n = tf.constant(1)
 
-        super(Empirical, self).__init__(
-            dtype=self._params.dtype,
-            is_continuous=False,
-            is_reparameterized=True,
-            validate_args=validate_args,
-            allow_nan_stats=allow_nan_stats,
-            parameters=parameters,
-            graph_parents=[self._params, self._n],
-            name=ns,
-            *args, **kwargs)
+    super(Empirical, self).__init__(
+        dtype=self._params.dtype,
+        is_continuous=False,
+        is_reparameterized=True,
+        validate_args=validate_args,
+        allow_nan_stats=allow_nan_stats,
+        parameters=parameters,
+        graph_parents=[self._params, self._n],
+        name=name,
+        *args, **kwargs)
 
   @staticmethod
   def _param_shapes(sample_shape):

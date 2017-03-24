@@ -14,47 +14,47 @@ except Exception as e:
 
 
 class DirichletProcess(RandomVariable, Distribution):
-  def __init__(self, alpha, base_cls, validate_args=False, allow_nan_stats=True,
-               name="DirichletProcess", value=None, *args, **kwargs):
-    """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
+  """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
 
-    It has two parameters: a positive real value :math:`\\alpha`,
-    known as the concentration parameter (``alpha``), and a base
-    distribution :math:`H` (``base_cls(*args, **kwargs)``).
-
+  It has two parameters: a positive real value :math:`\\alpha`,
+  known as the concentration parameter (``alpha``), and a base
+  distribution :math:`H` (``base``).
+  """
+  def __init__(self, alpha, base, validate_args=False, allow_nan_stats=True,
+               name="DirichletProcess", *args, **kwargs):
+    """
     Parameters
     ----------
     alpha : tf.Tensor
       Concentration parameter. Must be positive real-valued. Its shape
       determines the number of independent DPs (batch shape).
-    base_cls : RandomVariable
-      Class of base distribution. Its shape (when instantiated)
-      determines the shape of an individual DP (event shape).
-    *args, **kwargs : optional
-      Arguments passed into ``base_cls``.
+    base : RandomVariable
+      Base distribution. Its shape determines the shape of an
+      individual DP (event shape).
 
     Examples
     --------
     >>> # scalar concentration parameter, scalar base distribution
-    >>> dp = DirichletProcess(0.1, Normal, mu=0.0, sigma=1.0)
+    >>> dp = DirichletProcess(0.1, Normal(mu=0.0, sigma=1.0))
     >>> assert dp.shape == ()
     >>>
     >>> # vector of concentration parameters, matrix of Exponentials
     >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
-    ...                       Exponential, lam=tf.ones([5, 3]))
+    ...                       Exponential(lam=tf.ones([5, 3])))
     >>> assert dp.shape == (2, 5, 3)
     """
     parameters = locals()
     parameters.pop("self")
-    with tf.name_scope(name, values=[alpha]) as ns:
-      with tf.control_dependencies([]):
-        self._alpha = tf.identity(alpha, name="alpha")
-        self._base_cls = base_cls
-        self._base_args = args
-        self._base_kwargs = kwargs
+    with tf.name_scope(name, values=[alpha]):
+      with tf.control_dependencies([
+          tf.assert_positive(alpha),
+      ] if validate_args else []):
+        if validate_args and isinstance(base, RandomVariable):
+          raise TypeError("base must be a ed.RandomVariable object.")
 
-        # Instantiate base distribution.
-        self._base = self._base_cls(*self._base_args, **self._base_kwargs)
+        self._alpha = tf.identity(alpha, name="alpha")
+        self._base = base
+
         # Create empty tensor to store future atoms.
         self._theta = tf.zeros(
             [0] +
@@ -63,27 +63,32 @@ class DirichletProcess(RandomVariable, Distribution):
             dtype=self._base.dtype)
 
         # Instantiate beta distribution for stick breaking proportions.
-        self._betadist = Beta(a=tf.ones_like(self.alpha), b=self.alpha)
+        self._betadist = Beta(a=tf.ones_like(self._alpha), b=self._alpha)
         # Create empty tensor to store stick breaking proportions.
         self._beta = tf.zeros(
             [0] + self.get_batch_shape().as_list(),
             dtype=self._betadist.dtype)
 
-        super(DirichletProcess, self).__init__(
-            dtype=tf.int32,
-            is_continuous=False,
-            is_reparameterized=False,
-            validate_args=validate_args,
-            allow_nan_stats=allow_nan_stats,
-            parameters=parameters,
-            graph_parents=[self._alpha, self._beta, self._theta],
-            name=ns,
-            value=value)
+    super(DirichletProcess, self).__init__(
+        dtype=tf.int32,
+        is_continuous=False,
+        is_reparameterized=False,
+        validate_args=validate_args,
+        allow_nan_stats=allow_nan_stats,
+        parameters=parameters,
+        graph_parents=[self._alpha, self._beta, self._theta],
+        name=name,
+        *args, **kwargs)
 
   @property
   def alpha(self):
     """Concentration parameter."""
     return self._alpha
+
+  @property
+  def base(self):
+    """Base distribution used for drawing the atoms."""
+    return self._base
 
   @property
   def beta(self):
@@ -106,10 +111,10 @@ class DirichletProcess(RandomVariable, Distribution):
     return self.alpha.shape
 
   def _event_shape(self):
-    return tf.shape(self._base)
+    return tf.shape(self.base)
 
   def _get_event_shape(self):
-    return self._base.shape
+    return self.base.shape
 
   def _sample_n(self, n, seed=None):
     """Sample ``n`` draws from the DP. Draws from the base
@@ -154,7 +159,7 @@ class DirichletProcess(RandomVariable, Distribution):
     bools = tf.ones([n] + batch_shape, dtype=tf.bool)
 
     # Initialize all samples as zero, they will be overwritten in any case
-    draws = tf.zeros([n] + batch_shape + event_shape, dtype=self._base.dtype)
+    draws = tf.zeros([n] + batch_shape + event_shape, dtype=self.base.dtype)
 
     # Calculate shape invariance conditions for theta and beta as these
     # can change shape between loop iterations.
@@ -187,7 +192,7 @@ class DirichletProcess(RandomVariable, Distribution):
         lambda: (theta, beta),
         lambda: (
             tf.concat(
-                [theta, tf.expand_dims(self._base.sample(batch_shape), 0)], 0),
+                [theta, tf.expand_dims(self.base.sample(batch_shape), 0)], 0),
             tf.concat(
                 [beta, tf.expand_dims(self._betadist.sample(), 0)], 0)))
     theta_k = tf.gather(theta, k)
