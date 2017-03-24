@@ -12,7 +12,8 @@ class Empirical(RandomVariable, Distribution):
   """Empirical random variable."""
   def __init__(self, params, validate_args=False, allow_nan_stats=True,
                name="Empirical", *args, **kwargs):
-    """
+    """Initialize an ``Empirical`` random variable.
+
     Parameters
     ----------
     params : tf.Tensor

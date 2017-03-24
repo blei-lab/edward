@@ -16,7 +16,8 @@ class PointMass(RandomVariable, Distribution):
   """
   def __init__(self, params, validate_args=False, allow_nan_stats=True,
                name="PointMass", *args, **kwargs):
-    """
+    """Initialize a ``PointMass`` random variable.
+
     Parameters
     ----------
     params : tf.Tensor

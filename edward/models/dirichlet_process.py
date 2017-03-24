@@ -22,7 +22,8 @@ class DirichletProcess(RandomVariable, Distribution):
   """
   def __init__(self, alpha, base, validate_args=False, allow_nan_stats=True,
                name="DirichletProcess", *args, **kwargs):
-    """
+    """Initialize a batch of Dirichlet processes.
+
     Parameters
     ----------
     alpha : tf.Tensor
