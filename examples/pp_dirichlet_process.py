@@ -46,12 +46,11 @@ print(sess.run(dp))
 print(sess.run(dp))
 
 # Demo of the DirichletProcess random variable in Edward.
-base_cls = Normal
-kwargs = {'mu': 0.0, 'sigma': 1.0}
+base = Normal(mu=0.0, sigma=1.0)
 
 # Highly concentrated DP.
 alpha = 1.0
-dp = DirichletProcess(alpha, base_cls, **kwargs)
+dp = DirichletProcess(alpha, base)
 x = dp.sample(1000)
 samples = sess.run(x)
 plt.hist(samples, bins=100, range=(-3.0, 3.0))
@@ -60,7 +59,7 @@ plt.show()
 
 # More spread out DP.
 alpha = 50.0
-dp = DirichletProcess(alpha, base_cls, **kwargs)
+dp = DirichletProcess(alpha, base)
 x = dp.sample(1000)
 samples = sess.run(x)
 plt.hist(samples, bins=100, range=(-3.0, 3.0))
@@ -69,7 +68,7 @@ plt.show()
 
 # States persist across calls to sample() in a DP.
 alpha = 1.0
-dp = DirichletProcess(alpha, base_cls, **kwargs)
+dp = DirichletProcess(alpha, base)
 x = dp.sample(50)
 y = dp.sample(75)
 samples_x, samples_y = sess.run([x, y])
@@ -82,13 +81,13 @@ plt.show()
 
 # ``theta`` is the distribution indirectly returned by the DP.
 # Fetching theta is the same as fetching the Dirichlet process.
-dp = DirichletProcess(alpha, base_cls, **kwargs)
-theta = base_cls(value=tf.cast(dp, tf.float32), **kwargs)
+dp = DirichletProcess(alpha, base)
+theta = Normal(0.0, 1.0, value=tf.cast(dp, tf.float32))
 print(sess.run([dp, theta]))
 print(sess.run([dp, theta]))
 
 # DirichletProcess can also take in non-scalar concentrations and bases.
-base_cls = Exponential
-kwargs = {'lam': tf.ones([5, 2])}
-dp = DirichletProcess(tf.constant([0.1, 0.6, 0.4]), base_cls, **kwargs)
+alpha = tf.constant([0.1, 0.6, 0.4])
+base = Exponential(lam=tf.ones([5, 2]))
+dp = DirichletProcess(alpha, base)
 print(dp)

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
@@ -16,8 +17,16 @@ except ImportError:
   pass
 
 
+@six.add_metaclass(abc.ABCMeta)
 class VariationalInference(Inference):
-  """Base class for variational inference methods.
+  """Abstract base class for variational inference. Specific
+  variational inference methods inherit from ``VariationalInference``,
+  sharing methods such as a default optimizer.
+
+  To build an algorithm inheriting from ``VariaitonalInference``, one
+  must at the minimum implement ``build_loss_and_gradients``: it
+  determines the loss function and gradients to apply for a given
+  optimizer.
   """
   def __init__(self, *args, **kwargs):
     super(VariationalInference, self).__init__(*args, **kwargs)
@@ -150,8 +159,10 @@ class VariationalInference(Inference):
       if t == 1 or t % self.n_print == 0:
         self.progbar.update(t, {'Loss': info_dict['loss']})
 
+  @abc.abstractmethod
   def build_loss_and_gradients(self, var_list):
-    """Build loss function.
+    """Build loss function and its gradients. They will be leveraged
+    in an optimizer to update the model and variational parameters.
 
     Any derived class of ``VariationalInference`` **must** implement
     this method.

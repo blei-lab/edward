@@ -93,7 +93,7 @@ class RandomVariable(object):
 
   @property
   def shape(self):
-    """Get shape of random variable."""
+    """Shape of random variable."""
     return self._value.shape
 
   def __str__(self):
@@ -291,15 +291,19 @@ class RandomVariable(object):
     """Get shape of random variable."""
     return self.shape
 
+  @staticmethod
   def _session_run_conversion_fetch_function(tensor):
     return ([tensor.value()], lambda val: val[0])
 
+  @staticmethod
   def _session_run_conversion_feed_function(feed, feed_val):
     return [(feed.value(), feed_val)]
 
+  @staticmethod
   def _session_run_conversion_feed_function_for_partial_run(feed):
     return [feed.value()]
 
+  @staticmethod
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
     _ = name
     if dtype and not dtype.is_compatible_with(v.dtype):
