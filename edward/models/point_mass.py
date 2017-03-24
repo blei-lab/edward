@@ -35,20 +35,20 @@ class PointMass(RandomVariable, Distribution):
     """
     parameters = locals()
     parameters.pop("self")
-    with tf.name_scope(name, values=[params]):
+    with tf.name_scope(name, values=[params]) as ns:
       with tf.control_dependencies([]):
         self._params = tf.identity(params, name="params")
 
-    super(PointMass, self).__init__(
-        dtype=self._params.dtype,
-        is_continuous=False,
-        is_reparameterized=True,
-        validate_args=validate_args,
-        allow_nan_stats=allow_nan_stats,
-        parameters=parameters,
-        graph_parents=[self._params],
-        name=name,
-        *args, **kwargs)
+      super(PointMass, self).__init__(
+          dtype=self._params.dtype,
+          is_continuous=False,
+          is_reparameterized=True,
+          validate_args=validate_args,
+          allow_nan_stats=allow_nan_stats,
+          parameters=parameters,
+          graph_parents=[self._params],
+          name=ns,
+          *args, **kwargs)
 
   @staticmethod
   def _param_shapes(sample_shape):
