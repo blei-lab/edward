@@ -46,7 +46,7 @@ class GANInference(VariationalInference):
 
     Examples
     --------
-    >>> z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+    >>> z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
     >>> x = generative_network(z)
     >>>
     >>> inference = ed.GANInference({x: x_data}, discriminator)

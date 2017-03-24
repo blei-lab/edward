@@ -99,8 +99,8 @@ class Empirical(RandomVariable, Distribution):
           [tf.expand_dims(n, 0), [1] * len(self.event_shape)], 0)
       return tf.tile(input_tensor, multiples)
     else:
-      p = tf.ones([self.n]) / tf.cast(self.n, dtype=tf.float32)
-      cat = tf.contrib.distributions.Categorical(p=p)
+      probs = tf.ones([self.n]) / tf.cast(self.n, dtype=tf.float32)
+      cat = tf.contrib.distributions.Categorical(probs)
       indices = cat._sample_n(n, seed)
       tensor = tf.gather(input_tensor, indices)
       return tensor

@@ -51,8 +51,8 @@ class Laplace(MAP):
     Examples
     --------
     >>> X = tf.placeholder(tf.float32, [N, D])
-    >>> w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-    >>> y = Normal(mu=ed.dot(X, w), sigma=tf.ones(N))
+    >>> w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+    >>> y = Normal(loc=ed.dot(X, w), scale=tf.ones(N))
     >>>
     >>> qw = MultivariateNormalTriL(
     >>>     loc=tf.Variable(tf.random_normal([D])),
@@ -83,7 +83,7 @@ class Laplace(MAP):
     # optimize ``PointMass`` random variables, which subsequently
     # optimizes mean parameters of the normal approximations.
     latent_vars_normal = self.latent_vars.copy()
-    self.latent_vars = {z: PointMass(params=qz.mu)
+    self.latent_vars = {z: PointMass(params=qz.loc)
                         for z, qz in six.iteritems(latent_vars_normal)}
 
     super(Laplace, self).initialize(*args, **kwargs)

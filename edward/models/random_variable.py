@@ -60,14 +60,14 @@ class RandomVariable(object):
   Examples
   --------
   >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p=p)
+  >>> x = Bernoulli(p)
   >>>
   >>> z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
   >>> z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
   >>> x = Bernoulli(logits=tf.matmul(z1, z2))
   >>>
-  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
+  >>> mu = Normal(tf.constant(0.0), tf.constant(1.0))
+  >>> x = Normal(mu, tf.constant(1.0))
   """
   def __init__(self, *args, **kwargs):
     """

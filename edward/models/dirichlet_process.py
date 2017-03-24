@@ -37,7 +37,7 @@ class DirichletProcess(RandomVariable, Distribution):
     Examples
     --------
     >>> # scalar concentration parameter, scalar base distribution
-    >>> dp = DirichletProcess(0.1, Normal(mu=0.0, sigma=1.0))
+    >>> dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
     >>> assert dp.shape == ()
     >>>
     >>> # vector of concentration parameters, matrix of Exponentials
@@ -62,7 +62,7 @@ class DirichletProcess(RandomVariable, Distribution):
             dtype=self._base.dtype)
 
         # Instantiate distribution for stick breaking proportions.
-        self._betadist = Beta(a=tf.ones_like(self._alpha), b=self._alpha,
+        self._betadist = Beta(tf.ones_like(self._alpha), self._alpha,
                               collections=[])
         # Form empty tensor to store stick breaking proportions.
         self._beta = tf.zeros(
@@ -213,7 +213,7 @@ class DirichletProcess(RandomVariable, Distribution):
     draws = tf.where(bools_tile, theta_k_tile, draws)
 
     # Flip coins according to stick probabilities.
-    flips = Bernoulli(p=beta_k).sample(n)
+    flips = Bernoulli(beta_k).sample(n)
     # If coin lands heads, assign sample's corresponding bool to False
     # (this ends its "while loop").
     bools = tf.where(tf.cast(flips, tf.bool), tf.zeros_like(bools), bools)
