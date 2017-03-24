@@ -6,7 +6,6 @@ import inspect
 
 from edward.models.empirical import Empirical as distributions_Empirical
 from edward.models.point_mass import PointMass as distributions_PointMass
-from edward.models.param_mixture import ParamMixture as distributions_ParamMixture
 from edward.models.random_variable import RandomVariable
 from tensorflow.contrib import distributions
 
@@ -21,9 +20,9 @@ class PointMass(RandomVariable, distributions_PointMass):
     super(PointMass, self).__init__(*args, **kwargs)
 
 
-class ParamMixture(RandomVariable, distributions_ParamMixture):
-  def __init__(self, *args, **kwargs):
-    super(ParamMixture, self).__init__(*args, **kwargs)
+# class ParamMixture(RandomVariable, distributions_ParamMixture):
+#   def __init__(self, *args, **kwargs):
+#     super(ParamMixture, self).__init__(*args, **kwargs)
 
 
 # Automatically generate random variable classes from classes in
@@ -39,3 +38,5 @@ for _name in sorted(dir(distributions)):
     _globals[_name] = type(_name, (RandomVariable, _candidate), params)
 
     del _candidate
+
+from edward.models.param_mixture import ParamMixture
