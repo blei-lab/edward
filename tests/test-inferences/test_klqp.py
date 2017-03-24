@@ -26,9 +26,9 @@ class test_klqp_class(tf.test.TestCase):
       inference = ed.KLqp({mu: qmu}, data={x: x_data})
       inference.run(n_iter=5000)
 
-      self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
+      self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-1, atol=1e-1)
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
-                          rtol=1e-2, atol=1e-2)
+                          rtol=1e-1, atol=1e-1)
 
 if __name__ == '__main__':
   ed.set_seed(42)
