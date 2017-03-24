@@ -43,13 +43,15 @@ class ParamMixture(RandomVariable, distribution.Distribution):
   def _log_prob(self, x, conjugate=False, **kwargs):
     event_dim = len(self._components.get_event_shape())
     expanded_x = tf.expand_dims(x, -1 - event_dim)
+    result = 0
     if conjugate:
       log_probs = self._components.conjugate_log_prob(expanded_x)
     else:
       log_probs = self._components.log_prob(expanded_x)
     selecter = tf.one_hot(self.cat.value(), self.cat.p.get_shape()[-1],
                           dtype=tf.float32)
-    return tf.reduce_sum(log_probs * selecter, -1)
+    result += tf.reduce_sum(log_probs * selecter, -1)
+    return result
 
   def conjugate_log_prob(self):
     return self._log_prob(self.value(), conjugate=True)

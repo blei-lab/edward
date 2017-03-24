@@ -163,41 +163,85 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertAllClose(alpha_val, np.array([6., 5., 4., 3.], np.float32))
 
+  def test_mog(self):
+    x_val = np.array([1.1, 1.2, 2.1, 4.4, 5.5, 7.3, 6.8], np.float32)
+    z_val = np.array([0, 0, 0, 1, 1, 2, 2], np.int32)
+    pi_val = np.array([0.2, 0.3, 0.5], np.float32)
+    mu_val = np.array([1., 5., 7.], np.float32)
 
-  def test_bernoulli_mog(self):
-    x_val = np.array([1.1, 1.2, 2.1, 4.4, 7.3, 5.5, 6.8], np.float32)
-    z_val = np.array([0, 0, 0, 1, 1, 1, 1], np.int32)
     N = x_val.shape[0]
+    K = z_val.max() + 1
 
-    pi = 0.5
-    prior_sigma = 4.
-    mu0 = rvs.Normal(0., prior_sigma)
-    mu1 = rvs.Normal(0., prior_sigma)
+    pi_alpha = 1.3 + np.zeros(K, dtype=np.float32)
+    mu_sigma = 4.
     sigmasq = 2.**2
-    z = rvs.Bernoulli(p=pi, sample_shape=N)
-    f_z = tf.cast(z.value(), np.float32)
-    x_mean = f_z * mu1 + (1. - f_z) * mu0
-    x = rvs.Normal(x_mean, tf.sqrt(sigmasq))
+
+    pi = rvs.Dirichlet(pi_alpha)
+    mu = rvs.Normal(0., mu_sigma, sample_shape=[K])
+
+    x = rvs.ParamMixture(pi, {'mu': mu, 'sigma': tf.sqrt(sigmasq)},
+                         rvs.Normal, sample_shape=N)
+    z = x.cat
     
-    blanket = [z, x, mu0, mu1]
-    mu0_cond = conj.complete_conditional(mu0, blanket)
-    mu1_cond = conj.complete_conditional(mu1, blanket)
+    blanket = [x, z, mu, pi]
+    mu_cond = conj.complete_conditional(mu, blanket)
+    pi_cond = conj.complete_conditional(pi, blanket)
+    z_cond = conj.complete_conditional(z, blanket)
 
     sess = tf.InteractiveSession()
-    mu0_mu, mu0_sigma, mu1_mu, mu1_sigma = sess.run([mu0_cond.mu,
-                                                     mu0_cond.sigma,
-                                                     mu1_cond.mu,
-                                                     mu1_cond.sigma],
-                                                    {z.value(): z_val,
-                                                     x.value(): x_val})
-    true_sigmasq_0 = (1./sigmasq * (z_val==0).sum() + 1./prior_sigma**2)**-1
-    true_sigmasq_1 = (1./sigmasq * (z_val==1).sum() + 1./prior_sigma**2)**-1
-    true_mu_0 = 1./sigmasq * x_val[z_val == 0].sum() * true_sigmasq_0
-    true_mu_1 = 1./sigmasq * x_val[z_val == 1].sum() * true_sigmasq_1
-    self.assertAllClose(mu0_sigma**2, true_sigmasq_0)
-    self.assertAllClose(mu1_sigma**2, true_sigmasq_1)
-    self.assertAllClose(mu0_mu, true_mu_0)
-    self.assertAllClose(mu1_mu, true_mu_1)
+    pi_cond_alpha, mu_cond_mu, mu_cond_sigma, z_cond_p = (
+      sess.run([pi_cond.alpha, mu_cond.mu, mu_cond.sigma, z_cond.p],
+               {z: z_val, x: x_val, pi: pi_val, mu: mu_val})
+      )
+
+    true_pi = pi_alpha + np.unique(z_val, return_counts=True)[1]
+    self.assertAllClose(pi_cond_alpha, true_pi)
+    for k in xrange(K):
+      sigmasq_true = (1./4**2 + 1./sigmasq * (z_val == k).sum())**-1
+      mu_true = sigmasq_true * (1./sigmasq * x_val[z_val == k].sum())
+      self.assertAllClose(np.sqrt(sigmasq_true), mu_cond_sigma[k])
+      self.assertAllClose(mu_true, mu_cond_mu[k])
+    true_log_p_z = np.log(pi_val) - 0.5 / sigmasq * (x_val[:, np.newaxis] - mu_val)**2
+    true_log_p_z -= true_log_p_z.max(1, keepdims=True)
+    true_p_z = np.exp(true_log_p_z)
+    true_p_z /= true_p_z.sum(1, keepdims=True)
+    self.assertAllClose(z_cond_p, true_p_z)
+    
+
+#   def test_bernoulli_mog(self):
+#     x_val = np.array([1.1, 1.2, 2.1, 4.4, 7.3, 5.5, 6.8], np.float32)
+#     z_val = np.array([0, 0, 0, 1, 1, 1, 1], np.int32)
+#     N = x_val.shape[0]
+
+#     pi = 0.5
+#     prior_sigma = 4.
+#     mu0 = rvs.Normal(0., prior_sigma)
+#     mu1 = rvs.Normal(0., prior_sigma)
+#     sigmasq = 2.**2
+#     z = rvs.Bernoulli(p=pi, sample_shape=N)
+#     f_z = tf.cast(z.value(), np.float32)
+#     x_mean = f_z * mu1 + (1. - f_z) * mu0
+#     x = rvs.Normal(x_mean, tf.sqrt(sigmasq))
+    
+#     blanket = [z, x, mu0, mu1]
+#     mu0_cond = conj.complete_conditional(mu0, blanket)
+#     mu1_cond = conj.complete_conditional(mu1, blanket)
+
+#     sess = tf.InteractiveSession()
+#     mu0_mu, mu0_sigma, mu1_mu, mu1_sigma = sess.run([mu0_cond.mu,
+#                                                      mu0_cond.sigma,
+#                                                      mu1_cond.mu,
+#                                                      mu1_cond.sigma],
+#                                                     {z.value(): z_val,
+#                                                      x.value(): x_val})
+#     true_sigmasq_0 = (1./sigmasq * (z_val==0).sum() + 1./prior_sigma**2)**-1
+#     true_sigmasq_1 = (1./sigmasq * (z_val==1).sum() + 1./prior_sigma**2)**-1
+#     true_mu_0 = 1./sigmasq * x_val[z_val == 0].sum() * true_sigmasq_0
+#     true_mu_1 = 1./sigmasq * x_val[z_val == 1].sum() * true_sigmasq_1
+#     self.assertAllClose(mu0_sigma**2, true_sigmasq_0)
+#     self.assertAllClose(mu1_sigma**2, true_sigmasq_1)
+#     self.assertAllClose(mu0_mu, true_mu_0)
+#     self.assertAllClose(mu1_mu, true_mu_1)
 
 
 if __name__ == '__main__':

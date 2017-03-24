@@ -29,6 +29,7 @@ rvs.Normal.support = 'real'
 
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
+_suff_stat_to_dist['onehot'][(('#OneHot', ('#x',),),)] = (rvs.Categorical, lambda p1: {'p': tf.nn.softmax(p1)})
 _suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))), (u'#Log', ('#x',)))] = (rvs.Beta, lambda p1, p2: {'a': p2+1, 'b': p1+1})
 _suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = (rvs.Dirichlet, lambda p1: {'alpha': p1+1})
 _suff_stat_to_dist['nonnegative'][(('#x',), (u'#Log', ('#x',)))] = (rvs.Gamma, lambda p1, p2: {'alpha': p2+1, 'beta': -p1})
@@ -106,9 +107,8 @@ def complete_conditional(rv, blanket, log_joint=None):
     swap_dict = {}
     swap_back = {}
     for s_stat in s_stat_exprs.keys():
-      # TODO(mhoffman): This shape assumption won't work for MVNs or Wisharts.
-      s_stat_placeholder = tf.placeholder(np.float32,
-                                          shape=rv.value().get_shape())
+      s_stat_shape = s_stat_exprs[s_stat][0][0].get_shape()
+      s_stat_placeholder = tf.placeholder(np.float32, s_stat_shape)
       swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
       s_stat_placeholders.append(s_stat_placeholder)
       for s_stat_node, multiplier in s_stat_exprs[s_stat]:
@@ -195,7 +195,7 @@ def is_child(subgraph, node, stop_nodes):
 
 _linear_types = ['Add', 'AddN', 'Sub', 'Mul', 'Neg', 'Identity', 'Sum',
                  'Assert', 'Reshape', 'Slice', 'StridedSlice', 'Gather',
-                 'GatherNd', 'Squeeze', 'Concat', 'ExpandDims', 'OneHot']
+                 'GatherNd', 'Squeeze', 'Concat', 'ExpandDims']
 _n_important_args = {'Sum': 1}
 def suff_stat_nodes(subgraph, node, stop_nodes):
   '''Finds nonlinear nodes depending on `node`.

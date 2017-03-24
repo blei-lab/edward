@@ -34,7 +34,9 @@ _extractable_nodes = {
   'Reciprocal': tf.reciprocal,
   'Sqrt': tf.sqrt,
   'Identity': lambda x: x,
-  'One_minus': lambda x: 1 - x
+  'One_minus': lambda x: 1 - x,
+  # Makes some assumptions.
+  'OneHot': lambda x: tf.one_hot(x, tf.reduce_max(x)+1, dtype=tf.float32)
 }
 def symbolic_suff_stat(node, base_node, stop_nodes):
   '''Extracts a symbolic representation of the graph rooted at `node`.
@@ -57,11 +59,10 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
 def as_float(x):
   if isinstance(x, NodeWrapper):
     # TODO(mhoffman): Worry about complex numbers?
-    if x.node.dtype in [np.float16, np.float32, np.float64,
-                        np.float128]:
+    if x.node.dtype in [tf.float16, tf.float32, tf.float64]:
       return x.node
     else:
-      return tf.cast(x.node, np.float32)
+      return tf.cast(x.node, tf.float32)
   try:
     result = float(x)
     return result
@@ -318,6 +319,13 @@ def cast_simplify(expr):
   '''Replaces (<wrapped cast>, (.)) with (.).'''
   if isinstance(expr[0], NodeWrapper) and expr[0].node.op.type == 'Cast':
     return expr[1]
+
+
+@_register_simplify_fn
+def onehot_simplify(expr):
+  '''Gets rid of extraneous args to OneHot.'''
+  if expr[0] == '#OneHot' and len(expr) > 2:
+    return expr[:2]
 
 
 # @_register_simplify_fn
