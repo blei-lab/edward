@@ -46,7 +46,7 @@ class DirichletProcess(RandomVariable, Distribution):
     """
     parameters = locals()
     parameters.pop("self")
-    with tf.name_scope(name, values=[alpha]):
+    with tf.name_scope(name, values=[alpha]) as ns:
       with tf.control_dependencies([
           tf.assert_positive(alpha),
       ] if validate_args else []):
@@ -70,16 +70,16 @@ class DirichletProcess(RandomVariable, Distribution):
             [0] + self.get_batch_shape().as_list(),
             dtype=self._betadist.dtype)
 
-    super(DirichletProcess, self).__init__(
-        dtype=tf.int32,
-        is_continuous=False,
-        is_reparameterized=False,
-        validate_args=validate_args,
-        allow_nan_stats=allow_nan_stats,
-        parameters=parameters,
-        graph_parents=[self._alpha, self._beta, self._theta],
-        name=name,
-        *args, **kwargs)
+      super(DirichletProcess, self).__init__(
+          dtype=tf.int32,
+          is_continuous=False,
+          is_reparameterized=False,
+          validate_args=validate_args,
+          allow_nan_stats=allow_nan_stats,
+          parameters=parameters,
+          graph_parents=[self._alpha, self._beta, self._theta],
+          name=ns,
+          *args, **kwargs)
 
   @property
   def alpha(self):

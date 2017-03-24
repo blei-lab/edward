@@ -63,7 +63,7 @@ class Laplace(MAP):
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
         latent_vars = {rv: MultivariateNormalCholesky(
-            mu=tf.Variable(tf.random_normal(rv.batch_shape())),
+            mu=tf.Variable(tf.random_normal(rv.get_batch_shape())),
             chol=tf.Variable(tf.random_normal(
                 rv.get_batch_shape().concatenate(rv.get_batch_shape()[-1]))))
             for rv in latent_vars}

@@ -93,7 +93,7 @@ class RandomVariable(object):
 
   @property
   def shape(self):
-    """Get shape of random variable."""
+    """Shape of random variable."""
     return self._value.shape
 
   def __str__(self):

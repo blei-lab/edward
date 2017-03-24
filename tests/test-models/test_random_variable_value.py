@@ -36,7 +36,7 @@ class test_random_variable_value_class(tf.test.TestCase):
       self.assertRaises(ValueError, self._test_sample, Normal, 2,
                         mu=[0.5, 0.5], sigma=1.0)
       self.assertRaises(ValueError, self._test_sample, Normal, 2,
-                        mu=[0.5], sigma=[1.])
+                        mu=[0.5], sigma=[1.0])
       self.assertRaises(ValueError, self._test_sample, Normal, [2],
                         mu=0.5, sigma=1.0)
 
