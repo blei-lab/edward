@@ -92,10 +92,11 @@ class Laplace(MAP):
     self.finalize_ops = []
     for z, hessian in zip(six.iterkeys(self.latent_vars), hessians):
       qz = latent_vars_normal[z]
-      scale_var = get_variables(qz.scale)[0]
       if isinstance(qz, (MultivariateNormalDiag, Normal)):
+        scale_var = get_variables(qz.variance())[0]
         scale = 1.0 / tf.diag_part(hessian)
       else:  # qz is MultivariateNormalTriL
+        scale_var = get_variables(qz.covariance())[0]
         scale = tf.matrix_inverse(tf.cholesky(hessian))
 
       self.finalize_ops.append(scale_var.assign(scale))

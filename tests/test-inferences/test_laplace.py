@@ -90,10 +90,10 @@ class test_laplace_class(tf.test.TestCase):
       inference.run(n_iter=100)
 
       self._test(sess, qw, qb, w_true)
-      self.assertAllClose(qw.scale.eval(),
-                          tf.diag(tf.diag_part(qw.scale)).eval())
-      self.assertAllClose(qb.scale.eval(),
-                          tf.diag(tf.diag_part(qb.scale)).eval())
+      self.assertAllClose(qw.covariance().eval(),
+                          tf.diag(tf.diag_part(qw.covariance())).eval())
+      self.assertAllClose(qb.covariance().eval(),
+                          tf.diag(tf.diag_part(qb.covariance())).eval())
 
   def test_normal(self):
     with self.test_session() as sess:
