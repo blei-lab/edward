@@ -315,7 +315,7 @@ class RandomVariable(object):
           "of type '%s'" % (dtype.name, v.dtype.name))
     if as_ref:
       raise ValueError("%s: Ref type is not supported." % v)
-    return tf.identity(v.value())
+    return v.value()
 
 
 register_session_run_conversion_functions(
