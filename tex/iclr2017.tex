@@ -333,8 +333,7 @@ from edward.models import DirichletProcess, Normal
 N = 1000  # number of data points
 D = 5  # data dimensionality
 
-dp = DirichletProcess(
-    alpha=1.0, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D))
+dp = DirichletProcess(alpha=1.0, base=Normal(mu=tf.zeros(D), sigma=tf.ones(D)))
 mu = dp.sample(N)
 x = Normal(mu=mu, sigma=tf.ones([N, D]))
 \end{lstlisting}

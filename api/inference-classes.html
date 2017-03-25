@@ -187,12 +187,18 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <p>The classes below inherit methods from base inference classes; see the <a href="/api/inference-development">development page</a> for more details.</p>
 <dl class="class">
 <dt id="edward.inferences.VariationalInference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Base class for variational inference methods.</p>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">VariationalInference</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L21" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Abstract base class for variational inference. Specific
+variational inference methods inherit from <code class="docutils literal"><span class="pre">VariationalInference</span></code>,
+sharing methods such as a default optimizer.</p>
+<p>To build an algorithm inheriting from <code class="docutils literal"><span class="pre">VariaitonalInference</span></code>, one
+must at the minimum implement <code class="docutils literal"><span class="pre">build_loss_and_gradients</span></code>: it
+determines the loss function and gradients to apply for a given
+optimizer.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>var_list=None</em>, <em>use_prettytensor=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L25" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>var_list=None</em>, <em>use_prettytensor=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L34" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialize variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -224,7 +230,7 @@ Defaults to TensorFlow.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L109" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L118" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of optimizer for variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -249,13 +255,14 @@ loss function value after one iteration.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L145" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L154" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L153" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Build loss function.</p>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L162" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Build loss function and its gradients. They will be leveraged
+in an optimizer to update the model and variational parameters.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong> implement
 this method.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -270,7 +277,7 @@ this method.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.KLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">KLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -296,7 +303,7 @@ of using the model’s density</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.KLqp.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>kl_scaling=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L56" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_samples=1</em>, <em>kl_scaling=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -325,7 +332,7 @@ scale the KL term.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.KLqp.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L83" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L88" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Wrapper for the <code class="docutils literal"><span class="pre">KLqp</span></code> loss function.</p>
 <div class="math">
 \[-\text{ELBO} =
@@ -348,7 +355,7 @@ is tractable, then the loss function can be written as</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L132" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L137" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -357,7 +364,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L161" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L166" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -366,7 +373,7 @@ gradient and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L205" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L210" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -375,7 +382,7 @@ gradient and an analytic entropy term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L235" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L240" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -384,7 +391,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L264" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L269" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -393,7 +400,7 @@ and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L308" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L313" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -817,7 +824,7 @@ is the gradient of</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.Laplace">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L15" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Laplace approximation (Laplace, 1774).</p>
 <p>It approximates the posterior distribution using a multivariate
 normal distribution centered at the mode of the posterior.</p>
@@ -867,7 +874,7 @@ inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L87" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L109" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 <p>Computes the Hessian at the mode.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -888,8 +895,12 @@ during initialization.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.MonteCarlo">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MonteCarlo</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Base class for Monte Carlo inference methods.</p>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MonteCarlo</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L16" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Abstract base class for Monte Carlo. Specific Monte Carlo methods
+inherit from <code class="docutils literal"><span class="pre">MonteCarlo</span></code>, sharing methods in this class.</p>
+<p>To build an algorithm inheriting from <code class="docutils literal"><span class="pre">MonteCarlo</span></code>, one must at the
+minimum implement <code class="docutils literal"><span class="pre">build_update</span></code>: it determines how to assign
+the samples in the <code class="docutils literal"><span class="pre">Empirical</span></code> approximations.</p>
 <p class="rubric">Methods</p>
 <p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -946,7 +957,7 @@ each dimension.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L90" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L97" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of sampling for Monte Carlo.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -976,16 +987,15 @@ separately forces a consistent behavior.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L133" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L140" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L141" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Build update, which returns an assign op for parameters in
-the Empirical random variables.</p>
-<p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement
-this method.</p>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L148" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Build update rules, returning an assign op for parameters in
+the <code class="docutils literal"><span class="pre">Empirical</span></code> random variables.</p>
+<p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement this method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -998,7 +1008,7 @@ this method.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.MetropolisHastings">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MetropolisHastings</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>proposal_vars</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">MetropolisHastings</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>proposal_vars</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).</p>
 <p class="rubric">Notes</p>
 <p>In conditional inference, we infer <span class="math">\(z\)</span> in <span class="math">\(p(z, \beta
@@ -1039,7 +1049,7 @@ inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MetropolisHastings.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Draw sample from proposal conditional on last sample. Then
 accept or reject the sample based on the ratio,</p>
 <div class="math">
@@ -1054,7 +1064,7 @@ parameterized by <a href="#id1"><span class="problematic" id="id2">``</span></a>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.HMC">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">HMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L14" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">HMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
 (Duane et al., 1987; Neal, 2011).</p>
 <p class="rubric">Notes</p>
@@ -1081,7 +1091,7 @@ inference = ed.HMC({z: qz}, data)
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.HMC.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>n_steps=2</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L47" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>n_steps=2</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L52" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -1101,7 +1111,7 @@ inference = ed.HMC({z: qz}, data)
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.HMC.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/hmc.py#L66" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Simulate Hamiltonian dynamics using a numerical integrator.
 Correct for the integrator’s discretization error using an
 acceptance ratio.</p>
@@ -1112,7 +1122,7 @@ parameterized by <a href="#id3"><span class="problematic" id="id4">``</span></a>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.SGLD">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">SGLD</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">SGLD</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L18" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Stochastic gradient Langevin dynamics (Welling and Teh, 2011).</p>
 <p class="rubric">Notes</p>
 <p>In conditional inference, we infer <span class="math">\(z\)</span> in <span class="math">\(p(z, \beta
@@ -1138,7 +1148,7 @@ inference = ed.SGLD({z: qz}, data)
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.SGLD.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L45" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L50" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -1154,7 +1164,7 @@ inference = ed.SGLD({z: qz}, data)
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.SGLD.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L55" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sgld.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Simulate Langevin dynamics using a discretized integrator. Its
 discretization error goes to zero as the learning rate decreases.</p>
 <p class="rubric">Notes</p>
@@ -1164,7 +1174,7 @@ parameterized by <a href="#id5"><span class="problematic" id="id6">``</span></a>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.SGHMC">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">SGHMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">SGHMC</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L18" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Stochastic gradient Hamiltonian Monte Carlo (Chen et al., 2014).</p>
 <p class="rubric">Notes</p>
 <p>In conditional inference, we infer <span class="math">\(z\)</span> in <span class="math">\(p(z, \beta
@@ -1190,7 +1200,7 @@ inference = ed.SGHMC({z: qz}, data)
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.SGHMC.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>friction=0.1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L45" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>step_size=0.25</em>, <em>friction=0.1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L50" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -1210,7 +1220,7 @@ inference = ed.SGHMC({z: qz}, data)
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.SGHMC.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/sghmc.py#L65" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Simulate Hamiltonian dynamics with friction using a discretized
 integrator. Its discretization error goes to zero as the learning
 rate decreases.</p>

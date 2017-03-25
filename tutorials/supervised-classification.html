@@ -159,27 +159,29 @@ y_train = df[subset, 0]</code></pre>
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K}),\end{aligned}\]</span> with covariance matrix given as previously stated.</p>
 <p>Let’s build the model in Edward. We use a radial basis function (RBF) kernel, also known as the squared exponential or exponentiated quadratic.</p>
-<pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
+<pre class="python" language="Python"><code>from edward.models import Bernoulli, MultivariateNormalCholesky
 from edward.util import multivariate_rbf
 
 def kernel(x):
+  &quot;&quot;&quot;Compute lower triangular matrix, where entry (i, j) for i &lt;= j is
+  the kernel over the ith and jth data points.&quot;&quot;&quot;
   mat = []
   for i in range(N):
-    mat += [[]]
+    mat.append([])
     xi = x[i, :]
     for j in range(N):
-      if j == i:
-        mat[i] += [multivariate_rbf(xi, xi)]
+      xj = x[j, :]
+      if i &lt;= j:
+        mat[i].append(multivariate_rbf(xi, xj))
       else:
-        xj = x[j, :]
-        mat[i] += [multivariate_rbf(xi, xj)]
+        mat[i].append(0.0)
 
     mat[i] = tf.stack(mat[i])
 
   return tf.stack(mat)
 
 X = tf.placeholder(tf.float32, [N, D])
-f = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+f = MultivariateNormalCholesky(mu=tf.zeros(N), chol=kernel(X))
 y = Bernoulli(logits=f)</code></pre>
 <p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to data.</p>
 <h3 id="inference">Inference</h3>

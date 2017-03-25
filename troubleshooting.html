@@ -120,17 +120,21 @@
 <div class="nine columns">
 <h2 id="troubleshooting">Troubleshooting</h2>
 <h3 id="basic-installation">Basic Installation</h3>
+<p><strong>Note: TensorFlow v1.1.0rc0 made breaking API changes. Edward’s latest stable version only supports up to TensorFlow v1.0.1. If you aim to use TensorFlow v1.1.0rc0 or beyond, use the following development branch of Edward:</strong></p>
+<pre language="JSON"><code>pip install -e "git+https://github.com/blei-lab/edward.git@bugfix/issue-451#egg=edward"</code></pre>
+<p><strong>See <a href="https://github.com/blei-lab/edward/pull/452">the branch</a> for more details.</strong></p>
 <p>Edward depends on</p>
 <ul>
 <li>NumPy (&gt;=1.7)</li>
 <li>Six (&gt;=1.1.0)</li>
-<li>TensorFlow (&gt;=1.0.0a0)</li>
+<li>TensorFlow (&gt;=1.0.0a0, &lt;=1.0.1)</li>
 </ul>
-<p>We recommend using <code>pip</code> to install <code>numpy</code>, <code>six</code>, and <code>tensorflow</code> as</p>
-<pre language="JSON"><code>pip install numpy six tensorflow</code></pre>
+<p>Installing <code>edward</code> by default also installs <code>numpy</code> and <code>six</code> if they are not available (or are out-of-date in your system).</p>
+<p>Installing <code>edward</code> does not automatically install TensorFlow (or update an existing TensorFlow version). We recommend installing it via</p>
+<pre language="JSON"><code>pip install tensorflow</code></pre>
 <p>To use Edward with GPUs, install <code>tensorflow-gpu</code> instead of <code>tensorflow</code> as</p>
 <pre language="JSON"><code>pip install tensorflow-gpu</code></pre>
-<p>See TensorFlow’s <a href="https://www.tensorflow.org/install/">installation instructions</a> for details on how to setup up NVIDIA software for TensorFlow with GPUs.</p>
+<p>See TensorFlow’s <a href="https://www.tensorflow.org/install/">installation instructions</a> for details, including how to setup up NVIDIA software for TensorFlow with GPUs.</p>
 <h3 id="full-installation">Full Installation</h3>
 <p>Edward has optional features that depend on external packages.</p>
 <ul>

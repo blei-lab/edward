@@ -180,8 +180,18 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 <hr/>
 <dl class="class">
 <dt id="edward.inferences.Inference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Base class for Edward inference methods.</p>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L15" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Abstract base class for inference. All inference algorithms in
+Edward inherit from <code class="docutils literal"><span class="pre">Inference</span></code>, sharing common methods and
+properties via a class hierarchy.</p>
+<p>Specific algorithms typically inherit from other subclasses of
+<code class="docutils literal"><span class="pre">Inference</span></code> rather than <code class="docutils literal"><span class="pre">Inference</span></code> directly. For example, one
+might inherit from the abstract classes <code class="docutils literal"><span class="pre">MonteCarlo</span></code> or
+<code class="docutils literal"><span class="pre">VariationalInference</span></code>.</p>
+<p>To build an algorithm inheriting from <code class="docutils literal"><span class="pre">Inference</span></code>, one must at the
+minimum implement <code class="docutils literal"><span class="pre">initialize</span></code> and <code class="docutils literal"><span class="pre">update</span></code>: the former builds
+the computational graph for the algorithm; the latter runs the
+computational graph for the algorithm.</p>
 <p class="rubric">Methods</p>
 <p>Initialization.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -222,7 +232,7 @@ inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Inference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L70" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L85" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>A simple wrapper to run inference.</p>
 <ol class="arabic simple">
 <li>Initialize algorithm via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
@@ -268,8 +278,11 @@ for batch training with file readers.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L132" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialize inference algorithm.</p>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L147" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Initialize inference algorithm. It initializes hyperparameters
+and builds ops for the algorithm’s computational graph. No ops
+should be created outside the call to <code class="docutils literal"><span class="pre">initialize()</span></code>.</p>
+<p>Any derived class of <code class="docutils literal"><span class="pre">Inference</span></code> <strong>must</strong> implement this method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -309,8 +322,9 @@ times.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L185" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L206" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of inference.</p>
+<p>Any derived class of <code class="docutils literal"><span class="pre">Inference</span></code> <strong>must</strong> implement this method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -333,7 +347,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L219" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L243" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -350,7 +364,7 @@ placeholders that are not fed during initialization.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L232" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L256" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 </dd></dl>
 </dd></dl>
