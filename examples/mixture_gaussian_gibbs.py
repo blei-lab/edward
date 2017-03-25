@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Dirichlet, Categorical, InverseGamma, ParamMixture, \
-     Normal
+    Normal
 
 plt.style.use('ggplot')
 
@@ -31,7 +31,7 @@ pi_alpha = 1. + np.zeros(K, dtype=np.float32)
 mu_sigma = np.std(true_mu)
 sigmasq_alpha = 1.
 sigmasq_beta = 2.
-                    
+
 # Model
 pi = Dirichlet(pi_alpha)
 mu = Normal(0., mu_sigma, sample_shape=[K])
