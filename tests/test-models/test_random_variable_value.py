@@ -15,7 +15,7 @@ class test_random_variable_value_class(tf.test.TestCase):
     rv = RV(*args, value=value, **kwargs)
     value_shape = rv.value().shape
     expected_shape = rv.get_batch_shape().concatenate(rv.get_event_shape())
-    self.assertEqual(value_shape, expected_shape)
+    self.assertEqual(value_shape[-len(expected_shape):], expected_shape)
     self.assertEqual(rv.dtype, rv.value().dtype)
 
   def _test_copy(self, RV, value, *args, **kwargs):
@@ -37,8 +37,11 @@ class test_random_variable_value_class(tf.test.TestCase):
                         mu=[0.5, 0.5], sigma=1.0)
       self.assertRaises(ValueError, self._test_sample, Normal, 2,
                         mu=[0.5], sigma=[1.0])
-      self.assertRaises(ValueError, self._test_sample, Normal, [2],
-                        mu=0.5, sigma=1.0)
+      self.assertRaises(ValueError, self._test_sample, Normal,
+                        np.zeros([10, 3], np.float32),
+                        mu=[0.5, 0.5], sigma=1.)
+#       self.assertRaises(ValueError, self._test_sample, Normal, [2],
+#                         mu=0.5, sigma=1.0)
 
   def test_copy(self):
     with self.test_session():
