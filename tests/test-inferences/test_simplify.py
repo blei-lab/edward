@@ -19,7 +19,7 @@ class test_simplify_class(tf.test.TestCase):
     c = tf.constant(3.)
     ab = simplify._mul_n([a, b])
     abc = simplify._mul_n([a, b, c])
-    
+
     sess = tf.InteractiveSession()
     self.assertEquals(sess.run(ab), 2.)
     self.assertEquals(sess.run(abc), 6.)

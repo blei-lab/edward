@@ -39,7 +39,7 @@ class test_conjugacy_class(tf.test.TestCase):
     a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
 
     self.assertAllClose(a_val, a0 + x_data.sum())
-    self.assertAllClose(b_val, b0 + (1-x_data).sum())
+    self.assertAllClose(b_val, b0 + (1 - x_data).sum())
 
   def test_gamma_poisson(self):
     x_data = np.array([0, 1, 0, 7, 0, 0, 2, 0, 0, 1])
@@ -85,7 +85,7 @@ class test_conjugacy_class(tf.test.TestCase):
     beta0 = 1.75
     alpha_likelihood = 2.3
     beta = rvs.Gamma(alpha=alpha0, beta=beta0)
-    x = rvs.Gamma(alpha=alpha_likelihood, beta=alpha_likelihood*beta,
+    x = rvs.Gamma(alpha=alpha_likelihood, beta=alpha_likelihood * beta,
                   value=x_data)
 
     beta_cond = conj.complete_conditional(beta, [beta, x])
@@ -118,7 +118,8 @@ class test_conjugacy_class(tf.test.TestCase):
                                     len(x_data) / sigma_likelihood**2) ** -0.5)
     self.assertAllClose(mu_val,
                         sigma_val**2 * (mu0 / sigma0**2 +
-                                        1./sigma_likelihood**2 * x_data.sum()))
+                                        (1. / sigma_likelihood**2 *
+                                         x_data.sum())))
 
   def test_normal_normal_scaled(self):
     x_data = np.array([0.1, 0.5, 3.3, 2.7])
@@ -142,7 +143,8 @@ class test_conjugacy_class(tf.test.TestCase):
                          c**2 * len(x_data) / sigma_likelihood**2) ** -0.5)
     self.assertAllClose(mu_val,
                         sigma_val**2 * (mu0 / sigma0**2 +
-                                        c/sigma_likelihood**2 * x_data.sum()))
+                                        (c / sigma_likelihood**2 *
+                                         x_data.sum())))
 
   def test_dirichlet_categorical(self):
     x_data = np.array([0, 0, 0, 0, 1, 1, 1, 2, 2, 3], np.int32)
@@ -182,7 +184,7 @@ class test_conjugacy_class(tf.test.TestCase):
     x = rvs.ParamMixture(pi, {'mu': mu, 'sigma': tf.sqrt(sigmasq)},
                          rvs.Normal, sample_shape=N)
     z = x.cat
-    
+
     blanket = [x, z, mu, pi]
     mu_cond = conj.complete_conditional(mu, blanket)
     pi_cond = conj.complete_conditional(pi, blanket)
@@ -190,18 +192,18 @@ class test_conjugacy_class(tf.test.TestCase):
 
     sess = tf.InteractiveSession()
     pi_cond_alpha, mu_cond_mu, mu_cond_sigma, z_cond_p = (
-      sess.run([pi_cond.alpha, mu_cond.mu, mu_cond.sigma, z_cond.p],
-               {z: z_val, x: x_val, pi: pi_val, mu: mu_val})
-      )
+        sess.run([pi_cond.alpha, mu_cond.mu, mu_cond.sigma, z_cond.p],
+                 {z: z_val, x: x_val, pi: pi_val, mu: mu_val}))
 
     true_pi = pi_alpha + np.unique(z_val, return_counts=True)[1]
     self.assertAllClose(pi_cond_alpha, true_pi)
     for k in xrange(K):
-      sigmasq_true = (1./4**2 + 1./sigmasq * (z_val == k).sum())**-1
-      mu_true = sigmasq_true * (1./sigmasq * x_val[z_val == k].sum())
+      sigmasq_true = (1. / 4**2 + 1. / sigmasq * (z_val == k).sum())**-1
+      mu_true = sigmasq_true * (1. / sigmasq * x_val[z_val == k].sum())
       self.assertAllClose(np.sqrt(sigmasq_true), mu_cond_sigma[k])
       self.assertAllClose(mu_true, mu_cond_mu[k])
-    true_log_p_z = np.log(pi_val) - 0.5 / sigmasq * (x_val[:, np.newaxis] - mu_val)**2
+    true_log_p_z = np.log(pi_val) - 0.5 / sigmasq * (x_val[:, np.newaxis] -
+                                                     mu_val)**2
     true_log_p_z -= true_log_p_z.max(1, keepdims=True)
     true_p_z = np.exp(true_log_p_z)
     true_p_z /= true_p_z.sum(1, keepdims=True)
