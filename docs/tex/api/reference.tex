@@ -1,0 +1,65 @@
+\title{Reference}
+
+{{navbar}}
+
+\subsubsection{Models}
+
+Most Edward random variables are wrappers around TensorFlow distributions.
+Therefore the list of available models depends on the TensorFlow version
+installed. For TensorFlow {{tensorflow_version}}, the following models are
+available:
+
+{%sphinx
+
+* :class:`edward.models.RandomVariable`
+* :class:`edward.models.DirichletProcess`
+* :class:`edward.models.Empirical`
+* :class:`edward.models.PointMass`
+* {{tensorflow_distributions}}
+
+%}
+
+\subsubsection{Inference}
+
+{%sphinx
+
+* :class:`edward.inferences.Inference`
+* :class:`edward.inferences.VariationalInference`
+
+  * :class:`edward.inferences.KLqp`
+
+    * :class:`edward.inferences.ReparameterizationKLqp`
+    * :class:`edward.inferences.ReparameterizationKLKLqp`
+    * :class:`edward.inferences.ReparameterizationEntropyKLqp`
+    * :class:`edward.inferences.ScoreKLqp`
+    * :class:`edward.inferences.ScoreKLKLqp`
+    * :class:`edward.inferences.ScoreEntropyKLqp`
+
+  * :class:`edward.inferences.KLpq`
+
+  * :class:`edward.inferences.GANInference`
+
+    * :class:`edward.inferences.ImplicitKLqp`
+    * :class:`edward.inferences.WGANInference`
+
+  * :class:`edward.inferences.MAP`
+
+    * :class:`edward.inferences.Laplace`
+
+* :class:`edward.inferences.MonteCarlo`
+
+  * :class:`edward.inferences.MetropolisHastings`
+  * :class:`edward.inferences.HMC`
+  * :class:`edward.inferences.SGLD`
+  * :class:`edward.inferences.SGHMC`
+
+%}
+
+\subsubsection{Criticism}
+
+{%sphinx
+
+* :func:`edward.criticisms.evaluate`
+* :func:`edward.criticisms.ppc`
+
+%}

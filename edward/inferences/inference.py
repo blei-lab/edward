@@ -2,28 +2,30 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import get_session
+from edward.util import check_data, check_latent_vars, get_session, Progbar
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Inference(object):
-  """Base class for Edward inference methods.
+  """Abstract base class for inference. All inference algorithms in
+  Edward inherit from ``Inference``, sharing common methods and
+  properties via a class hierarchy.
 
-  Attributes
-  ----------
-  latent_vars : dict
-    Collection of latent variables (of type ``RandomVariable`` or
-    ``tf.Tensor``) to perform inference on. Each random variable is
-    binded to another random variable; the latter will infer the
-    former conditional on data.
-  data : dict
-    Data dictionary which binds observed variables (of type
-    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
-    type ``tf.Tensor``).
+  Specific algorithms typically inherit from other subclasses of
+  ``Inference`` rather than ``Inference`` directly. For example, one
+  might inherit from the abstract classes ``MonteCarlo`` or
+  ``VariationalInference``.
+
+  To build an algorithm inheriting from ``Inference``, one must at the
+  minimum implement ``initialize`` and ``update``: the former builds
+  the computational graph for the algorithm; the latter runs the
+  computational graph for the algorithm.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
@@ -43,118 +45,42 @@ class Inference(object):
       prior latent variables (of type ``RandomVariable``) to posterior
       latent variables (of type ``RandomVariable``).
 
-    Notes
-    -----
-    If ``data`` is not passed in, the dictionary is empty.
-
-    Three options are available for batch training:
-
-    1. internally if user passes in data as a dictionary of NumPy
-       arrays;
-    2. externally if user passes in data as a dictionary of
-       TensorFlow placeholders (and manually feeds them);
-    3. externally if user passes in data as TensorFlow tensors
-       which are the outputs of data readers.
-
     Examples
     --------
     >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-    >>> x = Normal(mu=tf.ones(N) * mu, sigma=tf.constant(1.0))
+    >>> x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant(1.0))
     >>>
-    >>> qmu_mu = tf.Variable(tf.random_normal([1]))
-    >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([1])))
+    >>> qmu_mu = tf.Variable(tf.random_normal([]))
+    >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
     >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
     >>>
-    >>> Inference({mu: qmu}, {x: tf.constant([0.0] * N)})
+    >>> inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
     """
     sess = get_session()
     if latent_vars is None:
       latent_vars = {}
-    elif not isinstance(latent_vars, dict):
-      raise TypeError("latent_vars must have type dict.")
-
-    for key, value in six.iteritems(latent_vars):
-      if not isinstance(key, (RandomVariable, tf.Tensor)):
-        raise TypeError("Latent variable key has an invalid type.")
-      elif not isinstance(value, (RandomVariable, tf.Tensor)):
-        raise TypeError("Latent variable value has an invalid type.")
-      elif not key.get_shape().is_compatible_with(value.get_shape()):
-        raise TypeError("Latent variable bindings do not have same shape.")
-
-    self.latent_vars = latent_vars
-
     if data is None:
       data = {}
-    elif not isinstance(data, dict):
-      raise TypeError("data must have type dict.")
 
+    check_latent_vars(latent_vars)
+    self.latent_vars = latent_vars
+
+    check_data(data)
     self.data = {}
     for key, value in six.iteritems(data):
-      if isinstance(key, RandomVariable) or \
-         (isinstance(key, tf.Tensor) and "Placeholder" not in key.op.type):
-        if isinstance(value, tf.Tensor):
-          if not key.get_shape().is_compatible_with(value.get_shape()):
-            raise TypeError("Observed variable bindings do not have same "
-                            "shape.")
-
-          self.data[key] = tf.cast(value, tf.float32)
-        elif isinstance(value, RandomVariable):
-          if not key.get_shape().is_compatible_with(value.get_shape()):
-            raise TypeError("Observed variable bindings do not have same "
-                            "shape.")
-
-          self.data[key] = value
-        elif isinstance(value, np.ndarray):
-          if not key.get_shape().is_compatible_with(value.shape):
-            raise TypeError("Observed variable bindings do not have same "
-                            "shape.")
-
-          # If value is a np.ndarray, store it in the graph. Assign its
-          # placeholder to an appropriate data type.
-          if np.issubdtype(value.dtype, np.float):
-            ph_type = tf.float32
-          elif np.issubdtype(value.dtype, np.int):
-            ph_type = tf.int32
-          else:
-            raise TypeError("Data value has an unsupported type.")
-          ph = tf.placeholder(ph_type, value.shape)
-          var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
-          sess.run(var.initializer, {ph: value})
-        elif isinstance(value, np.number):
-          if np.issubdtype(value.dtype, np.float):
-            ph_type = tf.float32
-          elif np.issubdtype(value.dtype, np.int):
-            ph_type = tf.int32
-          else:
-              raise TypeError("Data value as an invalid type.")
-          ph = tf.placeholder(ph_type, value.shape)
-          var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
-          sess.run(var.initializer, {ph: value})
-        elif isinstance(value, float):
-          ph_type = tf.float32
-          ph = tf.placeholder(ph_type, ())
-          var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
-          sess.run(var.initializer, {ph: value})
-        elif isinstance(value, int):
-          ph_type = tf.int32
-          ph = tf.placeholder(ph_type, ())
-          var = tf.Variable(ph, trainable=False, collections=[])
-          self.data[key] = var
-          # handle if value is `bool` which this case catches
-          sess.run(var.initializer, {ph: int(value)})
-        else:
-          raise TypeError("Data value has an invalid type.")
-      elif isinstance(key, tf.Tensor):
-        if isinstance(value, RandomVariable):
-          raise TypeError("Data placeholder cannot be bound to a "
-                          "RandomVariable.")
-
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         self.data[key] = value
-      else:
-        raise TypeError("Data key has an invalid type.")
+      elif isinstance(key, (RandomVariable, tf.Tensor)):
+        if isinstance(value, (RandomVariable, tf.Tensor)):
+          self.data[key] = value
+        elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
+          # If value is a Python type, store it in the graph.
+          # Assign its placeholder with the key's data type.
+          with tf.variable_scope("data"):
+            ph = tf.placeholder(key.dtype, np.shape(value))
+            var = tf.Variable(ph, trainable=False, collections=[])
+            sess.run(var.initializer, {ph: value})
+            self.data[key] = var
 
   def run(self, variables=None, use_coordinator=True, *args, **kwargs):
     """A simple wrapper to run inference.
@@ -218,9 +144,14 @@ class Inference(object):
       self.coord.request_stop()
       self.coord.join(self.threads)
 
+  @abc.abstractmethod
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
                  debug=False):
-    """Initialize inference algorithm.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computational graph. No ops
+    should be created outside the call to ``initialize()``.
+
+    Any derived class of ``Inference`` **must** implement this method.
 
     Parameters
     ----------
@@ -249,13 +180,15 @@ class Inference(object):
     else:
       self.n_print = n_print
 
-    self.t = tf.Variable(0, trainable=False)
+    self.progbar = Progbar(self.n_iter)
+    self.t = tf.Variable(0, trainable=False, name="iteration")
+
     self.increment_t = self.t.assign_add(1)
 
     if scale is None:
       scale = {}
     elif not isinstance(scale, dict):
-      raise TypeError()
+      raise TypeError("scale must be a dict object.")
 
     self.scale = scale
 
@@ -270,8 +203,11 @@ class Inference(object):
     if self.debug:
       self.op_check = tf.add_check_numerics_ops()
 
+  @abc.abstractmethod
   def update(self, feed_dict=None):
     """Run one iteration of inference.
+
+    Any derived class of ``Inference`` **must** implement this method.
 
     Parameters
     ----------
@@ -315,9 +251,7 @@ class Inference(object):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        print(string)
+        self.progbar.update(t)
 
   def finalize(self):
     """Function to call after convergence.

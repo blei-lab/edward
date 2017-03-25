@@ -4,52 +4,53 @@
 
 Interested in contributing to Edward? We appreciate all kinds of help!
 
-\subsubsection{Community}
-
-For general discussion about Edward, use Edward's
-\href{http://gitter.im/blei-lab/edward}{Gitter channel}.
-For example, it is used to get help with installation, coding and
-debugging in Edward, and probabilistic modeling.
-(We also plan to have a mailing list-like option in the future.)
-
-For development discussion about Edward, use Edward's
-\href{https://github.com/blei-lab/edward/issues}{Github issues tracker}.
-For example, it is used to submit bug reports and feature requests.
-
 \subsubsection{Pull requests}
 
 We gladly welcome pull requests.
 
 Before making any changes, we recommend opening an issue (if it
 doesn't already exist) and discussing your proposed changes. This will
-let us give you feedback on whether the changes should be made and
-advice on how they should be made.
-If the changes are minor, then feel free to make them
-without discussion.
+let us give you advice on the proposed changes. If the changes are
+minor, then feel free to make them without discussion.
 
-Want to contribute but not sure what to contribute? Here are two
+Want to contribute but not sure what to contribute? Here are a few
 suggestions:
 \begin{enumerate}
 \item
-Add a new example or tutorial.
-New scripts in the
+Add a new example.  They are located in the
 \href{https://github.com/blei-lab/edward/tree/master/examples}
-{\texttt{examples/}} directory are easy to add. They can also
-get you acquainted with Edward's developer process.
-Alternatively, add new tutorials to the
-\href{tutorials}{website} from the
+{\texttt{examples/}} directory on Github.
+They are the easiest to contribute to and
+can get you acquainted with Edward's developer process.
+\item
+Add a new tutorial. They are written as Jupyter notebooks and located
+in the
+\href{https://github.com/blei-lab/edward/tree/master/notebooks}
+{\texttt{notebooks/}} directory on Github.
+The goal is that all examples eventually become a tutorial---so you
+can port over an existing example.
+Each has a corresponding LaTeX document in the
 \href{https://github.com/blei-lab/edward/tree/master/docs/tex}
 {\texttt{docs/tex/}} directory.
+Write either the \texttt{ipynb} or \texttt{tex} version, and we can
+help you reformat to produce the other.
 \item
-Solve one of Edward's existing
-\href{https://github.com/blei-lab/edward/issues}{Github issues}.
-They range from low-level software bugs to higher-level design problems.
-One or two may pique your interest!
+Add a new algorithm (or improve existing algorithms).
+They are located in the
+\href{https://github.com/blei-lab/edward/tree/master/edward/inferences}
+{\texttt{edward/inferences/}} directory on Github.
+\item
+Solve
+\href{https://github.com/blei-lab/edward/issues}{existing issues}
+in Edward. They range from low-level software bugs to higher-level
+design problems. Check out the label
+"\href{https://github.com/blei-lab/edward/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+first+contribution%22}
+{Good first contribution}".
 \end{enumerate}
 
 To make changes,
 \href{https://help.github.com/articles/working-with-forks/}{fork the repo}.
-Write code in this fork with the following guidelines in mind:
+Write code in this fork with the following guidelines.
 
 \textbf{Style guide.}
 Follow
@@ -73,9 +74,10 @@ Follow
 \href{https://www.tensorflow.org/versions/master/api_docs/python/test.html}
 {TensorFlow's testing guide}.
 To run the unit tests, we use
-\href{http://doc.pytest.org/}{py.test}:
-run \texttt{py.test tests/}.
-To run specific unit tests, call \texttt{py.test} individually, e.g., \texttt{py.test tests/test_metrics.py}.
+\href{http://doc.pytest.org/}{pytest}:
+run \texttt{pytest tests/} in command line.
+To run specific unit tests, call \texttt{pytest} individually, e.g.,
+\texttt{pytest tests/test_metrics.py}.
 
 Submit the pull request whenever you're ready. You can also submit an
 incomplete pull request to get intermediate feedback.
@@ -88,10 +90,10 @@ any local changes you make to Edward to appear any time you
 import Edward in a Python session. To install locally, run the
 following:
 
-\begin{verbatim}
-git clone git@github.com:blei-lab/edward.git
+\begin{lstlisting}[language=JSON]
+git clone git@github.com:blei-lab/edward.git  # use your fork's url
 pip install -e edward
-\end{verbatim}
+\end{lstlisting}
 
 We recommend not installing with \texttt{sudo} but with
 \texttt{virtualenv}. In fact, we recommend

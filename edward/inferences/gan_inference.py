@@ -51,8 +51,8 @@ class GANInference(VariationalInference):
     >>>
     >>> inference = ed.GANInference({x: x_data}, discriminator)
     """
-    if discriminator is None:
-      raise NotImplementedError()
+    if not callable(discriminator):
+      raise TypeError("discriminator must be a callable function.")
 
     self.discriminator = discriminator
     super(GANInference, self).__init__(None, data)
@@ -175,7 +175,7 @@ class GANInference(VariationalInference):
           [self.train_d, self.increment_t, self.loss_d], feed_dict)
       loss = 0.0
     else:
-      raise NotImplementedError()
+      raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     if self.debug:
       sess.run(self.op_check)
@@ -194,19 +194,14 @@ class GANInference(VariationalInference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        loss = info_dict['loss']
-        loss_d = info_dict['loss_d']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Gen Loss = {0:.3f}'.format(loss)
-        string += ': Disc Loss = {0:.3f}'.format(loss_d)
-        print(string)
+        self.progbar.update(t, {'Gen Loss': info_dict['loss'],
+                                'Disc Loss': info_dict['loss_d']})
 
 
 def _build_optimizer(optimizer, global_step):
   if optimizer is None:
     # Use ADAM with a decaying scale factor.
-    global_step = tf.Variable(0, trainable=False)
+    global_step = tf.Variable(0, trainable=False, name="global_step")
     starter_learning_rate = 0.1
     learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                                global_step,
@@ -230,6 +225,6 @@ def _build_optimizer(optimizer, global_step):
     else:
       raise ValueError('Optimizer class not found:', optimizer)
   elif not isinstance(optimizer, tf.train.Optimizer):
-    raise TypeError()
+    raise TypeError("Optimizer must be a tf.train.Optimizer object.")
 
   return optimizer, global_step

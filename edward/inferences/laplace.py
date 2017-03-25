@@ -6,10 +6,14 @@ import six
 import tensorflow as tf
 
 from edward.inferences.map import MAP
-from edward.models import \
-    MultivariateNormalCholesky, MultivariateNormalDiag, \
-    MultivariateNormalFull, PointMass, RandomVariable
+from edward.models import PointMass, RandomVariable
 from edward.util import get_session, get_variables
+
+try:
+  from edward.models import \
+      MultivariateNormalCholesky, MultivariateNormalDiag, MultivariateNormalFull
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class Laplace(MAP):
@@ -59,7 +63,7 @@ class Laplace(MAP):
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
         latent_vars = {rv: MultivariateNormalCholesky(
-            mu=tf.Variable(tf.random_normal(rv.batch_shape())),
+            mu=tf.Variable(tf.random_normal(rv.get_batch_shape())),
             chol=tf.Variable(tf.random_normal(
                 rv.get_batch_shape().concatenate(rv.get_batch_shape()[-1]))))
             for rv in latent_vars}
@@ -75,14 +79,32 @@ class Laplace(MAP):
     # call grandparent's method; avoid parent (MAP)
     super(MAP, self).__init__(latent_vars, data)
 
-  def initialize(self, var_list=None, *args, **kwargs):
+  def initialize(self, *args, **kwargs):
     # Store latent variables in a temporary attribute; MAP will
     # optimize ``PointMass`` random variables, which subsequently
     # optimizes mean parameters of the normal approximations.
-    self.latent_vars_normal = self.latent_vars.copy()
+    latent_vars_normal = self.latent_vars.copy()
     self.latent_vars = {z: PointMass(params=qz.mu)
-                        for z, qz in six.iteritems(self.latent_vars_normal)}
-    super(Laplace, self).initialize(var_list, *args, **kwargs)
+                        for z, qz in six.iteritems(latent_vars_normal)}
+
+    super(Laplace, self).initialize(*args, **kwargs)
+
+    hessians = tf.hessians(self.loss, list(six.itervalues(self.latent_vars)))
+    self.finalize_ops = []
+    for z, hessian in zip(six.iterkeys(self.latent_vars), hessians):
+      qz = latent_vars_normal[z]
+      sigma_var = get_variables(qz.sigma)[0]
+      if isinstance(qz, MultivariateNormalCholesky):
+        sigma = tf.matrix_inverse(tf.cholesky(hessian))
+      elif isinstance(qz, MultivariateNormalDiag):
+        sigma = 1.0 / tf.diag_part(hessian)
+      else:  # qz is MultivariateNormalFull
+        sigma = tf.matrix_inverse(hessian)
+
+      self.finalize_ops.append(sigma_var.assign(sigma))
+
+    self.latent_vars = latent_vars_normal.copy()
+    del latent_vars_normal
 
   def finalize(self, feed_dict=None):
     """Function to call after convergence.
@@ -103,24 +125,6 @@ class Laplace(MAP):
       if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value
 
-    var_list = list(six.itervalues(self.latent_vars))
-    hessians = tf.hessians(self.loss, var_list)
-
-    assign_ops = []
-    for z, hessian in zip(six.iterkeys(self.latent_vars), hessians):
-      qz = self.latent_vars_normal[z]
-      sigma_var = get_variables(qz.sigma)[0]
-      if isinstance(qz, MultivariateNormalCholesky):
-        sigma = tf.matrix_inverse(tf.cholesky(hessian))
-      elif isinstance(qz, MultivariateNormalDiag):
-        sigma = 1.0 / tf.diag_part(hessian)
-      else:  # qz is MultivariateNormalFull
-        sigma = tf.matrix_inverse(hessian)
-
-      assign_ops.append(sigma_var.assign(sigma))
-
     sess = get_session()
-    sess.run(assign_ops, feed_dict)
-    self.latent_vars = self.latent_vars_normal.copy()
-    del self.latent_vars_normal
+    sess.run(self.finalize_ops, feed_dict)
     super(Laplace, self).finalize()

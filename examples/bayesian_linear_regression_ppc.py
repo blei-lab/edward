@@ -2,6 +2,10 @@
 """Bayesian linear regression using variational inference.
 
 This version visualizes additional fits of the model.
+
+References
+----------
+http://edwardlib.org/tutorials/supervised-regression
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -19,8 +23,7 @@ def build_toy_dataset(N, noise_std=0.5):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
                       np.linspace(6, 8, num=N / 2)])
   y = 2.0 * X + 10 * np.random.normal(0, noise_std, size=N)
-  X = X.astype(np.float32).reshape((N, 1))
-  y = y.astype(np.float32)
+  X = X.reshape((N, 1))
   return X, y
 
 
@@ -64,7 +67,7 @@ b_prior = b.sample(n_prior_samples).eval()
 
 plt.scatter(X_train, y_train)
 
-inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+inputs = np.linspace(-1, 10, num=400)
 for ns in range(n_prior_samples):
     output = inputs * w_prior[ns] + b_prior[ns]
     plt.plot(inputs, output)
@@ -79,7 +82,7 @@ b_post = qb.sample(n_posterior_samples).eval()
 
 plt.scatter(X_train, y_train)
 
-inputs = np.linspace(-1, 10, num=400, dtype=np.float32)
+inputs = np.linspace(-1, 10, num=400)
 for ns in range(n_posterior_samples):
     output = inputs * w_post[ns] + b_post[ns]
     plt.plot(inputs, output)

@@ -34,7 +34,7 @@ class MAP(VariationalInference):
   discrete optimization.
 
   This class also minimizes the loss with respect to any model
-  parameters :math:`p(z \mid x; \theta)`.
+  parameters :math:`p(z \mid x; \\theta)`.
 
   In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
   \mid x)` while fixing inference over :math:`\\beta` using another
@@ -64,13 +64,13 @@ class MAP(VariationalInference):
     >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
     >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
     >>> qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-    >>> MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+    >>> ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
     We also automate the specification of ``PointMass`` distributions,
     so one can pass in a list of latent variables instead:
 
-    >>> MAP([beta], data)
-    >>> MAP([pi, mu, sigma], data)
+    >>> ed.MAP([beta], data)
+    >>> ed.MAP([pi, mu, sigma], data)
 
     Currently, ``MAP`` can only instantiate ``PointMass`` random variables
     with unconstrained support. To constrain their support, one must
@@ -79,7 +79,7 @@ class MAP(VariationalInference):
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
         latent_vars = {rv: PointMass(
-            params=tf.Variable(tf.random_normal(rv.batch_shape())))
+            params=tf.Variable(tf.random_normal(rv.get_batch_shape())))
             for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):

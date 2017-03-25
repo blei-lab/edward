@@ -6,8 +6,13 @@ import six
 import tensorflow as tf
 
 from edward.inferences.monte_carlo import MonteCarlo
-from edward.models import Normal, RandomVariable, Empirical
+from edward.models import RandomVariable, Empirical
 from edward.util import copy
+
+try:
+  from edward.models import Normal
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class SGHMC(MonteCarlo):
@@ -36,7 +41,7 @@ class SGHMC(MonteCarlo):
     >>> z = Normal(mu=0.0, sigma=1.0)
     >>> x = Normal(mu=tf.ones(10) * z, sigma=1.0)
     >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros([500])))
+    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.SGHMC({z: qz}, data)
     """
@@ -53,15 +58,14 @@ class SGHMC(MonteCarlo):
     """
     self.step_size = step_size
     self.friction = friction
-    self.v = {z: tf.Variable(tf.zeros(qz.params.get_shape()[1:]))
+    self.v = {z: tf.Variable(tf.zeros(qz.params.shape[1:]))
               for z, qz in six.iteritems(self.latent_vars)}
     return super(SGHMC, self).initialize(*args, **kwargs)
 
   def build_update(self):
-    """
-    Simulate Hamiltonian dynamics with friction using a discretized
-    integrator. Its discretization error goes to zero as the learning rate
-    decreases.
+    """Simulate Hamiltonian dynamics with friction using a discretized
+    integrator. Its discretization error goes to zero as the learning
+    rate decreases.
 
     Implements the update equations from (15) of Chen et al. (2014).
     """
@@ -100,8 +104,7 @@ class SGHMC(MonteCarlo):
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):
-    """
-    Utility function to calculate model's log joint density,
+    """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
     Parameters

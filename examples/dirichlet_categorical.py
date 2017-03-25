@@ -16,26 +16,19 @@ from edward.models import Categorical, Dirichlet
 N = 1000
 K = 4
 
-# Data generation
-alpha = np.array([20., 30., 10., 10.])
-pi = np.random.dirichlet(alpha).astype(np.float32)
-zn_data = np.array([np.random.choice(K, 1, p=pi)[0] for n in range(N)])
-print('pi={}'.format(pi))
+# DATA
+pi_true = np.random.dirichlet(np.array([20.0, 30.0, 10.0, 10.0]))
+z_data = np.array([np.random.choice(K, 1, p=pi_true)[0] for n in range(N)])
+print('pi={}'.format(pi_true))
 
-# Prior definition
-alpha_prior = tf.Variable(np.array([1., 1., 1., 1.]),
-                          dtype=tf.float32, trainable=False)
+# MODEL
+pi = Dirichlet(alpha=tf.ones(4))
+z = Categorical(p=tf.ones([N, 1]) * pi)
 
-# Posterior inference
-# Probabilistic model
-pi = Dirichlet(alpha=alpha_prior)
-zn = Categorical(p=tf.ones([N, 1]) * pi)
-
-# Variational model
+# INFERENCE
 qpi = Dirichlet(alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
 
-# Inference
-inference = ed.KLqp({pi: qpi}, data={zn: zn_data})
+inference = ed.KLqp({pi: qpi}, data={z: z_data})
 inference.run(n_iter=1500, n_samples=30)
 
 sess = ed.get_session()

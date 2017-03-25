@@ -2,17 +2,23 @@
 """Convolutional variational auto-encoder for binarized MNIST.
 
 The neural networks are written with TensorFlow Slim.
+
+References
+----------
+http://edwardlib.org/tutorials/decoder
+http://edwardlib.org/tutorials/inference-networks
 """
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import numpy as np
 import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
-from progressbar import ETA, Bar, Percentage, ProgressBar
+from edward.util import Progbar
 from scipy.misc import imsave
 from tensorflow.contrib import slim
 from tensorflow.examples.tutorials.mnist import input_data
@@ -81,8 +87,8 @@ logits = generative_network(z)
 x = Bernoulli(logits=logits)
 
 # INFERENCE
-x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
-mu, sigma = inference_network(x_ph)
+x_ph = tf.placeholder(tf.int32, [M, 28 * 28])
+mu, sigma = inference_network(tf.cast(x_ph, tf.float32))
 qz = Normal(mu=mu, sigma=sigma)
 
 # Bind p(x, z) and q(z | x) to the same placeholder for x.
@@ -101,12 +107,11 @@ n_iter_per_epoch = 1000
 for epoch in range(n_epoch):
   avg_loss = 0.0
 
-  widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-  pbar = ProgressBar(n_iter_per_epoch, widgets=widgets)
-  pbar.start()
-  for t in range(n_iter_per_epoch):
+  pbar = Progbar(n_iter_per_epoch)
+  for t in range(1, n_iter_per_epoch + 1):
     pbar.update(t)
     x_train, _ = mnist.train.next_batch(M)
+    x_train = np.random.binomial(1, x_train)
     info_dict = inference.update(feed_dict={x_ph: x_train})
     avg_loss += info_dict['loss']
 

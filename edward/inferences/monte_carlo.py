@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
@@ -11,8 +12,14 @@ from edward.models import Empirical, RandomVariable
 from edward.util import get_session
 
 
+@six.add_metaclass(abc.ABCMeta)
 class MonteCarlo(Inference):
-  """Base class for Monte Carlo inference methods.
+  """Abstract base class for Monte Carlo. Specific Monte Carlo methods
+  inherit from ``MonteCarlo``, sharing methods in this class.
+
+  To build an algorithm inheriting from ``MonteCarlo``, one must at the
+  minimum implement ``build_update``: it determines how to assign
+  the samples in the ``Empirical`` approximations.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
@@ -39,15 +46,15 @@ class MonteCarlo(Inference):
     >>> qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
     >>> qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
     >>> qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    >>> MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+    >>> ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
     The inferred posterior is comprised of ``Empirical`` random
     variables with ``T`` samples. We also automate the specification
     of ``Empirical`` random variables. One can pass in a list of
     latent variables instead:
 
-    >>> MonteCarlo([beta], data)
-    >>> MonteCarlo([pi, mu, sigma], data)
+    >>> ed.MonteCarlo([beta], data)
+    >>> ed.MonteCarlo([pi, mu, sigma], data)
 
     It defaults to ``Empirical`` random variables with 10,000 samples for
     each dimension.
@@ -79,11 +86,11 @@ class MonteCarlo(Inference):
     super(MonteCarlo, self).__init__(latent_vars, data)
 
   def initialize(self, *args, **kwargs):
-    kwargs['n_iter'] = np.amin([qz.n for
+    kwargs['n_iter'] = np.amin([qz.params.shape.as_list()[0] for
                                 qz in six.itervalues(self.latent_vars)])
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
-    self.n_accept = tf.Variable(0, trainable=False)
+    self.n_accept = tf.Variable(0, trainable=False, name="n_accept")
     self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 
@@ -136,18 +143,14 @@ class MonteCarlo(Inference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        accept_rate = info_dict['accept_rate']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Acceptance Rate = {0:.2f}'.format(accept_rate)
-        print(string)
+        self.progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
 
+  @abc.abstractmethod
   def build_update(self):
-    """Build update, which returns an assign op for parameters in
-    the Empirical random variables.
+    """Build update rules, returning an assign op for parameters in
+    the ``Empirical`` random variables.
 
-    Any derived class of ``MonteCarlo`` **must** implement
-    this method.
+    Any derived class of ``MonteCarlo`` **must** implement this method.
 
     Raises
     ------

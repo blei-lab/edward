@@ -96,3 +96,7 @@ img/
 docs/api/
 docs/tutorials/
 docs/*.html
+
+# IDE related
+.idea/
+.vscode/

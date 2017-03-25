@@ -2,6 +2,10 @@
 """Probabilistic principal components analysis (Tipping and Bishop, 1999).
 
 Inference uses data subsampling.
+
+References
+----------
+http://edwardlib.org/tutorials/probabilistic-pca
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -77,13 +81,15 @@ sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
 
-for t in range(inference_w.n_iter):
+for _ in range(inference_w.n_iter):
   x_batch, idx_batch = next_batch(M)
   for _ in range(5):
     inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
 
   info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
   inference_w.print_progress(info_dict)
-  if t % 100 == 0:
-    print("Inferred principal axes:")
+
+  t = info_dict['t']
+  if t == 1 or t % inference.n_print == 0:
+    print("\nInferred principal axes:")
     print(sess.run(qw.mean()))

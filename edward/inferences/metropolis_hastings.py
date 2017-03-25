@@ -7,12 +7,17 @@ import tensorflow as tf
 
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
-from edward.models import RandomVariable, Uniform
+from edward.models import RandomVariable
 from edward.util import copy
+
+try:
+  from edward.models import Uniform
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class MetropolisHastings(MonteCarlo):
-  """Metropolis-Hastings.
+  """Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).
 
   Notes
   -----
@@ -44,7 +49,7 @@ class MetropolisHastings(MonteCarlo):
     >>> z = Normal(mu=0.0, sigma=1.0)
     >>> x = Normal(mu=tf.ones(10) * z, sigma=1.0)
     >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros([500])))
+    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
     >>> proposal_z = Normal(mu=z, sigma=0.5)
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
@@ -53,18 +58,19 @@ class MetropolisHastings(MonteCarlo):
     super(MetropolisHastings, self).__init__(latent_vars, data)
 
   def build_update(self):
-    """
-    Draw sample from proposal conditional on last sample. Then accept
-    or reject the sample based on the ratio,
+    """Draw sample from proposal conditional on last sample. Then
+    accept or reject the sample based on the ratio,
 
     .. math::
-      \\text{ratio} = \log p(x, z^{new}) - \log p(x, z^{old}) +
-        \log g(z^{new} \mid z^{old}) - \log g(z^{old} \mid z^{new})
+      \\text{ratio} =
+          \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) +
+          \log g(z^{\\text{new}} \mid z^{\\text{old}}) -
+          \log g(z^{\\text{old}} \mid z^{\\text{new}})
 
     Notes
     -----
     The updates assume each Empirical random variable is directly
-    parameterized by tf.Variables().
+    parameterized by ``tf.Variable``s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}

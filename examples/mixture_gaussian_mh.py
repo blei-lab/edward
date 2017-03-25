@@ -6,6 +6,10 @@ because we are proposing a sample in a high-dimensional space. The
 acceptance ratio is so small that it is unlikely we'll ever accept a
 proposed sample. A Gibbs-like extension ("MH within Gibbs"), which
 does a separate MH in each dimension, may succeed.
+
+References
+----------
+http://edwardlib.org/tutorials/unsupervised
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -25,7 +29,7 @@ def build_toy_dataset(N):
   pi = np.array([0.4, 0.6])
   mus = [[1, 1], [-1, -1]]
   stds = [[0.1, 0.1], [0.1, 0.1]]
-  x = np.zeros((N, 2), dtype=np.float32)
+  x = np.zeros((N, 2))
   for n in range(N):
     k = np.argmax(np.random.multinomial(1, pi))
     x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
@@ -70,16 +74,17 @@ inference = ed.MetropolisHastings(
 inference.initialize()
 
 sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
-for _ in range(T):
+for _ in range(inference.n_iter):
   info_dict = inference.update()
+  inference.print_progress(info_dict)
+
   t = info_dict['t']
   if t == 1 or t % inference.n_print == 0:
-    accept_rate = info_dict['accept_rate']
-    print("iter {:d} accept rate {:.2f}".format(t, accept_rate))
+    qpi_mean, qmu_mean = sess.run([qpi.mean(), qmu.mean()])
+    print("")
     print("Inferred membership probabilities:")
-    print(sess.run(qpi.mean()))
+    print(qpi_mean)
     print("Inferred cluster means:")
-    print(sess.run(qmu.mean()))
+    print(qmu_mean)

@@ -1,15 +1,14 @@
-\title{Supervised learning (Regression)}
+\title{Supervised Learning (Regression)}
 
-\subsection{Supervised learning (Regression)}
+\subsection{Supervised Learning (Regression)}
 
 In supervised learning, the task is to infer hidden structure from
 labeled data, comprised of training examples $\{(x_n, y_n)\}$.
-Regression (typically) means the output $y$ takes continuous values.
+Regression typically means the output $y$ takes continuous values.
 
-We demonstrate how to do this in Edward with an example.
-The script is available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_linear_regression.py}
-{\texttt{examples/bayesian_linear_regression.py}} in the Github repository.
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/supervised_regression.ipynb}{here}.
 
 \subsubsection{Data}
 
@@ -21,7 +20,7 @@ distributed noise.
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N, w, noise_std=0.1):
   D = len(w)
-  x = np.random.randn(N, D).astype(np.float32)
+  x = np.random.randn(N, D)
   y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
   return x, y
 
@@ -32,7 +31,6 @@ w_true = np.random.randn(D)
 X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(N, w_true)
 \end{lstlisting}
-
 
 \subsubsection{Model}
 
@@ -86,11 +84,11 @@ qb = Normal(mu=tf.Variable(tf.random_normal([1])),
             sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 \end{lstlisting}
 
-Run variational inference with the Kullback-Leibler divergence, using a
-default of $1000$ iterations.
+Run variational inference with the Kullback-Leibler divergence, using
+$250$ iterations and $5$ latent variable samples in the algorithm.
 \begin{lstlisting}[language=Python]
 inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.run()
+inference.run(n_samples=5, n_iter=250)
 \end{lstlisting}
 In this case \texttt{KLqp} defaults to minimizing the
 $\text{KL}(q\|p)$ divergence measure using the reparameterization
@@ -99,24 +97,66 @@ For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ 
 
 \subsubsection{Criticism}
 
-A standard evaluation in regression is to calculate point-based evaluations on
-held-out ``testing'' data. We do this first by forming the posterior predictive
+A standard evaluation for regression is to compare prediction accuracy on
+held-out ``testing'' data. We do this by first forming the posterior predictive
 distribution.
 \begin{lstlisting}[language=Python]
-y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
+y_post = ed.copy(y, {w: qw, b: qb})
+# This is equivalent to
+# y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
 \end{lstlisting}
 
-With this we can evaluate various point-based quantities using the posterior
-predictive.
-\begin{lstlisting}
+With this we can evaluate various quantities using predictions from
+the model (posterior predictive).
+\begin{lstlisting}[language=Python]
+print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
-> 0.012107
 
+print("Mean absolute error on test data:")
 print(ed.evaluate('mean_absolute_error', data={X: X_test, y_post: y_test}))
-> 0.0867875
 \end{lstlisting}
 
-The trained model makes predictions with low mean squared error
+\begin{lstlisting}
+## Mean squared error on test data:
+## 0.0300492
+## Mean absolute error on test data:
+## 0.123616
+\end{lstlisting}
+
+The trained model makes predictions with low error
 (relative to the magnitude of the output).
+
+We can also visualize the fit by comparing data generated with the
+prior to data generated with the posterior (on the first feature
+dimension).
+
+\begin{lstlisting}[language=Python]
+def visualise(X_data, y_data, w, b, n_samples=10):
+  w_samples = w.sample(n_samples).eval()
+  b_samples = b.sample(n_samples).eval()
+  plt.scatter(X_data, y_data)
+  inputs = np.linspace(-1, 10, num=400)
+  for ns in range(n_samples):
+    output = inputs * w_samples[ns] + b_samples[ns]
+    plt.plot(inputs, output)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+# Visualize samples from the prior.
+visualise(X_train, y_train, w, b)
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/supervised-regression-fig0.png}
+
+\begin{lstlisting}[language=Python]
+# Visualize samples from the posterior.
+visualise(X_train, y_train, qw, qb)
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/supervised-regression-fig1.png}
+
+The model has learned a linear relationship between the
+first dimension of $\mathbf{x}\in\mathbb{R}^D$ and the outputs
+$y\in\mathbb{R}$.
 
 \subsubsection{References}\label{references}

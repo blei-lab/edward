@@ -6,9 +6,14 @@ import six
 import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
-from edward.models import RandomVariable, Normal
+from edward.models import RandomVariable
 from edward.util import copy
 from tensorflow.contrib import distributions as ds
+
+try:
+  from edward.models import Normal
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class KLqp(VariationalInference):
@@ -61,14 +66,17 @@ class KLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
-    kl_scaling: dict of RandomVariable to float, optional
+    kl_scaling : dict of RandomVariable to float, optional
       Provides option to scale terms when using ELBO with KL divergence.
-      If the KL divergence terms are:
-      .. math::
-        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
+      If the KL divergence terms are
 
-      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
-      that specifies how much to scale the KL term.
+      .. math::
+        \\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+            \log q(z\mid x, \lambda) - \log p(z)],
+
+      then pass {:math:`p(z)`: :math:`\\alpha_p`} as ``kl_scaling``,
+      where :math:`\\alpha_p` is a float that specifies how much to
+      scale the KL term.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -176,14 +184,17 @@ class ReparameterizationKLKLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
-    kl_scaling: dict of RandomVariable to float, optional
+    kl_scaling : dict of RandomVariable to float, optional
       Provides option to scale terms when using ELBO with KL divergence.
-      If the KL divergence terms are:
-      .. math::
-        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
+      If the KL divergence terms are
 
-      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
-      that specifies how much to scale the KL term.
+      .. math::
+        \\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+            \log q(z\mid x, \lambda) - \log p(z)],
+
+      then pass {:math:`p(z)`: :math:`\\alpha_p`} as ``kl_scaling``,
+      where :math:`\\alpha_p` is a float that specifies how much to
+      scale the KL term.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -276,14 +287,17 @@ class ScoreKLKLqp(VariationalInference):
     n_samples : int, optional
       Number of samples from variational model for calculating
       stochastic gradients.
-    kl_scaling: dict of RandomVariable to float, optional
+    kl_scaling : dict of RandomVariable to float, optional
       Provides option to scale terms when using ELBO with KL divergence.
-      If the KL divergence terms are:
-      .. math::
-        \alpha_p E_{q(z| x, \lambda)} [ \log q(z| x, \lambda)/p(z)] then
+      If the KL divergence terms are
 
-      pass {p(z): \alpha_p} as kl_scaling, where \alpha_p is a float
-      that specifies how much to scale the KL term.
+      .. math::
+        \\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
+            \log q(z\mid x, \lambda) - \log p(z)],
+
+      then pass {:math:`p(z)`: :math:`\\alpha_p`} as ``kl_scaling``,
+      where :math:`\\alpha_p` is a float that specifies how much to
+      scale the KL term.
     """
     if kl_scaling is None:
       kl_scaling = {}

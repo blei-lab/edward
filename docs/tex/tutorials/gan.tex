@@ -7,10 +7,9 @@ probabilistic modeling \citep{goodfellow2014generative,goodfellow2016nips}.
 They posit a deep generative model and they enable fast and accurate
 inferences.
 
-We demonstrate how to use GANs in Edward.
-The script is available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}
-{\texttt{examples/gan.py}} in the Github repository.
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/gan.ipynb}{here}.
 
 \begin{lstlisting}[language=Python]
 M = 128  # batch size during training
@@ -20,7 +19,6 @@ DATA_DIR = "data/mnist"
 IMG_DIR = "img"
 \end{lstlisting}
 
-
 \subsubsection{Data}
 
 We use training data from MNIST, which consists of 55,000 $28\times
@@ -28,7 +26,7 @@ We use training data from MNIST, which consists of 55,000 $28\times
 as a flattened vector of 784 elements, and each element is a pixel
 intensity between 0 and 1.
 
-\includegraphics[width=450px]{/images/mnist-train-xs.png}
+\includegraphics[width=450px]{/images/gan-fig0.png}
 
 The goal is to build and infer a model that can generate high quality
 images of handwritten digits.
@@ -176,13 +174,13 @@ optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
 
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer,
+    optimizer=optimizer, optimizer_d=optimizer_d,
     n_iter=15000, n_print=1000)
 \end{lstlisting}
 
 We now form the main loop which trains the GAN. At each iteration, it
 takes a minibatch and updates the parameters according to the
-algorithm. At every 1000 iterations, it will print progress. It also
+algorithm. At every 1000 iterations, it will print progress and also
 saves a figure of generated samples from the model.
 
 \begin{lstlisting}[language=Python]
@@ -225,7 +223,7 @@ images during training. Below we show generations after 14,000
 iterations (that is, 14,000 gradient updates of both the generator and
 the discriminator).
 
-\includegraphics[width=500px]{/images/mnist_gan.png}
+\includegraphics[width=500px]{/images/gan-fig1.png}
 
 The images are meaningful albeit a little blurry. Suggestions for
 further improvements would be to tune the hyperparameters in the

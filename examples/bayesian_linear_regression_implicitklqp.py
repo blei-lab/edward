@@ -11,6 +11,10 @@ Note as with all GAN-style training, the algorithm is not stable. It
 is recommended to monitor training and halt manually according to some
 criterion (e.g., prediction accuracy on validation test, quality of
 samples).
+
+References
+----------
+http://edwardlib.org/tutorials/supervised-regression
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -26,7 +30,7 @@ from tensorflow.contrib import slim
 
 def build_toy_dataset(N, w, noise_std=0.1):
   D = len(w)
-  x = np.random.randn(N, D).astype(np.float32)
+  x = np.random.randn(N, D)
   y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
   return x, y
 
@@ -107,6 +111,6 @@ for _ in range(inference.n_iter):
   if t == 1 or t % inference.n_print == 0:
     # Check inferred posterior parameters.
     mean, std = sess.run([qw.mean(), qw.std()])
-    print("Inferred mean & std")
+    print("\nInferred mean & std:")
     print(mean)
     print(std)

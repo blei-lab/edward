@@ -1,6 +1,6 @@
-\title{Laplace approximation}
+\title{Laplace Approximation}
 
-\subsection{Laplace approximation}
+\subsection{Laplace Approximation}
 
 (This tutorial follows the
 \href{/tutorials/map}{Maximum a posteriori estimation} tutorial.)
@@ -12,9 +12,9 @@ better approximation to the posterior?
 
 The Laplace approximation
 \citep{laplace1986memoir}
-is one way of improving on an MAP estimate. The idea
+is one way of improving a MAP estimate. The idea
 is to approximate the posterior with a normal distribution centered at the MAP
-estimate
+estimate,
 \begin{align*}
   p(\mathbf{z} \mid \mathbf{x})
   &\approx
@@ -22,19 +22,19 @@ estimate
 \end{align*}
 This requires computing a precision matrix $\Lambda$. Derived from a
 Taylor expansion, the Laplace approximation uses the Hessian of the
-negative log joint density at the MAP estimate. For flat priors
-(equivalent to maximum likelihood), the precision matrix is known
-as the observed Fisher information \citep{fisher1925theory}.
+negative log joint density at the MAP estimate.
 It is defined component-wise as
 \begin{align*}
   \Lambda_{ij}
   &=
   \frac{\partial^2}{\partial z_i \partial z_j} -\log p(\mathbf{x}, \mathbf{z}).
 \end{align*}
-Edward uses automatic differentiation, specifically with TensorFlow's
-computational graphs, making this gradient computation both simple and
-efficient to distribute (although more expensive than a first-order
-gradient).
+For flat priors (which reduces MAP to maximum likelihood), the
+precision matrix is known as the observed Fisher information
+\citep{fisher1925theory}.
+Edward uses TensorFlow's automatic differentiation, making this
+second-order gradient computation both simple and efficient to
+distribute.
 
 For more details, see the \href{/api/}{API} as well as its
 implementation in Edward's code base.

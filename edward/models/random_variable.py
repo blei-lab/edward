@@ -4,8 +4,11 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from tensorflow.python.client.session import \
-    register_session_run_conversion_functions
+try:
+  from tensorflow.python.client.session import \
+      register_session_run_conversion_functions
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 RANDOM_VARIABLE_COLLECTION = "_random_variable_collection_"
 
@@ -21,18 +24,6 @@ class RandomVariable(object):
   graph, allowing random variables to be used in conjunction with
   other TensorFlow ops.
 
-  Examples
-  --------
-  >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p=p)
-  >>>
-  >>> z1 = tf.constant([[2.0, 8.0]])
-  >>> z2 = tf.constant([[1.0, 2.0]])
-  >>> x = Bernoulli(p=tf.matmul(z1, z2))
-  >>>
-  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
-
   Notes
   -----
   ``RandomVariable`` assumes use in a multiple inheritance setting. The
@@ -47,13 +38,25 @@ class RandomVariable(object):
      ``distributions.Bernoulli``, completing the ``__init__()`` of
      ``distributions.Bernoulli``.
   3. Complete the ``__init__()`` of ``RandomVariable``, which calls
-    ``self.sample()``, relying on the method from
-    ``distributions.Bernoulli``.
+     ``self.sample()``, relying on the method from
+     ``distributions.Bernoulli``.
   4. Complete the ``__init__()`` of the child class.
 
   Methods from both ``RandomVariable`` and ``distributions.Bernoulli``
   populate the namespace of the child class. Methods from
   ``RandomVariable`` will take higher priority if there are conflicts.
+
+  Examples
+  --------
+  >>> p = tf.constant(0.5)
+  >>> x = Bernoulli(p=p)
+  >>>
+  >>> z1 = tf.constant([[2.0, 8.0]])
+  >>> z2 = tf.constant([[1.0, 2.0]])
+  >>> x = Bernoulli(p=tf.matmul(z1, z2))
+  >>>
+  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
   """
   def __init__(self, *args, **kwargs):
     # storing args, kwargs for easy graph copying
@@ -85,23 +88,28 @@ class RandomVariable(object):
     else:
       try:
         self._value = self.sample(sample_shape)
-      except:
+      except NotImplementedError:
         raise NotImplementedError(
             "sample is not implemented for {0}. You must either pass in the "
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
+  @property
+  def shape(self):
+    """Shape of random variable."""
+    return self._value.shape
+
   def __str__(self):
     return "RandomVariable(\"%s\"%s%s%s)" % (
         self.name,
-        (", shape=%s" % self.get_shape())
-        if self.get_shape().ndims is not None else "",
+        (", shape=%s" % self.shape)
+        if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
         (", device=%s" % self.value().device) if self.value().device else "")
 
   def __repr__(self):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
-        self.name, self.get_shape(), self.dtype.name)
+        self.name, self.shape, self.dtype.name)
 
   def __add__(self, other):
     return tf.add(self, other)
@@ -233,7 +241,7 @@ class RandomVariable(object):
       The ``tf.Session`` to use to evaluate this random variable. If
       none, the default session is used.
     feed_dict : dict, optional
-      A dictionary that maps `Tensor` objects to feed values. See
+      A dictionary that maps ``tf.Tensor`` objects to feed values. See
       ``tf.Session.run()`` for a description of the valid feed values.
 
     Examples
@@ -284,17 +292,21 @@ class RandomVariable(object):
 
   def get_shape(self):
     """Get shape of random variable."""
-    return self._value.get_shape()
+    return self.shape
 
+  @staticmethod
   def _session_run_conversion_fetch_function(tensor):
     return ([tensor.value()], lambda val: val[0])
 
+  @staticmethod
   def _session_run_conversion_feed_function(feed, feed_val):
     return [(feed.value(), feed_val)]
 
+  @staticmethod
   def _session_run_conversion_feed_function_for_partial_run(feed):
     return [feed.value()]
 
+  @staticmethod
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
     _ = name
     if dtype and not dtype.is_compatible_with(v.dtype):

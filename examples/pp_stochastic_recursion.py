@@ -12,7 +12,7 @@ implementation (`tf.py_func`), and a CPS-style formulation.
 
 References
 ----------
-https://probmods.org/generative-models.html#stochastic-recursion
+https://probmods.org/chapters/02-generative-models.html#stochastic-recursion
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -25,8 +25,7 @@ from edward.models import Bernoulli
 
 
 def geometric(p):
-    x = tf.squeeze(Bernoulli(p=p))
-    cond = tf.equal(x, tf.constant(1))
+    cond = tf.cast(Bernoulli(p=p), tf.bool)
 
     def fn1():
       return tf.constant(0)
@@ -43,8 +42,5 @@ p = tf.constant(0.9)
 geom = geometric(p)
 
 sess = tf.Session()
-samples = []
-for n in range(1000):
-    samples += sess.run(geom)
-
+samples = [sess.run(geom) for _ in range(1000)]
 plt.hist(samples, bins='auto')

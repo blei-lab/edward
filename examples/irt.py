@@ -72,29 +72,31 @@ outcomes = Bernoulli(logits=observation_logodds)
 
 
 # INFERENCE
-def make_normal(n):
-  var = Normal(
-      mu=tf.Variable(tf.random_normal([n])),
-      sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n]))))
-  return var
+qstudents = Normal(
+    mu=tf.Variable(tf.random_normal([n_students])),
+    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_students]))))
+qquestions = Normal(
+    mu=tf.Variable(tf.random_normal([n_questions])),
+    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_questions]))))
+qlnvarstudents = Normal(
+    mu=tf.Variable(tf.random_normal([1])),
+    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+qlnvarquestions = Normal(
+    mu=tf.Variable(tf.random_normal([1])),
+    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+qmu = Normal(
+    mu=tf.Variable(tf.random_normal([1])),
+    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
-
-qstudents = make_normal(n_students)
-qquestions = make_normal(n_questions)
-qlnvarstudents = make_normal(1)
-qlnvarquestions = make_normal(1)
-qmu = make_normal(1)
-
-latent_dict = {
+latent_vars = {
     overall_mu: qmu,
     lnvar_students: qlnvarstudents,
     lnvar_questions: qlnvarquestions,
     student_etas: qstudents,
     question_etas: qquestions
 }
-data_dict = {outcomes: obs}
-
-inference = ed.KLqp(latent_dict, data_dict)
+data = {outcomes: obs}
+inference = ed.KLqp(latent_vars, data)
 inference.initialize(n_print=2, n_iter=50)
 
 qstudents_mean = qstudents.mean()

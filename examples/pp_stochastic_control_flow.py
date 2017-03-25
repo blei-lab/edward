@@ -2,12 +2,12 @@
 """Stochastic control flow.
 
 We sample from a geometric random variable by using samples from
-Bernoulli random variable. It requires a while loop whose condition is
-stochastic.
+Bernoulli random variables. It requires a while loop whose condition
+is stochastic.
 
 References
 ----------
-https://probmods.org/generative-models.html#stochastic-recursion
+https://probmods.org/chapters/02-generative-models.html#stochastic-recursion
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -20,23 +20,17 @@ from edward.models import Bernoulli
 
 
 def geometric(p):
-    i = tf.constant(0)
-
-    def cond(i):
-      return tf.equal(Bernoulli(p=p), tf.constant(1))
-
-    def body(i):
-      return i + 1
-
-    return tf.while_loop(cond, body, loop_vars=[i])
+  i = tf.constant(0)
+  sample = tf.while_loop(cond=lambda i: tf.cast(1 - Bernoulli(p=p), tf.bool),
+                         body=lambda i: i + 1, loop_vars=[i])
+  return sample
 
 
-p = tf.constant(0.9)
+p = 0.1
 geom = geometric(p)
 
 sess = tf.Session()
-samples = []
-for n in range(1000):
-    samples.append(sess.run(geom))
-
+samples = [sess.run(geom) for _ in range(1000)]
 plt.hist(samples, bins='auto')
+plt.title("Geometric({0})".format(p))
+plt.show()

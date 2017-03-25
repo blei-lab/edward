@@ -10,7 +10,7 @@ randomness, simply define another random variable to work with.
 
 References
 ----------
-https://probmods.org/generative-models.html#persistent-randomness-mem
+https://probmods.org/chapters/02-generative-models.html#persistent-randomness-mem
 """
 import edward as ed
 import tensorflow as tf
@@ -24,7 +24,7 @@ def eye_color(person):
   if person + '/' in random_variables:
     return random_variables[person + '/']
   else:
-    return Categorical(logits=ed.logit(tf.constant([1.0 / 3] * 3)), name=person)
+    return Categorical(p=tf.ones(3) / 3, name=person)
 
 
 # Only two categorical random variables are created.

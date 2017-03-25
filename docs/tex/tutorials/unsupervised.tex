@@ -1,18 +1,17 @@
-\title{Unsupervised learning}
+\title{Unsupervised Learning}
 
-\subsection{Unsupervised learning}
+\subsection{Unsupervised Learning}
 
 In unsupervised learning, the task is to infer hidden structure from
 unlabeled data, comprised of training examples $\{x_n\}$.
 
-We demonstrate how to do this in Edward with an example.
-The script is available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_collapsed.py}
-{\texttt{examples/mixture_gaussian_collapsed.py}} in the Github repository.
+We demonstrate with an example in Edward.
+An interactive version with Jupyter notebook is available
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/unsupervised.ipynb}{here}.
 
 \subsubsection{Data}
 
-Use a simulated dataset of 2-dimensional datapoints
+Use a simulated data set of 2-dimensional data points
 $\mathbf{x}_n\in\mathbb{R}^2$.
 \begin{lstlisting}[language=Python]
 def build_toy_dataset(N):
@@ -80,28 +79,28 @@ Define the prior on each component $\mathbf{\sigma}_k\in\mathbb{R}^D$ to be
   \text{InverseGamma}(\mathbf{\sigma}_k \mid a, b).
 \end{align*}
 
-We build two versions of the model in Edward: one explicitly with the
+We build two versions of the model in Edward: one jointly with the
 mixture assignments $c_n\in\{0,\ldots,K-1\}$ as latent variables,
 and another with them summed out.
 
-The explicit version is as follows:
+The joint version is written as follows.
 
 \begin{lstlisting}[language=Python]
-from edward.models import Categorical, Dirichlet, InverseGamma, Normal
+from edward.models import Categorical, InverseGamma, Normal
 
 K = 2  # number of components
 
 mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
 c = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=mu[c], sigma=sigma[c])
+x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))
 \end{lstlisting}
 
 The collapsed version marginalizes out the mixture assignments. We
 implement this with the \texttt{Mixture} random variable.
 
 \begin{lstlisting}[language=Python]
-from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
+from edward.models import Categorical, InverseGamma, Mixture, \
     MultivariateNormalDiag, Normal
 
 K = 2  # number of components
@@ -118,12 +117,10 @@ x = Mixture(cat=cat, components=components)
 
 We will use the collapsed version in this analysis.
 
-
 \subsubsection{Inference}
 Perform variational inference.
-%
-The latent variables are the mixture probabilities,
-component means, and component variances.
+The latent variables are the
+component means and component variances.
 Define the variational model to be
 \begin{align*}
  q(\mu, \sigma \;;\; \lambda)
@@ -154,7 +151,6 @@ In this case
 $\text{KL}(q\|p)$ divergence measure using the score function
 gradient.
 For more details on inference, see the \href{/tutorials/klqp}{$\text{KL}(q\|p)$ tutorial}.
-
 
 \subsubsection{Criticism}
 
@@ -197,6 +193,8 @@ plt.show()
 \end{lstlisting}
 
 \includegraphics[width=700px]{/images/unsupervised-fig1.png}
+
+The model has correctly clustered the data.
 
 \subsubsection{Remarks: The log-sum-exp trick}
 

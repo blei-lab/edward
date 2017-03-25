@@ -7,13 +7,14 @@ This webpage is a companion to the article,
 \citep{tran2017deep}.
 Here we provide more details for plug-and-play with the code snippets.
 An interactive version with Jupyter notebook is available
-\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/docs/notebooks/iclr2017.ipynb}{here}.
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/iclr2017.ipynb}{here}.
 
 The code snippets assume the following versions.
 
 \begin{lstlisting}[language=bash]
-pip install edward==1.2.3
+pip install edward==1.2.4
 pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
+pip install keras==1.0.0
 \end{lstlisting}
 
 \subsubsection{Section 3. Compositional Representations for Probabilistic Models}
@@ -98,8 +99,7 @@ beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([N, K]))
 x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
 \end{lstlisting}
-It is used below in Figure * (Inference), Figure 6 (left/right),
-Figure * (variational EM), and Figure * (data subsampling).
+It is used below in Figure 6 (left/right) and Figure * (variational EM).
 
 \textbf{Figure 6} \textbf{(left)}. Variational inference
 \citep{jordan1999introduction}.
@@ -110,7 +110,7 @@ import numpy as np
 import tensorflow as tf
 from edward.models import Categorical, Normal
 
-x_train = np.zeros([N, D], dtype=np.float32)
+x_train = np.zeros([N, D])
 
 qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
                sigma=tf.exp(tf.Variable(tf.zeros([K, D]))))
@@ -127,7 +127,7 @@ import numpy as np
 import tensorflow as tf
 from edward.models import Empirical
 
-x_train = np.zeros([N, D], dtype=np.float32)
+x_train = np.zeros([N, D])
 
 T = 10000  # number of samples
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D])))
@@ -157,7 +157,7 @@ def discriminative_network(x):
   return Dense(1, activation=None)(h)
 
 # DATA
-x_train = np.zeros([N, 28 * 28], dtype=np.float32)
+x_train = np.zeros([N, 28 * 28])
 
 # MODEL
 eps = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
@@ -167,9 +167,8 @@ x = generative_network(eps)
 inference = ed.GANInference(data={x: x_train},
     discriminator=discriminative_network)
 \end{lstlisting}
-For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/gan.py}{\texttt{examples/gan.py}}
-in the Github repository.
+For an example of it in use, see the
+\href{/tutorials/gan}{generative adversarial networks} tutorial.
 
 \textbf{Figure *}. Variational EM \citep{neal1993new}.
 It performs inference on the model defined in Figure 5.
@@ -180,7 +179,7 @@ import tensorflow as tf
 from edward.models import Categorical, PointMass
 
 # DATA
-x_train = np.zeros([N, D], dtype=np.float32)
+x_train = np.zeros([N, D])
 
 # INFERENCE
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
@@ -208,7 +207,6 @@ It leverages Hamiltonian Monte Carlo for the E-step to perform maximum
 marginal a posteriori.
 
 \textbf{Figure *}. Data subsampling.
-It performs inference on the model defined in Figure 5.
 \begin{lstlisting}[language=python]
 import edward as ed
 import tensorflow as tf
@@ -252,8 +250,8 @@ D = 54  # number of features
 T = 100  # number of empirical samples
 
 # DATA
-x_data = np.zeros([N, D], dtype=np.float32)
-y_data = np.zeros([N], dtype=np.float32)
+x_data = np.zeros([N, D])
+y_data = np.zeros([N])
 
 # MODEL
 x = tf.Variable(x_data, trainable=False)
@@ -266,7 +264,7 @@ inference = ed.HMC({beta: qbeta}, data={y: y_data})
 inference.run(step_size=0.5 / N, n_steps=10)
 \end{lstlisting}
 For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/hierarchical_logistic_regression.py}{\texttt{examples/hierarchical_logistic_regression.py}}
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_logistic_regression.py}{\texttt{examples/bayesian_logistic_regression.py}}
 in the Github repository.
 
 \subsubsection{Appendix A. Model Examples}
@@ -330,19 +328,19 @@ Y = Normal(mu=tf.matmul(U, V, transpose_b=True), sigma=tf.ones([N, M]))
 \textbf{Figure 13}. Dirichlet process mixture model \citep{antoniak1974mixtures}.
 \begin{lstlisting}[language=python]
 import tensorflow as tf
-from edward.models import Normal
+from edward.models import DirichletProcess, Normal
 
-mu = DirichletProcess(  # see script for implementation
-    alpha=0.1, base_cls=Normal, mu=tf.zeros(D), sigma=tf.ones(D), sample_n=N)
+N = 1000  # number of data points
+D = 5  # data dimensionality
+
+dp = DirichletProcess(alpha=1.0, base=Normal(mu=tf.zeros(D), sigma=tf.ones(D)))
+mu = dp.sample(N)
 x = Normal(mu=mu, sigma=tf.ones([N, D]))
 \end{lstlisting}
-To see the essential component defining the \texttt{DirichletProcess}
-random variable, see
+To see the essential component defining the \texttt{DirichletProcess}, see
 \href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}
-in the Github repository.
-A more involved version with a base distribution is available at
-\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process_base.py}{\texttt{examples/pp_dirichlet_process_base.py}}
-in the Github repository.
+in the Github repository. Its source implementation can be found at
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py}{\texttt{edward/models/dirichlet_process.py}}.
 
 \subsubsection{Appendix B. Inference Examples}
 

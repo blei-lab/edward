@@ -218,14 +218,14 @@ class test_random_variable_operators_class(tf.test.TestCase):
   def test_hash(self):
     x = Normal(mu=0.0, sigma=1.0)
     y = 5.0
-    assert not hash(x) == hash(y)
-    assert hash(x) == id(x)
+    self.assertNotEqual(hash(x), hash(y))
+    self.assertEqual(hash(x), id(x))
 
   def test_eq(self):
     x = Normal(mu=0.0, sigma=1.0)
     y = 5.0
-    assert not x == y
-    assert x == x
+    self.assertNotEqual(x, y)
+    self.assertEqual(x, x)
 
   def test_bool_nonzero(self):
     with self.test_session() as sess:

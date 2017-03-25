@@ -10,6 +10,10 @@ Note there are several common failure modes, such as
 somewhere around -1 rather than at the true data; and
 (3) mode collapse around the true Gaussian, where the variance is
 severely underestimated.
+
+References
+----------
+http://edwardlib.org/tutorials/gan
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -107,7 +111,7 @@ optimizer_d = tf.train.GradientDescentOptimizer(0.03)
 inference = ed.GANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer)
+    optimizer=optimizer, optimizer_d=optimizer_d)
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
