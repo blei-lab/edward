@@ -206,42 +206,6 @@ class test_conjugacy_class(tf.test.TestCase):
     true_p_z = np.exp(true_log_p_z)
     true_p_z /= true_p_z.sum(1, keepdims=True)
     self.assertAllClose(z_cond_p, true_p_z)
-    
-
-#   def test_bernoulli_mog(self):
-#     x_val = np.array([1.1, 1.2, 2.1, 4.4, 7.3, 5.5, 6.8], np.float32)
-#     z_val = np.array([0, 0, 0, 1, 1, 1, 1], np.int32)
-#     N = x_val.shape[0]
-
-#     pi = 0.5
-#     prior_sigma = 4.
-#     mu0 = rvs.Normal(0., prior_sigma)
-#     mu1 = rvs.Normal(0., prior_sigma)
-#     sigmasq = 2.**2
-#     z = rvs.Bernoulli(p=pi, sample_shape=N)
-#     f_z = tf.cast(z.value(), np.float32)
-#     x_mean = f_z * mu1 + (1. - f_z) * mu0
-#     x = rvs.Normal(x_mean, tf.sqrt(sigmasq))
-    
-#     blanket = [z, x, mu0, mu1]
-#     mu0_cond = conj.complete_conditional(mu0, blanket)
-#     mu1_cond = conj.complete_conditional(mu1, blanket)
-
-#     sess = tf.InteractiveSession()
-#     mu0_mu, mu0_sigma, mu1_mu, mu1_sigma = sess.run([mu0_cond.mu,
-#                                                      mu0_cond.sigma,
-#                                                      mu1_cond.mu,
-#                                                      mu1_cond.sigma],
-#                                                     {z.value(): z_val,
-#                                                      x.value(): x_val})
-#     true_sigmasq_0 = (1./sigmasq * (z_val==0).sum() + 1./prior_sigma**2)**-1
-#     true_sigmasq_1 = (1./sigmasq * (z_val==1).sum() + 1./prior_sigma**2)**-1
-#     true_mu_0 = 1./sigmasq * x_val[z_val == 0].sum() * true_sigmasq_0
-#     true_mu_1 = 1./sigmasq * x_val[z_val == 1].sum() * true_sigmasq_1
-#     self.assertAllClose(mu0_sigma**2, true_sigmasq_0)
-#     self.assertAllClose(mu1_sigma**2, true_sigmasq_1)
-#     self.assertAllClose(mu0_mu, true_mu_0)
-#     self.assertAllClose(mu1_mu, true_mu_1)
 
 
 if __name__ == '__main__':

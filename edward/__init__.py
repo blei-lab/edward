@@ -12,7 +12,8 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     HMC, MetropolisHastings, SGLD, SGHMC, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
-    GANInference, WGANInference, ImplicitKLqp, MAP, Laplace
+    GANInference, WGANInference, ImplicitKLqp, MAP, Laplace, \
+    complete_conditional
 from edward.models import RandomVariable
 from edward.util import copy, dot, get_ancestors, get_children, \
     get_descendants, get_dims, get_parents, get_session, get_siblings, \
