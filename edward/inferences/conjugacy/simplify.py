@@ -16,6 +16,7 @@ class NodeWrapper:
   def __str__(self):
     return str(self.node)
 
+
 def _mul_n(x):
   if len(x) == 2:
     return tf.multiply(x[0], x[1])
@@ -24,20 +25,22 @@ def _mul_n(x):
 
 
 _extractable_nodes = {
-  'Add': tf.add_n,
-  'Sub': tf.subtract,
-  'Mul': _mul_n,
-  'Log': tf.log,
-  'Exp': tf.exp,
-  'Pow': tf.pow,
-  'Square': tf.square,
-  'Reciprocal': tf.reciprocal,
-  'Sqrt': tf.sqrt,
-  'Identity': lambda x: x,
-  'One_minus': lambda x: 1 - x,
-  # Makes some assumptions.
-  'OneHot': lambda x: tf.one_hot(x, tf.reduce_max(x)+1, dtype=tf.float32)
+    'Add': tf.add_n,
+    'Sub': tf.subtract,
+    'Mul': _mul_n,
+    'Log': tf.log,
+    'Exp': tf.exp,
+    'Pow': tf.pow,
+    'Square': tf.square,
+    'Reciprocal': tf.reciprocal,
+    'Sqrt': tf.sqrt,
+    'Identity': lambda x: x,
+    'One_minus': lambda x: 1 - x,
+    # Makes some assumptions.
+    'OneHot': lambda x: tf.one_hot(x, tf.reduce_max(x) + 1, dtype=tf.float32)
 }
+
+
 def symbolic_suff_stat(node, base_node, stop_nodes):
   '''Extracts a symbolic representation of the graph rooted at `node`.
   '''
@@ -84,12 +87,11 @@ def reconstruct_expr(expr):
     assert(tf_fn is not None)
     return tf_fn(*args)
   assert(False)
-#   assert(isinstance(expr[0], NodeWrapper))
-#   return expr[0].node
-
 
 
 _simplify_fns = []
+
+
 def full_simplify(expr, simplify_fns=_simplify_fns):
   while True:
     did_something = False
@@ -132,7 +134,7 @@ def _register_simplify_fn(fn):
       did_something_i, expr = wrapped(expr, *args, **kwargs)
       did_something = did_something or did_something_i
     return did_something, expr
-    
+
   _simplify_fns.append(repeat_wrapped)
   return repeat_wrapped
 
@@ -144,10 +146,12 @@ def identity_op_simplify(expr):
 
 
 _power_ops = {
-  '#Reciprocal': -1.,
-  '#Square': 2.,
-  '#Sqrt': 0.5,
+    '#Reciprocal': -1.,
+    '#Square': 2.,
+    '#Sqrt': 0.5,
 }
+
+
 @_register_simplify_fn
 def power_op_simplify(expr):
   op_power = _power_ops.get(expr[0], None)
@@ -200,8 +204,9 @@ def mul_add_simplify(expr):
     return None
   for i in xrange(1, len(expr)):
     if expr[i][0] == '#Add':
-      other_args = expr[1:i] + expr[i+1:]
-      return ('#Add',) + tuple((('#Mul',) + other_args + (j,) for j in expr[i][1:]))
+      other_args = expr[1:i] + expr[i + 1:]
+      return ('#Add',) + tuple((('#Mul',) + other_args + (j,)
+                                for j in expr[i][1:]))
 
 
 def commutative_simplify(expr, op_name):
@@ -274,9 +279,9 @@ def square_add_simplify(expr):
   terms = []
   for i in xrange(1, len(expr[1])):
     terms.append(('#CPow2.0000e+00', expr[1][i]))
-    for j in xrange(i+1, len(expr[1])):
+    for j in xrange(i + 1, len(expr[1])):
       terms.append(('#Mul', ('2.0',), expr[1][i], expr[1][j]))
-  return ('#Add',) +  tuple(terms)
+  return ('#Add',) + tuple(terms)
 
 
 def expr_contains(expr, node_type):
@@ -326,10 +331,3 @@ def onehot_simplify(expr):
   '''Gets rid of extraneous args to OneHot.'''
   if expr[0] == '#OneHot' and len(expr) > 2:
     return expr[:2]
-
-
-# @_register_simplify_fn
-# def stop_gradient_simplify(expr):
-#   '''Replaces (<wrapped stop_gradient>, (.)) with (.).'''
-#   if isinstance(expr[0], NodeWrapper) and expr[0].node.op.type == 'StopGradient':
-#     return expr[1]

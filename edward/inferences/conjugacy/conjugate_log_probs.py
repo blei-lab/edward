@@ -42,7 +42,6 @@ rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
 @_val_wrapper
 def bernoulli_log_prob(self, val):
   p = self.parameters['p']
-#   f_val = as_float(val)
   f_val = tf.cast(val, np.float32)
   return (f_val * tf.log(p) +
           (1. - f_val) * tf.log(1. - p))
@@ -73,7 +72,7 @@ def poisson_log_prob(self, val):
   lam = self.parameters['lam']
   f_val = tf.cast(val, np.float32)
   result = f_val * tf.log(lam)
-  result += -lam - tf.lgamma(f_val+1)
+  result += -lam - tf.lgamma(f_val + 1)
   return result
 rvs.Poisson.conjugate_log_prob = poisson_log_prob
 
@@ -83,9 +82,9 @@ def normal_log_prob(self, val):
   mu = self.parameters['mu']
   sigma = self.parameters['sigma']
   prec = tf.reciprocal(tf.square(sigma))
-  result = prec * (-0.5 * tf.square(val) - 0.5 * tf.square(mu)
-                   + val * mu)
-  result -= tf.log(sigma) + 0.5 * np.log(2*np.pi)
+  result = prec * (-0.5 * tf.square(val) - 0.5 * tf.square(mu) +
+                   val * mu)
+  result -= tf.log(sigma) + 0.5 * np.log(2 * np.pi)
   return result
 rvs.Normal.conjugate_log_prob = normal_log_prob
 
