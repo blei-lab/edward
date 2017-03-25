@@ -197,7 +197,7 @@ class test_conjugacy_class(tf.test.TestCase):
 
     true_pi = pi_alpha + np.unique(z_val, return_counts=True)[1]
     self.assertAllClose(pi_cond_alpha, true_pi)
-    for k in xrange(K):
+    for k in range(K):
       sigmasq_true = (1. / 4**2 + 1. / sigmasq * (z_val == k).sum())**-1
       mu_true = sigmasq_true * (1. / sigmasq * x_val[z_val == k].sum())
       self.assertAllClose(np.sqrt(sigmasq_true), mu_cond_sigma[k])

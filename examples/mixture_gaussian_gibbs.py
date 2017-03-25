@@ -62,7 +62,7 @@ print()
 cond_dict = {pi: pi_est, mu: mu_est, sigmasq: sigmasq_est, z: z_est, x: x_val}
 t0 = time()
 T = 500
-for t in xrange(T):
+for t in range(T):
   z_est = sess.run(z_cond, cond_dict)
   cond_dict[z] = z_est
   pi_est, mu_est = sess.run([pi_cond, mu_cond], cond_dict)

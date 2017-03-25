@@ -19,8 +19,8 @@ class ParamMixture(RandomVariable, distribution.Distribution):
                allow_nan_stats=True,
                name="ParamMixture"):
     parameters = locals()
-    with tf.name_scope(name, values=[mixing_weights] +
-                       component_params.values()) as name:
+    values = [mixing_weights] + [i for i in component_params.values()]
+    with tf.name_scope(name, values=values) as name:
       self._mixing_weights = mixing_weights
       self._component_params = component_params
       self._cat = Categorical(p=self._mixing_weights,

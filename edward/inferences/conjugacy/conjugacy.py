@@ -98,7 +98,7 @@ def complete_conditional(rv, blanket, log_joint=None):
 
     # Simplify those nodes, and extract any new linear terms into multipliers_i.
     s_stat_exprs = defaultdict(list)
-    for i in xrange(len(s_stats)):
+    for i in range(len(s_stats)):
       expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
       expr = full_simplify(expr)
       multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
@@ -152,7 +152,7 @@ def complete_conditional(rv, blanket, log_joint=None):
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
     # Removes any dependencies on those old placeholders.
-    for i in xrange(len(nat_params)):
+    for i in range(len(nat_params)):
       nat_params[i] = edward.util.copy(nat_params[i], swap_back,
                                        scope=scope + 'swapback')
     nat_params = [nat_params[i] for i in order]

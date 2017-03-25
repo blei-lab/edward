@@ -202,7 +202,7 @@ def mul_add_simplify(expr):
   '''Turns Mul(Add(.), .) into Add(Mul(.), Mul(.),...)'''
   if expr[0] != '#Mul':
     return None
-  for i in xrange(1, len(expr)):
+  for i in range(1, len(expr)):
     if expr[i][0] == '#Add':
       other_args = expr[1:i] + expr[i + 1:]
       return ('#Add',) + tuple((('#Mul',) + other_args + (j,)
@@ -277,9 +277,9 @@ def square_add_simplify(expr):
   if not (expr[0] == '#CPow2.0000e+00' and expr[1][0] == '#Add'):
     return None
   terms = []
-  for i in xrange(1, len(expr[1])):
+  for i in range(1, len(expr[1])):
     terms.append(('#CPow2.0000e+00', expr[1][i]))
-    for j in xrange(i + 1, len(expr[1])):
+    for j in range(i + 1, len(expr[1])):
       terms.append(('#Mul', ('2.0',), expr[1][i], expr[1][j]))
   return ('#Add',) + tuple(terms)
 
@@ -300,7 +300,7 @@ def add_const_simplify(expr):
     return None
   did_something = False
   new_args = []
-  for i in xrange(1, len(expr)):
+  for i in range(1, len(expr)):
     if expr_contains(expr[i], '#x'):
       new_args.append(expr[i])
     else:
