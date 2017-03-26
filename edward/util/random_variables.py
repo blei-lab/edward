@@ -406,6 +406,43 @@ def get_ancestors(x, collection=None):
   return list(output)
 
 
+def get_blanket(x, collection=None):
+  """Get Markov blanket of input, which consists of its parents, its
+  children, and the other parents of its children.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find Markov blanket of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Markov blanket of x.
+
+  Examples
+  --------
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(0.0, 1.0)
+  >>> c = Normal(a * b, 1.0)
+  >>> d = Normal(0.0, 1.0)
+  >>> e = Normal(c * d, 1.0)
+  >>> assert set(ed.get_blanket(c)) == set([a, b, d, e])
+  """
+  output = set()
+  output.update(get_parents(x, collection))
+  children = get_children(x, collection)
+  output.update(children)
+  for child in children:
+    output.update(get_parents(child, collection))
+
+  output.discard(x)
+  return list(output)
+
+
 def get_children(x, collection=None):
   """Get child random variables of input.
 
