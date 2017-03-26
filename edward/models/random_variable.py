@@ -262,6 +262,11 @@ class RandomVariable(object):
     from edward.util.random_variables import get_ancestors
     return get_ancestors(self, collection)
 
+  def get_blanket(self, collection=None):
+    """Get the random variable's Markov blanket."""
+    from edward.util.random_variables import get_blanket
+    return get_blanket(self, collection)
+
   def get_children(self, collection=None):
     """Get child random variables."""
     from edward.util.random_variables import get_children
