@@ -372,10 +372,10 @@ def get_ancestors(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=0.0, sigma=1.0)
-  >>> d = Normal(mu=tf.mul(b, c), sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(0.0, 1.0)
+  >>> d = Normal(b * c, 1.0)
   >>> assert set(ed.get_ancestors(d)) == set([a, b, c])
   """
   if collection is None:
@@ -424,10 +424,10 @@ def get_children(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=a, sigma=1.0)
-  >>> d = Normal(mu=c, sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(a, 1.0)
+  >>> d = Normal(c, 1.0)
   >>> assert set(ed.get_children(a)) == set([b, c])
   """
   if collection is None:
@@ -477,10 +477,10 @@ def get_descendants(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=a, sigma=1.0)
-  >>> d = Normal(mu=c, sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(a, 1.0)
+  >>> d = Normal(c, 1.0)
   >>> assert set(ed.get_descendants(a)) == set([b, c, d])
   """
   if collection is None:
@@ -530,10 +530,10 @@ def get_parents(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=0.0, sigma=1.0)
-  >>> d = Normal(mu=tf.mul(b, c), sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(0.0, 1.0)
+  >>> d = Normal(b * c, 1.0)
   >>> assert set(ed.get_parents(d)) == set([b, c])
   """
   if collection is None:
@@ -582,9 +582,9 @@ def get_siblings(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=a, sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(a, 1.0)
   >>> assert ed.get_siblings(b) == [c]
   """
   parents = get_parents(x, collection)
@@ -616,7 +616,7 @@ def get_variables(x, collection=None):
   --------
   >>> a = tf.Variable(0.0)
   >>> b = tf.Variable(0.0)
-  >>> c = Normal(mu=tf.mul(a, b), sigma=1.0)
+  >>> c = Normal(a * b, 1.0)
   >>> assert set(ed.get_variables(c)) == set([a, b])
   """
   if collection is None:
