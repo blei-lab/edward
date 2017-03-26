@@ -11,6 +11,7 @@ from edward.util import get_variables
 class test_get_variables_class(tf.test.TestCase):
 
   def test_v_structure(self):
+    """a -> b -> e <- d <- c"""
     with self.test_session():
       a = tf.Variable(0.0)
       b = Normal(a, 1.0)
@@ -24,6 +25,7 @@ class test_get_variables_class(tf.test.TestCase):
       self.assertEqual(set(get_variables(e)), set([a, c]))
 
   def test_a_structure(self):
+    """e <- d <- a -> b -> c"""
     with self.test_session():
       a = tf.Variable(0.0)
       b = Normal(a, 1.0)
@@ -37,6 +39,7 @@ class test_get_variables_class(tf.test.TestCase):
       self.assertEqual(get_variables(e), [a])
 
   def test_chain_structure(self):
+    """a -> b -> c -> d -> e"""
     with self.test_session():
       a = tf.Variable(0.0)
       b = tf.Variable(a)

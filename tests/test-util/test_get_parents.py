@@ -11,6 +11,7 @@ from edward.util import get_parents
 class test_get_parents_class(tf.test.TestCase):
 
   def test_v_structure(self):
+    """a -> b -> e <- d <- c"""
     with self.test_session():
       a = Normal(0.0, 1.0)
       b = Normal(a, 1.0)
@@ -24,6 +25,7 @@ class test_get_parents_class(tf.test.TestCase):
       self.assertEqual(set(get_parents(e)), set([b, d]))
 
   def test_a_structure(self):
+    """e <- d <- a -> b -> c"""
     with self.test_session():
       a = Normal(0.0, 1.0)
       b = Normal(a, 1.0)
@@ -37,6 +39,7 @@ class test_get_parents_class(tf.test.TestCase):
       self.assertEqual(get_parents(e), [d])
 
   def test_chain_structure(self):
+    """a -> b -> c -> d -> e"""
     with self.test_session():
       a = Normal(0.0, 1.0)
       b = Normal(a, 1.0)
@@ -74,7 +77,7 @@ class test_get_parents_class(tf.test.TestCase):
       self.assertEqual(set(get_parents(e)), set([a, b]))
 
   def test_scan(self):
-    """copied form test_chain_structure"""
+    """copied from test_chain_structure"""
     def cumsum(x):
       return tf.scan(lambda a, x: a + x, x)
 
