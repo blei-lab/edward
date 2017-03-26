@@ -50,7 +50,7 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
     return (NodeWrapper(node),)
 
   if node.op.type in _extractable_nodes:
-    result = ['#%s' % node.op.type]
+    result = ['#%s' % str(node.op.type)]
   else:
     result = [NodeWrapper(node)]
 

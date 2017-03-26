@@ -42,16 +42,16 @@ _suff_stat_to_dist['binary'][(('#x',),)] = (
     rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
 _suff_stat_to_dist['onehot'][(('#OneHot', ('#x',),),)] = (
     rvs.Categorical, lambda p1: {'p': tf.nn.softmax(p1)})
-_suff_stat_to_dist['01'][((u'#Log', ('#One_minus', ('#x',))),
-                          (u'#Log', ('#x',)))] = (
+_suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
+                          ('#Log', ('#x',)))] = (
     rvs.Beta, lambda p1, p2: {'a': p2 + 1, 'b': p1 + 1})
-_suff_stat_to_dist['simplex'][((u'#Log', ('#x',)),)] = (
+_suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
     rvs.Dirichlet, lambda p1: {'alpha': p1 + 1})
-_suff_stat_to_dist['nonnegative'][(('#x',),
-                                   (u'#Log', ('#x',)))] = (
-    rvs.Gamma, lambda p1, p2: {'alpha': p2 + 1, 'beta': -p1})
+_suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
+                                   ('#x',))] = (
+    rvs.Gamma, lambda p1, p2: {'alpha': p1 + 1, 'beta': -p2})
 _suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)),
-                                   (u'#Log', ('#x',)))] = (
+                                   ('#Log', ('#x',)))] = (
     rvs.InverseGamma, lambda p1, p2: {'alpha': -p2 - 1, 'beta': -p1})
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
@@ -106,7 +106,7 @@ def complete_conditional(rv, blanket, log_joint=None):
                                       reconstruct_multiplier(multipliers_i)))
 
     # Sort out the sufficient statistics to identify this conditional's family.
-    s_stat_keys = s_stat_exprs.keys()
+    s_stat_keys = list(s_stat_exprs.keys())
     order = np.argsort([str(i) for i in s_stat_keys])
     dist_key = tuple((s_stat_keys[i] for i in order))
     dist_constructor, constructor_params = (
@@ -231,7 +231,7 @@ def suff_stat_nodes(subgraph, node, stop_nodes):
       return ()
   if subgraph[0] == node:
     return (subgraph[0],)
-  op_type = subgraph[0].op.type
+  op_type = str(subgraph[0].op.type)
   if op_type in _linear_types:
     result = []
     stop_index = _n_important_args.get(op_type, None)
