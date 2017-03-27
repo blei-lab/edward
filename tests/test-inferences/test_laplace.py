@@ -115,6 +115,30 @@ class test_laplace_class(tf.test.TestCase):
 
       self._test(sess, qw, qb, w_true)
 
+  def test_normal(self):
+    with self.test_session() as sess:
+      N, D, w_true, X_train, y_train, X, w, b, y = self._setup()
+
+      # INFERENCE. Initialize sigma's at identity to verify if we
+      # learned an approximately zero determinant.
+      qw = Normal(
+          mu=tf.Variable(tf.random_normal([D])),
+          sigma=tf.Variable(tf.ones(D)))
+      qb = Normal(
+          mu=tf.Variable(tf.random_normal([1])),
+          sigma=tf.Variable(tf.ones(1)))
+
+      inference = ed.Laplace({w: qw, b: qb}, data={X: X_train, y: y_train})
+      inference.run(n_iter=100)
+
+      qw_mu, qb_mu, qw_sigma_det, qb_sigma_det = \
+          sess.run([qw.mu, qb.mu,
+                    tf.reduce_prod(qw.sigma), tf.reduce_prod(qb.sigma)])
+      self.assertAllClose(qw_mu, w_true, atol=0.5)
+      self.assertAllClose(qb_mu, np.array([0.0]), atol=0.5)
+      self.assertAllClose(qw_sigma_det, 0.0, atol=0.1)
+      self.assertAllClose(qb_sigma_det, 0.0, atol=0.1)
+
 if __name__ == '__main__':
   ed.set_seed(42)
   tf.test.main()
