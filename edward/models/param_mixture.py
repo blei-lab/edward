@@ -27,6 +27,26 @@ class ParamMixture(RandomVariable, distribution.Distribution):
                               sample_shape=sample_shape)
       self._components = component_dist(sample_shape=sample_shape,
                                         **component_params)
+
+      with tf.name_scope('means'):
+        comp_means = self._components.mean()
+        comp_vars = self._components.variance()
+        comp_mean_sq = tf.square(comp_means) + comp_vars
+        expanded_mix = self._cat.p
+        comp_dim = self._comp_dim()
+        if comp_dim > 1:
+          new_shape = tf.concat([self._cat.p.get_shape(),
+                                 tf.ones(comp_dim - 2, dtype=tf.int32)], 0)
+          expanded_mix = tf.reshape(expanded_mix, new_shape)
+        self._mean_val = tf.reduce_sum(comp_means * expanded_mix, 0,
+                                       name='mean')
+        mean_sq_val = tf.reduce_sum(comp_mean_sq * expanded_mix, 0,
+                                    name='mean_squared')
+        self._variance_val = tf.subtract(mean_sq_val,
+                                         tf.square(self._mean_val),
+                                         name='variance')
+        self._stddev_val = tf.sqrt(self._variance_val, name='stddev')
+      
     super(ParamMixture, self).__init__(
         dtype=self._components.dtype,
         validate_args=validate_args,
@@ -65,7 +85,7 @@ class ParamMixture(RandomVariable, distribution.Distribution):
     # TODO(mhoffman): Make this more efficient
     K = self.cat.p.get_shape()[-1]
     selecter = tf.one_hot(self.cat.value(), K, dtype=tf.float32)
-    comp_dim = len(self._components.value().get_shape())
+    comp_dim = self._comp_dim()
     if comp_dim > 2:
       new_shape = tf.concat([selecter.get_shape(),
                              tf.ones(comp_dim - 2, dtype=tf.int32)], 0)
@@ -83,6 +103,9 @@ class ParamMixture(RandomVariable, distribution.Distribution):
     """Number of samples."""
     return self._n
 
+  def _comp_dim(self):
+    return len(self._components.value().get_shape())
+
   def _batch_shape(self):
     return self.cat.get_shape()
 
@@ -91,10 +114,10 @@ class ParamMixture(RandomVariable, distribution.Distribution):
     return self._components[0].get_event_shape()
 
   def _mean(self):
-    raise NotImplementedError()
+    return self._mean_val
 
   def _std(self):
-    raise NotImplementedError()
+    return self._stddev_val
 
   def _variance(self):
-    raise NotImplementedError()
+    return self._variance_val
