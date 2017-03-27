@@ -39,8 +39,7 @@ class test_random_variable_value_class(tf.test.TestCase):
       self.assertRaises(ValueError, self._test_sample, Normal, 2,
                         mu=[0.5], sigma=[1.0])
       self.assertRaises(ValueError, self._test_sample, Normal,
-                        np.zeros([10, 3], np.float32),
-                        mu=[0.5, 0.5], sigma=1.)
+                        np.zeros([10, 3]), mu=[0.5, 0.5], sigma=[1.0, 1.0])
 
   def test_copy(self):
     with self.test_session():

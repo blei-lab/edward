@@ -70,22 +70,31 @@ class RandomVariable(object):
   >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
   """
   def __init__(self, *args, **kwargs):
+    """
+    Parameters
+    ----------
+    sample_shape : tf.TensorShape, optional
+      Shape of samples to draw from the random variable.
+    value : tf.Tensor, optional
+      Fixed tensor to associate with random variable. Must have shape
+      ``sample_shape + batch_shape + event_shape``.
+    *args, **kwargs
+      Passed into parent ``__init__``.
+    """
     # storing args, kwargs for easy graph copying
     self._args = args
     self._kwargs = kwargs
 
-    # temporarily pop before calling parent __init__
+    # temporarily pop (then reinsert) before calling parent __init__
+    sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
-    self._sample_shape = kwargs.pop('sample_shape', tf.TensorShape([]))
     super(RandomVariable, self).__init__(*args, **kwargs)
-    # reinsert (needed for copying)
+    if sample_shape != ():
+      self._kwargs['sample_shape'] = sample_shape
     if value is not None:
       self._kwargs['value'] = value
-    if self._sample_shape != tf.TensorShape([]):
-      self._kwargs['sample_shape'] = self._sample_shape
 
-    tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
-
+    self._sample_shape = tf.TensorShape(sample_shape)
     if value is not None:
       t_value = tf.convert_to_tensor(value, self.dtype)
       value_shape = t_value.shape
@@ -105,6 +114,8 @@ class RandomVariable(object):
             "sample is not implemented for {0}. You must either pass in the "
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
+
+    tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
 
   @property
   def shape(self):
