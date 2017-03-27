@@ -24,6 +24,17 @@ class RandomVariable(object):
   graph, allowing random variables to be used in conjunction with
   other TensorFlow ops.
 
+  The random variable's shape is given by
+
+  ``sample_shape + batch_shape + event_shape``,
+
+  where ``sample_shape`` is an optional argument representing the
+  dimensions of samples drawn from the distribution (default is
+  a scalar); ``batch_shape`` is the number of independent random variables
+  (determined by the shape of its parameters); and ``event_shape`` is
+  the shape of one draw from the distribution (e.g., ``Normal`` has a
+  scalar ``event_shape``; ``Dirichlet`` has a vector ``event_shape``).
+
   Notes
   -----
   ``RandomVariable`` assumes use in a multiple inheritance setting. The
@@ -51,8 +62,8 @@ class RandomVariable(object):
   >>> p = tf.constant(0.5)
   >>> x = Bernoulli(p=p)
   >>>
-  >>> z1 = tf.constant([[2.0, 8.0]])
-  >>> z2 = tf.constant([[1.0, 2.0]])
+  >>> z1 = tf.constant([[2.0, 8.0], [1.0, 2.0]])
+  >>> z2 = tf.constant([[1.0, 2.0], [3.0, 1.0]])
   >>> x = Bernoulli(p=tf.matmul(z1, z2))
   >>>
   >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
@@ -63,23 +74,24 @@ class RandomVariable(object):
     self._args = args
     self._kwargs = kwargs
 
-    # need to temporarily pop value before __init__
+    # temporarily pop before calling parent __init__
     value = kwargs.pop('value', None)
-    sample_shape = kwargs.pop('sample_shape', ())
+    self._sample_shape = kwargs.pop('sample_shape', tf.TensorShape([]))
     super(RandomVariable, self).__init__(*args, **kwargs)
+    # reinsert (needed for copying)
     if value is not None:
-      self._kwargs['value'] = value  # reinsert (needed for copying)
-    if sample_shape is not None:
-      self._kwargs['sample_shape'] = sample_shape
+      self._kwargs['value'] = value
+    if self._sample_shape != tf.TensorShape([]):
+      self._kwargs['sample_shape'] = self._sample_shape
 
     tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
 
     if value is not None:
       t_value = tf.convert_to_tensor(value, self.dtype)
-      expected_shape = (self.get_batch_shape().as_list() +
-                        self.get_event_shape().as_list())
-      value_shape = t_value.get_shape().as_list()
-      if value_shape[:len(expected_shape)] != expected_shape:
+      value_shape = t_value.shape
+      expected_shape = self.get_sample_shape().concatenate(
+          self.get_batch_shape()).concatenate(self.get_event_shape())
+      if value_shape != expected_shape:
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
             "Expected %s, got %s." % (expected_shape, value_shape))
@@ -87,7 +99,7 @@ class RandomVariable(object):
         self._value = t_value
     else:
       try:
-        self._value = self.sample(sample_shape)
+        self._value = self.sample(self._sample_shape)
       except NotImplementedError:
         raise NotImplementedError(
             "sample is not implemented for {0}. You must either pass in the "
@@ -293,6 +305,10 @@ class RandomVariable(object):
   def get_shape(self):
     """Get shape of random variable."""
     return self.shape
+
+  def get_sample_shape(self):
+    """Sample shape of random variable."""
+    return self._sample_shape
 
   @staticmethod
   def _session_run_conversion_fetch_function(tensor):
