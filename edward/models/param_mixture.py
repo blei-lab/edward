@@ -46,7 +46,7 @@ class ParamMixture(RandomVariable, distribution.Distribution):
                                          tf.square(self._mean_val),
                                          name='variance')
         self._stddev_val = tf.sqrt(self._variance_val, name='stddev')
-      
+
     super(ParamMixture, self).__init__(
         dtype=self._components.dtype,
         validate_args=validate_args,
@@ -90,7 +90,7 @@ class ParamMixture(RandomVariable, distribution.Distribution):
       new_shape = tf.concat([selecter.get_shape(),
                              tf.ones(comp_dim - 2, dtype=tf.int32)], 0)
       selecter = tf.reshape(selecter, new_shape)
-                            
+
     return tf.reduce_sum(self._components.value() * selecter, 1)
 
   @property
