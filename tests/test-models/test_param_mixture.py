@@ -2,14 +2,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import edward as ed
 import numpy as np
 import tensorflow as tf
 
-import edward as ed
 from edward.models import ParamMixture, Normal, Beta
 
 
 class test_param_mixture_class(tf.test.TestCase):
+
   def _test(self, pi, params, dist):
     g = tf.Graph()
     with g.as_default():
@@ -51,25 +52,24 @@ class test_param_mixture_class(tf.test.TestCase):
 
   def test_mog(self):
     pi = np.array([0.2, 0.3, 0.5], np.float32)
-    mu = np.array([1., 5., 7.], np.float32)
+    mu = np.array([1.0, 5.0, 7.0], np.float32)
     sigma = 1.5
 
     self._test(pi, {'mu': mu, 'sigma': sigma}, Normal)
 
   def test_mob(self):
     pi = np.array([0.2, 0.3, 0.5], np.float32)
-    a = np.array([2., 1., 0.5], np.float32)
-    b = np.array([2., 1., 0.5], np.float32) + 2.
+    a = np.array([2.0, 1.0, 0.5], np.float32)
+    b = np.array([2.0, 1.0, 0.5], np.float32) + 2.
 
     self._test(pi, {'a': a, 'b': b}, Beta)
 
   def test_batched_mob(self):
     pi = np.array([0.2, 0.3, 0.5], np.float32)
-    a = np.array([[2., 1., 0.5], [0.5, 1., 2.]], np.float32).T
-    b = np.array([[2., 1., 0.5], [0.5, 1., 2.]], np.float32).T + 2.
+    a = np.array([[2.0, 1.0, 0.5], [0.5, 1.0, 2.0]], np.float32).T
+    b = np.array([[2.0, 1.0, 0.5], [0.5, 1.0, 2.0]], np.float32).T + 2.0
 
     self._test(pi, {'a': a, 'b': b}, Beta)
-
 
 if __name__ == '__main__':
   tf.test.main()
