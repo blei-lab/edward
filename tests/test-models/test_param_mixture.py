@@ -45,9 +45,9 @@ class test_param_mixture_class(tf.test.TestCase):
       self.assertAllClose((vals[z] == k).mean(), pi[k], rtol=0.01, atol=0.01)
       x_k = vals[x][vals[z] == k]
       self.assertAllClose(x_k.mean(0), vals[comp_means][k],
-                          rtol=0.01, atol=0.01)
+                          rtol=0.05, atol=0.05)
       self.assertAllClose(x_k.std(0), vals[comp_stddevs][k],
-                          rtol=0.01, atol=0.01)
+                          rtol=0.05, atol=0.05)
 
   def test_mog(self):
     pi = np.array([0.2, 0.3, 0.5], np.float32)

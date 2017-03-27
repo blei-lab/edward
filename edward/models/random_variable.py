@@ -88,7 +88,6 @@ class RandomVariable(object):
     # temporarily pop (then reinsert) before calling parent __init__
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
-    sample_shape = kwargs.pop('sample_shape', ())
     super(RandomVariable, self).__init__(*args, **kwargs)
     if sample_shape != ():
       self._kwargs['sample_shape'] = sample_shape
