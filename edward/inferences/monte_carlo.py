@@ -82,6 +82,9 @@ class MonteCarlo(Inference):
         if not isinstance(qz, Empirical):
           raise TypeError("Posterior approximation must consist of only "
                           "Empirical random variables.")
+        elif len(qz.get_sample_shape()) != 0:
+          raise ValueError("Empirical posterior approximations must have "
+                           "a scalar sample shape.")
 
     super(MonteCarlo, self).__init__(latent_vars, data)
 

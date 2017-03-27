@@ -11,7 +11,8 @@ from edward.util import get_session, get_variables
 
 try:
   from edward.models import \
-      MultivariateNormalCholesky, MultivariateNormalDiag, MultivariateNormalFull
+      MultivariateNormalCholesky, MultivariateNormalDiag, \
+      MultivariateNormalFull, Normal
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
@@ -38,16 +39,16 @@ class Laplace(MAP):
       ``MultivariateNormalCholesky`` random variable that is defined
       internally (with unconstrained support). If dictionary, each
       random variable must be a ``MultivariateNormalCholesky``,
-      ``MultivariateNormalFull``, or ``MultivariateNormalDiag`` random
-      variable.
+      ``MultivariateNormalFull``, ``MultivariateNormalDiag``, or
+      ``Normal`` random variable.
 
     Notes
     -----
-    If ``MultivariateNormalDiag`` random variables are specified as
-    approximations, then the Laplace approximation will only produce
-    the diagonal. This does not capture correlation among the
-    variables but it does not require a potentially expensive matrix
-    inversion.
+    If ``MultivariateNormalDiag`` or ``Normal`` random variables are
+    specified as approximations, then the Laplace approximation will
+    only produce the diagonal. This does not capture correlation among
+    the variables but it does not require a potentially expensive
+    matrix inversion.
 
     Examples
     --------
@@ -71,10 +72,10 @@ class Laplace(MAP):
       for qz in six.itervalues(latent_vars):
         if not isinstance(
             qz, (MultivariateNormalCholesky, MultivariateNormalDiag,
-                 MultivariateNormalFull)):
+                 MultivariateNormalFull, Normal)):
           raise TypeError("Posterior approximation must consist of only "
                           "MultivariateCholesky, MultivariateNormalDiag, "
-                          "or MultivariateNormalFull random variables.")
+                          "MultivariateNormalFull, or Normal random variables.")
 
     # call grandparent's method; avoid parent (MAP)
     super(MAP, self).__init__(latent_vars, data)
@@ -96,7 +97,7 @@ class Laplace(MAP):
       sigma_var = get_variables(qz.sigma)[0]
       if isinstance(qz, MultivariateNormalCholesky):
         sigma = tf.matrix_inverse(tf.cholesky(hessian))
-      elif isinstance(qz, MultivariateNormalDiag):
+      elif isinstance(qz, (MultivariateNormalDiag, Normal)):
         sigma = 1.0 / tf.diag_part(hessian)
       else:  # qz is MultivariateNormalFull
         sigma = tf.matrix_inverse(hessian)

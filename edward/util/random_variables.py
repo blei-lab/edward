@@ -372,10 +372,10 @@ def get_ancestors(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=0.0, sigma=1.0)
-  >>> d = Normal(mu=tf.mul(b, c), sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(0.0, 1.0)
+  >>> d = Normal(b * c, 1.0)
   >>> assert set(ed.get_ancestors(d)) == set([a, b, c])
   """
   if collection is None:
@@ -406,6 +406,43 @@ def get_ancestors(x, collection=None):
   return list(output)
 
 
+def get_blanket(x, collection=None):
+  """Get Markov blanket of input, which consists of its parents, its
+  children, and the other parents of its children.
+
+  Parameters
+  ----------
+  x : RandomVariable or tf.Tensor
+    Query node to find Markov blanket of.
+  collection : list of RandomVariable, optional
+    The collection of random variables to check with respect to;
+    defaults to all random variables in the graph.
+
+  Returns
+  -------
+  list of RandomVariable
+    Markov blanket of x.
+
+  Examples
+  --------
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(0.0, 1.0)
+  >>> c = Normal(a * b, 1.0)
+  >>> d = Normal(0.0, 1.0)
+  >>> e = Normal(c * d, 1.0)
+  >>> assert set(ed.get_blanket(c)) == set([a, b, d, e])
+  """
+  output = set()
+  output.update(get_parents(x, collection))
+  children = get_children(x, collection)
+  output.update(children)
+  for child in children:
+    output.update(get_parents(child, collection))
+
+  output.discard(x)
+  return list(output)
+
+
 def get_children(x, collection=None):
   """Get child random variables of input.
 
@@ -424,10 +461,10 @@ def get_children(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=a, sigma=1.0)
-  >>> d = Normal(mu=c, sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(a, 1.0)
+  >>> d = Normal(c, 1.0)
   >>> assert set(ed.get_children(a)) == set([b, c])
   """
   if collection is None:
@@ -477,10 +514,10 @@ def get_descendants(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=a, sigma=1.0)
-  >>> d = Normal(mu=c, sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(a, 1.0)
+  >>> d = Normal(c, 1.0)
   >>> assert set(ed.get_descendants(a)) == set([b, c, d])
   """
   if collection is None:
@@ -530,10 +567,10 @@ def get_parents(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=0.0, sigma=1.0)
-  >>> d = Normal(mu=tf.mul(b, c), sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(0.0, 1.0)
+  >>> d = Normal(b * c, 1.0)
   >>> assert set(ed.get_parents(d)) == set([b, c])
   """
   if collection is None:
@@ -582,9 +619,9 @@ def get_siblings(x, collection=None):
 
   Examples
   --------
-  >>> a = Normal(mu=0.0, sigma=1.0)
-  >>> b = Normal(mu=a, sigma=1.0)
-  >>> c = Normal(mu=a, sigma=1.0)
+  >>> a = Normal(0.0, 1.0)
+  >>> b = Normal(a, 1.0)
+  >>> c = Normal(a, 1.0)
   >>> assert ed.get_siblings(b) == [c]
   """
   parents = get_parents(x, collection)
@@ -616,7 +653,7 @@ def get_variables(x, collection=None):
   --------
   >>> a = tf.Variable(0.0)
   >>> b = tf.Variable(0.0)
-  >>> c = Normal(mu=tf.mul(a, b), sigma=1.0)
+  >>> c = Normal(a * b, 1.0)
   >>> assert set(ed.get_variables(c)) == set([a, b])
   """
   if collection is None:
