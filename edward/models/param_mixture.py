@@ -24,19 +24,26 @@ class ParamMixture(RandomVariable, Distribution):
                allow_nan_stats=True,
                name="ParamMixture",
                *args, **kwargs):
-    """Initialize a batch of mixture random variables. The number of
-    components is the outer (right-most) dimension of the mixing
-    weights, or equivalently, of the components' batch shape.
+    """Initialize a batch of mixture random variables.
 
     Parameters
     ----------
     mixing_weights : tf.Tensor
-      (Normalized) weights whose outer (right-most) dimension matches
+      (Normalized) weights whose inner (right-most) dimension matches
       the number of components.
     component_params : dict
       Parameters of the per-component distributions.
     component_dist : RandomVariable
-      Distribution of each component.
+      Distribution of each component. The outer (left-most) dimension
+      of its batch shape when instantiated determines the number of
+      components.
+
+    Notes
+    -----
+    Given ``ParamMixture``'s ``sample_shape``, ``batch_shape``, and
+    ``event_shape``, its ``components`` has shape
+    ``sample_shape + [num_components] + batch_shape + event_shape``,
+    and its ``cat`` has shape ``sample_shape + batch_shape``.
 
     Examples
     --------
@@ -45,8 +52,8 @@ class ParamMixture(RandomVariable, Distribution):
     >>> x = ParamMixture(probs, params, Normal)
     >>> assert x.shape == ()
     >>>
-    >>> probs = tf.fill([2, 5], 1.0 / 5.0)
-    >>> params = {'p': tf.fill([2, 5], 0.8)}
+    >>> probs = tf.ones([2, 5]) / 5.0
+    >>> params = {'p': tf.zeros([5, 2]) + 0.8}
     >>> x = ParamMixture(probs, params, Bernoulli)
     >>> assert x.shape == (2,)
     """
@@ -59,7 +66,18 @@ class ParamMixture(RandomVariable, Distribution):
           raise TypeError("component_params must be a dict.")
         elif not isinstance(component_dist, RandomVariable):
           raise TypeError("component_dist must be a ed.RandomVariable object.")
+        elif not mixing_weights.shape[-1].is_compatible_with(
+            components.get_batch_shape()[0]):
+          raise TypeError("Last dimension of mixing_weights must match with "
+                           "the first dimension of components.")
+        elif not mixing_weights.shape[:-1].is_compatible_with(
+            components.get_batch_shape()[1:]):
+          raise TypeError("Dimensions of mixing_weights are not compatible with "
+                          "the dimensions of components.")
 
+      # TODO broadcastable params along categorical and components
+      # TODO dynamic shapes
+      # TODO make sure works for n_components=1
       sample_shape = kwargs.get('sample_shape', ())
       self._mixing_weights = mixing_weights
       self._cat = Categorical(p=self._mixing_weights,
@@ -71,21 +89,25 @@ class ParamMixture(RandomVariable, Distribution):
                                         allow_nan_stats=allow_nan_stats,
                                         sample_shape=sample_shape,
                                         **component_params)
+      self._num_components = self._cat.p.shape.as_list()[-1]
 
       with tf.name_scope('means'):
         comp_means = self._components.mean()
         comp_vars = self._components.variance()
         comp_mean_sq = tf.square(comp_means) + comp_vars
 
-        expanded_mix = self._cat.p
-        comp_dim = len(self._components.shape)
-        if comp_dim >= 2:
-          expanded_mix = tf.reshape(
-              expanded_mix, self._cat.p.shape.as_list() + [1] * (comp_dim - 2))
+        # weights has shape batch_shape + [num_components]; change
+        # to broadcast with [num_components] + batch_shape + event_shape.
+        # TODO shapes are not compatible; this requires weights have scalar
+        # batch_shape
+        weights = self._cat.p
+        event_rank = self._components.get_event_shape().ndims
+        weights = tf.reshape(
+            weights, weights.shape.as_list() + [1] * event_rank)
 
-        self._mean_val = tf.reduce_sum(comp_means * expanded_mix, 0,
+        self._mean_val = tf.reduce_sum(comp_means * weights, 0,
                                        name='mean')
-        mean_sq_val = tf.reduce_sum(comp_mean_sq * expanded_mix, 0,
+        mean_sq_val = tf.reduce_sum(comp_mean_sq * weights, 0,
                                     name='mean_squared')
         self._variance_val = tf.subtract(mean_sq_val,
                                          tf.square(self._mean_val),
@@ -110,38 +132,50 @@ class ParamMixture(RandomVariable, Distribution):
   def components(self):
     return self._components
 
+  @property
+  def num_components(self):
+    return self._num_components
+
   def _batch_shape(self):
+    return tf.shape(self.cat)
+
+  def _get_batch_shape(self):
     return self.cat.shape
 
   def _event_shape(self):
-    # TODO(mhoffman): This could break if there is only one component.
-    return self.components[0].get_event_shape()
+    return self.components.event_shape()
+
+  def _get_event_shape(self):
+    return self.components.get_event_shape()
 
   def _log_prob(self, x, conjugate=False, **kwargs):
-    event_dim = len(self.components.get_event_shape())
-    expanded_x = tf.expand_dims(x, -1 - event_dim)
+    event_rank = self._components.get_event_shape().ndims
+    expanded_x = tf.expand_dims(x, -1 - event_rank)
     if conjugate:
       log_probs = self.components.conjugate_log_prob(expanded_x)
     else:
       log_probs = self.components.log_prob(expanded_x)
 
-    selecter = tf.one_hot(self.cat, self.cat.p.shape[-1],
-                          dtype=tf.float32)
-    return tf.reduce_sum(log_probs * selecter, -1)
+    # TODO
+    # this seems to select one, rather than weight them?
+    selecter = tf.one_hot(self.cat, self.num_components, dtype=tf.float32)
+    return tf.reduce_sum(log_probs * selecter, -1 - event_rank)
 
   def conjugate_log_prob(self):
     return self._log_prob(self, conjugate=True)
 
   def _sample_n(self, n, seed=None):
-    # TODO(mhoffman): Make this more efficient
-    K = self._mixing_weights.shape[-1]
-    selecter = tf.one_hot(self.cat, K, dtype=tf.float32)
-    comp_dim = len(self.components.shape)
-    if comp_dim > 2:
-      selecter = tf.reshape(
-          selecter, selecter.shape.as_list() + [1] * (comp_dim - 2))
+    # TODO avoid sampling n per component
+    selecter = tf.one_hot(self.cat.sample(n), self.num_components,
+                          axis=1, dtype=self.dtype)
 
-    return tf.reduce_sum(self.components * selecter, 1)
+    # selecter has shape [n] + [num_components] + batch_shape; change
+    # to broadcast with [n] + [num_components] + batch_shape + event_shape.
+    event_rank = self.get_event_shape().ndims
+    selecter = tf.reshape(selecter, selecter.shape.as_list() + [1] * event_rank)
+
+    # select the sampled component, sum out the component dimension
+    return tf.reduce_sum(self.components.sample(n) * selecter, 1)
 
   def _mean(self):
     return self._mean_val
