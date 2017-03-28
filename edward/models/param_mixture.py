@@ -66,20 +66,10 @@ class ParamMixture(RandomVariable, Distribution):
           raise TypeError("component_params must be a dict.")
         elif not isinstance(component_dist, RandomVariable):
           raise TypeError("component_dist must be a ed.RandomVariable object.")
-        elif not mixing_weights.shape[-1].is_compatible_with(
-            components.get_batch_shape()[0]):
-          raise TypeError("Last dimension of mixing_weights must match with "
-                           "the first dimension of components.")
-        elif not mixing_weights.shape[:-1].is_compatible_with(
-            components.get_batch_shape()[1:]):
-          raise TypeError("Dimensions of mixing_weights are not compatible with "
-                          "the dimensions of components.")
 
-      # TODO broadcastable params along categorical and components
       # TODO dynamic shapes
-      # TODO make sure works for n_components=1
       sample_shape = kwargs.get('sample_shape', ())
-      self._mixing_weights = mixing_weights
+      self._mixing_weights = tf.identity(mixing_weights, name="mixing_weights")
       self._cat = Categorical(p=self._mixing_weights,
                               validate_args=validate_args,
                               allow_nan_stats=allow_nan_stats,
@@ -90,6 +80,16 @@ class ParamMixture(RandomVariable, Distribution):
                                         sample_shape=sample_shape,
                                         **component_params)
       self._num_components = self._cat.p.shape.as_list()[-1]
+
+      if validate_args:
+        if not self._mixing_weights.shape[-1].is_compatible_with(
+            self._components.get_batch_shape()[0]):
+          raise TypeError("Last dimension of mixing_weights must match with "
+                           "the first dimension of components.")
+        elif not self._mixing_weights.shape[:-1].is_compatible_with(
+            self._components.get_batch_shape()[1:]):
+          raise TypeError("Dimensions of mixing_weights are not compatible with "
+                          "the dimensions of components.")
 
       with tf.name_scope('means'):
         comp_means = self._components.mean()

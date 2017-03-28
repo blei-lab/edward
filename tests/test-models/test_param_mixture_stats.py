@@ -63,8 +63,7 @@ class test_param_mixture_class(tf.test.TestCase):
     self._test(pi, {'a': a, 'b': b}, Beta)
 
   def test_beta_1d(self):
-    pi_broadcast = np.array([0.2, 0.3, 0.5], np.float32)
-    pi = np.tile(pi_broadcast, [2, 1])
+    pi = np.array([[0.2, 0.3, 0.5], [0.2, 0.3, 0.5]], np.float32)
     a = np.array([[2.0, 0.5], [1.0, 1.0], [0.5, 2.0]], np.float32)
     b = a + 2.0
 
