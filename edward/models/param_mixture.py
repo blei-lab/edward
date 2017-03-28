@@ -98,8 +98,10 @@ class ParamMixture(RandomVariable, Distribution):
 
         # weights has shape batch_shape + [num_components]; change
         # to broadcast with [num_components] + batch_shape + event_shape.
-        # TODO shapes are not compatible; this requires weights have scalar
-        # batch_shape
+        if self._cat.p.shape.ndims > 1:
+          # TODO shapes are not compatible; weights must have scalar batch_shape
+          raise NotImplementedError()
+
         weights = self._cat.p
         event_rank = self._components.get_event_shape().ndims
         weights = tf.reshape(
@@ -137,10 +139,10 @@ class ParamMixture(RandomVariable, Distribution):
     return self._num_components
 
   def _batch_shape(self):
-    return tf.shape(self.cat)
+    return self.cat.batch_shape()
 
   def _get_batch_shape(self):
-    return self.cat.shape
+    return self.cat.get_batch_shape()
 
   def _event_shape(self):
     return self.components.event_shape()

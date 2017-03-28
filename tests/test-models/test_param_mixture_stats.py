@@ -6,19 +6,19 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Beta, Dirichlet, Normal, ParamMixture
+from edward.models import Beta, Normal, ParamMixture
 
 
 class test_param_mixture_class(tf.test.TestCase):
 
-  def _test(self, *args, **kwargs):
+  def _test(self, pi, params, dist):
     g = tf.Graph()
     with g.as_default():
       tf.set_random_seed(10003)
 
       N = 10000
 
-      x = ParamMixture(*args, sample_shape=N, **kwargs)
+      x = ParamMixture(pi, params, dist, sample_shape=N)
       cat = x.cat
       components = x.components
       comp_means = components.mean()
@@ -48,32 +48,29 @@ class test_param_mixture_class(tf.test.TestCase):
       self.assertAllClose(x_k.std(0), vals[comp_stddevs][k],
                           rtol=0.05, atol=0.05)
 
-  def test_normal_0d(self):
+  def test_normal(self):
+    """Mixture of 3 normal distributions."""
     pi = np.array([0.2, 0.3, 0.5], np.float32)
     mu = np.array([1.0, 5.0, 7.0], np.float32)
     sigma = np.array([1.5, 1.5, 1.5], np.float32)
 
     self._test(pi, {'mu': mu, 'sigma': sigma}, Normal)
 
-  def test_beta_0d(self):
+  def test_beta(self):
+    """Mixture of 3 beta distributions."""
     pi = np.array([0.2, 0.3, 0.5], np.float32)
     a = np.array([2.0, 1.0, 0.5], np.float32)
     b = a + 2.0
 
     self._test(pi, {'a': a, 'b': b}, Beta)
 
-  def test_beta_1d(self):
+  def test_batch_beta(self):
+    """Two mixtures of 3 beta distributions."""
     pi = np.array([[0.2, 0.3, 0.5], [0.2, 0.3, 0.5]], np.float32)
     a = np.array([[2.0, 0.5], [1.0, 1.0], [0.5, 2.0]], np.float32)
     b = a + 2.0
 
     self._test(pi, {'a': a, 'b': b}, Beta)
-
-  def test_dirichlet_1d(self):
-    pi = np.array([0.4, 0.6], np.float32)
-    alpha = np.ones([2, 3], np.float32)
-
-    self._test(pi, {'alpha': alpha}, Dirichlet)
 
 if __name__ == '__main__':
   tf.test.main()
