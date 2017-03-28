@@ -11,21 +11,14 @@ from edward.models import Beta, Dirichlet, Normal, ParamMixture
 
 class test_param_mixture_class(tf.test.TestCase):
 
-  def _test_shape(self, *args, **kwargs):
-    g = tf.Graph()
-    with g.as_default():
-      x = ParamMixture(*args, **kwargs)
-      val_est = x.shape
-      val_true = x.cat.get_sample_shape().concatenate(
-          x.cat.get_batch_shape()).concatenate(x.components.get_event_shape())
-      self.assertEqual(val_est, val_true)
-
-  def _test_stats(self, *args, **kwargs):
+  def _test(self, *args, **kwargs):
     g = tf.Graph()
     with g.as_default():
       tf.set_random_seed(10003)
 
-      x = ParamMixture(*args, **kwargs)
+      N = 10000
+
+      x = ParamMixture(*args, sample_shape=N, **kwargs)
       cat = x.cat
       components = x.components
       comp_means = components.mean()
@@ -60,16 +53,14 @@ class test_param_mixture_class(tf.test.TestCase):
     mu = np.array([1.0, 5.0, 7.0], np.float32)
     sigma = np.array([1.5, 1.5, 1.5], np.float32)
 
-    self._test_shape(pi, {'mu': mu, 'sigma': sigma}, Normal)
-    self._test_stats(pi, {'mu': mu, 'sigma': sigma}, Normal, sample_shape=10000)
+    self._test(pi, {'mu': mu, 'sigma': sigma}, Normal)
 
   def test_beta_0d(self):
     pi = np.array([0.2, 0.3, 0.5], np.float32)
     a = np.array([2.0, 1.0, 0.5], np.float32)
     b = a + 2.0
 
-    self._test_shape(pi, {'a': a, 'b': b}, Beta)
-    self._test_stats(pi, {'a': a, 'b': b}, Beta, sample_shape=10000)
+    self._test(pi, {'a': a, 'b': b}, Beta)
 
   def test_beta_1d(self):
     pi_broadcast = np.array([0.2, 0.3, 0.5], np.float32)
@@ -77,16 +68,13 @@ class test_param_mixture_class(tf.test.TestCase):
     a = np.array([[2.0, 0.5], [1.0, 1.0], [0.5, 2.0]], np.float32)
     b = a + 2.0
 
-    # self._test_shape(pi_broadcast, {'a': a, 'b': b}, Beta)
-    self._test_shape(pi, {'a': a, 'b': b}, Beta)
-    self._test_stats(pi, {'a': a, 'b': b}, Beta, sample_shape=10000)
+    self._test(pi, {'a': a, 'b': b}, Beta)
 
-  # def test_dirichlet_1d(self):
-  #   # TODO
-  #   pi = np.array([0.4, 0.6], np.float32)
-  #   alpha = np.ones([2, 3], np.float32).T
+  def test_dirichlet_1d(self):
+    pi = np.array([0.4, 0.6], np.float32)
+    alpha = np.ones([2, 3], np.float32)
 
-  #   self._test(pi, {'alpha': alpha}, Dirichlet)
+    self._test(pi, {'alpha': alpha}, Dirichlet)
 
 if __name__ == '__main__':
   tf.test.main()
