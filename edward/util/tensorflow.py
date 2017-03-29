@@ -83,7 +83,7 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   .. math::
 
     k(x, x') = \\sigma^2 \exp\Big(
-        -\frac{1}{2} \sum_{d=1}^D \frac{1}{\\ell_d^2} (x_d - x'_d)^2 \Big).
+        -\frac{1}{2} \sum_{d=1}^D \frac{1}{\\ell_d^2} (x_d - x'_d)^2 \Big)
 
   for output variance :math:`\\sigma^2` and lengthscale :math:`\\ell^2`.
 
@@ -128,7 +128,7 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
     X2s = tf.reduce_sum(tf.square(X2), 1)
 
   square = tf.reshape(Xs, [-1, 1]) + tf.reshape(X2s, [1, -1]) - \
-           2 * tf.matmul(X, X2, transpose_b=True)
+      2 * tf.matmul(X, X2, transpose_b=True)
   output = variance * tf.exp(-square / 2)
   return output
 
