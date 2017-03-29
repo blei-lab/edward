@@ -67,7 +67,6 @@ class ParamMixture(RandomVariable, Distribution):
         elif not isinstance(component_dist, RandomVariable):
           raise TypeError("component_dist must be a ed.RandomVariable object.")
 
-      # TODO dynamic shapes
       sample_shape = kwargs.get('sample_shape', ())
       self._mixing_weights = tf.identity(mixing_weights, name="mixing_weights")
       self._cat = Categorical(p=self._mixing_weights,
@@ -79,7 +78,6 @@ class ParamMixture(RandomVariable, Distribution):
                                         allow_nan_stats=allow_nan_stats,
                                         sample_shape=sample_shape,
                                         **component_params)
-      self._num_components = self._cat.p.shape.as_list()[-1]
 
       if validate_args:
         if not self._mixing_weights.shape[-1].is_compatible_with(
@@ -90,6 +88,12 @@ class ParamMixture(RandomVariable, Distribution):
                 self._components.get_batch_shape()[1:]):
           raise TypeError("Dimensions of mixing_weights are not compatible "
                           "with the dimensions of components.")
+
+      try:
+        self._num_components = self._cat.p.shape.as_list()[-1]
+      except:  # if p has TensorShape None
+        raise NotImplementedError("Number of components must be statically "
+                                  "determined.")
 
       self._mean_val = None
       self._variance_val = None
@@ -106,8 +110,8 @@ class ParamMixture(RandomVariable, Distribution):
             # The below reshaping only works for empty batch_shape.
             weights = self._cat.p
             event_rank = self._components.get_event_shape().ndims
-            weights = tf.reshape(
-                weights, weights.shape.as_list() + [1] * event_rank)
+            for _ in range(event_rank):
+              weights = tf.expand_dims(weights, -1)
 
             self._mean_val = tf.reduce_sum(comp_means * weights, 0,
                                            name='mean')
@@ -156,7 +160,7 @@ class ParamMixture(RandomVariable, Distribution):
     return self.components.get_event_shape()
 
   def _log_prob(self, x, conjugate=False, **kwargs):
-    event_rank = self._components.get_event_shape().ndims
+    event_rank = self.get_event_shape().ndims
     expanded_x = tf.expand_dims(x, -1 - event_rank)
     if conjugate:
       log_probs = self.components.conjugate_log_prob(expanded_x)
@@ -179,7 +183,8 @@ class ParamMixture(RandomVariable, Distribution):
     # selecter has shape [n] + [num_components] + batch_shape; change
     # to broadcast with [n] + [num_components] + batch_shape + event_shape.
     event_rank = self.get_event_shape().ndims
-    selecter = tf.reshape(selecter, selecter.shape.as_list() + [1] * event_rank)
+    for _ in range(event_rank):
+      selecter = tf.expand_dims(selecter, -1)
 
     # select the sampled component, sum out the component dimension
     return tf.reduce_sum(self.components.sample(n) * selecter, 1)
