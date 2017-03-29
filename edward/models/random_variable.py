@@ -64,8 +64,7 @@ class RandomVariable(object):
   >>>
   >>> z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
   >>> z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
-  >>> logits = tf.matmul(z1, z2)
-  >>> x = Bernoulli(logits=logits)
+  >>> x = Bernoulli(logits=tf.matmul(z1, z2))
   >>>
   >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
   >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
