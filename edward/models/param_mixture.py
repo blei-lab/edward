@@ -83,38 +83,43 @@ class ParamMixture(RandomVariable, Distribution):
 
       if validate_args:
         if not self._mixing_weights.shape[-1].is_compatible_with(
-            self._components.get_batch_shape()[0]):
+                self._components.get_batch_shape()[0]):
           raise TypeError("Last dimension of mixing_weights must match with "
-                           "the first dimension of components.")
+                          "the first dimension of components.")
         elif not self._mixing_weights.shape[:-1].is_compatible_with(
-            self._components.get_batch_shape()[1:]):
-          raise TypeError("Dimensions of mixing_weights are not compatible with "
-                          "the dimensions of components.")
+                self._components.get_batch_shape()[1:]):
+          raise TypeError("Dimensions of mixing_weights are not compatible "
+                          "with the dimensions of components.")
 
-      with tf.name_scope('means'):
-        comp_means = self._components.mean()
-        comp_vars = self._components.variance()
-        comp_mean_sq = tf.square(comp_means) + comp_vars
+      self._mean_val = None
+      self._variance_val = None
+      self._stddev_val = None
+      if self._cat.p.shape.ndims <= 1:
+        with tf.name_scope('means'):
+          try:
+            comp_means = self._components.mean()
+            comp_vars = self._components.variance()
+            comp_mean_sq = tf.square(comp_means) + comp_vars
 
-        # weights has shape batch_shape + [num_components]; change
-        # to broadcast with [num_components] + batch_shape + event_shape.
-        if self._cat.p.shape.ndims > 1:
-          # TODO shapes are not compatible; weights must have scalar batch_shape
-          raise NotImplementedError()
+            # weights has shape batch_shape + [num_components]; change
+            # to broadcast with [num_components] + batch_shape + event_shape.
+            # The below reshaping only works for empty batch_shape.
+            weights = self._cat.p
+            event_rank = self._components.get_event_shape().ndims
+            weights = tf.reshape(
+                weights, weights.shape.as_list() + [1] * event_rank)
 
-        weights = self._cat.p
-        event_rank = self._components.get_event_shape().ndims
-        weights = tf.reshape(
-            weights, weights.shape.as_list() + [1] * event_rank)
-
-        self._mean_val = tf.reduce_sum(comp_means * weights, 0,
-                                       name='mean')
-        mean_sq_val = tf.reduce_sum(comp_mean_sq * weights, 0,
-                                    name='mean_squared')
-        self._variance_val = tf.subtract(mean_sq_val,
-                                         tf.square(self._mean_val),
-                                         name='variance')
-        self._stddev_val = tf.sqrt(self._variance_val, name='stddev')
+            self._mean_val = tf.reduce_sum(comp_means * weights, 0,
+                                           name='mean')
+            mean_sq_val = tf.reduce_sum(comp_mean_sq * weights, 0,
+                                        name='mean_squared')
+            self._variance_val = tf.subtract(mean_sq_val,
+                                             tf.square(self._mean_val),
+                                             name='variance')
+            self._stddev_val = tf.sqrt(self._variance_val, name='stddev')
+          except:
+            # This fails if _components.{mean,variance}() fails.
+            pass
 
       super(ParamMixture, self).__init__(
           dtype=self._components.dtype,
@@ -180,10 +185,19 @@ class ParamMixture(RandomVariable, Distribution):
     return tf.reduce_sum(self.components.sample(n) * selecter, 1)
 
   def _mean(self):
+    if self._mean_val is None:
+      raise NotImplementedError()
+
     return self._mean_val
 
   def _std(self):
+    if self._stddev_val is None:
+      raise NotImplementedError()
+
     return self._stddev_val
 
   def _variance(self):
+    if self._variance_val is None:
+      raise NotImplementedError()
+
     return self._variance_val
