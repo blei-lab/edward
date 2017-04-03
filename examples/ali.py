@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""Adversarially Learned Inference (Dumoulin et al., 2016) or
+  Bidirectional Generative Adversarial Networks (Donahue et al., 2016)
+  for joint learning of generator and inference networks for MNIST
+"""
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
@@ -12,46 +17,6 @@ import tensorflow as tf
 from tensorflow.contrib import slim
 from tensorflow.examples.tutorials.mnist import input_data
 from edward.models import Uniform
-
-
-# In[2]:
-
-def plot(samples):
-  fig = plt.figure(figsize=(4, 4))
-  plt.title(str(samples))
-  gs = gridspec.GridSpec(4, 4)
-  gs.update(wspace=0.05, hspace=0.05)
-
-  for i, sample in enumerate(samples):
-    ax = plt.subplot(gs[i])
-    plt.axis('off')
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_aspect('equal')
-    plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
-
-  return fig
-
-ed.set_seed(42)
-
-DATA_DIR = "data/mnist"
-IMG_DIR = "img"
-
-if not os.path.exists(DATA_DIR):
-  os.makedirs(DATA_DIR)
-if not os.path.exists(IMG_DIR):
-  os.makedirs(IMG_DIR)
-
-M = 100  # batch size during training
-d = 50  # latent dimension
-leak = 0.2  # leak parameter for leakyReLU
-hidden_units = 300
-encoder_variance = 0.01  # Set to 0 for deterministic encoder
-
-
-mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
-x_ph = tf.placeholder(tf.float32, [M, 784])
-z_ph = tf.placeholder(tf.float32, [M, d])
 
 
 def leakyrelu(x, alpha=leak):
@@ -70,11 +35,6 @@ def gen_data(z):
   return x
 
 
-with tf.variable_scope("Gen"):
-  xf = gen_data(z_ph)
-  zf = gen_latent(x_ph)
-
-
 def discriminative_network(x, y):
   #  Discriminator must output probability in logits
   inputs = tf.concat([x, y], 1)
@@ -83,7 +43,50 @@ def discriminative_network(x, y):
   return logit
 
 
-# Inference Init:
+def plot(samples):
+  fig = plt.figure(figsize=(4, 4))
+  plt.title(str(samples))
+  gs = gridspec.GridSpec(4, 4)
+  gs.update(wspace=0.05, hspace=0.05)
+
+  for i, sample in enumerate(samples):
+    ax = plt.subplot(gs[i])
+    plt.axis('off')
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_aspect('equal')
+    plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
+
+  return fig
+
+
+ed.set_seed(42)
+
+DATA_DIR = "data/mnist"
+IMG_DIR = "img"
+
+if not os.path.exists(DATA_DIR):
+  os.makedirs(DATA_DIR)
+if not os.path.exists(IMG_DIR):
+  os.makedirs(IMG_DIR)
+
+M = 100  # batch size during training
+d = 50  # latent dimension
+leak = 0.2  # leak parameter for leakyReLU
+hidden_units = 300
+encoder_variance = 0.01  # Set to 0 for deterministic encoder
+
+# DATA. MNIST batches are fed at training time.
+mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
+x_ph = tf.placeholder(tf.float32, [M, 784])
+z_ph = tf.placeholder(tf.float32, [M, d])
+
+# MODEL
+with tf.variable_scope("Gen"):
+  xf = gen_data(z_ph)
+  zf = gen_latent(x_ph)
+
+# INFERENCE:
 optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
 inference = ed.ALI(
@@ -91,8 +94,6 @@ inference = ed.ALI(
 inference.initialize(
     optimizer=optimizer, optimizer_d=optimizer_d, n_iter=100000, n_print=3000)
 
-
-# Initialize The Session
 sess = ed.get_session()
 init_op = tf.global_variables_initializer()
 sess.run(init_op)
