@@ -164,7 +164,7 @@ class ParamMixture(RandomVariable, Distribution):
   def _get_event_shape(self):
     return self.components.get_event_shape()
 
-### This will work in TF 1.1
+#   # This will work in TF 1.1
 #   @distribution_util.AppendDocstring(
 #     'Note that this function returns the conditional log probability of the '
 #     'observed variable given the categorical variable `cat`. For the '
@@ -179,7 +179,8 @@ class ParamMixture(RandomVariable, Distribution):
       log_probs = self.components.log_prob(expanded_x)
 
     selecter = tf.one_hot(self.cat, self.num_components, dtype=tf.float32,
-                          axis=self.components.get_shape().ndims - 1 - batch_event_rank)
+                          axis=self.components.get_shape().ndims -
+                          1 - batch_event_rank)
     return tf.reduce_sum(log_probs * selecter, -1 - batch_event_rank)
 
   def conjugate_log_prob(self):
