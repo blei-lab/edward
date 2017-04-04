@@ -9,6 +9,19 @@ import tensorflow as tf
 from edward.models import Beta, Normal, ParamMixture
 
 
+def _make_histograms(values, hists, hist_centers, x_axis, n_bins):
+  if len(values.shape) > 1:
+    for i in range(values.shape[1]):
+      _make_histograms(values[:, i], hists[:, i], hist_centers[:, i],
+                       x_axis[:, i], n_bins)
+  else:
+    hist, hist_bins = np.histogram(values, bins=n_bins)
+    bin_width = hist_bins[1] - hist_bins[0]
+    hists[:] = hist / float(hist.sum())
+    hist_centers[:] = 0.5 * (hist_bins[1:] + hist_bins[:-1])
+    x_axis[:n_bins] = hist_centers
+
+
 class test_param_mixture_class(tf.test.TestCase):
 
   def _test(self, pi, params, dist):
@@ -16,37 +29,73 @@ class test_param_mixture_class(tf.test.TestCase):
     with g.as_default():
       tf.set_random_seed(10003)
 
-      N = 10000
+      N = 50000
 
       x = ParamMixture(pi, params, dist, sample_shape=N)
       cat = x.cat
       components = x.components
+
+      marginal_logp = x.marginal_log_prob(x)
+      cond_logp = x.log_prob(x)
+
       comp_means = components.mean()
       comp_stddevs = components.std()
       marginal_mean = x.mean()
       marginal_stddev = x.std()
       marginal_var = x.variance()
 
+    sess = self.test_session(graph=g)
     with self.test_session(graph=g) as sess:
-      to_eval = [x, cat, comp_means, comp_stddevs, marginal_mean,
-                 marginal_stddev, marginal_var]
+      to_eval = [x, cat, components, comp_means, comp_stddevs, marginal_mean,
+                 marginal_stddev, marginal_var, marginal_logp, cond_logp]
       vals = sess.run(to_eval)
       vals = {k: v for k, v in zip(to_eval, vals)}
 
-    self.assertAllClose(vals[x].mean(0), vals[marginal_mean],
-                        rtol=0.01, atol=0.01)
-    self.assertAllClose(vals[x].std(0), vals[marginal_stddev],
-                        rtol=0.01, atol=0.01)
-    self.assertAllClose(vals[x].var(0), vals[marginal_var],
-                        rtol=0.01, atol=0.01)
-    for k in range(x.num_components):
-      selector = (vals[cat] == k)
-      self.assertAllClose(selector.mean(), pi[k], rtol=0.01, atol=0.01)
-      x_k = vals[x][selector]
-      self.assertAllClose(x_k.mean(0), vals[comp_means][k],
-                          rtol=0.05, atol=0.05)
-      self.assertAllClose(x_k.std(0), vals[comp_stddevs][k],
-                          rtol=0.05, atol=0.05)
+      # Test that marginal statistics are reasonable
+      self.assertAllClose(vals[x].mean(0), vals[marginal_mean],
+                          rtol=0.01, atol=0.01)
+      self.assertAllClose(vals[x].std(0), vals[marginal_stddev],
+                          rtol=0.01, atol=0.01)
+      self.assertAllClose(vals[x].var(0), vals[marginal_var],
+                          rtol=0.01, atol=0.01)
+
+      # Test that per-component statistics are reasonable
+      for k in range(x.num_components):
+        selector = (vals[cat] == k)
+        self.assertAllClose(selector.mean(), pi[k], rtol=0.01, atol=0.01)
+        x_k = vals[x][selector]
+        self.assertAllClose(x_k.mean(0), vals[comp_means][k],
+                            rtol=0.05, atol=0.05)
+        self.assertAllClose(x_k.std(0), vals[comp_stddevs][k],
+                            rtol=0.05, atol=0.05)
+
+      n_bins = 100
+      x_hists = np.zeros((n_bins,) + vals[x].shape[1:])
+      hist_centers = np.zeros_like(x_hists)
+      x_axis = np.zeros((N,) + vals[x].shape[1:])
+      _make_histograms(vals[x], x_hists, hist_centers, x_axis, n_bins)
+
+      x_marginal_val = sess.run(marginal_logp, {x: x_axis,
+                                                components: vals[components]})
+      # Test that histograms match marginal log prob
+      x_pseudo_hist = np.exp(x_marginal_val[:n_bins])
+      self.assertAllClose(x_pseudo_hist.sum(0) * (x_axis[1] - x_axis[0]), 1.,
+                          rtol=0.1, atol=0.1)
+      x_pseudo_hist /= x_pseudo_hist.sum(0, keepdims=True)
+      self.assertLess(abs(x_pseudo_hist - x_hists).sum(0).mean(), 0.1)
+
+      # Test that histograms match conditional log prob
+      for k in xrange(pi.shape[-1]):
+        k_cat = k + np.zeros(x_axis.shape, np.int32)
+        x_vals_k = sess.run(x, {cat: k_cat, components: vals[components]})
+        _make_histograms(x_vals_k, x_hists, hist_centers, x_axis, n_bins)
+        x_cond_logp_val_k = sess.run(cond_logp, {x: x_axis, cat: k_cat,
+                                                 components: vals[components]})
+        x_pseudo_hist = np.exp(x_cond_logp_val_k[:n_bins])
+        self.assertAllClose(x_pseudo_hist.sum(0) * (x_axis[1] - x_axis[0]), 1.,
+                            rtol=0.1, atol=0.1)
+        x_pseudo_hist /= x_pseudo_hist.sum(0, keepdims=True)
+        self.assertLess(abs(x_pseudo_hist - x_hists).sum(0).mean(), 0.1)
 
   def test_normal(self):
     """Mixture of 3 normal distributions."""
