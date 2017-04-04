@@ -19,17 +19,24 @@ from tensorflow.examples.tutorials.mnist import input_data
 from edward.models import Uniform
 
 
+M = 100  # batch size during training
+d = 50  # latent dimension
+leak = 0.2  # leak parameter for leakyReLU
+hidden_units = 300
+encoder_variance = 0.01  # Set to 0 for deterministic encoder
+
+
 def leakyrelu(x, alpha=leak):
     return tf.maximum(x, alpha * x)
 
 
-def gen_latent(x):
+def gen_latent(x, hidden_units):
   h = slim.fully_connected(x, hidden_units, activation_fn=leakyrelu)
   z = slim.fully_connected(h, d, activation_fn=None)
   return z + np.random.normal(0, encoder_variance, np.shape(z))
 
 
-def gen_data(z):
+def gen_data(z, hidden_units):
   h = slim.fully_connected(z, hidden_units, activation_fn=leakyrelu)
   x = slim.fully_connected(h, 784, activation_fn=tf.sigmoid)
   return x
@@ -70,12 +77,6 @@ if not os.path.exists(DATA_DIR):
 if not os.path.exists(IMG_DIR):
   os.makedirs(IMG_DIR)
 
-M = 100  # batch size during training
-d = 50  # latent dimension
-leak = 0.2  # leak parameter for leakyReLU
-hidden_units = 300
-encoder_variance = 0.01  # Set to 0 for deterministic encoder
-
 # DATA. MNIST batches are fed at training time.
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 x_ph = tf.placeholder(tf.float32, [M, 784])
@@ -83,8 +84,8 @@ z_ph = tf.placeholder(tf.float32, [M, d])
 
 # MODEL
 with tf.variable_scope("Gen"):
-  xf = gen_data(z_ph)
-  zf = gen_latent(x_ph)
+  xf = gen_data(z_ph, hidden_units)
+  zf = gen_latent(x_ph, hidden_units)
 
 # INFERENCE:
 optimizer = tf.train.AdamOptimizer()
