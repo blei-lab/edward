@@ -8,6 +8,8 @@ import tensorflow as tf
 from edward.models.random_variable import RandomVariable
 from tensorflow.contrib.distributions import Distribution
 
+import pdb
+
 try:
   from edward.models.random_variables import Categorical
 except Exception as e:
@@ -201,25 +203,32 @@ class ParamMixture(RandomVariable, Distribution):
                                -1 - batch_event_rank)
 
   def _sample_n(self, n, seed=None):
-    if getattr(self, '_value', False):
+    if getattr(self, '_value', None) is not None:
       cat_sample = self.cat.sample(n)
       comp_sample = self.components.sample(n)
     else:
       cat_sample = self.cat
       comp_sample = self.components
+      # Add a leading dimension like Distribution.sample(1) would.
+      if n == 1:
+        comp_sample = tf.expand_dims(comp_sample, 0)
+        cat_sample = tf.expand_dims(cat_sample, 0)
 
     # TODO avoid sampling n per component
+    batch_event_rank = (self.get_event_shape().ndims +
+                        self.get_batch_shape().ndims)
+    cat_axis = comp_sample.get_shape().ndims - 1 - batch_event_rank
     selecter = tf.one_hot(cat_sample, self.num_components,
-                          axis=1, dtype=self.dtype)
+                          axis=cat_axis, dtype=self.dtype)
 
     # selecter has shape [n] + [num_components] + batch_shape; change
     # to broadcast with [n] + [num_components] + batch_shape + event_shape.
-    event_rank = self.get_event_shape().ndims
-    for _ in range(event_rank):
+    while selecter.get_shape().ndims < comp_sample.get_shape().ndims:
       selecter = tf.expand_dims(selecter, -1)
 
     # select the sampled component, sum out the component dimension
-    return tf.reduce_sum(comp_sample * selecter, 1)
+    result = tf.reduce_sum(comp_sample * selecter, cat_axis)
+    return result
 
   def _mean(self):
     if self._mean_val is None:
