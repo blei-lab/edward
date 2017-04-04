@@ -15,7 +15,12 @@ except Exception as e:
 
 
 class ParamMixture(RandomVariable, Distribution):
-  """A mixture distribution where all components are of the same family."""
+  """A mixture distribution where all components are of the same family.
+
+  Note that this distribution actually represents the conditional
+  distribution of the observable variable given a latent categorical
+  variable `cat` saying which mixture component generated this
+  distribution."""
   def __init__(self,
                mixing_weights,
                component_params,
@@ -159,25 +164,51 @@ class ParamMixture(RandomVariable, Distribution):
   def _get_event_shape(self):
     return self.components.get_event_shape()
 
+### This will work in TF 1.1
+#   @distribution_util.AppendDocstring(
+#     'Note that this function returns the conditional log probability of the '
+#     'observed variable given the categorical variable `cat`. For the '
+#     'marginal log probability, use `marginal_log_prob()`.')
   def _log_prob(self, x, conjugate=False, **kwargs):
-    event_rank = self.get_event_shape().ndims
-    expanded_x = tf.expand_dims(x, -1 - event_rank)
+    batch_event_rank = (self.get_event_shape().ndims +
+                        self.get_batch_shape().ndims)
+    expanded_x = tf.expand_dims(x, -1 - batch_event_rank)
     if conjugate:
       log_probs = self.components.conjugate_log_prob(expanded_x)
     else:
       log_probs = self.components.log_prob(expanded_x)
 
-    # TODO
-    # this seems to select one, rather than weight them?
-    selecter = tf.one_hot(self.cat, self.num_components, dtype=tf.float32)
-    return tf.reduce_sum(log_probs * selecter, -1 - event_rank)
+    selecter = tf.one_hot(self.cat, self.num_components, dtype=tf.float32,
+                          axis=self.components.get_shape().ndims - 1 - batch_event_rank)
+    return tf.reduce_sum(log_probs * selecter, -1 - batch_event_rank)
 
   def conjugate_log_prob(self):
     return self._log_prob(self, conjugate=True)
 
+  def marginal_log_prob(self, x, **kwargs):
+    'The marginal log probability of the observed variable. Sums out `cat`.'
+    batch_event_rank = (self.get_event_shape().ndims +
+                        self.get_batch_shape().ndims)
+    expanded_x = tf.expand_dims(x, -1 - batch_event_rank)
+    log_probs = self.components.log_prob(expanded_x)
+
+    p_ndims = self.cat.p.get_shape().ndims
+    perm = tf.concat([[p_ndims - 1], tf.range(p_ndims - 1)], 0)
+    transposed_p = tf.transpose(self.cat.p, perm)
+
+    return tf.reduce_logsumexp(log_probs + tf.log(transposed_p),
+                               -1 - batch_event_rank)
+
   def _sample_n(self, n, seed=None):
+    if getattr(self, '_value', False):
+      cat_sample = self.cat.sample(n)
+      comp_sample = self.components.sample(n)
+    else:
+      cat_sample = self.cat
+      comp_sample = self.components
+
     # TODO avoid sampling n per component
-    selecter = tf.one_hot(self.cat.sample(n), self.num_components,
+    selecter = tf.one_hot(cat_sample, self.num_components,
                           axis=1, dtype=self.dtype)
 
     # selecter has shape [n] + [num_components] + batch_shape; change
@@ -187,7 +218,7 @@ class ParamMixture(RandomVariable, Distribution):
       selecter = tf.expand_dims(selecter, -1)
 
     # select the sampled component, sum out the component dimension
-    return tf.reduce_sum(self.components.sample(n) * selecter, 1)
+    return tf.reduce_sum(comp_sample * selecter, 1)
 
   def _mean(self):
     if self._mean_val is None:
