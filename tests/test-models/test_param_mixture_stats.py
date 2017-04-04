@@ -85,7 +85,7 @@ class test_param_mixture_class(tf.test.TestCase):
       self.assertLess(abs(x_pseudo_hist - x_hists).sum(0).mean(), 0.1)
 
       # Test that histograms match conditional log prob
-      for k in xrange(pi.shape[-1]):
+      for k in range(pi.shape[-1]):
         k_cat = k + np.zeros(x_axis.shape, np.int32)
         x_vals_k = sess.run(x, {cat: k_cat, components: vals[components]})
         _make_histograms(x_vals_k, x_hists, hist_centers, x_axis, n_bins)
