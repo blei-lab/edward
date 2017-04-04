@@ -56,10 +56,13 @@ class VariationalInference(Inference):
     if var_list is None:
       # Traverse random variable graphs to get default list of variables.
       var_list = set()
+      latent_var_list = set()
+      data_var_list = set()
       trainables = tf.trainable_variables()
       for z, qz in six.iteritems(self.latent_vars):
         if isinstance(z, RandomVariable):
           var_list.update(get_variables(z, collection=trainables))
+          latent_var_list.update(get_variables(z, collection=trainables))
 
         var_list.update(get_variables(qz, collection=trainables))
 
@@ -67,10 +70,28 @@ class VariationalInference(Inference):
         if isinstance(x, RandomVariable) and \
                 not isinstance(qx, RandomVariable):
           var_list.update(get_variables(x, collection=trainables))
+          data_var_list.update(get_variables(x, collection=trainables))
 
       var_list = list(var_list)
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
+
+    if self.logging:
+      #TODO: when var_list is not None
+      tf.summary.scalar("loss", self.loss)
+      for var in latent_var_list:
+        for grad_var_tuple in grads_and_vars:
+          if var == grad_var_tuple[1]:
+            tf.summary.histogram("InferenceWeight_"+var.name, var)
+            tf.summary.histogram("InferenceGradient_" + var.name, grad_var_tuple[0])
+
+      for var in data_var_list:
+        for grad_var_tuple in grads_and_vars:
+          if var == grad_var_tuple[1]:
+            tf.summary.histogram("ModelWeight_" + var.name, var)
+            tf.summary.histogram("ModelGradient_" + var.name, grad_var_tuple[0])
+
+      self.summarize = tf.summary.merge_all()
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
