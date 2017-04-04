@@ -24,14 +24,14 @@ def _make_histograms(values, hists, hist_centers, x_axis, n_bins):
 
 class test_param_mixture_class(tf.test.TestCase):
 
-  def _test(self, pi, params, dist):
+  def _test(self, probs, params, dist):
     g = tf.Graph()
     with g.as_default():
       tf.set_random_seed(10003)
 
       N = 50000
 
-      x = ParamMixture(pi, params, dist, sample_shape=N)
+      x = ParamMixture(probs, params, dist, sample_shape=N)
       cat = x.cat
       components = x.components
 
@@ -39,9 +39,9 @@ class test_param_mixture_class(tf.test.TestCase):
       cond_logp = x.log_prob(x)
 
       comp_means = components.mean()
-      comp_stddevs = components.std()
+      comp_stddevs = components.stddev()
       marginal_mean = x.mean()
-      marginal_stddev = x.std()
+      marginal_stddev = x.stddev()
       marginal_var = x.variance()
 
     sess = self.test_session(graph=g)
@@ -62,7 +62,7 @@ class test_param_mixture_class(tf.test.TestCase):
       # Test that per-component statistics are reasonable
       for k in range(x.num_components):
         selector = (vals[cat] == k)
-        self.assertAllClose(selector.mean(), pi[k], rtol=0.01, atol=0.01)
+        self.assertAllClose(selector.mean(), probs[k], rtol=0.01, atol=0.01)
         x_k = vals[x][selector]
         self.assertAllClose(x_k.mean(0), vals[comp_means][k],
                             rtol=0.05, atol=0.05)
@@ -85,7 +85,7 @@ class test_param_mixture_class(tf.test.TestCase):
       self.assertLess(abs(x_pseudo_hist - x_hists).sum(0).mean(), 0.1)
 
       # Test that histograms match conditional log prob
-      for k in range(pi.shape[-1]):
+      for k in range(probs.shape[-1]):
         k_cat = k + np.zeros(x_axis.shape, np.int32)
         x_vals_k = sess.run(x, {cat: k_cat, components: vals[components]})
         _make_histograms(x_vals_k, x_hists, hist_centers, x_axis, n_bins)
@@ -99,29 +99,33 @@ class test_param_mixture_class(tf.test.TestCase):
 
   def test_normal(self):
     """Mixture of 3 normal distributions."""
-    pi = np.array([0.2, 0.3, 0.5], np.float32)
-    mu = np.array([1.0, 5.0, 7.0], np.float32)
-    sigma = np.array([1.5, 1.5, 1.5], np.float32)
+    probs = np.array([0.2, 0.3, 0.5], np.float32)
+    loc = np.array([1.0, 5.0, 7.0], np.float32)
+    scale = np.array([1.5, 1.5, 1.5], np.float32)
 
-    self._test(pi, {'mu': mu, 'sigma': sigma}, Normal)
+    self._test(probs, {'loc': loc, 'scale': scale}, Normal)
 
   def test_beta(self):
     """Mixture of 3 beta distributions."""
-    pi = np.array([0.2, 0.3, 0.5], np.float32)
-    a = np.array([2.0, 1.0, 0.5], np.float32)
-    b = a + 2.0
+    probs = np.array([0.2, 0.3, 0.5], np.float32)
+    conc1 = np.array([2.0, 1.0, 0.5], np.float32)
+    conc0 = conc1 + 2.0
 
-    self._test(pi, {'a': a, 'b': b}, Beta)
+    self._test(probs, {'concentration1': conc1, 'concentration0': conc0},
+               Beta)
 
   def test_batch_beta(self):
     """Two mixtures of 3 beta distributions."""
-    pi = np.array([[0.2, 0.3, 0.5], [0.2, 0.3, 0.5]], np.float32)
-    a = np.array([[2.0, 0.5], [1.0, 1.0], [0.5, 2.0]], np.float32)
-    b = a + 2.0
+    probs = np.array([[0.2, 0.3, 0.5], [0.2, 0.3, 0.5]], np.float32)
+    conc1 = np.array([[2.0, 0.5], [1.0, 1.0], [0.5, 2.0]], np.float32)
+    conc0 = conc1 + 2.0
 
-    # self._test(pi, {'a': a, 'b': b}, Beta)
+    # self._test(probs, {'concentration1': conc1, 'concentration0': conc0},
+    #            Beta)
     self.assertRaises(NotImplementedError,
-                      self._test, pi, {'a': a, 'b': b}, Beta)
+                      self._test, probs,
+                      {'concentration1': conc1, 'concentration0': conc0},
+                      Beta)
 
 if __name__ == '__main__':
   tf.test.main()
