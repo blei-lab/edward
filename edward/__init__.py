@@ -9,7 +9,7 @@ from edward import util
 # Direct imports for convenience
 from edward.criticisms import evaluate, ppc
 from edward.inferences import Inference, MonteCarlo, VariationalInference, \
-    HMC, MetropolisHastings, SGLD, SGHMC, \
+    HMC, MetropolisHastings, SGLD, SGHMC, mSGNHT, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
     GANInference, WGANInference, ImplicitKLqp, MAP, Laplace
