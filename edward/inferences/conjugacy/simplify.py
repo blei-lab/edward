@@ -48,24 +48,19 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
   return tuple(result)
 
 
-def as_float(x):
+def is_number(x):
   if isinstance(x, tf.Tensor):
-    # TODO(mhoffman): Worry about complex numbers?
-    if x.dtype in [tf.float16, tf.float32, tf.float64]:
-      return x
-    else:
-      return tf.cast(x, tf.float32)
+    return True
   try:
-    result = float(x)
-    return result
+    float(x)
+    return True
   except:
-    return None
+    return False
 
 
 def reconstruct_expr(expr):
-  float_val = as_float(expr[0])
-  if float_val is not None:
-    return float_val
+  if is_number(expr[0]):
+    return expr[0]
   if expr[0] == '#x':
     raise ValueError('#x cannot appear in expr to be reconstructed.')
   args = [reconstruct_expr(i) for i in expr[1:]]
@@ -231,7 +226,7 @@ def identity_simplify(expr, op_name, identity_val):
   new_args = []
   did_something = False
   for i in expr[1:]:
-    if as_float(i[0]) != identity_val:
+    if i[0] != identity_val:
       new_args.append(i)
     else:
       did_something = True
@@ -257,7 +252,7 @@ def mul_zero_simplify(expr):
   if expr[0] != '#Mul':
     return None
   for i in expr[1:]:
-    if as_float(i[0]) == 0:
+    if i[0] == 0:
       return (0,)
 
 

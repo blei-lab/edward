@@ -24,9 +24,9 @@ class test_simplify_class(tf.test.TestCase):
     self.assertEqual(sess.run(ab), 2.)
     self.assertEqual(sess.run(abc), 6.)
 
-  def test_as_float(self):
-    self.assertEqual(simplify.as_float(1), 1.)
-    self.assertIsNone(simplify.as_float('one'))
+  def test_is_number(self):
+    self.assertTrue(simplify.is_number(1))
+    self.assertFalse(simplify.is_number('one'))
 
   def test_identity_op_simplify(self):
     expr = ('#Identity', ('#Mul', ('#Identity', ('#x',)),
