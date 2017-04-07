@@ -62,7 +62,7 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
 def as_float(x):
   if isinstance(x, NodeWrapper):
     # TODO(mhoffman): Worry about complex numbers?
-    if x.node.dtype in [tf.float16, tf.float32, tf.float64]:
+    if x.node.dtype in [tf.float16, tf.float32, tf.float64, tf.float128]:
       return x.node
     else:
       return tf.cast(x.node, tf.float32)
@@ -80,7 +80,7 @@ def reconstruct_expr(expr):
   if expr[0] == '#x':
     raise ValueError('#x cannot appear in expr to be reconstructed.')
   args = [reconstruct_expr(i) for i in expr[1:]]
-  if expr[0][:5] == '#CPow':
+  if str(expr[0])[:5] == '#CPow':
     return tf.pow(args[0], np.float32(expr[0][5:]))
   if expr[0][0] == '#':
     tf_fn = _extractable_nodes.get(expr[0][1:], None)
@@ -161,9 +161,9 @@ def power_op_simplify(expr):
 
 @_register_simplify_fn
 def pow_simplify(expr):
-  if expr[0][:5] != '#CPow':
+  if str(expr[0])[:5] != '#CPow':
     return None
-  if expr[1][0][:5] != '#CPow':
+  if str(expr[1][0])[:5] != '#CPow':
     return None
 
   op_power = float(expr[0][5:])
@@ -177,8 +177,8 @@ def pow_simplify(expr):
 
 @_register_simplify_fn
 def log_pow_simplify(expr):
-  if expr[0] == '#Log' and expr[1][0][:5] == '#CPow':
-    return ('#Mul', (expr[1][0][5:],), ('#Log', expr[1][1]))
+  if expr[0] == '#Log' and str(expr[1][0])[:5] == '#CPow':
+    return ('#Mul', (float(expr[1][0][5:]),), ('#Log', expr[1][1]))
   if expr[0] == '#Log' and expr[1][0] == '#Pow':
     return ('#Mul', expr[1][2], ('#Log', expr[1][1]))
 
@@ -191,7 +191,7 @@ def log_mul_simplify(expr):
 
 @_register_simplify_fn
 def pow_mul_simplify(expr):
-  if expr[0][:5] == '#CPow' and expr[1][0] == '#Mul':
+  if str(expr[0])[:5] == '#CPow' and expr[1][0] == '#Mul':
     return ('#Mul',) + tuple(((expr[0], i) for i in expr[1][1:]))
   if expr[0] == '#Pow' and expr[1][0] == '#Mul':
     return ('#Mul',) + tuple((('#Pow', i, expr[2]) for i in expr[1][1:]))
@@ -269,7 +269,7 @@ def mul_zero_simplify(expr):
     return None
   for i in expr[1:]:
     if as_float(i[0]) == 0:
-      return ('0',)
+      return (0,)
 
 
 @_register_simplify_fn
@@ -280,7 +280,7 @@ def square_add_simplify(expr):
   for i in range(1, len(expr[1])):
     terms.append(('#CPow2.0000e+00', expr[1][i]))
     for j in range(i + 1, len(expr[1])):
-      terms.append(('#Mul', ('2.0',), expr[1][i], expr[1][j]))
+      terms.append(('#Mul', (2.0,), expr[1][i], expr[1][j]))
   return ('#Add',) + tuple(terms)
 
 
