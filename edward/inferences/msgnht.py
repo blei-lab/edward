@@ -48,7 +48,7 @@ class mSGNHT(MonteCarlo):
     """
     super(mSGNHT, self).__init__(*args, **kwargs)
 
-  def initialize(self, D=0.75, step_size=0.005, *args, **kwargs):
+  def initialize(self, D=0.75, step_size=0.0001, *args, **kwargs):
     """
     Parameters
     ----------
@@ -89,7 +89,7 @@ class mSGNHT(MonteCarlo):
 
     for z in six.iterkeys(self.latent_vars):
       # Simulate "A" step of the integrator
-      first_sample[z] = self.p[z] * 0.5 * self.h
+      first_sample[z] = old_sample[z] + self.p[z] * 0.5 * self.h
       first_xi_sample[z] = self.xi[z] + (tf.multiply(self.p[z], self.p[z]) - 1) * self.h * 0.5
 
       # Simulate "B" step of the integrator
@@ -106,9 +106,8 @@ class mSGNHT(MonteCarlo):
 
       # Simulate "B" step of the integrator
       final_p_sample[z] = tf.multiply(tf.exp(- first_xi_sample[z] * self.h * 0.5), second_p_sample[z])
-
       # Simulate "A" step of the integrator
-      final_sample[z] = final_p_sample[z] * 0.5 * self.h
+      final_sample[z] = first_sample[z] + final_p_sample[z] * 0.5 * self.h
       final_xi_sample[z] = first_xi_sample[z] + (tf.multiply(final_p_sample[z], final_p_sample[z]) - 1) * self.h * 0.5
 
     # Update Empirical random variables.
