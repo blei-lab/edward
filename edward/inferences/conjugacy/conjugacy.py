@@ -84,11 +84,11 @@ def get_log_joint(blanket):
 def complete_conditional(rv, blanket, log_joint=None):
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
-    extended_blanket = copy(blanket)
+    blanket = set([rv] + list(blanket))
     if log_joint is None:
-      log_joint = get_log_joint(extended_blanket)
+      log_joint = get_log_joint(blanket)
     else:
-      log_joint = log_joint(extended_blanket)
+      log_joint = log_joint(blanket)
 
     # Pull out the nodes that are nonlinear functions of rv into s_stats.
     stop_nodes = set([i.value() for i in blanket])
