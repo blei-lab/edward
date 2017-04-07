@@ -1,15 +1,18 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import seaborn as sns
 
 
 def ppc_density_plot(y, y_rep):
-  """
-  Cretes 1D kernel density plot comparing data to samples from posterior.
+  """Creates 1D kernel density plot comparing data to samples from posterior.
 
   Parameters
   ----------
-  y : numpy array
+  y : np.ndarray
     A 1-D numpy array
-  y_rep : numpy array
+  y_rep : np.ndarray
     A 2-D numpy array where rows represent different samples from posterior
 
   Returns
@@ -34,18 +37,17 @@ def ppc_density_plot(y, y_rep):
   return ax
 
 def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
-  """
-  Cretes histogram plot comparing data to samples from posterior.
+  """Creates histogram plot comparing data to samples from posterior.
 
   Parameters
   ----------
-  y_stats : numpy array
-    A 1D numpy array
-  yrep_stats : float
+  y_stats : float
     Float representing statistic value of observed data
-  stat_name : string
+  yrep_stats : np.ndarray
+    A 1D numpy array
+  stat_name : string, optional
     Optional string value for including statistic name in legend
-  Keyword Arguments
+  **kwargs
     Keyword arguments used by seaborn.distplot can be given to customize plot
 
 
