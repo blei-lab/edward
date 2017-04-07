@@ -27,7 +27,7 @@ def ppc_density_plot(y, y_rep):
   n = y_rep.shape[0]
 
   for i in range(n):
-    ax = sns.kdeplot(y_rep[i,:], color="maroon", alpha=0.2, linewidth=0.8)
+    ax = sns.kdeplot(y_rep[i, :], color="maroon", alpha=0.2, linewidth=0.8)
 
   y_line = sns.plt.Line2D([], [], color='maroon', label='y')
   y_rep_line = sns.plt.Line2D([], [], color='maroon', alpha=0.2, label='y_rep')
@@ -38,6 +38,7 @@ def ppc_density_plot(y, y_rep):
   ax.legend(handles, labels)
 
   return ax
+
 
 def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
   """Creates histogram plot comparing data to samples from posterior.

@@ -13,9 +13,9 @@ def test_ppc_density_plot():
 
   ppc_density_plot(y, y_rep)
 
+
 def test_ppc_stat_hist_plot():
   y = np.random.randn(20)
   t = 0.0
 
   ppc_stat_hist_plot(t, y, stat_name="mean", bins=10)
-
