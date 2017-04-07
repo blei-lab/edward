@@ -6,17 +6,6 @@ import numpy as np
 import tensorflow as tf
 
 
-class NodeWrapper:
-  def __init__(self, node):
-    self.node = node
-
-  def __getitem__(self, key):
-    return self.node.op.type[key]
-
-  def __str__(self):
-    return str(self.node)
-
-
 def _mul_n(x):
   if len(x) == 2:
     return tf.multiply(x[0], x[1])
@@ -47,12 +36,12 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
   if node == base_node:
     return ('#x',)
   elif node in stop_nodes:
-    return (NodeWrapper(node),)
+    return (node,)
 
   if node.op.type in _extractable_nodes:
     result = ['#%s' % str(node.op.type)]
   else:
-    result = [NodeWrapper(node)]
+    result = [node]
 
   result += [symbolic_suff_stat(i, base_node, stop_nodes)
              for i in node.op.inputs]
@@ -60,12 +49,12 @@ def symbolic_suff_stat(node, base_node, stop_nodes):
 
 
 def as_float(x):
-  if isinstance(x, NodeWrapper):
+  if isinstance(x, tf.Tensor):
     # TODO(mhoffman): Worry about complex numbers?
-    if x.node.dtype in [tf.float16, tf.float32, tf.float64, tf.float128]:
-      return x.node
+    if x.dtype in [tf.float16, tf.float32, tf.float64]:
+      return x
     else:
-      return tf.cast(x.node, tf.float32)
+      return tf.cast(x, tf.float32)
   try:
     result = float(x)
     return result
@@ -312,9 +301,9 @@ def add_const_simplify(expr):
 @_register_simplify_fn
 def one_m_simplify(expr):
   '''Replaces ("#Sub", (<wrapped constant 1>,), (.)) with ("#One_minus", .).'''
-  if expr[0] != '#Sub' or not isinstance(expr[1][0], NodeWrapper):
+  if expr[0] != '#Sub' or not isinstance(expr[1][0], tf.Tensor):
     return None
-  value = tf.contrib.util.constant_value(expr[1][0].node.op.outputs[0])
+  value = tf.contrib.util.constant_value(expr[1][0].op.outputs[0])
   if value == 1.0:
     return ('#One_minus', expr[2])
 
@@ -322,7 +311,7 @@ def one_m_simplify(expr):
 @_register_simplify_fn
 def cast_simplify(expr):
   '''Replaces (<wrapped cast>, (.)) with (.).'''
-  if isinstance(expr[0], NodeWrapper) and expr[0].node.op.type == 'Cast':
+  if isinstance(expr[0], tf.Tensor) and expr[0].op.type == 'Cast':
     return expr[1]
 
 
