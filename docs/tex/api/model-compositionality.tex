@@ -163,26 +163,27 @@ For more details, see the
 tutorial. This approach is also useful for Poisson process models.
 
 In the lazy approach, we work directly on the infinite-dimensional space via
-\href{https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html}{control flow operations}
+\href{https://www.tensorflow.org/api_guides/python/control_flow_ops}{control flow operations}
 in TensorFlow. At runtime, the control flow will execute only the
 necessary computation in order to terminate. As an example, Edward
 provides a \texttt{DirichletProcess} random variable.
 
 \begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
 from edward.models import DirichletProcess, Normal
 
 def plot_dirichlet_process(alpha):
   with tf.Session() as sess:
-    dp = DirichletProcess(alpha, Normal, mu=0.0, sigma=1.0)
+    dp = DirichletProcess(alpha, Normal(0.0, 1.0))
     samples = sess.run(dp.sample(1000))
     plt.hist(samples, bins=100, range=(-3.0, 3.0))
     plt.title("DP({0}, N(0, 1))".format(alpha))
     plt.show()
 
 # Dirichlet process with high concentration
-plot_dirichlet_process(alpha=1.0)
+plot_dirichlet_process(1.0)
 # Dirichlet process with low concentration (more spread out)
-plot_dirichlet_process(alpha=50.0)
+plot_dirichlet_process(50.0)
 \end{lstlisting}
 
 \includegraphics[width=350px]{/images/dirichlet-process-fig0.png}

@@ -8,6 +8,7 @@ from __future__ import print_function
 
 import edward as ed
 import numpy as np
+import six
 import tensorflow as tf
 
 from edward.models import Bernoulli, Beta
@@ -24,14 +25,13 @@ x = Bernoulli(p=pi, sample_shape=10)
 # COMPLETE CONDITIONAL
 pi_cond = ed.complete_conditional(pi)
 
-sess = tf.Session()
-init = tf.global_variables_initializer()
-sess.run(init)
+sess = ed.get_session()
+tf.global_variables_initializer().run()
 
 print('p(pi | x) type:', pi_cond.parameters['name'])
-relevant_params = {key: val for key, val in pi_cond.parameters.iteritems()
-                   if isinstance(val, tf.Tensor)}
-param_vals = sess.run(relevant_params.values(), {x: x_data})
+param_vals = sess.run({key: val for
+                       key, val in six.iteritems(pi_cond.parameters)
+                       if isinstance(val, tf.Tensor)}, {x: x_data})
 print('parameters:')
-for i, j in enumerate(relevant_params.keys()):
-    print('%s:\t%.3f' % (j, param_vals[i]))
+for key, val in six.iteritems(param_vals):
+  print('%s:\t%.3f' % (key, val))

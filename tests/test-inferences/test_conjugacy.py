@@ -17,8 +17,8 @@ class test_conjugacy_class(tf.test.TestCase):
     z_cond = ed.complete_conditional(z, [z])
     self.assertIsInstance(z_cond, rvs.Bernoulli)
 
-    sess = tf.InteractiveSession()
-    p_val = sess.run(z_cond.p)
+    with self.test_session() as sess:
+      p_val = sess.run(z_cond.p)
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
@@ -28,8 +28,8 @@ class test_conjugacy_class(tf.test.TestCase):
     z_cond = ed.complete_conditional(z, [])
     self.assertIsInstance(z_cond, rvs.Bernoulli)
 
-    sess = tf.InteractiveSession()
-    p_val = sess.run(z_cond.p)
+    with self.test_session() as sess:
+      p_val = sess.run(z_cond.p)
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
@@ -39,8 +39,8 @@ class test_conjugacy_class(tf.test.TestCase):
     z_cond = ed.complete_conditional(z)
     self.assertIsInstance(z_cond, rvs.Bernoulli)
 
-    sess = tf.InteractiveSession()
-    p_val = sess.run(z_cond.p)
+    with self.test_session() as sess:
+      p_val = sess.run(z_cond.p)
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
@@ -56,8 +56,8 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertIsInstance(pi_cond, rvs.Beta)
 
-    sess = tf.InteractiveSession()
-    a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
+    with self.test_session() as sess:
+      a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
 
     self.assertAllClose(a_val, a0 + x_data.sum())
     self.assertAllClose(b_val, b0 + (1 - x_data).sum())
@@ -74,8 +74,10 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertIsInstance(lam_cond, rvs.Gamma)
 
-    sess = tf.InteractiveSession()
-    alpha_val, beta_val = sess.run([lam_cond.alpha, lam_cond.beta], {x: x_data})
+    with self.test_session() as sess:
+      alpha_val, beta_val = sess.run(
+          [lam_cond.alpha, lam_cond.beta], {x: x_data})
+
     self.assertAllClose(alpha_val, alpha0 + x_data.sum())
     self.assertAllClose(beta_val, beta0 + len(x_data))
 
@@ -93,9 +95,9 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertIsInstance(beta_cond, rvs.Gamma)
 
-    sess = tf.InteractiveSession()
-    alpha_val, beta_val = sess.run([beta_cond.alpha, beta_cond.beta],
-                                   {x: x_data})
+    with self.test_session() as sess:
+      alpha_val, beta_val = sess.run([beta_cond.alpha, beta_cond.beta],
+                                     {x: x_data})
     self.assertAllClose(alpha_val, alpha0 + alpha_likelihood * len(x_data))
     self.assertAllClose(beta_val, beta0 + x_data.sum())
 
@@ -113,9 +115,9 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertIsInstance(beta_cond, rvs.Gamma)
 
-    sess = tf.InteractiveSession()
-    alpha_val, beta_val = sess.run([beta_cond.alpha, beta_cond.beta],
-                                   {x: x_data})
+    with self.test_session() as sess:
+      alpha_val, beta_val = sess.run([beta_cond.alpha, beta_cond.beta],
+                                     {x: x_data})
     self.assertAllClose(alpha_val, alpha0 + alpha_likelihood * len(x_data))
     self.assertAllClose(beta_val, beta0 + alpha_likelihood * x_data.sum())
 
@@ -132,8 +134,8 @@ class test_conjugacy_class(tf.test.TestCase):
     mu_cond = ed.complete_conditional(mu, [mu, x])
     self.assertIsInstance(mu_cond, rvs.Normal)
 
-    sess = tf.InteractiveSession()
-    mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
+    with self.test_session() as sess:
+      mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
 
     self.assertAllClose(sigma_val, (1.0 / sigma0**2 +
                                     len(x_data) / sigma_likelihood**2) ** -0.5)
@@ -156,8 +158,8 @@ class test_conjugacy_class(tf.test.TestCase):
     mu_cond = ed.complete_conditional(mu, [mu, x])
     self.assertIsInstance(mu_cond, rvs.Normal)
 
-    sess = tf.InteractiveSession()
-    mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
+    with self.test_session() as sess:
+      mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
 
     self.assertAllClose(sigma_val,
                         (1.0 / sigma0**2 +
@@ -181,8 +183,8 @@ class test_conjugacy_class(tf.test.TestCase):
     blanket = [theta, x]
     theta_cond = ed.complete_conditional(theta, blanket)
 
-    sess = tf.InteractiveSession()
-    alpha_val = sess.run(theta_cond.alpha, {x: x_data})
+    with self.test_session() as sess:
+      alpha_val = sess.run(theta_cond.alpha, {x: x_data})
 
     self.assertAllClose(alpha_val, np.array([6.0, 5.0, 4.0, 3.0], np.float32))
 
@@ -211,10 +213,10 @@ class test_conjugacy_class(tf.test.TestCase):
     pi_cond = ed.complete_conditional(pi, blanket)
     z_cond = ed.complete_conditional(z, blanket)
 
-    sess = tf.InteractiveSession()
-    pi_cond_alpha, mu_cond_mu, mu_cond_sigma, z_cond_p = (
-        sess.run([pi_cond.alpha, mu_cond.mu, mu_cond.sigma, z_cond.p],
-                 {z: z_val, x: x_val, pi: pi_val, mu: mu_val}))
+    with self.test_session() as sess:
+      pi_cond_alpha, mu_cond_mu, mu_cond_sigma, z_cond_p = (
+          sess.run([pi_cond.alpha, mu_cond.mu, mu_cond.sigma, z_cond.p],
+                   {z: z_val, x: x_val, pi: pi_val, mu: mu_val}))
 
     true_pi = pi_alpha + np.unique(z_val, return_counts=True)[1]
     self.assertAllClose(pi_cond_alpha, true_pi)

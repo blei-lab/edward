@@ -8,7 +8,7 @@ import tensorflow as tf
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import copy
+from edward.util import check_latent_vars, copy
 
 try:
   from edward.models import Uniform
@@ -54,6 +54,7 @@ class MetropolisHastings(MonteCarlo):
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
     >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
     """
+    check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
     super(MetropolisHastings, self).__init__(latent_vars, data)
 

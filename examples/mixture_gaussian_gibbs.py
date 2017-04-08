@@ -18,24 +18,24 @@ from edward.models import Dirichlet, Categorical, InverseGamma, ParamMixture, \
 plt.style.use('ggplot')
 
 # Generate data
-true_mu = np.array([-1., 0., 1.], np.float32) * 10
-true_sigmasq = np.array([1.**2, 2.**2, 3.**2], np.float32)
+true_mu = np.array([-1.0, 0.0, 1.0], np.float32) * 10
+true_sigmasq = np.array([1.0**2, 2.0**2, 3.0**2], np.float32)
 true_pi = np.array([0.2, 0.3, 0.5], np.float32)
 N = 10000
 K = len(true_mu)
 true_z = np.random.choice(np.arange(K), size=N, p=true_pi)
-x_val = true_mu[true_z] + np.random.randn(N) * np.sqrt(true_sigmasq[true_z])
+x_data = true_mu[true_z] + np.random.randn(N) * np.sqrt(true_sigmasq[true_z])
 
 # Prior hyperparameters
 pi_alpha = 1. + np.zeros(K, dtype=np.float32)
 mu_sigma = np.std(true_mu)
-sigmasq_alpha = 1.
-sigmasq_beta = 2.
+sigmasq_alpha = 1.0
+sigmasq_beta = 2.0
 
 # Model
 pi = Dirichlet(pi_alpha)
-mu = Normal(0., mu_sigma, sample_shape=[K])
-sigmasq = InverseGamma(sigmasq_alpha, sigmasq_beta, sample_shape=[K])
+mu = Normal(0.0, mu_sigma, sample_shape=K)
+sigmasq = InverseGamma(sigmasq_alpha, sigmasq_beta, sample_shape=K)
 x = ParamMixture(pi, {'mu': mu, 'sigma': tf.sqrt(sigmasq)}, Normal,
                  sample_shape=N)
 z = x.cat
@@ -59,7 +59,7 @@ print('sigmasq:', sigmasq_est)
 print()
 
 # Gibbs sampler
-cond_dict = {pi: pi_est, mu: mu_est, sigmasq: sigmasq_est, z: z_est, x: x_val}
+cond_dict = {pi: pi_est, mu: mu_est, sigmasq: sigmasq_est, z: z_est, x: x_data}
 t0 = time()
 T = 500
 for t in range(T):
@@ -88,7 +88,7 @@ print()
 
 plt.figure(figsize=[10, 10])
 plt.subplot(2, 1, 1)
-plt.hist(x_val, 50)
+plt.hist(x_data, 50)
 plt.title('Empirical Distribution of $x$')
 plt.xlabel('$x$')
 plt.ylabel('frequency')

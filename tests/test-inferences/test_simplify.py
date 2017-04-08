@@ -18,9 +18,9 @@ class test_simplify_class(tf.test.TestCase):
     ab = simplify._mul_n([a, b])
     abc = simplify._mul_n([a, b, c])
 
-    sess = tf.InteractiveSession()
-    self.assertEqual(sess.run(ab), 2.0)
-    self.assertEqual(sess.run(abc), 6.0)
+    with self.test_session() as sess:
+      self.assertEqual(sess.run(ab), 2.0)
+      self.assertEqual(sess.run(abc), 6.0)
 
   def test_is_number(self):
     self.assertTrue(simplify.is_number(1))
