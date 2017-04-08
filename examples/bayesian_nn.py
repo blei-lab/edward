@@ -17,7 +17,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal
-from edward.util import rbf
 
 
 def build_toy_dataset(N=40, noise_std=0.1):

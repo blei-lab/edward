@@ -8,8 +8,6 @@ import tensorflow as tf
 from edward.models.random_variable import RandomVariable
 from tensorflow.contrib.distributions import Distribution
 
-import pdb
-
 try:
   from edward.models.random_variables import Categorical
 except Exception as e:
@@ -181,7 +179,7 @@ class ParamMixture(RandomVariable, Distribution):
       log_probs = self.components.log_prob(expanded_x)
 
     selecter = tf.one_hot(self.cat, self.num_components, dtype=tf.float32,
-                          axis=self.components.get_shape().ndims -
+                          axis=self.components.shape.ndims -
                           1 - batch_event_rank)
     return tf.reduce_sum(log_probs * selecter, -1 - batch_event_rank)
 
@@ -195,7 +193,7 @@ class ParamMixture(RandomVariable, Distribution):
     expanded_x = tf.expand_dims(x, -1 - batch_event_rank)
     log_probs = self.components.log_prob(expanded_x)
 
-    p_ndims = self.cat.p.get_shape().ndims
+    p_ndims = self.cat.p.shape.ndims
     perm = tf.concat([[p_ndims - 1], tf.range(p_ndims - 1)], 0)
     transposed_p = tf.transpose(self.cat.p, perm)
 
@@ -217,13 +215,13 @@ class ParamMixture(RandomVariable, Distribution):
     # TODO avoid sampling n per component
     batch_event_rank = (self.get_event_shape().ndims +
                         self.get_batch_shape().ndims)
-    cat_axis = comp_sample.get_shape().ndims - 1 - batch_event_rank
+    cat_axis = comp_sample.shape.ndims - 1 - batch_event_rank
     selecter = tf.one_hot(cat_sample, self.num_components,
                           axis=cat_axis, dtype=self.dtype)
 
     # selecter has shape [n] + [num_components] + batch_shape; change
     # to broadcast with [n] + [num_components] + batch_shape + event_shape.
-    while selecter.get_shape().ndims < comp_sample.get_shape().ndims:
+    while selecter.shape.ndims < comp_sample.shape.ndims:
       selecter = tf.expand_dims(selecter, -1)
 
     # select the sampled component, sum out the component dimension
