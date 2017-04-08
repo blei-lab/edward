@@ -34,6 +34,18 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
+
+  def test_missing_blanket(self):
+    N = 10
+    z = rvs.Bernoulli(p=0.75, sample_shape=N)
+    z_cond = conj.complete_conditional(z)
+    self.assertIsInstance(z_cond, rvs.Bernoulli)
+
+    sess = tf.InteractiveSession()
+    p_val = sess.run(z_cond.p)
+
+    self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
+
   def test_beta_bernoulli(self):
     x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 

@@ -12,6 +12,7 @@ import tensorflow as tf
 
 from edward.models.random_variable import RandomVariable
 from edward.models import random_variables as rvs
+from edward.util.graphs import random_variables
 
 import edward.inferences.conjugacy.conjugate_log_probs
 from edward.inferences.conjugacy.simplify \
@@ -58,45 +59,69 @@ _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
     rvs.Normal, normal_from_natural_params)
 
 
-def _log_joint_name(blanket):
-  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in blanket])) + '_'
+def _log_joint_name(cond_set):
+  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in cond_set])) + '_'
 
 
-def get_log_joint(blanket):
+def get_log_joint(cond_set):
   g = tf.get_default_graph()
-  blanket_name = _log_joint_name(blanket)
-  c = g.get_collection(blanket_name)
+  cond_set_name = _log_joint_name(cond_set)
+  c = g.get_collection(cond_set_name)
   if len(c):
     return c[0]
 
   with tf.name_scope('conjugate_log_joint') as scope:
     terms = []
-    for b in blanket:
+    for b in cond_set:
       if getattr(b, "conjugate_log_prob", None) is None:
         raise NotImplementedError("conjugate_log_prob not implemented for"
                                   " {}".format(type(b)))
       terms.append(tf.reduce_sum(b.conjugate_log_prob()))
     result = tf.add_n(terms, name=scope)
-    g.add_to_collection(blanket_name, result)
+    g.add_to_collection(cond_set_name, result)
     return result
 
 
-def complete_conditional(rv, blanket, log_joint=None):
+def complete_conditional(rv, cond_set=None):
+  """Returns the conditional distribution `RandomVariable` p(`rv` | .).
+
+  This function tries to infer the conditional distribution of `rv`
+  given `cond_set`, a set of other `RandomVariable`s in the graph. It
+  will only be able to do this if
+  a) p(`rv` | `cond_set`) is in a tractable exponential family AND
+  b) the truth of assumption (a) is not obscured in the TensorFlow graph.
+  In other words, this function will do its best to recognize conjugate
+  relationships when they exist, but it may not always be able to do the
+  necessary algebra.
+
+  Parameters
+  ----------
+  `rv` : `RandomVariable`
+    The `RandomVariable` whose conditional distribution we are interested in.
+  `cond_set` : `iterable` of `RandomVariables` (optional)
+    The set of `RandomVariable`s we want to condition on. Defaults to all
+    `RandomVariable`s in the graph. (It makes no difference if `cond_set` does
+    or does not include `rv`.)
+
+    NOTE: When calling `complete_conditional()` multiple times, one should
+    usually pass an explicit `cond_set`. Otherwise `complete_conditional()`
+    will try to condition on the `RandomVariable`s returned by previous calls
+    to itself, which may result in unpredictable behavior.
+  """
+  if cond_set is None:
+    cond_set = random_variables()
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
-    blanket = set([rv] + list(blanket))
-    if log_joint is None:
-      log_joint = get_log_joint(blanket)
-    else:
-      log_joint = log_joint(blanket)
+    cond_set = set([rv] + list(cond_set))
+    log_joint = get_log_joint(cond_set)
 
     # Pull out the nodes that are nonlinear functions of rv into s_stats.
-    stop_nodes = set([i.value() for i in blanket])
+    stop_nodes = set([i.value() for i in cond_set])
     subgraph = extract_subgraph(log_joint, stop_nodes)
-    s_stats = suff_stat_nodes(subgraph, rv.value(), blanket)
+    s_stats = suff_stat_nodes(subgraph, rv.value(), cond_set)
     s_stats = list(set(s_stats))
 
-    # Simplify those nodes, and extract any new linear terms into multipliers_i.
+    # Simplify those nodes, and put any new linear terms into multipliers_i.
     s_stat_exprs = defaultdict(list)
     for i in range(len(s_stats)):
       expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
@@ -135,7 +160,7 @@ def complete_conditional(rv, blanket, log_joint=None):
         fake_node = s_stat_placeholder * multiplier
         s_stat_nodes.append(s_stat_node)
         s_stat_replacements.append(fake_node)
-    for i in blanket:
+    for i in cond_set:
       if i == rv:
         continue
       val = i.value()
