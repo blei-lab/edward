@@ -48,7 +48,7 @@ class mSGNHT(MonteCarlo):
     """
     super(mSGNHT, self).__init__(*args, **kwargs)
 
-  def initialize(self, D=0.75, step_size=0.0001, *args, **kwargs):
+  def initialize(self, D=0.75, step_size=0.0001, anneal=True, *args, **kwargs):
     """
     Parameters
     ----------
@@ -60,9 +60,11 @@ class mSGNHT(MonteCarlo):
     """
     self.D = float(D)
     self.h = float(step_size)
-    self.p = {z: tf.Variable(tf.zeros(qz.params.shape[1:]))
+    self.p = {z: tf.Variable(tf.ones(qz.params.shape[1:]))
               for z, qz in six.iteritems(self.latent_vars)}
-    self.xi = self.p
+    self.xi = {z: tf.Variable(self.D * tf.ones(qz.params.shape[1:]))
+              for z, qz in six.iteritems(self.latent_vars)}
+    self.anneal = anneal
     return super(mSGNHT, self).initialize(*args, **kwargs)
 
   def build_update(self):
@@ -82,26 +84,30 @@ class mSGNHT(MonteCarlo):
     p_sample = {}
     xi_sample = {}
 
+    if self.anneal:
+      learning_rate = self.h / tf.cast(self.t + 1, tf.float32)
+    else:
+      learning_rate = self.h
+
     for z in six.iterkeys(old_sample):
-      sample[z] = old_sample[z] + self.p[z] * self.h
+      sample[z] = old_sample[z] + self.p[z] * learning_rate
 
-    grad_log_joint = tf.gradients(self._log_joint(sample),
-                                  list(six.itervalues(sample)))
-    for z, grad_log_p in zip(six.iterkeys(sample), grad_log_joint):
-      qz = self.latent_vars[z]
-      zeta = tf.contrib.distributions.Normal(mu=0., sigma=self.h)
-      p_sample[z] = self.p[z] - grad_log_p * self.h - tf.multiply(self.xi[z], self.p[z]) * self.h\
-                    + tf.sqrt(2 * self.D) * zeta.sample(sample_shape=qz.get_event_shape())
-      xi_sample[z] = self.xi[z] + (tf.multiply(p_sample[z], p_sample[z]) - 1) * self.h
-
+    grad_log_joint = tf.gradients(self._log_joint(old_sample),
+                                  list(six.itervalues(old_sample)))
+    for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
+      event_shape = self.latent_vars[z].get_event_shape()
+      zeta = Normal(mu=tf.zeros(event_shape), sigma=learning_rate * tf.ones(event_shape))
+      p_sample[z] = self.p[z] - grad_log_p * learning_rate - tf.multiply(self.xi[z], self.p[z]) * learning_rate\
+                    + tf.sqrt(2 * self.D) * zeta.sample()
+      xi_sample[z] = self.xi[z] + (tf.multiply(p_sample[z], p_sample[z]) - 1) * learning_rate
 
     # Update Empirical random variables.
     assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
       assign_ops.append(tf.assign(self.p[z], p_sample[z]).op)
-      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
       assign_ops.append(tf.assign(self.xi[z], xi_sample[z]).op)
+      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
 
     # Increment n_accept.
     assign_ops.append(self.n_accept.assign_add(1))
