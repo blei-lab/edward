@@ -17,7 +17,7 @@ except Exception as e:
 
 
 class mSGNHT(MonteCarlo):
-  """multivariate Stochastic Gradient Nose-Hoover Thermostats with Symmetric Splitting Integrator(Chen et al. 2015).
+  """multivariate Stochastic Gradient Nose-Hoover Thermostats with Euler Integrator(Chen et al. 2015).
 
   Notes
   -----
@@ -53,7 +53,8 @@ class mSGNHT(MonteCarlo):
     Parameters
     ----------
     D : positive float, optional
-      A positive constant of equation (2) in Chen, et al.(2015).
+      A positive constant of equation (2) in Chen, et al.(2015),
+      which controls the noise inserted by stochastic gradients.
     step_size : float, optional
       Constant scale factor of learning rate.
     """
@@ -76,47 +77,31 @@ class mSGNHT(MonteCarlo):
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
 
-    # Simulate mSGNHT according to equation (3) in Chen, et al.(2015).
-    first_sample = {}
-    first_p_sample = {}
-    first_xi_sample = {}
+    # Simulate equation (2) in Chen, et al. (2015).
+    sample = {}
+    p_sample = {}
+    xi_sample = {}
 
-    second_p_sample = {}
+    for z in six.iterkeys(old_sample):
+      sample[z] = old_sample[z] + self.p[z] * self.h
 
-    final_sample = {}
-    final_p_sample = {}
-    final_xi_sample = {}
-
-    for z in six.iterkeys(self.latent_vars):
-      # Simulate "A" step of the integrator
-      first_sample[z] = old_sample[z] + self.p[z] * 0.5 * self.h
-      first_xi_sample[z] = self.xi[z] + (tf.multiply(self.p[z], self.p[z]) - 1) * self.h * 0.5
-
-      # Simulate "B" step of the integrator
-      first_p_sample[z] = tf.multiply(tf.exp(- first_xi_sample[z] * self.h * 0.5), self.p[z])
-
-    grad_log_joint = tf.gradients(self._log_joint(first_sample),
-                                  list(six.itervalues(first_sample)))
-    for z, grad_log_p in zip(six.iterkeys(first_sample), grad_log_joint):
-      # Simulate "O" step of the integrator
+    grad_log_joint = tf.gradients(self._log_joint(sample),
+                                  list(six.itervalues(sample)))
+    for z, grad_log_p in zip(six.iterkeys(sample), grad_log_joint):
       qz = self.latent_vars[z]
       zeta = tf.contrib.distributions.Normal(mu=0., sigma=self.h)
-      second_p_sample[z] = first_p_sample[z] - grad_log_p * self.h + \
-                           tf.sqrt(2 * self.D) * zeta.sample(sample_shape=qz.get_event_shape())
+      p_sample[z] = self.p[z] - grad_log_p * self.h - tf.multiply(self.xi[z], self.p[z]) * self.h\
+                    + tf.sqrt(2 * self.D) * zeta.sample(sample_shape=qz.get_event_shape())
+      xi_sample[z] = self.xi[z] + (tf.multiply(p_sample[z], p_sample[z]) - 1) * self.h
 
-      # Simulate "B" step of the integrator
-      final_p_sample[z] = tf.multiply(tf.exp(- first_xi_sample[z] * self.h * 0.5), second_p_sample[z])
-      # Simulate "A" step of the integrator
-      final_sample[z] = first_sample[z] + final_p_sample[z] * 0.5 * self.h
-      final_xi_sample[z] = first_xi_sample[z] + (tf.multiply(final_p_sample[z], final_p_sample[z]) - 1) * self.h * 0.5
 
     # Update Empirical random variables.
     assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
-      assign_ops.append(tf.assign(self.p[z], final_p_sample[z]).op)
-      assign_ops.append(tf.scatter_update(variable, self.t, final_sample[z]))
-      assign_ops.append(tf.assign(self.xi[z], final_xi_sample[z]).op)
+      assign_ops.append(tf.assign(self.p[z], p_sample[z]).op)
+      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
+      assign_ops.append(tf.assign(self.xi[z], xi_sample[z]).op)
 
     # Increment n_accept.
     assign_ops.append(self.n_accept.assign_add(1))
