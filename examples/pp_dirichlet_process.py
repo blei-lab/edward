@@ -38,7 +38,7 @@ def dirichlet_process(alpha):
   return stick_num
 
 
-dp = dirichlet_process(alpha=10.0)
+dp = dirichlet_process(10.0)
 
 # The number of sticks broken is dynamic, changing across evaluations.
 sess = tf.Session()

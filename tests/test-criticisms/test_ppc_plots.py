@@ -9,6 +9,7 @@ from edward.criticisms.ppc_plots import ppc_density_plot, ppc_stat_hist_plot
 
 
 class test_ppc_plots_class(tf.test.TestCase):
+
   def test_ppc_density_plot(self):
     y = np.random.randn(20)
     y_rep = np.random.randn(20, 20)

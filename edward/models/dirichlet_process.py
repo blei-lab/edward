@@ -16,8 +16,8 @@ except Exception as e:
 class DirichletProcess(RandomVariable, Distribution):
   """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
 
-  It has two parameters: a positive real value :math:`\\alpha`,
-  known as the concentration parameter (``alpha``), and a base
+  It has two parameters: a positive real value :math:`\\alpha`, known
+  as the concentration parameter (``alpha``), and a base
   distribution :math:`H` (``base``).
   """
   def __init__(self, alpha, base, validate_args=False, allow_nan_stats=True,
@@ -56,16 +56,16 @@ class DirichletProcess(RandomVariable, Distribution):
         self._alpha = tf.identity(alpha, name="alpha")
         self._base = base
 
-        # Create empty tensor to store future atoms.
+        # Form empty tensor to store atom locations.
         self._theta = tf.zeros(
             [0] +
             self.get_batch_shape().as_list() +
             self.get_event_shape().as_list(),
             dtype=self._base.dtype)
 
-        # Instantiate beta distribution for stick breaking proportions.
+        # Instantiate distribution for stick breaking proportions.
         self._betadist = Beta(a=tf.ones_like(self._alpha), b=self._alpha)
-        # Create empty tensor to store stick breaking proportions.
+        # Form empty tensor to store stick breaking proportions.
         self._beta = tf.zeros(
             [0] + self.get_batch_shape().as_list(),
             dtype=self._betadist.dtype)
@@ -88,7 +88,7 @@ class DirichletProcess(RandomVariable, Distribution):
 
   @property
   def base(self):
-    """Base distribution used for drawing the atoms."""
+    """Base distribution used for drawing the atom locations."""
     return self._base
 
   @property
@@ -100,9 +100,9 @@ class DirichletProcess(RandomVariable, Distribution):
 
   @property
   def theta(self):
-    """Atoms. It has shape [None] + batch_shape + event_shape, where
-    the first dimension is the number of atoms, instantiated only as
-    needed."""
+    """Atom locations. It has shape [None] + batch_shape +
+    event_shape, where the first dimension is the number of atoms,
+    instantiated only as needed."""
     return self._theta
 
   def _batch_shape(self):

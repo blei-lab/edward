@@ -14,9 +14,9 @@ def ppc_density_plot(y, y_rep):
   Parameters
   ----------
   y : np.ndarray
-    A 1-D Numpy array.
+    A 1-D NumPy array.
   y_rep : np.ndarray
-    A 2-D Numpy array where rows represent different samples from posterior.
+    A 2-D NumPy array where rows represent different samples from posterior.
 
   Returns
   -------
@@ -48,7 +48,7 @@ def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
   y_stats : float
     Float representing statistic value of observed data.
   yrep_stats : np.ndarray
-    A 1-D Numpy array.
+    A 1-D NumPy array.
   stat_name : string, optional
     Optional string value for including statistic name in legend.
   **kwargs
