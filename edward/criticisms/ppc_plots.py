@@ -9,14 +9,14 @@ except ImportError:
 
 
 def ppc_density_plot(y, y_rep):
-  """Creates 1D kernel density plot comparing data to samples from posterior.
+  """Create 1D kernel density plot comparing data to samples from posterior.
 
   Parameters
   ----------
   y : np.ndarray
-    A 1-D numpy array
+    A 1-D Numpy array.
   y_rep : np.ndarray
-    A 2-D numpy array where rows represent different samples from posterior
+    A 2-D Numpy array where rows represent different samples from posterior.
 
   Returns
   -------
@@ -41,18 +41,18 @@ def ppc_density_plot(y, y_rep):
 
 
 def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
-  """Creates histogram plot comparing data to samples from posterior.
+  """Create histogram plot comparing data to samples from posterior.
 
   Parameters
   ----------
   y_stats : float
-    Float representing statistic value of observed data
+    Float representing statistic value of observed data.
   yrep_stats : np.ndarray
-    A 1D numpy array
+    A 1-D Numpy array.
   stat_name : string, optional
-    Optional string value for including statistic name in legend
+    Optional string value for including statistic name in legend.
   **kwargs
-    Keyword arguments used by seaborn.distplot can be given to customize plot
+    Keyword arguments used by seaborn.distplot can be given to customize plot.
 
 
   Returns
