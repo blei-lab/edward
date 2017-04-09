@@ -57,6 +57,8 @@ class mSGNHT(MonteCarlo):
       which controls the noise inserted by stochastic gradients.
     step_size : float, optional
       Constant scale factor of learning rate.
+    anneal : binary, optional
+      If True, step_size is gradually annealed.
     """
     self.D = float(D)
     self.h = float(step_size)
@@ -68,8 +70,7 @@ class mSGNHT(MonteCarlo):
     return super(mSGNHT, self).initialize(*args, **kwargs)
 
   def build_update(self):
-    """Simulate mSGNHT using a symmetric splitting integrator(SSI).
-     SSI is more accurate than the the traditional Euler integrator.
+    """Simulate mSGNHT using a Euler integrator.
 
     Notes
     -----

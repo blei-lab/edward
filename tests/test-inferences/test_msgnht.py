@@ -24,10 +24,6 @@ class test_sgld_class(tf.test.TestCase):
       inference = ed.mSGNHT({mu: qmu}, data={x: x_data})
       inference.run(step_size=0.05, anneal=False)
 
-      v = qmu.get_variables()[0].eval(session=sess)
-      for i in range(2000):
-        print(v[i])
-
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
       self.assertAllClose(qmu.std().eval(), np.sqrt(1 / 51),
                           rtol=5e-2, atol=5e-2)

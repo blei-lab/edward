@@ -22,7 +22,7 @@ z = MultivariateNormalFull(
 qz = Empirical(params=tf.Variable(tf.random_normal([2000, 2])))
 
 inference = ed.mSGNHT({z: qz})
-inference.run(step_size=0.001)
+inference.run(step_size=0.00001, anneal=False)
 
 # CRITICISM
 sess = ed.get_session()
