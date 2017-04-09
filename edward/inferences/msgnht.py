@@ -17,7 +17,8 @@ except Exception as e:
 
 
 class mSGNHT(MonteCarlo):
-  """multivariate Stochastic Gradient Nose-Hoover Thermostats with Euler Integrator(Chen et al. 2015).
+  """multivariate Stochastic Gradient Nose-Hoover Thermostats
+   with Euler Integrator(Chen et al. 2015).
 
   Notes
   -----
@@ -65,7 +66,7 @@ class mSGNHT(MonteCarlo):
     self.p = {z: tf.Variable(tf.ones(qz.params.shape[1:]))
               for z, qz in six.iteritems(self.latent_vars)}
     self.xi = {z: tf.Variable(self.D * tf.ones(qz.params.shape[1:]))
-              for z, qz in six.iteritems(self.latent_vars)}
+               for z, qz in six.iteritems(self.latent_vars)}
     self.anneal = anneal
     return super(mSGNHT, self).initialize(*args, **kwargs)
 
@@ -97,10 +98,13 @@ class mSGNHT(MonteCarlo):
                                   list(six.itervalues(old_sample)))
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       event_shape = self.latent_vars[z].get_event_shape()
-      zeta = Normal(mu=tf.zeros(event_shape), sigma=learning_rate * tf.ones(event_shape))
-      p_sample[z] = self.p[z] + grad_log_p * learning_rate - tf.multiply(self.xi[z], self.p[z]) * learning_rate\
-                    + tf.sqrt(2 * self.D) * zeta.sample()
-      xi_sample[z] = self.xi[z] + (tf.multiply(p_sample[z], p_sample[z]) - 1) * learning_rate
+      zeta = Normal(mu=tf.zeros(event_shape),
+                    sigma=learning_rate * tf.ones(event_shape))
+      p_sample[z] = self.p[z] + grad_log_p * learning_rate \
+          - tf.multiply(self.xi[z], self.p[z]) * learning_rate \
+          + tf.sqrt(2*self.D) * zeta.sample()
+      xi_sample[z] = self.xi[z] + (tf.multiply(p_sample[z], p_sample[z])
+                                   - 1) * learning_rate
 
     # Update Empirical random variables.
     assign_ops = []
