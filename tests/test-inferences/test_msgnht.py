@@ -22,7 +22,7 @@ class test_sgld_class(tf.test.TestCase):
 
       # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
       inference = ed.mSGNHT({mu: qmu}, data={x: x_data})
-      inference.run(step_size=0.1, D=30)
+      inference.run(step_size=0.05, anneal=False)
 
       v = qmu.get_variables()[0].eval(session=sess)
       for i in range(2000):

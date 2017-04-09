@@ -97,7 +97,7 @@ class mSGNHT(MonteCarlo):
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       event_shape = self.latent_vars[z].get_event_shape()
       zeta = Normal(mu=tf.zeros(event_shape), sigma=learning_rate * tf.ones(event_shape))
-      p_sample[z] = self.p[z] - grad_log_p * learning_rate - tf.multiply(self.xi[z], self.p[z]) * learning_rate\
+      p_sample[z] = self.p[z] + grad_log_p * learning_rate - tf.multiply(self.xi[z], self.p[z]) * learning_rate\
                     + tf.sqrt(2 * self.D) * zeta.sample()
       xi_sample[z] = self.xi[z] + (tf.multiply(p_sample[z], p_sample[z]) - 1) * learning_rate
 
