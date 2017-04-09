@@ -45,7 +45,7 @@ class mSGNHT(MonteCarlo):
     >>>
     >>> qz = Empirical(tf.Variable(tf.zeros(500)))
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    >>> inference = ed.SGLD({z: qz}, data)
+    >>> inference = ed.mSGNHT({z: qz}, data)
     """
     super(mSGNHT, self).__init__(*args, **kwargs)
 
