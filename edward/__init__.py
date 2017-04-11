@@ -4,6 +4,7 @@ from __future__ import print_function
 
 from edward import criticisms
 from edward import inferences
+from edward.inferences import conjugacy
 from edward import util
 
 # Direct imports for convenience
@@ -12,7 +13,8 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     HMC, MetropolisHastings, SGLD, SGHMC, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
-    GANInference, WGANInference, ImplicitKLqp, MAP, Laplace
+    GANInference, WGANInference, ImplicitKLqp, MAP, Laplace, \
+    complete_conditional
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, copy, dot, \
     get_ancestors, get_blanket, get_children, get_control_variate_coef, \

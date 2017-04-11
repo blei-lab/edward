@@ -16,3 +16,4 @@ from edward.inferences.sgld import *
 from edward.inferences.sghmc import *
 from edward.inferences.variational_inference import *
 from edward.inferences.wgan_inference import *
+from edward.inferences.conjugacy import complete_conditional
