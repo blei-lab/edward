@@ -34,7 +34,6 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
-
   def test_missing_blanket(self):
     N = 10
     z = rvs.Bernoulli(p=0.75, sample_shape=N)
