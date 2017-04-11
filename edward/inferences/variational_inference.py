@@ -53,43 +53,50 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
 
+    latent_var_list = set()
+    data_var_list = set()
     if var_list is None:
       # Traverse random variable graphs to get default list of variables.
-      var_list = set()
-      latent_var_list = set()
-      data_var_list = set()
       trainables = tf.trainable_variables()
       for z, qz in six.iteritems(self.latent_vars):
         if isinstance(z, RandomVariable):
-          var_list.update(get_variables(z, collection=trainables))
           latent_var_list.update(get_variables(z, collection=trainables))
 
-        var_list.update(get_variables(qz, collection=trainables))
+        latent_var_list.update(get_variables(qz, collection=trainables))
 
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable) and \
                 not isinstance(qx, RandomVariable):
-          var_list.update(get_variables(x, collection=trainables))
           data_var_list.update(get_variables(x, collection=trainables))
 
-      var_list = list(var_list)
+      var_list = list(data_var_list | latent_var_list)
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
     if self.logging:
-      #TODO: when var_list is not None
       tf.summary.scalar("loss", self.loss)
-      for var in latent_var_list:
-        for grad_var_tuple in grads_and_vars:
-          if var == grad_var_tuple[1]:
-            tf.summary.histogram("InferenceWeight_"+var.name, var)
-            tf.summary.histogram("InferenceGradient_" + var.name, grad_var_tuple[0])
+      with tf.name_scope('variational'):
+        for grad, var in grads_and_vars:
+          if var in latent_var_list:
+            tf.summary.histogram("parameter_" + var.name.replace(':', '_'), var)
+            tf.summary.histogram("gradient_" + grad.name.replace(':', '_'), grad)
+            tf.summary.scalar("gradient_norm_", grad.name.replace(':', '_'), tf.norm(grad))
+      #       replace : with _ because tf does not allow : in var names in summaries
 
-      for var in data_var_list:
-        for grad_var_tuple in grads_and_vars:
-          if var == grad_var_tuple[1]:
-            tf.summary.histogram("ModelWeight_" + var.name, var)
-            tf.summary.histogram("ModelGradient_" + var.name, grad_var_tuple[0])
+      with tf.name_scope('model'):
+        for grad, var in grads_and_vars:
+          if var in data_var_list:
+            tf.summary.histogram("parameter_" + var.name.replace(':', '_'), var)
+            tf.summary.histogram("gradient_" + grad.name.replace(':', '_'), grad)
+            tf.summary.scalar("gradient_norm_", grad.name.replace(':', '_'), tf.norm(grad))
+
+      # when var_list is not initialized with None
+      with tf.name_scope(''):
+        for grad, var in grads_and_vars:
+          if var not in latent_var_list and var not in data_var_list:
+            tf.summary.histogram("parameter_" + var.name.replace(':', '_'), var)
+            tf.summary.histogram("gradient_" + grad.name.replace(':', '_'), grad)
+            tf.summary.scalar("gradient_norm_", grad.name.replace(':', '_'), tf.norm(grad))
 
       self.summarize = tf.summary.merge_all()
 
