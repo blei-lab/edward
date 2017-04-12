@@ -78,17 +78,20 @@ def complete_conditional(rv, cond_set=None):
 
   Parameters
   ----------
-  `rv` : `RandomVariable`
+  rv : RandomVariable
     The `RandomVariable` whose conditional distribution we are interested in.
-  `cond_set` : `iterable` of `RandomVariables` (optional)
+  cond_set : iterable of RandomVariables, optional
     The set of `RandomVariable`s we want to condition on. Defaults to all
     `RandomVariable`s in the graph. (It makes no difference if `cond_set` does
     or does not include `rv`.)
 
-    NOTE: When calling `complete_conditional()` multiple times, one should
-    usually pass an explicit `cond_set`. Otherwise `complete_conditional()`
-    will try to condition on the `RandomVariable`s returned by previous calls
-    to itself, which may result in unpredictable behavior.
+  Notes
+  -----
+  When calling `complete_conditional()` multiple times, one should
+  usually pass an explicit `cond_set`. Otherwise
+  `complete_conditional()` will try to condition on the
+  `RandomVariable`s returned by previous calls to itself, which may
+  result in unpredictable behavior.
   """
   if cond_set is None:
     cond_set = random_variables()
@@ -188,8 +191,8 @@ def reconstruct_multiplier(multipliers):
 
 
 def extract_subgraph(root, stop_nodes=set()):
-  '''Copies the TF graph structure into something more pythonic.
-  '''
+  """Copies the TF graph structure into something more pythonic.
+  """
   result = [root]
   for input in root.op.inputs:
     if input in stop_nodes:
@@ -200,8 +203,8 @@ def extract_subgraph(root, stop_nodes=set()):
 
 
 def subgraph_leaves(subgraph):
-  '''Returns a list of leaf nodes from extract_subgraph().
-  '''
+  """Returns a list of leaf nodes from extract_subgraph().
+  """
   if len(subgraph) == 1:
     return subgraph
   result = []
@@ -226,8 +229,8 @@ _n_important_args = {'Sum': 1}
 
 
 def suff_stat_nodes(subgraph, node, stop_nodes):
-  '''Finds nonlinear nodes depending on `node`.
-  '''
+  """Finds nonlinear nodes depending on `node`.
+  """
   if subgraph[0] == node:
     return (node,)
   elif len(subgraph) == 1:
