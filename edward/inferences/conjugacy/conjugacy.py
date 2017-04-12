@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import six
 import tensorflow as tf
 
 from collections import defaultdict
@@ -106,15 +107,15 @@ def complete_conditional(rv, cond_set=None):
 
     # Simplify those nodes, and put any new linear terms into multipliers_i.
     s_stat_exprs = defaultdict(list)
-    for i in range(len(s_stats)):
-      expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
+    for s_stat in s_stats:
+      expr = symbolic_suff_stat(s_stat, rv.value(), stop_nodes)
       expr = full_simplify(expr)
       multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
-      s_stat_exprs[s_stats_i].append((s_stats[i],
-                                      reconstruct_multiplier(multipliers_i)))
+      s_stat_exprs[s_stats_i].append(
+          (s_stat, reconstruct_multiplier(multipliers_i)))
 
     # Sort out the sufficient statistics to identify this conditional's family.
-    s_stat_keys = list(s_stat_exprs.keys())
+    s_stat_keys = list(six.iterkeys(s_stat_exprs))
     order = np.argsort([str(i) for i in s_stat_keys])
     dist_key = tuple((s_stat_keys[i] for i in order))
     dist_constructor, constructor_params = (
@@ -134,7 +135,7 @@ def complete_conditional(rv, cond_set=None):
     s_stat_placeholders = []
     swap_dict = {}
     swap_back = {}
-    for s_stat in s_stat_exprs.keys():
+    for s_stat in six.iterkeys(s_stat_exprs):
       s_stat_shape = s_stat_exprs[s_stat][0][0].get_shape()
       s_stat_placeholder = tf.placeholder(np.float32, s_stat_shape)
       swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
@@ -205,11 +206,10 @@ def subgraph_leaves(subgraph):
   '''
   if len(subgraph) == 1:
     return subgraph
-  else:
-    result = []
-    for input in subgraph[1:]:
-      result += subgraph_leaves(input)
-    return tuple(result)
+  result = []
+  for input in subgraph[1:]:
+    result += subgraph_leaves(input)
+  return tuple(result)
 
 
 def is_child(subgraph, node, stop_nodes):
@@ -230,13 +230,10 @@ _n_important_args = {'Sum': 1}
 def suff_stat_nodes(subgraph, node, stop_nodes):
   '''Finds nonlinear nodes depending on `node`.
   '''
-  if len(subgraph) == 1:
-    if subgraph[0] == node:
-      return (node,)
-    else:
-      return ()
   if subgraph[0] == node:
-    return (subgraph[0],)
+    return (node,)
+  elif len(subgraph) == 1:
+    return ()
   op_type = str(subgraph[0].op.type)
   if op_type in _linear_types:
     result = []
