@@ -7,7 +7,6 @@ import six
 import tensorflow as tf
 
 from collections import defaultdict
-import edward.inferences.conjugacy.conjugate_log_probs
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 from edward.models import random_variables as rvs

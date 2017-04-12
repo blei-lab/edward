@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from edward.models.conjugate_log_probs import *
 from edward.models.dirichlet_process import *
 from edward.models.empirical import *
 from edward.models.param_mixture import *
