@@ -2,27 +2,25 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from pprint import pprint
-
 import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.inferences.conjugacy import simplify as simplify
+from edward.inferences.conjugacy import simplify
 
 
 class test_simplify_class(tf.test.TestCase):
 
   def test_mul_n(self):
-    a = tf.constant(1.)
-    b = tf.constant(2.)
-    c = tf.constant(3.)
+    a = tf.constant(1.0)
+    b = tf.constant(2.0)
+    c = tf.constant(3.0)
     ab = simplify._mul_n([a, b])
     abc = simplify._mul_n([a, b, c])
 
     sess = tf.InteractiveSession()
-    self.assertEqual(sess.run(ab), 2.)
-    self.assertEqual(sess.run(abc), 6.)
+    self.assertEqual(sess.run(ab), 2.0)
+    self.assertEqual(sess.run(abc), 6.0)
 
   def test_is_number(self):
     self.assertTrue(simplify.is_number(1))
@@ -81,71 +79,71 @@ class test_simplify_class(tf.test.TestCase):
     self.assertFalse(did_something)
 
   def test_cpow_mul_simplify(self):
-    expr = ('#CPow2.1', ('#Mul', (3,), (4.,), (1.2e+01,)))
+    expr = ('#CPow2.1', ('#Mul', (3,), (4.0,), (1.2e+01,)))
     did_something, new_expr = simplify.pow_mul_simplify(expr)
     self.assertTrue(did_something)
     self.assertEqual(new_expr, ('#Mul', ('#CPow2.1', (3,)),
-                                ('#CPow2.1', (4.,)),
+                                ('#CPow2.1', (4.0,)),
                                 ('#CPow2.1', (1.2e+01,))))
     did_something, new_expr = simplify.pow_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_pow_mul_simplify(self):
-    expr = ('#Pow', ('#Mul', (3,), (4.,), (1.2e+01,)), (2.1,))
+    expr = ('#Pow', ('#Mul', (3,), (4.0,), (1.2e+01,)), (2.1,))
     did_something, new_expr = simplify.pow_mul_simplify(expr)
     self.assertTrue(did_something)
     self.assertEqual(new_expr, ('#Mul', ('#Pow', (3,), (2.1,)),
-                                ('#Pow', (4.,), (2.1,)),
+                                ('#Pow', (4.0,), (2.1,)),
                                 ('#Pow', (1.2e+01,), (2.1,))))
     did_something, new_expr = simplify.pow_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_mul_add_simplify(self):
-    expr = ('#Mul', ('#Add', (3.,), (2.,)),
-            ('#Add', (4.,), (5.,)))
+    expr = ('#Mul', ('#Add', (3.0,), (2.0,)),
+            ('#Add', (4.0,), (5.0,)))
     did_something, new_expr = simplify.mul_add_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEqual(new_expr, ('#Add', ('#Add', ('#Mul', (3.,), (4.,)),
-                                         ('#Mul', (3.,), (5.,))),
-                                ('#Add', ('#Mul', (2.,), (4.,)),
-                                 ('#Mul', (2.,), (5.,)))))
+    self.assertEqual(new_expr, ('#Add', ('#Add', ('#Mul', (3.0,), (4.0,)),
+                                         ('#Mul', (3.0,), (5.0,))),
+                                ('#Add', ('#Mul', (2.0,), (4.0,)),
+                                 ('#Mul', (2.0,), (5.0,)))))
     did_something, new_expr = simplify.pow_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_add_add_simplify(self):
-    expr = ('#Add', (3.,), ('#Add', (4.,), (5.,), ('#Add', (6.,))))
+    expr = ('#Add', (3.0,), ('#Add', (4.0,), (5.0,), ('#Add', (6.0,))))
     did_something, new_expr = simplify.add_add_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEqual(new_expr, ('#Add', (3.,), (4.,), (5.,), (6.,)))
+    self.assertEqual(new_expr, ('#Add', (3.0,), (4.0,), (5.0,), (6.0,)))
     did_something, new_expr = simplify.add_add_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_mul_mul_simplify(self):
-    expr = ('#Mul', (3.,), ('#Mul', (4.,), (5.,), ('#Mul', (6.,))))
+    expr = ('#Mul', (3.0,), ('#Mul', (4.0,), (5.0,), ('#Mul', (6.0,))))
     did_something, new_expr = simplify.mul_mul_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEqual(new_expr, ('#Mul', (3.,), (4.,), (5.,), (6.,)))
+    self.assertEqual(new_expr, ('#Mul', (3.0,), (4.0,), (5.0,), (6.0,)))
     did_something, new_expr = simplify.mul_mul_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_mul_one_simplify(self):
-    expr = ('#Mul', (3.,), (1.,), (4.,), (5.,), (6.,), (1.,))
+    expr = ('#Mul', (3.0,), (1.0,), (4.0,), (5.0,), (6.0,), (1.0,))
     did_something, new_expr = simplify.mul_one_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEqual(new_expr, ('#Mul', (3.,), (4.,), (5.,), (6.,)))
+    self.assertEqual(new_expr, ('#Mul', (3.0,), (4.0,), (5.0,), (6.0,)))
     did_something, new_expr = simplify.mul_one_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_add_zero_simplify(self):
-    expr = ('#Add', (3.,), (0.,), (4.,), (5.,), (6.,), (0.,))
+    expr = ('#Add', (3.0,), (0.0,), (4.0,), (5.0,), (6.0,), (0.0,))
     did_something, new_expr = simplify.add_zero_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEqual(new_expr, ('#Add', (3.,), (4.,), (5.,), (6.,)))
+    self.assertEqual(new_expr, ('#Add', (3.0,), (4.0,), (5.0,), (6.0,)))
     did_something, new_expr = simplify.add_zero_simplify(new_expr)
     self.assertFalse(did_something)
 
   def test_mul_zero_simplify(self):
-    expr = ('#Mul', (3.,), (0.,), (5.,), (6.,), (1.,))
+    expr = ('#Mul', (3.0,), (0.0,), (5.0,), (6.0,), (1.0,))
     did_something, new_expr = simplify.mul_zero_simplify(expr)
     self.assertTrue(did_something)
     self.assertEqual(new_expr, (0,))
@@ -153,12 +151,12 @@ class test_simplify_class(tf.test.TestCase):
     self.assertFalse(did_something)
 
   def test_square_add_simplify(self):
-    expr = ('#CPow2.0000e+00', ('#Add', (1.,), ('#Neg', (2.,))))
+    expr = ('#CPow2.0000e+00', ('#Add', (1.0,), ('#Neg', (2.0,))))
     did_something, new_expr = simplify.square_add_simplify(expr)
     self.assertTrue(did_something)
-    self.assertEqual(new_expr, ('#Add', ('#CPow2.0000e+00', (1.,)),
-                                ('#Mul', (2.0,), (1.,), ('#Neg', (2.,))),
-                                ('#CPow2.0000e+00', ('#Neg', (2.,)))))
+    self.assertEqual(new_expr, ('#Add', ('#CPow2.0000e+00', (1.0,)),
+                                ('#Mul', (2.0,), (1.0,), ('#Neg', (2.0,))),
+                                ('#CPow2.0000e+00', ('#Neg', (2.0,)))))
     did_something, new_expr = simplify.square_add_simplify(new_expr)
     self.assertFalse(did_something)
 
