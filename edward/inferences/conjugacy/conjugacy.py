@@ -2,40 +2,22 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import re
-from collections import defaultdict
-from pprint import pprint
-from copy import copy
-
+import edward.inferences.conjugacy.conjugate_log_probs
 import numpy as np
+import six
 import tensorflow as tf
 
-from edward.models.random_variable import RandomVariable
-from edward.models import random_variables as rvs
-from edward.util.graphs import random_variables
-
-import edward.inferences.conjugacy.conjugate_log_probs
+from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
-
-copy_op_to_graph = tf.contrib.copy_graph.copy_op_to_graph
-
-# TODO(mhoffman): Support for slicing, tf.gather, etc.
+from edward.models import random_variables as rvs
+from edward.util import copy, random_variables
 
 
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
   mu = sigmasq * p2
   return {'mu': mu, 'sigma': tf.sqrt(sigmasq)}
-
-
-rvs.Bernoulli.support = 'binary'
-rvs.Categorical.support = 'onehot'
-rvs.Beta.support = '01'
-rvs.Dirichlet.support = 'simplex'
-rvs.Gamma.support = 'nonnegative'
-rvs.InverseGamma.support = 'nonnegative'
-rvs.Normal.support = 'real'
 
 
 _suff_stat_to_dist = defaultdict(dict)
@@ -96,17 +78,20 @@ def complete_conditional(rv, cond_set=None):
 
   Parameters
   ----------
-  `rv` : `RandomVariable`
+  rv : RandomVariable
     The `RandomVariable` whose conditional distribution we are interested in.
-  `cond_set` : `iterable` of `RandomVariables` (optional)
+  cond_set : iterable of RandomVariables, optional
     The set of `RandomVariable`s we want to condition on. Defaults to all
     `RandomVariable`s in the graph. (It makes no difference if `cond_set` does
     or does not include `rv`.)
 
-    NOTE: When calling `complete_conditional()` multiple times, one should
-    usually pass an explicit `cond_set`. Otherwise `complete_conditional()`
-    will try to condition on the `RandomVariable`s returned by previous calls
-    to itself, which may result in unpredictable behavior.
+  Notes
+  -----
+  When calling `complete_conditional()` multiple times, one should
+  usually pass an explicit `cond_set`. Otherwise
+  `complete_conditional()` will try to condition on the
+  `RandomVariable`s returned by previous calls to itself, which may
+  result in unpredictable behavior.
   """
   if cond_set is None:
     cond_set = random_variables()
@@ -123,15 +108,15 @@ def complete_conditional(rv, cond_set=None):
 
     # Simplify those nodes, and put any new linear terms into multipliers_i.
     s_stat_exprs = defaultdict(list)
-    for i in range(len(s_stats)):
-      expr = symbolic_suff_stat(s_stats[i], rv.value(), stop_nodes)
+    for s_stat in s_stats:
+      expr = symbolic_suff_stat(s_stat, rv.value(), stop_nodes)
       expr = full_simplify(expr)
       multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
-      s_stat_exprs[s_stats_i].append((s_stats[i],
-                                      reconstruct_multiplier(multipliers_i)))
+      s_stat_exprs[s_stats_i].append(
+          (s_stat, reconstruct_multiplier(multipliers_i)))
 
     # Sort out the sufficient statistics to identify this conditional's family.
-    s_stat_keys = list(s_stat_exprs.keys())
+    s_stat_keys = list(six.iterkeys(s_stat_exprs))
     order = np.argsort([str(i) for i in s_stat_keys])
     dist_key = tuple((s_stat_keys[i] for i in order))
     dist_constructor, constructor_params = (
@@ -151,7 +136,7 @@ def complete_conditional(rv, cond_set=None):
     s_stat_placeholders = []
     swap_dict = {}
     swap_back = {}
-    for s_stat in s_stat_exprs.keys():
+    for s_stat in six.iterkeys(s_stat_exprs):
       s_stat_shape = s_stat_exprs[s_stat][0][0].get_shape()
       s_stat_placeholder = tf.placeholder(np.float32, s_stat_shape)
       swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
@@ -172,14 +157,12 @@ def complete_conditional(rv, cond_set=None):
       swap_dict[i] = j
       swap_back[j] = i
 
-    log_joint_copy = edward.util.copy(log_joint, swap_dict,
-                                      scope=scope + 'swap')
+    log_joint_copy = copy(log_joint, swap_dict, scope=scope + 'swap')
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
     # Removes any dependencies on those old placeholders.
     for i in range(len(nat_params)):
-      nat_params[i] = edward.util.copy(nat_params[i], swap_back,
-                                       scope=scope + 'swapback')
+      nat_params[i] = copy(nat_params[i], swap_back, scope=scope + 'swapback')
     nat_params = [nat_params[i] for i in order]
 
     return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
@@ -208,8 +191,8 @@ def reconstruct_multiplier(multipliers):
 
 
 def extract_subgraph(root, stop_nodes=set()):
-  '''Copies the TF graph structure into something more pythonic.
-  '''
+  """Copies the TF graph structure into something more pythonic.
+  """
   result = [root]
   for input in root.op.inputs:
     if input in stop_nodes:
@@ -220,15 +203,14 @@ def extract_subgraph(root, stop_nodes=set()):
 
 
 def subgraph_leaves(subgraph):
-  '''Returns a list of leaf nodes from extract_subgraph().
-  '''
+  """Returns a list of leaf nodes from extract_subgraph().
+  """
   if len(subgraph) == 1:
     return subgraph
-  else:
-    result = []
-    for input in subgraph[1:]:
-      result += subgraph_leaves(input)
-    return tuple(result)
+  result = []
+  for input in subgraph[1:]:
+    result += subgraph_leaves(input)
+  return tuple(result)
 
 
 def is_child(subgraph, node, stop_nodes):
@@ -247,15 +229,12 @@ _n_important_args = {'Sum': 1}
 
 
 def suff_stat_nodes(subgraph, node, stop_nodes):
-  '''Finds nonlinear nodes depending on `node`.
-  '''
-  if len(subgraph) == 1:
-    if subgraph[0] == node:
-      return (node,)
-    else:
-      return ()
+  """Finds nonlinear nodes depending on `node`.
+  """
   if subgraph[0] == node:
-    return (subgraph[0],)
+    return (node,)
+  elif len(subgraph) == 1:
+    return ()
   op_type = str(subgraph[0].op.type)
   if op_type in _linear_types:
     result = []

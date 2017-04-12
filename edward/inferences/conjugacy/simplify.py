@@ -31,8 +31,8 @@ _extractable_nodes = {
 
 
 def symbolic_suff_stat(node, base_node, stop_nodes):
-  '''Extracts a symbolic representation of the graph rooted at `node`.
-  '''
+  """Extracts a symbolic representation of the graph rooted at `node`.
+  """
   if node == base_node:
     return ('#x',)
   elif node in stop_nodes:
@@ -88,7 +88,7 @@ def full_simplify(expr, simplify_fns=_simplify_fns):
 
 
 def _register_simplify_fn(fn):
-  '''Wraps and registers simplification functions.
+  """Wraps and registers simplification functions.
 
   A simplification function takes as input an expression and possible
   some other args/kwargs, and returns either None (if it did not find
@@ -97,7 +97,7 @@ def _register_simplify_fn(fn):
 
   The wrapped function will repeatedly apply this simplification
   function to all nodes of the graph until it stops doing anything.
-  '''
+  """
   def wrapped(expr, *args, **kwargs):
     result = fn(expr, *args, **kwargs)
     if result is None:
@@ -183,7 +183,7 @@ def pow_mul_simplify(expr):
 
 @_register_simplify_fn
 def mul_add_simplify(expr):
-  '''Turns Mul(Add(.), .) into Add(Mul(.), Mul(.),...)'''
+  """Turns Mul(Add(.), .) into Add(Mul(.), Mul(.),...)"""
   if expr[0] != '#Mul':
     return None
   for i in range(1, len(expr)):
@@ -279,7 +279,7 @@ def expr_contains(expr, node_type):
 
 @_register_simplify_fn
 def add_const_simplify(expr):
-  '''Prunes branches not containing any #x nodes.'''
+  """Prunes branches not containing any #x nodes."""
   if expr[0] != '#Add':
     return None
   did_something = False
@@ -295,7 +295,7 @@ def add_const_simplify(expr):
 
 @_register_simplify_fn
 def one_m_simplify(expr):
-  '''Replaces ("#Sub", (<wrapped constant 1>,), (.)) with ("#One_minus", .).'''
+  """Replaces ("#Sub", (<wrapped constant 1>,), (.)) with ("#One_minus", .)."""
   if expr[0] != '#Sub' or not isinstance(expr[1][0], tf.Tensor):
     return None
   value = tf.contrib.util.constant_value(expr[1][0].op.outputs[0])
@@ -305,13 +305,13 @@ def one_m_simplify(expr):
 
 @_register_simplify_fn
 def cast_simplify(expr):
-  '''Replaces (<wrapped cast>, (.)) with (.).'''
+  """Replaces (<wrapped cast>, (.)) with (.)."""
   if isinstance(expr[0], tf.Tensor) and expr[0].op.type == 'Cast':
     return expr[1]
 
 
 @_register_simplify_fn
 def onehot_simplify(expr):
-  '''Gets rid of extraneous args to OneHot.'''
+  """Gets rid of extraneous args to OneHot."""
   if expr[0] == '#OneHot' and len(expr) > 2:
     return expr[:2]

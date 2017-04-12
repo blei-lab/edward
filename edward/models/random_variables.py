@@ -20,3 +20,12 @@ for _name in sorted(dir(distributions)):
     _globals[_name] = type(_name, (RandomVariable, _candidate), params)
 
     del _candidate
+
+# Add supports; these are used, e.g., in conjugacy.
+Bernoulli.support = 'binary'
+Categorical.support = 'onehot'
+Beta.support = '01'
+Dirichlet.support = 'simplex'
+Gamma.support = 'nonnegative'
+InverseGamma.support = 'nonnegative'
+Normal.support = 'real'
