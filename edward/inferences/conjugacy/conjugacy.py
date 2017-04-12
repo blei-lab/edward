@@ -2,23 +2,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import re
-from collections import defaultdict
-from pprint import pprint
-from copy import copy
-
 import numpy as np
 import tensorflow as tf
 
-from edward.models.random_variable import RandomVariable
-from edward.models import random_variables as rvs
-from edward.util.graphs import random_variables
-
+from collections import defaultdict
 import edward.inferences.conjugacy.conjugate_log_probs
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
-
-copy_op_to_graph = tf.contrib.copy_graph.copy_op_to_graph
+from edward.models import random_variables as rvs
+from edward.util import copy, random_variables
 
 # TODO(mhoffman): Support for slicing, tf.gather, etc.
 
@@ -172,14 +164,12 @@ def complete_conditional(rv, cond_set=None):
       swap_dict[i] = j
       swap_back[j] = i
 
-    log_joint_copy = edward.util.copy(log_joint, swap_dict,
-                                      scope=scope + 'swap')
+    log_joint_copy = copy(log_joint, swap_dict, scope=scope + 'swap')
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
     # Removes any dependencies on those old placeholders.
     for i in range(len(nat_params)):
-      nat_params[i] = edward.util.copy(nat_params[i], swap_back,
-                                       scope=scope + 'swapback')
+      nat_params[i] = copy(nat_params[i], swap_back, scope=scope + 'swapback')
     nat_params = [nat_params[i] for i in order]
 
     return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
