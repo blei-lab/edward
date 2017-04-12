@@ -4,7 +4,6 @@ from __future__ import print_function
 
 from edward import criticisms
 from edward import inferences
-from edward.inferences import conjugacy
 from edward import util
 
 # Direct imports for convenience

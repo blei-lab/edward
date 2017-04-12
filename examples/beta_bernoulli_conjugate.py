@@ -11,7 +11,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Bernoulli, Beta
-from edward import conjugacy as conj
 
 ed.set_seed(42)
 
@@ -23,7 +22,7 @@ pi = Beta(a=1.0, b=1.0)
 x = Bernoulli(p=pi, sample_shape=10)
 
 # COMPLETE CONDITIONAL
-pi_cond = conj.complete_conditional(pi, [pi, x])
+pi_cond = ed.complete_conditional(pi)
 
 sess = tf.Session()
 init = tf.global_variables_initializer()
