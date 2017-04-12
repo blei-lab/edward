@@ -21,15 +21,6 @@ def normal_from_natural_params(p1, p2):
   return {'mu': mu, 'sigma': tf.sqrt(sigmasq)}
 
 
-rvs.Bernoulli.support = 'binary'
-rvs.Categorical.support = 'onehot'
-rvs.Beta.support = '01'
-rvs.Dirichlet.support = 'simplex'
-rvs.Gamma.support = 'nonnegative'
-rvs.InverseGamma.support = 'nonnegative'
-rvs.Normal.support = 'real'
-
-
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
     rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
