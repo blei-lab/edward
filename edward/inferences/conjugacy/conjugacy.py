@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import edward.inferences.conjugacy.conjugate_log_probs
 import numpy as np
 import six
 import tensorflow as tf
@@ -11,8 +12,6 @@ from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 from edward.models import random_variables as rvs
 from edward.util import copy, random_variables
-
-# TODO(mhoffman): Support for slicing, tf.gather, etc.
 
 
 def normal_from_natural_params(p1, p2):
