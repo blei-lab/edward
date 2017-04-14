@@ -47,10 +47,12 @@ class Gibbs(MonteCarlo):
     """
     Parameters
     ----------
-    scan_order : str or list of RandomVariable, optional
-      The scan order during each Gibbs update. If list, it is the
-      deterministic order of latent variables. If 'random', will use a
-      random order at each update.
+    scan_order : list or str, optional
+      The scan order for each Gibbs update. If list, it is the
+      deterministic order of latent variables. An element in the list
+      can be a ``RandomVariable`` or itself a list of
+      ``RandomVariable``s (this defines a blocked Gibbs sampler). If
+      'random', will use a random order at each update.
     """
     self.scan_order = scan_order
     self.feed_dict = {}
@@ -101,14 +103,20 @@ class Gibbs(MonteCarlo):
     if self.scan_order == 'random':
       scan_order = list(six.iterkeys(self.latent_vars))
       random.shuffle(scan_order)
-    else:
+    else:  # list
       scan_order = self.scan_order
 
     # Fetch samples by iterating over complete conditional draws.
     for z in scan_order:
-      draw = sess.run(self.proposal_vars[z], feed_dict)
-      feed_dict[z] = draw
-      self.feed_dict[z] = draw
+      if isinstance(z, RandomVariable):
+        draw = sess.run(self.proposal_vars[z], feed_dict)
+        feed_dict[z] = draw
+        self.feed_dict[z] = draw
+      else:  # list
+        draws = sess.run([self.proposal_vars[zz] for zz in z], feed_dict)
+        for zz, draw in zip(z, draws):
+          feed_dict[zz] = draw
+          feed_dict[zz] = draw
 
     # Assign the samples to the Empirical random variables.
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
