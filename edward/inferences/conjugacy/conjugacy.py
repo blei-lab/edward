@@ -94,8 +94,6 @@ def complete_conditional(rv, cond_set=None):
   result in unpredictable behavior.
   """
   if cond_set is None:
-    # cond_set = random_variables()
-    # TODO moralized
     cond_set = get_blanket(rv) + [rv]
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
