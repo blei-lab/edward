@@ -11,7 +11,7 @@ from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 from edward.models import random_variables as rvs
-from edward.util import copy, random_variables
+from edward.util import copy, get_blanket, random_variables
 
 
 def normal_from_natural_params(p1, p2):
@@ -94,7 +94,9 @@ def complete_conditional(rv, cond_set=None):
   result in unpredictable behavior.
   """
   if cond_set is None:
-    cond_set = random_variables()
+    # cond_set = random_variables()
+    # TODO moralized
+    cond_set = get_blanket(rv) + [rv]
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
     cond_set = set([rv] + list(cond_set))

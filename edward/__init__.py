@@ -13,7 +13,7 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
     GANInference, WGANInference, ImplicitKLqp, MAP, Laplace, \
-    complete_conditional
+    complete_conditional, Gibbs
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, copy, dot, \
     get_ancestors, get_blanket, get_children, get_control_variate_coef, \
