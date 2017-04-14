@@ -2,15 +2,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import six
 import random
+import six
 import tensorflow as tf
 
 from collections import OrderedDict
 from edward.inferences.conjugacy import complete_conditional
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import check_latent_vars, copy, get_session
+from edward.util import check_latent_vars, get_session
 
 
 class Gibbs(MonteCarlo):
@@ -60,7 +60,7 @@ class Gibbs(MonteCarlo):
     return super(Gibbs, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):
-    """Run one iteration of sampling for Monte Carlo.
+    """Run one iteration of Gibbs sampling.
 
     Parameters
     ----------
@@ -73,13 +73,6 @@ class Gibbs(MonteCarlo):
     dict
       Dictionary of algorithm-specific information. In this case, the
       acceptance rate of samples since (and including) this iteration.
-
-    Notes
-    -----
-    We run the increment of ``t`` separately from other ops. Whether the
-    others op run with the ``t`` before incrementing or after incrementing
-    depends on which is run faster in the TensorFlow graph. Running it
-    separately forces a consistent behavior.
     """
     sess = get_session()
     if not self.feed_dict:
@@ -117,7 +110,7 @@ class Gibbs(MonteCarlo):
         draws = sess.run([self.proposal_vars[zz] for zz in z], feed_dict)
         for zz, draw in zip(z, draws):
           feed_dict[zz] = draw
-          feed_dict[zz] = draw
+          self.feed_dict[zz] = draw
 
     # Assign the samples to the Empirical random variables.
     _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
