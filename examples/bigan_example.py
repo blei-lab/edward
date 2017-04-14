@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""Adversarially Learned Inference (Dumoulin et al., 2016) or
-  Bidirectional Generative Adversarial Networks (Donahue et al., 2016)
+"""Adversarially Learned Inference (Dumoulin et al., 2017) or
+  Bidirectional Generative Adversarial Networks (Donahue et al., 2017)
   for joint learning of generator and inference networks for MNIST
 """
 from __future__ import absolute_import
@@ -90,8 +90,9 @@ with tf.variable_scope("Gen"):
 # INFERENCE:
 optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
-inference = ed.ALI(
-    data={xf: x_ph, zf: z_ph}, discriminator=discriminative_network)
+inference = ed.BiGANInference(
+    latent_vars={zf: z_ph}, data = {xf: x_ph}, discriminator=discriminative_network)
+
 inference.initialize(
     optimizer=optimizer, optimizer_d=optimizer_d, n_iter=100000, n_print=3000)
 
