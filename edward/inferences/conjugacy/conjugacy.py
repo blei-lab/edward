@@ -11,7 +11,7 @@ from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 from edward.models import random_variables as rvs
-from edward.util import copy, get_blanket, random_variables
+from edward.util import copy, get_blanket
 
 
 def normal_from_natural_params(p1, p2):
