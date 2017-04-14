@@ -6,6 +6,7 @@ import six
 import random
 import tensorflow as tf
 
+from collections import OrderedDict
 from edward.inferences.conjugacy import complete_conditional
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
@@ -83,9 +84,9 @@ class Gibbs(MonteCarlo):
     sess = get_session()
     if not self.feed_dict:
       # Initialize feed for all conditionals to be the draws at step 0.
-      inits = sess.run([qz.params[0]
-                        for qz in six.itervalues(self.latent_vars)])
-      for z, init in zip(six.iterkeys(self.latent_vars), inits):
+      samples = OrderedDict(self.latent_vars)
+      inits = sess.run([qz.params[0] for qz in six.itervalues(samples)])
+      for z, init in zip(six.iterkeys(samples), inits):
         self.feed_dict[z] = init
 
       for key, value in six.iteritems(self.data):
