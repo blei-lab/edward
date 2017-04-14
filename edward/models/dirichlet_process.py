@@ -64,7 +64,8 @@ class DirichletProcess(RandomVariable, Distribution):
             dtype=self._base.dtype)
 
         # Instantiate distribution for stick breaking proportions.
-        self._betadist = Beta(a=tf.ones_like(self._alpha), b=self._alpha)
+        self._betadist = Beta(a=tf.ones_like(self._alpha), b=self._alpha,
+                              collections=[])
         # Form empty tensor to store stick breaking proportions.
         self._beta = tf.zeros(
             [0] + self.get_batch_shape().as_list(),
