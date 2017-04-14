@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import six
+import random
 import tensorflow as tf
 
 from edward.inferences.conjugacy import complete_conditional
@@ -46,10 +47,10 @@ class Gibbs(MonteCarlo):
     """
     Parameters
     ----------
-    scan_order : str, optional
-      The scan order during each Gibbs update. 'random', 'fixed',
-      'asynchronous' in which the updates proceed and terminate
-      whenever.
+    scan_order : str or list of RandomVariable, optional
+      The scan order during each Gibbs update. If list, it is the
+      deterministic order of latent variables. If 'random', will use a
+      random order at each update.
     """
     self.scan_order = scan_order
     self.feed_dict = {}
@@ -96,9 +97,16 @@ class Gibbs(MonteCarlo):
 
     feed_dict.update(self.feed_dict)
 
+    # Determine scan order.
+    if self.scan_order == 'random':
+      scan_order = list(six.iterkeys(self.latent_vars))
+      random.shuffle(scan_order)
+    else:
+      scan_order = self.scan_order
+
     # Fetch samples by iterating over complete conditional draws.
-    for z, z_cond in six.iteritems(self.proposal_vars):
-      draw = sess.run(z_cond, feed_dict)
+    for z in scan_order:
+      draw = sess.run(self.proposal_vars[z], feed_dict)
       feed_dict[z] = draw
       self.feed_dict[z] = draw
 
