@@ -91,7 +91,8 @@ with tf.variable_scope("Gen"):
 optimizer = tf.train.AdamOptimizer()
 optimizer_d = tf.train.AdamOptimizer()
 inference = ed.BiGANInference(
-    latent_vars={zf: z_ph}, data = {xf: x_ph}, discriminator=discriminative_network)
+    latent_vars={zf: z_ph}, data={xf: x_ph},
+    discriminator=discriminative_network)
 
 inference.initialize(
     optimizer=optimizer, optimizer_d=optimizer_d, n_iter=100000, n_print=3000)

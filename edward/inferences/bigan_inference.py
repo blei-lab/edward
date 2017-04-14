@@ -38,21 +38,24 @@ class BiGANInference(GANInference):
     >>> with tf.variable_scope("Gen"):
     >>>   xf = gen_data(z_ph)
     >>>   zf = gen_latent(x_ph)
-    >>> inference = ed.BiGANInference({latent_vars: qz}, {xf: x_data}, discriminator)
+    >>> inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
     """
-    joint = latent_vars.copy()
-    joint.update(data)
-    
-    super(BiGANInference, self).__init__(joint, discriminator)
+
+    if not callable(discriminator):
+      raise TypeError("discriminator must be a callable function.")
+
+    super(BiGANInference, self).__init__(data, discriminator)
+
+    self.latent_vars = latent_vars
 
   def build_loss_and_gradients(self, var_list):
-    
+
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
-    
-    z_true = list(six.itervalues(self.data))[1]
-    z_fake = list(six.iterkeys(self.data))[1]
-    
+
+    z_true = list(six.iterkeys(self.latent_vars))[0]
+    z_fake = list(six.itervalues(self.latent_vars))[0]
+
     with tf.variable_scope("Disc"):
         # xtzf := x_true, z_fake
         d_xtzf = self.discriminator(x_true, z_fake)
