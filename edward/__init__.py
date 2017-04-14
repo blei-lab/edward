@@ -16,7 +16,7 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     HMC, MetropolisHastings, SGLD, SGHMC, \
     KLpq, KLqp, MFVI, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
-    GANInference, ALI, WGANInference, MAP, Laplace
+    GANInference, BiGANInference, WGANInference, MAP, Laplace
 from edward.models import PyMC3Model, PythonModel, StanModel, \
     RandomVariable
 from edward.util import copy, dot, get_ancestors, get_children, \
