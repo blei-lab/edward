@@ -9,23 +9,22 @@ from edward.inferences.gan_inference import GANInference
 from edward.util import get_session
 
 
-class ALI(GANInference):
-  """Adversarially Learned Inference (Dumoulin et al., 2016) or
-  Bidirectional Generative Adversarial Networks (Donahue et al., 2016)
+class BiGANInference(GANInference):
+  """Adversarially Learned Inference (Dumoulin et al., 2017) or
+  Bidirectional Generative Adversarial Networks (Donahue et al., 2017)
   for joint learning of generator and inference networks.
 
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
   """
-  def __init__(self, *args, **kwargs):
+  def __init__(self, latent_vars, data, discriminator):
     """
     Notes
     -----
-    ``ALI`` matches a mapping from data to latent variables and a
+    ``BiGANInference`` matches a mapping from data to latent variables and a
     mapping from latent variables to data through a joint
-    discriminator. The encoder approximates the posterior p(z|x)
-    when the network is stochastic.
+    discriminator.
 
     In building the computation graph for inference, the
     discriminator's parameters can be accessed with the variable scope
@@ -39,20 +38,23 @@ class ALI(GANInference):
     >>> with tf.variable_scope("Gen"):
     >>>   xf = gen_data(z_ph)
     >>>   zf = gen_latent(x_ph)
-    >>> inference = ed.ALI({xf: x_data, zf: z_samples}, discriminator)
+    >>> inference = ed.BiGANInference({latent_vars: qz}, {xf: x_data}, discriminator)
     """
-    super(ALI, self).__init__(*args, **kwargs)
-
-  def initialize(self, *args, **kwargs):
-    super(ALI, self).initialize(*args, **kwargs)
+    joint = latent_vars.copy()
+    joint.update(data)
+    
+    super(BiGANInference, self).__init__(joint, discriminator)
 
   def build_loss_and_gradients(self, var_list):
+    
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
+    
     z_true = list(six.itervalues(self.data))[1]
     z_fake = list(six.iterkeys(self.data))[1]
+    
     with tf.variable_scope("Disc"):
-        # xfzt := x_fake, z_true
+        # xtzf := x_true, z_fake
         d_xtzf = self.discriminator(x_true, z_fake)
     with tf.variable_scope("Disc", reuse=True):
         # xfzt := x_fake, z_true
@@ -80,7 +82,3 @@ class ALI(GANInference):
     grads_and_vars_d = list(zip(grads_d, var_list_d))
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars, loss_d, grads_and_vars_d
-
-  def update(self, feed_dict=None, variables=None):
-    info_dict = super(ALI, self).update(feed_dict, variables)
-    return info_dict
