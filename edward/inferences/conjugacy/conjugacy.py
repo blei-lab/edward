@@ -116,21 +116,21 @@ def complete_conditional(rv, cond_set=None):
     swap_back = {}
     for s_stat in six.iterkeys(s_stat_exprs):
       s_stat_shape = s_stat_exprs[s_stat][0][0].get_shape()
-      s_stat_placeholder = tf.placeholder(np.float32, s_stat_shape)
-      swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
+      s_stat_placeholder = tf.placeholder(tf.float32, s_stat_shape)
+      swap_back[s_stat_placeholder] = tf.cast(rv.value(), tf.float32)
       s_stat_placeholders.append(s_stat_placeholder)
       for s_stat_node, multiplier in s_stat_exprs[s_stat]:
         fake_node = s_stat_placeholder * multiplier
         s_stat_nodes.append(s_stat_node)
         s_stat_replacements.append(fake_node)
+
     for i in cond_set:
       if i == rv:
         continue
       val = i.value()
       swap_dict[val] = tf.placeholder(val.dtype)
       swap_back[swap_dict[val]] = val
-      # This prevents random variable nodes from being copied.
-      swap_back[val] = val
+      swap_back[val] = val  # prevent random variable nodes from being copied
     for i, j in zip(s_stat_nodes, s_stat_replacements):
       swap_dict[i] = j
       swap_back[j] = i
