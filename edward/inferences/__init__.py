@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from edward.inferences.bigan_inference import *
 from edward.inferences.conjugacy import complete_conditional
 from edward.inferences.gan_inference import *
 from edward.inferences.gibbs import *
