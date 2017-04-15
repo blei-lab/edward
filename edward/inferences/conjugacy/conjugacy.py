@@ -71,10 +71,11 @@ def complete_conditional(rv, cond_set=None):
   result in unpredictable behavior.
   """
   if cond_set is None:
-    cond_set = get_blanket(rv) + [rv]
+    cond_set = get_blanket(rv)
+
+  cond_set = set([rv] + list(cond_set))
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
-    cond_set = set([rv] + list(cond_set))
     log_joint = get_log_joint(cond_set)
 
     # Pull out the nodes that are nonlinear functions of rv into s_stats.
