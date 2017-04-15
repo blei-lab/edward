@@ -41,29 +41,6 @@ _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
     rvs.Normal, normal_from_natural_params)
 
 
-def _log_joint_name(cond_set):
-  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in cond_set])) + '_'
-
-
-def get_log_joint(cond_set):
-  g = tf.get_default_graph()
-  cond_set_name = _log_joint_name(cond_set)
-  c = g.get_collection(cond_set_name)
-  if len(c):
-    return c[0]
-
-  with tf.name_scope('conjugate_log_joint') as scope:
-    terms = []
-    for b in cond_set:
-      if getattr(b, "conjugate_log_prob", None) is None:
-        raise NotImplementedError("conjugate_log_prob not implemented for"
-                                  " {}".format(type(b)))
-      terms.append(tf.reduce_sum(b.conjugate_log_prob()))
-    result = tf.add_n(terms, name=scope)
-    g.add_to_collection(cond_set_name, result)
-    return result
-
-
 def complete_conditional(rv, cond_set=None):
   """Returns the conditional distribution `RandomVariable` p(`rv` | .).
 
@@ -166,6 +143,29 @@ def complete_conditional(rv, cond_set=None):
     nat_params = [nat_params[i] for i in order]
 
     return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
+
+
+def _log_joint_name(cond_set):
+  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in cond_set])) + '_'
+
+
+def get_log_joint(cond_set):
+  g = tf.get_default_graph()
+  cond_set_name = _log_joint_name(cond_set)
+  c = g.get_collection(cond_set_name)
+  if len(c):
+    return c[0]
+
+  with tf.name_scope('conjugate_log_joint') as scope:
+    terms = []
+    for b in cond_set:
+      if getattr(b, "conjugate_log_prob", None) is None:
+        raise NotImplementedError("conjugate_log_prob not implemented for"
+                                  " {}".format(type(b)))
+      terms.append(tf.reduce_sum(b.conjugate_log_prob()))
+    result = tf.add_n(terms, name=scope)
+    g.add_to_collection(cond_set_name, result)
+    return result
 
 
 def extract_s_stat_multipliers(expr):
