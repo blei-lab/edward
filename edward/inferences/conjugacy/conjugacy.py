@@ -145,26 +145,31 @@ def complete_conditional(rv, cond_set=None):
     return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
 
 
-def _log_joint_name(cond_set):
-  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in cond_set])) + '_'
-
-
 def get_log_joint(cond_set):
   g = tf.get_default_graph()
-  cond_set_name = _log_joint_name(cond_set)
-  c = g.get_collection(cond_set_name)
-  if len(c):
-    return c[0]
+  cond_set_name = 'log_joint_of_' + ('_'.join([i.name[:-1] for i in cond_set]))
+  with tf.name_scope("conjugate_log_joint/") as scope:
+    try:
+      # Use log joint tensor if already built in graph.
+      return g.get_tensor_by_name(scope + cond_set_name + ':0')
+    except:
+      pass
 
-  with tf.name_scope('conjugate_log_joint') as scope:
     terms = []
     for b in cond_set:
-      if getattr(b, "conjugate_log_prob", None) is None:
-        raise NotImplementedError("conjugate_log_prob not implemented for"
-                                  " {}".format(type(b)))
-      terms.append(tf.reduce_sum(b.conjugate_log_prob()))
-    result = tf.add_n(terms, name=scope)
-    g.add_to_collection(cond_set_name, result)
+      name = b.name.replace(':', '_') + '_conjugate_log_prob'
+      try:
+        # Use log prob tensor if already built in graph.
+        conjugate_log_prob = g.get_tensor_by_name(scope + name + ':0')
+      except:
+        if getattr(b, "conjugate_log_prob", None) is None:
+          raise NotImplementedError("conjugate_log_prob not implemented for"
+                                    " {}".format(type(b)))
+        conjugate_log_prob = tf.reduce_sum(b.conjugate_log_prob(), name=name)
+
+      terms.append(conjugate_log_prob)
+
+    result = tf.add_n(terms, name=cond_set_name)
     return result
 
 
