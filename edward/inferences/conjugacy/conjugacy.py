@@ -41,29 +41,6 @@ _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
     rvs.Normal, normal_from_natural_params)
 
 
-def _log_joint_name(cond_set):
-  return '_log_joint_of_' + ('&'.join([i.name[:-1] for i in cond_set])) + '_'
-
-
-def get_log_joint(cond_set):
-  g = tf.get_default_graph()
-  cond_set_name = _log_joint_name(cond_set)
-  c = g.get_collection(cond_set_name)
-  if len(c):
-    return c[0]
-
-  with tf.name_scope('conjugate_log_joint') as scope:
-    terms = []
-    for b in cond_set:
-      if getattr(b, "conjugate_log_prob", None) is None:
-        raise NotImplementedError("conjugate_log_prob not implemented for"
-                                  " {}".format(type(b)))
-      terms.append(tf.reduce_sum(b.conjugate_log_prob()))
-    result = tf.add_n(terms, name=scope)
-    g.add_to_collection(cond_set_name, result)
-    return result
-
-
 def complete_conditional(rv, cond_set=None):
   """Returns the conditional distribution `RandomVariable` p(`rv` | .).
 
@@ -94,10 +71,11 @@ def complete_conditional(rv, cond_set=None):
   result in unpredictable behavior.
   """
   if cond_set is None:
-    cond_set = get_blanket(rv) + [rv]
+    cond_set = get_blanket(rv)
+
+  cond_set = set([rv] + list(cond_set))
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
-    cond_set = set([rv] + list(cond_set))
     log_joint = get_log_joint(cond_set)
 
     # Pull out the nodes that are nonlinear functions of rv into s_stats.
@@ -128,44 +106,67 @@ def complete_conditional(rv, cond_set=None):
                                 'sufficient statistics.' % str(dist_key))
 
     # Swap sufficient statistics for placeholders, then take gradients
-    # w.r.t.  those placeholders to get natural parameters. The original
+    # w.r.t. those placeholders to get natural parameters. The original
     # nodes involving the sufficient statistic nodes are swapped for new
     # nodes that depend linearly on the sufficient statistic placeholders.
-    s_stat_nodes = []
-    s_stat_replacements = []
     s_stat_placeholders = []
     swap_dict = {}
     swap_back = {}
-    for s_stat in six.iterkeys(s_stat_exprs):
-      s_stat_shape = s_stat_exprs[s_stat][0][0].get_shape()
-      s_stat_placeholder = tf.placeholder(np.float32, s_stat_shape)
-      swap_back[s_stat_placeholder] = tf.cast(rv.value(), np.float32)
+    for s_stat_expr in six.itervalues(s_stat_exprs):
+      s_stat_placeholder = tf.placeholder(tf.float32,
+                                          s_stat_expr[0][0].get_shape())
+      swap_back[s_stat_placeholder] = tf.cast(rv.value(), tf.float32)
       s_stat_placeholders.append(s_stat_placeholder)
-      for s_stat_node, multiplier in s_stat_exprs[s_stat]:
+      for s_stat_node, multiplier in s_stat_expr:
         fake_node = s_stat_placeholder * multiplier
-        s_stat_nodes.append(s_stat_node)
-        s_stat_replacements.append(fake_node)
+        swap_dict[s_stat_node] = fake_node
+        swap_back[fake_node] = s_stat_node
+
     for i in cond_set:
-      if i == rv:
-        continue
-      val = i.value()
-      swap_dict[val] = tf.placeholder(val.dtype)
-      swap_back[swap_dict[val]] = val
-      # This prevents random variable nodes from being copied.
-      swap_back[val] = val
-    for i, j in zip(s_stat_nodes, s_stat_replacements):
-      swap_dict[i] = j
-      swap_back[j] = i
+      if i != rv:
+        val = i.value()
+        val_placeholder = tf.placeholder(val.dtype)
+        swap_dict[val] = val_placeholder
+        swap_back[val_placeholder] = val
+        swap_back[val] = val  # prevent random variable nodes from being copied
 
     log_joint_copy = copy(log_joint, swap_dict, scope=scope + 'swap')
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
-    # Removes any dependencies on those old placeholders.
-    for i in range(len(nat_params)):
-      nat_params[i] = copy(nat_params[i], swap_back, scope=scope + 'swapback')
+    # Remove any dependencies on those old placeholders.
+    nat_params = [copy(nat_param, swap_back, scope=scope + 'swapback')
+                  for nat_param in nat_params]
     nat_params = [nat_params[i] for i in order]
 
     return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
+
+
+def get_log_joint(cond_set):
+  g = tf.get_default_graph()
+  cond_set_name = 'log_joint_of_' + ('_'.join([i.name[:-1] for i in cond_set]))
+  with tf.name_scope("conjugate_log_joint/") as scope:
+    try:
+      # Use log joint tensor if already built in graph.
+      return g.get_tensor_by_name(scope + cond_set_name + ':0')
+    except:
+      pass
+
+    terms = []
+    for b in cond_set:
+      name = b.name.replace(':', '_') + '_conjugate_log_prob'
+      try:
+        # Use log prob tensor if already built in graph.
+        conjugate_log_prob = g.get_tensor_by_name(scope + name + ':0')
+      except:
+        if getattr(b, "conjugate_log_prob", None) is None:
+          raise NotImplementedError("conjugate_log_prob not implemented for"
+                                    " {}".format(type(b)))
+        conjugate_log_prob = tf.reduce_sum(b.conjugate_log_prob(), name=name)
+
+      terms.append(conjugate_log_prob)
+
+    result = tf.add_n(terms, name=cond_set_name)
+    return result
 
 
 def extract_s_stat_multipliers(expr):
@@ -186,7 +187,7 @@ def extract_s_stat_multipliers(expr):
 def reconstruct_multiplier(multipliers):
   result = 1.
   for m in multipliers:
-    result = result * reconstruct_expr(m)
+    result *= reconstruct_expr(m)
   return result
 
 
