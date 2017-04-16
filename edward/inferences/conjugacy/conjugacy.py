@@ -71,13 +71,11 @@ def complete_conditional(rv, cond_set=None):
   result in unpredictable behavior.
   """
   if cond_set is None:
+    # Default to Markov blanket, excluding conditionals. This is useful if
+    # calling complete_conditional many times without passing in cond_set.
     cond_set = get_blanket(rv)
-    # Default to excluding conditionals in blanket. This is useful if
-    # calling complete_conditional many times without passing in
-    # cond_set.
-    for i in cond_set:
-      if i.name.endswith('cond_dist/'):
-        cond_set.remove(i)
+    cond_set = [i for i in cond_set if not
+                ('complete_conditional' in i.name and 'cond_dist' in i.name)]
 
   cond_set = set([rv] + list(cond_set))
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
