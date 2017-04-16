@@ -187,7 +187,7 @@ def extract_s_stat_multipliers(expr):
 def reconstruct_multiplier(multipliers):
   result = 1.
   for m in multipliers:
-    result = result * reconstruct_expr(m)
+    result *= reconstruct_expr(m)
   return result
 
 
