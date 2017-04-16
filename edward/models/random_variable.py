@@ -10,7 +10,7 @@ try:
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
-RANDOM_VARIABLE_COLLECTION = "_random_variable_collection_"
+RANDOM_VARIABLE_COLLECTION = "random_variables"
 
 
 class RandomVariable(object):
@@ -78,6 +78,9 @@ class RandomVariable(object):
     value : tf.Tensor, optional
       Fixed tensor to associate with random variable. Must have shape
       ``sample_shape + batch_shape + event_shape``.
+    collections : list, optional
+      Optional list of graph collections keys. The random variable is
+      added to these collections. Defaults to ["random_variables"].
     *args, **kwargs
       Passed into parent ``__init__``.
     """
@@ -88,11 +91,14 @@ class RandomVariable(object):
     # temporarily pop (then reinsert) before calling parent __init__
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
+    collections = kwargs.pop('collections', [RANDOM_VARIABLE_COLLECTION])
     super(RandomVariable, self).__init__(*args, **kwargs)
     if sample_shape != ():
       self._kwargs['sample_shape'] = sample_shape
     if value is not None:
       self._kwargs['value'] = value
+    if collections != [RANDOM_VARIABLE_COLLECTION]:
+      self._kwargs['collections'] = collections
 
     self._sample_shape = tf.TensorShape(sample_shape)
     if value is not None:
@@ -115,7 +121,8 @@ class RandomVariable(object):
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
-    tf.add_to_collection(RANDOM_VARIABLE_COLLECTION, self)
+    for collection in collections:
+      tf.add_to_collection(collection, self)
 
   @property
   def shape(self):

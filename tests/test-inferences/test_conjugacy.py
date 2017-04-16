@@ -180,8 +180,7 @@ class test_conjugacy_class(tf.test.TestCase):
     theta = rvs.Dirichlet(alpha)
     x = rvs.Categorical(p=theta, sample_shape=sample_shape)
 
-    blanket = [theta, x]
-    theta_cond = ed.complete_conditional(theta, blanket)
+    theta_cond = ed.complete_conditional(theta, [theta, x])
 
     with self.test_session() as sess:
       alpha_val = sess.run(theta_cond.alpha, {x: x_data})
@@ -208,10 +207,9 @@ class test_conjugacy_class(tf.test.TestCase):
                          rvs.Normal, sample_shape=N)
     z = x.cat
 
-    blanket = [x, z, mu, pi]
-    mu_cond = ed.complete_conditional(mu, blanket)
-    pi_cond = ed.complete_conditional(pi, blanket)
-    z_cond = ed.complete_conditional(z, blanket)
+    mu_cond = ed.complete_conditional(mu)
+    pi_cond = ed.complete_conditional(pi)
+    z_cond = ed.complete_conditional(z)
 
     with self.test_session() as sess:
       pi_cond_alpha, mu_cond_mu, mu_cond_sigma, z_cond_p = (

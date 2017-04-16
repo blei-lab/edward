@@ -41,11 +41,10 @@ x = ParamMixture(pi, {'mu': mu, 'sigma': tf.sqrt(sigmasq)}, Normal,
 z = x.cat
 
 # Conditionals
-blanket = [x, z, mu, pi, sigmasq]
-mu_cond = ed.complete_conditional(mu, blanket)
-sigmasq_cond = ed.complete_conditional(sigmasq, blanket)
-pi_cond = ed.complete_conditional(pi, blanket)
-z_cond = ed.complete_conditional(z, blanket)
+mu_cond = ed.complete_conditional(mu)
+sigmasq_cond = ed.complete_conditional(sigmasq)
+pi_cond = ed.complete_conditional(pi)
+z_cond = ed.complete_conditional(z)
 
 sess = ed.get_session()
 

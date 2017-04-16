@@ -71,7 +71,11 @@ def complete_conditional(rv, cond_set=None):
   result in unpredictable behavior.
   """
   if cond_set is None:
+    # Default to Markov blanket, excluding conditionals. This is useful if
+    # calling complete_conditional many times without passing in cond_set.
     cond_set = get_blanket(rv)
+    cond_set = [i for i in cond_set if not
+                ('complete_conditional' in i.name and 'cond_dist' in i.name)]
 
   cond_set = set([rv] + list(cond_set))
   with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
@@ -143,7 +147,9 @@ def complete_conditional(rv, cond_set=None):
 
 def get_log_joint(cond_set):
   g = tf.get_default_graph()
-  cond_set_name = 'log_joint_of_' + ('_'.join([i.name[:-1] for i in cond_set]))
+  cond_set_names = [i.name[:-1] for i in cond_set]
+  cond_set_names.sort()
+  cond_set_name = 'log_joint_of_' + '_'.join(cond_set_names)
   with tf.name_scope("conjugate_log_joint/") as scope:
     try:
       # Use log joint tensor if already built in graph.

@@ -82,6 +82,7 @@ class ParamMixture(RandomVariable, Distribution):
       self._components = component_dist(validate_args=validate_args,
                                         allow_nan_stats=allow_nan_stats,
                                         sample_shape=sample_shape,
+                                        collections=[],
                                         **component_params)
 
       if validate_args:
