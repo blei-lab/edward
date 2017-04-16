@@ -106,41 +106,36 @@ def complete_conditional(rv, cond_set=None):
                                 'sufficient statistics.' % str(dist_key))
 
     # Swap sufficient statistics for placeholders, then take gradients
-    # w.r.t.  those placeholders to get natural parameters. The original
+    # w.r.t. those placeholders to get natural parameters. The original
     # nodes involving the sufficient statistic nodes are swapped for new
     # nodes that depend linearly on the sufficient statistic placeholders.
-    s_stat_nodes = []
-    s_stat_replacements = []
     s_stat_placeholders = []
     swap_dict = {}
     swap_back = {}
-    for s_stat in six.iterkeys(s_stat_exprs):
-      s_stat_shape = s_stat_exprs[s_stat][0][0].get_shape()
-      s_stat_placeholder = tf.placeholder(tf.float32, s_stat_shape)
+    for s_stat_expr in six.itervalues(s_stat_exprs):
+      s_stat_placeholder = tf.placeholder(tf.float32,
+                                          s_stat_expr[0][0].get_shape())
       swap_back[s_stat_placeholder] = tf.cast(rv.value(), tf.float32)
       s_stat_placeholders.append(s_stat_placeholder)
-      for s_stat_node, multiplier in s_stat_exprs[s_stat]:
+      for s_stat_node, multiplier in s_stat_expr:
         fake_node = s_stat_placeholder * multiplier
-        s_stat_nodes.append(s_stat_node)
-        s_stat_replacements.append(fake_node)
+        swap_dict[s_stat_node] = fake_node
+        swap_back[fake_node] = s_stat_node
 
     for i in cond_set:
-      if i == rv:
-        continue
-      val = i.value()
-      swap_dict[val] = tf.placeholder(val.dtype)
-      swap_back[swap_dict[val]] = val
-      swap_back[val] = val  # prevent random variable nodes from being copied
-    for i, j in zip(s_stat_nodes, s_stat_replacements):
-      swap_dict[i] = j
-      swap_back[j] = i
+      if i != rv:
+        val = i.value()
+        val_placeholder = tf.placeholder(val.dtype)
+        swap_dict[val] = val_placeholder
+        swap_back[val_placeholder] = val
+        swap_back[val] = val  # prevent random variable nodes from being copied
 
     log_joint_copy = copy(log_joint, swap_dict, scope=scope + 'swap')
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
-    # Removes any dependencies on those old placeholders.
-    for i in range(len(nat_params)):
-      nat_params[i] = copy(nat_params[i], swap_back, scope=scope + 'swapback')
+    # Remove any dependencies on those old placeholders.
+    nat_params = [copy(nat_param, swap_back, scope=scope + 'swapback')
+                  for nat_param in nat_params]
     nat_params = [nat_params[i] for i in order]
 
     return dist_constructor(name='cond_dist', **constructor_params(*nat_params))
