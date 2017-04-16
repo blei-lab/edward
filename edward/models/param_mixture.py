@@ -77,8 +77,7 @@ class ParamMixture(RandomVariable, Distribution):
       self._cat = Categorical(p=self._mixing_weights,
                               validate_args=validate_args,
                               allow_nan_stats=allow_nan_stats,
-                              sample_shape=sample_shape,
-                              collections=[])
+                              sample_shape=sample_shape)
       self._component_params = component_params
       self._components = component_dist(validate_args=validate_args,
                                         allow_nan_stats=allow_nan_stats,
