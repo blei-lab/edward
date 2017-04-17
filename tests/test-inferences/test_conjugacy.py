@@ -78,13 +78,53 @@ class test_conjugacy_class(tf.test.TestCase):
     self.assertAllClose(a_val, a0 + x_data.sum())
     self.assertAllClose(b_val, b0 + (1 - x_data).sum())
 
+  def test_beta_binomial(self):
+    n_data = 10
+    x_data = 2
+
+    a0 = 0.5
+    b0 = 1.5
+    pi = rvs.Beta(a=a0, b=b0)
+    # use value since cannot sample
+    x = rvs.Binomial(n=n_data, p=pi, value=0.0)
+
+    pi_cond = ed.complete_conditional(pi, [pi, x])
+
+    self.assertIsInstance(pi_cond, rvs.Beta)
+
+    with self.test_session() as sess:
+      a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
+
+    self.assertAllClose(a_val, a0 + x_data)
+    self.assertAllClose(b_val, b0 + n_data - x_data)
+
+  def test_gamma_exponential(self):
+    x_data = np.array([0.1, 0.5, 3.3, 2.7])
+
+    alpha0 = 0.5
+    beta0 = 1.75
+    lam = rvs.Gamma(alpha=alpha0, beta=beta0)
+    x = rvs.Exponential(lam=lam, sample_shape=4)
+
+    lam_cond = ed.complete_conditional(lam, [lam, x])
+
+    self.assertIsInstance(lam_cond, rvs.Gamma)
+
+    with self.test_session() as sess:
+      alpha_val, beta_val = sess.run(
+          [lam_cond.alpha, lam_cond.beta], {x: x_data})
+
+    self.assertAllClose(alpha_val, alpha0 + len(x_data))
+    self.assertAllClose(beta_val, beta0 + x_data.sum())
+
   def test_gamma_poisson(self):
     x_data = np.array([0, 1, 0, 7, 0, 0, 2, 0, 0, 1])
 
     alpha0 = 0.5
     beta0 = 1.75
     lam = rvs.Gamma(alpha=alpha0, beta=beta0)
-    x = rvs.Poisson(lam=lam, value=x_data, sample_shape=10)
+    # use value since cannot sample
+    x = rvs.Poisson(lam=lam, value=tf.zeros(10), sample_shape=10)
 
     lam_cond = ed.complete_conditional(lam, [lam, x])
 
@@ -105,7 +145,7 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha_likelihood = 2.3
     beta = rvs.Gamma(alpha=alpha0, beta=beta0)
     x = rvs.Gamma(alpha=alpha_likelihood, beta=beta,
-                  value=x_data, sample_shape=4)
+                  sample_shape=4)
 
     beta_cond = ed.complete_conditional(beta, [beta, x])
 
@@ -125,7 +165,7 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha_likelihood = 2.3
     beta = rvs.Gamma(alpha=alpha0, beta=beta0)
     x = rvs.Gamma(alpha=alpha_likelihood, beta=alpha_likelihood * beta,
-                  value=x_data, sample_shape=4)
+                  sample_shape=4)
 
     beta_cond = ed.complete_conditional(beta, [beta, x])
 
@@ -190,11 +230,27 @@ class test_conjugacy_class(tf.test.TestCase):
     N = x_data.shape[0]
     D = x_data.max() + 1
 
-    alpha = np.zeros([D]).astype(np.float32) + 2.0
-    sample_shape = (N,)
+    alpha = np.zeros(D).astype(np.float32) + 2.0
 
     theta = rvs.Dirichlet(alpha)
-    x = rvs.Categorical(p=theta, sample_shape=sample_shape)
+    x = rvs.Categorical(p=theta, sample_shape=N)
+
+    theta_cond = ed.complete_conditional(theta, [theta, x])
+
+    with self.test_session() as sess:
+      alpha_val = sess.run(theta_cond.alpha, {x: x_data})
+
+    self.assertAllClose(alpha_val, np.array([6.0, 5.0, 4.0, 3.0], np.float32))
+
+  def test_dirichlet_multinomial(self):
+    x_data = np.array([4, 3, 2, 1], np.int32)
+    N = x_data.sum()
+    D = x_data.shape[0]
+
+    alpha = np.zeros(D).astype(np.float32) + 2.0
+
+    theta = rvs.Dirichlet(alpha)
+    x = rvs.Multinomial(n=tf.cast(N, tf.float32), p=theta)
 
     theta_cond = ed.complete_conditional(theta, [theta, x])
 
