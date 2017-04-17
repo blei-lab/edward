@@ -40,8 +40,7 @@ def dirichlet_log_prob(self, val):
 def bernoulli_log_prob(self, val):
   p = self.parameters['p']
   f_val = tf.cast(val, tf.float32)
-  return (f_val * tf.log(p) +
-          (1. - f_val) * tf.log(1. - p))
+  return f_val * tf.log(p) + (1.0 - f_val) * tf.log(1.0 - p)
 
 
 @_val_wrapper
@@ -49,6 +48,29 @@ def categorical_log_prob(self, val):
   p = self.parameters['p']
   one_hot = tf.one_hot(val, p.get_shape()[-1], dtype=tf.float32)
   return tf.reduce_sum(tf.log(p) * one_hot, -1)
+
+
+@_val_wrapper
+def binomial_log_prob(self, val):
+  n = self.parameters['n']
+  p = self.parameters['p']
+  f_n = tf.cast(n, tf.float32)
+  f_val = tf.cast(val, tf.float32)
+  result = f_val * tf.log(p) + (f_n - f_val) * tf.log(1.0 - p)
+  result += tf.lgamma(f_n + 1) - tf.lgamma(f_val + 1) - \
+            tf.lgamma(f_n - f_val + 1)
+  return result
+
+
+@_val_wrapper
+def multinomial_log_prob(self, val):
+  n = self.parameters['n']
+  p = self.parameters['p']
+  f_n = tf.cast(n, tf.float32)
+  f_val = tf.cast(val, tf.float32)
+  result = tf.reduce_sum(tf.log(p) * f_val, -1)
+  result += tf.lgamma(f_n + 1) - tf.reduce_sum(tf.lgamma(f_val + 1), -1)
+  return result
 
 
 @_val_wrapper
@@ -106,6 +128,8 @@ rvs.Beta.conjugate_log_prob = beta_log_prob
 rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
 rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
 rvs.Categorical.conjugate_log_prob = categorical_log_prob
+rvs.Binomial.conjugate_log_prob = binomial_log_prob
+rvs.Multinomial.conjugate_log_prob = multinomial_log_prob
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 rvs.Poisson.conjugate_log_prob = poisson_log_prob
 rvs.MultivariateNormalDiag.conjugate_log_prob = mvn_diag_log_prob
