@@ -6,12 +6,19 @@ import edward.inferences.conjugacy.conjugate_log_probs
 import numpy as np
 import six
 import tensorflow as tf
+import time
 
 from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
 from edward.models import random_variables as rvs
 from edward.util import copy, get_blanket
+
+
+def mvn_diag_from_natural_params(p1, p2):
+  sigmasq = 0.5 * tf.reciprocal(-p1)
+  mu = sigmasq * p2
+  return {'mu': mu, 'diag_stdev': tf.sqrt(sigmasq)}
 
 
 def normal_from_natural_params(p1, p2):
@@ -36,6 +43,9 @@ _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
 _suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)),
                                    ('#Log', ('#x',)))] = (
     rvs.InverseGamma, lambda p1, p2: {'alpha': -p2 - 1, 'beta': -p1})
+_suff_stat_to_dist['multivariate_real'][(('#CPow2.0000e+00', ('#x',)),
+                                        ('#x',))] = (
+    rvs.MultivariateNormalDiag, mvn_diag_from_natural_params)
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
     rvs.Normal, normal_from_natural_params)
@@ -134,11 +144,12 @@ def complete_conditional(rv, cond_set=None):
         swap_back[val_placeholder] = val
         swap_back[val] = val  # prevent random variable nodes from being copied
 
-    log_joint_copy = copy(log_joint, swap_dict, scope=scope + 'swap')
+    scope_name = scope + str(time.time())  # ensure unique scope when copying
+    log_joint_copy = copy(log_joint, swap_dict, scope=scope_name + 'swap')
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
     # Remove any dependencies on those old placeholders.
-    nat_params = [copy(nat_param, swap_back, scope=scope + 'swapback')
+    nat_params = [copy(nat_param, swap_back, scope=scope_name + 'swapback')
                   for nat_param in nat_params]
     nat_params = [nat_params[i] for i in order]
 

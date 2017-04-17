@@ -27,7 +27,7 @@ true_z = np.random.choice(np.arange(K), size=N, p=true_pi)
 x_data = true_mu[true_z] + np.random.randn(N) * np.sqrt(true_sigmasq[true_z])
 
 # Prior hyperparameters
-pi_alpha = 1. + np.zeros(K, dtype=np.float32)
+pi_alpha = np.ones(K, dtype=np.float32)
 mu_sigma = np.std(true_mu)
 sigmasq_alpha = 1.0
 sigmasq_beta = 2.0

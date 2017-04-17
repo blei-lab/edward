@@ -69,7 +69,7 @@ class ParamMixture(RandomVariable, Distribution):
       if validate_args:
         if not isinstance(component_params, dict):
           raise TypeError("component_params must be a dict.")
-        elif not isinstance(component_dist, RandomVariable):
+        elif not issubclass(component_dist, RandomVariable):
           raise TypeError("component_dist must be a ed.RandomVariable object.")
 
       sample_shape = kwargs.get('sample_shape', ())
@@ -173,15 +173,23 @@ class ParamMixture(RandomVariable, Distribution):
   def _log_prob(self, x, conjugate=False, **kwargs):
     batch_event_rank = (self.get_event_shape().ndims +
                         self.get_batch_shape().ndims)
+    # expand x to broadcast log probs over num_components dimension
     expanded_x = tf.expand_dims(x, -1 - batch_event_rank)
     if conjugate:
       log_probs = self.components.conjugate_log_prob(expanded_x)
     else:
       log_probs = self.components.log_prob(expanded_x)
 
-    selecter = tf.one_hot(self.cat, self.num_components, dtype=tf.float32,
-                          axis=self.components.shape.ndims -
-                          1 - batch_event_rank)
+    cat_axis = self.components.shape.ndims - 1 - batch_event_rank
+    selecter = tf.one_hot(self.cat, self.num_components,
+                          axis=cat_axis, dtype=log_probs.dtype)
+
+    # selecter has shape [n] + [num_components] + batch_shape; change
+    # to broadcast with [n] + [num_components] + batch_shape + event_shape.
+    while selecter.shape.ndims < log_probs.shape.ndims:
+      selecter = tf.expand_dims(selecter, -1)
+
+    # select the sampled component, sum out the component dimension
     return tf.reduce_sum(log_probs * selecter, -1 - batch_event_rank)
 
   def conjugate_log_prob(self):
@@ -191,6 +199,7 @@ class ParamMixture(RandomVariable, Distribution):
     'The marginal log probability of the observed variable. Sums out `cat`.'
     batch_event_rank = (self.get_event_shape().ndims +
                         self.get_batch_shape().ndims)
+    # expand x to broadcast log probs over num_components dimension
     expanded_x = tf.expand_dims(x, -1 - batch_event_rank)
     log_probs = self.components.log_prob(expanded_x)
 
