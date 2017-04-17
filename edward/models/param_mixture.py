@@ -69,7 +69,7 @@ class ParamMixture(RandomVariable, Distribution):
       if validate_args:
         if not isinstance(component_params, dict):
           raise TypeError("component_params must be a dict.")
-        elif not isinstance(component_dist, RandomVariable):
+        elif not issubclass(component_dist, RandomVariable):
           raise TypeError("component_dist must be a ed.RandomVariable object.")
 
       sample_shape = kwargs.get('sample_shape', ())
