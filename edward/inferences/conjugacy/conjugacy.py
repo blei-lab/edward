@@ -35,6 +35,8 @@ _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
     rvs.Beta, lambda p1, p2: {'a': p2 + 1, 'b': p1 + 1})
 _suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
     rvs.Categorical, lambda p1: {'p': tf.nn.softmax(p1)})
+_suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),)] = (
+    rvs.Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
 _suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
     rvs.Dirichlet, lambda p1: {'alpha': p1 + 1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),

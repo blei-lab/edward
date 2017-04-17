@@ -54,6 +54,16 @@ def categorical_log_prob(self, val):
 
 
 @_val_wrapper
+def chi2_log_prob(self, val):
+  df = self.parameters['df']
+  eta = 0.5 * df - 1
+  result = tf.reduce_sum(eta * tf.log(val), -1)
+  result += tf.exp(-0.5 * val)
+  result -= tf.lgamma(eta + 1) + (eta + 1) * tf.log(2.0)
+  return result
+
+
+@_val_wrapper
 def dirichlet_log_prob(self, val):
   alpha = self.parameters['alpha']
   result = tf.reduce_sum((alpha - 1.0) * tf.log(val), -1)
@@ -128,6 +138,7 @@ rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
 rvs.Beta.conjugate_log_prob = beta_log_prob
 rvs.Binomial.conjugate_log_prob = binomial_log_prob
 rvs.Categorical.conjugate_log_prob = categorical_log_prob
+rvs.Chi2.conjugate_log_prob = chi2_log_prob
 rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 rvs.InverseGamma.conjugate_log_prob = inverse_gamma_log_prob
