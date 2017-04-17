@@ -73,6 +73,13 @@ def dirichlet_log_prob(self, val):
 
 
 @_val_wrapper
+def exponential_log_prob(self, val):
+  lam = self.parameters['lam']
+  result = tf.log(lam) - lam * val
+  return result
+
+
+@_val_wrapper
 def gamma_log_prob(self, val):
   alpha = self.parameters['alpha']
   beta = self.parameters['beta']
@@ -140,6 +147,7 @@ rvs.Binomial.conjugate_log_prob = binomial_log_prob
 rvs.Categorical.conjugate_log_prob = categorical_log_prob
 rvs.Chi2.conjugate_log_prob = chi2_log_prob
 rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
+rvs.Exponential.conjugate_log_prob = exponential_log_prob
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 rvs.InverseGamma.conjugate_log_prob = inverse_gamma_log_prob
 rvs.Multinomial.conjugate_log_prob = multinomial_log_prob

@@ -97,6 +97,25 @@ class test_conjugacy_class(tf.test.TestCase):
     self.assertAllClose(a_val, a0 + x_data)
     self.assertAllClose(b_val, b0 + n_data - x_data)
 
+  def test_gamma_exponential(self):
+    x_data = np.array([0.1, 0.5, 3.3, 2.7])
+
+    alpha0 = 0.5
+    beta0 = 1.75
+    lam = rvs.Gamma(alpha=alpha0, beta=beta0)
+    x = rvs.Exponential(lam=lam, sample_shape=4)
+
+    lam_cond = ed.complete_conditional(lam, [lam, x])
+
+    self.assertIsInstance(lam_cond, rvs.Gamma)
+
+    with self.test_session() as sess:
+      alpha_val, beta_val = sess.run(
+          [lam_cond.alpha, lam_cond.beta], {x: x_data})
+
+    self.assertAllClose(alpha_val, alpha0 + len(x_data))
+    self.assertAllClose(beta_val, beta0 + x_data.sum())
+
   def test_gamma_poisson(self):
     x_data = np.array([0, 1, 0, 7, 0, 0, 2, 0, 0, 1])
 

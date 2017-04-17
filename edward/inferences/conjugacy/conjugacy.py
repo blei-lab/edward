@@ -39,6 +39,8 @@ _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),)] = (
     rvs.Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
 _suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
     rvs.Dirichlet, lambda p1: {'alpha': p1 + 1})
+_suff_stat_to_dist['nonnegative'][(('#x',),)] = (
+    rvs.Exponential, lambda p1: {'lam': -p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
                                    ('#x',))] = (
     rvs.Gamma, lambda p1, p2: {'alpha': p1 + 1, 'beta': -p2})
