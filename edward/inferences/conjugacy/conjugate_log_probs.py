@@ -42,7 +42,7 @@ def binomial_log_prob(self, val):
   f_val = tf.cast(val, tf.float32)
   result = f_val * tf.log(p) + (f_n - f_val) * tf.log(1.0 - p)
   result += tf.lgamma(f_n + 1) - tf.lgamma(f_val + 1) - \
-            tf.lgamma(f_n - f_val + 1)
+      tf.lgamma(f_n - f_val + 1)
   return result
 
 
