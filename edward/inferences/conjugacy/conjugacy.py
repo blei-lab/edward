@@ -30,13 +30,11 @@ def normal_from_natural_params(p1, p2):
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
     rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
-_suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
-    rvs.Categorical, lambda p1: {'p': tf.nn.softmax(p1)})
-_suff_stat_to_dist['countable'][(('#x',),)] = (
-    rvs.Poisson, lambda p1: {'lam': tf.exp(p1)})
 _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
                           ('#Log', ('#x',)))] = (
     rvs.Beta, lambda p1, p2: {'a': p2 + 1, 'b': p1 + 1})
+_suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
+    rvs.Categorical, lambda p1: {'p': tf.nn.softmax(p1)})
 _suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
     rvs.Dirichlet, lambda p1: {'alpha': p1 + 1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
@@ -51,6 +49,8 @@ _suff_stat_to_dist['multivariate_real'][(('#CPow2.0000e+00', ('#x',)),
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
     rvs.Normal, normal_from_natural_params)
+_suff_stat_to_dist['countable'][(('#x',),)] = (
+    rvs.Poisson, lambda p1: {'lam': tf.exp(p1)})
 
 
 def complete_conditional(rv, cond_set=None):

@@ -23,13 +23,13 @@ for _name in sorted(dir(distributions)):
 
 # Add supports; these are used, e.g., in conjugacy.
 Bernoulli.support = 'binary'
-Categorical.support = 'categorical'
-Poisson.support = 'countable'
-Binomial.support = 'onehot'
-Multinomial.support = 'onehot'
 Beta.support = '01'
+Binomial.support = 'onehot'
+Categorical.support = 'categorical'
 Dirichlet.support = 'simplex'
 Gamma.support = 'nonnegative'
 InverseGamma.support = 'nonnegative'
+Multinomial.support = 'onehot'
 MultivariateNormalDiag.support = 'multivariate_real'
 Normal.support = 'real'
+Poisson.support = 'countable'
