@@ -85,6 +85,7 @@ class test_conjugacy_class(tf.test.TestCase):
     a0 = 0.5
     b0 = 1.5
     pi = rvs.Beta(a=a0, b=b0)
+    # use value since cannot sample
     x = rvs.Binomial(n=n_data, p=pi, value=0.0)
 
     pi_cond = ed.complete_conditional(pi, [pi, x])
@@ -122,7 +123,8 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha0 = 0.5
     beta0 = 1.75
     lam = rvs.Gamma(alpha=alpha0, beta=beta0)
-    x = rvs.Poisson(lam=lam, value=x_data, sample_shape=10)
+    # use value since cannot sample
+    x = rvs.Poisson(lam=lam, value=tf.zeros(10), sample_shape=10)
 
     lam_cond = ed.complete_conditional(lam, [lam, x])
 
@@ -143,7 +145,7 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha_likelihood = 2.3
     beta = rvs.Gamma(alpha=alpha0, beta=beta0)
     x = rvs.Gamma(alpha=alpha_likelihood, beta=beta,
-                  value=x_data, sample_shape=4)
+                  sample_shape=4)
 
     beta_cond = ed.complete_conditional(beta, [beta, x])
 
@@ -163,7 +165,7 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha_likelihood = 2.3
     beta = rvs.Gamma(alpha=alpha0, beta=beta0)
     x = rvs.Gamma(alpha=alpha_likelihood, beta=alpha_likelihood * beta,
-                  value=x_data, sample_shape=4)
+                  sample_shape=4)
 
     beta_cond = ed.complete_conditional(beta, [beta, x])
 
