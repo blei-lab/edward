@@ -20,6 +20,12 @@ def normal_from_natural_params(p1, p2):
   return {'mu': mu, 'sigma': tf.sqrt(sigmasq)}
 
 
+def multivariate_normal_diag_from_natural_params(p1, p2):
+  sigmasq = 0.5 * tf.reciprocal(-p1)
+  mu = sigmasq * p2
+  return {'mu': mu, 'diag_stdev': tf.sqrt(sigmasq)}
+
+
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
     rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
@@ -39,6 +45,9 @@ _suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)),
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
     rvs.Normal, normal_from_natural_params)
+_suff_stat_to_dist['multivariate_real'][(('#CPow2.0000e+00', ('#x',)),
+                            ('#x',))] = (
+    rvs.MultivariateNormalDiag, multivariate_normal_diag_from_natural_params)
 
 
 def complete_conditional(rv, cond_set=None):

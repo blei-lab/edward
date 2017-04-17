@@ -77,6 +77,18 @@ rvs.Poisson.conjugate_log_prob = poisson_log_prob
 
 
 @_val_wrapper
+def multivariate_normal_diag_log_prob(self, val):
+  mu = self.parameters['mu']
+  sigma = self.parameters['diag_stdev']
+  prec = tf.reciprocal(tf.square(sigma))
+  result = prec * (-0.5 * tf.square(val) - 0.5 * tf.square(mu) +
+                   val * mu)
+  result -= tf.log(sigma) + 0.5 * tf.log(2 * np.pi)
+  return result
+rvs.MultivariateNormalDiag.conjugate_log_prob = multivariate_normal_diag_log_prob
+
+
+@_val_wrapper
 def normal_log_prob(self, val):
   mu = self.parameters['mu']
   sigma = self.parameters['sigma']
