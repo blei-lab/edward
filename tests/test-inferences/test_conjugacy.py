@@ -44,6 +44,22 @@ class test_conjugacy_class(tf.test.TestCase):
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
+  def test_blanket_changes(self):
+    pi = rvs.Dirichlet(tf.ones(3))
+    mu = rvs.Normal(0.0, 1.0)
+    z = rvs.Categorical(p=pi)
+
+    pi1_cond = ed.complete_conditional(pi, [z, pi])
+    pi2_cond = ed.complete_conditional(pi, [z, mu, pi])
+
+    self.assertIsInstance(pi1_cond, rvs.Dirichlet)
+    self.assertIsInstance(pi2_cond, rvs.Dirichlet)
+
+    with self.test_session() as sess:
+      alpha1_val, alpha2_val = sess.run([pi1_cond.alpha, pi2_cond.alpha])
+
+    self.assertAllClose(alpha1_val, alpha2_val)
+
   def test_beta_bernoulli(self):
     x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 

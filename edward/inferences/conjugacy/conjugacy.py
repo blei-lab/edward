@@ -6,6 +6,7 @@ import edward.inferences.conjugacy.conjugate_log_probs
 import numpy as np
 import six
 import tensorflow as tf
+import time
 
 from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
@@ -143,11 +144,12 @@ def complete_conditional(rv, cond_set=None):
         swap_back[val_placeholder] = val
         swap_back[val] = val  # prevent random variable nodes from being copied
 
-    log_joint_copy = copy(log_joint, swap_dict, scope=scope + 'swap')
+    scope_name = scope + str(time.time())  # ensure unique scope when copying
+    log_joint_copy = copy(log_joint, swap_dict, scope=scope_name + 'swap')
     nat_params = tf.gradients(log_joint_copy, s_stat_placeholders)
 
     # Remove any dependencies on those old placeholders.
-    nat_params = [copy(nat_param, swap_back, scope=scope + 'swapback')
+    nat_params = [copy(nat_param, swap_back, scope=scope_name + 'swapback')
                   for nat_param in nat_params]
     nat_params = [nat_params[i] for i in order]
 
