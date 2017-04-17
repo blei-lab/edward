@@ -30,7 +30,7 @@ def normal_from_natural_params(p1, p2):
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
     rvs.Bernoulli, lambda p1: {'p': tf.sigmoid(p1)})
-_suff_stat_to_dist['onehot'][(('#OneHot', ('#x',),),)] = (
+_suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
     rvs.Categorical, lambda p1: {'p': tf.nn.softmax(p1)})
 _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
                           ('#Log', ('#x',)))] = (

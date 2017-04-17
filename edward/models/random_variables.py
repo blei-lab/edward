@@ -23,7 +23,7 @@ for _name in sorted(dir(distributions)):
 
 # Add supports; these are used, e.g., in conjugacy.
 Bernoulli.support = 'binary'
-Categorical.support = 'onehot'
+Categorical.support = 'categorical'
 Beta.support = '01'
 Dirichlet.support = 'simplex'
 Gamma.support = 'nonnegative'
