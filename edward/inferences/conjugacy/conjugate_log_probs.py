@@ -100,6 +100,15 @@ def inverse_gamma_log_prob(self, val):
 
 
 @_val_wrapper
+def laplace_log_prob(self, val):
+  loc = self.parameters['loc']
+  scale = self.parameters['scale']
+  f_val = tf.cast(val, tf.float32)
+  result = -tf.log(2.0 * scale) - tf.abs(f_val - loc) / scale
+  return result
+
+
+@_val_wrapper
 def multinomial_log_prob(self, val):
   n = self.parameters['n']
   p = self.parameters['p']
@@ -150,6 +159,7 @@ rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
 rvs.Exponential.conjugate_log_prob = exponential_log_prob
 rvs.Gamma.conjugate_log_prob = gamma_log_prob
 rvs.InverseGamma.conjugate_log_prob = inverse_gamma_log_prob
+rvs.Laplace.conjugate_log_prob = laplace_log_prob
 rvs.Multinomial.conjugate_log_prob = multinomial_log_prob
 rvs.MultivariateNormalDiag.conjugate_log_prob = mvn_diag_log_prob
 rvs.Normal.conjugate_log_prob = normal_log_prob
