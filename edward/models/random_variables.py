@@ -24,6 +24,7 @@ for _name in sorted(dir(distributions)):
 # Add supports; these are used, e.g., in conjugacy.
 Bernoulli.support = 'binary'
 Categorical.support = 'categorical'
+Poisson.support = 'countable'
 Binomial.support = 'onehot'
 Multinomial.support = 'onehot'
 Beta.support = '01'
