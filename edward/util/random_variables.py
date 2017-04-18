@@ -7,7 +7,8 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
-from edward.models.random_variable import RandomVariable
+from edward.models.random_variable import \
+    RandomVariable, RANDOM_VARIABLE_COLLECTION
 from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
@@ -175,37 +176,39 @@ def copy(org_instance, dict_swap=None, scope="copied",
             return org_instance
           break
 
+  # If instance is a tf.Variable, return it; do not copy any.
+  variables = [x for x in tf.global_variables() if org_instance.name == x.name]
+  if variables:
+    variable = variables[0]
+    if variable in dict_swap and replace_itself:
+      # Deal with case when `org_instance` is the associated _ref
+      # tensor for a tf.Variable.
+      return dict_swap[variable]
+    else:
+      return variable
+
+  # If instance is a tf.placeholder, return it; do not copy any.
+  if isinstance(org_instance, tf.Tensor) and \
+          "Placeholder" in org_instance.op.type:
+    return org_instance
+
   graph = tf.get_default_graph()
   new_name = scope + '/' + org_instance.name
 
   # If an instance of the same name exists, return appropriately.
-  # Do this for ed.RandomVariable.
-  random_variables = {x.name: x for x in
-                      graph.get_collection('_random_variable_collection_')}
-  if new_name in random_variables:
-    return random_variables[new_name]
-
-  # Do this for tf.Tensor and tf.Operation.
-  try:
-    already_present = graph.as_graph_element(new_name,
-                                             allow_tensor=True,
-                                             allow_operation=True)
-    return already_present
-  except:
-    pass
-
-  # If instance is a tf.Variable, return it; do not re-copy any.
-  # Note we check variables via their name and not their type. This
-  # is because if we get variables through an op's inputs, it has
-  # type tf.Tensor: we can only tell it is a Variable via its name.
-  variables = [x for x in tf.global_variables() if org_instance.name == x.name]
-  if variables:
-    return variables[0]
-
-  # Do the same for tf.placeholders.
-  if isinstance(org_instance, tf.Tensor) and \
-          "Placeholder" in org_instance.op.type:
-    return org_instance
+  if isinstance(org_instance, RandomVariable):
+    random_variables = {x.name: x for x in
+                        graph.get_collection(RANDOM_VARIABLE_COLLECTION)}
+    if new_name in random_variables:
+      return random_variables[new_name]
+  elif isinstance(org_instance, (tf.Tensor, tf.Operation)):
+    try:
+      already_present = graph.as_graph_element(new_name,
+                                               allow_tensor=True,
+                                               allow_operation=True)
+      return already_present
+    except:
+      pass
 
   if isinstance(org_instance, RandomVariable):
     rv = org_instance
