@@ -198,10 +198,9 @@ def copy(org_instance, dict_swap=None, scope="copied",
   # Note we check variables via their name and not their type. This
   # is because if we get variables through an op's inputs, it has
   # type tf.Tensor: we can only tell it is a Variable via its name.
-  variables = {x.name: x for
-               x in graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)}
-  if org_instance.name in variables:
-    return graph.get_tensor_by_name(variables[org_instance.name].name)
+  variables = [x for x in tf.global_variables() if org_instance.name == x.name]
+  if variables:
+    return variables[0]
 
   # Do the same for tf.placeholders.
   if isinstance(org_instance, tf.Tensor) and \
