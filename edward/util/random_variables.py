@@ -177,15 +177,17 @@ def copy(org_instance, dict_swap=None, scope="copied",
           break
 
   # If instance is a tf.Variable, return it; do not copy any.
-  variables = [x for x in tf.global_variables() if org_instance.name == x.name]
-  if variables:
-    variable = variables[0]
-    if variable in dict_swap and replace_itself:
-      # Deal with case when `org_instance` is the associated _ref
-      # tensor for a tf.Variable.
-      return dict_swap[variable]
-    else:
-      return variable
+  # Note we check variables via their name and not their type. If we
+  # get variables through an op's inputs, it has type tf.Tensor and
+  # not tf.Variable.
+  for variable in tf.global_variables():
+    if org_instance.name == variable.name:
+      if variable in dict_swap and replace_itself:
+        # Deal with case when `org_instance` is the associated _ref
+        # tensor for a tf.Variable.
+        return dict_swap[variable]
+      else:
+        return variable
 
   # If instance is a tf.placeholder, return it; do not copy any.
   if isinstance(org_instance, tf.Tensor) and \
@@ -195,7 +197,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   graph = tf.get_default_graph()
   new_name = scope + '/' + org_instance.name
 
-  # If an instance of the same name exists, return appropriately.
+  # If an instance of the same name exists, return it.
   if isinstance(org_instance, RandomVariable):
     random_variables = {x.name: x for x in
                         graph.get_collection(RANDOM_VARIABLE_COLLECTION)}
