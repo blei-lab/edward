@@ -85,6 +85,24 @@ class test_copy_class(tf.test.TestCase):
       z_new = ed.copy(z, {x: qx})
       self.assertEqual(z_new.eval(), 12.0)
 
+  def test_swap_placeholder_tensor(self):
+    with self.test_session():
+      x = tf.placeholder(tf.float32, name="CustomName")
+      y = tf.constant(3.0)
+      z = x * y
+      qx = tf.constant(4.0)
+      z_new = ed.copy(z, {x: qx})
+      self.assertEqual(z_new.eval(), 12.0)
+
+  def test_swap_tensor_placeholder(self):
+    with self.test_session() as sess:
+      x = tf.constant(2.0)
+      y = tf.constant(3.0)
+      z = x * y
+      qx = tf.placeholder(tf.float32, name="CustomName")
+      z_new = ed.copy(z, {x: qx})
+      self.assertEqual(sess.run(z_new, feed_dict={qx: 4.0}), 12.0)
+
   def test_swap_variable_tensor(self):
     with self.test_session():
       x = tf.Variable(2.0, name="CustomName")
@@ -104,24 +122,6 @@ class test_copy_class(tf.test.TestCase):
       z_new = ed.copy(z, {x: qx})
       tf.variables_initializer([qx]).run()
       self.assertEqual(z_new.eval(), 12.0)
-
-  def test_swap_placeholder_tensor(self):
-    with self.test_session():
-      x = tf.placeholder(tf.float32, name="CustomName")
-      y = tf.constant(3.0)
-      z = x * y
-      qx = tf.constant(4.0)
-      z_new = ed.copy(z, {x: qx})
-      self.assertEqual(z_new.eval(), 12.0)
-
-  def test_swap_tensor_placeholder(self):
-    with self.test_session() as sess:
-      x = tf.constant(2.0)
-      y = tf.constant(3.0)
-      z = x * y
-      qx = tf.placeholder(tf.float32, name="CustomName")
-      z_new = ed.copy(z, {x: qx})
-      self.assertEqual(sess.run(z_new, feed_dict={qx: 4.0}), 12.0)
 
   def test_swap_rv_rv(self):
     with self.test_session():
