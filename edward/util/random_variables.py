@@ -140,7 +140,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   >>> # `x` -> `z` <- y`, `qx`
   >>>
   >>> # This adds a subgraph with newly copied nodes,
-  >>> # `copied/qx` -> `copied/z` <- `copied/y`
+  >>> # `qx` -> `copied/z` <- `copied/y`
   >>> z_new = ed.copy(z, {x: qx})
   >>>
   >>> sess = tf.Session()
@@ -185,7 +185,13 @@ def copy(org_instance, dict_swap=None, scope="copied",
         if variable in dict_swap and replace_itself:
           # Deal with case when `org_instance` is the associated _ref
           # tensor for a tf.Variable.
-          return dict_swap[variable]
+          org_instance = dict_swap[variable]
+          if not copy_q or isinstance(org_instance, tf.Variable):
+            return org_instance
+          for variable in tf.global_variables():
+            if org_instance.name == variable.name:
+              return variable
+          break
         else:
           return variable
 
