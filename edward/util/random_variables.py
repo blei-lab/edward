@@ -200,10 +200,9 @@ def copy(org_instance, dict_swap=None, scope="copied",
       return random_variables[new_name]
   elif isinstance(org_instance, (tf.Tensor, tf.Operation)):
     try:
-      already_present = graph.as_graph_element(new_name,
-                                               allow_tensor=True,
-                                               allow_operation=True)
-      return already_present
+      return graph.as_graph_element(new_name,
+                                    allow_tensor=True,
+                                    allow_operation=True)
     except:
       pass
 
