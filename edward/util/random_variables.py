@@ -176,23 +176,18 @@ def copy(org_instance, dict_swap=None, scope="copied",
             return org_instance
           break
 
-  # If instance is a tf.Variable, return it; do not copy any.
-  # Note we check variables via their name and not their type. If we
-  # get variables through an op's inputs, it has type tf.Tensor and
-  # not tf.Variable.
-  for variable in tf.global_variables():
-    if org_instance.name == variable.name:
-      if variable in dict_swap and replace_itself:
-        # Deal with case when `org_instance` is the associated _ref
-        # tensor for a tf.Variable.
-        return dict_swap[variable]
-      else:
-        return variable
-
-  # If instance is a tf.placeholder, return it; do not copy any.
-  if isinstance(org_instance, tf.Tensor) and \
-          "Placeholder" in org_instance.op.type:
-    return org_instance
+  # If instance is a tf.Variable, return it; do not copy any. Note we
+  # check variables via their name. If we get variables through an
+  # op's inputs, it has type tf.Tensor and not tf.Variable.
+  if isinstance(org_instance, (tf.Tensor, tf.Variable)):
+    for variable in tf.global_variables():
+      if org_instance.name == variable.name:
+        if variable in dict_swap and replace_itself:
+          # Deal with case when `org_instance` is the associated _ref
+          # tensor for a tf.Variable.
+          return dict_swap[variable]
+        else:
+          return variable
 
   graph = tf.get_default_graph()
   new_name = scope + '/' + org_instance.name
@@ -234,6 +229,10 @@ def copy(org_instance, dict_swap=None, scope="copied",
   elif isinstance(org_instance, tf.Tensor):
     tensor = org_instance
 
+    # Do not copy tf.placeholders.
+    if 'Placeholder' in tensor.op.type:
+      return tensor
+
     # A tensor is one of the outputs of its underlying
     # op. Therefore copy the op itself.
     op = tensor.op
@@ -243,7 +242,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
     new_tensor = new_op.outputs[output_index]
 
     # Add copied tensor to collections that the original one is in.
-    for name, collection in tensor.graph._collections.items():
+    for name, collection in six.iteritems(tensor.graph._collections):
       if tensor in collection:
         graph.add_to_collection(name, new_tensor)
 
