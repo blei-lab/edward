@@ -90,6 +90,6 @@ for _ in range(inference_w.n_iter):
   inference_w.print_progress(info_dict)
 
   t = info_dict['t']
-  if t == 1 or t % inference.n_print == 0:
+  if t == 1 or t % inference_w.n_print == 0:
     print("\nInferred principal axes:")
     print(sess.run(qw.mean()))
