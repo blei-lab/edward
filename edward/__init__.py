@@ -7,7 +7,8 @@ from edward import inferences
 from edward import util
 
 # Direct imports for convenience
-from edward.criticisms import evaluate, ppc
+from edward.criticisms import evaluate, ppc, ppc_density_plot, \
+    ppc_stat_hist_plot
 from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     HMC, MetropolisHastings, SGLD, SGHMC, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \

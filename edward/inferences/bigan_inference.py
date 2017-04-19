@@ -40,13 +40,12 @@ class BiGANInference(GANInference):
     >>>   zf = gen_latent(x_ph)
     >>> inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
     """
-
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 
-    super(BiGANInference, self).__init__(data, discriminator)
-
-    self.latent_vars = latent_vars
+    self.discriminator = discriminator
+    # call grandparent's method; avoid parent (GANInference)
+    super(GANInference, self).__init__(latent_vars, data)
 
   def build_loss_and_gradients(self, var_list):
 

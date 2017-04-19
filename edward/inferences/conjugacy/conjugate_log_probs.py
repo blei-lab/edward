@@ -49,7 +49,7 @@ def binomial_log_prob(self, val):
 @_val_wrapper
 def categorical_log_prob(self, val):
   p = self.parameters['p']
-  one_hot = tf.one_hot(val, p.get_shape()[-1], dtype=tf.float32)
+  one_hot = tf.one_hot(val, p.shape[-1], dtype=tf.float32)
   return tf.reduce_sum(tf.log(p) * one_hot, -1)
 
 

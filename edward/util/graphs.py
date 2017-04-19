@@ -20,7 +20,6 @@ try:
 except ImportError:
   sys.stderr = save_stderr
   have_keras = False
-  pass
 
 
 def get_session():

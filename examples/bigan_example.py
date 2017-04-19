@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Adversarially Learned Inference (Dumoulin et al., 2017) or
-  Bidirectional Generative Adversarial Networks (Donahue et al., 2017)
-  for joint learning of generator and inference networks for MNIST
+"""Adversarially Learned Inference (Dumoulin et al., 2017), aka
+  Bidirectional Generative Adversarial Networks (Donahue et al., 2017),
+  for joint learning of generator and inference networks for MNIST.
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -16,7 +16,6 @@ import tensorflow as tf
 
 from tensorflow.contrib import slim
 from tensorflow.examples.tutorials.mnist import input_data
-from edward.models import Uniform
 
 
 M = 100  # batch size during training

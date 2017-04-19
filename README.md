@@ -30,7 +30,7 @@ It supports __inference__ with
 + Monte Carlo
   + Hamiltonian Monte Carlo
   + Stochastic gradient Langevin dynamics
-  + Metropolis-Hastings
+  + Gibbs sampling
 + Compositions of inference
   + Expectation-Maximization
   + Pseudo-marginal and ABC methods

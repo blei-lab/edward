@@ -7,8 +7,7 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
-from edward.models.random_variable import \
-    RandomVariable, RANDOM_VARIABLE_COLLECTION
+from edward.models.random_variable import RandomVariable
 from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
@@ -202,7 +201,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
   # If an instance of the same name exists, return it.
   if isinstance(org_instance, RandomVariable):
-    for rv in graph.get_collection(RANDOM_VARIABLE_COLLECTION):
+    for rv in random_variables():
       if new_name == rv.name:
         return rv
   elif isinstance(org_instance, (tf.Tensor, tf.Operation)):
@@ -265,7 +264,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # its operation-level seed if it has one.
     node_def = deepcopy(op.node_def)
     node_def.name = new_name
-    if 'seed2' in node_def.attr:
+    if 'seed2' in node_def.attr and tf.get_seed(None)[1] is not None:
       node_def.attr['seed2'].i = tf.get_seed(None)[1]
 
     # Copy other arguments needed for initialization.
