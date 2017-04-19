@@ -258,47 +258,47 @@ def copy(org_instance, dict_swap=None, scope="copied",
     if 'Queue' in op.type:
       return op
 
-    # If it has an original op, copy it.
-    if op._original_op is not None:
-      new_original_op = copy(op._original_op, dict_swap, scope, True, copy_q)
-    else:
-      new_original_op = None
-
     # Copy the node def.
     # It stores string-based info such as name, device, and type of
     # the op. It is unique to every Operation instance.
-    new_node_def = deepcopy(op.node_def)
-    new_node_def.name = new_name
+    node_def = deepcopy(op.node_def)
+    node_def.name = new_name
 
-    # Copy the other inputs needed for initialization.
+    # Copy other arguments needed for initialization.
     output_types = op._output_types[:]
+
+    # If it has an original op, copy it.
+    if op._original_op is not None:
+      original_op = copy(op._original_op, dict_swap, scope, True, copy_q)
+    else:
+      original_op = None
 
     # Copy the op def.
     # It is unique to every Operation type.
     op_def = deepcopy(op.op_def)
 
-    new_op = tf.Operation(new_node_def,
+    new_op = tf.Operation(node_def,
                           graph,
-                          [],
+                          [],  # inputs; will add them afterwards
                           output_types,
-                          [],
-                          [],
-                          new_original_op,
+                          [],  # control inputs; will add them afterwards
+                          [],  # input types; will add them afterwards
+                          original_op,
                           op_def)
 
     # advertise op early to break recursions
     graph._add_op(new_op)
 
     # If it has control inputs, copy them.
-    elems = []
+    control_inputs = []
     for x in op.control_inputs:
       elem = copy(x, dict_swap, scope, True, copy_q)
       if not isinstance(elem, tf.Operation):
         elem = tf.convert_to_tensor(elem)
 
-      elems.append(elem)
+      control_inputs.append(elem)
 
-    new_op._add_control_inputs(elems)
+    new_op._add_control_inputs(control_inputs)
 
     # If it has inputs, copy them.
     for x in op.inputs:
