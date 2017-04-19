@@ -743,10 +743,8 @@ def transform(x, *args, **kwargs):
   >>> sess.run(y)
   -2.2279539
   """
-  if len(args) != 0:
-    bij = args.pop(0)
-  elif kwargs.get('bijector', None) is not None:
-    bij = kwargs.pop('bijector')
+  if len(args) != 0 or kwargs.get('bijector', None) is not None:
+    return TransformedDistribution(x, *args, **kwargs)
   elif x.support == '01':
     bij = bijector.Invert(bijector.SigmoidCentered())
   elif x.support == 'nonnegative':
