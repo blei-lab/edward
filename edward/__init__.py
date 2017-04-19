@@ -19,5 +19,5 @@ from edward.util import check_data, check_latent_vars, copy, dot, \
     get_ancestors, get_blanket, get_children, get_control_variate_coef, \
     get_descendants, get_parents, get_session, get_siblings, get_variables, \
     logit, Progbar, random_variables, rbf, reduce_logmeanexp, set_seed, \
-    to_simplex
+    to_simplex, transform
 from edward.version import __version__

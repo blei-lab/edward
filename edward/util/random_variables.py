@@ -9,7 +9,9 @@ import tensorflow as tf
 from copy import deepcopy
 from edward.models.random_variable import \
     RandomVariable, RANDOM_VARIABLE_COLLECTION
+from edward.models.random_variables import TransformedDistribution
 from edward.util.graphs import random_variables
+from tensorflow.contrib.distributions import bijector
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
@@ -715,66 +717,45 @@ def transform(x, *args, **kwargs):
 
   Examples
   --------
-  >>> x = Beta(a=1.0, b=1.0)
-  >>> y = transform(x)
+  >>> x = Gamma(1.0, 1.0)
+  >>> y = ed.transform(x)
   >>> sess = tf.Session()
-  >>> sess.run(y.sample())
+  >>> sess.run(y)
   -2.2279539
   """
-  # TODO move import statements to top
-  from edward.models import TransformedDistribution
-  from tensorflow.contrib.distributions import bijector
-  import inspect
-
-  # import tensorflow.contrib.distributions as ds
-  # check using ds instead of ed.models to account for random variable
-  # subclasses which inherit from ds classes, e.g., BetaWithSoftplusAB
-
-  # TODO try/except or something or use __all__ to avoid choosing
-  # distributions not available in a specific version
-
-  rv_name = inspect.getattr_static(x, '_name')
-
   if len(args) != 0:
-    bijector = args.pop(0)
+    bij = args.pop(0)
   elif kwargs.get('bijector', None) is not None:
-    bijector = kwargs.pop('bijector')
-  # support on [0, 1]
-  elif any(rv in rv_name for rv in ['Beta']):
-    bijector = bijector.Invert(bijector.SigmoidCentered())
-  # support on [0, infty)
-  elif any(rv in rv_name for rv in ['Chi2', 'Exponential',
-                                    'Gamma', 'InverseGamma']):
-    bijector = bijector.Invert(bijector.Softplus())
-  # support on simplex
-  elif any(rv in rv_name for rv in ['Dirichlet']):
-    bijector = bijector.Invert(bijector.SoftmaxCentered())
-  # support already on (-infty, infty)
-  elif any(rv in rv_name for rv in ['Gumbel', 'Laplace', 'Logistic',
-                                    'Normal', 'StudentT']):
-    msg = ('The random variable {} is already unconstrained. '
-           'Please do not apply `transform()` to it.').format(rv_name)
-    raise TypeError(msg)
-    # TODO probably don't even want to return a transformed
-    # distribution of identity if we just call this hapharzardly and
-    # rewrite to self.latent_vars
-    # bijector = bijector.Identity
+    bij = kwargs.pop('bijector')
+  elif x.support == '01':
+    bij = bijector.Invert(bijector.SigmoidCentered())
+  elif x.support == 'nonnegative':
+    bij = bijector.Invert(bijector.Softplus())
+  elif x.support == 'simplex':
+    bij = bijector.Invert(bijector.SoftmaxCentered())
+  elif x.support == 'real' or 'multivariate_real':
+    return x
   else:
     raise NotImplementedError()
 
-  return TransformedDistribution(x, bijector, *args, **kwargs)
+  return TransformedDistribution(x, bij, *args, **kwargs)
 
   # TODO: support these
-
-  # Uniform
-  # arbitrary bounds; should also be true for > 0 or <0 supports
-  # use chain(affine with the others)
-
+  #
+  # add supports in models/random_variables.py
+  # Gumbel
+  # Logistic
+  # StudentT
   # MultivariateNormalDiag
   # MultivariateNormalDiagWithSoftplusStDev
   # MultivariateNormalCholesky
   # MultivariateNormalFull
   # MultivariateNormalDiagPlusVDVT
+
+  # Uniform
+  # arbitrary bounds; should also be true for > 0 or <0 supports
+  # use chain(affine with the others)
+
   # WishartCholesky
   # WishartFull
 
