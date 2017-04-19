@@ -106,7 +106,7 @@ class RandomVariable(object):
       value_shape = t_value.shape
       expected_shape = self.get_sample_shape().concatenate(
           self.get_batch_shape()).concatenate(self.get_event_shape())
-      if value_shape != expected_shape:
+      if not value_shape.is_compatible_with(expected_shape):
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
             "Expected %s, got %s." % (expected_shape, value_shape))
