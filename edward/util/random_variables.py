@@ -738,31 +738,29 @@ def transform(x, *args, **kwargs):
 
   return TransformedDistribution(x, bij, *args, **kwargs)
 
-  # TODO: support these
-  #
-  # add supports in models/random_variables.py
-  # Gumbel
-  # Logistic
-  # StudentT
-  # MultivariateNormalDiag
-  # MultivariateNormalDiagWithSoftplusStDev
-  # MultivariateNormalCholesky
-  # MultivariateNormalFull
-  # MultivariateNormalDiagPlusVDVT
+# TODO
+# add supports in models/random_variables.py
+# Gumbel
+# Logistic
+# StudentT
+# MultivariateNormalDiag
+# MultivariateNormalDiagWithSoftplusStDev
+# MultivariateNormalCholesky
+# MultivariateNormalFull
+# MultivariateNormalDiagPlusVDVT
 
-  # Uniform
-  # arbitrary bounds; should also be true for > 0 or <0 supports
-  # use chain(affine with the others)
+# Uniform
+# arbitrary bounds; should also be true for > 0 or <0 supports
+# use chain(affine with the others)
 
-  # WishartCholesky
-  # WishartFull
+# WishartCholesky
+# WishartFull
 
-  # These are continous, but we will probably not support them:
+# RelaxedBernoulli
+# RelaxedOneHotCategorical
 
-  # Mixture
-  # RelaxedBernoulli
-  # RelaxedOneHotCategorical
-  # TransformedDistribution
-
-  # Empirical
-  # PointMass
+# should we support?
+# Mixture
+# TransformedDistribution
+# Empirical
+# PointMass
