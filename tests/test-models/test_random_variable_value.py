@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal, Poisson, RandomVariable
+from edward.models import Bernoulli, Normal, Poisson, RandomVariable
 from edward.util import copy
 
 
@@ -31,6 +31,10 @@ class test_random_variable_value_class(tf.test.TestCase):
       self._test_sample(Normal, 2, mu=0.5, sigma=1.0)
       self._test_sample(Normal, [2], mu=[0.5], sigma=[1.0])
       self._test_sample(Poisson, 2, lam=0.5)
+
+  def test_unknown_shape(self):
+    with self.test_session():
+      x = Bernoulli(0.5, value=tf.placeholder(tf.int32))
 
   def test_mismatch_raises(self):
     with self.test_session():
