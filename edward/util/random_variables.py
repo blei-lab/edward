@@ -82,6 +82,39 @@ def check_latent_vars(latent_vars):
                       "dtype: {}, {}".format(key.dtype, value.dtype))
 
 
+def _copy_context(ctx, context_matches):
+  if ctx is None:
+    return None
+  elif ctx in context_matches:
+    return context_matches[ctx]
+
+  loop_exits = []
+  for tensor in ctx.loop_exits:
+    loop_exits.append(copy(tensor, dict_swap, scope, True, copy_q))
+
+  values = set()
+  # TODO is this neecssary?
+  # also, how are gradient values in the value def being updated?
+  for string in ctx._values:
+    values.add(scope + '/' + string)
+
+  _copy_context(ctx.outer_context, context_matches)
+
+  # TODO is control_flow_context necessary? if so, also check out ctx.Enter()/Exit()
+  # prev = graph._get_control_flow_context()
+  try:
+    # graph._set_control_flow_context(ctx)
+    ctx_copy = ctx.from_proto(ctx.to_proto(), scope)
+    # graph._set_control_flow_context(prev)
+    ctx_copy._loop_exits = loop_exits
+    ctx_copy._values = values
+    context_matches[ctx] = ctx_copy
+    return ctx_copy
+  except:
+    # graph._set_control_flow_context(prev)
+    return None
+
+
 def _copy_default(x, *args, **kwargs):
   if isinstance(x, (RandomVariable, tf.Operation, tf.Tensor, tf.Variable)):
     x = copy(x, *args, **kwargs)
@@ -335,6 +368,10 @@ def copy(org_instance, dict_swap=None, scope="copied",
         elem = tf.convert_to_tensor(elem)
 
       new_op._add_input(elem)
+
+    # Copy the control flow context.
+    control_flow_context = _copy_context(op._get_control_flow_context(), {})
+    new_op._set_control_flow_context(control_flow_context)
 
     # Use Graph's private methods to add the op, following
     # implementation of `tf.Graph().create_op()`.
