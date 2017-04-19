@@ -200,10 +200,9 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
   # If an instance of the same name exists, return it.
   if isinstance(org_instance, RandomVariable):
-    random_variables = {x.name: x for x in
-                        graph.get_collection(RANDOM_VARIABLE_COLLECTION)}
-    if new_name in random_variables:
-      return random_variables[new_name]
+    for rv in graph.get_collection(RANDOM_VARIABLE_COLLECTION):
+      if new_name == rv.name:
+        return rv
   elif isinstance(org_instance, (tf.Tensor, tf.Operation)):
     try:
       return graph.as_graph_element(new_name,
