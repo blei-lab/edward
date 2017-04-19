@@ -93,11 +93,13 @@ def copy(org_instance, dict_swap=None, scope="copied",
   where any of its ancestors existing in `dict_swap` are
   replaced with `dict_swap`'s corresponding value.
 
-  The copying is done recursively, so any `Operation` whose output
-  is required to evaluate `org_instance` is also copied (if it isn't
-  already copied within the new scope). This is with the exception of
-  `tf.Variable`s, `tf.placeholder`s, and nodes of type `Queue`, which
-  are reused and not newly copied.
+  Copying is done recursively. Any `Operation` whose output is
+  required to copy `org_instance` is also copied (if it isn't already
+  copied within the new scope).
+
+  `tf.Variable`s, `tf.placeholder`s, and nodes of type `Queue` are
+  always reused and not copied. In addition, `tf.Operation`s with
+  operation-level seeds are copied with a new operation-level seed.
 
   Parameters
   ----------
@@ -259,10 +261,12 @@ def copy(org_instance, dict_swap=None, scope="copied",
       return op
 
     # Copy the node def.
-    # It stores string-based info such as name, device, and type of
-    # the op. It is unique to every Operation instance.
+    # It is unique to every Operation instance. Replace the name and
+    # its operation-level seed if it has one.
     node_def = deepcopy(op.node_def)
     node_def.name = new_name
+    if 'seed2' in node_def.attr:
+      node_def.attr['seed2'].i = tf.get_seed(None)[1]
 
     # Copy other arguments needed for initialization.
     output_types = op._output_types[:]

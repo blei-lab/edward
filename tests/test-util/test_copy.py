@@ -54,6 +54,15 @@ class test_copy_class(tf.test.TestCase):
       z_new = ed.copy(z, {x: y.value()})
       self.assertGreater(z_new.value().eval(), 5.0)
 
+  def test_random(self):
+    with self.test_session() as sess:
+      ed.set_seed(3742)
+      x = tf.random_normal([])
+      x_copy = ed.copy(x)
+
+      result_copy, result = sess.run([x_copy, x])
+      self.assertNotAlmostEquals(result_copy, result)
+
   def test_scan(self):
     with self.test_session() as sess:
       ed.set_seed(42)
@@ -63,18 +72,6 @@ class test_copy_class(tf.test.TestCase):
       result_copy, result = sess.run([copy_op, op])
       self.assertAllClose(result_copy, [2.0, 5.0, 6.0])
       self.assertAllClose(result, [2.0, 5.0, 6.0])
-
-  def test_scan_random(self):
-    with self.test_session() as sess:
-      ed.set_seed(1234)
-      op = tf.scan(lambda a, x: a + x, tf.random_normal([3]))
-      copy_op = ed.copy(op)
-
-      # check that the random inputs are different
-      # currently ed.set_seed prevents variate generation to work
-      # result_copy, result = sess.run([copy_op, op])
-      # for elem_copy, elem in zip(result_copy, result):
-      #   self.assertNotAlmostEquals(elem_copy, elem)
 
   def test_swap_tensor_tensor(self):
     with self.test_session():
