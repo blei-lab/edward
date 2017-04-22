@@ -88,7 +88,7 @@ class VariationalInference(Inference):
             tf.summary.scalar("gradient_norm_" +
                               grad.name.replace(':', '_'),
                               tf.norm(grad), collections=[summary_key])
-      #       replace : with _ because tf does not allow : in var names in summaries
+      # replace : with _ because tf does not allow : in var names in summaries
 
       with tf.name_scope('model'):
         for grad, var in grads_and_vars:
