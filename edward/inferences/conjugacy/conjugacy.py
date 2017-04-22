@@ -17,14 +17,14 @@ from edward.util import copy, get_blanket
 
 def mvn_diag_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
-  mu = sigmasq * p2
-  return {'mu': mu, 'diag_stdev': tf.sqrt(sigmasq)}
+  loc = sigmasq * p2
+  return {'loc': loc, 'scale_diag': tf.sqrt(sigmasq)}
 
 
 def normal_from_natural_params(p1, p2):
   sigmasq = 0.5 * tf.reciprocal(-p1)
-  mu = sigmasq * p2
-  return {'mu': mu, 'sigma': tf.sqrt(sigmasq)}
+  loc = sigmasq * p2
+  return {'loc': loc, 'scale': tf.sqrt(sigmasq)}
 
 
 _suff_stat_to_dist = defaultdict(dict)
@@ -32,21 +32,22 @@ _suff_stat_to_dist['binary'][(('#x',),)] = (
     rvs.Bernoulli, lambda p1: {'logits': p1})
 _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
                           ('#Log', ('#x',)))] = (
-    rvs.Beta, lambda p1, p2: {'a': p2 + 1, 'b': p1 + 1})
+    rvs.Beta, lambda p1, p2: {'concentration1': p2 + 1,
+                              'concentration0': p1 + 1})
 _suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
     rvs.Categorical, lambda p1: {'logits': p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),)] = (
     rvs.Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
 _suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
-    rvs.Dirichlet, lambda p1: {'alpha': p1 + 1})
+    rvs.Dirichlet, lambda p1: {'concentration': p1 + 1})
 _suff_stat_to_dist['nonnegative'][(('#x',),)] = (
-    rvs.Exponential, lambda p1: {'lam': -p1})
+    rvs.Exponential, lambda p1: {'rate': -p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
                                    ('#x',))] = (
-    rvs.Gamma, lambda p1, p2: {'alpha': p1 + 1, 'beta': -p2})
+    rvs.Gamma, lambda p1, p2: {'concentration': p1 + 1, 'rate': -p2})
 _suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)),
                                    ('#Log', ('#x',)))] = (
-    rvs.InverseGamma, lambda p1, p2: {'alpha': -p2 - 1, 'beta': -p1})
+    rvs.InverseGamma, lambda p1, p2: {'concentration': -p2 - 1, 'rate': -p1})
 _suff_stat_to_dist['multivariate_real'][(('#CPow2.0000e+00', ('#x',)),
                                         ('#x',))] = (
     rvs.MultivariateNormalDiag, mvn_diag_from_natural_params)
@@ -54,7 +55,7 @@ _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
     rvs.Normal, normal_from_natural_params)
 _suff_stat_to_dist['countable'][(('#x',),)] = (
-    rvs.Poisson, lambda p1: {'lam': tf.exp(p1)})
+    rvs.Poisson, lambda p1: {'rate': tf.exp(p1)})
 
 
 def complete_conditional(rv, cond_set=None):
@@ -91,10 +92,11 @@ def complete_conditional(rv, cond_set=None):
     # calling complete_conditional many times without passing in cond_set.
     cond_set = get_blanket(rv)
     cond_set = [i for i in cond_set if not
-                ('complete_conditional' in i.name and 'cond_dist' in i.name)]
+                ('complete_conditional' in i.unique_name and
+                 'cond_dist' in i.unique_name)]
 
   cond_set = set([rv] + list(cond_set))
-  with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
+  with tf.name_scope('complete_conditional_%s' % rv.unique_name) as scope:
     # log_joint holds all the information we need to get a conditional.
     log_joint = get_log_joint(cond_set)
 
@@ -164,7 +166,7 @@ def complete_conditional(rv, cond_set=None):
 
 def get_log_joint(cond_set):
   g = tf.get_default_graph()
-  cond_set_names = [i.name[:-1] for i in cond_set]
+  cond_set_names = [i.unique_name[:-1] for i in cond_set]
   cond_set_names.sort()
   cond_set_name = 'log_joint_of_' + '_'.join(cond_set_names)
   with tf.name_scope("conjugate_log_joint/") as scope:
@@ -176,7 +178,7 @@ def get_log_joint(cond_set):
 
     terms = []
     for b in cond_set:
-      name = b.name.replace(':', '_') + '_conjugate_log_prob'
+      name = b.unique_name.replace(':', '_') + '_conjugate_log_prob'
       try:
         # Use log prob tensor if already built in graph.
         conjugate_log_prob = g.get_tensor_by_name(scope + name + ':0')

@@ -19,8 +19,8 @@ ed.set_seed(42)
 x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 # MODEL
-pi = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=pi, sample_shape=10)
+pi = Beta(1.0, 1.0)
+x = Bernoulli(probs=pi, sample_shape=10)
 
 # COMPLETE CONDITIONAL
 pi_cond = ed.complete_conditional(pi)

@@ -36,7 +36,7 @@ sigmasq_beta = 2.0
 pi = Dirichlet(pi_alpha)
 mu = Normal(0.0, mu_sigma, sample_shape=K)
 sigmasq = InverseGamma(sigmasq_alpha, sigmasq_beta, sample_shape=K)
-x = ParamMixture(pi, {'mu': mu, 'sigma': tf.sqrt(sigmasq)}, Normal,
+x = ParamMixture(pi, {'loc': mu, 'scale': tf.sqrt(sigmasq)}, Normal,
                  sample_shape=N)
 z = x.cat
 
