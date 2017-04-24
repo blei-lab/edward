@@ -121,7 +121,9 @@ class RandomVariable(object):
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
-    self._unique_name = self._value.name.split('/')[0]
+    with tf.name_scope(self.name) as ns:
+      self._unique_name = ns
+
     for collection in collections:
       tf.add_to_collection(collection, self)
 
