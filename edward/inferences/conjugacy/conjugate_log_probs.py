@@ -29,7 +29,7 @@ def beta_log_prob(self, val):
   conc0 = self.parameters['concentration0']
   conc1 = self.parameters['concentration1']
   result = (conc1 - 1.0) * tf.log(val)
-  result += (conc0 - 1.0) * tf.log(tf.constant(1.0) - val)
+  result += (conc0 - 1.0) * tf.log(1.0 - val)
   result += -tf.lgamma(conc1) - tf.lgamma(conc0) + tf.lgamma(conc1 + conc0)
   return result
 
