@@ -103,8 +103,10 @@ class GANInference(VariationalInference):
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar('loss_fake', self.loss_d, collections=[summary_key])
-      tf.summary.scalar('loss_samples', self.loss, collections=[summary_key])
+      tf.summary.scalar('loss_discriminative', self.loss_d,
+                        collections=[summary_key])
+      tf.summary.scalar('loss_generative', self.loss,
+                        collections=[summary_key])
       self.summarize = tf.summary.merge_all(key=summary_key)
 
   def build_loss_and_gradients(self, var_list):
