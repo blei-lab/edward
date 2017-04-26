@@ -2,10 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
 import tensorflow as tf
 
-from edward.util.graphs import get_session
 from tensorflow.python.ops import control_flow_ops
 
 
@@ -196,7 +194,6 @@ def to_simplex(x):
     shape = x.shape
 
   if len(shape) == 1:
-    n_rows = ()
     K_minus_one = shape[0]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
