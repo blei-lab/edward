@@ -196,7 +196,6 @@ def to_simplex(x):
     shape = x.shape
 
   if len(shape) == 1:
-    n_rows = ()
     K_minus_one = shape[0]
     eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
     z = tf.sigmoid(eq + x)
