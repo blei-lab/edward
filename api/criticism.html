@@ -299,6 +299,62 @@ ed.ppc(T, data={x: x_train})
 </code>
 </pre>
 </dd></dl>
+<dl class="function">
+<dt id="edward.criticisms.ppc_density_plot">
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc_density_plot</code><span class="sig-paren">(</span><em>y</em>, <em>y_rep</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc_plots.py#L11" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Create 1D kernel density plot comparing data to samples from posterior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>y</strong> : np.ndarray</p>
+<blockquote>
+<div><p>A 1-D NumPy array.</p>
+</div></blockquote>
+<p><strong>y_rep</strong> : np.ndarray</p>
+<blockquote>
+<div><p>A 2-D NumPy array where rows represent different samples from posterior.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first last">matplotlib axes</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+<dl class="function">
+<dt id="edward.criticisms.ppc_stat_hist_plot">
+<code class="descclassname">edward.criticisms.</code><code class="descname">ppc_stat_hist_plot</code><span class="sig-paren">(</span><em>y_stats</em>, <em>yrep_stats</em>, <em>stat_name=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/ppc_plots.py#L43" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Create histogram plot comparing data to samples from posterior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>y_stats</strong> : float</p>
+<blockquote>
+<div><p>Float representing statistic value of observed data.</p>
+</div></blockquote>
+<p><strong>yrep_stats</strong> : np.ndarray</p>
+<blockquote>
+<div><p>A 1-D NumPy array.</p>
+</div></blockquote>
+<p><strong>stat_name</strong> : string, optional</p>
+<blockquote>
+<div><p>Optional string value for including statistic name in legend.</p>
+</div></blockquote>
+<p><strong>**kwargs</strong></p>
+<blockquote>
+<div><p>Keyword arguments used by seaborn.distplot can be given to customize plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first last">matplotlib axes</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
 <div id="ref-box1976science">

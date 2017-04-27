@@ -183,7 +183,7 @@ K = 2  # number of components
 pi = Dirichlet(tf.ones(K))
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-x = ParamMixture(pi, {&#39;mu&#39;: mu, &#39;diag_stdev&#39;: tf.sqrt(sigmasq)}, MultivariateNormalDiag,
+x = ParamMixture(pi, {&#39;loc&#39;: mu, &#39;scale_diag&#39;: tf.sqrt(sigmasq)}, MultivariateNormalDiag,
                  sample_shape=N)
 z = x.cat</code></pre>
 <p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable; it takes as input a Categorical distribution and a list of individual distribution components. It is the distribution of the mixture summing out the mixture assignments.</p>
@@ -232,9 +232,9 @@ for _ in range(inference.n_iter):
 <pre class="python" language="Python"><code># Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 mu_sample = qmu.sample(100)
-sigma_sample = qsigma.sample(100)
+sigmasq_sample = qsigmasq.sample(100)
 x_post = Normal(loc=tf.ones([N, 1, 1, 1]) * mu_sample,
-                scale=tf.ones([N, 1, 1, 1]) * sigma_sample)
+                scale=tf.ones([N, 1, 1, 1]) * tf.sqrt(sigmasq_sample))
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, 100, K, 1])
 
 # Sum over latent dimension, then average over posterior samples.
