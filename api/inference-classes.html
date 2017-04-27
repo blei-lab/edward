@@ -1341,7 +1341,8 @@ rate decreases.</p>
 <span class="target" id="module-edward.inferences.conjugacy"></span><dl class="function">
 <dt id="edward.inferences.conjugacy.complete_conditional">
 <code class="descclassname">edward.inferences.conjugacy.</code><code class="descname">complete_conditional</code><span class="sig-paren">(</span><em>rv</em>, <em>cond_set=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/conjugacy/conjugacy.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Returns the conditional distribution <code class="docutils literal"><span class="pre">RandomVariable</span></code> p(<code class="docutils literal"><span class="pre">rv</span></code> | .).</p>
+<dd><p>Returns the conditional distribution <code class="docutils literal"><span class="pre">RandomVariable</span></code>
+<span class="math">\(p(\text{rv} | \cdot)\)</span>.</p>
 <p>This function tries to infer the conditional distribution of <code class="docutils literal"><span class="pre">rv</span></code>
 given <code class="docutils literal"><span class="pre">cond_set</span></code>, a set of other <a href="#id11"><span class="problematic" id="id12">``</span></a>RandomVariable``s in the graph. It
 will only be able to do this if</p>
@@ -1360,9 +1361,9 @@ necessary algebra.</p>
 <blockquote>
 <div><p>The <code class="docutils literal"><span class="pre">RandomVariable</span></code> whose conditional distribution we are interested in.</p>
 </div></blockquote>
-<p><strong>cond_set</strong> : iterable of RandomVariables, optional</p>
+<p><strong>cond_set</strong> : iterable of RandomVariable, optional</p>
 <blockquote class="last">
-<div><p>The set of <code class="docutils literal"><span class="pre">RandomVariable``s</span> <span class="pre">we</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">condition</span> <span class="pre">on.</span> <span class="pre">Defaults</span> <span class="pre">to</span> <span class="pre">all</span>
+<div><p>The set of <code class="docutils literal"><span class="pre">RandomVariable``s</span> <span class="pre">we</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">condition</span> <span class="pre">on.</span> <span class="pre">Default</span> <span class="pre">is</span> <span class="pre">all</span>
 <span class="pre">``RandomVariable``s</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">graph.</span> <span class="pre">(It</span> <span class="pre">makes</span> <span class="pre">no</span> <span class="pre">difference</span> <span class="pre">if</span> <span class="pre">``cond_set</span></code>
 does or does not include <code class="docutils literal"><span class="pre">rv</span></code>.)</p>
 </div></blockquote>
