@@ -75,13 +75,15 @@ class WGANInference(GANInference):
     if self.penalty is None:
       penalty = 0.0
     else:
-      eps = Uniform()
+      eps = Uniform().sample(x_true.shape[0])
+      while eps.shape.ndims < x_true.shape.ndims:
+        eps = tf.expand_dims(eps, -1)
       x_interpolated = eps * x_true + (1.0 - eps) * x_fake
       with tf.variable_scope("Disc", reuse=True):
         d_interpolated = self.discriminator(x_interpolated)
 
-      gradients = tf.gradients(d_interpolated, x_interpolated)
-      slopes = tf.norm(gradients, axis=list(range(1, len(gradients.shape))))
+      gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
+      slopes = tf.norm(gradients, axis=list(range(1, gradients.shape.ndims)))
       penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
 
     mean_true = tf.reduce_mean(d_true)
