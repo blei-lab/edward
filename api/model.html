@@ -139,27 +139,27 @@
 <pre class="python" language="Python"><code>from edward.models import Normal, Exponential
 
 # univariate normal
-Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
 # vector of 5 univariate normals
-Normal(mu=tf.zeros(5), sigma=tf.ones(5))
+Normal(loc=tf.zeros(5), scale=tf.ones(5))
 # 2 x 3 matrix of Exponentials
-Exponential(lam=tf.ones([2, 3]))</code></pre>
+Exponential(rate=tf.ones([2, 3]))</code></pre>
 <p>For multivariate distributions, the multivariate dimension is the innermost (right-most) dimension of the parameters.</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, MultivariateNormalFull
+<pre class="python" language="Python"><code>from edward.models import Dirichlet, MultivariateNormalTriL
 
 # K-dimensional Dirichlet
-Dirichlet(alpha=tf.constant([0.1] * K))
-# vector of 5 K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=tf.ones([5, K, K]))
+Dirichlet(concentration=tf.constant([0.1] * K))
+# vector of 5 K-dimensional multivariate normals with lower triangular cov
+MultivariateNormalTriL(loc=tf.zeros([5, K]), scale_tril=tf.ones([5, K, K]))
 # 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=tf.ones([2, 5, K, K]))</code></pre>
+MultivariateNormalTriL(loc=tf.zeros([2, 5, K]), scale_tril=tf.ones([2, 5, K, K]))</code></pre>
 <p>Random variables are equipped with methods such as <code>log_prob()</code>, <span class="math inline">\(\log p(\mathbf{x}\mid\theta^*)\)</span>, <code>mean()</code>, <span class="math inline">\(\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]\)</span>, and <code>sample()</code>, <span class="math inline">\(\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)\)</span>. Further, each random variable is associated to a tensor <span class="math inline">\(\mathbf{x}^*\)</span> in the computational graph, which represents a single sample <span class="math inline">\(\mathbf{x}^*\sim
 p(\mathbf{x}\mid\theta^*)\)</span>.</p>
 <p>This makes it easy to parameterize random variables with complex deterministic structure, such as with deep neural networks, a diverse set of math operations, and compatibility with third party libraries which also build on TensorFlow. The design also enables compositions of random variables to capture complex stochastic structure. They operate on <span class="math inline">\(\mathbf{x}^*\)</span>.</p>
 <p><img alt="image" src="/images/random_variable_ops.png" width="375"/></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
-x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+x = Normal(loc=tf.zeros(10), scale=tf.ones(10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
 tf.tanh(x * y)
@@ -177,6 +177,14 @@ equipped with methods such as the log-density, mean, and sample.</p>
 from the random variable. This enables operations on the TensorFlow
 graph, allowing random variables to be used in conjunction with
 other TensorFlow ops.</p>
+<p>The random variable’s shape is given by</p>
+<p><code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>,</p>
+<p>where <code class="docutils literal"><span class="pre">sample_shape</span></code> is an optional argument representing the
+dimensions of samples drawn from the distribution (default is
+a scalar); <code class="docutils literal"><span class="pre">batch_shape</span></code> is the number of independent random variables
+(determined by the shape of its parameters); and <code class="docutils literal"><span class="pre">event_shape</span></code> is
+the shape of one draw from the distribution (e.g., <code class="docutils literal"><span class="pre">Normal</span></code> has a
+scalar <code class="docutils literal"><span class="pre">event_shape</span></code>; <code class="docutils literal"><span class="pre">Dirichlet</span></code> has a vector <code class="docutils literal"><span class="pre">event_shape</span></code>).</p>
 <p class="rubric">Notes</p>
 <p><code class="docutils literal"><span class="pre">RandomVariable</span></code> assumes use in a multiple inheritance setting. The
 child class must first inherit <code class="docutils literal"><span class="pre">RandomVariable</span></code>, then second inherit a
@@ -199,26 +207,65 @@ populate the namespace of the child class. Methods from
 <code class="docutils literal"><span class="pre">RandomVariable</span></code> will take higher priority if there are conflicts.</p>
 <p class="rubric">Examples</p>
 <pre class="python" language="Python"><code>p = tf.constant(0.5)
-x = Bernoulli(p=p)
+x = Bernoulli(p)
 
-z1 = tf.constant([[2.0, 8.0]])
-z2 = tf.constant([[1.0, 2.0]])
-x = Bernoulli(p=tf.matmul(z1, z2))
+z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
+z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
+x = Bernoulli(logits=tf.matmul(z1, z2))
 
-mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-x = Normal(mu=mu, sigma=tf.constant(1.0))
+mu = Normal(tf.constant(0.0), tf.constant(1.0))
+x = Normal(mu, tf.constant(1.0))
 </code>
 </pre>
 <p class="rubric">Attributes</p>
 <p class="rubric">Methods</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
+<blockquote>
+<div><p>Shape of samples to draw from the random variable.</p>
+</div></blockquote>
+<p><strong>value</strong> : tf.Tensor, optional</p>
+<blockquote>
+<div><p>Fixed tensor to associate with random variable. Must have shape
+<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
+</div></blockquote>
+<p><strong>collections</strong> : list, optional</p>
+<blockquote>
+<div><p>Optional list of graph collections keys. The random variable is
+added to these collections. Defaults to [“random_variables”].</p>
+</div></blockquote>
+<p><strong>*args, **kwargs</strong></p>
+<blockquote class="last">
+<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<p class="rubric">Methods</p>
+<dl class="attribute">
+<dt id="edward.models.RandomVariable.sample_shape">
+<code class="descname">sample_shape</code><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
+<dd><p>Sample shape of random variable.</p>
+</dd></dl>
 <dl class="attribute">
 <dt id="edward.models.RandomVariable.shape">
 <code class="descname">shape</code><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
 <dd><p>Shape of random variable.</p>
 </dd></dl>
+<dl class="attribute">
+<dt id="edward.models.RandomVariable.unique_name">
+<code class="descname">unique_name</code><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
+<dd><p>Name of random variable with its unique scoping name. Use
+<code class="docutils literal"><span class="pre">name</span></code> to just get the name of the random variable.</p>
+</dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.eval">
-<code class="descname">eval</code><span class="sig-paren">(</span><em>session=None</em>, <em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L226" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">eval</code><span class="sig-paren">(</span><em>session=None</em>, <em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L273" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>In a session, computes and returns the value of this random variable.</p>
 <p>This is not a graph construction method, it does not add ops to the graph.</p>
 <p>This convenience method requires a session where the graph
@@ -255,51 +302,56 @@ with tf.Session() as sess:
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.value">
-<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L256" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L303" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get tensor that the random variable corresponds to.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_ancestors">
-<code class="descname">get_ancestors</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L260" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_ancestors</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L307" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get ancestor random variables.</p>
 </dd></dl>
 <dl class="method">
+<dt id="edward.models.RandomVariable.get_blanket">
+<code class="descname">get_blanket</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L312" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Get the random variable’s Markov blanket.</p>
+</dd></dl>
+<dl class="method">
 <dt id="edward.models.RandomVariable.get_children">
-<code class="descname">get_children</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L265" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_children</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L317" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get child random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_descendants">
-<code class="descname">get_descendants</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L270" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_descendants</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L322" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get descendant random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_parents">
-<code class="descname">get_parents</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L275" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_parents</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L327" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get parent random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_siblings">
-<code class="descname">get_siblings</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L280" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_siblings</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L332" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get sibling random variables.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_variables">
-<code class="descname">get_variables</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L285" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_variables</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L337" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get TensorFlow variables that the random variable depends on.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.models.RandomVariable.get_shape">
-<code class="descname">get_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L290" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">get_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L342" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Get shape of random variable.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
 <dt id="edward.models.DirichletProcess">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">DirichletProcess</code><span class="sig-paren">(</span><em>alpha</em>, <em>base</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='DirichletProcess'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py#L16" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">DirichletProcess</code><span class="sig-paren">(</span><em>concentration</em>, <em>base</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='DirichletProcess'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py#L17" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Dirichlet process <span class="math">\(\mathcal{DP}(\alpha, H)\)</span>.</p>
-<p>It has two parameters: a positive real value <span class="math">\(\alpha\)</span>,
-known as the concentration parameter (<code class="docutils literal"><span class="pre">alpha</span></code>), and a base
+<p>It has two parameters: a positive real value <span class="math">\(\alpha\)</span>, known
+as the concentration parameter (<code class="docutils literal"><span class="pre">concentration</span></code>), and a base
 distribution <span class="math">\(H\)</span> (<code class="docutils literal"><span class="pre">base</span></code>).</p>
 <p class="rubric">Attributes</p>
 <p class="rubric">Methods</p>
@@ -308,7 +360,7 @@ distribution <span class="math">\(H\)</span> (<code class="docutils literal"><sp
 <col class="field-name"></col>
 <col class="field-body"></col>
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>alpha</strong> : tf.Tensor</p>
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>concentration</strong> : tf.Tensor</p>
 <blockquote>
 <div><p>Concentration parameter. Must be positive real-valued. Its shape
 determines the number of independent DPs (batch shape).</p>
@@ -324,7 +376,7 @@ individual DP (event shape).</p>
 </table>
 <p class="rubric">Examples</p>
 <pre class="python" language="Python"><code># scalar concentration parameter, scalar base distribution
-dp = DirichletProcess(0.1, Normal(mu=0.0, sigma=1.0))
+dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
 assert dp.shape == ()
 
 # vector of concentration parameters, matrix of Exponentials
@@ -337,7 +389,7 @@ assert dp.shape == (2, 5, 3)
 </dd></dl>
 <dl class="class">
 <dt id="edward.models.Empirical">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='Empirical'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py#L11" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='Empirical'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py#L16" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Empirical random variable.</p>
 <p class="rubric">Attributes</p>
 <p class="rubric">Methods</p>
@@ -369,7 +421,7 @@ assert x.shape == (2, 3)
 </dd></dl>
 <dl class="class">
 <dt id="edward.models.PointMass">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='PointMass'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py#L11" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>params</em>, <em>validate_args=False</em>, <em>allow_nan_stats=True</em>, <em>name='PointMass'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py#L16" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>PointMass random variable.</p>
 <p>It is analogous to an Empirical random variable with one sample, but
 its parameter argument does not have an outer dimension.</p>

@@ -129,16 +129,20 @@
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math inline">\(y\)</span> takes discrete values.</p>
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/supervised_classification.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>Use 25 data points from the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>.</p>
-<pre class="python" language="Python"><code>df = np.loadtxt(&#39;data/crabs_train.txt&#39;, delimiter=&#39;,&#39;)
-df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
+<p>We use the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>, which consists of morphological measurements on a crab species. We are interested in predicting whether a given crab has the color form blue or orange.</p>
+<pre class="python" language="Python"><code>data = np.loadtxt(&#39;data/crabs_train.txt&#39;, delimiter=&#39;,&#39;)
+data[data[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
 
-N = 25  # number of data points
-D = df.shape[1] - 1  # number of features
+N = data.shape[0]  # number of data points
+D = data.shape[1] - 1  # number of features
 
-subset = np.random.choice(df.shape[0], N, replace=False)
-X_train = df[subset, 1:]
-y_train = df[subset, 0]</code></pre>
+X_train = data[:, 1:]
+y_train = data[:, 0]
+
+print(&quot;Number of data points: {}&quot;.format(N))
+print(&quot;Number of features: {}&quot;.format(D))</code></pre>
+<pre><code>Number of data points: 100
+Number of features: 5</code></pre>
 <h3 id="model">Model</h3>
 <p>A Gaussian process is a powerful object for modeling nonlinear relationships between pairs of random variables. It defines a distribution over (possibly nonlinear) functions, which can be applied for representing our uncertainty around the true functional relationship. Here we define a Gaussian process model for classification <span class="citation">(Rasmussen &amp; Williams, 2006)</span>.</p>
 <p>Formally, a distribution over functions <span class="math inline">\(f:\mathbb{R}^D\to\mathbb{R}\)</span> can be specified by a Gaussian process <span class="math display">\[\begin{aligned}
@@ -158,36 +162,18 @@ y_train = df[subset, 0]</code></pre>
   p(\mathbf{z})
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K}),\end{aligned}\]</span> with covariance matrix given as previously stated.</p>
-<p>Let’s build the model in Edward. We use a radial basis function (RBF) kernel, also known as the squared exponential or exponentiated quadratic.</p>
-<pre class="python" language="Python"><code>from edward.models import Bernoulli, MultivariateNormalCholesky
-from edward.util import multivariate_rbf
-
-def kernel(x):
-  &quot;&quot;&quot;Compute lower triangular matrix, where entry (i, j) for i &lt;= j is
-  the kernel over the ith and jth data points.&quot;&quot;&quot;
-  mat = []
-  for i in range(N):
-    mat.append([])
-    xi = x[i, :]
-    for j in range(N):
-      xj = x[j, :]
-      if i &lt;= j:
-        mat[i].append(multivariate_rbf(xi, xj))
-      else:
-        mat[i].append(0.0)
-
-    mat[i] = tf.stack(mat[i])
-
-  return tf.stack(mat)
+<p>Let’s build the model in Edward. We use a radial basis function (RBF) kernel, also known as the squared exponential or exponentiated quadratic. It returns the kernel matrix evaluated over all pairs of data points; we then Cholesky decompose the matrix to parameterize the multivariate normal distribution.</p>
+<pre class="python" language="Python"><code>from edward.models import Bernoulli, MultivariateNormalTriL
+from edward.util import rbf
 
 X = tf.placeholder(tf.float32, [N, D])
-f = MultivariateNormalCholesky(mu=tf.zeros(N), chol=kernel(X))
+f = MultivariateNormalTriL(loc=tf.zeros(N), scale_tril=tf.cholesky(rbf(X)))
 y = Bernoulli(logits=f)</code></pre>
 <p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to data.</p>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. Define the variational model to be a fully factorized normal.</p>
-<pre class="python" language="Python"><code>qf = Normal(mu=tf.Variable(tf.random_normal([N])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))</code></pre>
+<pre class="python" language="Python"><code>qf = Normal(loc=tf.Variable(tf.random_normal([N])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))</code></pre>
 <p>Run variational inference for <code>500</code> iterations.</p>
 <pre class="python" language="Python"><code>inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
 inference.run(n_iter=500)</code></pre>

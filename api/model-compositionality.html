@@ -141,8 +141,8 @@
 \prod_{n=1}^{50} \text{Bernoulli}(x_n\mid \theta),\]</span> where <span class="math inline">\(\theta\)</span> is a latent probability shared across the 50 data points <span class="math inline">\(\mathbf{x}\in\{0,1\}^{50}\)</span>.</p>
 <pre language="python"><code>from edward.models import Bernoulli, Beta
 
-theta = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=tf.ones(50) * theta)</code></pre>
+theta = Beta(1.0, 1.0)
+x = Bernoulli(tf.ones(50) * theta)</code></pre>
 <p><img alt="image" src="/images/beta_bernoulli.png" width="450"/><br/>
 <span><em>Computational graph for a Beta-Bernoulli program.</em> </span></p>
 <p>The random variable <code>x</code> (<span class="math inline">\(\mathbf{x}\)</span>) is 50-dimensional, parameterized by the random tensor <span class="math inline">\(\theta^*\)</span>. Fetching <code>x</code> from a session runs the graph: it simulates from the generative process and outputs a binary vector (<span class="math inline">\(\mathbf{x}^*\)</span>) of <span class="math inline">\(50\)</span> elements.</p>
@@ -150,7 +150,7 @@ x = Bernoulli(p=tf.ones(50) * theta)</code></pre>
 <pre language="python"><code>from edward.models import Bernoulli
 
 theta = tf.Variable(0.0)
-x = Bernoulli(p=tf.ones(50) * tf.sigmoid(theta))</code></pre>
+x = Bernoulli(tf.ones(50) * tf.sigmoid(theta))</code></pre>
 <p>Another use case of mutable states is for building discriminative models <span class="math inline">\(p(\mathbf{y}\mid\mathbf{x})\)</span>, where <span class="math inline">\(\mathbf{x}\)</span> are features that are input as training or test data. The program can be written independent of the data, using a mutable state (<code>tf.placeholder</code>) for <span class="math inline">\(\mathbf{x}\)</span> in its graph. During training and testing, we feed the placeholder the appropriate values. (See the <a href="/tutorials/supervised-regression">Bayesian linear regression</a> tutorial as an example.)</p>
 <h3 id="neural-networks">Neural Networks</h3>
 <p>As Edward uses TensorFlow, it is easy to construct neural networks for probabilistic modeling <span class="citation">(Rumelhart, McClelland, &amp; Group, 1988)</span>. For example, one can specify stochastic neural networks <span class="citation">(Neal, 1990)</span>; see the <a href="/tutorials/bayesian-neural-network">Bayesian neural network tutorial</a> for details.</p>
@@ -165,14 +165,14 @@ p=\mathrm{NN}(\mathbf{z}_n; \mathbf{\theta})).\end{aligned}\]</span> The latent 
 <pre language="python"><code>from edward.models import Bernoulli, Normal
 from tensorflow.contrib import slim
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 h = slim.fully_connected(z, 256)
 x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))</code></pre>
 <p>With Keras, we write this model as follows:</p>
 <pre language="python"><code>from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 h = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
 <p>Keras and TensorFlow Slim automatically manage TensorFlow variables, which serve as parameters of the high-level neural network layers. This saves the trouble of having to manage them manually. However, note that neural network parameters defined this way always serve as model parameters. That is, the parameters are not exposed to the user so we cannot be Bayesian about them with prior distributions.</p>
@@ -186,23 +186,24 @@ def kernel(X):
   return
 
 X = tf.placeholder(tf.float32, [N, D])
-y = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))</code></pre>
+y = MultivariateNormalTriL(loc=tf.zeros(N), scale_tril=kernel(X))</code></pre>
 <p>For more details, see the <a href="/tutorials/supervised-classification">Gaussian process classification</a> tutorial. This approach is also useful for Poisson process models.</p>
-<p>In the lazy approach, we work directly on the infinite-dimensional space via <a href="https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html">control flow operations</a> in TensorFlow. At runtime, the control flow will execute only the necessary computation in order to terminate. As an example, Edward provides a <code>DirichletProcess</code> random variable.</p>
-<pre class="python" language="Python"><code>from edward.models import DirichletProcess, Normal
+<p>In the lazy approach, we work directly on the infinite-dimensional space via <a href="https://www.tensorflow.org/api_guides/python/control_flow_ops">control flow operations</a> in TensorFlow. At runtime, the control flow will execute only the necessary computation in order to terminate. As an example, Edward provides a <code>DirichletProcess</code> random variable.</p>
+<pre class="python" language="Python"><code>import matplotlib.pyplot as plt
+from edward.models import DirichletProcess, Normal
 
 def plot_dirichlet_process(alpha):
   with tf.Session() as sess:
-    dp = DirichletProcess(alpha, Normal, mu=0.0, sigma=1.0)
+    dp = DirichletProcess(alpha, Normal(0.0, 1.0))
     samples = sess.run(dp.sample(1000))
     plt.hist(samples, bins=100, range=(-3.0, 3.0))
     plt.title("DP({0}, N(0, 1))".format(alpha))
     plt.show()
 
 # Dirichlet process with high concentration
-plot_dirichlet_process(alpha=1.0)
+plot_dirichlet_process(1.0)
 # Dirichlet process with low concentration (more spread out)
-plot_dirichlet_process(alpha=50.0)</code></pre>
+plot_dirichlet_process(50.0)</code></pre>
 <p><img alt="image" src="/images/dirichlet-process-fig0.png" width="350"/> <img alt="image" src="/images/dirichlet-process-fig1.png" width="350"/></p>
 <p>To see the essential component defining the <code>DirichletProcess</code>, see <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py"><code>examples/pp_dirichlet_process.py</code></a> in the Github repository. Its source implementation can be found at <a href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py"><code>edward/models/dirichlet_process.py</code></a>.</p>
 <h3 id="probabilistic-programs">Probabilistic Programs</h3>

@@ -158,7 +158,7 @@ def generative_network(eps):
   return x
 
 with tf.variable_scope(&quot;Gen&quot;):
-  eps = Uniform(a=tf.zeros([M, d]) - 1.0, b=tf.ones([M, d]))
+  eps = Uniform(tf.zeros([M, d]) - 1.0, tf.ones([M, d]))
   x = generative_network(eps)</code></pre>
 <p>We aim to estimate parameters of the generative network such that the model best captures the data. (Note in GANs, we are interested only in parameter estimation and not inference about any latent variables.)</p>
 <p>Unfortunately, probability models described above do not admit a tractable likelihood. This poses a problem for most inference algorithms, as they usually require taking the model’s density. Thus we are motivated to use “likelihood-free” algorithms <span class="citation">(Marin, Pudlo, Robert, &amp; Ryder, 2012)</span>, a class of methods which assume one can only sample from the model.</p>

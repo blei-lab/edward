@@ -12,19 +12,29 @@ An interactive version with Jupyter notebook is available
 
 \subsubsection{Data}
 
-Use 25 data points from the \href
-{https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html}
-{crabs data set}.
+We use the
+\href{https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html}
+{crabs data set},
+which consists of morphological measurements on a crab species. We
+are interested in predicting whether a given crab has the color form
+blue or orange.
 \begin{lstlisting}[language=Python]
-df = np.loadtxt('data/crabs_train.txt', delimiter=',')
-df[df[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
+data = np.loadtxt('data/crabs_train.txt', delimiter=',')
+data[data[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
 
-N = 25  # number of data points
-D = df.shape[1] - 1  # number of features
+N = data.shape[0]  # number of data points
+D = data.shape[1] - 1  # number of features
 
-subset = np.random.choice(df.shape[0], N, replace=False)
-X_train = df[subset, 1:]
-y_train = df[subset, 0]
+X_train = data[:, 1:]
+y_train = data[:, 0]
+
+print("Number of data points: {}".format(N))
+print("Number of features: {}".format(D))
+\end{lstlisting}
+
+\begin{lstlisting}
+Number of data points: 100
+Number of features: 5
 \end{lstlisting}
 
 \subsubsection{Model}
@@ -83,31 +93,15 @@ with covariance matrix given as previously stated.
 
 Let's build the model in Edward. We use a radial basis function (RBF)
 kernel, also known as the squared exponential or exponentiated
-quadratic.
+quadratic. It returns the kernel matrix evaluated over all pairs of
+data points; we then Cholesky decompose the matrix to parameterize the
+multivariate normal distribution.
 \begin{lstlisting}[language=Python]
-from edward.models import Bernoulli, MultivariateNormalCholesky
-from edward.util import multivariate_rbf
-
-def kernel(x):
-  """Compute lower triangular matrix, where entry (i, j) for i <= j is
-  the kernel over the ith and jth data points."""
-  mat = []
-  for i in range(N):
-    mat.append([])
-    xi = x[i, :]
-    for j in range(N):
-      xj = x[j, :]
-      if i <= j:
-        mat[i].append(multivariate_rbf(xi, xj))
-      else:
-        mat[i].append(0.0)
-
-    mat[i] = tf.stack(mat[i])
-
-  return tf.stack(mat)
+from edward.models import Bernoulli, MultivariateNormalTriL
+from edward.util import rbf
 
 X = tf.placeholder(tf.float32, [N, D])
-f = MultivariateNormalCholesky(mu=tf.zeros(N), chol=kernel(X))
+f = MultivariateNormalTriL(loc=tf.zeros(N), scale_tril=tf.cholesky(rbf(X)))
 y = Bernoulli(logits=f)
 \end{lstlisting}
 Here, we define a placeholder \texttt{X}. During inference, we pass in
@@ -118,8 +112,8 @@ the value for this placeholder according to data.
 Perform variational inference.
 Define the variational model to be a fully factorized normal.
 \begin{lstlisting}[language=Python]
-qf = Normal(mu=tf.Variable(tf.random_normal([N])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
+qf = Normal(loc=tf.Variable(tf.random_normal([N])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
 \end{lstlisting}
 
 Run variational inference for \texttt{500} iterations.

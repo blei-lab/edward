@@ -96,9 +96,9 @@ axes.
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-w = Normal(mu=tf.zeros([D, K]), sigma=2.0 * tf.ones([D, K]))
-z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
-x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, N]))
+w = Normal(loc=tf.zeros([D, K]), scale=2.0 * tf.ones([D, K]))
+z = Normal(loc=tf.zeros([N, K]), scale=tf.ones([N, K]))
+x = Normal(loc=tf.matmul(w, z, transpose_b=True), scale=tf.ones([D, N]))
 
 \end{lstlisting}
 
@@ -111,10 +111,10 @@ variational inference to minimize the $\text{KL}(q\|p)$ divergence
 measure.
 
 \begin{lstlisting}[language=Python]
-qw = Normal(mu=tf.Variable(tf.random_normal([D, K])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, K]))))
-qz = Normal(mu=tf.Variable(tf.random_normal([N, K])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
+qw = Normal(loc=tf.Variable(tf.random_normal([D, K])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, K]))))
+qz = Normal(loc=tf.Variable(tf.random_normal([N, K])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
 
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 inference.run(n_iter=500, n_print=100, n_samples=10)

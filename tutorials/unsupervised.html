@@ -152,65 +152,80 @@ plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
 <p>A mixture model is a model typically used for clustering. It assigns a mixture component to each data point, and this mixture component determines the distribution that the data point is generated from. A mixture of Gaussians uses Gaussian distributions to generate this data <span class="citation">(Bishop, 2006)</span>.</p>
-<p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is <span class="math display">\[\begin{aligned}
+<p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is</p>
+<p><span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n \mid \pi, \mu, \sigma)
   &amp;=
-  \sum_{k=1}^K \pi_k \, \text{Normal}(\mathbf{x}_n \mid \mu_k, \sigma_k).\end{aligned}\]</span> The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by a mean <span class="math inline">\(\mu_k\)</span> and standard deviation <span class="math inline">\(\sigma_k\)</span>.</p>
-<p>Define the prior on <span class="math inline">\(\pi\in[0,1]\)</span> such that <span class="math inline">\(\sum_{k=1}^K\pi_k=1\)</span> to be <span class="math display">\[\begin{aligned}
+  \sum_{k=1}^K \pi_k \, \text{Normal}(\mathbf{x}_n \mid \mu_k, \sigma_k).\end{aligned}\]</span></p>
+<p>The latent variable <span class="math inline">\(\pi\)</span> is a <span class="math inline">\(K\)</span>-dimensional probability vector which mixes individual Gaussian distributions, each characterized by a mean <span class="math inline">\(\mu_k\)</span> and standard deviation <span class="math inline">\(\sigma_k\)</span>.</p>
+<p>Define the prior on <span class="math inline">\(\pi\in[0,1]\)</span> such that <span class="math inline">\(\sum_{k=1}^K\pi_k=1\)</span> to be</p>
+<p><span class="math display">\[\begin{aligned}
   p(\pi)
   &amp;=
-  \text{Dirichlet}(\pi \mid \alpha \mathbf{1}_{K}).\end{aligned}\]</span></p>
-<p>Define the prior on each component <span class="math inline">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
+  \text{Dirichlet}(\pi \mid \alpha \mathbf{1}_{K})\end{aligned}\]</span></p>
+<p>for fixed <span class="math inline">\(\alpha=1\)</span>. Define the prior on each component <span class="math inline">\(\mathbf{\mu}_k\in\mathbb{R}^D\)</span> to be</p>
+<p><span class="math display">\[\begin{aligned}
   p(\mathbf{\mu}_k)
   &amp;=
-  \text{Normal}(\mathbf{\mu}_k \mid \mathbf{0}, \sigma^2\mathbf{I}).\end{aligned}\]</span></p>
-<p>Define the prior on each component <span class="math inline">\(\mathbf{\sigma}_k\in\mathbb{R}^D\)</span> to be <span class="math display">\[\begin{aligned}
-  p(\mathbf{\sigma}_k)
+  \text{Normal}(\mathbf{\mu}_k \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
+<p>Define the prior on each component <span class="math inline">\(\mathbf{\sigma}_k^2\in\mathbb{R}^D\)</span> to be</p>
+<p><span class="math display">\[\begin{aligned}
+  p(\mathbf{\sigma}_k^2)
   &amp;=
-  \text{InverseGamma}(\mathbf{\sigma}_k \mid a, b).\end{aligned}\]</span></p>
+  \text{InverseGamma}(\mathbf{\sigma}_k^2 \mid a, b).\end{aligned}\]</span></p>
 <p>We build two versions of the model in Edward: one jointly with the mixture assignments <span class="math inline">\(c_n\in\{0,\ldots,K-1\}\)</span> as latent variables, and another with them summed out.</p>
-<p>The joint version is written as follows.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, InverseGamma, Normal
+<p>The joint version includes an explicit latent variable for the mixture assignments. We implement this with the ‘ParamMixture‘ random variable; it takes as input the mixing probabilities, the components’ parameters, and the distribution of the components. It is the distribution of the mixture conditional on mixture assignments. (Note we can also write this separately by first building a ‘Categorical‘ random variable for ‘z‘ and then building ‘x‘; ‘ParamMixture‘ avoids requiring ‘tf.gather‘ which is slightly more efficient.)</p>
+<pre class="python" language="Python"><code>from edward.models import Dirichlet, InverseGamma, MultivariateNormalDiag, \
+    Normal, ParamMixture
 
 K = 2  # number of components
 
-mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
-sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
-c = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=tf.gather(mu, c), sigma=tf.gather(sigma, c))</code></pre>
-<p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, InverseGamma, Mixture, \
+pi = Dirichlet(tf.ones(K))
+mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
+sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+x = ParamMixture(pi, {&#39;mu&#39;: mu, &#39;diag_stdev&#39;: tf.sqrt(sigmasq)}, MultivariateNormalDiag,
+                 sample_shape=N)
+z = x.cat</code></pre>
+<p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable; it takes as input a Categorical distribution and a list of individual distribution components. It is the distribution of the mixture summing out the mixture assignments.</p>
+<pre class="python" language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
     MultivariateNormalDiag, Normal
 
 K = 2  # number of components
 
-mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
-sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
-cat = Categorical(logits=tf.zeros([N, K]))
+pi = Dirichlet(tf.ones(K))
+mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
+sigma = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+cat = Categorical(probs=pi, sample_shape=N)
 components = [
-    MultivariateNormalDiag(mu=tf.ones([N, 1]) * mu[k],
-                           diag_stdev=tf.ones([N, 1]) * sigma[k])
+    MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
     for k in range(K)]
 x = Mixture(cat=cat, components=components)</code></pre>
-<p>We will use the collapsed version in this analysis.</p>
+<p>We will use the joint version in this analysis.</p>
 <h3 id="inference">Inference</h3>
-<p>Perform variational inference. The latent variables are the component means and component variances. Define the variational model to be <span class="math display">\[\begin{aligned}
- q(\mu, \sigma \;;\; \lambda)
- &amp;=
- \prod_{k=1}^K
- \text{Normal}(\mu_k; \lambda_{\mu_k})
- ~
- \text{InverseGamma}(\sigma_k; \lambda_{\sigma_k}).\end{aligned}\]</span> The model in Edward is</p>
-<pre class="python" language="Python"><code>qmu = Normal(
-    mu=tf.Variable(tf.random_normal([K, D])),
-    sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
-qsigma = InverseGamma(
-    alpha=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))),
-    beta=tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))</code></pre>
-<p>Run variational inference for 4000 iterations and 20 latent variable samples per iteration.</p>
-<pre class="python" language="Python"><code>inference = ed.KLqp({mu: qmu, sigma: qsigma}, data={x: x_train})
-inference.run(n_iter=4000, n_samples=20)</code></pre>
-<p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the score function gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.</p>
+<p>Each distribution in the model is written with conjugate priors, so we can use Gibbs sampling. It performs Markov chain Monte Carlo by iterating over draws from the complete conditionals of each distribution, i.e., each distribution conditional on a previously drawn value. First we set up Empirical random variables which will approximate the posteriors using the collection of samples.</p>
+<pre class="python" language="Python"><code>T = 500  # number of MCMC samples
+qpi = Empirical(tf.Variable(tf.ones([T, K]) / K))
+qmu = Empirical(tf.Variable(tf.zeros([T, K, D])))
+qsigmasq = Empirical(tf.Variable(tf.ones([T, K, D])))
+qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))</code></pre>
+<p>Run Gibbs sampling. We write the training loop explicitly, so that we can track the cluster means as the sampler progresses.</p>
+<pre class="python" language="Python"><code>inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz}, data={x: x_train})
+inference.initialize()
+
+sess = ed.get_session()
+tf.global_variables_initializer().run()
+
+t_ph = tf.placeholder(tf.int32, [])
+running_cluster_means = tf.reduce_mean(qmu.params[:t_ph], 0)
+
+for _ in range(inference.n_iter):
+  info_dict = inference.update()
+  inference.print_progress(info_dict)
+  t = info_dict[&#39;t&#39;]
+  if t % inference.n_print == 0:
+    print(&quot;\nInferred cluster means:&quot;)
+    print(sess.run(running_cluster_means, {t_ph: t - 1}))</code></pre>
+<p>See the associated Jupyter notebook for the inferred cluster means tracked during training.</p>
 <h3 id="criticism">Criticism</h3>
 <p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest posterior predictive density for each data point.</p>
 <p>To do this, we first draw a sample from the posterior and calculate a a <span class="math inline">\(N\times K\)</span> matrix of log-likelihoods, one for each data point <span class="math inline">\(\mathbf{x}_n\)</span> and cluster assignment <span class="math inline">\(k\)</span>. We perform this averaged over 100 posterior samples.</p>
@@ -218,8 +233,8 @@ inference.run(n_iter=4000, n_samples=20)</code></pre>
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 mu_sample = qmu.sample(100)
 sigma_sample = qsigma.sample(100)
-x_post = Normal(mu=tf.ones([N, 1, 1, 1]) * mu_sample,
-                sigma=tf.ones([N, 1, 1, 1]) * sigma_sample)
+x_post = Normal(loc=tf.ones([N, 1, 1, 1]) * mu_sample,
+                scale=tf.ones([N, 1, 1, 1]) * sigma_sample)
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, 100, K, 1])
 
 # Sum over latent dimension, then average over posterior samples.

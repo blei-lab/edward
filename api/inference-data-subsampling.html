@@ -151,14 +151,14 @@ M = 128  # minibatch size
 D = 2  # data dimensionality
 K = 5  # number of clusters
 
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+beta = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([M, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([M, D]))</code></pre>
+x = Normal(loc=tf.gather(beta, z), scale=tf.ones([M, D]))</code></pre>
 <p>For inference, the variational model is <span class="math display">\[q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{n=1}^N q(z_n \mid \beta; \gamma_n),\]</span> parameterized by <span class="math inline">\(\{\lambda, \{\gamma_n\}\}\)</span>. Again, we work on only a subgraph of the model, <span class="math display">\[q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{m=1}^M q(z_m \mid \beta; \gamma_m).\]</span> parameterized by <span class="math inline">\(\{\lambda, \{\gamma_m\}\}\)</span>. Importantly, only <span class="math inline">\(M\)</span> parameters are stored in memory for <span class="math inline">\(\{\gamma_m\}\)</span> rather than <span class="math inline">\(N\)</span>.</p>
-<pre class="python" language="Python"><code>qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
+<pre class="python" language="Python"><code>qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
 qz_variables = tf.Variable(tf.zeros([M, K]))
 qz = Categorical(logits=qz_variables)</code></pre>
 <p>We will perform inference with <code>KLqp</code>, a variational method that minimizes the divergence measure <span class="math inline">\(\text{KL}(q\| p)\)</span>.</p>

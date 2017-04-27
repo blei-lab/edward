@@ -164,7 +164,7 @@ p(\mathbf{x}_{\text{train}}; \theta)\]</span></p>
 <pre class="python" language="Python"><code>from edward.models import Normal
 
 theta = tf.Variable(0.0)
-x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
+x = Normal(loc=tf.ones(10) * theta, scale=1.0)
 
 inference = ed.Inference({}, {x: x_train})</code></pre>
 <p>Only a subset of inference algorithms support estimation of model parameters. (Note also that this inference example does not have any latent variables. It is only about estimating <code>theta</code> given that we observe <span class="math inline">\(\mathbf{x} = \mathbf{x}_{\text{train}}\)</span>. We can add them so that inference is both posterior inference and parameter estimation.)</p>
@@ -219,12 +219,12 @@ latent variables (of type <code class="docutils literal"><span class="pre">Rando
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant(1.0))
+<pre class="python" language="Python"><code>mu = Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
+x = Normal(loc=tf.ones(50) * mu, scale=tf.constant(1.0))
 
-qmu_mu = tf.Variable(tf.random_normal([]))
-qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+qmu_loc = tf.Variable(tf.random_normal([]))
+qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+qmu = Normal(loc=qmu_loc, scale=qmu_scale)
 
 inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
 </code>

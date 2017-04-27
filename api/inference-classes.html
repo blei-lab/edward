@@ -149,8 +149,8 @@ q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
 q(\mathbf{z};\pi) &amp;= \text{Categorical}(\mathbf{z};\pi),\end{aligned}\]</span> using TensorFlow variables to represent its parameters <span class="math inline">\(\lambda=\{\pi,\mu,\sigma\}\)</span>.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, Normal
 
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
+qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.exp(tf.Variable(tf.zeros[K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
@@ -355,7 +355,7 @@ is tractable, then the loss function can be written as</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L137" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L139" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -364,7 +364,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L166" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L168" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -373,7 +373,7 @@ gradient and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ReparameterizationEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L210" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ReparameterizationEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L212" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -382,7 +382,7 @@ gradient and an analytic entropy term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L240" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L242" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -391,7 +391,7 @@ gradient.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreKLKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L269" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreKLKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L271" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -400,7 +400,7 @@ and an analytic KL term.</p>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ScoreEntropyKLqp">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L313" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">ScoreEntropyKLqp</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/klqp.py#L315" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Variational inference with the KL divergence</p>
 <div class="math">
 \[\text{KL}( q(z; \lambda) \| p(z \mid x) ).\]</div>
@@ -447,7 +447,7 @@ discriminator’s parameters can be accessed with the variable scope
 “Disc”.</p>
 <p>GANs also only work for one observed random variable in <code class="docutils literal"><span class="pre">data</span></code>.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+<pre class="python" language="Python"><code>z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
 x = generative_network(z)
 
 inference = ed.GANInference({x: x_data}, discriminator)
@@ -540,6 +540,34 @@ parameters.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
+<dt id="edward.inferences.BiGANInference">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">BiGANInference</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>data</em>, <em>discriminator</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/bigan_inference.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Adversarially Learned Inference (Dumoulin et al., 2017) or
+Bidirectional Generative Adversarial Networks (Donahue et al., 2017)
+for joint learning of generator and inference networks.</p>
+<p>Works for the class of implicit (and differentiable) probabilistic
+models. These models do not require a tractable density and assume
+only a program that generates samples.</p>
+<p class="rubric">Methods</p>
+<p class="rubric">Notes</p>
+<p><code class="docutils literal"><span class="pre">BiGANInference</span></code> matches a mapping from data to latent variables and a
+mapping from latent variables to data through a joint
+discriminator.</p>
+<p>In building the computation graph for inference, the
+discriminator’s parameters can be accessed with the variable scope
+“Disc”.
+In building the computation graph for inference, the
+encoder and decoder parameters can be accessed with the variable scope
+“Gen”.</p>
+<p class="rubric">Examples</p>
+<pre class="python" language="Python"><code>with tf.variable_scope("Gen"):
+  xf = gen_data(z_ph)
+  zf = gen_latent(x_ph)
+inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
+</code>
+</pre>
+</dd></dl>
+<dl class="class">
 <dt id="edward.inferences.WGANInference">
 <em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">WGANInference</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/wgan_inference.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Parameter estimation with GAN-style training (Goodfellow et al.,
@@ -555,7 +583,7 @@ function or critic. <code class="docutils literal"><span class="pre">WGANInferen
 <code class="docutils literal"><span class="pre">discriminator</span></code> only to share methods and attributes with
 <code class="docutils literal"><span class="pre">GANInference</span></code>.</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+<pre class="python" language="Python"><code>z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
 x = generative_network(z)
 
 inference = ed.WGANInference({x: x_data}, discriminator)
@@ -844,29 +872,29 @@ covariance of the normal approximation.</p>
 </div></blockquote>
 <p>Collection of random variables to perform inference on. If list,
 each random variable will be implictly optimized using a
-<code class="docutils literal"><span class="pre">MultivariateNormalCholesky</span></code> random variable that is defined
+<code class="docutils literal"><span class="pre">MultivariateNormalTriL</span></code> random variable that is defined
 internally (with unconstrained support). If dictionary, each
-random variable must be a <code class="docutils literal"><span class="pre">MultivariateNormalCholesky</span></code>,
-<code class="docutils literal"><span class="pre">MultivariateNormalFull</span></code>, or <code class="docutils literal"><span class="pre">MultivariateNormalDiag</span></code> random
-variable.</p>
+random variable must be a <code class="docutils literal"><span class="pre">MultivariateNormalDiag</span></code>,
+<code class="docutils literal"><span class="pre">MultivariateNormalTriL</span></code>, or <code class="docutils literal"><span class="pre">Normal</span></code> random variable.</p>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>If <code class="docutils literal"><span class="pre">MultivariateNormalDiag</span></code> random variables are specified as
-approximations, then the Laplace approximation will only produce
-the diagonal. This does not capture correlation among the
-variables but it does not require a potentially expensive matrix
-inversion.</p>
+<p>If <code class="docutils literal"><span class="pre">MultivariateNormalDiag</span></code> or <code class="docutils literal"><span class="pre">Normal</span></code> random variables are
+specified as approximations, then the Laplace approximation will
+only produce the diagonal. This does not capture correlation among
+the variables but it does not require a potentially expensive
+matrix inversion.</p>
 <p class="rubric">Examples</p>
 <pre class="python" language="Python"><code>X = tf.placeholder(tf.float32, [N, D])
-w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-y = Normal(mu=ed.dot(X, w), sigma=tf.ones(N))
+w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+y = Normal(loc=ed.dot(X, w), scale=tf.ones(N))
 
-qw = MultivariateNormalFull(mu=tf.Variable(tf.random_normal([D])),
-                            sigma=tf.Variable(tf.random_normal([D, D])))
+qw = MultivariateNormalTriL(
+    loc=tf.Variable(tf.random_normal([D])),
+    scale_tril=tf.Variable(tf.random_normal([D, D])))
 
 inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
 </code>
@@ -874,7 +902,7 @@ inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.Laplace.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L109" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">finalize</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/laplace.py#L107" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Function to call after convergence.</p>
 <p>Computes the Hessian at the mode.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -957,7 +985,7 @@ each dimension.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L97" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L100" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of sampling for Monte Carlo.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -987,12 +1015,12 @@ separately forces a consistent behavior.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L140" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L143" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L148" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L151" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build update rules, returning an assign op for parameters in
 the <code class="docutils literal"><span class="pre">Empirical</span></code> random variables.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement this method.</p>
@@ -1037,11 +1065,11 @@ binded to a proposal distribution <span class="math">\(g(z' \mid z)\)</span>.</p
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
-x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+<pre class="python" language="Python"><code>z = Normal(loc=0.0, scale=1.0)
+x = Normal(loc=tf.ones(10) * z, scale=1.0)
 
 qz = Empirical(tf.Variable(tf.zeros(500)))
-proposal_z = Normal(mu=z, sigma=0.5)
+proposal_z = Normal(loc=z, scale=0.5)
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
 inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
 </code>
@@ -1049,7 +1077,7 @@ inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MetropolisHastings.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/metropolis_hastings.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Draw sample from proposal conditional on last sample. Then
 accept or reject the sample based on the ratio,</p>
 <div class="math">
@@ -1060,6 +1088,89 @@ accept or reject the sample based on the ratio,</p>
 <p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
 parameterized by <a href="#id1"><span class="problematic" id="id2">``</span></a>tf.Variable``s.</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="edward.inferences.Gibbs">
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Gibbs</code><span class="sig-paren">(</span><em>latent_vars</em>, <em>proposal_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gibbs.py#L16" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Gibbs sampling (Geman and Geman, 1984).</p>
+<p class="rubric">Methods</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>proposal_vars</strong> : dict of RandomVariable to RandomVariable, optional</p>
+<blockquote class="last">
+<div><p>Collection of random variables to perform inference on; each is
+binded to its complete conditionals which Gibbs cycles draws on.
+If not specified, default is to use <code class="docutils literal"><span class="pre">ed.complete_conditional</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<pre class="python" language="Python"><code>x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+p = Beta(1.0, 1.0)
+x = Bernoulli(p=p, sample_shape=10)
+
+qp = Empirical(tf.Variable(tf.zeros(500)))
+inference = ed.Gibbs({p: qp}, data={x: x_data})
+</code>
+</pre>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="edward.inferences.Gibbs.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>scan_order='random'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gibbs.py#L47" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>scan_order</strong> : list or str, optional</p>
+<blockquote class="last">
+<div><p>The scan order for each Gibbs update. If list, it is the
+deterministic order of latent variables. An element in the list
+can be a <code class="docutils literal"><span class="pre">RandomVariable</span></code> or itself a list of
+<a href="#id3"><span class="problematic" id="id4">``</span></a>RandomVariable``s (this defines a blocked Gibbs sampler). If
+‘random’, will use a random order at each update.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+<dl class="method">
+<dt id="edward.inferences.Gibbs.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gibbs.py#L62" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Run one iteration of Gibbs sampling.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
+<blockquote>
+<div><p>Feed dictionary for a TensorFlow session run. It is used to feed
+placeholders that are not fed during initialization.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">dict</p>
+<blockquote class="last">
+<div><p>Dictionary of algorithm-specific information. In this case, the
+acceptance rate of samples since (and including) this iteration.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+<dl class="method">
+<dt id="edward.inferences.Gibbs.build_update">
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gibbs.py#L129" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p class="rubric">Notes</p>
+<p>The updates assume each Empirical random variable is directly
+parameterized by <a href="#id5"><span class="problematic" id="id6">``</span></a>tf.Variable``s.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -1080,8 +1191,8 @@ q(\beta)\)</span>. This is unbiased (and therefore asymptotically exact as a
 pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</span>.</p>
 <p class="rubric">Methods</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
-x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+<pre class="python" language="Python"><code>z = Normal(loc=0.0, scale=1.0)
+x = Normal(loc=tf.ones(10) * z, scale=1.0)
 
 qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
@@ -1117,7 +1228,7 @@ Correct for the integrator’s discretization error using an
 acceptance ratio.</p>
 <p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
-parameterized by <a href="#id3"><span class="problematic" id="id4">``</span></a>tf.Variable``s.</p>
+parameterized by <a href="#id7"><span class="problematic" id="id8">``</span></a>tf.Variable``s.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -1137,8 +1248,8 @@ q(\beta)\)</span>. This is unbiased (and therefore asymptotically exact as a
 pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</span>.</p>
 <p class="rubric">Methods</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
-x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+<pre class="python" language="Python"><code>z = Normal(loc=0.0, scale=1.0)
+x = Normal(loc=tf.ones(10) * z, scale=1.0)
 
 qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
@@ -1169,7 +1280,7 @@ inference = ed.SGLD({z: qz}, data)
 discretization error goes to zero as the learning rate decreases.</p>
 <p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
-parameterized by <a href="#id5"><span class="problematic" id="id6">``</span></a>tf.Variable``s.</p>
+parameterized by <a href="#id9"><span class="problematic" id="id10">``</span></a>tf.Variable``s.</p>
 </dd></dl>
 </dd></dl>
 <dl class="class">
@@ -1189,8 +1300,8 @@ q(\beta)\)</span>. This is unbiased (and therefore asymptotically exact as a
 pseudo-marginal method) if <span class="math">\(q(\beta) = p(\beta \mid x)\)</span>.</p>
 <p class="rubric">Methods</p>
 <p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>z = Normal(mu=0.0, sigma=1.0)
-x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+<pre class="python" language="Python"><code>z = Normal(loc=0.0, scale=1.0)
+x = Normal(loc=tf.ones(10) * z, scale=1.0)
 
 qz = Empirical(tf.Variable(tf.zeros(500)))
 data = {x: np.array([0.0] * 10, dtype=np.float32)}
@@ -1226,6 +1337,43 @@ integrator. Its discretization error goes to zero as the learning
 rate decreases.</p>
 <p>Implements the update equations from (15) of Chen et al. (2014).</p>
 </dd></dl>
+</dd></dl>
+<span class="target" id="module-edward.inferences.conjugacy"></span><dl class="function">
+<dt id="edward.inferences.conjugacy.complete_conditional">
+<code class="descclassname">edward.inferences.conjugacy.</code><code class="descname">complete_conditional</code><span class="sig-paren">(</span><em>rv</em>, <em>cond_set=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/conjugacy/conjugacy.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Returns the conditional distribution <cite>RandomVariable</cite> p(<cite>rv</cite> | .).</p>
+<p>This function tries to infer the conditional distribution of <cite>rv</cite>
+given <cite>cond_set</cite>, a set of other <cite>RandomVariable`s in the graph. It
+will only be able to do this if
+a) p(`rv</cite> | <cite>cond_set</cite>) is in a tractable exponential family AND
+b) the truth of assumption (a) is not obscured in the TensorFlow graph.
+In other words, this function will do its best to recognize conjugate
+relationships when they exist, but it may not always be able to do the
+necessary algebra.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>rv</strong> : RandomVariable</p>
+<blockquote>
+<div><p>The <cite>RandomVariable</cite> whose conditional distribution we are interested in.</p>
+</div></blockquote>
+<p><strong>cond_set</strong> : iterable of RandomVariables, optional</p>
+<blockquote class="last">
+<div><p>The set of <cite>RandomVariable`s we want to condition on. Defaults to all
+`RandomVariable`s in the graph. (It makes no difference if `cond_set</cite> does
+or does not include <cite>rv</cite>.)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>When calling <cite>complete_conditional()</cite> multiple times, one should
+usually pass an explicit <cite>cond_set</cite>. Otherwise
+<cite>complete_conditional()</cite> will try to condition on the
+<a href="#id11"><span class="problematic" id="id12">`</span></a>RandomVariable`s returned by previous calls to itself, which may
+result in unpredictable behavior.</p>
 </dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">

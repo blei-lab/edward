@@ -144,7 +144,7 @@
 <pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 hidden = Dense(256, activation=&#39;relu&#39;)(z)
 x = Bernoulli(logits=Dense(28 * 28)(hidden))</code></pre>
 <p>It starts with a <span class="math inline">\(d\)</span>-dimensional standard normal prior, one for each data point. Then it applies a layer of 256 hidden units with <code>relu</code> nonlinearity. The output layer is <span class="math inline">\(28\cdot 28\)</span> units without a nonlinearity. This output parameterizes the Bernoulli’s logits. Logits are a more numerically stable parameterization than probabilities constrained from 0 and 1.</p>
