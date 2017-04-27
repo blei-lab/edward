@@ -125,15 +125,15 @@ class KLqp(VariationalInference):
     $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
         \\text{KL}( q(z; \lambda) \| p(z) ),$
 
-    where the KL term is computed analytically [@kingma2014auto]. We
-    compute this automatically when $p(z)$ and $q(z; \lambda)$ are
-    Normal.
+    where the KL term is computed analytically [@kingma2014auto].
     """
     is_reparameterizable = all([
         rv.reparameterization_type ==
         tf.contrib.distributions.FULLY_REPARAMETERIZED
         for rv in six.itervalues(self.latent_vars)])
-    is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
+    # TODO(dt): determine if there is a kl registered for kl(qz, z)
+    # for each pair in self.latent_vars. how?
+    is_analytic_kl = all([_is_registered_kl(qz, z)
                           for z, qz in six.iteritems(self.latent_vars)])
     if not is_analytic_kl and self.kl_scaling:
       raise TypeError("kl_scaling must be None when using non-analytic KL term")
