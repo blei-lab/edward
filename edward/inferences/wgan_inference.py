@@ -48,14 +48,15 @@ class WGANInference(GANInference):
     ----------
     penalty : float, optional
       Scalar value to enforce gradient penalty that ensures the
-      gradients have norm equal to 1. Set to None (or 0.0) if using no
-      penalty.
+      gradients have norm equal to 1 (Gulrajani et al., 2017). Set to
+      None (or 0.0) if using no penalty.
     clip : float, optional
       Value to clip weights by. Default is no clipping.
     """
+    self.penalty = penalty
+
     super(WGANInference, self).initialize(*args, **kwargs)
 
-    self.penalty = penalty
     self.clip_d = None
     if clip is not None:
       var_list_d = tf.get_collection(
@@ -83,7 +84,8 @@ class WGANInference(GANInference):
         d_interpolated = self.discriminator(x_interpolated)
 
       gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
-      slopes = tf.norm(gradients, axis=list(range(1, gradients.shape.ndims)))
+      slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients),
+                       list(range(1, gradients.shape.ndims))))
       penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
 
     mean_true = tf.reduce_mean(d_true)
