@@ -36,18 +36,18 @@ X_train, y_train = build_toy_dataset(N)
 
 # MODEL
 X = tf.placeholder(tf.float32, [N, D])
-w = Normal(mu=tf.zeros(D), sigma=3.0 * tf.ones(D))
-b = Normal(mu=tf.zeros([]), sigma=3.0 * tf.ones([]))
+w = Normal(loc=tf.zeros(D), scale=3.0 * tf.ones(D))
+b = Normal(loc=tf.zeros([]), scale=3.0 * tf.ones([]))
 y = Bernoulli(logits=ed.dot(X, w) + b)
 
 # INFERENCE
-qw_mu = tf.Variable(tf.random_normal([D]))
-qw_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
-qb_mu = tf.Variable(tf.random_normal([]) + 10)
-qb_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+qw_loc = tf.Variable(tf.random_normal([D]))
+qw_scale = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
+qb_loc = tf.Variable(tf.random_normal([]) + 10)
+qb_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 
-qw = Normal(mu=qw_mu, sigma=qw_sigma)
-qb = Normal(mu=qb_mu, sigma=qb_sigma)
+qw = Normal(loc=qw_loc, scale=qw_scale)
+qb = Normal(loc=qb_loc, scale=qb_scale)
 
 inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
 inference.initialize(n_print=10, n_iter=600)

@@ -73,7 +73,7 @@ from edward.models import Normal, Poisson
 N = x_train.shape[0]  # number of data points
 K = 3  # latent dimensionality
 
-z = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
+z = Normal(loc=tf.zeros([N, K]), scale=tf.ones([N, K]))
 
 # Calculate N x N distance matrix.
 # 1. Create a vector, [||z_1||^2, ||z_2||^2, ..., ||z_N||^2], and tile
@@ -86,13 +86,8 @@ xp = xp + tf.transpose(xp) - 2 * tf.matmul(z, z, transpose_b=True)
 # be close to zero.
 xp = 1.0 / tf.sqrt(xp + tf.diag(tf.zeros(N) + 1e3))
 
-x = Poisson(lam=xp, value=tf.zeros_like(xp))
+x = Poisson(rate=xp)
 \end{lstlisting}
-
-Note Edward doesn't currently support sampling for \texttt{Poisson}
-random variables. For now, we hard-code its associated tensor to be
-full of 0's via the \texttt{value} argument. It is required only for
-instantiating the random variable and is not used in the experiment.
 
 \subsubsection{Inference}
 
@@ -108,8 +103,8 @@ See this extended tutorial about
 One could instead run variational inference. This requires specifying
 a variational model and instantiating \texttt{KLqp}.
 \begin{lstlisting}[language=Python]
-qz = Normal(mu=tf.Variable(tf.random_normal([N * K])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
+qz = Normal(loc=tf.Variable(tf.random_normal([N * K])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
 inference = ed.KLqp({z: qz}, data={x: x_train})
 \end{lstlisting}
 See this extended tutorial about

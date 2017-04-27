@@ -17,13 +17,13 @@ ed.set_seed(42)
 x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 # MODEL
-p = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=tf.ones(10) * p)
+p = Beta(1.0, 1.0)
+x = Bernoulli(tf.ones(10) * p)
 
 # INFERENCE
 qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
 qp_b = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-qp = Beta(a=qp_a, b=qp_b)
+qp = Beta(qp_a, qp_b)
 
 inference = ed.KLqp({p: qp}, data={x: x_data})
 inference.run(n_iter=500)

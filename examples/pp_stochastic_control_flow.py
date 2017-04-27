@@ -21,7 +21,7 @@ from edward.models import Bernoulli
 
 def geometric(p):
   i = tf.constant(0)
-  sample = tf.while_loop(cond=lambda i: tf.cast(1 - Bernoulli(p=p), tf.bool),
+  sample = tf.while_loop(cond=lambda i: tf.cast(1 - Bernoulli(p), tf.bool),
                          body=lambda i: i + 1, loop_vars=[i])
   return sample
 

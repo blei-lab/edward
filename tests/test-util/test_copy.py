@@ -45,10 +45,10 @@ class test_copy_class(tf.test.TestCase):
 
   def test_list(self):
     with self.test_session() as sess:
-      x = Normal(mu=tf.constant(0.0), sigma=tf.constant(0.1))
-      y = Normal(mu=tf.constant(10.0), sigma=tf.constant(0.1))
+      x = Normal(tf.constant(0.0), tf.constant(0.1))
+      y = Normal(tf.constant(10.0), tf.constant(0.1))
       cat = Categorical(logits=tf.zeros(5))
-      components = [Normal(mu=x, sigma=tf.constant(0.1))
+      components = [Normal(x, tf.constant(0.1))
                     for _ in range(5)]
       z = Mixture(cat=cat, components=components)
       z_new = ed.copy(z, {x: y.value()})
@@ -123,30 +123,30 @@ class test_copy_class(tf.test.TestCase):
   def test_swap_rv_rv(self):
     with self.test_session():
       ed.set_seed(325135)
-      x = Normal(mu=0.0, sigma=0.1)
+      x = Normal(0.0, 0.1)
       y = tf.constant(1.0)
       z = x * y
-      qx = Normal(mu=10.0, sigma=0.1)
+      qx = Normal(10.0, 0.1)
       z_new = ed.copy(z, {x: qx})
       self.assertGreater(z_new.eval(), 5.0)
 
   def test_swap_rv_tensor(self):
     with self.test_session():
       ed.set_seed(289362)
-      x = Normal(mu=0.0, sigma=0.1)
+      x = Normal(0.0, 0.1)
       y = tf.constant(1.0)
       z = x * y
-      qx = Normal(mu=10.0, sigma=0.1)
+      qx = Normal(10.0, 0.1)
       z_new = ed.copy(z, {x: qx.value()})
       self.assertGreater(z_new.eval(), 5.0)
 
   def test_swap_tensor_rv(self):
     with self.test_session():
       ed.set_seed(95258)
-      x = Normal(mu=0.0, sigma=0.1)
+      x = Normal(0.0, 0.1)
       y = tf.constant(1.0)
       z = x * y
-      qx = Normal(mu=10.0, sigma=0.1)
+      qx = Normal(10.0, 0.1)
       z_new = ed.copy(z, {x.value(): qx})
       self.assertGreater(z_new.eval(), 5.0)
 

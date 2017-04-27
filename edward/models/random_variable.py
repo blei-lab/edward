@@ -60,14 +60,14 @@ class RandomVariable(object):
   Examples
   --------
   >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p=p)
+  >>> x = Bernoulli(p)
   >>>
   >>> z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
   >>> z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
   >>> x = Bernoulli(logits=tf.matmul(z1, z2))
   >>>
-  >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-  >>> x = Normal(mu=mu, sigma=tf.constant(1.0))
+  >>> mu = Normal(tf.constant(0.0), tf.constant(1.0))
+  >>> x = Normal(mu, tf.constant(1.0))
   """
   def __init__(self, *args, **kwargs):
     """
@@ -104,8 +104,8 @@ class RandomVariable(object):
     if value is not None:
       t_value = tf.convert_to_tensor(value, self.dtype)
       value_shape = t_value.shape
-      expected_shape = self.get_sample_shape().concatenate(
-          self.get_batch_shape()).concatenate(self.get_event_shape())
+      expected_shape = self._sample_shape.concatenate(
+          self.batch_shape).concatenate(self.event_shape)
       if not value_shape.is_compatible_with(expected_shape):
         raise ValueError(
             "Incompatible shape for initialization argument 'value'. "
@@ -121,17 +121,31 @@ class RandomVariable(object):
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
+    with tf.name_scope(self.name) as ns:
+      self._unique_name = ns
+
     for collection in collections:
       tf.add_to_collection(collection, self)
+
+  @property
+  def sample_shape(self):
+    """Sample shape of random variable."""
+    return self._sample_shape
 
   @property
   def shape(self):
     """Shape of random variable."""
     return self._value.shape
 
+  @property
+  def unique_name(self):
+    """Name of random variable with its unique scoping name. Use
+    ``name`` to just get the name of the random variable."""
+    return self._unique_name
+
   def __str__(self):
     return "RandomVariable(\"%s\"%s%s%s)" % (
-        self.name,
+        self.unique_name,
         (", shape=%s" % self.shape)
         if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
@@ -139,7 +153,7 @@ class RandomVariable(object):
 
   def __repr__(self):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
-        self.name, self.shape, self.dtype.name)
+        self.unique_name, self.shape, self.dtype.name)
 
   def __add__(self, other):
     return tf.add(self, other)
@@ -329,10 +343,6 @@ class RandomVariable(object):
     """Get shape of random variable."""
     return self.shape
 
-  def get_sample_shape(self):
-    """Sample shape of random variable."""
-    return self._sample_shape
-
   @staticmethod
   def _session_run_conversion_fetch_function(tensor):
     return ([tensor.value()], lambda val: val[0])
@@ -347,13 +357,11 @@ class RandomVariable(object):
 
   @staticmethod
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
-    _ = name
+    _ = name, as_ref
     if dtype and not dtype.is_compatible_with(v.dtype):
       raise ValueError(
           "Incompatible type conversion requested to type '%s' for variable "
           "of type '%s'" % (dtype.name, v.dtype.name))
-    if as_ref:
-      raise ValueError("%s: Ref type is not supported." % v)
     return v.value()
 
 

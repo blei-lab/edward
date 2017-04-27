@@ -15,10 +15,10 @@ class test_inference_scale_class(tf.test.TestCase):
     with self.test_session():
       N = 10
       M = 5
-      mu = Normal(mu=0.0, sigma=1.0)
-      x = Normal(mu=tf.ones(M) * mu, sigma=tf.ones(M))
+      mu = Normal(loc=0.0, scale=1.0)
+      x = Normal(loc=tf.ones(M) * mu, scale=tf.ones(M))
 
-      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+      qmu = Normal(loc=tf.Variable(0.0), scale=tf.constant(1.0))
 
       x_ph = tf.placeholder(tf.float32, [M])
       data = {x: x_ph}
@@ -30,10 +30,10 @@ class test_inference_scale_class(tf.test.TestCase):
     with self.test_session():
       N = 10
       M = 5
-      mu = Normal(mu=0.0, sigma=1.0)
-      x = Normal(mu=tf.ones(M) * mu, sigma=tf.ones(M))
+      mu = Normal(loc=0.0, scale=1.0)
+      x = Normal(loc=tf.ones(M) * mu, scale=tf.ones(M))
 
-      qmu = Normal(mu=tf.Variable(0.0), sigma=tf.constant(1.0))
+      qmu = Normal(loc=tf.Variable(0.0), scale=tf.constant(1.0))
 
       x_ph = tf.placeholder(tf.float32, [M])
       inference = ed.KLqp({mu: qmu}, data={x: x_ph})

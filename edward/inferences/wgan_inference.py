@@ -21,7 +21,7 @@ class WGANInference(GANInference):
     """
     Examples
     --------
-    >>> z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+    >>> z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
     >>> x = generative_network(z)
     >>>
     >>> inference = ed.WGANInference({x: x_data}, discriminator)

@@ -45,7 +45,7 @@ mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 x_train, _ = mnist.train.next_batch(N)
 
 # MODEL
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 logits = generative_network(z)
 x = Bernoulli(logits=logits)
 

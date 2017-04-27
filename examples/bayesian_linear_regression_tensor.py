@@ -38,15 +38,15 @@ X_data, y_data = build_toy_dataset(N)
 
 # MODEL
 X = tf.cast(X_data, tf.float32)
-w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
-y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
+w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+y = Normal(loc=ed.dot(X, w) + b, scale=tf.ones(N))
 
 # INFERENCE
-qw = Normal(mu=tf.Variable(tf.random_normal([D])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
-qb = Normal(mu=tf.Variable(tf.random_normal([1])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+qw = Normal(loc=tf.Variable(tf.random_normal([D])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qb = Normal(loc=tf.Variable(tf.random_normal([1])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 inference = ed.KLqp({w: qw, b: qb}, data={y: y_data})
 inference.run()

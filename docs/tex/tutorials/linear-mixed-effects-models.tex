@@ -136,15 +136,15 @@ sigma_d = tf.sqrt(tf.exp(tf.Variable(tf.random_normal([]))))
 sigma_dept = tf.sqrt(tf.exp(tf.Variable(tf.random_normal([]))))
 
 # Set up random effects.
-eta_s = Normal(mu=tf.zeros(n_s), sigma=sigma_s * tf.ones(n_s))
-eta_d = Normal(mu=tf.zeros(n_d), sigma=sigma_d * tf.ones(n_d))
-eta_dept = Normal(mu=tf.zeros(n_dept), sigma=sigma_dept * tf.ones(n_dept))
+eta_s = Normal(loc=tf.zeros(n_s), scale=sigma_s * tf.ones(n_s))
+eta_d = Normal(loc=tf.zeros(n_d), scale=sigma_d * tf.ones(n_d))
+eta_dept = Normal(loc=tf.zeros(n_dept), scale=sigma_dept * tf.ones(n_dept))
 
 yhat = tf.gather(eta_s, s_ph) + \
     tf.gather(eta_d, d_ph) + \
     tf.gather(eta_dept, dept_ph) + \
     mu + service * service_ph
-y = Normal(mu=yhat, sigma=tf.ones(n_obs))
+y = Normal(loc=yhat, scale=tf.ones(n_obs))
 \end{lstlisting}
 
 \subsubsection{Inference}
@@ -158,14 +158,14 @@ estimated under a variational EM scheme.
 
 \begin{lstlisting}[language=Python]
 q_eta_s = Normal(
-    mu=tf.Variable(tf.random_normal([n_s])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_s]))))
+    loc=tf.Variable(tf.random_normal([n_s])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_s]))))
 q_eta_d = Normal(
-    mu=tf.Variable(tf.random_normal([n_d])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_d]))))
+    loc=tf.Variable(tf.random_normal([n_d])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_d]))))
 q_eta_dept = Normal(
-    mu=tf.Variable(tf.random_normal([n_dept])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_dept]))))
+    loc=tf.Variable(tf.random_normal([n_dept])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_dept]))))
 
 latent_vars = {
     eta_s: q_eta_s,

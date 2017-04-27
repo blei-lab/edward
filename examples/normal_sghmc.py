@@ -11,13 +11,13 @@ import numpy as np
 import tensorflow as tf
 
 from matplotlib import pyplot as plt
-from edward.models import Empirical, MultivariateNormalFull
+from edward.models import Empirical, MultivariateNormalTriL
 
 plt.style.use("ggplot")
 
 
 def mvn_plot_contours(z, label=False, ax=None):
-  """Plot the contours of 2-d Normal or MultivariateNormalFull object.
+  """Plot the contours of 2-d Normal or MultivariateNormal object.
   Scale the axes to show 3 standard deviations.
   """
   sess = ed.get_session()
@@ -42,8 +42,9 @@ def mvn_plot_contours(z, label=False, ax=None):
 ed.set_seed(42)
 
 # MODEL
-z = MultivariateNormalFull(mu=tf.ones(2),
-                           sigma=tf.constant([[1.0, 0.8], [0.8, 1.0]]))
+z = MultivariateNormalTriL(
+    loc=tf.ones(2),
+    scale_tril=tf.cholesky(tf.constant([[1.0, 0.8], [0.8, 1.0]])))
 
 # INFERENCE
 qz = Empirical(params=tf.Variable(tf.random_normal([5000, 2])))
@@ -53,11 +54,11 @@ inference.run(step_size=0.02)
 
 # CRITICISM
 sess = ed.get_session()
-mean, std = sess.run([qz.mean(), qz.std()])
+mean, stddev = sess.run([qz.mean(), qz.stddev()])
 print("Inferred posterior mean:")
 print(mean)
-print("Inferred posterior std:")
-print(std)
+print("Inferred posterior stddev:")
+print(stddev)
 
 fig, ax = plt.subplots()
 trace = sess.run(qz.params)

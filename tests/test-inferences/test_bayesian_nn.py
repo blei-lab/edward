@@ -26,11 +26,11 @@ class test_inference_bayesian_nn_class(tf.test.TestCase):
     N = X_train.shape[0]  # number of data points
     D = X_train.shape[1]  # number of features
 
-    W_1 = Normal(mu=tf.zeros([D, 20]), sigma=tf.ones([D, 20]) * 100)
-    W_2 = Normal(mu=tf.zeros([20, 15]), sigma=tf.ones([20, 15]) * 100)
-    W_3 = Normal(mu=tf.zeros([15, 1]), sigma=tf.ones([15, 1]) * 100)
-    b_1 = Normal(mu=tf.zeros(20), sigma=tf.ones(20) * 100)
-    b_2 = Normal(mu=tf.zeros(15), sigma=tf.ones(15) * 100)
+    W_1 = Normal(loc=tf.zeros([D, 20]), scale=tf.ones([D, 20]) * 100)
+    W_2 = Normal(loc=tf.zeros([20, 15]), scale=tf.ones([20, 15]) * 100)
+    W_3 = Normal(loc=tf.zeros([15, 1]), scale=tf.ones([15, 1]) * 100)
+    b_1 = Normal(loc=tf.zeros(20), scale=tf.ones(20) * 100)
+    b_2 = Normal(loc=tf.zeros(15), scale=tf.ones(15) * 100)
 
     X = tf.placeholder(tf.float32, [N, D])
     y = Bernoulli(logits=neural_network(X, W_1, W_2, W_3, b_1, b_2))

@@ -47,12 +47,12 @@ class Inference(object):
 
     Examples
     --------
-    >>> mu = Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
-    >>> x = Normal(mu=tf.ones(50) * mu, sigma=tf.constant(1.0))
+    >>> mu = Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
+    >>> x = Normal(loc=tf.ones(50) * mu, scale=tf.constant(1.0))
     >>>
-    >>> qmu_mu = tf.Variable(tf.random_normal([]))
-    >>> qmu_sigma = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-    >>> qmu = Normal(mu=qmu_mu, sigma=qmu_sigma)
+    >>> qmu_loc = tf.Variable(tf.random_normal([]))
+    >>> qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+    >>> qmu = Normal(loc=qmu_loc, scale=qmu_scale)
     >>>
     >>> inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
     """

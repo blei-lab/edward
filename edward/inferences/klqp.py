@@ -112,8 +112,10 @@ class KLqp(VariationalInference):
     2014). We compute this automatically when :math:`p(z)` and
     :math:`q(z; \lambda)` are Normal.
     """
-    is_reparameterizable = all([rv.is_reparameterized and rv.is_continuous
-                                for rv in six.itervalues(self.latent_vars)])
+    is_reparameterizable = all([
+        rv.reparameterization_type ==
+        tf.contrib.distributions.FULLY_REPARAMETERIZED
+        for rv in six.itervalues(self.latent_vars)])
     is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
                           for z, qz in six.iteritems(self.latent_vars)])
     if is_reparameterizable:

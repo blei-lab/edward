@@ -96,12 +96,12 @@ y_data = np.array([np.random.binomial(1, i) for i in p])
 
 # MODEL
 X = tf.placeholder(tf.float32, [N, D])
-w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
 y = Bernoulli(logits=ed.dot(X, w))
 
 # INFERENCE
-qw = Normal(mu=tf.Variable(tf.random_normal([D])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qw = Normal(loc=tf.Variable(tf.random_normal([D])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
 
 inference = IWVI({w: qw}, data={X: X_data, y: y_data})
 inference.run(K=5, n_iter=1000)

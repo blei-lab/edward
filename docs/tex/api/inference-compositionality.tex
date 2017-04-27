@@ -69,15 +69,15 @@ D = 2  # data dimension
 K = 5  # number of clusters
 
 # MODEL
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+beta = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
 z1 = Categorical(logits=tf.zeros([N1, K]))
 z2 = Categorical(logits=tf.zeros([N2, K]))
-x1 = Normal(mu=tf.gather(beta, z1), sigma=tf.ones([N1, D]))
-x2 = Normal(mu=tf.gather(beta, z2), sigma=tf.ones([N2, D]))
+x1 = Normal(loc=tf.gather(beta, z1), scale=tf.ones([N1, D]))
+x2 = Normal(loc=tf.gather(beta, z2), scale=tf.ones([N2, D]))
 
 # INFERENCE
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
 qz1 = Categorical(logits=tf.Variable(tf.zeros[N1, K]))
 qz2 = Categorical(logits=tf.Variable(tf.zeros[N2, K]))
 

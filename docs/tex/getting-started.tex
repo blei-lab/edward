@@ -50,28 +50,28 @@ define the neural network manually with \texttt{tanh} nonlinearities.
 import tensorflow as tf
 from edward.models import Normal
 
-W_0 = Normal(mu=tf.zeros([1, 2]), sigma=tf.ones([1, 2]))
-W_1 = Normal(mu=tf.zeros([2, 1]), sigma=tf.ones([2, 1]))
-b_0 = Normal(mu=tf.zeros(2), sigma=tf.ones(2))
-b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+W_0 = Normal(loc=tf.zeros([1, 2]), scale=tf.ones([1, 2]))
+W_1 = Normal(loc=tf.zeros([2, 1]), scale=tf.ones([2, 1]))
+b_0 = Normal(loc=tf.zeros(2), scale=tf.ones(2))
+b_1 = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
 x = x_train
-y = Normal(mu=tf.matmul(tf.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
-           sigma=0.1)
+y = Normal(loc=tf.matmul(tf.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1,
+           scale=0.1)
 \end{lstlisting}
 
 Next, make inferences about the model from data. We will use variational
 inference. Specify a normal approximation over the weights and biases.
 
 \begin{lstlisting}[language=Python]
-qW_0 = Normal(mu=tf.Variable(tf.zeros([1, 2])),
-              sigma=tf.nn.softplus(tf.Variable(tf.zeros([1, 2]))))
-qW_1 = Normal(mu=tf.Variable(tf.zeros([2, 1])),
-              sigma=tf.nn.softplus(tf.Variable(tf.zeros([2, 1]))))
-qb_0 = Normal(mu=tf.Variable(tf.zeros(2)),
-              sigma=tf.nn.softplus(tf.Variable(tf.zeros(2))))
-qb_1 = Normal(mu=tf.Variable(tf.zeros(1)),
-              sigma=tf.nn.softplus(tf.Variable(tf.zeros(1))))
+qW_0 = Normal(loc=tf.Variable(tf.zeros([1, 2])),
+              scale=tf.nn.softplus(tf.Variable(tf.zeros([1, 2]))))
+qW_1 = Normal(loc=tf.Variable(tf.zeros([2, 1])),
+              scale=tf.nn.softplus(tf.Variable(tf.zeros([2, 1]))))
+qb_0 = Normal(loc=tf.Variable(tf.zeros(2)),
+              scale=tf.nn.softplus(tf.Variable(tf.zeros(2))))
+qb_1 = Normal(loc=tf.Variable(tf.zeros(1)),
+              scale=tf.nn.softplus(tf.Variable(tf.zeros(1))))
 \end{lstlisting}
 
 Defining \texttt{tf.Variable} allows the variational factors'

@@ -84,8 +84,8 @@ from edward.models import Normal
 from keras.layers import Dense
 
 hidden = Dense(256, activation='relu')(x_ph)
-qz = Normal(mu=Dense(10)(hidden),
-            sigma=Dense(10, activation='softplus')(hidden))
+qz = Normal(loc=Dense(10)(hidden),
+            scale=Dense(10, activation='softplus')(hidden))
 \end{lstlisting}
 The variational model is parameterized by the neural network's
 output.

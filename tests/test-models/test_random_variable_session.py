@@ -12,9 +12,9 @@ class test_random_variable_session_class(tf.test.TestCase):
 
   def test_eval(self):
     with self.test_session() as sess:
-      x = Normal(mu=0.0, sigma=0.1)
+      x = Normal(0.0, 0.1)
       x_ph = tf.placeholder(tf.float32, [])
-      y = Normal(mu=x_ph, sigma=0.1)
+      y = Normal(x_ph, 0.1)
       self.assertLess(x.eval(), 5.0)
       self.assertLess(x.eval(sess), 5.0)
       self.assertLess(x.eval(feed_dict={x_ph: 100.0}), 5.0)
@@ -25,9 +25,9 @@ class test_random_variable_session_class(tf.test.TestCase):
 
   def test_run(self):
     with self.test_session() as sess:
-      x = Normal(mu=0.0, sigma=0.1)
+      x = Normal(0.0, 0.1)
       x_ph = tf.placeholder(tf.float32, [])
-      y = Normal(mu=x_ph, sigma=0.1)
+      y = Normal(x_ph, 0.1)
       self.assertLess(sess.run(x), 5.0)
       self.assertLess(sess.run(x, feed_dict={x_ph: 100.0}), 5.0)
       self.assertGreater(sess.run(y, feed_dict={x_ph: 100.0}), 5.0)

@@ -31,8 +31,8 @@ points $\mathbf{x}\in\{0,1\}^{50}$.
 \begin{lstlisting}[language=python]
 from edward.models import Bernoulli, Beta
 
-theta = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=tf.ones(50) * theta)
+theta = Beta(1.0, 1.0)
+x = Bernoulli(tf.ones(50) * theta)
 \end{lstlisting}
 
 \includegraphics[width=450px]{/images/beta_bernoulli.png} \\
@@ -55,7 +55,7 @@ about. In TensorFlow, this is given by a \texttt{tf.Variable}.
 from edward.models import Bernoulli
 
 theta = tf.Variable(0.0)
-x = Bernoulli(p=tf.ones(50) * tf.sigmoid(theta))
+x = Bernoulli(tf.ones(50) * tf.sigmoid(theta))
 \end{lstlisting}
 
 Another use case of mutable states is for building discriminative
@@ -110,7 +110,7 @@ With TensorFlow Slim, we write this model as follows:
 from edward.models import Bernoulli, Normal
 from tensorflow.contrib import slim
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 h = slim.fully_connected(z, 256)
 x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))
 \end{lstlisting}
@@ -121,7 +121,7 @@ With Keras, we write this model as follows:
 from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 h = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(h))
 \end{lstlisting}
@@ -155,7 +155,7 @@ def kernel(X):
   return
 
 X = tf.placeholder(tf.float32, [N, D])
-y = MultivariateNormalFull(mu=tf.zeros(N), sigma=kernel(X))
+y = MultivariateNormalTriL(loc=tf.zeros(N), scale_tril=kernel(X))
 \end{lstlisting}
 
 For more details, see the

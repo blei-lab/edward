@@ -13,41 +13,41 @@ class test_conjugacy_class(tf.test.TestCase):
 
   def test_basic_bernoulli(self):
     N = 10
-    z = rvs.Bernoulli(p=0.75, sample_shape=N)
+    z = rvs.Bernoulli(probs=0.75, sample_shape=N)
     z_cond = ed.complete_conditional(z, [z])
     self.assertIsInstance(z_cond, rvs.Bernoulli)
 
     with self.test_session() as sess:
-      p_val = sess.run(z_cond.p)
+      p_val = sess.run(z_cond.probs)
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
   def test_incomplete_blanket(self):
     N = 10
-    z = rvs.Bernoulli(p=0.75, sample_shape=N)
+    z = rvs.Bernoulli(probs=0.75, sample_shape=N)
     z_cond = ed.complete_conditional(z, [])
     self.assertIsInstance(z_cond, rvs.Bernoulli)
 
     with self.test_session() as sess:
-      p_val = sess.run(z_cond.p)
+      p_val = sess.run(z_cond.probs)
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
   def test_missing_blanket(self):
     N = 10
-    z = rvs.Bernoulli(p=0.75, sample_shape=N)
+    z = rvs.Bernoulli(probs=0.75, sample_shape=N)
     z_cond = ed.complete_conditional(z)
     self.assertIsInstance(z_cond, rvs.Bernoulli)
 
     with self.test_session() as sess:
-      p_val = sess.run(z_cond.p)
+      p_val = sess.run(z_cond.probs)
 
     self.assertAllClose(p_val, 0.75 + np.zeros(N, np.float32))
 
   def test_blanket_changes(self):
     pi = rvs.Dirichlet(tf.ones(3))
     mu = rvs.Normal(0.0, 1.0)
-    z = rvs.Categorical(p=pi)
+    z = rvs.Categorical(probs=pi)
 
     pi1_cond = ed.complete_conditional(pi, [z, pi])
     pi2_cond = ed.complete_conditional(pi, [z, mu, pi])
@@ -56,24 +56,26 @@ class test_conjugacy_class(tf.test.TestCase):
     self.assertIsInstance(pi2_cond, rvs.Dirichlet)
 
     with self.test_session() as sess:
-      alpha1_val, alpha2_val = sess.run([pi1_cond.alpha, pi2_cond.alpha])
+      conc1_val, conc2_val = sess.run([pi1_cond.concentration,
+                                       pi2_cond.concentration])
 
-    self.assertAllClose(alpha1_val, alpha2_val)
+    self.assertAllClose(conc1_val, conc2_val)
 
   def test_beta_bernoulli(self):
     x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
     a0 = 0.5
     b0 = 1.5
-    pi = rvs.Beta(a=a0, b=b0)
-    x = rvs.Bernoulli(p=pi, sample_shape=10)
+    pi = rvs.Beta(a0, b0)
+    x = rvs.Bernoulli(probs=pi, sample_shape=10)
 
     pi_cond = ed.complete_conditional(pi, [pi, x])
 
     self.assertIsInstance(pi_cond, rvs.Beta)
 
     with self.test_session() as sess:
-      a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
+      a_val, b_val = sess.run([pi_cond.concentration1,
+                               pi_cond.concentration0], {x: x_data})
 
     self.assertAllClose(a_val, a0 + x_data.sum())
     self.assertAllClose(b_val, b0 + (1 - x_data).sum())
@@ -84,16 +86,17 @@ class test_conjugacy_class(tf.test.TestCase):
 
     a0 = 0.5
     b0 = 1.5
-    pi = rvs.Beta(a=a0, b=b0)
+    pi = rvs.Beta(a0, b0)
     # use value since cannot sample
-    x = rvs.Binomial(n=n_data, p=pi, value=0.0)
+    x = rvs.Binomial(total_count=n_data, probs=pi, value=0.0)
 
     pi_cond = ed.complete_conditional(pi, [pi, x])
 
     self.assertIsInstance(pi_cond, rvs.Beta)
 
     with self.test_session() as sess:
-      a_val, b_val = sess.run([pi_cond.a, pi_cond.b], {x: x_data})
+      a_val, b_val = sess.run([pi_cond.concentration1,
+                               pi_cond.concentration0], {x: x_data})
 
     self.assertAllClose(a_val, a0 + x_data)
     self.assertAllClose(b_val, b0 + n_data - x_data)
@@ -103,8 +106,8 @@ class test_conjugacy_class(tf.test.TestCase):
 
     alpha0 = 0.5
     beta0 = 1.75
-    lam = rvs.Gamma(alpha=alpha0, beta=beta0)
-    x = rvs.Exponential(lam=lam, sample_shape=4)
+    lam = rvs.Gamma(alpha0, beta0)
+    x = rvs.Exponential(lam, sample_shape=4)
 
     lam_cond = ed.complete_conditional(lam, [lam, x])
 
@@ -112,7 +115,7 @@ class test_conjugacy_class(tf.test.TestCase):
 
     with self.test_session() as sess:
       alpha_val, beta_val = sess.run(
-          [lam_cond.alpha, lam_cond.beta], {x: x_data})
+          [lam_cond.concentration, lam_cond.rate], {x: x_data})
 
     self.assertAllClose(alpha_val, alpha0 + len(x_data))
     self.assertAllClose(beta_val, beta0 + x_data.sum())
@@ -122,9 +125,9 @@ class test_conjugacy_class(tf.test.TestCase):
 
     alpha0 = 0.5
     beta0 = 1.75
-    lam = rvs.Gamma(alpha=alpha0, beta=beta0)
+    lam = rvs.Gamma(alpha0, beta0)
     # use value since cannot sample
-    x = rvs.Poisson(lam=lam, value=tf.zeros(10), sample_shape=10)
+    x = rvs.Poisson(lam, value=tf.zeros(10), sample_shape=10)
 
     lam_cond = ed.complete_conditional(lam, [lam, x])
 
@@ -132,7 +135,7 @@ class test_conjugacy_class(tf.test.TestCase):
 
     with self.test_session() as sess:
       alpha_val, beta_val = sess.run(
-          [lam_cond.alpha, lam_cond.beta], {x: x_data})
+          [lam_cond.concentration, lam_cond.rate], {x: x_data})
 
     self.assertAllClose(alpha_val, alpha0 + x_data.sum())
     self.assertAllClose(beta_val, beta0 + len(x_data))
@@ -143,17 +146,16 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha0 = 0.5
     beta0 = 1.75
     alpha_likelihood = 2.3
-    beta = rvs.Gamma(alpha=alpha0, beta=beta0)
-    x = rvs.Gamma(alpha=alpha_likelihood, beta=beta,
-                  sample_shape=4)
+    beta = rvs.Gamma(alpha0, beta0)
+    x = rvs.Gamma(alpha_likelihood, beta, sample_shape=4)
 
     beta_cond = ed.complete_conditional(beta, [beta, x])
 
     self.assertIsInstance(beta_cond, rvs.Gamma)
 
     with self.test_session() as sess:
-      alpha_val, beta_val = sess.run([beta_cond.alpha, beta_cond.beta],
-                                     {x: x_data})
+      alpha_val, beta_val = sess.run(
+          [beta_cond.concentration, beta_cond.rate], {x: x_data})
     self.assertAllClose(alpha_val, alpha0 + alpha_likelihood * len(x_data))
     self.assertAllClose(beta_val, beta0 + x_data.sum())
 
@@ -163,16 +165,15 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha0 = 0.5
     beta0 = 1.75
     alpha_likelihood = 2.3
-    beta = rvs.Gamma(alpha=alpha0, beta=beta0)
-    x = rvs.Gamma(alpha=alpha_likelihood, beta=alpha_likelihood * beta,
-                  sample_shape=4)
+    beta = rvs.Gamma(alpha0, beta0)
+    x = rvs.Gamma(alpha_likelihood, alpha_likelihood * beta, sample_shape=4)
 
     beta_cond = ed.complete_conditional(beta, [beta, x])
 
     self.assertIsInstance(beta_cond, rvs.Gamma)
 
     with self.test_session() as sess:
-      alpha_val, beta_val = sess.run([beta_cond.alpha, beta_cond.beta],
+      alpha_val, beta_val = sess.run([beta_cond.concentration, beta_cond.rate],
                                      {x: x_data})
     self.assertAllClose(alpha_val, alpha0 + alpha_likelihood * len(x_data))
     self.assertAllClose(beta_val, beta0 + alpha_likelihood * x_data.sum())
@@ -191,7 +192,7 @@ class test_conjugacy_class(tf.test.TestCase):
     self.assertIsInstance(mu_cond, rvs.Normal)
 
     with self.test_session() as sess:
-      mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
+      mu_val, sigma_val = sess.run([mu_cond.loc, mu_cond.scale], {x: x_data})
 
     self.assertAllClose(sigma_val, (1.0 / sigma0**2 +
                                     len(x_data) / sigma_likelihood**2) ** -0.5)
@@ -215,7 +216,7 @@ class test_conjugacy_class(tf.test.TestCase):
     self.assertIsInstance(mu_cond, rvs.Normal)
 
     with self.test_session() as sess:
-      mu_val, sigma_val = sess.run([mu_cond.mu, mu_cond.sigma], {x: x_data})
+      mu_val, sigma_val = sess.run([mu_cond.loc, mu_cond.scale], {x: x_data})
 
     self.assertAllClose(sigma_val,
                         (1.0 / sigma0**2 +
@@ -233,12 +234,12 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha = np.zeros(D).astype(np.float32) + 2.0
 
     theta = rvs.Dirichlet(alpha)
-    x = rvs.Categorical(p=theta, sample_shape=N)
+    x = rvs.Categorical(probs=theta, sample_shape=N)
 
     theta_cond = ed.complete_conditional(theta, [theta, x])
 
     with self.test_session() as sess:
-      alpha_val = sess.run(theta_cond.alpha, {x: x_data})
+      alpha_val = sess.run(theta_cond.concentration, {x: x_data})
 
     self.assertAllClose(alpha_val, np.array([6.0, 5.0, 4.0, 3.0], np.float32))
 
@@ -250,12 +251,12 @@ class test_conjugacy_class(tf.test.TestCase):
     alpha = np.zeros(D).astype(np.float32) + 2.0
 
     theta = rvs.Dirichlet(alpha)
-    x = rvs.Multinomial(n=tf.cast(N, tf.float32), p=theta)
+    x = rvs.Multinomial(total_count=tf.cast(N, tf.float32), probs=theta)
 
     theta_cond = ed.complete_conditional(theta, [theta, x])
 
     with self.test_session() as sess:
-      alpha_val = sess.run(theta_cond.alpha, {x: x_data})
+      alpha_val = sess.run(theta_cond.concentration, {x: x_data})
 
     self.assertAllClose(alpha_val, np.array([6.0, 5.0, 4.0, 3.0], np.float32))
 
@@ -275,7 +276,7 @@ class test_conjugacy_class(tf.test.TestCase):
     pi = rvs.Dirichlet(pi_alpha)
     mu = rvs.Normal(0.0, mu_sigma, sample_shape=[K])
 
-    x = rvs.ParamMixture(pi, {'mu': mu, 'sigma': tf.sqrt(sigmasq)},
+    x = rvs.ParamMixture(pi, {'loc': mu, 'scale': tf.sqrt(sigmasq)},
                          rvs.Normal, sample_shape=N)
     z = x.cat
 
@@ -285,7 +286,8 @@ class test_conjugacy_class(tf.test.TestCase):
 
     with self.test_session() as sess:
       pi_cond_alpha, mu_cond_mu, mu_cond_sigma, z_cond_p = (
-          sess.run([pi_cond.alpha, mu_cond.mu, mu_cond.sigma, z_cond.p],
+          sess.run([pi_cond.concentration, mu_cond.loc,
+                    mu_cond.scale, z_cond.probs],
                    {z: z_val, x: x_val, pi: pi_val, mu: mu_val}))
 
     true_pi = pi_alpha + np.unique(z_val, return_counts=True)[1]

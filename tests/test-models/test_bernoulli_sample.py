@@ -11,9 +11,9 @@ from tensorflow.contrib import distributions as ds
 
 class test_bernoulli_sample_class(tf.test.TestCase):
 
-  def _test(self, p, n):
-    rv = Bernoulli(p=p)
-    dist = ds.Bernoulli(p=p)
+  def _test(self, probs, n):
+    rv = Bernoulli(probs)
+    dist = ds.Bernoulli(probs)
     self.assertEqual(rv.sample(n).shape, dist.sample(n).shape)
 
   def test_0d(self):

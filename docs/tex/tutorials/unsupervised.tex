@@ -124,11 +124,11 @@ from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
 K = 2  # number of components
 
 pi = Dirichlet(tf.ones(K))
-mu = Normal(mu=tf.zeros(D), sigma=tf.ones(D), sample_shape=K)
-sigma = InverseGamma(alpha=tf.ones(D), beta=tf.ones(D), sample_shape=K)
-cat = Categorical(p=pi, sample_shape=N)
+mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
+sigma = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+cat = Categorical(probs=pi, sample_shape=N)
 components = [
-    MultivariateNormalDiag(mu=mu[k], diag_stdev=sigma[k], sample_shape=N)
+    MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
     for k in range(K)]
 x = Mixture(cat=cat, components=components)
 \end{lstlisting}
@@ -192,8 +192,8 @@ We perform this averaged over 100 posterior samples.
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 mu_sample = qmu.sample(100)
 sigma_sample = qsigma.sample(100)
-x_post = Normal(mu=tf.ones([N, 1, 1, 1]) * mu_sample,
-                sigma=tf.ones([N, 1, 1, 1]) * sigma_sample)
+x_post = Normal(loc=tf.ones([N, 1, 1, 1]) * mu_sample,
+                scale=tf.ones([N, 1, 1, 1]) * sigma_sample)
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, 100, K, 1])
 
 # Sum over latent dimension, then average over posterior samples.

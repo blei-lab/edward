@@ -70,7 +70,7 @@ x_ph = tf.placeholder(tf.float32, [M, 784])
 
 # MODEL
 with tf.variable_scope("Gen"):
-  eps = Uniform(a=tf.zeros([M, d]) - 1.0, b=tf.ones([M, d]))
+  eps = Uniform(low=tf.zeros([M, d]) - 1.0, high=tf.ones([M, d]))
   x = generative_network(eps)
 
 # INFERENCE

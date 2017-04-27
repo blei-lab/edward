@@ -40,21 +40,21 @@ I_test = 1 - I_train
 
 # MODEL
 I = tf.placeholder(tf.float32, [N, M])
-U = Normal(mu=tf.zeros([D, N]), sigma=tf.ones([D, N]))
-V = Normal(mu=tf.zeros([D, M]), sigma=tf.ones([D, M]))
-R = Normal(mu=tf.matmul(tf.transpose(U), V) * I, sigma=tf.ones([N, M]))
+U = Normal(loc=tf.zeros([D, N]), scale=tf.ones([D, N]))
+V = Normal(loc=tf.zeros([D, M]), scale=tf.ones([D, M]))
+R = Normal(loc=tf.matmul(tf.transpose(U), V) * I, scale=tf.ones([N, M]))
 
 # INFERENCE
-qU = Normal(mu=tf.Variable(tf.random_normal([D, N])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, N]))))
-qV = Normal(mu=tf.Variable(tf.random_normal([D, M])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, M]))))
+qU = Normal(loc=tf.Variable(tf.random_normal([D, N])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, N]))))
+qV = Normal(loc=tf.Variable(tf.random_normal([D, M])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, M]))))
 
 inference = ed.KLqp({U: qU, V: qV}, data={R: R_true, I: I_train})
 inference.run()
 
 # CRITICISM
-qR = Normal(mu=tf.matmul(tf.transpose(qU), qV), sigma=tf.ones([N, M]))
+qR = Normal(loc=tf.matmul(tf.transpose(qU), qV), scale=tf.ones([N, M]))
 
 print("Mean squared error on test data:")
 print(ed.evaluate('mean_squared_error', data={qR: R_true, I: I_test}))

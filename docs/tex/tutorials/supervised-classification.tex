@@ -97,11 +97,11 @@ quadratic. It returns the kernel matrix evaluated over all pairs of
 data points; we then Cholesky decompose the matrix to parameterize the
 multivariate normal distribution.
 \begin{lstlisting}[language=Python]
-from edward.models import Bernoulli, MultivariateNormalCholesky
+from edward.models import Bernoulli, MultivariateNormalTriL
 from edward.util import rbf
 
 X = tf.placeholder(tf.float32, [N, D])
-f = MultivariateNormalCholesky(mu=tf.zeros(N), chol=tf.cholesky(rbf(X)))
+f = MultivariateNormalTriL(loc=tf.zeros(N), scale_tril=tf.cholesky(rbf(X)))
 y = Bernoulli(logits=f)
 \end{lstlisting}
 Here, we define a placeholder \texttt{X}. During inference, we pass in
@@ -112,8 +112,8 @@ the value for this placeholder according to data.
 Perform variational inference.
 Define the variational model to be a fully factorized normal.
 \begin{lstlisting}[language=Python]
-qf = Normal(mu=tf.Variable(tf.random_normal([N])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
+qf = Normal(loc=tf.Variable(tf.random_normal([N])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
 \end{lstlisting}
 
 Run variational inference for \texttt{500} iterations.
