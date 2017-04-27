@@ -60,7 +60,7 @@ class GANInference(VariationalInference):
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
-    """Initialize variational inference.
+    """Initialize GAN inference.
 
     Parameters
     ----------

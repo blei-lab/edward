@@ -50,7 +50,7 @@ n_obs = train.shape[0]  # number of observations
 
 With linear regression, one makes an independence assumption where
 each data point regresses with a constant slope among each other. In
-our setting, the observations come from sets of groups which may have
+our setting, the observations come from groups which may have
 varying slopes and intercepts. Thus we'd like to build a model that
 can capture this behavior \citep{gelman2006data}.
 
@@ -102,10 +102,10 @@ population). We illustrate below in our example:
 \item
 Select \texttt{service} as the fixed effect. It is a binary covariate
 corresponding to whether the lecture belongs to the lecturer's main
-department or not. No matter how much additional data we collect, it
+department. No matter how much additional data we collect, it
 can only take on the values in $0$ and $1$.
 \item
-Selct the categorical values of \texttt{students}, \texttt{teachers},
+Select the categorical values of \texttt{students}, \texttt{teachers},
 and \texttt{departments} as the random effects. Given more
 observations from the population of instructor evaluation ratings, we
 may be looking at new students, teachers, or departments.
