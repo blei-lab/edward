@@ -122,6 +122,6 @@ class MAP(VariationalInference):
 
     loss = -p_log_prob
 
-    grads = tf.gradients(loss, [v._ref() for v in var_list])
+    grads = tf.gradients(loss, var_list)
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
