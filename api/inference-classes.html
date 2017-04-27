@@ -1346,12 +1346,12 @@ rate decreases.</p>
 <p>This function tries to infer the conditional distribution of <code class="docutils literal"><span class="pre">rv</span></code>
 given <code class="docutils literal"><span class="pre">cond_set</span></code>, a set of other <a href="#id11"><span class="problematic" id="id12">``</span></a>RandomVariable``s in the graph. It
 will only be able to do this if</p>
-<ol class="loweralpha simple">
-<li>p(<code class="docutils literal"><span class="pre">rv</span></code> | <code class="docutils literal"><span class="pre">cond_set</span></code>) is in a tractable exponential family AND</li>
-<li>the truth of assumption (a) is not obscured in the TensorFlow graph.</li>
+<ol class="arabic simple">
+<li>p(<code class="docutils literal"><span class="pre">rv</span></code> | <code class="docutils literal"><span class="pre">cond_set</span></code>) is in a tractable exponential family, AND</li>
+<li>the truth of assumption 1 is not obscured in the TensorFlow graph.</li>
 </ol>
 <p>In other words, this function will do its best to recognize conjugate
-relationships when they exist, but it may not always be able to do the
+relationships when they exist. But it may not always be able to do the
 necessary algebra.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -1359,12 +1359,12 @@ necessary algebra.</p>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>rv</strong> : RandomVariable</p>
 <blockquote>
-<div><p>The <code class="docutils literal"><span class="pre">RandomVariable</span></code> whose conditional distribution we are interested in.</p>
+<div><p>The random variable whose conditional distribution we are interested in.</p>
 </div></blockquote>
 <p><strong>cond_set</strong> : iterable of RandomVariable, optional</p>
 <blockquote class="last">
-<div><p>The set of <code class="docutils literal"><span class="pre">RandomVariable``s</span> <span class="pre">we</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">condition</span> <span class="pre">on.</span> <span class="pre">Default</span> <span class="pre">is</span> <span class="pre">all</span>
-<span class="pre">``RandomVariable``s</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">graph.</span> <span class="pre">(It</span> <span class="pre">makes</span> <span class="pre">no</span> <span class="pre">difference</span> <span class="pre">if</span> <span class="pre">``cond_set</span></code>
+<div><p>The set of random variables we want to condition on. Default is all
+random variables in the graph. (It makes no difference if <code class="docutils literal"><span class="pre">cond_set</span></code>
 does or does not include <code class="docutils literal"><span class="pre">rv</span></code>.)</p>
 </div></blockquote>
 </td>
