@@ -11,7 +11,7 @@ setup(
     author='Dustin Tran',
     author_email="dustin@cs.columbia.edu",
     packages=['edward', 'edward.criticisms', 'edward.inferences',
-              'edward.models', 'edward.util'],
+              'edward.models', 'edward.util', 'edward.inferences.conjugacy'],
     install_requires=['numpy>=1.7',
                       'six>=1.10.0'],
     extras_require={'tensorflow': ['tensorflow>=1.1.0rc0'],

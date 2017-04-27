@@ -191,9 +191,9 @@ We perform this averaged over 100 posterior samples.
 # Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 mu_sample = qmu.sample(100)
-sigma_sample = qsigma.sample(100)
+sigmasq_sample = qsigmasq.sample(100)
 x_post = Normal(loc=tf.ones([N, 1, 1, 1]) * mu_sample,
-                scale=tf.ones([N, 1, 1, 1]) * sigma_sample)
+                scale=tf.ones([N, 1, 1, 1]) * tf.sqrt(sigmasq_sample))
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, 100, K, 1])
 
 # Sum over latent dimension, then average over posterior samples.
