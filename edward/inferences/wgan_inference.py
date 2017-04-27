@@ -57,12 +57,12 @@ class WGANInference(GANInference):
 
     super(WGANInference, self).initialize(*args, **kwargs)
 
-    self.clip_d = None
+    self.clip_op = None
     if clip is not None:
-      var_list_d = tf.get_collection(
+      var_list = tf.get_collection(
           tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-      self.clip_d = [w.assign(tf.clip_by_value(w, -clip, clip))
-                     for w in var_list_d]
+      self.clip_op = [w.assign(tf.clip_by_value(w, -clip, clip))
+                      for w in var_list]
 
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
@@ -108,7 +108,7 @@ class WGANInference(GANInference):
     info_dict = super(WGANInference, self).update(feed_dict, variables)
 
     sess = get_session()
-    if self.clip_d is not None and (variables is None or variables == "Disc"):
-      sess.run(self.clip_d)
+    if self.clip_op is not None and variables in (None, "Disc"):
+      sess.run(self.clip_op)
 
     return info_dict
