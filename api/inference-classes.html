@@ -457,7 +457,7 @@ inference = ed.GANInference({x: x_data}, discriminator)
 <dl class="method">
 <dt id="edward.inferences.GANInference.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>optimizer_d=None</em>, <em>global_step=None</em>, <em>global_step_d=None</em>, <em>var_list=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialize variational inference.</p>
+<dd><p>Initialize GAN inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -1341,13 +1341,15 @@ rate decreases.</p>
 <span class="target" id="module-edward.inferences.conjugacy"></span><dl class="function">
 <dt id="edward.inferences.conjugacy.complete_conditional">
 <code class="descclassname">edward.inferences.conjugacy.</code><code class="descname">complete_conditional</code><span class="sig-paren">(</span><em>rv</em>, <em>cond_set=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/conjugacy/conjugacy.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Returns the conditional distribution <cite>RandomVariable</cite> p(<cite>rv</cite> | .).</p>
-<p>This function tries to infer the conditional distribution of <cite>rv</cite>
-given <cite>cond_set</cite>, a set of other <cite>RandomVariable`s in the graph. It
-will only be able to do this if
-a) p(`rv</cite> | <cite>cond_set</cite>) is in a tractable exponential family AND
-b) the truth of assumption (a) is not obscured in the TensorFlow graph.
-In other words, this function will do its best to recognize conjugate
+<dd><p>Returns the conditional distribution <code class="docutils literal"><span class="pre">RandomVariable</span></code> p(<code class="docutils literal"><span class="pre">rv</span></code> | .).</p>
+<p>This function tries to infer the conditional distribution of <code class="docutils literal"><span class="pre">rv</span></code>
+given <code class="docutils literal"><span class="pre">cond_set</span></code>, a set of other <a href="#id11"><span class="problematic" id="id12">``</span></a>RandomVariable``s in the graph. It
+will only be able to do this if</p>
+<ol class="loweralpha simple">
+<li>p(<code class="docutils literal"><span class="pre">rv</span></code> | <code class="docutils literal"><span class="pre">cond_set</span></code>) is in a tractable exponential family AND</li>
+<li>the truth of assumption (a) is not obscured in the TensorFlow graph.</li>
+</ol>
+<p>In other words, this function will do its best to recognize conjugate
 relationships when they exist, but it may not always be able to do the
 necessary algebra.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1356,23 +1358,23 @@ necessary algebra.</p>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>rv</strong> : RandomVariable</p>
 <blockquote>
-<div><p>The <cite>RandomVariable</cite> whose conditional distribution we are interested in.</p>
+<div><p>The <code class="docutils literal"><span class="pre">RandomVariable</span></code> whose conditional distribution we are interested in.</p>
 </div></blockquote>
 <p><strong>cond_set</strong> : iterable of RandomVariables, optional</p>
 <blockquote class="last">
-<div><p>The set of <cite>RandomVariable`s we want to condition on. Defaults to all
-`RandomVariable`s in the graph. (It makes no difference if `cond_set</cite> does
-or does not include <cite>rv</cite>.)</p>
+<div><p>The set of <code class="docutils literal"><span class="pre">RandomVariable``s</span> <span class="pre">we</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">condition</span> <span class="pre">on.</span> <span class="pre">Defaults</span> <span class="pre">to</span> <span class="pre">all</span>
+<span class="pre">``RandomVariable``s</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">graph.</span> <span class="pre">(It</span> <span class="pre">makes</span> <span class="pre">no</span> <span class="pre">difference</span> <span class="pre">if</span> <span class="pre">``cond_set</span></code>
+does or does not include <code class="docutils literal"><span class="pre">rv</span></code>.)</p>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>When calling <cite>complete_conditional()</cite> multiple times, one should
-usually pass an explicit <cite>cond_set</cite>. Otherwise
-<cite>complete_conditional()</cite> will try to condition on the
-<a href="#id11"><span class="problematic" id="id12">`</span></a>RandomVariable`s returned by previous calls to itself, which may
+<p>When calling <code class="docutils literal"><span class="pre">complete_conditional()</span></code> multiple times, one should
+usually pass an explicit <code class="docutils literal"><span class="pre">cond_set</span></code>. Otherwise
+<code class="docutils literal"><span class="pre">complete_conditional()</span></code> will try to condition on the
+<a href="#id13"><span class="problematic" id="id14">``</span></a>RandomVariable``s returned by previous calls to itself, which may
 result in unpredictable behavior.</p>
 </dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
