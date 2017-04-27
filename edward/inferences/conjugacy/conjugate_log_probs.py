@@ -122,7 +122,7 @@ def multinomial_log_prob(self, val):
 @_val_wrapper
 def mvn_diag_log_prob(self, val):
   loc = self.parameters['loc']
-  scale_diag = self.parameters['scale'].diag
+  scale_diag = self.parameters['scale_diag']
   prec = tf.reciprocal(tf.square(scale_diag))
   result = prec * (-0.5 * tf.square(val) - 0.5 * tf.square(loc) +
                    val * loc)
