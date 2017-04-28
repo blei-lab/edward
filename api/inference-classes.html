@@ -1347,7 +1347,8 @@ rate decreases.</p>
 given <code class="docutils literal"><span class="pre">cond_set</span></code>, a set of other <a href="#id11"><span class="problematic" id="id12">``</span></a>RandomVariable``s in the graph. It
 will only be able to do this if</p>
 <ol class="arabic simple">
-<li>p(<code class="docutils literal"><span class="pre">rv</span></code> | <code class="docutils literal"><span class="pre">cond_set</span></code>) is in a tractable exponential family, AND</li>
+<li><span class="math">\(p(\text{rv} | \text{cond_set})\)</span> is in a tractable
+exponential family, AND</li>
 <li>the truth of assumption 1 is not obscured in the TensorFlow graph.</li>
 </ol>
 <p>In other words, this function will do its best to recognize conjugate
