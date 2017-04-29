@@ -85,7 +85,7 @@ class WGANInference(GANInference):
 
       gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
       slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients),
-                       list(range(1, gradients.shape.ndims))))
+                                     list(range(1, gradients.shape.ndims))))
       penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
 
     mean_true = tf.reduce_mean(d_true)
