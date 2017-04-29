@@ -4,10 +4,10 @@
 
 \subsubsection{Models}
 
-Most Edward random variables are wrappers around TensorFlow distributions.
-Therefore the list of available models depends on the TensorFlow version
-installed. For TensorFlow {{tensorflow_version}}, the following models are
-available:
+Most Edward random variables are light wrappers around distributions
+in TensorFlow. Therefore the list of available random variables
+depends on the TensorFlow version installed. For TensorFlow
+{{tensorflow_version}}, the following are available:
 
 {%sphinx
 
@@ -20,6 +20,10 @@ available:
 %}
 
 \subsubsection{Inference}
+
+Inference is mostly comprised of classes. They are organized in a
+class hierarchy, where methods are shared via parent classes and
+\texttt{Inference} is the top-most base class.
 
 {%sphinx
 
@@ -60,6 +64,10 @@ available:
 %}
 
 \subsubsection{Criticism}
+
+Criticism is comprised of functions. They either operate on random
+variables in the model or NumPy arrays representing values drawn
+from the random variables.
 
 {%sphinx
 

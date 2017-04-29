@@ -142,7 +142,7 @@ n_d = 1128  # number of instructors
 n_dept = 14  # number of departments
 n_obs = train.shape[0]  # number of observations</code></pre>
 <h3 id="model">Model</h3>
-<p>With linear regression, one makes an independence assumption where each data point regresses with a constant slope among each other. In our setting, the observations come from sets of groups which may have varying slopes and intercepts. Thus we’d like to build a model that can capture this behavior <span class="citation">(Gelman &amp; Hill, 2006)</span>.</p>
+<p>With linear regression, one makes an independence assumption where each data point regresses with a constant slope among each other. In our setting, the observations come from groups which may have varying slopes and intercepts. Thus we’d like to build a model that can capture this behavior <span class="citation">(Gelman &amp; Hill, 2006)</span>.</p>
 <p>For examples of this phenomena:</p>
 <ul>
 <li>The observations from a single student are not independent of each other. Rather, some students may systematically give low (or high) lecture ratings.</li>
@@ -156,8 +156,8 @@ n_obs = train.shape[0]  # number of observations</code></pre>
 <p>Because the random effects have mean 0, the data’s mean is captured by <span class="math inline">\(\mathbf{X}\beta\)</span>. The random effects component <span class="math inline">\(\mathbf{Z}\eta\)</span> captures variations in the data (e.g. Instructor #54 is rated 1.4 points higher than the mean).</p>
 <p>A natural question is the difference between fixed and random effects. A fixed effect is an effect that is constant for a given population. A random effect is an effect that varies for a given population (i.e., it may be constant within subpopulations but varies within the overall population). We illustrate below in our example:</p>
 <ul>
-<li>Select <code>service</code> as the fixed effect. It is a binary covariate corresponding to whether the lecture belongs to the lecturer’s main department or not. No matter how much additional data we collect, it can only take on the values in <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>.</li>
-<li>Selct the categorical values of <code>students</code>, <code>teachers</code>, and <code>departments</code> as the random effects. Given more observations from the population of instructor evaluation ratings, we may be looking at new students, teachers, or departments.</li>
+<li>Select <code>service</code> as the fixed effect. It is a binary covariate corresponding to whether the lecture belongs to the lecturer’s main department. No matter how much additional data we collect, it can only take on the values in <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>.</li>
+<li>Select the categorical values of <code>students</code>, <code>teachers</code>, and <code>departments</code> as the random effects. Given more observations from the population of instructor evaluation ratings, we may be looking at new students, teachers, or departments.</li>
 </ul>
 <p>In the syntax of R’s lme4 package <span class="citation">(Bates et al., 2015)</span>, the model can be summarized as</p>
 <pre language="JSON"><code>y ~ 1 + (1|students) + (1|instructor) + (1|dept) + service</code></pre>
