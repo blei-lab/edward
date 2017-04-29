@@ -73,7 +73,7 @@ class WGANInference(GANInference):
     with tf.variable_scope("Disc", reuse=True):
       d_fake = self.discriminator(x_fake)
 
-    if self.penalty is None:
+    if self.penalty is None or self.penalty == 0:
       penalty = 0.0
     else:
       eps = Uniform().sample(x_true.shape[0])
