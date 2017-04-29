@@ -49,7 +49,8 @@ class test_wgan_class(tf.test.TestCase):
 
         inference.update(feed_dict={x_ph: x_data}, variables="Gen")
 
-      self.assertAllClose(theta.eval(), 4.0, rtol=1.0, atol=1.0)
+      # CRITICISM
+      self.assertAllClose(theta.eval(), 4.0, atol=1.0)
 
   def test_normal_penalty(self):
     with self.test_session() as sess:
@@ -77,7 +78,7 @@ class test_wgan_class(tf.test.TestCase):
         inference.update(feed_dict={x_ph: x_data}, variables="Gen")
 
       # CRITICISM
-      self.assertAllClose(theta.eval(), 4.0, rtol=1.0, atol=1.0)
+      self.assertAllClose(theta.eval(), 4.0, atol=1.0)
 
 if __name__ == '__main__':
   ed.set_seed(12451)
