@@ -156,27 +156,22 @@ class GANInference(VariationalInference):
     """
     if feed_dict is None:
       feed_dict = {}
+    if variables not in (None, "Gen", "Disc"):
+      raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value
 
     sess = get_session()
-    if variables is None:
-      _, _, t, loss, loss_d = sess.run(
-          [self.train, self.train_d, self.increment_t, self.loss, self.loss_d],
-          feed_dict)
-    elif variables == "Gen":
-      _, t, loss = sess.run(
-          [self.train, self.increment_t, self.loss], feed_dict)
-      loss_d = 0.0
-    elif variables == "Disc":
-      _, t, loss_d = sess.run(
-          [self.train_d, self.increment_t, self.loss_d], feed_dict)
-      loss = 0.0
-    else:
-      raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
+    loss_d = 0.0
+    loss = 0.0
+    if variables in (None, "Disc"):
+      _, loss_d = sess.run([self.train_d, self.loss_d], feed_dict)
+    if variables in (None, "Gen"):
+      _, loss = sess.run([self.train, self.loss], feed_dict)
 
+    t = sess.run(self.increment_t)
     if self.debug:
       sess.run(self.op_check)
 
