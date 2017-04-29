@@ -81,7 +81,7 @@ inference = ed.WGANInference(
     data={x: x_ph}, discriminator=discriminative_network)
 inference.initialize(
     optimizer=optimizer, optimizer_d=optimizer_d,
-    n_iter=15000, n_print=1000)
+    n_iter=15000, n_print=1000, clip=0.01, penalty=None)
 
 sess = ed.get_session()
 tf.global_variables_initializer().run()
