@@ -88,7 +88,7 @@ def complete_conditional(rv, cond_set=None):
   When calling ``complete_conditional()`` multiple times, one should
   usually pass an explicit ``cond_set``. Otherwise
   ``complete_conditional()`` will try to condition on the
-  ``RandomVariable``s returned by previous calls to itself, which may
+  ``RandomVariable``s returned by previous calls to itself. This may
   result in unpredictable behavior.
   """
   if cond_set is None:
