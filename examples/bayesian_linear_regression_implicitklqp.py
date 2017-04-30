@@ -74,7 +74,6 @@ D = 2  # number of features
 # DATA
 w_true = np.ones(D) * 5.0
 X_train, y_train = build_toy_dataset(N, w_true)
-X_test, y_test = build_toy_dataset(N, w_true)
 
 # MODEL
 X = tf.placeholder(tf.float32, [M, D])
