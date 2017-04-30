@@ -32,7 +32,7 @@ class ImplicitKLqp(GANInference):
   random variables (``rv``) satisfies ``rv.is_reparameterized`` and
   ``rv.is_continuous``.
   """
-  def __init__(self, latent_vars, data=None, discriminator=None,
+  def __init__(self, latent_vars=None, data=None, discriminator=None,
                global_vars=None):
     """
     Parameters
