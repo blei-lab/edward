@@ -196,10 +196,12 @@ class ImplicitKLqp(GANInference):
       r_qsample = self.discriminator(x_qsample, qz_sample, qbeta_sample)
 
     # Form ratio loss and ratio estimator.
-    if len(self.scale) <= 1:
+    if len(self.scale) == 0:
       loss_d = tf.reduce_mean(self.ratio_loss(r_psample, r_qsample))
-      scale = list(six.itervalues(self.scale))
-      scale = scale[0] if scale else 1.0
+      scaled_ratio = tf.reduce_sum(r_qsample)
+    elif len(self.scale) == 1:
+      loss_d = tf.reduce_mean(self.ratio_loss(r_psample, r_qsample))
+      scale = list(six.itervalues(self.scale))[0]
       scaled_ratio = tf.reduce_sum(scale * r_qsample)
     else:
       loss_d = [tf.reduce_mean(self.ratio_loss(r_psample[key], r_qsample[key]))
