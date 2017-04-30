@@ -28,19 +28,12 @@ from edward.models import Normal
 from tensorflow.contrib import slim
 
 
-def build_toy_dataset(N, w, noise_std=0.1):
-  D = len(w)
-  x = np.random.randn(N, D)
-  y = np.dot(x, w) + np.random.normal(0, noise_std, size=N)
-  return x, y
-
-
 def ratio_estimator(data, local_vars, global_vars):
   # data[y] has shape (M,); global_vars[w] has shape (D,)
   # we concatenate w to each data point y, so input has shape (M, 1 + D)
   input = tf.concat([
       tf.reshape(data[y], [M, 1]),
-      tf.tile(tf.reshape(global_vars[w], [1, D]), [M, 1])], 1)
+      tf.tile(tf.reshape(global_vars[w], [1, 1]), [M, 1])], 1)
   # this is equivalent to previous. it has the error, meaning it is
   # not slim. the initializations are the same, as iter 0 is same
   # hidden = slim.fully_connected(input, 64, activation_fn=None,
@@ -49,7 +42,7 @@ def ratio_estimator(data, local_vars, global_vars):
   # output = slim.fully_connected(hidden, 1, activation_fn=None,
   #     weights_initializer=tf.random_normal_initializer(),
   #     biases_initializer=None)
-  w1 = tf.get_variable("w1", shape=[3, 64],
+  w1 = tf.get_variable("w1", shape=[2, 64],
       initializer=tf.random_normal_initializer())
   w2 = tf.get_variable("w2", shape=[64, 1],
       initializer=tf.random_normal_initializer())
@@ -60,23 +53,23 @@ def ratio_estimator(data, local_vars, global_vars):
 
 ed.set_seed(42)
 
-M = 50  # batch size during training
-D = 2  # number of features
+M = 50  # size of data
 
 # DATA
-w_true = np.ones(D) * 5.0
-X_batch, y_batch = build_toy_dataset(M, w_true)
+w_true = 5.0
+X_data = np.random.randn(M)
+y_data = X_data * w_true + np.random.normal(0, 0.1, size=M)
 
 # MODEL
-X = X_batch.astype(np.float32)
-w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
-y = Normal(loc=ed.dot(X, w), scale=tf.ones(M))
+X = tf.cast(X_data, tf.float32)
+w = Normal(loc=0.0, scale=1.0)
+y = Normal(loc=X * w, scale=tf.ones(M))
 
 # INFERENCE
-qw = Normal(loc=tf.Variable([1.0, 1.0]), scale=[1.0, 1.0])
+qw = Normal(loc=tf.Variable(1.0), scale=1.0)
 
 inference = ed.ImplicitKLqp(
-    {w: qw}, data={y: y_batch},
+    {w: qw}, data={y: y_data},
     discriminator=ratio_estimator, global_vars={w: qw})
 inference.initialize(n_iter=50, n_print=10)
 
