@@ -39,6 +39,7 @@ available:
 
   * :class:`edward.inferences.GANInference`
 
+    * :class:`edward.inferences.BiGANInference`
     * :class:`edward.inferences.ImplicitKLqp`
     * :class:`edward.inferences.WGANInference`
 
@@ -48,10 +49,13 @@ available:
 
 * :class:`edward.inferences.MonteCarlo`
 
+  * :class:`edward.inferences.Gibbs`
   * :class:`edward.inferences.MetropolisHastings`
   * :class:`edward.inferences.HMC`
   * :class:`edward.inferences.SGLD`
   * :class:`edward.inferences.SGHMC`
+
+* :func:`edward.complete_conditional`
 
 %}
 
@@ -59,7 +63,9 @@ available:
 
 {%sphinx
 
-* :func:`edward.criticisms.evaluate`
-* :func:`edward.criticisms.ppc`
+* :func:`edward.evaluate`
+* :func:`edward.ppc`
+* :func:`edward.ppc_density_plot`
+* :func:`edward.ppc_stat_hist_plot`
 
 %}

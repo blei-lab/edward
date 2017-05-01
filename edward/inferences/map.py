@@ -79,7 +79,7 @@ class MAP(VariationalInference):
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
         latent_vars = {rv: PointMass(
-            params=tf.Variable(tf.random_normal(rv.get_batch_shape())))
+            params=tf.Variable(tf.random_normal(rv.batch_shape)))
             for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
@@ -122,6 +122,6 @@ class MAP(VariationalInference):
 
     loss = -p_log_prob
 
-    grads = tf.gradients(loss, [v._ref() for v in var_list])
+    grads = tf.gradients(loss, var_list)
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars

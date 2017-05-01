@@ -36,8 +36,8 @@ $\lambda=\{\pi,\mu,\sigma\}$.
 \begin{lstlisting}[language=Python]
 from edward.models import Categorical, Normal
 
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.exp(tf.Variable(tf.zeros[K, D])))
+qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.exp(tf.Variable(tf.zeros[K, D])))
 qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
@@ -158,6 +158,9 @@ details.
 .. autoclass:: edward.inferences.GANInference
    :members:
 
+.. autoclass:: edward.inferences.BiGANInference
+   :members:
+
 .. autoclass:: edward.inferences.WGANInference
    :members:
 
@@ -179,6 +182,9 @@ details.
 .. autoclass:: edward.inferences.MetropolisHastings
    :members:
 
+.. autoclass:: edward.inferences.Gibbs
+   :members:
+
 .. autoclass:: edward.inferences.HMC
    :members:
 
@@ -187,6 +193,9 @@ details.
 
 .. autoclass:: edward.inferences.SGHMC
    :members:
+
+.. automodule:: edward.inferences.conjugacy
+   :members: complete_conditional
 
 %}
 

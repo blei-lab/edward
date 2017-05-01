@@ -112,8 +112,10 @@ class KLqp(VariationalInference):
     2014). We compute this automatically when :math:`p(z)` and
     :math:`q(z; \lambda)` are Normal.
     """
-    is_reparameterizable = all([rv.is_reparameterized and rv.is_continuous
-                                for rv in six.itervalues(self.latent_vars)])
+    is_reparameterizable = all([
+        rv.reparameterization_type ==
+        tf.contrib.distributions.FULLY_REPARAMETERIZED
+        for rv in six.itervalues(self.latent_vars)])
     is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
                           for z, qz in six.iteritems(self.latent_vars)])
     if is_reparameterizable:
@@ -396,7 +398,7 @@ def build_reparam_loss_and_gradients(inference, var_list):
 
   loss = -tf.reduce_mean(p_log_prob - q_log_prob)
 
-  grads = tf.gradients(loss, [v._ref() for v in var_list])
+  grads = tf.gradients(loss, var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -455,7 +457,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
 
   loss = -(tf.reduce_mean(p_log_lik) - kl)
 
-  grads = tf.gradients(loss, [v._ref() for v in var_list])
+  grads = tf.gradients(loss, var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -518,7 +520,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
 
-  grads = tf.gradients(loss, [v._ref() for v in var_list])
+  grads = tf.gradients(loss, var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -577,7 +579,7 @@ def build_score_loss_and_gradients(inference, var_list):
 
   grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
-      [v._ref() for v in var_list])
+      var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -636,7 +638,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   loss = -(tf.reduce_mean(p_log_lik) - kl)
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
-      [v._ref() for v in var_list])
+      var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
 
@@ -700,6 +702,6 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),
-      [v._ref() for v in var_list])
+      var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars

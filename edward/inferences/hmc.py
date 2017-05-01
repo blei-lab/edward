@@ -40,8 +40,8 @@ class HMC(MonteCarlo):
     """
     Examples
     --------
-    >>> z = Normal(mu=0.0, sigma=1.0)
-    >>> x = Normal(mu=tf.ones(10) * z, sigma=1.0)
+    >>> z = Normal(loc=0.0, scale=1.0)
+    >>> x = Normal(loc=tf.ones(10) * z, scale=1.0)
     >>>
     >>> qz = Empirical(tf.Variable(tf.zeros(500)))
     >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
@@ -80,8 +80,8 @@ class HMC(MonteCarlo):
     # Sample momentum.
     old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars):
-      event_shape = qz.get_event_shape()
-      normal = Normal(mu=tf.zeros(event_shape), sigma=tf.ones(event_shape))
+      event_shape = qz.event_shape
+      normal = Normal(loc=tf.zeros(event_shape), scale=tf.ones(event_shape))
       old_r_sample[z] = normal.sample()
 
     # Simulate Hamiltonian dynamics.

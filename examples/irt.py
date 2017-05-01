@@ -19,7 +19,7 @@ from scipy.special import expit
 
 
 def build_toy_dataset(n_students, n_questions, n_obs,
-                      sigma_students=1.0, sigma_questions=1.5, mu=0.0):
+                      sigma_students=1.0, sigma_questions=1.5, loc=0.0):
   student_etas = np.random.normal(0.0, sigma_students,
                                   size=n_students)
   question_etas = np.random.normal(0.0, sigma_questions,
@@ -52,18 +52,18 @@ student_ids = data['student_id'].values.astype(int)
 question_ids = data['question_id'].values.astype(int)
 
 # MODEL
-lnvar_students = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
-lnvar_questions = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+lnvar_students = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+lnvar_questions = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
 sigma_students = tf.sqrt(tf.exp(lnvar_students))
 sigma_questions = tf.sqrt(tf.exp(lnvar_questions))
 
-overall_mu = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+overall_mu = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
-student_etas = Normal(mu=tf.zeros(n_students),
-                      sigma=sigma_students * tf.ones(n_students))
-question_etas = Normal(mu=tf.zeros(n_questions),
-                       sigma=sigma_questions * tf.ones(n_questions))
+student_etas = Normal(loc=tf.zeros(n_students),
+                      scale=sigma_students * tf.ones(n_students))
+question_etas = Normal(loc=tf.zeros(n_questions),
+                       scale=sigma_questions * tf.ones(n_questions))
 
 observation_logodds = tf.gather(student_etas, student_ids) + \
     tf.gather(question_etas, question_ids) + \
@@ -73,20 +73,20 @@ outcomes = Bernoulli(logits=observation_logodds)
 
 # INFERENCE
 qstudents = Normal(
-    mu=tf.Variable(tf.random_normal([n_students])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_students]))))
+    loc=tf.Variable(tf.random_normal([n_students])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_students]))))
 qquestions = Normal(
-    mu=tf.Variable(tf.random_normal([n_questions])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([n_questions]))))
+    loc=tf.Variable(tf.random_normal([n_questions])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_questions]))))
 qlnvarstudents = Normal(
-    mu=tf.Variable(tf.random_normal([1])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+    loc=tf.Variable(tf.random_normal([1])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 qlnvarquestions = Normal(
-    mu=tf.Variable(tf.random_normal([1])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+    loc=tf.Variable(tf.random_normal([1])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 qmu = Normal(
-    mu=tf.Variable(tf.random_normal([1])),
-    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+    loc=tf.Variable(tf.random_normal([1])),
+    scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 
 latent_vars = {
     overall_mu: qmu,

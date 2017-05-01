@@ -7,6 +7,12 @@ matrix:
         - python: 3.4
 notifications:
     email: false
+before_install:
+  # To avoid matplotlib error about X11:
+  # 'no display name and no $DISPLAY environment variable'
+  # source: http://docs.travis-ci.com/user/gui-and-headless-browsers/#Starting-a-Web-Server
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
 install:
   # source: http://conda.pydata.org/docs/travis.html
   # We do this conditionally because it saves us some downloading if the
@@ -30,10 +36,11 @@ install:
   - pip install python-coveralls pytest-cov
   - pip install numpydoc
   - pip install keras
+  - pip install matplotlib seaborn
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.0.0rc0-cp27-none-linux_x86_64.whl;
+      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.1.0rc0-cp27-none-linux_x86_64.whl;
     elif [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then
-      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.0.0rc0-cp34-cp34m-linux_x86_64.whl;
+      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.1.0rc0-cp34-cp34m-linux_x86_64.whl;
     fi
   - python setup.py install
 script:

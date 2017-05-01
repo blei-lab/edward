@@ -91,7 +91,7 @@ p(\mathbf{x}_{\text{train}}; \theta)
 from edward.models import Normal
 
 theta = tf.Variable(0.0)
-x = Normal(mu=tf.ones(10) * theta, sigma=1.0)
+x = Normal(loc=tf.ones(10) * theta, scale=1.0)
 
 inference = ed.Inference({}, {x: x_train})
 \end{lstlisting}

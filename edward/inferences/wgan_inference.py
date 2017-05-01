@@ -8,6 +8,11 @@ import tensorflow as tf
 from edward.inferences.gan_inference import GANInference
 from edward.util import get_session
 
+try:
+  from edward.models import Uniform
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
+
 
 class WGANInference(GANInference):
   """Parameter estimation with GAN-style training (Goodfellow et al.,
@@ -21,7 +26,7 @@ class WGANInference(GANInference):
     """
     Examples
     --------
-    >>> z = Normal(mu=tf.zeros([100, 10]), sigma=tf.ones([100, 10]))
+    >>> z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
     >>> x = generative_network(z)
     >>>
     >>> inference = ed.WGANInference({x: x_data}, discriminator)
@@ -36,13 +41,28 @@ class WGANInference(GANInference):
     """
     super(WGANInference, self).__init__(*args, **kwargs)
 
-  def initialize(self, *args, **kwargs):
+  def initialize(self, penalty=10.0, clip=None, *args, **kwargs):
+    """Initialize Wasserstein GAN inference.
+
+    Parameters
+    ----------
+    penalty : float, optional
+      Scalar value to enforce gradient penalty that ensures the
+      gradients have norm equal to 1 (Gulrajani et al., 2017). Set to
+      None (or 0.0) if using no penalty.
+    clip : float, optional
+      Value to clip weights by. Default is no clipping.
+    """
+    self.penalty = penalty
+
     super(WGANInference, self).initialize(*args, **kwargs)
 
-    var_list_d = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-    clip_d = [w.assign(tf.clip_by_value(w, -0.01, 0.01)) for w in var_list_d]
-    self.clip_d = clip_d
+    self.clip_op = None
+    if clip is not None:
+      var_list = tf.get_collection(
+          tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
+      self.clip_op = [w.assign(tf.clip_by_value(w, -clip, clip))
+                      for w in var_list]
 
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
@@ -53,9 +73,24 @@ class WGANInference(GANInference):
     with tf.variable_scope("Disc", reuse=True):
       d_fake = self.discriminator(x_fake)
 
+    if self.penalty is None or self.penalty == 0:
+      penalty = 0.0
+    else:
+      eps = Uniform().sample(x_true.shape[0])
+      while eps.shape.ndims < x_true.shape.ndims:
+        eps = tf.expand_dims(eps, -1)
+      x_interpolated = eps * x_true + (1.0 - eps) * x_fake
+      with tf.variable_scope("Disc", reuse=True):
+        d_interpolated = self.discriminator(x_interpolated)
+
+      gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
+      slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients),
+                                     list(range(1, gradients.shape.ndims))))
+      penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
+
     mean_true = tf.reduce_mean(d_true)
     mean_fake = tf.reduce_mean(d_fake)
-    loss_d = -mean_true + mean_fake
+    loss_d = mean_fake - mean_true + penalty
     loss = -mean_fake
 
     var_list_d = tf.get_collection(
@@ -73,7 +108,7 @@ class WGANInference(GANInference):
     info_dict = super(WGANInference, self).update(feed_dict, variables)
 
     sess = get_session()
-    if variables is None or variables == "Disc":
-      sess.run(self.clip_d)
+    if self.clip_op is not None and variables in (None, "Disc"):
+      sess.run(self.clip_op)
 
     return info_dict

@@ -79,12 +79,12 @@ X_test, y_test = build_toy_dataset(N, w_true)
 # MODEL
 X = tf.placeholder(tf.float32, [M, D])
 y_ph = tf.placeholder(tf.float32, [M])
-w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-y = Normal(mu=ed.dot(X, w), sigma=tf.ones(M))
+w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+y = Normal(loc=ed.dot(X, w), scale=tf.ones(M))
 
 # INFERENCE
-qw = Normal(mu=tf.Variable(tf.random_normal([D]) + 1.0),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qw = Normal(loc=tf.Variable(tf.random_normal([D]) + 1.0),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
 
 inference = ed.ImplicitKLqp(
     {w: qw}, data={y: y_ph},
@@ -110,7 +110,7 @@ for _ in range(inference.n_iter):
   inference.print_progress(info_dict)
   if t == 1 or t % inference.n_print == 0:
     # Check inferred posterior parameters.
-    mean, std = sess.run([qw.mean(), qw.std()])
+    mean, std = sess.run([qw.mean(), qw.stddev()])
     print("\nInferred mean & std:")
     print(mean)
     print(std)

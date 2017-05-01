@@ -16,11 +16,11 @@ from edward.models import Normal
 ed.set_seed(42)
 
 # MODEL
-z = Normal(mu=1.0, sigma=1.0)
+z = Normal(loc=1.0, scale=1.0)
 
 # INFERENCE
-qz = Normal(mu=tf.Variable(tf.random_normal([])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
+qz = Normal(loc=tf.Variable(tf.random_normal([])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
 
 inference = ed.KLqp({z: qz})
 inference.initialize(n_iter=250)

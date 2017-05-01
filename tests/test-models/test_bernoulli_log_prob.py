@@ -10,9 +10,9 @@ from tensorflow.contrib import distributions as ds
 
 class test_bernoulli_log_prob_class(tf.test.TestCase):
 
-  def _test(self, p, n):
-    rv = Bernoulli(p=p)
-    dist = ds.Bernoulli(p=p)
+  def _test(self, probs, n):
+    rv = Bernoulli(probs)
+    dist = ds.Bernoulli(probs)
     x = rv.sample(n).eval()
     self.assertAllEqual(rv.log_prob(x).eval(), dist.log_prob(x).eval())
 

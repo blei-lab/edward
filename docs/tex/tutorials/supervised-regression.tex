@@ -65,9 +65,9 @@ Let's build the model in Edward, fixing $\sigma_w,\sigma_b,\sigma_y=1$.
 from edward.models import Normal
 
 X = tf.placeholder(tf.float32, [N, D])
-w = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
-b = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
-y = Normal(mu=ed.dot(X, w) + b, sigma=tf.ones(N))
+w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+y = Normal(loc=ed.dot(X, w) + b, scale=tf.ones(N))
 \end{lstlisting}
 Here, we define a placeholder \texttt{X}. During inference, we pass in
 the value for this placeholder according to data.
@@ -78,10 +78,10 @@ We now turn to inferring the posterior using variational inference.
 Define the variational model to be a fully factorized normal across
 the weights.
 \begin{lstlisting}[language=Python]
-qw = Normal(mu=tf.Variable(tf.random_normal([D])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
-qb = Normal(mu=tf.Variable(tf.random_normal([1])),
-            sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+qw = Normal(loc=tf.Variable(tf.random_normal([D])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qb = Normal(loc=tf.Variable(tf.random_normal([1])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 \end{lstlisting}
 
 Run variational inference with the Kullback-Leibler divergence, using
@@ -103,7 +103,7 @@ distribution.
 \begin{lstlisting}[language=Python]
 y_post = ed.copy(y, {w: qw, b: qb})
 # This is equivalent to
-# y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones(N))
+# y_post = Normal(loc=ed.dot(X, qw) + qb, scale=tf.ones(N))
 \end{lstlisting}
 
 With this we can evaluate various quantities using predictions from
@@ -132,10 +132,10 @@ dimension).
 
 \begin{lstlisting}[language=Python]
 def visualise(X_data, y_data, w, b, n_samples=10):
-  w_samples = w.sample(n_samples).eval()
+  w_samples = w.sample(n_samples)[0].eval()
   b_samples = b.sample(n_samples).eval()
-  plt.scatter(X_data, y_data)
-  inputs = np.linspace(-1, 10, num=400)
+  plt.scatter(X_data[:, 0], y_data)
+  inputs = np.linspace(-8, 8, num=400)
   for ns in range(n_samples):
     output = inputs * w_samples[ns] + b_samples[ns]
     plt.plot(inputs, output)

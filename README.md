@@ -30,7 +30,7 @@ It supports __inference__ with
 + Monte Carlo
   + Hamiltonian Monte Carlo
   + Stochastic gradient Langevin dynamics
-  + Metropolis-Hastings
+  + Gibbs sampling
 + Compositions of inference
   + Expectation-Maximization
   + Pseudo-marginal and ABC methods
@@ -53,3 +53,5 @@ visualization with TensorBoard.
 + [Edward Gitter channel](http://gitter.im/blei-lab/edward)
 + [Edward releases](https://github.com/blei-lab/edward/releases)
 + [Edward papers, posters, and slides](https://github.com/edwardlib/papers)
+
+See [Getting Started](http://edwardlib.org/getting-started) for how to install Edward.

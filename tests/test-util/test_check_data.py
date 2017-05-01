@@ -13,8 +13,8 @@ class test_check_data_class(tf.test.TestCase):
 
   def test(self):
     with self.test_session():
-      x = Normal(mu=0.0, sigma=1.0)
-      qx = Normal(mu=0.0, sigma=1.0)
+      x = Normal(0.0, 1.0)
+      qx = Normal(0.0, 1.0)
       x_ph = tf.placeholder(tf.float32, [])
 
       check_data({x: tf.constant(0.0)})
@@ -36,8 +36,8 @@ class test_check_data_class(tf.test.TestCase):
       self.assertRaises(TypeError, check_data,
                         {x_ph: tf.constant(0.0)})
 
-      x_vec = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
-      qx_vec = Normal(mu=tf.constant([0.0]), sigma=tf.constant([1.0]))
+      x_vec = Normal(tf.constant([0.0]), tf.constant([1.0]))
+      qx_vec = Normal(tf.constant([0.0]), tf.constant([1.0]))
 
       check_data({x_vec: qx_vec})
       check_data({x_vec: [0.0]})

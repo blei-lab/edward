@@ -12,9 +12,9 @@ An interactive version with Jupyter notebook is available
 The code snippets assume the following versions.
 
 \begin{lstlisting}[language=bash]
-pip install edward==1.2.4
-pip install tensorflow==1.0.0  # alternatively, tensorflow-gpu==1.0.0
-pip install keras==1.0.0
+pip install edward==1.3.1
+pip install tensorflow==1.1.0  # alternatively, tensorflow-gpu==1.1.0
+pip install keras==2.0.0
 \end{lstlisting}
 
 \subsubsection{Section 3. Compositional Representations for Probabilistic Models}
@@ -24,8 +24,8 @@ pip install keras==1.0.0
 import tensorflow as tf
 from edward.models import Bernoulli, Beta
 
-theta = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=tf.ones(50) * theta)
+theta = Beta(1.0, 1.0)
+x = Bernoulli(tf.ones(50) * theta)
 \end{lstlisting}
 For an example of it in use, see
 \href{https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli.py}{\texttt{examples/beta_bernoulli.py}}
@@ -42,15 +42,15 @@ N = 55000  # number of data points
 d = 50  # latent dimension
 
 # Probabilistic model
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 h = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28, activation=None)(h))
 
 # Variational model
 qx = tf.placeholder(tf.float32, [N, 28 * 28])
 qh = Dense(256, activation='relu')(qx)
-qz = Normal(mu=Dense(d, activation=None)(qh),
-            sigma=Dense(d, activation='softplus')(qh))
+qz = Normal(loc=Dense(d, activation=None)(qh),
+            scale=Dense(d, activation='softplus')(qh))
 \end{lstlisting}
 For an example of it in use, see
 \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}{\texttt{examples/vae.py}}
@@ -70,15 +70,15 @@ D = 10  # number of features
 def rnn_cell(hprev, xt):
   return tf.tanh(ed.dot(hprev, Wh) + ed.dot(xt, Wx) + bh)
 
-Wh = Normal(mu=tf.zeros([H, H]), sigma=tf.ones([H, H]))
-Wx = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
-Wy = Normal(mu=tf.zeros([H, 1]), sigma=tf.ones([H, 1]))
-bh = Normal(mu=tf.zeros(H), sigma=tf.ones(H))
-by = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+Wh = Normal(loc=tf.zeros([H, H]), scale=tf.ones([H, H]))
+Wx = Normal(loc=tf.zeros([D, H]), scale=tf.ones([D, H]))
+Wy = Normal(loc=tf.zeros([H, 1]), scale=tf.ones([H, 1]))
+bh = Normal(loc=tf.zeros(H), scale=tf.ones(H))
+by = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
 x = tf.placeholder(tf.float32, [None, D])
 h = tf.scan(rnn_cell, x, initializer=tf.zeros(H))
-y = Normal(mu=tf.matmul(h, Wy) + by, sigma=1.0)
+y = Normal(loc=tf.matmul(h, Wy) + by, scale=1.0)
 \end{lstlisting}
 
 \subsubsection{Section 4. Compositional Representations for Inference}
@@ -95,9 +95,9 @@ N = 10000  # number of data points
 D = 2  # data dimension
 K = 5  # number of clusters
 
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+beta = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([N, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([N, D]))
+x = Normal(loc=tf.gather(beta, z), scale=tf.ones([N, D]))
 \end{lstlisting}
 It is used below in Figure 6 (left/right) and Figure * (variational EM).
 
@@ -112,8 +112,8 @@ from edward.models import Categorical, Normal
 
 x_train = np.zeros([N, D])
 
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.exp(tf.Variable(tf.zeros([K, D]))))
+qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.exp(tf.Variable(tf.zeros([K, D]))))
 qz = Categorical(logits=tf.Variable(tf.zeros([N, K])))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})
@@ -160,7 +160,7 @@ def discriminative_network(x):
 x_train = np.zeros([N, 28 * 28])
 
 # MODEL
-eps = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+eps = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 x = generative_network(eps)
 
 # INFERENCE
@@ -221,13 +221,13 @@ K = 5  # number of clusters
 x_batch = tf.placeholder(tf.float32, [M, D])
 
 # MODEL
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+beta = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([M, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([M, D]))
+x = Normal(loc=tf.gather(beta, z), scale=tf.ones([M, D]))
 
 # INFERENCE
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
 qz = Categorical(logits=tf.Variable(tf.zeros([M, D])))
 
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_batch})
@@ -255,7 +255,7 @@ y_data = np.zeros([N])
 
 # MODEL
 x = tf.Variable(x_data, trainable=False)
-beta = Normal(mu=tf.zeros(D), sigma=tf.ones(D))
+beta = Normal(loc=tf.zeros(D), scale=tf.ones(D))
 y = Bernoulli(logits=ed.dot(x, beta))
 
 # INFERENCE
@@ -278,10 +278,10 @@ N = 1000  # number of data points
 D = 528  # number of features
 H = 256  # hidden layer size
 
-W_0 = Normal(mu=tf.zeros([D, H]), sigma=tf.ones([D, H]))
-W_1 = Normal(mu=tf.zeros([H, 1]), sigma=tf.ones([H, 1]))
-b_0 = Normal(mu=tf.zeros(H), sigma=tf.ones(H))
-b_1 = Normal(mu=tf.zeros(1), sigma=tf.ones(1))
+W_0 = Normal(loc=tf.zeros([D, H]), scale=tf.ones([D, H]))
+W_1 = Normal(loc=tf.zeros([H, 1]), scale=tf.ones([H, 1]))
+b_0 = Normal(loc=tf.zeros(H), scale=tf.ones(H))
+b_1 = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
 x = tf.placeholder(tf.float32, [N, D])
 y = Bernoulli(logits=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1)
@@ -300,14 +300,14 @@ N = [11502, 213, 1523, 1351]  # words per doc
 K = 10  # number of topics
 V = 100000  # vocabulary size
 
-theta = Dirichlet(alpha=tf.zeros([D, K]) + 0.1)
-phi = Dirichlet(alpha=tf.zeros([K, V]) + 0.05)
+theta = Dirichlet(tf.zeros([D, K]) + 0.1)
+phi = Dirichlet(tf.zeros([K, V]) + 0.05)
 z = [[0] * N] * D
 w = [[0] * N] * D
 for d in range(D):
   for n in range(N[d]):
-    z[d][n] = Categorical(pi=theta[d, :])
-    w[d][n] = Categorical(pi=phi[z[d][n], :])
+    z[d][n] = Categorical(theta[d, :])
+    w[d][n] = Categorical(phi[z[d][n], :])
 \end{lstlisting}
 
 \textbf{Figure 12}. Gaussian matrix factorization
@@ -320,9 +320,9 @@ N = 10
 M = 10
 K = 5  # latent dimension
 
-U = Normal(mu=tf.zeros([M, K]), sigma=tf.ones([M, K]))
-V = Normal(mu=tf.zeros([N, K]), sigma=tf.ones([N, K]))
-Y = Normal(mu=tf.matmul(U, V, transpose_b=True), sigma=tf.ones([N, M]))
+U = Normal(loc=tf.zeros([M, K]), scale=tf.ones([M, K]))
+V = Normal(loc=tf.zeros([N, K]), scale=tf.ones([N, K]))
+Y = Normal(loc=tf.matmul(U, V, transpose_b=True), scale=tf.ones([N, M]))
 \end{lstlisting}
 
 \textbf{Figure 13}. Dirichlet process mixture model \citep{antoniak1974mixtures}.
@@ -333,9 +333,9 @@ from edward.models import DirichletProcess, Normal
 N = 1000  # number of data points
 D = 5  # data dimensionality
 
-dp = DirichletProcess(alpha=1.0, base=Normal(mu=tf.zeros(D), sigma=tf.ones(D)))
+dp = DirichletProcess(alpha=1.0, base=Normal(loc=tf.zeros(D), scale=tf.ones(D)))
 mu = dp.sample(N)
-x = Normal(mu=mu, sigma=tf.ones([N, D]))
+x = Normal(loc=mu, scale=tf.ones([N, D]))
 \end{lstlisting}
 To see the essential component defining the \texttt{DirichletProcess}, see
 \href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}

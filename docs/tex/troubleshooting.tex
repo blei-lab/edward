@@ -4,26 +4,12 @@
 
 \subsubsection{Basic Installation}
 
-\textbf{Note:
-TensorFlow v1.1.0rc0 made breaking API changes.
-Edward's latest stable version only supports up to TensorFlow v1.0.1.
-If you aim to use TensorFlow v1.1.0rc0 or beyond, use the
-following development branch of Edward:
-}
-
-\begin{lstlisting}[language=JSON]
-pip install -e "git+https://github.com/blei-lab/edward.git@bugfix/issue-451#egg=edward"
-\end{lstlisting}
-
-\textbf{See \href{https://github.com/blei-lab/edward/pull/452}
-{the branch} for more details.}
-
 Edward depends on
 
 \begin{itemize}
   \item NumPy (>=1.7)
   \item Six (>=1.1.0)
-  \item TensorFlow (>=1.0.0a0, <=1.0.1)
+  \item TensorFlow (>=1.1.0rc0)
 \end{itemize}
 
 Installing \texttt{edward} by default also installs \texttt{numpy} and

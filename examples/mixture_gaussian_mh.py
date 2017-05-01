@@ -46,11 +46,11 @@ ed.set_seed(42)
 x_data = build_toy_dataset(N)
 
 # MODEL
-pi = Dirichlet(alpha=tf.constant([1.0] * K))
-mu = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
-sigma = InverseGamma(alpha=tf.ones([K, D]), beta=tf.ones([K, D]))
+pi = Dirichlet(concentration=tf.constant([1.0] * K))
+mu = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
+sigma = InverseGamma(concentration=tf.ones([K, D]), rate=tf.ones([K, D]))
 c = Categorical(logits=tf.tile(tf.reshape(ed.logit(pi), [1, K]), [N, 1]))
-x = Normal(mu=mu[c], sigma=sigma[c])
+x = Normal(loc=tf.gather(mu, c), scale=tf.gather(sigma, c))
 
 # INFERENCE
 T = 5000
@@ -59,11 +59,11 @@ qmu = Empirical(params=tf.Variable(tf.zeros([T, K, D])))
 qsigma = Empirical(params=tf.Variable(tf.ones([T, K, D])))
 qc = Empirical(params=tf.Variable(tf.zeros([T, N], dtype=tf.int32)))
 
-gpi = Dirichlet(alpha=tf.constant([1.4, 1.6]))
-gmu = Normal(mu=tf.constant([[1.0, 1.0], [-1.0, -1.0]]),
-             sigma=tf.constant([[0.5, 0.5], [0.5, 0.5]]))
-gsigma = InverseGamma(alpha=tf.constant([[1.1, 1.1], [1.1, 1.1]]),
-                      beta=tf.constant([[1.0, 1.0], [1.0, 1.0]]))
+gpi = Dirichlet(concentration=tf.constant([1.4, 1.6]))
+gmu = Normal(loc=tf.constant([[1.0, 1.0], [-1.0, -1.0]]),
+             scale=tf.constant([[0.5, 0.5], [0.5, 0.5]]))
+gsigma = InverseGamma(concentration=tf.constant([[1.1, 1.1], [1.1, 1.1]]),
+                      rate=tf.constant([[1.0, 1.0], [1.0, 1.0]]))
 gc = Categorical(logits=tf.zeros([N, K]))
 
 inference = ed.MetropolisHastings(

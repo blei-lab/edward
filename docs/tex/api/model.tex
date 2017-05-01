@@ -18,25 +18,25 @@ the dimensions of its parameters.
 from edward.models import Normal, Exponential
 
 # univariate normal
-Normal(mu=tf.constant(0.0), sigma=tf.constant(1.0))
+Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
 # vector of 5 univariate normals
-Normal(mu=tf.zeros(5), sigma=tf.ones(5))
+Normal(loc=tf.zeros(5), scale=tf.ones(5))
 # 2 x 3 matrix of Exponentials
-Exponential(lam=tf.ones([2, 3]))
+Exponential(rate=tf.ones([2, 3]))
 \end{lstlisting}
 
 For multivariate distributions, the multivariate dimension is the
 innermost (right-most) dimension of the parameters.
 
 \begin{lstlisting}[language=Python]
-from edward.models import Dirichlet, MultivariateNormalFull
+from edward.models import Dirichlet, MultivariateNormalTriL
 
 # K-dimensional Dirichlet
-Dirichlet(alpha=tf.constant([0.1] * K))
-# vector of 5 K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([5, K]), sigma=tf.ones([5, K, K]))
+Dirichlet(concentration=tf.constant([0.1] * K))
+# vector of 5 K-dimensional multivariate normals with lower triangular cov
+MultivariateNormalTriL(loc=tf.zeros([5, K]), scale_tril=tf.ones([5, K, K]))
 # 2 x 5 matrix of K-dimensional multivariate normals
-MultivariateNormalFull(mu=tf.zeros([2, 5, K]), sigma=tf.ones([2, 5, K, K]))
+MultivariateNormalTriL(loc=tf.zeros([2, 5, K]), scale_tril=tf.ones([2, 5, K, K]))
 \end{lstlisting}
 
 Random variables are equipped with methods such as
@@ -60,7 +60,7 @@ They operate on $\mathbf{x}^*$.
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-x = Normal(mu=tf.zeros(10), sigma=tf.ones(10))
+x = Normal(loc=tf.zeros(10), scale=tf.ones(10))
 y = tf.constant(5.0)
 x + y, x - y, x * y, x / y
 tf.tanh(x * y)

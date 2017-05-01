@@ -53,9 +53,9 @@ M = 128  # minibatch size
 D = 2  # data dimensionality
 K = 5  # number of clusters
 
-beta = Normal(mu=tf.zeros([K, D]), sigma=tf.ones([K, D]))
+beta = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([M, K]))
-x = Normal(mu=tf.gather(beta, z), sigma=tf.ones([M, D]))
+x = Normal(loc=tf.gather(beta, z), scale=tf.ones([M, D]))
 \end{lstlisting}
 
 For inference, the variational model is
@@ -73,8 +73,8 @@ parameterized by $\{\lambda, \{\gamma_m\}\}$. Importantly, only $M$
 parameters are stored in memory for $\{\gamma_m\}$ rather than $N$.
 
 \begin{lstlisting}[language=Python]
-qbeta = Normal(mu=tf.Variable(tf.zeros([K, D])),
-               sigma=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
+qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+               scale=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
 qz_variables = tf.Variable(tf.zeros([M, K]))
 qz = Categorical(logits=qz_variables)
 \end{lstlisting}
