@@ -38,7 +38,7 @@ def neural_network(X):
 
 ed.set_seed(42)
 
-N = 40  # number of data ponts
+N = 40  # number of data points
 D = 1   # number of features
 
 # DATA
@@ -53,7 +53,7 @@ b_1 = Normal(loc=tf.zeros(10), scale=tf.ones(10))
 b_2 = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
 X = tf.placeholder(tf.float32, [N, D])
-y = Normal(loc=neural_network(x), scale=0.1 * tf.ones(N))
+y = Normal(loc=neural_network(X), scale=0.1 * tf.ones(N))
 
 # INFERENCE
 qW_0 = Normal(loc=tf.Variable(tf.random_normal([D, 10])),
