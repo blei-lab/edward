@@ -38,7 +38,7 @@ def neural_network(X):
 
 ed.set_seed(42)
 
-N = 40  # number of data ponts
+N = 40  # number of data points
 D = 1   # number of features
 
 # DATA
