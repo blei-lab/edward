@@ -129,6 +129,11 @@ class KLpq(VariationalInference):
     p_log_prob = tf.stack(p_log_prob)
     q_log_prob = tf.stack(q_log_prob)
 
+    if self.logging:
+      summary_key = 'summaries_' + str(id(self))
+      tf.summary.histogram("p_log_prob", p_log_prob, collections=[summary_key])
+      tf.summary.histogram("q_log_prob", q_log_prob, collections=[summary_key])
+
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - tf.reduce_logsumexp(log_w)
     w_norm = tf.exp(log_w_norm)

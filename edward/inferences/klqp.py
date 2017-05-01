@@ -388,6 +388,12 @@ def build_reparam_loss_and_gradients(inference, var_list):
 
   p_log_prob = tf.stack(p_log_prob)
   q_log_prob = tf.stack(q_log_prob)
+
+  if inference.logging:
+    summary_key = 'summaries_' + str(id(inference))
+    tf.summary.histogram("p_log_prob", p_log_prob, collections=[summary_key])
+    tf.summary.histogram("q_log_prob", q_log_prob, collections=[summary_key])
+
   loss = -tf.reduce_mean(p_log_prob - q_log_prob)
 
   grads = tf.gradients(loss, [v._ref() for v in var_list])
@@ -441,6 +447,11 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   kl = tf.reduce_sum([
       inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
+
+  if inference.logging:
+    summary_key = 'summaries_' + str(id(inference))
+    tf.summary.histogram('p_log_lik', p_log_lik, collections=[summary_key])
+    tf.summary.scalar('kl', kl, collections=[summary_key])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl)
 
@@ -500,6 +511,11 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   q_entropy = tf.reduce_sum([
       qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
 
+  if inference.logging:
+    summary_key = 'summaries_' + str(id(inference))
+    tf.summary.histogram('p_log_prob', p_log_prob, collections=[summary_key])
+    tf.summary.scalar('q_entropy', q_entropy, collections=[summary_key])
+
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
 
   grads = tf.gradients(loss, [v._ref() for v in var_list])
@@ -550,6 +566,11 @@ def build_score_loss_and_gradients(inference, var_list):
 
   p_log_prob = tf.stack(p_log_prob)
   q_log_prob = tf.stack(q_log_prob)
+
+  if inference.logging:
+    summary_key = 'summaries_' + str(id(inference))
+    tf.summary.histogram('p_log_prob', p_log_prob, collections=[summary_key])
+    tf.summary.scalar('q_log_prob', q_log_prob, collections=[summary_key])
 
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
@@ -605,6 +626,12 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   kl = tf.reduce_sum([
       inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
+
+  if inference.logging:
+    summary_key = 'summaries_' + str(id(inference))
+    tf.summary.histogram('p_log_lik', p_log_lik, collections=[summary_key])
+    tf.summary.histogram('q_log_prob', q_log_prob, collections=[summary_key])
+    tf.summary.scalar('kl', kl, collections=[summary_key])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl)
   grads = tf.gradients(
@@ -662,6 +689,12 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
 
   q_entropy = tf.reduce_sum([
       qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
+
+  if inference.logging:
+    summary_key = 'summaries_' + str(id(inference))
+    tf.summary.histogram('p_log_prob', p_log_prob, collections=[summary_key])
+    tf.summary.histogram('q_log_prob', q_log_prob, collections=[summary_key])
+    tf.summary.scalar('q_entropy', q_entropy, collections=[summary_key])
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
   grads = tf.gradients(
