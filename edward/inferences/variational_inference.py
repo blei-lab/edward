@@ -83,10 +83,10 @@ class VariationalInference(Inference):
                                  var.name.replace(':', '_'),
                                  var, collections=[summary_key])
             tf.summary.histogram("gradient_" +
-                                 grad.name.replace(':', '_'),
+                                 var.name.replace(':', '_'),
                                  grad, collections=[summary_key])
             tf.summary.scalar("gradient_norm_" +
-                              grad.name.replace(':', '_'),
+                              var.name.replace(':', '_'),
                               tf.norm(grad), collections=[summary_key])
       # replace : with _ because tf does not allow : in var names in summaries
 
@@ -96,10 +96,10 @@ class VariationalInference(Inference):
             tf.summary.histogram("parameter_" + var.name.replace(':', '_'),
                                  var, collections=[summary_key])
             tf.summary.histogram("gradient_" +
-                                 grad.name.replace(':', '_'),
+                                 var.name.replace(':', '_'),
                                  grad, collections=[summary_key])
             tf.summary.scalar("gradient_norm_" +
-                              grad.name.replace(':', '_'),
+                              var.name.replace(':', '_'),
                               tf.norm(grad), collections=[summary_key])
 
       # when var_list is not initialized with None
@@ -109,10 +109,10 @@ class VariationalInference(Inference):
             tf.summary.histogram("parameter_" + var.name.replace(':', '_'),
                                  var, collections=[summary_key])
             tf.summary.histogram("gradient_" +
-                                 grad.name.replace(':', '_'),
+                                 var.name.replace(':', '_'),
                                  grad, collections=[summary_key])
             tf.summary.scalar("gradient_norm_" +
-                              grad.name.replace(':', '_'),
+                              var.name.replace(':', '_'),
                               tf.norm(grad), collections=[summary_key])
 
       self.summarize = tf.summary.merge_all(key=summary_key)
