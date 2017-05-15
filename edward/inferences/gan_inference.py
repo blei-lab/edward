@@ -157,6 +157,9 @@ class GANInference(VariationalInference):
     if feed_dict is None:
       feed_dict = {}
 
+    for key, value in six.iteritems(self.init_const_bindings):
+      feed_dict[key] = value
+
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value
@@ -178,7 +181,7 @@ class GANInference(VariationalInference):
       raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
