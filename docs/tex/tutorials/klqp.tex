@@ -1,6 +1,6 @@
-\title{KL(q||p) minimization}
+\title{KL(q||p) Minimization}
 
-\subsection{$\text{KL}(q\|p)$ minimization}
+\subsection{$\text{KL}(q\|p)$ Minimization}
 
 One form of variational inference minimizes the Kullback-Leibler
 divergence \textbf{from} $q(\mathbf{z}\;;\;\lambda)$ \textbf{to}
@@ -91,10 +91,152 @@ concentrating to one location.
 
 Edward uses two generic strategies to obtain gradients for
 optimization.
+
 \begin{itemize}
-    \item \href{/tutorials/klqp-score}{Score function gradient}
-    \item \href{/tutorials/klqp-reparam}{Reparameterization gradient}
-  \end{itemize}
+  \item Score function gradient;
+  \item Reparameterization gradient.
+\end{itemize}
+
+\subsection{Score function gradient}
+
+Gradient descent is a standard approach for optimizing complicated
+objectives like the ELBO. The idea is to calculate its gradient
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=
+  \nabla_\lambda\;
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \big[
+  \log p(\mathbf{x}, \mathbf{z})
+  -
+  \log q(\mathbf{z}\;;\;\lambda)
+  \big],
+\end{align*}
+and update the current set of parameters proportional to the gradient.
+
+The score function gradient estimator leverages a property of
+logarithms to write the gradient as
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(\mathbf{z}\;;\;\lambda)}
+  \big[
+  \nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)
+  \:
+  \big(
+  \log p(\mathbf{x}, \mathbf{z})
+  -
+  \log q(\mathbf{z}\;;\;\lambda)
+  \big)
+  \big].
+\end{align*}
+The gradient of the ELBO is an expectation over the variational
+model $q(\mathbf{z}\;;\;\lambda)$; the only new ingredient it requires is the
+\emph{score function} $\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)$
+\citep{paisley2012variational,ranganath2014black}.
+
+We can use Monte Carlo integration to obtain noisy estimates of both the ELBO
+and its gradient. The basic procedure follows these steps:
+\begin{enumerate}
+  \item draw $S$ samples $\{\mathbf{z}_s\}_1^S \sim q(\mathbf{z}\;;\;\lambda)$,
+  \item evaluate the argument of the expectation using $\{\mathbf{z}_s\}_1^S$, and
+  \item compute the empirical mean of the evaluated quantities.
+\end{enumerate}
+
+A Monte Carlo estimate of the gradient is then
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &\approx\;
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \big(
+  \log p(\mathbf{x}, \mathbf{z}_s)
+  -
+  \log q(\mathbf{z}_s\;;\;\lambda)
+  \big)
+  \:
+  \nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)
+  \big].
+\end{align*}
+This is an unbiased estimate of the actual gradient of the ELBO.
+
+\subsection{Reparameterization gradient}
+
+If the model has differentiable latent variables, then it is generally
+advantageous to leverage gradient information from the model in order to
+better traverse the optimization space. One approach to doing this is
+the reparameterization gradient
+\citep{kingma2014auto,rezende2014stochastic}.
+
+Some variational distributions $q(\mathbf{z}\;;\;\lambda)$ admit useful
+reparameterizations. For example, we can reparameterize a normal distribution
+$\mathbf{z} \sim \text{Normal}(\mu, \Sigma)$ as
+$\mathbf{z} \sim \mu + L \text{Normal}(0, I)$ where $\Sigma = LL^\top$. In general, write
+this as
+\begin{align*}
+  \epsilon &\sim q(\epsilon)\\
+  \mathbf{z} &= \mathbf{z}(\epsilon \;;\; \lambda),
+\end{align*}
+where $\epsilon$ is a random variable that does \textbf{not} depend on the
+variational parameters $\lambda$. The deterministic function
+$\mathbf{z}(\cdot;\lambda)$ encapsulates the variational parameters instead,
+and following the process is equivalent to directly drawing $\mathbf{z}$ from
+the original distribution.
+
+The reparameterization gradient leverages this property of the
+variational distribution to write the gradient as
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &=\;
+  \mathbb{E}_{q(\epsilon)}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  -
+  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].
+\end{align*}
+The gradient of the ELBO is an expectation over the base
+distribution $q(\epsilon)$, and the gradient can be applied directly
+to the inner expression.
+
+We can use Monte Carlo integration to obtain noisy estimates of both the ELBO
+and its gradient. The basic procedure follows these steps:
+\begin{enumerate}
+  \item draw $S$ samples $\{\epsilon_s\}_1^S \sim q(\epsilon)$,
+  \item evaluate the argument of the expectation using $\{\epsilon_s\}_1^S$, and
+  \item compute the empirical mean of the evaluated quantities.
+\end{enumerate}
+
+A Monte Carlo estimate of the gradient is then
+\begin{align*}
+  \nabla_\lambda\;
+  \text{ELBO}(\lambda)
+  &\approx\;
+  \frac{1}{S}
+  \sum_{s=1}^{S}
+  \big[
+  \nabla_\lambda
+  \big(
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  -
+  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \big)
+  \big].
+\end{align*}
+This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it
+exhibits lower variance than the
+score function gradient, leading to
+faster convergence in a large set of problems.
+
+For more details, see the \href{/api/}{API} as well as its
+implementation in Edward's code base.
 
 \subsubsection{References}\label{references}
-

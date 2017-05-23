@@ -3,23 +3,9 @@ from __future__ import division
 from __future__ import print_function
 
 import inspect
-import tensorflow as tf
 
-from edward.models.empirical import Empirical as distributions_Empirical
-from edward.models.point_mass import PointMass as distributions_PointMass
 from edward.models.random_variable import RandomVariable
 from tensorflow.contrib import distributions
-
-
-class Empirical(RandomVariable, distributions_Empirical):
-  def __init__(self, *args, **kwargs):
-    super(Empirical, self).__init__(*args, **kwargs)
-
-
-class PointMass(RandomVariable, distributions_PointMass):
-  def __init__(self, *args, **kwargs):
-    super(PointMass, self).__init__(*args, **kwargs)
-
 
 # Automatically generate random variable classes from classes in
 # tf.contrib.distributions.
@@ -30,12 +16,23 @@ for _name in sorted(dir(distributions)):
           _candidate != distributions.Distribution and
           issubclass(_candidate, distributions.Distribution)):
 
-    class _WrapperRandomVariable(RandomVariable, _candidate):
-      def __init__(self, *args, **kwargs):
-        RandomVariable.__init__(self, *args, **kwargs)
+    params = {'__doc__': _candidate.__doc__}
+    _globals[_name] = type(_name, (RandomVariable, _candidate), params)
 
-    _WrapperRandomVariable.__name__ = _name
-    _globals[_name] = _WrapperRandomVariable
-
-    del _WrapperRandomVariable
     del _candidate
+
+# Add supports; these are used, e.g., in conjugacy.
+Bernoulli.support = 'binary'
+Beta.support = '01'
+Binomial.support = 'onehot'
+Categorical.support = 'categorical'
+Chi2.support = 'nonnegative'
+Dirichlet.support = 'simplex'
+Exponential.support = 'nonnegative'
+Gamma.support = 'nonnegative'
+InverseGamma.support = 'nonnegative'
+Laplace.support = 'real'
+Multinomial.support = 'onehot'
+MultivariateNormalDiag.support = 'multivariate_real'
+Normal.support = 'real'
+Poisson.support = 'countable'

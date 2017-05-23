@@ -6,7 +6,7 @@
 
 Data defines a set of observations. There are three ways
 to read data in Edward. They follow the
-\href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html}
+\href{https://www.tensorflow.org/programmers_guide/reading_data}
 {three ways to read data in TensorFlow}.
 
 \textbf{Preloaded data.}
@@ -23,8 +23,7 @@ x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 During inference, we store them in TensorFlow variables internally to
 prevent copying data more than once in memory. As an example, see the
-\href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}
-{getting started} script.
+\href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/getting_started.ipynb}{getting started} notebook.
 
 \textbf{Feeding.}
 Manual code provides the data when running each step of inference.
@@ -32,7 +31,7 @@ This setting provides the most fine control which is useful for
 experimentation.
 
 Represent the data as
-\href{https://www.tensorflow.org/versions/master/how_tos/reading_data/index.html#feeding}{TensorFlow placeholders},
+\href{https://www.tensorflow.org/programmers_guide/reading_data#feeding}{TensorFlow placeholders},
 which are nodes in the graph that are fed at runtime.
 
 \begin{lstlisting}[language=Python]

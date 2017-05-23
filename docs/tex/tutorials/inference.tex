@@ -1,9 +1,9 @@
-\title{Inference of probability models}
+\title{Inference of Probabilistic Models}
 
-\subsection{Inference of probability models}
+\subsection{Inference of Probabilistic Models}
 
 This tutorial asks the question: what does it mean to do inference of
-probability models? This sets the stage for understanding how to
+probabilistic models? This sets the stage for understanding how to
 design inference algorithms in Edward.
 
 \subsubsection{The posterior}
@@ -13,7 +13,7 @@ data $\mathbf{x}$? In other words, what hidden structure $\mathbf{z}$
 explains the data? We seek to infer this hidden structure using the
 model.
 
-Inference of probability models leverages Bayes' rule to define the
+One method of inference leverages Bayes' rule to define the
 \emph{posterior}
 \begin{align*}
   p(\mathbf{z} \mid \mathbf{x})
@@ -33,7 +33,6 @@ statisticians such as Box, Rubin, and Gelman, the posterior is simply
 a fitted model to data, to be criticized and thus revised
 \citep{box1982apology,gelman2013philosophy}.
 
-
 \subsubsection{Inferring the posterior}
 
 Now we know what the posterior represents. How do we calculate it? This is the
@@ -47,7 +46,7 @@ posterior.
 
 For details on how to specify inference in Edward, see the
 \href{/api/inference}{inference API}. We describe several examples in
-detail in the other inference \href{/tutorials/}{tutorials}.
+detail in the \href{/tutorials/}{tutorials}.
 
 
 \subsubsection{References}\label{references}

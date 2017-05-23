@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
@@ -11,35 +12,32 @@ from edward.models import Empirical, RandomVariable
 from edward.util import get_session
 
 
+@six.add_metaclass(abc.ABCMeta)
 class MonteCarlo(Inference):
-  """Base class for Monte Carlo inference methods.
+  """Abstract base class for Monte Carlo. Specific Monte Carlo methods
+  inherit from ``MonteCarlo``, sharing methods in this class.
+
+  To build an algorithm inheriting from ``MonteCarlo``, one must at the
+  minimum implement ``build_update``: it determines how to assign
+  the samples in the ``Empirical`` approximations.
   """
-  def __init__(self, latent_vars=None, data=None, model_wrapper=None):
+  def __init__(self, latent_vars=None, data=None):
     """Initialization.
 
     Parameters
     ----------
-    latent_vars : list of RandomVariable or
-                  dict of RandomVariable to RandomVariable
-      Collection of random variables to perform inference on. If
-      list, each random variable will be implictly approximated
-      using a ``Empirical`` random variable that is defined
-      internally (with unconstrained support). If dictionary, each
-      random variable must be a ``Empirical`` random variable.
+    latent_vars : list or dict, optional
+      Collection of random variables (of type ``RandomVariable`` or
+      ``tf.Tensor``) to perform inference on. If list, each random
+      variable will be approximated using a ``Empirical`` random
+      variable that is defined internally (with unconstrained
+      support). If dictionary, each value in the dictionary must be a
+      ``Empirical`` random variable.
     data : dict, optional
       Data dictionary which binds observed variables (of type
-      ``RandomVariable``) to their realizations (of type ``tf.Tensor``).
-      It can also bind placeholders (of type ``tf.Tensor``) used in the
-      model to their realizations.
-    model_wrapper : ed.Model, optional
-      A wrapper for the probability model. If specified, the random
-      variables in ``latent_vars``' dictionary keys are strings used
-      accordingly by the wrapper. ``data`` is also changed. For
-      TensorFlow, Python, and Stan models, the key type is a string;
-      for PyMC3, the key type is a Theano shared variable. For
-      TensorFlow, Python, and PyMC3 models, the value type is a NumPy
-      array or TensorFlow tensor; for Stan, the value type is the
-      type according to the Stan program's data block.
+      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+      type ``tf.Tensor``). It can also bind placeholders (of type
+      ``tf.Tensor``) used in the model to their realizations.
 
     Examples
     --------
@@ -48,15 +46,15 @@ class MonteCarlo(Inference):
     >>> qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
     >>> qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
     >>> qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    >>> MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+    >>> ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
 
     The inferred posterior is comprised of ``Empirical`` random
     variables with ``T`` samples. We also automate the specification
     of ``Empirical`` random variables. One can pass in a list of
     latent variables instead:
 
-    >>> MonteCarlo([beta], data)
-    >>> MonteCarlo([pi, mu, sigma], data)
+    >>> ed.MonteCarlo([beta], data)
+    >>> ed.MonteCarlo([pi, mu, sigma], data)
 
     It defaults to ``Empirical`` random variables with 10,000 samples for
     each dimension.
@@ -76,27 +74,26 @@ class MonteCarlo(Inference):
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
-        if model_wrapper is None:
-          latent_vars = {rv: Empirical(params=tf.Variable(
-              tf.zeros([1e4] + rv.get_batch_shape().as_list())))
-              for rv in latent_vars}
-        else:
-          raise NotImplementedError("A list is not supported for model "
-                                    "wrappers. See documentation.")
+        latent_vars = {rv: Empirical(params=tf.Variable(
+            tf.zeros([1e4] + rv.batch_shape.as_list())))
+            for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, Empirical):
           raise TypeError("Posterior approximation must consist of only "
                           "Empirical random variables.")
+        elif len(qz.sample_shape) != 0:
+          raise ValueError("Empirical posterior approximations must have "
+                           "a scalar sample shape.")
 
-    super(MonteCarlo, self).__init__(latent_vars, data, model_wrapper)
+    super(MonteCarlo, self).__init__(latent_vars, data)
 
   def initialize(self, *args, **kwargs):
-    kwargs['n_iter'] = np.amin([qz.n for
+    kwargs['n_iter'] = np.amin([qz.params.shape.as_list()[0] for
                                 qz in six.itervalues(self.latent_vars)])
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
-    self.n_accept = tf.Variable(0, trainable=False)
+    self.n_accept = tf.Variable(0, trainable=False, name="n_accept")
     self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 
@@ -126,7 +123,7 @@ class MonteCarlo(Inference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value
 
     sess = get_session()
@@ -149,18 +146,14 @@ class MonteCarlo(Inference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        accept_rate = info_dict['accept_rate']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Acceptance Rate = {0:.2f}'.format(accept_rate)
-        print(string)
+        self.progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
 
+  @abc.abstractmethod
   def build_update(self):
-    """Build update, which returns an assign op for parameters in
-    the Empirical random variables.
+    """Build update rules, returning an assign op for parameters in
+    the ``Empirical`` random variables.
 
-    Any derived class of ``MonteCarlo`` **must** implement
-    this method.
+    Any derived class of ``MonteCarlo`` **must** implement this method.
 
     Raises
     ------

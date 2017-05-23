@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
-from edward.models import RandomVariable, Normal
-from edward.util import copy, log_sum_exp
+from edward.models import RandomVariable
+from edward.util import copy
 
 
 class KLpq(VariationalInference):
@@ -22,7 +22,7 @@ class KLpq(VariationalInference):
 
   Notes
   -----
-  ``KLpq`` also optimizes any model parameters :math:`p(z | x;
+  ``KLpq`` also optimizes any model parameters :math:`p(z\mid x;
   \\theta)`. It does this by variational EM, minimizing
 
   .. math::
@@ -68,7 +68,7 @@ class KLpq(VariationalInference):
     """Build loss function
 
     .. math::
-      \\text{KL}( p(z \mid x) || q(z) )
+      \\text{KL}( p(z \mid x) \| q(z) )
       = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]
 
     and stochastic gradients based on importance sampling.
@@ -76,73 +76,66 @@ class KLpq(VariationalInference):
     The loss function can be estimated as
 
     .. math::
-      \\frac{1}{B} \sum_{b=1}^B [
-        w_{norm}(z^b; \lambda) (\log p(x, z^b) - \log q(z^b; \lambda) ],
+      \\frac{1}{S} \sum_{s=1}^S [
+        w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],
 
-    where for :math:`z^b \sim q(z^b; \lambda)`,
+    where for :math:`z^s \sim q(z; \lambda)`,
 
     .. math::
 
-      w_{norm}(z^b; \lambda) = w(z^b; \lambda) / \sum_{b=1}^B w(z^b; \lambda)
+      w_{\\text{norm}}(z^s; \lambda) =
+          w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)
 
-    normalizes the importance weights, :math:`w(z^b; \lambda) = p(x,
-    z^b) / q(z^b; \lambda)`.
+    normalizes the importance weights, :math:`w(z^s; \lambda) = p(x,
+    z^s) / q(z^s; \lambda)`.
 
     This provides a gradient,
 
     .. math::
-      - \\frac{1}{B} \sum_{b=1}^B [
-        w_{norm}(z^b; \lambda) \\nabla_{\lambda} \log q(z^b; \lambda) ].
+      - \\frac{1}{S} \sum_{s=1}^S [
+        w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples
     for s in range(self.n_samples):
+      # Form dictionary in order to replace conditioning on prior or
+      # observed variable with conditioning on a specific value.
       scope = 'inference_' + str(id(self)) + '/' + str(s)
-      z_sample = {}
+      dict_swap = {}
+      for x, qx in six.iteritems(self.data):
+        if isinstance(x, RandomVariable):
+          if isinstance(qx, RandomVariable):
+            qx_copy = copy(qx, scope=scope)
+            dict_swap[x] = qx_copy.value()
+          else:
+            dict_swap[x] = qx
+
       for z, qz in six.iteritems(self.latent_vars):
         # Copy q(z) to obtain new set of posterior samples.
         qz_copy = copy(qz, scope=scope)
-        z_sample[z] = qz_copy.value()
+        dict_swap[z] = qz_copy.value()
         q_log_prob[s] += tf.reduce_sum(
-            qz.log_prob(tf.stop_gradient(z_sample[z])))
+            qz_copy.log_prob(tf.stop_gradient(dict_swap[z])))
 
-      if self.model_wrapper is None:
-        # Form dictionary in order to replace conditioning on prior or
-        # observed variable with conditioning on a specific value.
-        dict_swap = z_sample
-        for x, qx in six.iteritems(self.data):
-          if isinstance(x, RandomVariable):
-            if isinstance(qx, RandomVariable):
-              qx_copy = copy(qx, scope=scope)
-              dict_swap[x] = qx_copy.value()
-            else:
-              dict_swap[x] = qx
+      for z in six.iterkeys(self.latent_vars):
+        z_copy = copy(z, dict_swap, scope=scope)
+        p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
 
-        for z in six.iterkeys(self.latent_vars):
-          z_copy = copy(z, dict_swap, scope=scope)
-          p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
+      for x in six.iterkeys(self.data):
+        if isinstance(x, RandomVariable):
+          x_copy = copy(x, dict_swap, scope=scope)
+          p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
 
-        for x in six.iterkeys(self.data):
-          if isinstance(x, RandomVariable):
-            x_copy = copy(x, dict_swap, scope=scope)
-            p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
-      else:
-        x = self.data
-        p_log_prob[s] = self.model_wrapper.log_prob(x, z_sample)
-
-    p_log_prob = tf.pack(p_log_prob)
-    q_log_prob = tf.pack(q_log_prob)
+    p_log_prob = tf.stack(p_log_prob)
+    q_log_prob = tf.stack(q_log_prob)
 
     log_w = p_log_prob - q_log_prob
-    log_w_norm = log_w - log_sum_exp(log_w)
+    log_w_norm = log_w - tf.reduce_logsumexp(log_w)
     w_norm = tf.exp(log_w_norm)
-
-    if var_list is None:
-      var_list = tf.trainable_variables()
 
     loss = tf.reduce_mean(w_norm * log_w)
     grads = tf.gradients(
         -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
-        [v.ref() for v in var_list])
+        var_list)
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars

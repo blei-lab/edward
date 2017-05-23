@@ -7,11 +7,10 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import logit, get_session
+from edward.util import check_data, get_session, logit
 
 
-def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
-             n_samples=100, output_key='y'):
+def evaluate(metrics, data, n_samples=500, output_key=None):
   """Evaluate fitted model using a set of metrics.
 
   A metric, or scoring rule (Winkler, 1994), is a function of observed
@@ -43,26 +42,13 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     ``'log_lik'`` or ``'log_likelihood'``.
   data : dict
     Data to evaluate model with. It binds observed variables (of type
-    ``RandomVariable``) to their realizations (of type ``tf.Tensor``). It
-    can also bind placeholders (of type ``tf.Tensor``) used in the model
-    to their realizations.
-  latent_vars : dict of str to RandomVariable, optional
-    Collection of random variables binded to their inferred posterior.
-    It is only used (and in fact required) if the model wrapper is
-    specified.
-  model_wrapper : ed.Model, optional
-    An optional wrapper for the probability model. It must have a
-    ``predict`` method, and ``latent_vars`` must be specified. ``data`` is
-    also changed. For TensorFlow, Python, and Stan models, the key
-    type is a string; for PyMC3, the key type is a Theano shared
-    variable. For TensorFlow, Python, and PyMC3 models, the value type
-    is a NumPy array or TensorFlow placeholder; for Stan, the value
-    type is the type according to the Stan program's data block.
+    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
+    type ``tf.Tensor``). It can also bind placeholders (of type
+    ``tf.Tensor``) used in the model to their realizations.
   n_samples : int, optional
-    Number of posterior samples for making predictions,
-    using the posterior predictive distribution. It is only used if
-    the model wrapper is specified.
-  output_key : RandomVariable or str, optional
+    Number of posterior samples for making predictions, using the
+    posterior predictive distribution.
+  output_key : RandomVariable, optional
     It is the key in ``data`` which corresponds to the model's output.
 
   Returns
@@ -78,60 +64,62 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
   Examples
   --------
   >>> # build posterior predictive after inference: it is
-  >>> # parameterized by posterior means
-  >>> x_post = copy(x, {z: qz.mean(), beta: qbeta.mean()})
+  >>> # parameterized by a posterior sample
+  >>> x_post = ed.copy(x, {z: qz, beta: qbeta})
   >>>
   >>> # log-likelihood performance
-  >>> evaluate('log_likelihood', data={x_post: x_train})
+  >>> ed.evaluate('log_likelihood', data={x_post: x_train})
   >>>
   >>> # classification accuracy
   >>> # here, ``x_ph`` is any features the model is defined with respect to,
   >>> # and ``y_post`` is the posterior predictive distribution
-  >>> evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+  >>> ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
   >>>
   >>> # mean squared error
   >>> ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
   """
   sess = get_session()
-  # Create feed_dict for data placeholders that the model conditions
-  # on; it is necessary for all session runs.
-  feed_dict = {x: obs for x, obs in six.iteritems(data)
-               if not isinstance(x, RandomVariable) and
-               not isinstance(x, str)}
-
   if isinstance(metrics, str):
     metrics = [metrics]
+  elif not isinstance(metrics, list):
+    raise TypeError("metrics must have type str or list.")
 
-  # Set default for output_key if not using a model wrapper.
-  if model_wrapper is None:
-    if output_key == 'y':
-      # Try to default to the only one observed random variable.
-      keys = [key for key in six.iterkeys(data)
-              if isinstance(key, RandomVariable)]
-      if len(keys) == 1:
-        output_key = keys[0]
-      else:
-        raise KeyError("User must specify output_key.")
+  check_data(data)
+  if not isinstance(n_samples, int):
+    raise TypeError("n_samples must have type int.")
 
-  # Form true data. (It is not required in the specific setting of the
-  # log-likelihood metric with a model wrapper.)
-  if (metrics != ['log_lik'] and metrics != ['log_likelihood']) or \
-          model_wrapper is None:
-    y_true = data[output_key]
-
-  # Form predicted data (if there are any supervised metrics).
-  if metrics != ['log_lik'] and metrics != ['log_likelihood']:
-    if model_wrapper is None:
-      y_pred = output_key.mean()
+  if output_key is None:
+    # Default output_key to the only data key that isn't a placeholder.
+    keys = [key for key in six.iterkeys(data) if not
+            isinstance(key, tf.Tensor) or "Placeholder" not in key.op.type]
+    if len(keys) == 1:
+      output_key = keys[0]
     else:
-      # Monte Carlo estimate the mean of the posterior predictive.
-      y_pred = []
-      for s in range(n_samples):
-        zrep = {key: qz.sample(())
-                for key, qz in six.iteritems(latent_vars)}
-        y_pred += [model_wrapper.predict(data, zrep)]
+      raise KeyError("User must specify output_key.")
+  elif not isinstance(output_key, RandomVariable):
+    raise TypeError("output_key must have type RandomVariable.")
 
-      y_pred = tf.reduce_mean(y_pred, 0)
+  # Create feed_dict for data placeholders that the model conditions
+  # on; it is necessary for all session runs.
+  feed_dict = {key: value for key, value in six.iteritems(data)
+               if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type}
+
+  # Form true data.
+  y_true = data[output_key]
+  # Make predictions (if there are any supervised metrics).
+  if metrics != ['log_lik'] and metrics != ['log_likelihood']:
+    # Monte Carlo estimate the mean of the posterior predictive.
+    # Note the naive solution of taking the mean of
+    # ``y_pred.sample(n_samples)`` does not work: ``y_pred`` is
+    # parameterized by one posterior sample; this implies each
+    # sample call from ``y_pred`` depends on the same posterior
+    # sample. Instead, we fetch the sample tensor from the graph
+    # many times. Alternatively, we could copy ``y_pred``
+    # ``n_samples`` many times, so that each copy depends on a
+    # different posterior sample. But it's expensive.
+    tensor = tf.convert_to_tensor(output_key)
+    y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+    y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
@@ -177,19 +165,13 @@ def evaluate(metrics, data, latent_vars=None, model_wrapper=None,
     elif metric == 'cosine' or metric == 'cosine_proximity':
       evaluations += [cosine_proximity(y_true, y_pred)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
-      if model_wrapper is None:
-        evaluations += [tf.reduce_mean(output_key.log_prob(y_true))]
-      else:
-        # Monte Carlo estimate the log-density of the posterior predictive.
-        log_liks = []
-        for s in range(n_samples):
-          zrep = {key: qz.sample(())
-                  for key, qz in six.iteritems(latent_vars)}
-          log_liks += [model_wrapper.log_lik(data, zrep)]
-
-        evaluations += [tf.reduce_mean(log_liks)]
+      # Monte Carlo estimate the log-density of the posterior predictive.
+      tensor = tf.reduce_mean(output_key.log_prob(y_true))
+      log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+      log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tf.float32)
+      evaluations += [log_pred]
     else:
-      raise NotImplementedError()
+      raise NotImplementedError("Metric is not implemented: {}".format(metric))
 
   if len(evaluations) == 1:
     return sess.run(evaluations[0], feed_dict)
@@ -206,7 +188,7 @@ def binary_accuracy(y_true, y_pred):
   Parameters
   ----------
   y_true : tf.Tensor
-    Tensor of 0s and 1s.
+    Tensor of 0s and 1s (most generally, any real values a and b).
   y_pred : tf.Tensor
     Tensor of probabilities.
   """
@@ -228,8 +210,8 @@ def categorical_accuracy(y_true, y_pred):
     The outermost dimension denote the categorical probabilities for
     that data point per row.
   """
-  y_true = tf.cast(tf.argmax(y_true, len(y_true.get_shape()) - 1), tf.float32)
-  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
+  y_true = tf.cast(tf.argmax(y_true, len(y_true.shape) - 1), tf.float32)
+  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.shape) - 1), tf.float32)
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
@@ -242,12 +224,12 @@ def sparse_categorical_accuracy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of integers {0, 1, ..., K-1}.
   y_pred : tf.Tensor
-    Tensor of probabilities, with shape ``(y_true.get_shape(), K)``.
+    Tensor of probabilities, with shape ``(y_true.shape, K)``.
     The outermost dimension are the categorical probabilities for
     that data point.
   """
   y_true = tf.cast(y_true, tf.float32)
-  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.get_shape()) - 1), tf.float32)
+  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.shape) - 1), tf.float32)
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
@@ -263,7 +245,8 @@ def binary_crossentropy(y_true, y_pred):
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = logit(tf.cast(y_pred, tf.float32))
-  return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_pred, y_true))
+  return tf.reduce_mean(
+      tf.nn.sigmoid_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
 
 def categorical_crossentropy(y_true, y_pred):
@@ -281,7 +264,8 @@ def categorical_crossentropy(y_true, y_pred):
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = logit(tf.cast(y_pred, tf.float32))
-  return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_pred, y_true))
+  return tf.reduce_mean(
+      tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
 
 def sparse_categorical_crossentropy(y_true, y_pred):
@@ -293,14 +277,14 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of integers {0, 1, ..., K-1}.
   y_pred : tf.Tensor
-    Tensor of probabilities, with shape ``(y_true.get_shape(), K)``.
+    Tensor of probabilities, with shape ``(y_true.shape, K)``.
     The outermost dimension are the categorical probabilities for
     that data point.
   """
   y_true = tf.cast(y_true, tf.int64)
   y_pred = logit(tf.cast(y_pred, tf.float32))
-  return tf.reduce_mean(
-      tf.nn.sparse_softmax_cross_entropy_with_logits(y_pred, y_true))
+  return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
+      logits=y_pred, labels=y_true))
 
 
 def hinge(y_true, y_pred):
@@ -410,6 +394,6 @@ def cosine_proximity(y_true, y_pred):
   y_pred : tf.Tensor
     Tensors of same shape and type.
   """
-  y_true = tf.nn.l2_normalize(y_true, len(y_true.get_shape()) - 1)
-  y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.get_shape()) - 1)
+  y_true = tf.nn.l2_normalize(y_true, len(y_true.shape) - 1)
+  y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.shape) - 1)
   return tf.reduce_sum(y_true * y_pred)

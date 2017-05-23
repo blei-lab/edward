@@ -1,6 +1,6 @@
-\title{Maximum a posteriori estimation}
+\title{Maximum a Posteriori Estimation}
 
-\subsection{Maximum a posteriori estimation}
+\subsection{Maximum a Posteriori Estimation}
 
 Maximum a posteriori (MAP) estimation is a form of approximate
 posterior inference. It uses the mode as a point estimate of the
@@ -57,8 +57,8 @@ prior or Laplace prior on $\mathbf{z}$ corresponds to $\ell_2$ penalization, als
 known as ridge regression, and $\ell_1$ penalization, also
 known as the LASSO.
 
-Maximum likelihood is also known as minimizing the cross entropy, where
-for a data set $\mathbf{x}=\{x_n\}$,
+Maximum likelihood is also known as cross entropy minimization. For a
+data set $\mathbf{x}=\{x_n\}$,
 \begin{align*}
   \mathbf{z}_\text{MAP}
   &=
@@ -79,51 +79,20 @@ using a set of $N$ data points.
 
 \subsubsection{Gradient descent}
 
-To find the MAP estimate of the latent variables $\mathbf{z}$, we simply
-calculate the gradient of the log joint density
+To find the MAP estimate of the latent variables $\mathbf{z}$, we use
+the gradient of the log joint density
 \begin{align*}
   \nabla_\mathbf{z}
   \log p(\mathbf{x}, \mathbf{z})
 \end{align*}
 and follow it to a (local) optima.
-Edward uses automatic differentiation, specifically with TensorFlow's
-computational graphs, making this gradient computation both simple and
-efficient to distribute.
+Edward uses TensorFlow's automatic differentiation, making this gradient
+computation both simple and efficient to distribute.
 
-\subsubsection{Implementation}
+Edward currently does not support MAP for discrete latent variables.
+This amounts to discrete optimization, which is difficult.
 
-\textbf{Note: These details are outdated since Edward v1.1.3.}
-
-In Edward, we view MAP estimation as a special case of
-\href{/tutorials/klqp}{$KL(q\|p)$ minimization}, where the variational
-distribution is a point mass (delta function) distribution. This makes
-explicit the additional assumptions underlying MAP estimation from the
-viewpoint of variational inference: namely, it approximates the
-posterior using a point to summarize the full distribution.
-
-\begin{lstlisting}[language=Python]
-class MAP(VariationalInference):
-  def __init__(self, latent_vars, data=None, model_wrapper=None):
-    ...
-    super(MAP, self).__init__(latent_vars, data, model_wrapper)
-
-  def build_loss(self):
-    x = self.data
-    z = {key: rv.sample([1]) for key, rv in six.iteritems(self.latent_vars)}
-    self.loss = tf.squeeze(self.model_wrapper.log_prob(x, z))
-    return -self.loss
-\end{lstlisting}
-
-The \texttt{MAP} class inherits from \texttt{VariationalInference} and
-initializes a point mass as the variational distribution. It requires
-defining only one method:
-\texttt{build_loss()}, which implicitly specifies the gradient of the
-log joint. TensorFlow's automatic differentiation will apply to
-\texttt{z}, thus backpropagating (applying the chain rule of
-differentiation) to compute the gradient of the objective.
-
-There is a nuance here. TensorFlow's optimizers are configured to
-\emph{minimize} an objective function. So the gradient is set to be
-the negative of the log density's gradient.
+For more details, see the \href{/api/}{API} as well as its
+implementation in Edward's code base.
 
 \subsubsection{References}\label{references}

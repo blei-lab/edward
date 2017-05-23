@@ -2,6 +2,10 @@
 """Probabilistic principal components analysis (Tipping and Bishop, 1999).
 
 Inference uses data subsampling.
+
+References
+----------
+http://edwardlib.org/tutorials/probabilistic-pca
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -46,21 +50,21 @@ x_train = build_toy_dataset(N, D, K)
 
 # MODEL
 
-w = Normal(mu=tf.zeros([D, K]), sigma=10.0 * tf.ones([D, K]))
-z = Normal(mu=tf.zeros([M, K]), sigma=tf.ones([M, K]))
-x = Normal(mu=tf.matmul(w, z, transpose_b=True), sigma=tf.ones([D, M]))
+w = Normal(loc=tf.zeros([D, K]), scale=10.0 * tf.ones([D, K]))
+z = Normal(loc=tf.zeros([M, K]), scale=tf.ones([M, K]))
+x = Normal(loc=tf.matmul(w, z, transpose_b=True), scale=tf.ones([D, M]))
 
 # INFERENCE
 
 qw_variables = [tf.Variable(tf.random_normal([D, K])),
                 tf.Variable(tf.random_normal([D, K]))]
-qw = Normal(mu=qw_variables[0], sigma=tf.nn.softplus(qw_variables[1]))
+qw = Normal(loc=qw_variables[0], scale=tf.nn.softplus(qw_variables[1]))
 
 qz_variables = [tf.Variable(tf.random_normal([N, K])),
                 tf.Variable(tf.random_normal([N, K]))]
 idx_ph = tf.placeholder(tf.int32, M)
-qz = Normal(mu=tf.gather(qz_variables[0], idx_ph),
-            sigma=tf.nn.softplus(tf.gather(qz_variables[1], idx_ph)))
+qz = Normal(loc=tf.gather(qz_variables[0], idx_ph),
+            scale=tf.nn.softplus(tf.gather(qz_variables[1], idx_ph)))
 
 x_ph = tf.placeholder(tf.float32, [D, M])
 inference_w = ed.KLqp({w: qw}, data={x: x_ph, z: qz})
@@ -74,16 +78,18 @@ inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
                        n_samples=5)
 
 sess = ed.get_session()
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 init.run()
 
-for t in range(inference_w.n_iter):
+for _ in range(inference_w.n_iter):
   x_batch, idx_batch = next_batch(M)
   for _ in range(5):
     inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
 
   info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
   inference_w.print_progress(info_dict)
-  if t % 100 == 0:
-    print("Inferred principal axes:")
+
+  t = info_dict['t']
+  if t == 1 or t % inference_w.n_print == 0:
+    print("\nInferred principal axes:")
     print(sess.run(qw.mean()))

@@ -1,0 +1,160 @@
+\title{Model Criticism}
+
+\subsection{Model Criticism}
+
+We can never validate whether a model is true. In practice, ``all
+models are wrong'' \citep{box1976science}. However, we can try to
+uncover where the model goes wrong. Model criticism helps justify the
+model as an approximation or point to good directions for revising the
+model.
+
+Model criticism typically analyzes the posterior predictive
+distribution,
+\begin{align*}
+  p(\mathbf{x}_\text{new} \mid \mathbf{x})
+  &=
+  \int
+  p(\mathbf{x}_\text{new} \mid \mathbf{z})
+  p(\mathbf{z} \mid \mathbf{x})
+  \text{d} \mathbf{z}.
+\end{align*}
+The model's posterior predictive can be used to generate new data
+given past observations and can also make predictions on new data
+given past observations.
+It is formed by calculating the likelihood of the new data, averaged
+over every set of latent variables according to the posterior
+distribution.
+
+A helpful utility function to form the posterior predictive is
+\texttt{copy}. For example, assume the model defines a likelihood
+\texttt{x} connected to a prior
+\texttt{z}. The posterior predictive distribution is
+\begin{lstlisting}[language=Python]
+x_post = ed.copy(x, {z: qz})
+\end{lstlisting}
+Here, we copy the likelihood node \texttt{x} in the graph and replace dependence
+on the prior \texttt{z} with dependence on the inferred posterior \texttt{qz}.
+We describe several techniques for model criticism.
+
+\subsubsection{Point Evaluation}
+
+A point evaluation is a scalar-valued metric for assessing
+trained models \citep{winkler1996scoring,gneiting2007strictly}.
+For example, we can assess models for classification
+by predicting the label for each observation in the data and comparing
+it to their true labels. Edward implements a variety of metrics, such
+as classification error and mean absolute error.
+
+The \texttt{ed.evaluate()} method takes as input a set of metrics to
+evaluate, and a data dictionary. As with inference, the data dictionary binds the
+observed random variables in the model to realizations: in this case,
+it is the posterior predictive random variable of outputs \texttt{y_post} to
+\texttt{y_train} and a placeholder for inputs \texttt{x} to
+\texttt{x_train}.
+\begin{lstlisting}[language=Python]
+ed.evaluate('categorical_accuracy', data={y_post: y_train, x: x_train})
+ed.evaluate('mean_absolute_error', data={y_post: y_train, x: x_train})
+\end{lstlisting}
+
+Point evaluation also applies to unsupervised tasks. For example, we
+can evaluate the likelihood of observing the data.
+\begin{lstlisting}[language=Python]
+ed.evaluate('log_likelihood', data={x_post: x_train})
+\end{lstlisting}
+
+It is common practice to criticize models with data held-out from
+training. To do this, we must first perform inference over any local
+latent variables of the held-out data, fixing the global variables; we
+demonstrate this below. Then we make predictions on the held-out data.
+
+\begin{lstlisting}[language=Python]
+from edward.models import Categorical
+
+# create local posterior factors for test data, assuming test data
+# has N_test many data points
+qz_test = Categorical(logits=tf.Variable(tf.zeros[N_test, K]))
+
+# run local inference conditional on global factors
+inference_test = ed.Inference({z: qz_test}, data={x: x_test, beta: qbeta})
+inference_test.run()
+
+# build posterior predictive on test data
+x_post = ed.copy(x, {z: qz_test, beta: qbeta}})
+ed.evaluate('log_likelihood', data={x_post: x_test})
+\end{lstlisting}
+
+Point evaluations are formally known as scoring rules
+in decision theory. Scoring rules are useful for model comparison, model
+selection, and model averaging.
+
+See the \href{/api/criticism}{criticism API} for further details.
+An example of point evaluation is in the
+\href{/tutorials/supervised-regression}{supervised learning
+(regression)} tutorial.
+
+\subsubsection{Posterior predictive checks}
+
+Posterior predictive checks (PPCs)
+analyze the degree to which data generated from the model deviate from
+data generated from the true distribution. They can be used either
+numerically to quantify this degree, or graphically to visualize this
+degree. PPCs can be thought of as a probabilistic generalization of
+point evaluation
+\citep{box1980sampling,rubin1984bayesianly,meng1994posterior,gelman1996posterior}.
+
+The simplest PPC works by applying a test statistic on new data
+generated from the posterior predictive, such as
+$T(\mathbf{x}_\text{new}) = \max(\mathbf{x}_\text{new})$.  Applying
+$T(\mathbf{x}_\text{new})$ to new data over many data replications
+induces a distribution. We compare this distribution to the test
+statistic on the real data $T(\mathbf{x})$.
+
+\includegraphics{/images/ppc.png}
+
+In the figure, $T(\mathbf{x})$ falls in a low probability region of
+this reference distribution: if the model were true, the probability
+of observing the test statistic is very low. This indicates that the
+model fits the data poorly according to this check; this suggests an
+area of improvement for the model.
+
+More generally, the test statistic can be a function of the
+model's latent variables $T(\mathbf{x}, \mathbf{z})$, known as a
+discrepancy function.  Examples of discrepancy functions are the
+metrics used for point evaluation. We can now interpret the
+point evaluation as a special case of PPCs: it simply calculates
+$T(\mathbf{x}, \mathbf{z})$ over the real data and without a reference
+distribution in mind. A reference distribution allows us to make
+probabilistic statements about the point, in reference to an overall
+distribution.
+
+The \texttt{ed.ppc()} method provides a scaffold for studying various
+discrepancy functions. It takes as input a user-defined discrepancy
+function, and a data dictionary.
+\begin{lstlisting}[language=Python]
+ed.ppc(lambda xs, zs: tf.reduce_mean(xs[x_post]), data={x_post: x_train})
+\end{lstlisting}
+The discrepancy can also take latent variables as input, which we pass
+into the PPC.
+\begin{lstlisting}[language=Python]
+ed.ppc(lambda xs, zs: tf.maximum(zs[z]),
+       data={y_post: y_train, x_ph: x_train},
+       latent_vars={z: qz, beta: qbeta})
+\end{lstlisting}
+
+See the \href{/api/criticism}{criticism API} for further details.
+
+PPCs are an excellent tool for revising models---simplifying or
+expanding the current model as one examines its fit to data.
+They are inspired by classical hypothesis testing; these methods
+criticize models under the frequentist perspective of large sample
+assessment.
+
+PPCs can also be applied to tasks such as hypothesis testing, model
+comparison, model selection, and model averaging.  It's important to
+note that while PPCs can be applied as a form of Bayesian hypothesis
+testing, hypothesis testing is generally not recommended: binary
+decision making from a single test is not as common a use case as one
+might believe. We recommend performing many PPCs to get a holistic
+understanding of the model fit.
+
+\subsubsection{References}\label{references}

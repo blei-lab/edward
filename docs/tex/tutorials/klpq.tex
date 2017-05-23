@@ -1,6 +1,6 @@
-\title{KL(p||q) minimization}
+\title{KL(p||q) Minimization}
 
-\subsection{$\text{KL}(p\|q)$ minimization}
+\subsection{$\text{KL}(p\|q)$ Minimization}
 
 One form of variational inference minimizes the Kullback-Leibler divergence
 \textbf{from} $p(\mathbf{z} \mid \mathbf{x})$ \textbf{to} $q(\mathbf{z}\;;\;\lambda)$,
@@ -111,7 +111,7 @@ This follows from Bayes' rule
   p(\mathbf{x}, \mathbf{z}) / \text{a constant function of }\mathbf{z}.
 \end{align*}
 
-Importance sampling thus gives the following noisy yet unbiased gradient
+Importance sampling thus gives the following biased yet consistent gradient
 estimate
 \begin{align*}
 \nabla_\lambda\;
@@ -138,71 +138,7 @@ Adaptive importance sampling follows this gradient to a local optimum using
 stochastic optimization. It is adaptive because the variational distribution
 $q(\mathbf{z}\;;\;\lambda)$ iteratively gets closer to the posterior $p(\mathbf{z} \mid \mathbf{x})$.
 
-\subsubsection{Implementation}
-
-\textbf{Note: These details are outdated since Edward v1.1.3.}
-
-We implement $\text{KL}(q\|p)$ minimization with the importance
-sampling gradient in the class \texttt{KLpq}. It inherits from
-\texttt{VariationalInference}, which provides a collection of default
-methods such as an optimizer.
-
-\begin{lstlisting}[language=Python]
-class KLpq(VariationalInference):
-  def __init__(self, *args, **kwargs):
-    super(KLpq, self).__init__(*args, **kwargs)
-
-  def initialize(self, n_samples=1, *args, **kwargs):
-    self.n_samples = n_samples
-    return super(KLpq, self).initialize(*args, **kwargs)
-
-  def build_loss(self):
-    x = self.data
-    z = {key: rv.sample([self.n_samples])
-         for key, rv in six.iteritems(self.latent_vars)}
-
-    # normalized importance weights
-    q_log_prob = 0.0
-    for key, rv in six.iteritems(self.latent_vars):
-      q_log_prob += tf.reduce_sum(rv.log_prob(tf.stop_gradient(z[key])),
-                                  list(range(1, len(rv.get_batch_shape()) + 1)))
-
-    log_w = self.model_wrapper.log_prob(x, z) - q_log_prob
-    log_w_norm = log_w - log_sum_exp(log_w)
-    w_norm = tf.exp(log_w_norm)
-
-    self.loss = tf.reduce_mean(w_norm * log_w)
-    return -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm))
-\end{lstlisting}
-
-Two methods are added: \texttt{initialize()} and
-\texttt{build_loss()}. The method \texttt{initialize()}
-follows the same initialization as \texttt{VariationalInference}, and
-adds an argument: \texttt{n_samples} for the number of samples from
-the variational model.
-
-The method \texttt{build_loss()} implements the $\text{KL}(q\|p)$
-objective and its gradient. It draws \texttt{self.n_samples} samples from the
-variational model. It registers the Monte Carlo
-estimate of $\text{KL}(q\|p)$ in TensorFlow's computational graph, and stores it
-in \texttt{self.loss}, to track progress of the inference for diagnostics.
-
-The method returns an object whose
-automatic differentiation is a stochastic gradient of $\text{KL}(p\|q)$.
-The TensorFlow function \texttt{tf.stop_gradient()} tells the computational
-graph to stop traversing nodes to propagate gradients. In this case,
-the only gradients taken are $\nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)$,
-one for each sample $\mathbf{z}_s$. We multiply it by \texttt{w_norm}
-element-wise and return the mean.
-
-Computing the normalized importance weights is a numerically
-challenging task.  Underflow is a common issue. Here we use the
-\texttt{log_sum_exp} trick to compute weights in the log space,
-available in \texttt{edward.util}. However, the normalized weights are
-still exponentiated to compute the gradient. As with importance
-sampling in general, this inference method does not scale to high
-dimensions.
-
-See the \href{/api/}{API} for more details.
+For more details, see the \href{/api/}{API} as well as its
+implementation in Edward's code base.
 
 \subsubsection{References}\label{references}

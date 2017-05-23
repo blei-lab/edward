@@ -3,62 +3,60 @@
 \subsection{Tutorials}
 
 Edward provides a testbed for rapid experimentation and research with
-probabilistic models. Here we demonstrate examples from each of the
-three components defining Edward: \textbf{Models}, \textbf{Inference},
-and \textbf{Criticism}.
-In the \textbf{End-to-End} section, we demonstrate examples that
-sweep through the whole process.
+probabilistic models. Here we show how to apply this process for
+diverse learning tasks.
 
-\subsubsection{Models}
+\href{supervised-regression}{Bayesian linear regression} \\
+A fundamental model for supervised learning.
 
+\href{linear-mixed-effects-models}{Linear mixed effects models} \\
+Linear modeling of fixed and random effects.
+
+\href{supervised-classification}{Gaussian process classification} \\
+Learning a distribution over functions for supervised classification.
+
+\href{unsupervised}{Mixture models} \\
+Unsupervised learning by clustering data points.
+
+\href{latent-space-models}{Latent space models} \\
+Analyzing connectivity patterns in neural data.
+
+\href{mixture-density-network}{Mixture density networks} \\
+A neural density estimator for solving inverse problems.
+
+\href{gan}{Generative adversarial networks} \\
+Building a deep generative model of MNIST digits.
+
+\href{decoder}{Probabilistic decoder} \\
+A model of latent codes in information theory.
+
+\href{inference-networks}{Inference networks} \\
+How to amortize computation for training and testing models.
+
+\href{bayesian-neural-network}{Bayesian neural network} \\
+Bayesian analysis with neural networks.
+
+\href{probabilistic-pca}{Probabilistic PCA} \\
+Dimensionality reduction with latent variables.
+
+If you're interested in contributing a tutorial, checking out the
+\href{/contributing}{contributing page}.
+For more background and notation, see the pages below.
 \begin{itemize}
-\item \href{model}{Probability models}
-%\item \href{posteriors}{Tractable posteriors}
-%\item \href{conjugate}{Conjugate models}
-\item \href{bayesian-linear-regression}{Bayesian linear regression}
-%\item \href{hierarchical-logistic}{Hierarchical logistic regression}
-\item \href{mixture-gaussian}{Mixture of Gaussians}
-\item \href{gp-classification}{Gaussian process classification}
-\item \href{bayesian-neural-network}{Bayesian neural network}
-%\item \href{mixture-density}{Mixture density network}
-\item \href{decoder}{Probabilistic decoder}
-\end{itemize}
-
-\subsubsection{Inference}
-
-\begin{itemize}
-  \item \href{inference}{Inference of probability models}
-  \item \href{variational-inference}{Variational inference}
-  \item \href{klqp}{$\text{KL}(q\|p)$ minimization}
+  \item \href{model}{Probabilistic models}
+  \item \href{inference}{Inference of probabilistic models}
   \begin{itemize}
-    \item \href{klqp-score}{Score function gradient}
-    \item \href{klqp-reparam}{Reparameterization gradient}
+   \item \href{variational-inference}{Variational inference}
+   \item \href{klqp}{$\text{KL}(q\|p)$ minimization}
+   \item \href{klpq}{$\text{KL}(p\|q)$ minimization}
+   \item \href{map}{Maximum a posteriori estimation}
+   \item \href{map-laplace}{Laplace approximation}
   \end{itemize}
-  \item \href{klpq}{$\text{KL}(p\|q)$ minimization}
-  \item \href{map}{Maximum a posteriori estimation}
-  \begin{itemize}
-    \item \href{map-laplace}{Laplace approximation}
-  \end{itemize}
-  \item \href{inference-networks}{Inference networks}
-  %\item \href{iwvi}{Importance-weighted variational inference}
-  %\item \href{#}{Variational expectation maximization}
+  \item \href{criticism}{Model criticism}
 \end{itemize}
 
-\subsubsection{Criticism}
-
+There are also companion webpages for several papers about Edward.
 \begin{itemize}
-  \item \href{point-evaluation}{Point-based evaluations}
-  %\item \href{prior-pc}{Prior predictive checks}
-  \item \href{ppc}{Posterior predictive checks}
-\end{itemize}
-
-\subsubsection{End-to-end}
-
-\begin{itemize}
-  \item \href{supervised-regression}{Supervised learning (Regression)}
-  \item \href{supervised-classification}{Supervised learning (Classification)}
-  \item \href{unsupervised}{Unsupervised learning}
-  \item \href{latent-space-models}{Latent space models for neural data}
-  \item \href{mixture-density-network}{Mixture density networks}
-  %\item \href{vae}{Variational auto-encoder}
+\item
+\href{/iclr2017}{"Deep probabilistic programming" at ICLR 2017}
 \end{itemize}

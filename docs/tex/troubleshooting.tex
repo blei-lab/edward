@@ -4,48 +4,36 @@
 
 \subsubsection{Basic Installation}
 
-\textbf{Warning: TensorFlow v0.12.0rc0 and v0.12.0rc1 broke
-compatibility with Edward. Use at most
-\href{https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html#download-and-setup}{TensorFlow v0.11.0} for now.}
-
 Edward depends on
 
 \begin{itemize}
   \item NumPy (>=1.7)
   \item Six (>=1.1.0)
-  \item TensorFlow (>=0.11.0rc0, !=0.12.0rc0, !=0.12.0rc1)
+  \item TensorFlow (>=1.1.0rc0)
 \end{itemize}
 
-We recommend using \texttt{pip} to install \texttt{numpy} and
-\texttt{six} as
+Installing \texttt{edward} by default also installs \texttt{numpy} and
+\texttt{six} if they are not available (or are out-of-date in your
+system).
+
+Installing \texttt{edward} does not automatically install TensorFlow
+(or update an existing TensorFlow version). We recommend installing
+it via
 
 \begin{lstlisting}[language=JSON]
-pip install numpy six
+pip install tensorflow
 \end{lstlisting}
 
-\href{https://www.tensorflow.org/}{TensorFlow} is not on PyPI yet. We recommend
-using \texttt{pip} to install the latest TensorFlow binaries. Please
-follow the
-\href
-{https://www.tensorflow.org/versions/master/get_started/os_setup.html#pip-installation}
-{instructions} from Google.
-
-\subsubsection{TensorFlow via \texttt{conda}}
-
-If you use the Anaconda Python distribution or the \texttt{conda}
-Python package manager, getting started with the CPU-only version
-of TensorFlow can be more simply
-installed via the community-supported \texttt{conda-forge} channel:
+To use Edward with GPUs, install \texttt{tensorflow-gpu} instead of
+\texttt{tensorflow} as
 
 \begin{lstlisting}[language=JSON]
-conda config --add channels conda-forge
-conda create -n cpu-tf-edward numpy six tensorflow
-source activate cpu-tf-edward
-pip install edward
+pip install tensorflow-gpu
 \end{lstlisting}
 
-The GPU-enabled version of TensorFlow can later be installed as
-described above.
+See TensorFlow's
+\href{https://www.tensorflow.org/install/}{installation instructions}
+for details, including how to setup up NVIDIA software for TensorFlow with GPUs.
 
 \subsubsection{Full Installation}
 
@@ -60,17 +48,8 @@ pip install keras
 \end{lstlisting}
 \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
 Slim} (native in TensorFlow), and
-\href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.5.3)
+\href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.7.4)
 \begin{lstlisting}[language=JSON]
 pip install prettytensor
 \end{lstlisting}
-  \item The \href{http://mc-stan.org}{Stan} modeling language is supported
-  through PyStan (>=2.0.1.3)
-\begin{lstlisting}[language=JSON]
-pip install pystan
-\end{lstlisting}
-  \item The \href{http://pymc-devs.github.io/pymc3/}{PyMC3} modeling language is supported
-  through PyMC3 (>=3.0). Please see their installation
-  \href{http://pymc-devs.github.io/pymc3/notebooks/getting_started.html}
-  {instructions}.
 \end{itemize}

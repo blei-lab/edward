@@ -31,8 +31,8 @@ points $\mathbf{x}\in\{0,1\}^{50}$.
 \begin{lstlisting}[language=python]
 from edward.models import Bernoulli, Beta
 
-theta = Beta(a=1.0, b=1.0)
-x = Bernoulli(p=tf.ones(50) * theta)
+theta = Beta(1.0, 1.0)
+x = Bernoulli(tf.ones(50) * theta)
 \end{lstlisting}
 
 \includegraphics[width=450px]{/images/beta_bernoulli.png} \\
@@ -41,9 +41,9 @@ Computational graph for a Beta-Bernoulli program.
 }}
 
 The random variable \texttt{x} ($\mathbf{x}$) is 50-dimensional,
-parameterized by the random tensor $\theta^*$. Fetching the object
-\texttt{x.value()} ($\mathbf{x}^*$) from session runs the graph: it simulates from
-the generative process and outputs a binary vector of $50$ elements.
+parameterized by the random tensor $\theta^*$. Fetching \texttt{x}
+from a session runs the graph: it simulates from the generative process
+and outputs a binary vector ($\mathbf{x}^*$) of $50$ elements.
 
 With computational graphs, it is also natural to build mutable states
 within the probabilistic program. As a typical use of computational
@@ -55,7 +55,7 @@ about. In TensorFlow, this is given by a \texttt{tf.Variable}.
 from edward.models import Bernoulli
 
 theta = tf.Variable(0.0)
-x = Bernoulli(p=tf.ones(50) * tf.sigmoid(theta))
+x = Bernoulli(tf.ones(50) * tf.sigmoid(theta))
 \end{lstlisting}
 
 Another use case of mutable states is for building discriminative
@@ -65,7 +65,7 @@ independent of the data, using a mutable state
 (\texttt{tf.placeholder}) for $\mathbf{x}$ in its graph. During
 training and testing, we feed the placeholder the appropriate values.
 (See the
-\href{/tutorials/bayesian-linear-regression}{Bayesian linear
+\href{/tutorials/supervised-regression}{Bayesian linear
 regression} tutorial as an example.)
 
 \subsubsection{Neural Networks}
@@ -110,7 +110,7 @@ With TensorFlow Slim, we write this model as follows:
 from edward.models import Bernoulli, Normal
 from tensorflow.contrib import slim
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
 h = slim.fully_connected(z, 256)
 x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))
 \end{lstlisting}
@@ -121,8 +121,8 @@ With Keras, we write this model as follows:
 from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
-z = Normal(mu=tf.zeros([N, d]), sigma=tf.ones([N, d]))
-h = Dense(256, activation='relu')(z.value())
+z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
+h = Dense(256, activation='relu')(z)
 x = Bernoulli(logits=Dense(28 * 28)(h))
 \end{lstlisting}
 
@@ -141,22 +141,58 @@ Edward supports the two typical approaches to handling these models:
 collapsing the infinite-dimensional space and lazily defining the
 infinite-dimensional space.
 
-For the collapsed approach, see the
-\href{/tutorials/gp-classification}{Gaussian process classification}
-tutorial as an example. We specify distributions over the function
-evaluations of the Gaussian process, and the Gaussian process is
-implicitly marginalized out. This approach is also useful for Poisson
-process models.
+In the collapsed approach, we specify a distribution over its
+instantiation, and the stochastic process is implicitly marginalized
+out. For example, we can represent a distribution over the function
+evaluations of a Gaussian process, and not explicitly represent the
+function draw.
 
-To work directly on the infinite-dimensional space, one can leverage
-random variables with
-\href{https://www.tensorflow.org/versions/master/api_docs/python/control_flow_ops.html}{control flow operations}
-in TensorFlow. At runtime, the control flow will lazily define any
-parameters in the space necessary in order to generate samples. As an
-example, we use a while loop to
-define a
-\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}
-{Dirichlet process} according to its stick breaking representation.
+\begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Normal
+
+def kernel(X):
+  """Evaluate kernel over each pair of rows (data points) in the matrix."""
+  return
+
+X = tf.placeholder(tf.float32, [N, D])
+y = MultivariateNormalTriL(loc=tf.zeros(N), scale_tril=kernel(X))
+\end{lstlisting}
+
+For more details, see the
+\href{/tutorials/supervised-classification}{Gaussian process classification}
+tutorial. This approach is also useful for Poisson process models.
+
+In the lazy approach, we work directly on the infinite-dimensional space via
+\href{https://www.tensorflow.org/api_guides/python/control_flow_ops}{control flow operations}
+in TensorFlow. At runtime, the control flow will execute only the
+necessary computation in order to terminate. As an example, Edward
+provides a \texttt{DirichletProcess} random variable.
+
+\begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+from edward.models import DirichletProcess, Normal
+
+def plot_dirichlet_process(alpha):
+  with tf.Session() as sess:
+    dp = DirichletProcess(alpha, Normal(0.0, 1.0))
+    samples = sess.run(dp.sample(1000))
+    plt.hist(samples, bins=100, range=(-3.0, 3.0))
+    plt.title("DP({0}, N(0, 1))".format(alpha))
+    plt.show()
+
+# Dirichlet process with high concentration
+plot_dirichlet_process(1.0)
+# Dirichlet process with low concentration (more spread out)
+plot_dirichlet_process(50.0)
+\end{lstlisting}
+
+\includegraphics[width=350px]{/images/dirichlet-process-fig0.png}
+\includegraphics[width=350px]{/images/dirichlet-process-fig1.png}
+
+To see the essential component defining the \texttt{DirichletProcess}, see
+\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}
+in the Github repository. Its source implementation can be found at
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py}{\texttt{edward/models/dirichlet_process.py}}.
 
 \subsubsection{Probabilistic Programs}
 

@@ -2,17 +2,23 @@
 """Convolutional variational auto-encoder for binarized MNIST.
 
 The neural networks are written with TensorFlow Slim.
+
+References
+----------
+http://edwardlib.org/tutorials/decoder
+http://edwardlib.org/tutorials/inference-networks
 """
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import numpy as np
 import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
-from progressbar import ETA, Bar, Percentage, ProgressBar
+from edward.util import Progbar
 from scipy.misc import imsave
 from tensorflow.contrib import slim
 from tensorflow.examples.tutorials.mnist import input_data
@@ -41,7 +47,7 @@ def inference_network(x):
   """Inference network to parameterize variational model. It takes
   data as input and outputs the variational parameters.
 
-  mu, sigma = neural_network(x)
+  loc, scale = neural_network(x)
   """
   with slim.arg_scope([slim.conv2d, slim.fully_connected],
                       activation_fn=tf.nn.elu,
@@ -55,9 +61,9 @@ def inference_network(x):
     net = slim.flatten(net)
     params = slim.fully_connected(net, d * 2, activation_fn=None)
 
-  mu = params[:, :d]
-  sigma = tf.nn.softplus(params[:, d:])
-  return mu, sigma
+  loc = params[:, :d]
+  scale = tf.nn.softplus(params[:, d:])
+  return loc, scale
 
 
 ed.set_seed(42)
@@ -76,14 +82,14 @@ if not os.path.exists(IMG_DIR):
 mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
 
 # MODEL
-z = Normal(mu=tf.zeros([M, d]), sigma=tf.ones([M, d]))
-logits = generative_network(z.value())
+z = Normal(loc=tf.zeros([M, d]), scale=tf.ones([M, d]))
+logits = generative_network(z)
 x = Bernoulli(logits=logits)
 
 # INFERENCE
-x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
-mu, sigma = inference_network(x_ph)
-qz = Normal(mu=mu, sigma=sigma)
+x_ph = tf.placeholder(tf.int32, [M, 28 * 28])
+loc, scale = inference_network(tf.cast(x_ph, tf.float32))
+qz = Normal(loc=loc, scale=scale)
 
 # Bind p(x, z) and q(z | x) to the same placeholder for x.
 data = {x: x_ph}
@@ -91,7 +97,9 @@ inference = ed.KLqp({z: qz}, data)
 optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)
 
-init = tf.initialize_all_variables()
+hidden_rep = tf.sigmoid(logits)
+
+init = tf.global_variables_initializer()
 init.run()
 
 n_epoch = 100
@@ -99,12 +107,11 @@ n_iter_per_epoch = 1000
 for epoch in range(n_epoch):
   avg_loss = 0.0
 
-  widgets = ["epoch #%d|" % epoch, Percentage(), Bar(), ETA()]
-  pbar = ProgressBar(n_iter_per_epoch, widgets=widgets)
-  pbar.start()
-  for t in range(n_iter_per_epoch):
+  pbar = Progbar(n_iter_per_epoch)
+  for t in range(1, n_iter_per_epoch + 1):
     pbar.update(t)
     x_train, _ = mnist.train.next_batch(M)
+    x_train = np.random.binomial(1, x_train)
     info_dict = inference.update(feed_dict={x_ph: x_train})
     avg_loss += info_dict['loss']
 
@@ -115,6 +122,6 @@ for epoch in range(n_epoch):
   print("log p(x) >= {:0.3f}".format(avg_loss))
 
   # Visualize hidden representations.
-  imgs = tf.sigmoid(logits).eval()
+  imgs = hidden_rep.eval()
   for m in range(M):
     imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))

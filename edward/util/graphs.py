@@ -4,9 +4,22 @@ from __future__ import print_function
 
 import numpy as np
 import six
+import sys
 import tensorflow as tf
 
 from edward.models.random_variable import RANDOM_VARIABLE_COLLECTION
+
+save_stderr = sys.stderr
+
+try:
+  import os
+  sys.stderr = open(os.devnull, 'w')  # suppress keras import
+  from keras import backend as K
+  sys.stderr = save_stderr
+  have_keras = True
+except ImportError:
+  sys.stderr = save_stderr
+  have_keras = False
 
 
 def get_session():
@@ -24,6 +37,9 @@ def get_session():
     _ED_SESSION = tf.InteractiveSession()
   else:
     _ED_SESSION = tf.get_default_session()
+
+  if have_keras:
+    K.set_session(_ED_SESSION)
 
   return _ED_SESSION
 

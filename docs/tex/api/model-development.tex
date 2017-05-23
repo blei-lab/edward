@@ -1,0 +1,97 @@
+\title{Developing Custom Random Variables}
+
+{{navbar}}
+
+\subsubsection{Developing Custom Random Variables}
+
+Oftentimes we'd like to implement our own random variables.
+To do so, write a class that inherits
+the \texttt{RandomVariable} class in \texttt{edward.models} and
+the \texttt{Distribution} class in \texttt{tf.contrib.distributions} (in that
+order). A template is provided below.
+
+\begin{lstlisting}[language=Python]
+from edward.models import RandomVariable
+from tensorflow.contrib.distributions import Distribution
+
+class CustomRandomVariable(RandomVariable, Distribution):
+  def __init__(self, *args, **kwargs):
+    super(CustomRandomVariable, self).__init__(*args, **kwargs)
+
+  def _log_prob(self, value):
+    raise NotImplementedError("log_prob is not implemented")
+
+  def _sample_n(self, n, seed=None):
+    raise NotImplementedError("sample_n is not implemented")
+\end{lstlisting}
+
+One method that all Edward random variables call during instantiation is
+\texttt{_sample_n()}.
+It takes an integer \texttt{n} as input and outputs a tensor of shape
+\texttt{(n,) + batch_shape + event_shape}, where \texttt{batch_shape}
+is the number of independent distributions in the instantiated object
+and \texttt{event_shape} is the shape of an individual distribution.
+
+For examples of custom random variables developed in Edward, see
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py}{\texttt{empirical.py}}
+and
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py}{\texttt{point_mass.py}}
+in the Github repository.
+For more details and more methods one can implement, see the API
+documentation in TensorFlow's
+\href{https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Distribution}{\texttt{Distribution} class}.
+
+\subsubsection{Advanced settings}
+
+Sometimes the random variable you'd like to work with already exists
+in Edward, but it is missing a particular feature. One hack is to
+implement and overwrite the missing method. For example, to implement
+your own sampling for \texttt{Poisson}:
+
+\begin{lstlisting}[language=Python]
+from edward.models import Poisson
+from scipy.stats import poisson
+
+def _sample_n(self, n=1, seed=None):
+  # define Python function which returns samples as a Numpy array
+  def np_sample(rate, n):
+    return poisson.rvs(mu=rate, size=n, random_state=seed).astype(np.float32)
+
+  # wrap python function as tensorflow op
+  val = tf.py_func(np_sample, [self.rate, n], [tf.float32])[0]
+  # set shape from unknown shape
+  batch_event_shape = self.batch_shape.concatenate(self.event_shape)
+  shape = tf.concat(
+      [tf.expand_dims(n, 0), tf.convert_to_tensor(batch_event_shape)], 0)
+  val = tf.reshape(val, shape)
+  return val
+
+Poisson._sample_n = _sample_n
+
+sess = ed.get_session()
+x = Poisson(rate=1.0)
+sess.run(x)
+## 1.0
+sess.run(x)
+## 4.0
+\end{lstlisting}
+
+(Note the function \texttt{np_sample} should broadcast correctly if
+you'd like to work with non-scalar parameters; it is not correct in
+this toy implementation.)
+
+Sometimes the random variable you'd like to work with does not even
+admit (easy) sampling, and you're only using it as a likelihood ``node'' rather
+than as some prior to parameters of another random variable.
+You can avoid having to implement \texttt{_sample_n} altogether:
+after creating \texttt{CustomRandomVariable}, instantiate it with the
+\texttt{value} argument:
+
+\begin{lstlisting}[language=Python]
+x = CustomRandomVariable(custom_params=params, value=tf.zeros_like(params))
+\end{lstlisting}
+
+This fixes the associated value of the random variable to a bunch of
+zeros and avoids the \texttt{_sample_n} error that appears otherwise.
+Make sure that the value matches the desired shape of the random
+variable.

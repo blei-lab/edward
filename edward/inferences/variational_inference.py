@@ -2,12 +2,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abc
 import numpy as np
 import six
 import tensorflow as tf
 
 from edward.inferences.inference import Inference
-from edward.models import RandomVariable, StanModel
+from edward.models import RandomVariable
 from edward.util import get_session, get_variables
 
 try:
@@ -16,8 +17,16 @@ except ImportError:
   pass
 
 
+@six.add_metaclass(abc.ABCMeta)
 class VariationalInference(Inference):
-  """Base class for variational inference methods.
+  """Abstract base class for variational inference. Specific
+  variational inference methods inherit from ``VariationalInference``,
+  sharing methods such as a default optimizer.
+
+  To build an algorithm inheriting from ``VariaitonalInference``, one
+  must at the minimum implement ``build_loss_and_gradients``: it
+  determines the loss function and gradients to apply for a given
+  optimizer.
   """
   def __init__(self, *args, **kwargs):
     super(VariationalInference, self).__init__(*args, **kwargs)
@@ -45,33 +54,27 @@ class VariationalInference(Inference):
     super(VariationalInference, self).initialize(*args, **kwargs)
 
     if var_list is None:
-      if self.model_wrapper is None:
-        # Traverse random variable graphs to get default list of variables.
-        var_list = set([])
-        trainables = tf.trainable_variables()
-        for z, qz in six.iteritems(self.latent_vars):
-          if isinstance(z, RandomVariable):
-            var_list.update(get_variables(z, collection=trainables))
+      # Traverse random variable graphs to get default list of variables.
+      var_list = set()
+      trainables = tf.trainable_variables()
+      for z, qz in six.iteritems(self.latent_vars):
+        if isinstance(z, RandomVariable):
+          var_list.update(get_variables(z, collection=trainables))
 
-          var_list.update(get_variables(qz, collection=trainables))
+        var_list.update(get_variables(qz, collection=trainables))
 
-        for x, qx in six.iteritems(self.data):
-          if isinstance(x, RandomVariable) and \
-                  not isinstance(qx, RandomVariable):
-            var_list.update(get_variables(x, collection=trainables))
+      for x, qx in six.iteritems(self.data):
+        if isinstance(x, RandomVariable) and \
+                not isinstance(qx, RandomVariable):
+          var_list.update(get_variables(x, collection=trainables))
 
-        var_list = list(var_list)
-      else:
-        # Variables may not be instantiated for model wrappers until
-        # their methods are first called. For now, hard-code
-        # ``var_list`` inside build_losses.
-        var_list = None
+      var_list = list(var_list)
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
-      global_step = tf.Variable(0, trainable=False)
+      global_step = tf.Variable(0, trainable=False, name="global_step")
       starter_learning_rate = 0.1
       learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                                  global_step,
@@ -100,7 +103,7 @@ class VariationalInference(Inference):
       # Custom optimizers have no control over global_step.
       global_step = None
     else:
-      raise TypeError()
+      raise TypeError("Optimizer must be str or tf.train.Optimizer.")
 
     if not use_prettytensor:
       self.train = optimizer.apply_gradients(grads_and_vars,
@@ -131,7 +134,7 @@ class VariationalInference(Inference):
       feed_dict = {}
 
     for key, value in six.iteritems(self.data):
-      if isinstance(key, tf.Tensor):
+      if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value
 
     sess = get_session()
@@ -142,8 +145,9 @@ class VariationalInference(Inference):
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        summary = sess.run(self.summarize, feed_dict)
-        self.train_writer.add_summary(summary, t)
+        if self.summarize is not None:
+          summary = sess.run(self.summarize, feed_dict)
+          self.train_writer.add_summary(summary, t)
 
     return {'t': t, 'loss': loss}
 
@@ -153,14 +157,12 @@ class VariationalInference(Inference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        loss = info_dict['loss']
-        string = 'Iteration {0}'.format(str(t).rjust(len(str(self.n_iter))))
-        string += ' [{0}%]'.format(str(int(t / self.n_iter * 100)).rjust(3))
-        string += ': Loss = {0:.3f}'.format(loss)
-        print(string)
+        self.progbar.update(t, {'Loss': info_dict['loss']})
 
+  @abc.abstractmethod
   def build_loss_and_gradients(self, var_list):
-    """Build loss function.
+    """Build loss function and its gradients. They will be leveraged
+    in an optimizer to update the model and variational parameters.
 
     Any derived class of ``VariationalInference`` **must** implement
     this method.
