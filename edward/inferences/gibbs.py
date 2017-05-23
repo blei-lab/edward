@@ -30,7 +30,7 @@ class Gibbs(MonteCarlo):
     >>> x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
     >>>
     >>> p = Beta(1.0, 1.0)
-    >>> x = Bernoulli(p=p, sample_shape=10)
+    >>> x = Bernoulli(probs=p, sample_shape=10)
     >>>
     >>> qp = Empirical(tf.Variable(tf.zeros(500)))
     >>> inference = ed.Gibbs({p: qp}, data={x: x_data})
