@@ -305,7 +305,7 @@ class Inference(object):
      Returns
      -------
      None
-       
+
     """
     if logvars is None:
       logvars = []
