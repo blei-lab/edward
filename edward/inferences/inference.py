@@ -146,7 +146,7 @@ class Inference(object):
 
   @abc.abstractmethod
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
-                 debug=False):
+                 logrun=None, debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computational graph. No ops
     should be created outside the call to ``initialize()``.
@@ -169,11 +169,18 @@ class Inference(object):
     logdir : str, optional
       Directory where event file will be written. For details,
       see ``tf.summary.FileWriter``. Default is to write nothing.
+    logrun : str, optional
+      Subdirectory of logdir to save the specific run results, if None
+      will set it to current UTC timestamp in the format 'YYYYMMDDTHHMMSS",
+      if logrun == '', then the results will be saved to logdir      
     debug : bool, optional
       If True, add checks for ``NaN`` and ``Inf`` to all computations
       in the graph. May result in substantially slower execution
       times.
     """
+    from datetime import datetime
+    import os
+
     self.n_iter = n_iter
     if n_print is None:
       self.n_print = int(n_iter / 10)
@@ -194,6 +201,13 @@ class Inference(object):
 
     if logdir is not None:
       self.logging = True
+
+      if logrun is None:
+        # Set default to timestamp
+        logrun = datetime.strftime(datetime.utcnow(), "%Y%m%dT%H%M%S")
+      if len(logrun):
+        logdir = os.path.join(logdir, logrun)
+
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
       self.summarize = tf.summary.merge_all()
     else:
