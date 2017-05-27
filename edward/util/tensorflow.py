@@ -8,11 +8,13 @@ from tensorflow.python.ops import control_flow_ops
 
 
 def dot(x, y):
-  """Compute dot product between a 2-D tensor and a 1-D tensor.
+  """Compute dot product between a 1-D or 2-D tensors.
 
   If x is a ``[M x N]`` matrix, then y is a ``M``-vector.
 
-  If x is a ``M``-vector, then y is a ``[M x N]`` matrix.
+  Else If x is a ``M``-vector, then y is a ``[M x N]`` matrix.
+  
+  Else x y is a ``[N x M]`` matrix and y is a ``[M x N]`` matrix.
 
   Parameters
   ----------
@@ -24,7 +26,7 @@ def dot(x, y):
   Returns
   -------
   tf.Tensor
-    A 1-D tensor of length ``N``.
+    A 1-D tensor of length ``N`` or a 2-D tensor of length ``[N x N]``.
 
   Raises
   ------
@@ -42,11 +44,14 @@ def dot(x, y):
     vec = x
     mat = y
     return tf.reshape(tf.matmul(tf.expand_dims(vec, 0), mat), [-1])
-  else:
+  elif len(y.shape) == 1:
     mat = x
     vec = y
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
-
+  else:
+    mat = x
+    vec = y
+    z = tf.matmul(mat, vec)
 
 def logit(x):
   """Evaluate :math:`\log(x / (1 - x))` elementwise.
