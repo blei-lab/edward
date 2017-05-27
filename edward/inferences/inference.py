@@ -8,8 +8,7 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import check_data, check_latent_vars, get_session, Progbar
-
+from edward.util import check_data, check_latent_vars, get_session, Progbar, get_variables
 
 @six.add_metaclass(abc.ABCMeta)
 class Inference(object):
@@ -146,7 +145,8 @@ class Inference(object):
 
   @abc.abstractmethod
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
-                 logrun=None, debug=False):
+                 logrun=None, logvars=None, log_max_scalers_per_var=10,
+                 debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computational graph. No ops
     should be created outside the call to ``initialize()``.
@@ -172,7 +172,14 @@ class Inference(object):
     logrun : str, optional
       Subdirectory of logdir to save the specific run results, if None
       will set it to current UTC timestamp in the format 'YYYYMMDDTHHMMSS",
-      if logrun == '', then the results will be saved to logdir      
+      if logrun == '', then the results will be saved to logdir
+    logvars : list, optional
+      Specifies the list of variables to log after each n_print steps.  If 
+      None, will log all `latent_variables` that have been given custom names`.
+      If logvars == [], no variables will be logged.
+    log_max_scalers_per_var : int, default 10
+      Enables logging of individual values from 1 dimensional variables up to 
+      a maximum dimension, if None will log all dimensions.   
     debug : bool, optional
       If True, add checks for ``NaN`` and ``Inf`` to all computations
       in the graph. May result in substantially slower execution
@@ -207,6 +214,8 @@ class Inference(object):
         logrun = datetime.strftime(datetime.utcnow(), "%Y%m%dT%H%M%S")
       if len(logrun):
         logdir = os.path.join(logdir, logrun)
+
+      self.set_log_variables(logvars=logvars, log_max_scalers_per_var=log_max_scalers_per_var)
 
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
       self.summarize = tf.summary.merge_all()
@@ -272,3 +281,47 @@ class Inference(object):
     """
     if self.logging:
       self.train_writer.close()
+
+  def set_log_variables(self, logvars=None, log_max_scalers_per_var=None):
+    """Logs variables to TensorBoard
+
+     For each variable in logvars, creates 'scalar' and / or 'histogram' by 
+     calling `tf.summary.scalar` or `tf.summary.histogram`
+     
+     if logvars is None, automatically log all latent variables that have been given non-default names 
+     if logvars is [], no logging will be created
+
+     Parameters
+     ----------
+     logvars : list, optional
+       A list of variables to be logged
+     log_max_scalers_per_var : int, default None
+       Enables logging of individual values from 1 dimensional variables up to 
+       a maximum dimension, if None will log all dimensions.
+
+     Returns
+     -------
+     None
+       
+    """
+    if logvars is None:
+      logvars = []
+      for k in self.latent_vars:
+        logvars += get_variables(self.latent_vars[k])
+
+      # Prune variables to only be custom named variables (without 'Variable') substring
+      logvars = [var for var in logvars if not 'Variable' in var.name]
+
+    for var in logvars:
+      var_name = var.name.replace(':', '/')  # colons are an invalid character
+
+      # If variable is a one dimensional tensor, log each element in the tensor individually
+      # Will only log the first 100 dimensions
+      if len(var.shape) == 1:
+        for i in range(var.shape[0]):
+          if log_max_scalers_per_var is None or i < log_max_scalers_per_var:
+            tf.summary.scalar('{}/{}'.format(var_name, i), var[i])
+
+      # If var is multi-dimensional, log the distribution
+      if len(var.shape) > 0 and np.max(var.shape) > 1:
+        tf.summary.histogram(var_name, var)
