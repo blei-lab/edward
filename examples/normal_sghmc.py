@@ -21,9 +21,9 @@ def mvn_plot_contours(z, label=False, ax=None):
   Scale the axes to show 3 standard deviations.
   """
   sess = ed.get_session()
-  mu = sess.run(z.mu)
+  mu = sess.run(z.loc)
   mu_x, mu_y = mu
-  Sigma = sess.run(z.sigma)
+  Sigma = sess.run(z.scale)
   sigma_x, sigma_y = np.sqrt(Sigma[0, 0]), np.sqrt(Sigma[1, 1])
   xmin, xmax = mu_x - 3 * sigma_x, mu_x + 3 * sigma_x
   ymin, ymax = mu_y - 3 * sigma_y, mu_y + 3 * sigma_y
@@ -50,6 +50,7 @@ z = MultivariateNormalTriL(
 qz = Empirical(params=tf.Variable(tf.random_normal([5000, 2])))
 
 inference = ed.SGHMC({z: qz})
+inference.initialize(logdir='C:\\Users\skruz\\temp\\tensorflow\\')
 inference.run(step_size=0.02)
 
 # CRITICISM
