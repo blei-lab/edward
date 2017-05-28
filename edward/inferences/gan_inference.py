@@ -120,7 +120,8 @@ class GANInference(VariationalInference):
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.histogram('disc_outputs', tf.concat(d_true, d_fake, axis=0),
+      tf.summary.histogram('discriminator_outputs',
+                           tf.concat(d_true, d_fake, axis=0),
                            collections=[summary_key])
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(

@@ -74,46 +74,21 @@ class VariationalInference(Inference):
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar("loss", self.loss, collections=[summary_key])
-      with tf.name_scope('variational'):
+      # TODO maybe i can do this name scoping only if i spot more than one
+      with tf.name_scope('inference_' + str(id(self)) + '/'):
+        summary_key = 'summaries_' + str(id(self))
+        tf.summary.scalar("loss", self.loss, collections=[summary_key])
         for grad, var in grads_and_vars:
-          if var in latent_var_list:
-            # replace colons which are an invalid character
-            tf.summary.histogram("parameter/" +
-                                 var.name.replace(':', '/'),
-                                 var, collections=[summary_key])
-            tf.summary.histogram("gradient/" +
-                                 var.name.replace(':', '/'),
-                                 grad, collections=[summary_key])
-            tf.summary.scalar("gradient_norm/" +
-                              var.name.replace(':', '/'),
-                              tf.norm(grad), collections=[summary_key])
-
-      with tf.name_scope('model'):
-        for grad, var in grads_and_vars:
-          if var in data_var_list:
-            tf.summary.histogram("parameter/" + var.name.replace(':', '/'),
-                                 var, collections=[summary_key])
-            tf.summary.histogram("gradient/" +
-                                 var.name.replace(':', '/'),
-                                 grad, collections=[summary_key])
-            tf.summary.scalar("gradient_norm/" +
-                              var.name.replace(':', '/'),
-                              tf.norm(grad), collections=[summary_key])
-
-      # when var_list is not initialized with None
-      with tf.name_scope(''):
-        for grad, var in grads_and_vars:
-          if var not in latent_var_list and var not in data_var_list:
-            tf.summary.histogram("parameter/" + var.name.replace(':', '/'),
-                                 var, collections=[summary_key])
-            tf.summary.histogram("gradient/" +
-                                 var.name.replace(':', '/'),
-                                 grad, collections=[summary_key])
-            tf.summary.scalar("gradient_norm/" +
-                              var.name.replace(':', '/'),
-                              tf.norm(grad), collections=[summary_key])
+          # replace colons which are an invalid character
+          tf.summary.histogram("parameter/" +
+                               var.name.replace(':', '/'),
+                               var, collections=[summary_key])
+          tf.summary.histogram("gradient/" +
+                               var.name.replace(':', '/'),
+                               grad, collections=[summary_key])
+          tf.summary.scalar("gradient_norm/" +
+                            var.name.replace(':', '/'),
+                            tf.norm(grad), collections=[summary_key])
 
       self.summarize = tf.summary.merge_all(key=summary_key)
 
