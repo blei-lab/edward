@@ -8,10 +8,10 @@ import tensorflow as tf
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
 from edward.util import copy
-from tensorflow.contrib import distributions as ds
 
 try:
   from edward.models import Normal
+  from tensorflow.contrib.distributions import kl_divergence
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
@@ -449,7 +449,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   p_log_lik = tf.reduce_mean(p_log_lik)
 
   kl_penalty = tf.reduce_sum([
-      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
+      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(kl_divergence(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
@@ -630,7 +630,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   kl_penalty = tf.reduce_sum([
-      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
+      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(kl_divergence(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
