@@ -26,4 +26,4 @@ qmu = Normal(loc=qmu_mu, scale=qmu_sigma, name='qmu')
 
 # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
 inference = ed.KLqp({mu: qmu}, data={x: x_data})
-inference.run(logdir='train')
+inference.run(logdir='log')
