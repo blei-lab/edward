@@ -85,13 +85,13 @@ class Gibbs(MonteCarlo):
       for key, value in six.iteritems(self.data):
         if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
           self.feed_dict[key] = value
-        elif isinstance(key, RandomVariable) and isinstance(value, tf.Variable):
+        elif isinstance(key, RandomVariable) and \
+                isinstance(value, (tf.Tensor, tf.Variable)):
           self.feed_dict[key] = sess.run(value)
 
     if feed_dict is None:
       feed_dict = {}
 
-    feed_dict.update(self.init_const_bindings)
     feed_dict.update(self.feed_dict)
 
     # Determine scan order.

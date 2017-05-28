@@ -151,8 +151,6 @@ class VariationalInference(Inference):
     if feed_dict is None:
       feed_dict = {}
 
-    feed_dict.update(self.init_const_bindings)
-
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value

@@ -67,7 +67,6 @@ class Inference(object):
 
     check_data(data)
     self.data = {}
-    self.init_const_bindings = {}
     for key, value in six.iteritems(data):
       if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         self.data[key] = value
@@ -80,7 +79,6 @@ class Inference(object):
           with tf.variable_scope("data"):
             ph = tf.placeholder(key.dtype, np.shape(value))
             var = tf.Variable(ph, trainable=False, collections=[])
-            self.init_const_bindings[ph] = value
             sess.run(var.initializer, {ph: value})
             self.data[key] = var
 
@@ -233,7 +231,7 @@ class Inference(object):
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
