@@ -3,6 +3,8 @@
 (see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016)).
 
 Inspired by autograd's Bayesian neural network example.
+This example prettifies some of the tensor naming for visualization in
+TensorBoard. To view TensorBoard, run `tensorboard --logdir=log`.
 
 References
 ----------
@@ -60,28 +62,28 @@ with tf.name_scope("model"):
 with tf.name_scope("posterior"):
   with tf.name_scope("qW_0"):
     qW_0 = Normal(loc=tf.Variable(tf.random_normal([D, 10]), name="loc"),
-                  scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, 10]),
-                  name="scale")))
+                  scale=tf.nn.softplus(
+                      tf.Variable(tf.random_normal([D, 10]), name="scale")))
   with tf.name_scope("qW_1"):
     qW_1 = Normal(loc=tf.Variable(tf.random_normal([10, 10]), name="loc"),
-                    scale=tf.nn.softplus(tf.Variable(tf.random_normal([10, 10]),
-                    name="scale")))
+                  scale=tf.nn.softplus(
+                      tf.Variable(tf.random_normal([10, 10]), name="scale")))
   with tf.name_scope("qW_2"):
     qW_2 = Normal(loc=tf.Variable(tf.random_normal([10, 1]), name="loc"),
-                  scale=tf.nn.softplus(tf.Variable(tf.random_normal([10, 1]),
-                  name="scale")))
+                  scale=tf.nn.softplus(
+                      tf.Variable(tf.random_normal([10, 1]), name="scale")))
   with tf.name_scope("qb_0"):
     qb_0 = Normal(loc=tf.Variable(tf.random_normal([10]), name="loc"),
-                  scale=tf.nn.softplus(tf.Variable(tf.random_normal([10]),
-                  name="scale")))
+                  scale=tf.nn.softplus(
+                      tf.Variable(tf.random_normal([10]), name="scale")))
   with tf.name_scope("qb_1"):
     qb_1 = Normal(loc=tf.Variable(tf.random_normal([10]), name="loc"),
-                  scale=tf.nn.softplus(tf.Variable(tf.random_normal([10]),
-                  name="scale")))
+                  scale=tf.nn.softplus(
+                      tf.Variable(tf.random_normal([10]), name="scale")))
   with tf.name_scope("qb_2"):
     qb_2 = Normal(loc=tf.Variable(tf.random_normal([1]), name="loc"),
-                  scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]),
-                  name="scale")))
+                  scale=tf.nn.softplus(
+                      tf.Variable(tf.random_normal([1]), name="scale")))
 
 inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
                      W_1: qW_1, b_1: qb_1,
