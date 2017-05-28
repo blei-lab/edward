@@ -126,12 +126,12 @@
 <li>Six (&gt;=1.1.0)</li>
 <li>TensorFlow (&gt;=1.1.0rc0)</li>
 </ul>
-<p>Installing <code>edward</code> by default also installs <code>numpy</code> and <code>six</code> if they are not available (or are out-of-date in your system).</p>
-<p>Installing <code>edward</code> does not automatically install TensorFlow (or update an existing TensorFlow version). We recommend installing it via</p>
+<p>Installing <code>edward</code> by default also installs <code>numpy</code> and <code>six</code> if they are unavailable (or out-of-date).</p>
+<p>Installing <code>edward</code> does not automatically install or update TensorFlow. We recommend installing it via</p>
 <pre language="JSON"><code>pip install tensorflow</code></pre>
 <p>To use Edward with GPUs, install <code>tensorflow-gpu</code> instead of <code>tensorflow</code> as</p>
 <pre language="JSON"><code>pip install tensorflow-gpu</code></pre>
-<p>See TensorFlow’s <a href="https://www.tensorflow.org/install/">installation instructions</a> for details, including how to setup up NVIDIA software for TensorFlow with GPUs.</p>
+<p>See TensorFlow’s <a href="https://www.tensorflow.org/install/">installation instructions</a> for details, including how to set up NVIDIA software for TensorFlow with GPUs.</p>
 <h3 id="full-installation">Full Installation</h3>
 <p>Edward has optional features that depend on external packages.</p>
 <ul>
@@ -139,6 +139,12 @@
 <pre language="JSON"><code>pip install keras</code></pre>
 <p><a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> (native in TensorFlow), and <a href="https://github.com/google/prettytensor">PrettyTensor</a> (&gt;=0.7.4)</p>
 <pre language="JSON"><code>pip install prettytensor</code></pre></li>
+<li>Notebooks require <a href="http://jupyter.org">Jupyter</a> (&gt;=1.0.0)
+<pre language="JSON"><code>pip install jupyter</code></pre></li>
+<li>Visualization requires <a href="http://matplotlib.org">Matplotlib</a> (&gt;=1.3), <a href="https://pillow.readthedocs.io">Pillow</a> (&gt;=3.4.2), and <a href="https://seaborn.pydata.org">Seaborn</a> (&gt;=0.3.1)
+<pre language="JSON"><code>pip install matplotlib
+pip install pillow
+pip install seaborn</code></pre></li>
 </ul>
 </div>
 </div>

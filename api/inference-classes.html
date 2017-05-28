@@ -182,7 +182,7 @@ inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <p>For example, Edward supports non-Bayesian methods such as generative adversarial networks (GANs) <span class="citation">(Goodfellow et al., 2014)</span>. For more details, see the <a href="/tutorials/gan">GAN tutorial</a>.</p>
 <p>In general, we think opening the door to non-Bayesian approaches is a crucial feature for probabilistic programming. This enables advances in other fields such as deep learning to be complementary: all is in service for probabilistic models and thus it makes sense to combine our efforts.</p>
 <h3 id="exact-inference">Exact Inference</h3>
-<p>In order to uncover conjugacy relationships between random variables (if they exist), we use symbolic algebra on nodes in the computational graph. Users can then integrate out variables to automatically derive clas<span>bishop2006pattern</span>, and exact inference.</p>
+<p>In order to uncover conjugacy relationships between random variables (if they exist), we use symbolic algebra on nodes in the computational graph. Users can then integrate out variables to automatically derive classical Gibbs <span class="citation">(Gelfand &amp; Smith, 1990)</span>, mean-field updates <span class="citation">(Bishop, 2006)</span>, and exact inference.</p>
 <p>For example, can calculate a conjugate posterior analytically by using the <code>ed.complete_conditional</code> function:</p>
 <pre class="python" language="Python"><code>from edward.models import Bernoulli, Beta
 
@@ -469,7 +469,7 @@ inference = ed.GANInference({x: x_data}, discriminator)
 <dl class="method">
 <dt id="edward.inferences.GANInference.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>optimizer_d=None</em>, <em>global_step=None</em>, <em>global_step_d=None</em>, <em>var_list=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialize variational inference.</p>
+<dd><p>Initialize GAN inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -1203,7 +1203,7 @@ acceptance rate of samples since (and including) this iteration.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.Gibbs.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gibbs.py#L129" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gibbs.py#L130" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p class="rubric">Notes</p>
 <p>The updates assume each Empirical random variable is directly
 parameterized by <a href="#id5"><span class="problematic" id="id6">``</span></a>tf.Variable``s.</p>
@@ -1377,14 +1377,18 @@ rate decreases.</p>
 <span class="target" id="module-edward.inferences.conjugacy"></span><dl class="function">
 <dt id="edward.inferences.conjugacy.complete_conditional">
 <code class="descclassname">edward.inferences.conjugacy.</code><code class="descname">complete_conditional</code><span class="sig-paren">(</span><em>rv</em>, <em>cond_set=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/conjugacy/conjugacy.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Returns the conditional distribution <cite>RandomVariable</cite> p(<cite>rv</cite> | .).</p>
-<p>This function tries to infer the conditional distribution of <cite>rv</cite>
-given <cite>cond_set</cite>, a set of other <cite>RandomVariable`s in the graph. It
-will only be able to do this if
-a) p(`rv</cite> | <cite>cond_set</cite>) is in a tractable exponential family AND
-b) the truth of assumption (a) is not obscured in the TensorFlow graph.
-In other words, this function will do its best to recognize conjugate
-relationships when they exist, but it may not always be able to do the
+<dd><p>Returns the conditional distribution <code class="docutils literal"><span class="pre">RandomVariable</span></code>
+<span class="math">\(p(\text{rv} | \cdot)\)</span>.</p>
+<p>This function tries to infer the conditional distribution of <code class="docutils literal"><span class="pre">rv</span></code>
+given <code class="docutils literal"><span class="pre">cond_set</span></code>, a set of other <a href="#id11"><span class="problematic" id="id12">``</span></a>RandomVariable``s in the graph. It
+will only be able to do this if</p>
+<ol class="arabic simple">
+<li><span class="math">\(p(\text{rv} | \text{cond_set})\)</span> is in a tractable
+exponential family, AND</li>
+<li>the truth of assumption 1 is not obscured in the TensorFlow graph.</li>
+</ol>
+<p>In other words, this function will do its best to recognize conjugate
+relationships when they exist. But it may not always be able to do the
 necessary algebra.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -1392,29 +1396,35 @@ necessary algebra.</p>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>rv</strong> : RandomVariable</p>
 <blockquote>
-<div><p>The <cite>RandomVariable</cite> whose conditional distribution we are interested in.</p>
+<div><p>The random variable whose conditional distribution we are interested in.</p>
 </div></blockquote>
-<p><strong>cond_set</strong> : iterable of RandomVariables, optional</p>
+<p><strong>cond_set</strong> : iterable of RandomVariable, optional</p>
 <blockquote class="last">
-<div><p>The set of <cite>RandomVariable`s we want to condition on. Defaults to all
-`RandomVariable`s in the graph. (It makes no difference if `cond_set</cite> does
-or does not include <cite>rv</cite>.)</p>
+<div><p>The set of random variables we want to condition on. Default is all
+random variables in the graph. (It makes no difference if <code class="docutils literal"><span class="pre">cond_set</span></code>
+does or does not include <code class="docutils literal"><span class="pre">rv</span></code>.)</p>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>When calling <cite>complete_conditional()</cite> multiple times, one should
-usually pass an explicit <cite>cond_set</cite>. Otherwise
-<cite>complete_conditional()</cite> will try to condition on the
-<a href="#id11"><span class="problematic" id="id12">`</span></a>RandomVariable`s returned by previous calls to itself, which may
+<p>When calling <code class="docutils literal"><span class="pre">complete_conditional()</span></code> multiple times, one should
+usually pass an explicit <code class="docutils literal"><span class="pre">cond_set</span></code>. Otherwise
+<code class="docutils literal"><span class="pre">complete_conditional()</span></code> will try to condition on the
+<a href="#id13"><span class="problematic" id="id14">``</span></a>RandomVariable``s returned by previous calls to itself. This may
 result in unpredictable behavior.</p>
 </dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
+<div id="ref-bishop2006pattern">
+<p>Bishop, C. M. (2006). <em>Pattern recognition and machine learning</em>. Springer New York.</p>
+</div>
 <div id="ref-doucet2001introduction">
 <p>Doucet, A., De Freitas, N., &amp; Gordon, N. (2001). An introduction to sequential Monte Carlo methods. In <em>Sequential monte carlo methods in practice</em> (pp. 3–14). Springer.</p>
+</div>
+<div id="ref-gelfand1990sampling">
+<p>Gelfand, A. E., &amp; Smith, A. F. (1990). Sampling-based approaches to calculating marginal densities. <em>Journal of the American Statistical Association</em>, <em>85</em>(410), 398–409.</p>
 </div>
 <div id="ref-goodfellow2014generative">
 <p>Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., … Bengio, Y. (2014). Generative adversarial nets. In <em>Neural information processing systems</em>.</p>

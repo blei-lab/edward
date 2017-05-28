@@ -135,7 +135,7 @@
 </div>
 </div>
 <h3 id="data-subsampling">Data Subsampling</h3>
-<p>Running algorithms which require the full data set for each update can be expensive when the data is large. In order to scale inferences, we can do <em>data subsampling</em>, i.e., update inference using only a subsample of data at a time. (Note that only certain algorithms can support data subsampling such as <code>MAP</code>, <code>KLqp</code>, and <code>SGLD</code>.)</p>
+<p>Running algorithms which require the full data set for each update can be expensive when the data is large. In order to scale inferences, we can do <em>data subsampling</em>, i.e., update inference using only a subsample of data at a time. (Note that only certain algorithms support data subsampling such as <code>MAP</code>, <code>KLqp</code>, and <code>SGLD</code>.)</p>
 <h3 id="subgraphs">Subgraphs</h3>
 <p><img alt="image" src="/images/hierarchical_model_subgraph.png" width="250"/><br/>
 <span><em>Data subsampling with a hierarchical model. We define a subgraph of the full model, forming a plate of size <span class="math inline">\(M\)</span> rather than <span class="math inline">\(N\)</span>.</em></span></p>
@@ -143,7 +143,7 @@
 <p>For example, consider a hierarchical model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),\]</span> where there are latent variables <span class="math inline">\(z_n\)</span> for each data point <span class="math inline">\(x_n\)</span> (local variables) and latent variables <span class="math inline">\(\beta\)</span> which are shared across data points (global variables).</p>
 <p>To avoid memory issues, we work on only a subgraph of the model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
-= p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta).\]</span> More concretely, we define a mixture of Gaussians over <span class="math inline">\(D\)</span>-dimensional data <span class="math inline">\(\{x_n\}\in\mathbb{R}^{N\times D}\)</span>. There are <span class="math inline">\(K\)</span> latent cluster means <span class="math inline">\(\{\beta_k\}\in\mathbb{R}^{K\times D}\)</span> and a membership assignment <span class="math inline">\(z_n\in\{0,\ldots,K-1\}\)</span> for each data point <span class="math inline">\(x_n\)</span>.</p>
+= p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta).\]</span> More concretely, we might define a mixture of Gaussians over <span class="math inline">\(D\)</span>-dimensional data <span class="math inline">\(\{x_n\}\in\mathbb{R}^{N\times D}\)</span>. There are <span class="math inline">\(K\)</span> latent cluster means <span class="math inline">\(\{\beta_k\}\in\mathbb{R}^{K\times D}\)</span> and a membership assignment <span class="math inline">\(z_n\in\{0,\ldots,K-1\}\)</span> for each data point <span class="math inline">\(x_n\)</span>.</p>
 <pre class="python" language="Python"><code>from edward.models import Categorical, Normal
 
 N = 10000000  # data set size
@@ -154,14 +154,14 @@ K = 5  # number of clusters
 beta = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
 z = Categorical(logits=tf.zeros([M, K]))
 x = Normal(loc=tf.gather(beta, z), scale=tf.ones([M, D]))</code></pre>
-<p>For inference, the variational model is <span class="math display">\[q(\mathbf{z}, \beta) =
+<p>For inference, the variational model follows the same factorization as the posterior, <span class="math display">\[q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{n=1}^N q(z_n \mid \beta; \gamma_n),\]</span> parameterized by <span class="math inline">\(\{\lambda, \{\gamma_n\}\}\)</span>. Again, we work on only a subgraph of the model, <span class="math display">\[q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{m=1}^M q(z_m \mid \beta; \gamma_m).\]</span> parameterized by <span class="math inline">\(\{\lambda, \{\gamma_m\}\}\)</span>. Importantly, only <span class="math inline">\(M\)</span> parameters are stored in memory for <span class="math inline">\(\{\gamma_m\}\)</span> rather than <span class="math inline">\(N\)</span>.</p>
 <pre class="python" language="Python"><code>qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
                scale=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
 qz_variables = tf.Variable(tf.zeros([M, K]))
 qz = Categorical(logits=qz_variables)</code></pre>
-<p>We will perform inference with <code>KLqp</code>, a variational method that minimizes the divergence measure <span class="math inline">\(\text{KL}(q\| p)\)</span>.</p>
+<p>For illustration, we perform inference with <code>KLqp</code>, a variational method that minimizes the divergence measure <span class="math inline">\(\text{KL}(q\| p)\)</span>.</p>
 <p>We instantiate two algorithms: a global inference over <span class="math inline">\(\beta\)</span> given the subset of <span class="math inline">\(\mathbf{z}\)</span> and a local inference over the subset of <span class="math inline">\(\mathbf{z}\)</span> given <span class="math inline">\(\beta\)</span>. We also pass in a TensorFlow placeholder <code>x_ph</code> for the data, so we can change the data at each step. (Alternatively, <a href="/api/data">batch tensors</a> can be used.)</p>
 <pre class="python" language="Python"><code>x_ph = tf.placeholder(tf.float32, [M])
 inference_global = ed.KLqp({beta: qbeta}, data={x: x_ph, z: qz})
