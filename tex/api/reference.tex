@@ -4,10 +4,10 @@
 
 \subsubsection{Models}
 
-Most Edward random variables are light wrappers around distributions
-in TensorFlow. Therefore the list of available random variables
-depends on the TensorFlow version installed. For TensorFlow
-{{tensorflow_version}}, the following are available:
+Most Edward random variables are wrappers around TensorFlow distributions.
+Therefore the list of available models depends on the TensorFlow version
+installed. For TensorFlow {{tensorflow_version}}, the following models are
+available:
 
 {%sphinx
 
@@ -20,10 +20,6 @@ depends on the TensorFlow version installed. For TensorFlow
 %}
 
 \subsubsection{Inference}
-
-Inference is mostly comprised of classes. They are organized in a
-class hierarchy, where methods are shared via parent classes and
-\texttt{Inference} is the top-most base class.
 
 {%sphinx
 
@@ -59,21 +55,17 @@ class hierarchy, where methods are shared via parent classes and
   * :class:`edward.inferences.SGLD`
   * :class:`edward.inferences.SGHMC`
 
-* :func:`edward.inferences.conjugacy.complete_conditional`
+* :func:`edward.complete_conditional`
 
 %}
 
 \subsubsection{Criticism}
 
-Criticism is comprised of functions. They either operate on random
-variables in the model or NumPy arrays representing values drawn
-from the random variables.
-
 {%sphinx
 
-* :func:`edward.criticisms.evaluate`
-* :func:`edward.criticisms.ppc`
-* :func:`edward.criticisms.ppc_density_plot`
-* :func:`edward.criticisms.ppc_stat_hist_plot`
+* :func:`edward.evaluate`
+* :func:`edward.ppc`
+* :func:`edward.ppc_density_plot`
+* :func:`edward.ppc_stat_hist_plot`
 
 %}

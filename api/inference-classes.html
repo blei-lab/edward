@@ -176,13 +176,25 @@ qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
 qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
 
 inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
-<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{z}^{(t)}\)</span> at a time in the empirical approximation. Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{(z)}^{(t)}\)</span> at a time in the empirical approximation. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of <code>tf.Variable</code>s). Specific Monte Carlo samplers determine the update rules; they can use gradients such as in Hamiltonian Monte Carlo <span class="citation">(Neal, 2011)</span> and graph structure such as in sequential Monte Carlo <span class="citation">(Doucet, De Freitas, &amp; Gordon, 2001)</span>.</p>
+<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{(z)}^{(t)}\)</span> at a time in the empirical approximation. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of <code>tf.Variable</code>s). Specific Monte Carlo samplers determine the update rules; they can use gradients such as in Hamiltonian Monte Carlo <span class="citation">(Neal, 2011)</span> and graph structure such as in sequential Monte Carlo <span class="citation">(Doucet, De Freitas, &amp; Gordon, 2001)</span>.</p>
 <h3 id="non-bayesian-methods">Non-Bayesian Methods</h3>
 <p>As a library for probabilistic modeling (not necessarily Bayesian modeling), Edward is agnostic to the paradigm for inference. This means Edward can use frequentist (population-based) inferences, strictly point estimation, and alternative foundations for parameter uncertainty.</p>
 <p>For example, Edward supports non-Bayesian methods such as generative adversarial networks (GANs) <span class="citation">(Goodfellow et al., 2014)</span>. For more details, see the <a href="/tutorials/gan">GAN tutorial</a>.</p>
 <p>In general, we think opening the door to non-Bayesian approaches is a crucial feature for probabilistic programming. This enables advances in other fields such as deep learning to be complementary: all is in service for probabilistic models and thus it makes sense to combine our efforts.</p>
 <h3 id="exact-inference">Exact Inference</h3>
-<p>This approach also extends to algorithms that usually require tedious algebraic manipulation. With symbolic algebra on the nodes of the computational graph, we can uncover conjugacy relationships between random variables. Users can then integrate out variables to automatically derive classical Gibbs <span class="citation">(Gelfand &amp; Smith, 1990)</span>, mean-field updates <span class="citation">(Bishop, 2006)</span>, and exact inference.</p>
+<p>In order to uncover conjugacy relationships between random variables (if they exist), we use symbolic algebra on nodes in the computational graph. Users can then integrate out variables to automatically derive clas<span>bishop2006pattern</span>, and exact inference.</p>
+<p>For example, can calculate a conjugate posterior analytically by using the <code>ed.complete_conditional</code> function:</p>
+<pre class="python" language="Python"><code>from edward.models import Bernoulli, Beta
+
+# Beta-Bernoulli model
+pi = Beta(1.0, 1.0)
+x = Bernoulli(probs=pi, sample_shape=10)
+
+# Beta posterior; it conditions on the sample tensor associated to x
+pi_cond = ed.complete_conditional(pi)
+
+# Generate samples from p(pi | x = NumPy array)
+sess.run(pi_cond, {x: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])})</code></pre>
 <hr/>
 <p>The classes below inherit methods from base inference classes; see the <a href="/api/inference-development">development page</a> for more details.</p>
 <dl class="class">
@@ -230,7 +242,7 @@ Defaults to TensorFlow.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L118" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L136" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of optimizer for variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -255,12 +267,12 @@ loss function value after one iteration.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L154" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L172" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.VariationalInference.build_loss_and_gradients">
-<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L162" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_loss_and_gradients</code><span class="sig-paren">(</span><em>var_list</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/variational_inference.py#L180" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build loss function and its gradients. They will be leveraged
 in an optimizer to update the model and variational parameters.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">VariationalInference</span></code> <strong>must</strong> implement
@@ -457,7 +469,7 @@ inference = ed.GANInference({x: x_data}, discriminator)
 <dl class="method">
 <dt id="edward.inferences.GANInference.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>optimizer_d=None</em>, <em>global_step=None</em>, <em>global_step_d=None</em>, <em>var_list=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L60" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialize GAN inference.</p>
+<dd><p>Initialize variational inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
 <col class="field-body"></col>
@@ -501,7 +513,7 @@ and <code class="docutils literal"><span class="pre">data</span></code> depend o
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.GANInference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em>, <em>variables=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L133" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em>, <em>variables=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L147" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of optimization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -535,7 +547,7 @@ parameters.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.GANInference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L191" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/gan_inference.py#L205" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 </dd></dl>
@@ -569,7 +581,7 @@ inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.WGANInference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">WGANInference</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/wgan_inference.py#L12" title="Link to definition on GitHub.">[source]</a></dt>
+<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">WGANInference</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/wgan_inference.py#L17" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Parameter estimation with GAN-style training (Goodfellow et al.,
 2014), using the Wasserstein distance (Arjovsky et al., 2017).</p>
 <p>Works for the class of implicit (and differentiable) probabilistic
@@ -589,6 +601,30 @@ x = generative_network(z)
 inference = ed.WGANInference({x: x_data}, discriminator)
 </code>
 </pre>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="edward.inferences.WGANInference.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>penalty=10.0</em>, <em>clip=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/wgan_inference.py#L44" title="Link to definition on GitHub.">[source]</a></dt>
+<dd><p>Initialize Wasserstein GAN inference.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>penalty</strong> : float, optional</p>
+<blockquote>
+<div><p>Scalar value to enforce gradient penalty that ensures the
+gradients have norm equal to 1 (Gulrajani et al., 2017). Set to
+None (or 0.0) if using no penalty.</p>
+</div></blockquote>
+<p><strong>clip</strong> : float, optional</p>
+<blockquote class="last">
+<div><p>Value to clip weights by. Default is no clipping.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 </dd></dl>
 <dl class="class">
 <dt id="edward.inferences.ImplicitKLqp">
@@ -985,7 +1021,7 @@ each dimension.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L100" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L105" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Run one iteration of sampling for Monte Carlo.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -1015,12 +1051,12 @@ separately forces a consistent behavior.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L143" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L148" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Print progress to output.</p>
 </dd></dl>
 <dl class="method">
 <dt id="edward.inferences.MonteCarlo.build_update">
-<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L151" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descname">build_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/monte_carlo.py#L156" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Build update rules, returning an assign op for parameters in
 the <code class="docutils literal"><span class="pre">Empirical</span></code> random variables.</p>
 <p>Any derived class of <code class="docutils literal"><span class="pre">MonteCarlo</span></code> <strong>must</strong> implement this method.</p>
@@ -1113,7 +1149,7 @@ If not specified, default is to use <code class="docutils literal"><span class="
 <pre class="python" language="Python"><code>x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 p = Beta(1.0, 1.0)
-x = Bernoulli(p=p, sample_shape=10)
+x = Bernoulli(probs=p, sample_shape=10)
 
 qp = Empirical(tf.Variable(tf.zeros(500)))
 inference = ed.Gibbs({p: qp}, data={x: x_data})
@@ -1341,18 +1377,14 @@ rate decreases.</p>
 <span class="target" id="module-edward.inferences.conjugacy"></span><dl class="function">
 <dt id="edward.inferences.conjugacy.complete_conditional">
 <code class="descclassname">edward.inferences.conjugacy.</code><code class="descname">complete_conditional</code><span class="sig-paren">(</span><em>rv</em>, <em>cond_set=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/conjugacy/conjugacy.py#L61" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Returns the conditional distribution <code class="docutils literal"><span class="pre">RandomVariable</span></code>
-<span class="math">\(p(\text{rv} | \cdot)\)</span>.</p>
-<p>This function tries to infer the conditional distribution of <code class="docutils literal"><span class="pre">rv</span></code>
-given <code class="docutils literal"><span class="pre">cond_set</span></code>, a set of other <a href="#id11"><span class="problematic" id="id12">``</span></a>RandomVariable``s in the graph. It
-will only be able to do this if</p>
-<ol class="arabic simple">
-<li><span class="math">\(p(\text{rv} | \text{cond_set})\)</span> is in a tractable
-exponential family, AND</li>
-<li>the truth of assumption 1 is not obscured in the TensorFlow graph.</li>
-</ol>
-<p>In other words, this function will do its best to recognize conjugate
-relationships when they exist. But it may not always be able to do the
+<dd><p>Returns the conditional distribution <cite>RandomVariable</cite> p(<cite>rv</cite> | .).</p>
+<p>This function tries to infer the conditional distribution of <cite>rv</cite>
+given <cite>cond_set</cite>, a set of other <cite>RandomVariable`s in the graph. It
+will only be able to do this if
+a) p(`rv</cite> | <cite>cond_set</cite>) is in a tractable exponential family AND
+b) the truth of assumption (a) is not obscured in the TensorFlow graph.
+In other words, this function will do its best to recognize conjugate
+relationships when they exist, but it may not always be able to do the
 necessary algebra.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name"></col>
@@ -1360,35 +1392,29 @@ necessary algebra.</p>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>rv</strong> : RandomVariable</p>
 <blockquote>
-<div><p>The random variable whose conditional distribution we are interested in.</p>
+<div><p>The <cite>RandomVariable</cite> whose conditional distribution we are interested in.</p>
 </div></blockquote>
-<p><strong>cond_set</strong> : iterable of RandomVariable, optional</p>
+<p><strong>cond_set</strong> : iterable of RandomVariables, optional</p>
 <blockquote class="last">
-<div><p>The set of random variables we want to condition on. Default is all
-random variables in the graph. (It makes no difference if <code class="docutils literal"><span class="pre">cond_set</span></code>
-does or does not include <code class="docutils literal"><span class="pre">rv</span></code>.)</p>
+<div><p>The set of <cite>RandomVariable`s we want to condition on. Defaults to all
+`RandomVariable`s in the graph. (It makes no difference if `cond_set</cite> does
+or does not include <cite>rv</cite>.)</p>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>When calling <code class="docutils literal"><span class="pre">complete_conditional()</span></code> multiple times, one should
-usually pass an explicit <code class="docutils literal"><span class="pre">cond_set</span></code>. Otherwise
-<code class="docutils literal"><span class="pre">complete_conditional()</span></code> will try to condition on the
-<a href="#id13"><span class="problematic" id="id14">``</span></a>RandomVariable``s returned by previous calls to itself, which may
+<p>When calling <cite>complete_conditional()</cite> multiple times, one should
+usually pass an explicit <cite>cond_set</cite>. Otherwise
+<cite>complete_conditional()</cite> will try to condition on the
+<a href="#id11"><span class="problematic" id="id12">`</span></a>RandomVariable`s returned by previous calls to itself, which may
 result in unpredictable behavior.</p>
 </dd></dl>
 <h3 class="unnumbered" id="references">References</h3>
 <div class="references" id="refs">
-<div id="ref-bishop2006pattern">
-<p>Bishop, C. M. (2006). <em>Pattern recognition and machine learning</em>. Springer New York.</p>
-</div>
 <div id="ref-doucet2001introduction">
 <p>Doucet, A., De Freitas, N., &amp; Gordon, N. (2001). An introduction to sequential Monte Carlo methods. In <em>Sequential monte carlo methods in practice</em> (pp. 3–14). Springer.</p>
-</div>
-<div id="ref-gelfand1990sampling">
-<p>Gelfand, A. E., &amp; Smith, A. F. (1990). Sampling-based approaches to calculating marginal densities. <em>Journal of the American Statistical Association</em>, <em>85</em>(410), 398–409.</p>
 </div>
 <div id="ref-goodfellow2014generative">
 <p>Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., … Bengio, Y. (2014). Generative adversarial nets. In <em>Neural information processing systems</em>.</p>

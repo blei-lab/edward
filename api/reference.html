@@ -129,7 +129,7 @@
 </div>
 </div>
 <h3 id="models">Models</h3>
-<p>Most Edward random variables are light wrappers around distributions in TensorFlow. Therefore the list of available random variables depends on the TensorFlow version installed. For TensorFlow 1.1.0, the following are available:</p>
+<p>Most Edward random variables are wrappers around TensorFlow distributions. Therefore the list of available models depends on the TensorFlow version installed. For TensorFlow 1.1.0, the following models are available:</p>
 <ul class="simple">
 <li><a class="reference internal" href="model.html#edward.models.RandomVariable" title="edward.models.RandomVariable"><code class="xref py py-class docutils literal"><span class="pre">edward.models.RandomVariable</span></code></a></li>
 <li><a class="reference internal" href="model.html#edward.models.DirichletProcess" title="edward.models.DirichletProcess"><code class="xref py py-class docutils literal"><span class="pre">edward.models.DirichletProcess</span></code></a></li>
@@ -185,7 +185,6 @@
 <li><a class="reference" href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/WishartFull" title="edward.models.WishartFull"><code class="xref py py-class docutils literal"><span class="pre">edward.models.WishartFull</span></code></a></li>
 </ul>
 <h3 id="inference">Inference</h3>
-<p>Inference is mostly comprised of classes. They are organized in a class hierarchy, where methods are shared via parent classes and <code>Inference</code> is the top-most base class.</p>
 <ul class="simple">
 <li><a class="reference internal" href="inference.html#edward.inferences.Inference" title="edward.inferences.Inference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.Inference</span></code></a></li>
 <li><a class="reference internal" href="inference-classes.html#edward.inferences.VariationalInference" title="edward.inferences.VariationalInference"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.VariationalInference</span></code></a><ul>
@@ -219,15 +218,14 @@
 <li><a class="reference internal" href="inference-classes.html#edward.inferences.SGHMC" title="edward.inferences.SGHMC"><code class="xref py py-class docutils literal"><span class="pre">edward.inferences.SGHMC</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="inference-classes.html#edward.inferences.conjugacy.complete_conditional" title="edward.inferences.conjugacy.complete_conditional"><code class="xref py py-func docutils literal"><span class="pre">edward.inferences.conjugacy.complete_conditional()</span></code></a></li>
+<li><code class="xref py py-func docutils literal"><span class="pre">edward.complete_conditional()</span></code></li>
 </ul>
 <h3 id="criticism">Criticism</h3>
-<p>Criticism is comprised of functions. They either operate on random variables in the model or NumPy arrays representing values drawn from the random variables.</p>
 <ul class="simple">
-<li><a class="reference internal" href="criticism.html#edward.criticisms.evaluate" title="edward.criticisms.evaluate"><code class="xref py py-func docutils literal"><span class="pre">edward.criticisms.evaluate()</span></code></a></li>
-<li><a class="reference internal" href="criticism.html#edward.criticisms.ppc" title="edward.criticisms.ppc"><code class="xref py py-func docutils literal"><span class="pre">edward.criticisms.ppc()</span></code></a></li>
-<li><a class="reference internal" href="criticism.html#edward.criticisms.ppc_density_plot" title="edward.criticisms.ppc_density_plot"><code class="xref py py-func docutils literal"><span class="pre">edward.criticisms.ppc_density_plot()</span></code></a></li>
-<li><a class="reference internal" href="criticism.html#edward.criticisms.ppc_stat_hist_plot" title="edward.criticisms.ppc_stat_hist_plot"><code class="xref py py-func docutils literal"><span class="pre">edward.criticisms.ppc_stat_hist_plot()</span></code></a></li>
+<li><code class="xref py py-func docutils literal"><span class="pre">edward.evaluate()</span></code></li>
+<li><code class="xref py py-func docutils literal"><span class="pre">edward.ppc()</span></code></li>
+<li><code class="xref py py-func docutils literal"><span class="pre">edward.ppc_density_plot()</span></code></li>
+<li><code class="xref py py-func docutils literal"><span class="pre">edward.ppc_stat_hist_plot()</span></code></li>
 </ul>
 </div>
 </div>

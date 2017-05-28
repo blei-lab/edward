@@ -193,7 +193,7 @@ print(ed.evaluate(&#39;mean_absolute_error&#39;, data={X: X_test, y_post: y_test
 <p>The trained model makes predictions with low error (relative to the magnitude of the output).</p>
 <p>We can also visualize the fit by comparing data generated with the prior to data generated with the posterior (on the first feature dimension).</p>
 <pre class="python" language="Python"><code>def visualise(X_data, y_data, w, b, n_samples=10):
-  w_samples = w.sample(n_samples)[0].eval()
+  w_samples = w.sample(n_samples)[:, 0].eval()
   b_samples = b.sample(n_samples).eval()
   plt.scatter(X_data[:, 0], y_data)
   inputs = np.linspace(-8, 8, num=400)

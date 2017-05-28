@@ -22,7 +22,7 @@ It is a data set of instructor evaluation ratings, where the inputs
 instructor evaluation rating.
 
 \begin{lstlisting}[language=Python]
-data = pd.read_csv('../../examples/data/insteval.csv')
+data = pd.read_csv('../examples/data/insteval.csv')
 data['dcodes'] = data['d'].astype('category').cat.codes
 data['deptcodes'] = data['dept'].astype('category').cat.codes
 data['s'] = data['s'] - 1
@@ -50,7 +50,7 @@ n_obs = train.shape[0]  # number of observations
 
 With linear regression, one makes an independence assumption where
 each data point regresses with a constant slope among each other. In
-our setting, the observations come from groups which may have
+our setting, the observations come from sets of groups which may have
 varying slopes and intercepts. Thus we'd like to build a model that
 can capture this behavior \citep{gelman2006data}.
 
@@ -102,10 +102,10 @@ population). We illustrate below in our example:
 \item
 Select \texttt{service} as the fixed effect. It is a binary covariate
 corresponding to whether the lecture belongs to the lecturer's main
-department. No matter how much additional data we collect, it
+department or not. No matter how much additional data we collect, it
 can only take on the values in $0$ and $1$.
 \item
-Select the categorical values of \texttt{students}, \texttt{teachers},
+Selct the categorical values of \texttt{students}, \texttt{teachers},
 and \texttt{departments} as the random effects. Given more
 observations from the population of instructor evaluation ratings, we
 may be looking at new students, teachers, or departments.
@@ -193,6 +193,12 @@ by copying \texttt{yhat} defined in the model and replacing its
 dependence on random effects with their inferred means. During the
 algorithm, we evaluate the predictions, feeding in test inputs.
 
+We have also fit the same model
+\texttt{(y ~ service + (1|dept) + (1|s) + (1|d)},
+fit on the entire InstEval dataset, specifically) in lme4. We
+have saved the random effect estimates and will compare them to our
+learned parameters.
+
 \begin{lstlisting}[language=Python]
 yhat_test = ed.copy(yhat, {
     eta_s: q_eta_s.mean(),
@@ -235,10 +241,94 @@ residual plots.
 Below we show the residuals for the model post-convergence. (For
 intermediate residual plots, check the Jupyter notebook.)
 
-\includegraphics[width=450px]{/images/linear-mixed-effects-models.png}
+\includegraphics[width=450px]{/images/linear-mixed-effects-models-fig0.png}
 
-The residuals appear normally distributed with mean 0. This provides
-evidence that the model correctly fits the data.
+The residuals appear normally distributed with mean 0. The residuals
+appear normally distributed with mean 0. This is a good
+sanity check for the model.
+
+We can also compare our learned parameters to those estimated by R's
+`lme4`.
+
+\begin{lstlisting}[language=Python]
+student_effects_lme4 = pd.read_csv('../examples/data/insteval_student_ranefs_r.csv')
+instructor_effects_lme4 = pd.read_csv('../examples/data/insteval_instructor_ranefs_r.csv')
+dept_effects_lme4 = pd.read_csv('../examples/data/insteval_dept_ranefs_r.csv')
+
+student_effects_edward = q_eta_s.mean().eval()
+instructor_effects_edward = q_eta_d.mean().eval()
+dept_effects_edward = q_eta_dept.mean().eval()
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+plt.title("Student Effects Comparison")
+plt.xlim(-1, 1)
+plt.ylim(-1, 1)
+plt.xlabel("Student Effects from lme4")
+plt.ylabel("Student Effects from edward")
+plt.scatter(student_effects_lme4["(Intercept)"],
+            student_effects_edward,
+            alpha = 0.25)
+plt.show()
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/linear-mixed-effects-models-fig1.png}
+
+\begin{lstlisting}[language=Python]
+plt.title("Instructor Effects Comparison")
+plt.xlim(-1.5, 1.5)
+plt.ylim(-1.5, 1.5)
+plt.xlabel("Instructor Effects from lme4")
+plt.ylabel("Instructor Effects from edward")
+plt.scatter(instructor_effects_lme4["(Intercept)"],
+            instructor_effects_edward,
+            alpha = 0.25)
+plt.show()
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/linear-mixed-effects-models-fig2.png}
+
+Great!  Our estimates for both student and instructor effects seem to
+match those from `lme4` closely.  We have set up a slightly different
+model here (for example, our overall mean is regularized, as are our
+variances for student, department, and instructor effects, which is not
+true of `lme4`s model), and we have a different inference method, so we
+should not expect to find exactly the same parameters as `lme4`.  But
+it is reassuring that they match up closely!
+
+\begin{lstlisting}[language=Python]
+#  Add in the intercept from R and edward
+dept_effects_and_intercept_lme4 = 3.28259 + dept_effects_lme4["(Intercept)"]
+dept_effects_and_intercept_edward = mu.eval() + dept_effects_edward
+
+plt.title("Departmental Effects Comparison")
+plt.xlim(3.0, 3.5)
+plt.ylim(3.0, 3.5)
+plt.xlabel("Department Effects from lme4")
+plt.ylabel("Department Effects from edward")
+plt.scatter(dept_effects_and_intercept_lme4,
+            dept_effects_and_intercept_edward,
+            s = 0.01*train.dept.value_counts())
+plt.show()
+\end{lstlisting}
+
+\includegraphics[width=450px]{/images/linear-mixed-effects-models-fig3.png}
+
+Our department effects do not match up nearly as well with those from `lme4`.
+There are likely several reasons for this:
+
+\begin{itemize}
+\item
+  We regularize the overall mean, while `lme4` doesn't. This causes the
+  Edward model to put some of the intercept into the department effects,
+  which are allowed to vary more widely since we learn a variance
+\item
+  We are using 80% of the data to train the edward model, while our `lme4`
+  estimate uses the whole `InstEval` data set
+\item
+  The department effects are the weakest in the model and difficult to
+  estimate.
+\end{itemize}
 
 \subsubsection{Acknowledgments}
 

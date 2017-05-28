@@ -124,11 +124,10 @@ The optimization problem used in GANs is
 + \mathbb{E}_{p(\mathbf{x}; \theta)} [ \log (1 - D(\mathbf{x}; \phi)) ].
 \end{equation*}
 
-This optimization problem is bilevel: it requires a minima solution
-with respect to generative parameters and a maxima solution with
-respect to discriminative parameters.
-In practice, the algorithm proceeds by iterating gradient updates on
-each. An additional heuristic also modifies the objective function for the
+This optimization problem is bilevel: it requires a min-max solution.
+In practice, the algorithm proceeds by iterating among these two
+optimizations, alternating gradient updates. An
+additional heuristic also modifies the objective function for the
 generative model in order to avoid saturation of gradients
 \citep{goodfellow2014on}.
 
