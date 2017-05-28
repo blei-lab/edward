@@ -92,7 +92,6 @@ class Gibbs(MonteCarlo):
     if feed_dict is None:
       feed_dict = {}
 
-    feed_dict.update(self.init_const_bindings)
     feed_dict.update(self.feed_dict)
 
     # Determine scan order.
