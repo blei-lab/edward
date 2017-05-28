@@ -103,9 +103,9 @@ class GANInference(VariationalInference):
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar('loss_discriminative', self.loss_d,
+      tf.summary.scalar('loss/discriminative', self.loss_d,
                         collections=[summary_key])
-      tf.summary.scalar('loss_generative', self.loss,
+      tf.summary.scalar('loss/generative', self.loss,
                         collections=[summary_key])
       self.summarize = tf.summary.merge_all(key=summary_key)
 
