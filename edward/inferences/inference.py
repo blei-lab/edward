@@ -6,6 +6,8 @@ import abc
 import numpy as np
 import six
 import tensorflow as tf
+import os
+from datetime import datetime
 
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, Progbar
@@ -187,9 +189,6 @@ class Inference(object):
       in the graph. May result in substantially slower execution
       times.
     """
-    from datetime import datetime
-    import os
-
     self.n_iter = n_iter
     if n_print is None:
       self.n_print = int(n_iter / 10)
@@ -213,7 +212,7 @@ class Inference(object):
 
       if logrun is None:
         # Set default to timestamp
-        logrun = datetime.strftime(datetime.utcnow(), "%Y%m%dT%H%M%S")
+        logrun = datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S")
       if len(logrun):
         logdir = os.path.join(logdir, logrun)
 
@@ -288,8 +287,8 @@ class Inference(object):
   def set_log_variables(self, logvars=None, log_max_scalers_per_var=None):
     """Logs variables to TensorBoard
 
-     For each variable in logvars, creates 'scalar' and / or 'histogram' by
-     calling `tf.summary.scalar` or `tf.summary.histogram`
+     For each variable in logvars, creates ``scalar`` and / or ``histogram`` by
+     calling ``tf.summary.scalar`` or ``tf.summary.histogram``
 
      if logvars is None, automatically log all latent variables that have been
      given non-default names.  If logvars is [], no logging will be created.
@@ -309,6 +308,12 @@ class Inference(object):
     """
     if logvars is None:
       logvars = []
+
+      # Add model parameters
+      for k in self.data:
+        logvars += get_variables(self.data[k])
+
+      # Add model priors
       for k in self.latent_vars:
         logvars += get_variables(self.latent_vars[k])
 
