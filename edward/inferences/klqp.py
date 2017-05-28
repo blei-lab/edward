@@ -446,16 +446,16 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
 
   p_log_lik = tf.reduce_mean(tf.stack(p_log_lik))
 
-  kl = tf.reduce_sum([
+  kl_penalty = tf.reduce_sum([
       inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
     summary_key = 'summaries_' + str(id(inference))
     tf.summary.scalar('p_log_lik', p_log_lik, collections=[summary_key])
-    tf.summary.scalar('kl', kl, collections=[summary_key])
+    tf.summary.scalar('kl_penalty', kl_penalty, collections=[summary_key])
 
-  loss = -(p_log_lik - kl)
+  loss = -(p_log_lik - kl_penalty)
 
   grads = tf.gradients(loss, var_list)
   grads_and_vars = list(zip(grads, var_list))
@@ -627,7 +627,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   p_log_lik = tf.stack(p_log_lik)
   q_log_prob = tf.stack(q_log_prob)
 
-  kl = tf.reduce_sum([
+  kl_penalty = tf.reduce_sum([
       inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
@@ -637,11 +637,11 @@ def build_score_kl_loss_and_gradients(inference, var_list):
                       collections=[summary_key])
     tf.summary.scalar('q_log_prob', tf.reduce_mean(q_log_prob),
                       collections=[summary_key])
-    tf.summary.scalar('kl', kl, collections=[summary_key])
+    tf.summary.scalar('kl_penalty', kl_penalty, collections=[summary_key])
 
-  loss = -(tf.reduce_mean(p_log_lik) - kl)
+  loss = -(tf.reduce_mean(p_log_lik) - kl_penalty)
   grads = tf.gradients(
-      -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl),
+      -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl_penalty),
       var_list)
   grads_and_vars = list(zip(grads, var_list))
   return loss, grads_and_vars
