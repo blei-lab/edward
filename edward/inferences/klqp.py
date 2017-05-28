@@ -388,8 +388,8 @@ def build_reparam_loss_and_gradients(inference, var_list):
         p_log_prob[s] += tf.reduce_sum(
             inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
-  p_log_prob = tf.reduce_mean(tf.stack(p_log_prob))
-  q_log_prob = tf.reduce_mean(tf.stack(q_log_prob))
+  p_log_prob = tf.reduce_mean(p_log_prob)
+  q_log_prob = tf.reduce_mean(q_log_prob)
 
   if inference.logging:
     summary_key = 'summaries_' + str(id(inference))
@@ -444,7 +444,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
         p_log_lik[s] += tf.reduce_sum(
             inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
-  p_log_lik = tf.reduce_mean(tf.stack(p_log_lik))
+  p_log_lik = tf.reduce_mean(p_log_lik)
 
   kl_penalty = tf.reduce_sum([
       inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(ds.kl(qz, z))
@@ -508,7 +508,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
         p_log_prob[s] += tf.reduce_sum(
             inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
-  p_log_prob = tf.reduce_mean(tf.stack(p_log_prob))
+  p_log_prob = tf.reduce_mean(p_log_prob)
 
   q_entropy = tf.reduce_sum([
       qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
