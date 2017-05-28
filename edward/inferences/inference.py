@@ -285,7 +285,7 @@ class Inference(object):
       self.train_writer.close()
 
   def set_log_variables(self, logvars=None, log_max_scalers_per_var=None):
-    """Logs variables to TensorBoard
+    """Logs variables to TensorBoard.
 
      For each variable in logvars, creates ``scalar`` and / or ``histogram`` by
      calling ``tf.summary.scalar`` or ``tf.summary.histogram``
