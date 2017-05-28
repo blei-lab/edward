@@ -163,7 +163,7 @@ class Inference(object):
       Number of iterations for algorithm.
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
-      progress, then specify 0. Default is ``int(n_iter / 10)``.
+      progress, then specify 0. Default is ``int(n_iter / 100)``.
     scale : dict of RandomVariable to tf.Tensor, optional
       A tensor to scale computation for any random variable that it is
       binded to. Its shape must be broadcastable; it is multiplied
@@ -191,7 +191,7 @@ class Inference(object):
     """
     self.n_iter = n_iter
     if n_print is None:
-      self.n_print = int(n_iter / 10)
+      self.n_print = int(n_iter / 100)
     else:
       self.n_print = n_print
 

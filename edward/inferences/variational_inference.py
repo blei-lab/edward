@@ -53,24 +53,42 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
 
+    latent_var_list = set()
+    data_var_list = set()
     if var_list is None:
       # Traverse random variable graphs to get default list of variables.
-      var_list = set()
       trainables = tf.trainable_variables()
       for z, qz in six.iteritems(self.latent_vars):
         if isinstance(z, RandomVariable):
-          var_list.update(get_variables(z, collection=trainables))
+          latent_var_list.update(get_variables(z, collection=trainables))
 
-        var_list.update(get_variables(qz, collection=trainables))
+        latent_var_list.update(get_variables(qz, collection=trainables))
 
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable) and \
                 not isinstance(qx, RandomVariable):
-          var_list.update(get_variables(x, collection=trainables))
+          data_var_list.update(get_variables(x, collection=trainables))
 
-      var_list = list(var_list)
+      var_list = list(data_var_list | latent_var_list)
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
+
+    if self.logging:
+      summary_key = 'summaries_' + str(id(self))
+      tf.summary.scalar("loss", self.loss, collections=[summary_key])
+      for grad, var in grads_and_vars:
+        # replace colons which are an invalid character
+        tf.summary.histogram("parameter/" +
+                             var.name.replace(':', '/'),
+                             var, collections=[summary_key])
+        tf.summary.histogram("gradient/" +
+                             var.name.replace(':', '/'),
+                             grad, collections=[summary_key])
+        tf.summary.scalar("gradient_norm/" +
+                          var.name.replace(':', '/'),
+                          tf.norm(grad), collections=[summary_key])
+
+      self.summarize = tf.summary.merge_all(key=summary_key)
 
     if optimizer is None:
       # Use ADAM with a decaying scale factor.
