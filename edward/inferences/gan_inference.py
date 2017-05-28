@@ -101,6 +101,14 @@ class GANInference(VariationalInference):
     self.train_d = optimizer_d.apply_gradients(grads_and_vars_d,
                                                global_step=global_step_d)
 
+    if self.logging:
+      summary_key = 'summaries_' + str(id(self))
+      tf.summary.scalar('loss_discriminative', self.loss_d,
+                        collections=[summary_key])
+      tf.summary.scalar('loss_generative', self.loss,
+                        collections=[summary_key])
+      self.summarize = tf.summary.merge_all(key=summary_key)
+
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
@@ -109,6 +117,11 @@ class GANInference(VariationalInference):
 
     with tf.variable_scope("Disc", reuse=True):
       d_fake = self.discriminator(x_fake)
+
+    if self.logging:
+      summary_key = 'summaries_' + str(id(self))
+      tf.summary.histogram('disc_outputs', tf.concat(d_true, d_fake, axis=0),
+                           collections=[summary_key])
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_true), logits=d_true) + \
