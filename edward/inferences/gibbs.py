@@ -91,6 +91,7 @@ class Gibbs(MonteCarlo):
     if feed_dict is None:
       feed_dict = {}
 
+    feed_dict.update(self.init_const_bindings)
     feed_dict.update(self.feed_dict)
 
     # Determine scan order.
@@ -117,7 +118,7 @@ class Gibbs(MonteCarlo):
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:

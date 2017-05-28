@@ -127,6 +127,8 @@ class MonteCarlo(Inference):
     if feed_dict is None:
       feed_dict = {}
 
+    feed_dict.update(self.init_const_bindings)
+
     for key, value in six.iteritems(self.data):
       if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
         feed_dict[key] = value
@@ -136,7 +138,7 @@ class MonteCarlo(Inference):
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
