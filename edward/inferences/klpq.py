@@ -131,9 +131,9 @@ class KLpq(VariationalInference):
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar("p_log_prob", tf.reduce_mean(p_log_prob),
+      tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
                         collections=[summary_key])
-      tf.summary.scalar("q_log_prob", tf.reduce_mean(q_log_prob),
+      tf.summary.scalar("loss/q_log_prob", tf.reduce_mean(q_log_prob),
                         collections=[summary_key])
 
     log_w = p_log_prob - q_log_prob

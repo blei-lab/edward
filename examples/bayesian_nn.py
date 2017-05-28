@@ -83,16 +83,7 @@ with tf.name_scope("posterior"):
                   scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]),
                   name="scale")))
 
-with tf.name_scope("inference"):
-  inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
-                       W_1: qW_1, b_1: qb_1,
-                       W_2: qW_2, b_2: qb_2}, data={X: X_train, y: y_train})
-  inference.run(logdir='log/iteration_one')
-
-# This is just to show that TensorBoard can elegantly handle displays
-# of multiple inference runs.
-with tf.name_scope("inference_1"):
-  inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
-                       W_1: qW_1, b_1: qb_1,
-                       W_2: qW_2, b_2: qb_2}, data={X: X_train, y: y_train})
-  inference.run(logdir='log/iteration_two')
+inference = ed.KLqp({W_0: qW_0, b_0: qb_0,
+                     W_1: qW_1, b_1: qb_1,
+                     W_2: qW_2, b_2: qb_2}, data={X: X_train, y: y_train})
+inference.run(logdir='log')
