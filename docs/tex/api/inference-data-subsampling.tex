@@ -8,8 +8,13 @@ Running algorithms which require the full data set for each update
 can be expensive when the data is large. In order to scale inferences,
 we can do \emph{data subsampling}, i.e., update inference using
 only a subsample of data at a time.
-(Note that only certain algorithms can support data subsampling such as
-\texttt{MAP}, \texttt{KLqp}, and \texttt{SGLD}.)
+
+(Note that only certain algorithms support data subsampling such as
+\texttt{MAP}, \texttt{KLqp}, and \texttt{SGLD}. Also, below we
+illustrate data subsampling for hierarchical models; for models with
+only global variables such as Bayesian neural networks, a simpler
+solution exists: see the
+\href{/tutorials/batch-training}{batch training tutorial}.)
 
 \subsubsection{Subgraphs}
 
@@ -25,7 +30,7 @@ It is scalable in that both the
 algorithm's computational complexity (per iteration) and memory
 complexity are independent of the data set size.
 
-For example, consider a hierarchical model,
+As illustration, consider a hierarchical model,
 \begin{equation*}
 p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),
@@ -39,7 +44,7 @@ To avoid memory issues, we work on only a subgraph of the model,
 p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta).
 \end{equation*}
-More concretely, we define a mixture of Gaussians over
+More concretely, we might define a mixture of Gaussians over
 $D$-dimensional data $\{x_n\}\in\mathbb{R}^{N\times D}$. There are $K$
 latent cluster means $\{\beta_k\}\in\mathbb{R}^{K\times D}$ and a
 membership assignment $z_n\in\{0,\ldots,K-1\}$ for each data point
@@ -58,7 +63,8 @@ z = Categorical(logits=tf.zeros([M, K]))
 x = Normal(loc=tf.gather(beta, z), scale=tf.ones([M, D]))
 \end{lstlisting}
 
-For inference, the variational model is
+For inference, the variational model follows the same factorization as
+the posterior,
 \begin{equation*}
 q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{n=1}^N q(z_n \mid \beta; \gamma_n),
@@ -79,7 +85,7 @@ qz_variables = tf.Variable(tf.zeros([M, K]))
 qz = Categorical(logits=qz_variables)
 \end{lstlisting}
 
-We will perform inference with \texttt{KLqp}, a variational method
+For illustration, we perform inference with \texttt{KLqp}, a variational method
 that minimizes the divergence measure $\text{KL}(q\| p)$.
 
 We instantiate two algorithms: a global inference over $\beta$ given

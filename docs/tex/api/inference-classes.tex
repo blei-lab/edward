@@ -86,9 +86,6 @@ qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
 
 inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
 \end{lstlisting}
-Monte Carlo
-algorithms proceed by updating one sample $\beta^{(t)},\mathbf{z}^{(t)}$ at a time in the empirical
-approximation.
 Monte Carlo algorithms proceed by updating one sample
 $\beta^{(t)},\mathbf{(z)}^{(t)}$ at a time in the empirical approximation.
 %
@@ -122,12 +119,28 @@ our efforts.
 
 \subsubsection{Exact Inference}
 
-This approach also extends to algorithms that usually require tedious
-algebraic manipulation.  With symbolic algebra on the nodes of the
-computational graph, we can uncover conjugacy relationships between
-random variables.  Users can then integrate out variables to
-automatically derive classical Gibbs \citep{gelfand1990sampling},
+In order to uncover conjugacy relationships between random variables
+(if they exist), we use symbolic algebra on nodes in the computational
+graph.  Users can then integrate out variables to automatically derive
+classical Gibbs \citep{gelfand1990sampling},
 mean-field updates \citep{bishop2006pattern}, and exact inference.
+
+For example,  can calculate a conjugate posterior analytically by
+using the \texttt{ed.complete_conditional} function:
+
+\begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Beta
+
+# Beta-Bernoulli model
+pi = Beta(1.0, 1.0)
+x = Bernoulli(probs=pi, sample_shape=10)
+
+# Beta posterior; it conditions on the sample tensor associated to x
+pi_cond = ed.complete_conditional(pi)
+
+# Generate samples from p(pi | x = NumPy array)
+sess.run(pi_cond, {x: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])})
+\end{lstlisting}
 
 \begin{center}\rule{3in}{0.4pt}\end{center}
 

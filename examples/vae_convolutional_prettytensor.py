@@ -79,7 +79,7 @@ if not os.path.exists(IMG_DIR):
   os.makedirs(IMG_DIR)
 
 # DATA. MNIST batches are fed at training time.
-mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
+mnist = input_data.read_data_sets(DATA_DIR)
 
 # MODEL
 z = Normal(loc=tf.zeros([M, d]), scale=tf.ones([M, d]))

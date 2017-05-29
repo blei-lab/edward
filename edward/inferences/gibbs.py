@@ -85,7 +85,8 @@ class Gibbs(MonteCarlo):
       for key, value in six.iteritems(self.data):
         if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
           self.feed_dict[key] = value
-        elif isinstance(key, RandomVariable) and isinstance(value, tf.Variable):
+        elif isinstance(key, RandomVariable) and \
+                isinstance(value, (tf.Tensor, tf.Variable)):
           self.feed_dict[key] = sess.run(value)
 
     if feed_dict is None:
@@ -117,7 +118,7 @@ class Gibbs(MonteCarlo):
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
