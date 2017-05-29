@@ -21,8 +21,7 @@ class test_inference_scale_class(tf.test.TestCase):
       qmu = Normal(loc=tf.Variable(0.0), scale=tf.constant(1.0))
 
       x_ph = tf.placeholder(tf.float32, [M])
-      data = {x: x_ph}
-      inference = ed.KLqp({mu: qmu}, data)
+      inference = ed.KLqp({mu: qmu}, data={x: x_ph})
       inference.initialize(scale={x: float(N) / M})
       self.assertAllEqual(inference.scale[x], float(N) / M)
 

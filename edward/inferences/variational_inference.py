@@ -159,7 +159,7 @@ class VariationalInference(Inference):
     _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:

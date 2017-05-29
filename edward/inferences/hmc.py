@@ -162,11 +162,11 @@ def leapfrog(z_old, r_old, step_size, log_joint, n_steps):
   for _ in range(n_steps):
     for i, key in enumerate(six.iterkeys(z_new)):
       z, r = z_new[key], r_new[key]
-      r_new[key] = r + 0.5 * step_size * grad_log_joint[i]
+      r_new[key] = r + 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
       z_new[key] = z + step_size * r_new[key]
 
     grad_log_joint = tf.gradients(log_joint(z_new), list(six.itervalues(z_new)))
     for i, key in enumerate(six.iterkeys(z_new)):
-      r_new[key] += 0.5 * step_size * grad_log_joint[i]
+      r_new[key] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
 
   return z_new, r_new

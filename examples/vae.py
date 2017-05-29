@@ -35,7 +35,7 @@ M = 100  # batch size during training
 d = 2  # latent dimension
 
 # DATA. MNIST batches are fed at training time.
-mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
+mnist = input_data.read_data_sets(DATA_DIR)
 
 # MODEL
 # Define a subgraph of the full model, corresponding to a minibatch of
