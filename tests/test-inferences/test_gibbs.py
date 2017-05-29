@@ -47,6 +47,23 @@ class test_gibbs_class(tf.test.TestCase):
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
                           rtol=1e-2, atol=1e-2)
 
+  def test_data_tensor(self):
+    with self.test_session() as sess:
+      x_data = tf.zeros(50)
+
+      mu = Normal(0.0, 1.0)
+      x = Normal(mu, 1.0, sample_shape=50)
+
+      qmu = Empirical(tf.Variable(tf.ones(1000)))
+
+      # analytic solution: N(mu=0.0, sigma=\sqrt{1/51}=0.140)
+      inference = ed.Gibbs({mu: qmu}, data={x: x_data})
+      inference.run()
+
+      self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
+      self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
+                          rtol=1e-2, atol=1e-2)
+
 if __name__ == '__main__':
   ed.set_seed(127832)
   tf.test.main()

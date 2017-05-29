@@ -60,7 +60,7 @@ class GANInference(VariationalInference):
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
-    """Initialize variational inference.
+    """Initialize GAN inference.
 
     Parameters
     ----------
@@ -192,7 +192,7 @@ class GANInference(VariationalInference):
       raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
