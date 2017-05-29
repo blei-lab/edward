@@ -135,12 +135,13 @@
 </div>
 </div>
 <h3 id="data-subsampling">Data Subsampling</h3>
-<p>Running algorithms which require the full data set for each update can be expensive when the data is large. In order to scale inferences, we can do <em>data subsampling</em>, i.e., update inference using only a subsample of data at a time. (Note that only certain algorithms support data subsampling such as <code>MAP</code>, <code>KLqp</code>, and <code>SGLD</code>.)</p>
+<p>Running algorithms which require the full data set for each update can be expensive when the data is large. In order to scale inferences, we can do <em>data subsampling</em>, i.e., update inference using only a subsample of data at a time.</p>
+<p>(Note that only certain algorithms support data subsampling such as <code>MAP</code>, <code>KLqp</code>, and <code>SGLD</code>. Also, below we illustrate data subsampling for hierarchical models; for models with only global variables such as Bayesian neural networks, a simpler solution exists: see the <a href="/tutorials/batch-training">batch training tutorial</a>.)</p>
 <h3 id="subgraphs">Subgraphs</h3>
 <p><img alt="image" src="/images/hierarchical_model_subgraph.png" width="250"/><br/>
 <span><em>Data subsampling with a hierarchical model. We define a subgraph of the full model, forming a plate of size <span class="math inline">\(M\)</span> rather than <span class="math inline">\(N\)</span>.</em></span></p>
 <p>In the subgraph setting, we do data subsampling while working with a subgraph of the full model. This setting is necessary when the data and model do not fit in memory. It is scalable in that both the algorithm’s computational complexity (per iteration) and memory complexity are independent of the data set size.</p>
-<p>For example, consider a hierarchical model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
+<p>As illustration, consider a hierarchical model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),\]</span> where there are latent variables <span class="math inline">\(z_n\)</span> for each data point <span class="math inline">\(x_n\)</span> (local variables) and latent variables <span class="math inline">\(\beta\)</span> which are shared across data points (global variables).</p>
 <p>To avoid memory issues, we work on only a subgraph of the model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta).\]</span> More concretely, we might define a mixture of Gaussians over <span class="math inline">\(D\)</span>-dimensional data <span class="math inline">\(\{x_n\}\in\mathbb{R}^{N\times D}\)</span>. There are <span class="math inline">\(K\)</span> latent cluster means <span class="math inline">\(\{\beta_k\}\in\mathbb{R}^{K\times D}\)</span> and a membership assignment <span class="math inline">\(z_n\in\{0,\ldots,K-1\}\)</span> for each data point <span class="math inline">\(x_n\)</span>.</p>

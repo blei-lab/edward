@@ -5,7 +5,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="text/css" http-equiv="Content-Style-Type"/>
 <meta content="pandoc" name="generator"/>
-<title>Edward – Tutorials</title>
+<title>Edward – Probability Zoo</title>
 <!-- Mobile Specific Metas -->
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <!-- FONT -->
@@ -118,49 +118,23 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="tutorials">Tutorials</h2>
-<p>Edward provides a testbed for rapid experimentation and research with probabilistic models. Here we show how to apply this process for diverse learning tasks.</p>
-<p><a href="supervised-regression">Bayesian linear regression</a><br/>
-A fundamental model for supervised learning.</p>
-<p><a href="batch-training">Batch training</a><br/>
-How to train a model using only minibatches of data at a time.</p>
-<p><a href="linear-mixed-effects-models">Linear mixed effects models</a><br/>
-Linear modeling of fixed and random effects.</p>
-<p><a href="supervised-classification">Gaussian process classification</a><br/>
-Learning a distribution over functions for supervised classification.</p>
-<p><a href="unsupervised">Mixture models</a><br/>
-Unsupervised learning by clustering data points.</p>
-<p><a href="latent-space-models">Latent space models</a><br/>
-Analyzing connectivity patterns in neural data.</p>
-<p><a href="mixture-density-network">Mixture density networks</a><br/>
-A neural density estimator for solving inverse problems.</p>
-<p><a href="gan">Generative adversarial networks</a><br/>
-Building a deep generative model of MNIST digits.</p>
-<p><a href="decoder">Probabilistic decoder</a><br/>
-A model of latent codes in information theory.</p>
-<p><a href="inference-networks">Inference networks</a><br/>
-How to amortize computation for training and testing models.</p>
-<p><a href="bayesian-neural-network">Bayesian neural network</a><br/>
-Bayesian analysis with neural networks.</p>
-<p><a href="probabilistic-pca">Probabilistic PCA</a><br/>
-Dimensionality reduction with latent variables.</p>
-<p>If you’re interested in contributing a tutorial, checking out the <a href="/contributing">contributing page</a>. For more background and notation, see the pages below.</p>
+<h2 id="probability-zoo">Probability Zoo</h2>
+<p>The <em>Probability Zoo</em> is a community repository for pre-trained probabilistic models. It includes any parameters to the model as well as parameters to its inferred posterior (such as a variational approximation or posterior samples).</p>
 <ul>
-<li><a href="model">Probabilistic models</a></li>
-<li><a href="inference">Inference of probabilistic models</a>
-<ul>
-<li><a href="variational-inference">Variational inference</a></li>
-<li><a href="klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> minimization</a></li>
-<li><a href="klpq"><span class="math inline">\(\text{KL}(p\|q)\)</span> minimization</a></li>
-<li><a href="map">Maximum a posteriori estimation</a></li>
-<li><a href="map-laplace">Laplace approximation</a></li>
-</ul></li>
-<li><a href="criticism">Model criticism</a></li>
+<li><strong>Under construction. Check back soon!</strong></li>
 </ul>
-<p>There are also companion webpages for several papers about Edward.</p>
-<ul>
-<li><a href="/iclr2017">“Deep probabilistic programming” at ICLR 2017</a></li>
-</ul>
+<p>To contribute a pre-trained model to the repository, please submit a <a href="https://github.com/blei-lab/edward/pulls">pull request</a>. The parameters should be preferably stored in a <a href="https://www.tensorflow.org/versions/master/how_tos/variables/">TensorFlow checkpoint file</a>.</p>
+<h3 id="footnotes">Footnotes</h3>
+<p>The Probability Zoo is inspired by the model zoo in <a href="http://caffe.berkeleyvision.org">Caffe</a> <span class="citation">(Jia et al., 2014)</span>, which provides many pre-trained discriminative neural networks. It is also inspired by <a href="http://forestdb.org">Forest</a> <span class="citation">(Stuhlmüller, 2012)</span>, which provides examples of probabilistic programs.</p>
+<h3 class="unnumbered" id="references">References</h3>
+<div class="references" id="refs">
+<div id="ref-jia2014caffe">
+<p>Jia, Y., Shelhamer, E., Donahue, J., Karayev, S., Long, J., Girshick, R., … Darrell, T. (2014). Caffe: Convolutional architecture for fast feature embedding. <em>ArXiv Preprint ArXiv:1408.5093</em>.</p>
+</div>
+<div id="ref-stuhlmueller2012forest">
+<p>Stuhlmüller, A. (2012). Forest: A repository for generative models. Retrieved from <a class="uri" href="http://forestdb.org">http://forestdb.org</a></p>
+</div>
+</div>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Batch Training</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  /* Docstrings. */
+  dl.class + dl.class, dl.function + dl.function {
+    /* Add border inbetween docstrings. */
+    border-top: 1px solid #E1E1E1;
+  }
+  dt { /* Add spacing for top border. */
+    margin-top: 1.0rem;
+  }
+  dd { /* Remove overall indenting in an entry. */
+    margin-left: 0.0rem;
+  }
+  dl th, dl td { /* Remove extraneous padding and decorations. */
+    padding: 0 15px 0 0;
+    border: none;
+  }
+  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
+    font-family: monospace, monospace;
+    font-style: normal;
+    font-size: 14px !important;
+  }
+  /* Attribute contents within a docstring. */
+  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
+    margin-left: 0.0rem;
+    margin-top: 0.0rem;
+    margin-bottom: 0.0rem;
+  }
+  dl td p { /* Reduce spacing. */
+    margin-bottom: 0.75rem;
+  }
+  dl td.field-body { /* Add indenting. */
+    padding-top: 0.75rem;
+    padding-left: 2.0rem;
+    display: block;
+  }
+  dl code { /* Keep code font size consistent with rest of contents. */
+    font-size: 90%;
+  }
+  </style>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/getting-started">Getting Started</a>
+    <a class="button u-full-width" href="/tutorials/">Tutorials</a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <a class="button u-full-width" href="/community">Community</a>
+    <a class="button u-full-width" href="/contributing">Contributing</a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+
+<h2 id="batch-training">Batch Training</h2>
+<p>Running algorithms which require the full data set for each update can be expensive when the data is large. In order to scale inferences, we can do <em>batch training</em>. This trains the model using only a subsample of data at a time.</p>
+<p>In this tutorial, we extend the <a href="http://edwardlib.org/tutorials/supervised-regression">supervised learning tutorial</a>, where the task is to infer hidden structure from labeled examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/batch_training.ipynb">here</a>.</p>
+<h3 id="data">Data</h3>
+<p>Simulate <span class="math inline">\(N\)</span> training examples and a fixed number of test examples. Each example is a pair of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{10}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
+<pre class="python" language="Python"><code>def build_toy_dataset(N, w):
+  D = len(w)
+  x = np.random.normal(0.0, 2.0, size=(N, D))
+  y = np.dot(x, w) + np.random.normal(0.0, 0.05, size=N)
+  return x, y
+
+N = 10000  # size of training data
+M = 128    # batch size during training
+D = 10     # number of features
+
+w_true = np.ones(D) * 5
+X_train, y_train = build_toy_dataset(N, w_true)
+X_test, y_test = build_toy_dataset(235, w_true)</code></pre>
+<p>We also define a helper function to select the next batch of data points from the full set of examples. It keeps track of the current batch index using an internal counter.</p>
+<pre class="python" language="Python"><code>def next_batch(X, y, size):
+  &quot;&quot;&quot;Grab a [size, :] tensor from X and [size] tensor from y.&quot;&quot;&quot;
+  global i
+  try:  # initialize batch index
+    i
+  except:
+    i = 0
+
+  N = X.shape[0]
+  diff = (i + 1) * size - N
+  if diff &lt;= 0:
+    X_batch = X[(i * size):((i + 1) * size), :]
+    y_batch = y[(i * size):((i + 1) * size)]
+    i += 1
+  else:
+    X_batch = np.concatenate((X[(i * size):, :], X[:diff, :]))
+    y_batch = np.concatenate((y[(i * size):], y[:diff]))
+    i = 0
+
+  return X_batch, y_batch</code></pre>
+<p>We will use <code>next_batch</code> during inference.</p>
+<h3 id="model">Model</h3>
+<p>Posit the model as Bayesian linear regression <span class="citation">(Murphy, 2012)</span>. For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model posits the following distributions:</p>
+<p><span class="math display">\[\begin{aligned}
+  p(\mathbf{w})
+  &amp;=
+  \text{Normal}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \\[1.5ex]
+  p(b)
+  &amp;=
+  \text{Normal}(b \mid 0, \sigma_b^2),
+  \\
+  p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
+  &amp;=
+  \prod_{n=1}^N
+  \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span></p>
+<p>The latent variables are the linear model’s weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_w^2,\sigma_b^2\)</span> are known prior variances and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
+<p>Let’s build the model in Edward, fixing <span class="math inline">\(\sigma_w,\sigma_b,\sigma_y=1\)</span>.</p>
+<pre class="python" language="Python"><code>X = tf.placeholder(tf.float32, [None, D])
+y_ph = tf.placeholder(tf.float32, [None])
+
+w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+y = Normal(loc=ed.dot(X, w) + b, scale=1.0)</code></pre>
+<p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to batches of data. To enable training with batches of varying size, we don’t fix the number of rows for <code>X</code> and <code>y</code>. (Alternatively, we could fix it to be the batch size if we’re training and testing with a fixed size.)</p>
+<h3 id="inference">Inference</h3>
+<p>We now turn to inferring the posterior using variational inference. Define the variational model to be a fully factorized normal across the weights.</p>
+<pre class="python" language="Python"><code>qw = Normal(loc=tf.Variable(tf.random_normal([D])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+qb = Normal(loc=tf.Variable(tf.random_normal([1])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))</code></pre>
+<p>Run variational inference with the Kullback-Leibler divergence. We use <span class="math inline">\(5\)</span> latent variable samples for computing black box stochastic gradients in the algorithm. (For more details, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.)</p>
+<p>For batch training, we iterate over the number of batches and feed them to the respective placeholder. We set the number of iterations to be the total number of batches for 5 epochs (full passes over the data set).</p>
+<pre class="python" language="Python"><code>n_batch = int(N / M)
+n_epoch = 5
+
+inference = ed.KLqp({w: qw, b: qb}, data={y: y_ph})
+inference.initialize(n_iter=n_batch * n_epoch, n_samples=5, scale={y: N / M})
+tf.global_variables_initializer().run()
+
+for _ in range(inference.n_iter):
+  X_batch, y_batch = next_batch(X_train, y_train, M)
+  info_dict = inference.update({X: X_batch, y_ph: y_batch})
+  inference.print_progress(info_dict)</code></pre>
+<pre><code>390/390 [100%] ██████████████████████████████ Elapsed: 4s | Loss: 10481.556</code></pre>
+<p>When initializing inference, note we scale <span class="math inline">\(y\)</span> by <span class="math inline">\(N/M\)</span>, so it is as if the algorithm had seen <span class="math inline">\(N/M\)</span> as many data points per iteration. Algorithmically, this will scale all computation regarding <span class="math inline">\(y\)</span> by <span class="math inline">\(N/M\)</span> such as scaling the log-likelihood in a variational method’s objective. (Statistically, this avoids inference being dominated by the prior.)</p>
+<p>The loop construction makes training very flexible. For example, we can also try running many updates for each batch.</p>
+<pre class="python" language="Python"><code>n_batch = int(N / M)
+n_epoch = 1
+
+inference = ed.KLqp({w: qw, b: qb}, data={y: y_ph})
+inference.initialize(n_iter=n_batch * n_epoch * 10, n_samples=5, scale={y: N / M})
+tf.global_variables_initializer().run()
+
+for _ in range(inference.n_iter // 10):
+  X_batch, y_batch = next_batch(X_train, y_train, M)
+  for _ in range(10):
+    info_dict = inference.update({X: X_batch, y_ph: y_batch})
+
+  inference.print_progress(info_dict)</code></pre>
+<pre><code>770/780 [ 98%] █████████████████████████████  ETA: 0s | Loss: 9760.541</code></pre>
+<p>In general, make sure that the total number of training iterations is specified correctly when initializing <code>inference</code>. Otherwise an incorrect number of training iterations can have unintended consequences; for example, <code>ed.KLqp</code> uses an internal counter to appropriately decay its optimizer’s learning rate step size.</p>
+<p>Note also that the reported <code>loss</code> value as we run the algorithm corresponds to the computed objective given the current batch and not the total data set. We can instead have it report the loss over the total data set by summing <code>info_dict[’loss’]</code> for each epoch.</p>
+<h3 id="criticism">Criticism</h3>
+<p>A standard evaluation for regression is to compare prediction accuracy on held-out “testing” data. We do this by first forming the posterior predictive distribution.</p>
+<pre class="python" language="Python"><code>y_post = ed.copy(y, {w: qw, b: qb})
+# This is equivalent to
+# y_post = Normal(loc=ed.dot(X, qw) + qb, scale=tf.ones(N))</code></pre>
+<p>With this we can evaluate various quantities using predictions from the model (posterior predictive).</p>
+<pre class="python" language="Python"><code>print(&quot;Mean squared error on test data:&quot;)
+print(ed.evaluate(&#39;mean_squared_error&#39;, data={X: X_test, y_post: y_test}))
+
+print(&quot;Mean absolute error on test data:&quot;)
+print(ed.evaluate(&#39;mean_absolute_error&#39;, data={X: X_test, y_post: y_test}))</code></pre>
+<pre><code>## Mean squared error on test data:
+## 0.00659598
+## Mean absolute error on test data:
+## 0.0705906</code></pre>
+<p>The trained model makes predictions with low error (relative to the magnitude of the output).</p>
+<h3 id="footnotes">Footnotes</h3>
+<p>Only certain algorithms support batch training such as <code>MAP</code>, <code>KLqp</code>, and <code>SGLD</code>. Also, above we illustrated batch training for models with only global latent variables, which are variables are shared across all data points. For more complex strategies, see the <a href="http://edwardlib.org/api/inference-data-subsampling">inference data subsampling API</a>.</p>
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
+<div id="ref-murphy2012machine">
+<p>Murphy, K. P. (2012). <em>Machine learning: A probabilistic perspective</em>. MIT Press.</p>
+</div>
+</div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
