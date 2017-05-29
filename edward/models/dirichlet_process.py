@@ -214,7 +214,7 @@ class DirichletProcess(RandomVariable, Distribution):
     draws = tf.where(bools_tile, locs_k_tile, draws)
 
     # Flip coins according to stick probabilities.
-    flips = Bernoulli(probs_k).sample(n)
+    flips = Bernoulli(probs=probs_k).sample(n)
     # If coin lands heads, assign sample's corresponding bool to False
     # (this ends its "while loop").
     bools = tf.where(tf.cast(flips, tf.bool), tf.zeros_like(bools), bools)
