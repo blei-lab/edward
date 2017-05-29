@@ -84,21 +84,23 @@ class RandomVariable(object):
     *args, **kwargs
       Passed into parent ``__init__``.
     """
-    # storing args, kwargs for easy graph copying
-    self._args = args
-    self._kwargs = kwargs
-
-    # temporarily pop (then reinsert) before calling parent __init__
+    # pop and store RandomVariable-specific parameters in _kwargs
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
     collections = kwargs.pop('collections', [RANDOM_VARIABLE_COLLECTION])
-    super(RandomVariable, self).__init__(*args, **kwargs)
+
+    # store args, kwargs for easy graph copying
+    self._args = args
+    self._kwargs = kwargs.copy()
+
     if sample_shape != ():
       self._kwargs['sample_shape'] = sample_shape
     if value is not None:
       self._kwargs['value'] = value
     if collections != [RANDOM_VARIABLE_COLLECTION]:
       self._kwargs['collections'] = collections
+
+    super(RandomVariable, self).__init__(*args, **kwargs)
 
     self._sample_shape = tf.TensorShape(sample_shape)
     if value is not None:

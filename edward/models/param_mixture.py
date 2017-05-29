@@ -71,8 +71,12 @@ class distributions_ParamMixture(Distribution):
         elif not issubclass(component_dist, RandomVariable):
           raise TypeError("component_dist must be a ed.RandomVariable object.")
 
-      # TODO
-      sample_shape = kwargs.get('sample_shape', ())
+      # get sample_shape from inherited RandomVariable specifically
+      if hasattr(self, '_kwargs'):
+        sample_shape = self._kwargs.get('sample_shape', ())
+      else:
+        sample_shape = ()
+
       self._mixing_weights = tf.identity(mixing_weights, name="mixing_weights")
       self._cat = Categorical(probs=self._mixing_weights,
                               validate_args=validate_args,
