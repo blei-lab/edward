@@ -8,8 +8,13 @@ Running algorithms which require the full data set for each update
 can be expensive when the data is large. In order to scale inferences,
 we can do \emph{data subsampling}, i.e., update inference using
 only a subsample of data at a time.
+
 (Note that only certain algorithms support data subsampling such as
-\texttt{MAP}, \texttt{KLqp}, and \texttt{SGLD}.)
+\texttt{MAP}, \texttt{KLqp}, and \texttt{SGLD}. Also, below we
+illustrate data subsampling for hierarchical models; for models with
+only global variables such as Bayesian neural networks, a simpler
+solution exists: see the
+\href{/tutorials/batch-training}{batch training tutorial}.)
 
 \subsubsection{Subgraphs}
 
@@ -25,7 +30,7 @@ It is scalable in that both the
 algorithm's computational complexity (per iteration) and memory
 complexity are independent of the data set size.
 
-For example, consider a hierarchical model,
+As illustration, consider a hierarchical model,
 \begin{equation*}
 p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),
