@@ -17,7 +17,7 @@ It supports __modeling__ with
 + Neural networks (via libraries such as
     [Keras](http://keras.io) and [TensorFlow
     Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim))
-+ Intractable likelihoods
++ Implicit generative models
 + Bayesian nonparametrics and probabilistic programs
 
 It supports __inference__ with
@@ -28,9 +28,9 @@ It supports __inference__ with
   + Generative adversarial networks
   + Maximum a posteriori estimation
 + Monte Carlo
+  + Gibbs sampling
   + Hamiltonian Monte Carlo
   + Stochastic gradient Langevin dynamics
-  + Gibbs sampling
 + Compositions of inference
   + Expectation-Maximization
   + Pseudo-marginal and ABC methods

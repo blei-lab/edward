@@ -201,6 +201,27 @@ class test_conjugacy_class(tf.test.TestCase):
                                         (1.0 / sigma_likelihood**2 *
                                          x_data.sum())))
 
+  def test_inverse_gamma_normal(self):
+    x_data = np.array([0.1, 0.5, 3.3, 2.7])
+
+    sigmasq_conc = 1.3
+    sigmasq_rate = 2.1
+    x_loc = 0.3
+
+    sigmasq = rvs.InverseGamma(sigmasq_conc, sigmasq_rate)
+    x = rvs.Normal(x_loc, tf.sqrt(sigmasq), sample_shape=len(x_data))
+
+    sigmasq_cond = ed.complete_conditional(sigmasq, [sigmasq, x])
+    self.assertIsInstance(sigmasq_cond, rvs.InverseGamma)
+
+    with self.test_session() as sess:
+      conc_val, rate_val = sess.run(
+          [sigmasq_cond.concentration, sigmasq_cond.rate], {x: x_data})
+
+    self.assertAllClose(conc_val, sigmasq_conc + 0.5 * len(x_data))
+    self.assertAllClose(rate_val,
+                        sigmasq_rate + 0.5 * np.sum((x_data - x_loc)**2))
+
   def test_normal_normal_scaled(self):
     x_data = np.array([0.1, 0.5, 3.3, 2.7])
 
