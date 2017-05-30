@@ -187,6 +187,16 @@ loss function and its decomposition into individual terms. This
 particular example shows that \texttt{n_samples=1} tends to have higher
 variance than \texttt{n_samples=5} but still converges to the same solution.
 
+\textbf{TensorBoard Graphs.}
+
+\includegraphics[width=750px]{/images/tensorboard-graphs-0.png} \\
+\includegraphics[width=750px]{/images/tensorboard-graphs-1.png}
+
+Graphs displays the computational graph underlying the model,
+approximating family, and inference. Boxes denote tensors grouped
+under the same name scope. Cleaning up names in the graph makes it
+easy to better understand and optimize your code.
+
 \textbf{TensorBoard Distributions.}
 
 \includegraphics[width=750px]{/images/tensorboard-distributions.png}
@@ -201,16 +211,6 @@ of your model and approximating family.
 
 Histograms displays the same information as Distributions but as a 3-D
 histogram changing aross iteration.
-
-\textbf{TensorBoard Graphs.}
-
-\includegraphics[width=750px]{/images/tensorboard-graphs-0.png} \\
-\includegraphics[width=750px]{/images/tensorboard-graphs-1.png}
-
-Graphs displays the computational graph underlying the model,
-approximating family, and inference. Boxes denote tensors grouped
-under the same name scope. Cleaning up names in the graph makes it
-easy to better understand and optimize your code.
 
 \subsubsection{Acknowledgments}
 
