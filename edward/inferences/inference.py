@@ -6,9 +6,12 @@ import abc
 import numpy as np
 import six
 import tensorflow as tf
+import os
+from datetime import datetime
 
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, Progbar
+from edward.util import get_variables
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -146,7 +149,7 @@ class Inference(object):
 
   @abc.abstractmethod
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
-                 debug=False):
+                 log_timestamp=None, log_vars=None, debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computational graph. No ops
     should be created outside the call to ``initialize()``.
@@ -169,6 +172,14 @@ class Inference(object):
     logdir : str, optional
       Directory where event file will be written. For details,
       see ``tf.summary.FileWriter``. Default is to write nothing.
+    log_timestamp : bool, optional
+      If true, creates a subdirectory of logdir to save the specific run
+      results that is set to the current UTC timestamp in the format
+      'YYYYMMDD_HHMMSS"
+    log_vars : list, optional
+      Specifies the list of variables to log after each n_print steps.  If
+      None, will log all `latent_variables` that have been given custom names`.
+      If log_vars == [], no variables will be logged.
     debug : bool, optional
       If True, add checks for ``NaN`` and ``Inf`` to all computations
       in the graph. May result in substantially slower execution
@@ -194,6 +205,15 @@ class Inference(object):
 
     if logdir is not None:
       self.logging = True
+
+      if log_timestamp:
+        # Appends the timestamp as a subdirectory
+        logdir = os.path.join(logdir,
+                              datetime.strftime(datetime.utcnow(),
+                                                "%Y%m%d_%H%M%S"))
+
+      self.set_log_variables(log_vars=log_vars)
+
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
       self.summarize = tf.summary.merge_all()
     else:
@@ -258,3 +278,52 @@ class Inference(object):
     """
     if self.logging:
       self.train_writer.close()
+
+  def set_log_variables(self, log_vars=None):
+    """Logs variables to TensorBoard.
+
+     For each variable in log_vars, creates ``scalar`` and / or ``histogram`` by
+     calling ``tf.summary.scalar`` or ``tf.summary.histogram``
+
+     if log_vars is None, automatically log all latent variables that have been
+     given non-default names.  If log_vars is [], no logging will be created.
+
+     Parameters
+     ----------
+     log_vars : list, optional
+       A list of variables to be logged
+
+     Returns
+     -------
+     None
+
+    """
+    summary_key = 'summaries_' + str(id(self))
+    if log_vars is None:
+      log_vars = []
+
+      # Add model parameters
+      for k in self.data:
+        log_vars += get_variables(k)
+
+      # Add latent variables and model priors
+      for k in self.latent_vars:
+        log_vars += get_variables(k)
+        log_vars += get_variables(self.latent_vars[k])
+
+      # Prune variables to only be custom named variables (without 'Variable')
+      # substring
+      log_vars = [var for var in log_vars if 'Variable' not in var.name]
+
+    for var in log_vars:
+      var_name = var.name.replace(':', '/')  # colons are an invalid character
+
+      if len(var.shape) == 1 and var.shape[0] == 1:
+        # Log all scalars
+        tf.summary.scalar("parameter/{}".format(var_name),
+                          var[0], collections=[summary_key])
+
+      # If var is multi-dimensional, log the distribution
+      if len(var.shape) > 0 and np.max(var.shape) > 1:
+        tf.summary.histogram("parameter/{}".format(var_name),
+                             var, collections=[summary_key])
