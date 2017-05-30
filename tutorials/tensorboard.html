@@ -200,11 +200,11 @@ inference.run(n_samples=5, n_iter=250, logdir=&#39;log/n_samples_5&#39;)</code><
 <p>Below we assume the above code is run twice with different configurations of the <code>n_samples</code> hyperparameter. We specified the log directory to be <code>log/n_samples_*</code>. By default, Edward also includes a timestamped subdirectory so that multiple runs of the same experiment have properly organized logs for TensorBoard. You can turn it off by specifying <code>log_timestamp=False</code> during inference.</p>
 <p><strong>TensorBoard Scalars.</strong></p>
 <p><img src="/images/tensorboard-scalars.png" alt="image" width="750" /></p>
-<p>Scalars provides scalar-valued information across iterations of the algorithm, wall time, and relative wall time. In Edward, the tab includes the value of scalar TensorFlow variables in the model or approximating family.</p>
+<p>Scalars provides scalar-valued information across iterations of the algorithm, wall time, and relative wall time. In Edward, the tab includes the value of scalar TensorFlow variables (free parameters) in the model or approximating family.</p>
 <p>With variational inference, we also include information such as the loss function and its decomposition into individual terms. This particular example shows that <code>n_samples=1</code> tends to have higher variance than <code>n_samples=5</code> but still converges to the same solution.</p>
 <p><strong>TensorBoard Distributions.</strong></p>
 <p><img src="/images/tensorboard-distributions.png" alt="image" width="750" /></p>
-<p>Distributions display the distribution of each non-scalar TensorFlow variable in the model and approximating family across iterations.</p>
+<p>Distributions displays the distribution of each non-scalar TensorFlow variable across iterations. These variables are the free parameters of your model and approximating family.</p>
 <p><strong>TensorBoard Histograms.</strong></p>
 <p><img src="/images/tensorboard-histograms.png" alt="image" width="750" /></p>
 <p>Histograms displays the same information as Distributions but as a 3-D histogram changing aross iteration.</p>

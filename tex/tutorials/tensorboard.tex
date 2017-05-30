@@ -156,7 +156,7 @@ inference.run(n_samples=5, n_iter=250, logdir='log/n_samples_5')
 Optionally, we might include an \texttt{"inference"} name scope.
 If it is absent, the charts are partitioned naturally
 and not automatically grouped under the monolithic \texttt{"inference"}.
-If it is added, the TensorBoard graph is slightly more organized.
+If it is added, the computational graph is slightly more organized.
 
 \subsubsection{Criticism}
 
@@ -179,8 +179,8 @@ TensorBoard. You can turn it off by specifying
 
 Scalars provides scalar-valued information across iterations of the
 algorithm, wall time, and relative wall time. In Edward, the tab
-includes the value of scalar TensorFlow variables in the model or
-approximating family.
+includes the value of scalar TensorFlow variables (free parameters) in
+the model or approximating family.
 
 With variational inference, we also include information such as the
 loss function and its decomposition into individual terms. This
@@ -191,8 +191,9 @@ variance than \texttt{n_samples=5} but still converges to the same solution.
 
 \includegraphics[width=750px]{/images/tensorboard-distributions.png}
 
-Distributions display the distribution of each non-scalar TensorFlow
-variable in the model and approximating family across iterations.
+Distributions displays the distribution of each non-scalar TensorFlow
+variable across iterations. These variables are the free parameters
+of your model and approximating family.
 
 \textbf{TensorBoard Histograms.}
 
