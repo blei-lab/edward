@@ -213,11 +213,15 @@ def generate_tensorflow_distributions():
   import edward.models
   from tensorflow.contrib import distributions
 
+  built_in_models = ['DirichletProcess', 'distributions_DirichletProcess',
+                     'Empirical', 'distributions_Empirical',
+                     'ParamMixture', 'distributions_ParamMixture',
+                     'PointMass', 'distributions_PointMass']
   models = [getattr(edward.models, name) for name in dir(edward.models)]
   models = [model for model in models
             if (isinstance(model, type) and
                 issubclass(model, distributions.Distribution) and
-                model.__name__ not in {'Empirical', 'PointMass'}
+                model.__name__ not in built_in_models
                 )
             ]
   models = sorted(models, key=lambda cls: cls.__name__)
