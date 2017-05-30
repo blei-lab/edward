@@ -149,7 +149,7 @@ class Inference(object):
 
   @abc.abstractmethod
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
-                 log_timestamp=None, log_vars=None, debug=False):
+                 log_timestamp=True, log_vars=None, debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computational graph. No ops
     should be created outside the call to ``initialize()``.
@@ -171,15 +171,16 @@ class Inference(object):
       applying masks on a random variable.
     logdir : str, optional
       Directory where event file will be written. For details,
-      see ``tf.summary.FileWriter``. Default is to write nothing.
+      see ``tf.summary.FileWriter``. Default is to log nothing.
     log_timestamp : bool, optional
-      If true, creates a subdirectory of logdir to save the specific run
-      results that is set to the current UTC timestamp in the format
-      'YYYYMMDD_HHMMSS"
+      If True (and ``logdir`` is specified), create a subdirectory of
+      ``logdir`` to save the specific run results. The subdirectory's
+      name is the current UTC timestamp with format 'YYYYMMDD_HHMMSS'.
     log_vars : list, optional
-      Specifies the list of variables to log after each n_print steps.  If
-      None, will log all `latent_variables` that have been given custom names`.
-      If log_vars == [], no variables will be logged.
+      Specifies the list of variables to log after each ``n_print``
+      steps. If None, will log all variables. If ``[]``, no variables
+      will be logged. ``logdir`` must be specified for variables to be
+      logged.
     debug : bool, optional
       If True, add checks for ``NaN`` and ``Inf`` to all computations
       in the graph. May result in substantially slower execution
@@ -205,15 +206,11 @@ class Inference(object):
 
     if logdir is not None:
       self.logging = True
-
       if log_timestamp:
-        # Appends the timestamp as a subdirectory
-        logdir = os.path.join(logdir,
-                              datetime.strftime(datetime.utcnow(),
-                                                "%Y%m%d_%H%M%S"))
+        logdir = os.path.join(
+            logdir, datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S"))
 
-      self.set_log_variables(log_vars=log_vars)
-
+      self.set_log_variables(log_vars)
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
       self.summarize = tf.summary.merge_all()
     else:
@@ -283,27 +280,26 @@ class Inference(object):
     """Log variables to TensorBoard.
 
     For each variable in ``log_vars``, forms a ``tf.summary.scalar``if
-    the variable has scalar shape; otherwise forms
-    a``tf.summary.histogram``.
+    the variable has scalar shape; otherwise forms a``tf.summary.histogram``.
 
     Parameters
     ----------
     log_vars : list, optional
-      A list of variables to be logged. If ``None``, automatically log
-      all latent variables that have been given non-default names. If
-      ``[]``, no logging will be created.
+      Specifies the list of variables to log after each ``n_print``
+      steps. If None, will log all variables. If ``[]``, no variables
+      will be logged.
     """
     summary_key = 'summaries_' + str(id(self))
     if log_vars is None:
-      log_vars = set()
+      log_vars = []
       for key in six.iterkeys(self.data):
-        log_vars.add(get_variables(key))
+        log_vars += get_variables(key)
 
       for key, value in six.iteritems(self.latent_vars):
-        log_vars.add(get_variables(key))
-        log_vars.add(get_variables(value))
+        log_vars += get_variables(key)
+        log_vars += get_variables(value)
 
-      log_vars = list(log_vars)
+      log_vars = set(log_vars)
 
     for var in log_vars:
       # replace colons which are an invalid character
