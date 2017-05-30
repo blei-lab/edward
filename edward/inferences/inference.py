@@ -280,50 +280,44 @@ class Inference(object):
       self.train_writer.close()
 
   def set_log_variables(self, log_vars=None):
-    """Logs variables to TensorBoard.
+    """Log variables to TensorBoard.
 
-     For each variable in log_vars, creates ``scalar`` and / or ``histogram`` by
-     calling ``tf.summary.scalar`` or ``tf.summary.histogram``
+    For each variable in ``log_vars``, forms a ``tf.summary.scalar``if
+    the variable has scalar shape; otherwise forms
+    a``tf.summary.histogram``.
 
-     if log_vars is None, automatically log all latent variables that have been
-     given non-default names.  If log_vars is [], no logging will be created.
-
-     Parameters
-     ----------
-     log_vars : list, optional
-       A list of variables to be logged
-
-     Returns
-     -------
-     None
-
+    Parameters
+    ----------
+    log_vars : list, optional
+      A list of variables to be logged. If ``None``, automatically log
+      all latent variables that have been given non-default names. If
+      ``[]``, no logging will be created.
     """
     summary_key = 'summaries_' + str(id(self))
     if log_vars is None:
-      log_vars = []
+      log_vars = {}
+      for key in six.iterkeys(self.data):
+        log_vars.add(get_variables(key))
 
-      # Add model parameters
-      for k in self.data:
-        log_vars += get_variables(k)
+      for key, value in six.iteritems(self.latent_vars):
+        log_vars.add(get_variables(key))
+        log_vars.add(get_variables(value))
 
-      # Add latent variables and model priors
-      for k in self.latent_vars:
-        log_vars += get_variables(k)
-        log_vars += get_variables(self.latent_vars[k])
-
-      # Prune variables to only be custom named variables (without 'Variable')
-      # substring
+      # Prune variables to only be custom named variables (without
+      # 'Variable' substring).
       log_vars = [var for var in log_vars if 'Variable' not in var.name]
 
     for var in log_vars:
-      var_name = var.name.replace(':', '/')  # colons are an invalid character
-
-      if len(var.shape) == 1 and var.shape[0] == 1:
-        # Log all scalars
+      # replace colons which are an invalid character
+      var_name = var.name.replace(':', '/')
+      # Log all scalars.
+      if len(var.shape) == 0:
+        tf.summary.scalar("parameter/{}".format(var_name),
+                          var, collections=[summary_key])
+      elif len(var.shape) == 1 and var.shape[0] == 1:
         tf.summary.scalar("parameter/{}".format(var_name),
                           var[0], collections=[summary_key])
-
-      # If var is multi-dimensional, log the distribution
-      if len(var.shape) > 0 and np.max(var.shape) > 1:
+      else:
+        # If var is multi-dimensional, log a histogram of its values.
         tf.summary.histogram("parameter/{}".format(var_name),
                              var, collections=[summary_key])
