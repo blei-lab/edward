@@ -202,8 +202,6 @@ components = [
 x = Mixture(cat=cat, components=components)</code></pre>
 <p>We will use the joint version in this analysis.</p>
 <h3 id="inference">Inference</h3>
-<p><strong>Note: A bug appears in conjugacy for <code>MultivariateNormalDiag</code> with Edward 1.3.1. This is fixed in Edward’s development version. Install it via</strong></p>
-<pre class="java" language="Java"><code>pip install -e &quot;git+https://github.com/blei-lab/edward.git#egg=edward&quot;</code></pre>
 <p>Each distribution in the model is written with conjugate priors, so we can use Gibbs sampling. It performs Markov chain Monte Carlo by iterating over draws from the complete conditionals of each distribution, i.e., each distribution conditional on a previously drawn value. First we set up Empirical random variables which will approximate the posteriors using the collection of samples.</p>
 <pre class="python" language="Python"><code>T = 500  # number of MCMC samples
 qpi = Empirical(tf.Variable(tf.ones([T, K]) / K))

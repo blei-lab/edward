@@ -418,6 +418,44 @@ added to these collections. Defaults to [“random_variables”].</p>
 <p class="rubric">Attributes</p>
 </dd></dl>
 <dl class="class">
+<dt id="edward.models.ParamMixture">
+<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">ParamMixture</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
+<dd><p>A mixture distribution where all components are of the same family.</p>
+<p>Note that this distribution actually represents the conditional
+distribution of the observable variable given a latent categorical
+variable <cite>cat</cite> saying which mixture component generated this
+distribution.</p>
+<p class="rubric">Attributes</p>
+<p class="rubric">Methods</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name"></col>
+<col class="field-body"></col>
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
+<blockquote>
+<div><p>Shape of samples to draw from the random variable.</p>
+</div></blockquote>
+<p><strong>value</strong> : tf.Tensor, optional</p>
+<blockquote>
+<div><p>Fixed tensor to associate with random variable. Must have shape
+<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
+</div></blockquote>
+<p><strong>collections</strong> : list, optional</p>
+<blockquote>
+<div><p>Optional list of graph collections keys. The random variable is
+added to these collections. Defaults to [“random_variables”].</p>
+</div></blockquote>
+<p><strong>*args, **kwargs</strong></p>
+<blockquote class="last">
+<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+</dd></dl>
+<dl class="class">
 <dt id="edward.models.PointMass">
 <em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
 <dd><p>PointMass random variable.</p>

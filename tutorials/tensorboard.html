@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Tensorboard</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  /* Docstrings. */
+  dl.class + dl.class, dl.function + dl.function {
+    /* Add border inbetween docstrings. */
+    border-top: 1px solid #E1E1E1;
+  }
+  dt { /* Add spacing for top border. */
+    margin-top: 1.0rem;
+  }
+  dd { /* Remove overall indenting in an entry. */
+    margin-left: 0.0rem;
+  }
+  dl th, dl td { /* Remove extraneous padding and decorations. */
+    padding: 0 15px 0 0;
+    border: none;
+  }
+  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
+    font-family: monospace, monospace;
+    font-style: normal;
+    font-size: 14px !important;
+  }
+  /* Attribute contents within a docstring. */
+  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
+    margin-left: 0.0rem;
+    margin-top: 0.0rem;
+    margin-bottom: 0.0rem;
+  }
+  dl td p { /* Reduce spacing. */
+    margin-bottom: 0.75rem;
+  }
+  dl td.field-body { /* Add indenting. */
+    padding-top: 0.75rem;
+    padding-left: 2.0rem;
+    display: block;
+  }
+  dl code { /* Keep code font size consistent with rest of contents. */
+    font-size: 90%;
+  }
+  </style>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/getting-started">Getting Started</a>
+    <a class="button u-full-width" href="/tutorials/">Tutorials</a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <a class="button u-full-width" href="/community">Community</a>
+    <a class="button u-full-width" href="/contributing">Contributing</a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+
+<h2 id="tensorboard">Tensorboard</h2>
+<p>TensorBoard provides a suite of visualization tools to make it easier to understand, debug, and optimize Edward programs. You can use it “to visualize your TensorFlow graph, plot quantitative metrics about the execution of your graph, and show additional data like images that pass through it” (<a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">tensorflow.org</a>).</p>
+<p>A Jupyter notebook version of this tutorial is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/tensorboard.ipynb">here</a>.</p>
+<p><img src="/images/tensorboard-scalars.png" alt="image" width="750" /></p>
+<p>To use TensorBoard, we first need to specify a directory for storing logs during inference. For example, if manually controlling inference, call</p>
+<pre class="python" language="Python"><code>inference.initialize(logdir=&#39;log&#39;)</code></pre>
+<p>If you’re using the catch-all <code>inference.run()</code>, include <code>logdir</code> as an argument. As inference runs, files are outputted to <code>log/</code> within the working directory. In commandline, we run TensorBoard and point to that directory.</p>
+<pre language="JSON"><code>tensorboard --logdir=log/</code></pre>
+<p>The command will provide a web address to access TensorBoard. By default, it is <a href="http://localhost:6006" class="uri">http://localhost:6006</a>. If working correctly, you should see something like the above picture.</p>
+<p>You’re set up!</p>
+<p>Additional steps need to be taken in order to clean up TensorBoard’s naming. Specifically, we might configure names for random variables and tensors in the computational graph. To provide a concrete example, we extend the <a href="http://edwardlib.org/tutorials/supervised-regression">supervised learning tutorial</a>, where the task is to infer hidden structure from labeled examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>.</p>
+<h3 id="data">Data</h3>
+<p>Simulate training and test sets of <span class="math inline">\(40\)</span> data points. They comprise of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{5}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
+<pre class="python" language="Python"><code>def build_toy_dataset(N, w):
+  D = len(w)
+  x = np.random.normal(0.0, 2.0, size=(N, D))
+  y = np.dot(x, w) + np.random.normal(0.0, 0.01, size=N)
+  return x, y
+
+ed.set_seed(42)
+
+N = 40  # number of data points
+D = 5  # number of features
+
+w_true = np.random.randn(D) * 0.5
+X_train, y_train = build_toy_dataset(N, w_true)
+X_test, y_test = build_toy_dataset(N, w_true)</code></pre>
+<h3 id="model">Model</h3>
+<p>Posit the model as Bayesian linear regression <span class="citation">(Murphy, 2012)</span>. For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model posits the following distributions:</p>
+<p><span class="math display">\[\begin{aligned}
+  p(\mathbf{w})
+  &amp;=
+  \text{Normal}(\mathbf{w} \mid \mathbf{0}, \sigma_w^2\mathbf{I}),
+  \\[1.5ex]
+  p(b)
+  &amp;=
+  \text{Normal}(b \mid 0, \sigma_b^2),
+  \\
+  p(\mathbf{y} \mid \mathbf{w}, b, \mathbf{X})
+  &amp;=
+  \prod_{n=1}^N
+  \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span></p>
+<p>The latent variables are the linear model’s weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_w^2,\sigma_b^2\)</span> are known prior variances and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
+<p>Let’s build the model in Edward, fixing <span class="math inline">\(\sigma_w,\sigma_b,\sigma_y=1\)</span>.</p>
+<pre class="python" language="Python"><code>with tf.name_scope(&quot;model&quot;):
+  X = tf.placeholder(tf.float32, [N, D], name=&quot;X&quot;)
+  w = Normal(loc=tf.zeros(D, name=&quot;weights/loc&quot;),
+             scale=tf.ones(D, name=&quot;weights/loc&quot;),
+             name=&quot;weights&quot;)
+  b = Normal(loc=tf.zeros(1, name=&quot;bias/loc&quot;),
+             scale=tf.ones(1, name=&quot;bias/scale&quot;),
+             name=&quot;bias&quot;)
+  y = Normal(loc=ed.dot(X, w) + b,
+             scale=tf.ones(N, name=&quot;y/scale&quot;),
+             name=&quot;y&quot;)</code></pre>
+<p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to batches of data. We also use a name scope. This adds the scope’s name as a prefix (<code>model/</code>) to all tensors in the <code>with</code> context. Similarly, we name the parameters in each random variable under a grouped naming system.</p>
+<h3 id="inference">Inference</h3>
+<p>We now turn to inferring the posterior using variational inference. Define the variational model to be a fully factorized normal across the weights. We add another scope to group naming in the variational family.</p>
+<pre class="python" language="Python"><code>with tf.name_scope(&quot;posterior&quot;):
+  qw = Normal(loc=tf.Variable(tf.random_normal([D]), name=&quot;qw/loc&quot;),
+              scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]), name=&quot;qw/unconstrained_scale&quot;)),
+              name=&quot;qw&quot;)
+  qb = Normal(loc=tf.Variable(tf.random_normal([1]), name=&quot;qb/loc&quot;),
+              scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]), name=&quot;qb/unconstrained_scale&quot;)),
+              name=&quot;qb&quot;)</code></pre>
+<p>Run variational inference with the Kullback-Leibler divergence. We use <span class="math inline">\(5\)</span> latent variable samples for computing black box stochastic gradients in the algorithm. (For more details, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.)</p>
+<pre class="python" language="Python"><code>inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
+inference.run(n_samples=5, n_iter=250, logdir=&#39;log/n_samples_5&#39;)</code></pre>
+<pre><code>250/250 [100%] ██████████████████████████████ Elapsed: 5s | Loss: 50.865</code></pre>
+<p>Optionally, we might include an <code>inference</code> name scope. If it is absent, the charts are partitioned naturally and not automatically grouped under the monolithic <code>inference</code>. If it is added, the TensorBoard graph is slightly more organized.</p>
+<h3 id="criticism">Criticism</h3>
+<p>We can use TensorBoard to explore learning and diagnose any problems. After running TensorBoard with the command above, we can navigate the tabs.</p>
+<p>Below we assume the above code is run twice with different configurations of the <code>n_samples</code> hyperparameter. We specified the log directory to be <code>log/n_samples_*</code>. By default, Edward also includes a timestamped subdirectory so that multiple runs of the same experiment have properly organized logs for TensorBoard. You can turn it off by specifying <code>log_timestamp=False</code> during inference.</p>
+<p><strong>TensorBoard Scalars.</strong></p>
+<p><img src="/images/tensorboard-scalars.png" alt="image" width="750" /></p>
+<p>Scalars provides scalar-valued information across iterations of the algorithm, wall time, and relative wall time. In Edward, the tab includes the value of scalar TensorFlow variables in the model or approximating family.</p>
+<p>With variational inference, we also include information such as the loss function and its decomposition into individual terms. This particular example shows that <code>n_samples=1</code> tends to have higher variance than <code>n_samples=5</code> but still converges to the same solution.</p>
+<p><strong>TensorBoard Distributions.</strong></p>
+<p><img src="/images/tensorboard-distributions.png" alt="image" width="750" /></p>
+<p>Distributions display the distribution of each non-scalar TensorFlow variable in the model and approximating family across iterations.</p>
+<p><strong>TensorBoard Histograms.</strong></p>
+<p><img src="/images/tensorboard-histograms.png" alt="image" width="750" /></p>
+<p>Histograms displays the same information as Distributions but as a 3-D histogram changing aross iteration.</p>
+<p><strong>TensorBoard Graphs.</strong></p>
+<p><img src="/images/tensorboard-graphs-0.png" alt="image" width="750" /><br />
+<img src="/images/tensorboard-graphs-1.png" alt="image" width="750" /></p>
+<p>Graphs displays the computational graph underlying the model, approximating family, and inference. Boxes denote tensors grouped under the same name scope. Cleaning up names in the graph makes it easy to better understand and optimize your code.</p>
+<h3 id="acknowledgments">Acknowledgments</h3>
+<p>We thank Sean Kruzel for writing the initial version of this tutorial.</p>
+<p>A TensorFlow tutorial to TensorBoard can be found <a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">here</a>.</p>
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
+<div id="ref-murphy2012machine">
+<p>Murphy, K. P. (2012). <em>Machine learning: A probabilistic perspective</em>. MIT Press.</p>
+</div>
+</div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>
