@@ -295,7 +295,7 @@ class Inference(object):
     """
     summary_key = 'summaries_' + str(id(self))
     if log_vars is None:
-      log_vars = {}
+      log_vars = set()
       for key in six.iterkeys(self.data):
         log_vars.add(get_variables(key))
 
@@ -303,9 +303,7 @@ class Inference(object):
         log_vars.add(get_variables(key))
         log_vars.add(get_variables(value))
 
-      # Prune variables to only be custom named variables (without
-      # 'Variable' substring).
-      log_vars = [var for var in log_vars if 'Variable' not in var.name]
+      log_vars = list(log_vars)
 
     for var in log_vars:
       # replace colons which are an invalid character
