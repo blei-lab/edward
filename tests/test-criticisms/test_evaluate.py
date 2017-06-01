@@ -6,7 +6,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Bernoulli, Normal
 
 
 class test_evaluate_class(tf.test.TestCase):
@@ -65,6 +65,12 @@ class test_evaluate_class(tf.test.TestCase):
       self.assertRaises(TypeError, ed.evaluate, 'mean_squared_error',
                         {x: x_data, y: y_data, x_ph: x_ph_data}, n_samples=1,
                         output_key='x')
+
+  def test_dtype_int(self):
+    with self.test_session():
+      x = Bernoulli(probs=0.5)
+      x_data = tf.constant(0)
+      ed.evaluate('binary_accuracy', {x: x_data}, n_samples=1)
 
 if __name__ == '__main__':
   tf.test.main()
