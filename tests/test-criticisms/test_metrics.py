@@ -65,7 +65,7 @@ class test_metrics_class(tf.test.TestCase):
           y_pred = tf.convert_to_tensor(np.random.randint(0, 7, (6,)))
           self.assertEqual(metric(y_true, y_pred).eval().shape, ())
         elif metric == criticisms.sparse_categorical_crossentropy:
-          y_true = tf.convert_to_tensor(np.random.randint(0, 5, (6, 7)))
+          y_true = tf.convert_to_tensor(np.random.randint(0, 5, (6)))
           y_pred = tf.random_normal([6, 7])
           self.assertEqual(metric(y_true, y_pred).eval().shape, ())
         else:
