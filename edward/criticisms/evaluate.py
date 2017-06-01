@@ -7,7 +7,13 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import check_data, get_session, logit
+from edward.util import check_data, get_session
+
+try:
+  from edward.models import Bernoulli, Binomial, Categorical, \
+      Multinomial, OneHotCategorical
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 def evaluate(metrics, data, n_samples=500, output_key=None):
@@ -48,7 +54,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   n_samples : int, optional
     Number of posterior samples for making predictions, using the
     posterior predictive distribution.
-  output_key : RandomVariable, optional
+  output_key : RandomVariable or tf.Tensor, optional
     It is the key in ``data`` which corresponds to the model's output.
 
   Returns
@@ -108,25 +114,31 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   y_true = data[output_key]
   # Make predictions (if there are any supervised metrics).
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
-    # Monte Carlo estimate the mean of the posterior predictive.
-    # Note the naive solution of taking the mean of
-    # ``y_pred.sample(n_samples)`` does not work: ``y_pred`` is
-    # parameterized by one posterior sample; this implies each
-    # sample call from ``y_pred`` depends on the same posterior
-    # sample. Instead, we fetch the sample tensor from the graph
-    # many times. Alternatively, we could copy ``y_pred``
-    # ``n_samples`` many times, so that each copy depends on a
-    # different posterior sample. But it's expensive.
-    tensor = tf.convert_to_tensor(output_key)
-    y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
-    y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
+    binary_discrete = (Bernoulli, Binomial)
+    categorical_discrete = (Categorical, Multinomial, OneHotCategorical)
+    if isinstance(output_key, binary_discrete + categorical_discrete):
+      # Average over realizations of their probabilities, then predict
+      # via argmax over probabilities.
+      probs = [sess.run(output_key.probs, feed_dict) for _ in range(n_samples)]
+      probs = tf.add_n(probs) / tf.cast(n_samples, tf.float32)
+      if isinstance(output_key, binary_discrete):
+        # make random prediction whenever probs is exactly 0.5
+        random = tf.random_uniform(shape=tf.shape(probs))
+        y_pred = tf.round(tf.where(tf.equal(0.5, probs), random, probs))
+      else:
+        y_pred = tf.argmax(probs, len(probs.shape) - 1)
+    else:
+      # Monte Carlo estimate the mean of the posterior predictive.
+      y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
+      y_pred = tf.cast(tf.add_n(y_pred), tf.float32) / \
+          tf.cast(n_samples, tf.float32)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
   for metric in metrics:
     if metric == 'accuracy' or metric == 'crossentropy':
       # automate binary or sparse cat depending on its support
-      support = tf.reduce_max(y_true).eval()
+      support = sess.run(tf.reduce_max(y_true), feed_dict)
       if support <= 1:
         metric = 'binary_' + metric
       else:
@@ -190,12 +202,10 @@ def binary_accuracy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of 0s and 1s (most generally, any real values a and b).
   y_pred : tf.Tensor
-    Tensor of probabilities.
+    Tensor of predictions, with same shape as ``y_true``.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
-  random = tf.random_uniform(shape=tf.shape(y_pred))
-  y_pred = tf.round(tf.where(tf.equal(0.5, y_pred), random, y_pred))
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
@@ -208,12 +218,11 @@ def categorical_accuracy(y_true, y_pred):
     Tensor of 0s and 1s, where the outermost dimension of size ``K``
     has only one 1 per row.
   y_pred : tf.Tensor
-    Tensor of probabilities, with same shape as ``y_true``.
-    The outermost dimension denote the categorical probabilities for
-    that data point per row.
+    Tensor of predictions, with shape ``y_true.shape[:-1]``. Each
+    entry is an integer {0, 1, ..., K-1}.
   """
   y_true = tf.cast(tf.argmax(y_true, len(y_true.shape) - 1), tf.float32)
-  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.shape) - 1), tf.float32)
+  y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
@@ -226,13 +235,14 @@ def sparse_categorical_accuracy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of integers {0, 1, ..., K-1}.
   y_pred : tf.Tensor
-    Tensor of probabilities, with shape ``(y_true.shape, K)``.
-    The outermost dimension are the categorical probabilities for
-    that data point.
+    Tensor of predictions, with same shape as ``y_true``.
   """
   y_true = tf.cast(y_true, tf.float32)
-  y_pred = tf.cast(tf.argmax(y_pred, len(y_pred.shape) - 1), tf.float32)
+  y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
+
+
+# Classification metrics (with real-valued predictions)
 
 
 def binary_crossentropy(y_true, y_pred):
@@ -243,10 +253,11 @@ def binary_crossentropy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of 0s and 1s.
   y_pred : tf.Tensor
-    Tensor of probabilities.
+    Tensor of real values (logit probabilities), with same shape as
+    ``y_true``.
   """
   y_true = tf.cast(y_true, tf.float32)
-  y_pred = logit(tf.cast(y_pred, tf.float32))
+  y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(
       tf.nn.sigmoid_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
@@ -260,12 +271,11 @@ def categorical_crossentropy(y_true, y_pred):
     Tensor of 0s and 1s, where the outermost dimension of size K
     has only one 1 per row.
   y_pred : tf.Tensor
-    Tensor of probabilities, with same shape as y_true.
-    The outermost dimension denote the categorical probabilities for
-    that data point per row.
+    Tensor of real values (logit probabilities), with same shape as
+    ``y_true``. The outermost dimension is the number of classes.
   """
   y_true = tf.cast(y_true, tf.float32)
-  y_pred = logit(tf.cast(y_pred, tf.float32))
+  y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(
       tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 
@@ -279,12 +289,11 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of integers {0, 1, ..., K-1}.
   y_pred : tf.Tensor
-    Tensor of probabilities, with shape ``(y_true.shape, K)``.
-    The outermost dimension are the categorical probabilities for
-    that data point.
+    Tensor of real values (logit probabilities), with shape
+    ``(y_true.shape, K)``. The outermost dimension is the number of classes.
   """
   y_true = tf.cast(y_true, tf.int64)
-  y_pred = logit(tf.cast(y_pred, tf.float32))
+  y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
       logits=y_pred, labels=y_true))
 
@@ -297,7 +306,7 @@ def hinge(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of 0s and 1s.
   y_pred : tf.Tensor
-    Tensor of real value.
+    Tensor of real values, with same shape as ``y_true``.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -312,7 +321,7 @@ def squared_hinge(y_true, y_pred):
   y_true : tf.Tensor
     Tensor of 0s and 1s.
   y_pred : tf.Tensor
-    Tensor of real value.
+    Tensor of real values, with same shape as ``y_true``.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
