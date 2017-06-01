@@ -119,7 +119,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
     # different posterior sample. But it's expensive.
     tensor = tf.convert_to_tensor(output_key)
     y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
-    y_pred = tf.add_n(y_pred) / tf.cast(n_samples, tf.float32)
+    y_pred = tf.cast(tf.add_n(y_pred), tf.float32) / \
+        tf.cast(n_samples, tf.float32)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
