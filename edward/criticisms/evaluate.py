@@ -48,7 +48,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   n_samples : int, optional
     Number of posterior samples for making predictions, using the
     posterior predictive distribution.
-  output_key : RandomVariable, optional
+  output_key : RandomVariable or tf.Tensor, optional
     It is the key in ``data`` which corresponds to the model's output.
 
   Returns
@@ -117,8 +117,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
     # many times. Alternatively, we could copy ``y_pred``
     # ``n_samples`` many times, so that each copy depends on a
     # different posterior sample. But it's expensive.
-    tensor = tf.convert_to_tensor(output_key)
-    y_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+    y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
     y_pred = tf.cast(tf.add_n(y_pred), tf.float32) / \
         tf.cast(n_samples, tf.float32)
 
