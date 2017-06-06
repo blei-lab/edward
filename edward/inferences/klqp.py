@@ -118,6 +118,8 @@ class KLqp(VariationalInference):
         for rv in six.itervalues(self.latent_vars)])
     is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
                           for z, qz in six.iteritems(self.latent_vars)])
+    if not is_analytic_kl and self.kl_scaling:
+      raise TypeError("kl_scaling must be None when using non-analytic KL term")
     if is_reparameterizable:
       if is_analytic_kl:
         return build_reparam_kl_loss_and_gradients(self, var_list)
