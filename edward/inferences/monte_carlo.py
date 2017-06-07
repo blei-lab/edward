@@ -95,6 +95,7 @@ class MonteCarlo(Inference):
 
     self.n_accept = tf.Variable(0, trainable=False, name="n_accept")
     self.n_accept_over_t = self.n_accept / self.t
+    self.reset = [tf.assign(self.t, 0), tf.assign(self.n_accept, 0)]
     self.train = self.build_update()
 
     if self.logging:
@@ -165,15 +166,3 @@ class MonteCarlo(Inference):
     NotImplementedError
     """
     raise NotImplementedError()
-
-  def reset(self):
-    """Returns a list of ops that effectively restart the chain.
-
-    By default, this op does two things:
-    * Set ``t`` to 0.
-    * Set ``n_accept`` to 0.
-
-    Algorithms that have more state than this should append ops that
-    reset that state appropriately.
-    """
-    return [tf.assign(self.t, 0), tf.assign(self.n_accept, 0)]
