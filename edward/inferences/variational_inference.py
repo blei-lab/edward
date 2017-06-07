@@ -89,15 +89,21 @@ class VariationalInference(Inference):
 
       self.summarize = tf.summary.merge_all(key=summary_key)
 
-    if isinstance(global_step, tf.Variable):
-        starter_learning_rate = 0.1
-        learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                                   global_step,
-                                                   100, 0.9, staircase=True)
-    else:
-        learning_rate = 0.01
+    if optimizer is None and global_step is None:
+      # Default optimizer always uses a global step variable.
+      global_step = tf.Variable(0, trainable=False, name="global_step")
 
-    if optimizer is None or optimizer == 'adam':
+    if isinstance(global_step, tf.Variable):
+      global_step = tf.Variable(0, trainable=False, name="global_step")
+      starter_learning_rate = 0.1
+      learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                                 global_step,
+                                                 100, 0.9, staircase=True)
+    else:
+      learning_rate = 0.01
+
+    # Build optimizer.
+    if optimizer is None:
       optimizer = tf.train.AdamOptimizer(learning_rate)
     elif isinstance(optimizer, str):
       if optimizer == 'gradientdescent':
@@ -108,17 +114,16 @@ class VariationalInference(Inference):
         optimizer = tf.train.AdagradOptimizer(learning_rate)
       elif optimizer == 'momentum':
         optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
+      elif optimizer == 'adam':
+        optimizer = tf.train.AdamOptimizer(learning_rate)
       elif optimizer == 'ftrl':
         optimizer = tf.train.FtrlOptimizer(learning_rate)
       elif optimizer == 'rmsprop':
         optimizer = tf.train.RMSPropOptimizer(learning_rate)
       else:
         raise ValueError('Optimizer class not found:', optimizer)
-    elif isinstance(optimizer, tf.train.Optimizer):
-      # Custom optimizers have no control over global_step.
-      global_step = None
     else:
-      raise TypeError("Optimizer must be str or tf.train.Optimizer.")
+      raise TypeError("Optimizer must be str.")
 
     if not use_prettytensor:
       self.train = optimizer.apply_gradients(grads_and_vars,
