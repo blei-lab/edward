@@ -165,3 +165,15 @@ class MonteCarlo(Inference):
     NotImplementedError
     """
     raise NotImplementedError()
+
+  def reset(self):
+    """Returns a list of ops that effectively restart the chain.
+
+    By default, this op does two things:
+    * Set ``t`` to 0.
+    * Set ``n_accept`` to 0.
+
+    Algorithms that have more state than this should append ops that
+    reset that state appropriately.
+    """
+    return [tf.assign(self.t, 0), tf.assign(self.n_accept, 0)]
