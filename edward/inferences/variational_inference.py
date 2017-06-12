@@ -120,15 +120,20 @@ class VariationalInference(Inference):
     else:
       raise TypeError("Optimizer must be str or tf.train.Optimizer.")
 
-    if not use_prettytensor:
-      self.train = optimizer.apply_gradients(grads_and_vars,
-                                             global_step=global_step)
-    else:
-      # Note PrettyTensor optimizer does not accept manual updates;
-      # it autodiffs the loss directly.
-      self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
-                                      global_step=global_step,
-                                      var_list=var_list)
+    scope = "optimizer_" + str(id(self))
+    with tf.variable_scope(scope):
+      if not use_prettytensor:
+        self.train = optimizer.apply_gradients(grads_and_vars,
+                                               global_step=global_step)
+      else:
+        # Note PrettyTensor optimizer does not accept manual updates;
+        # it autodiffs the loss directly.
+        self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
+                                        global_step=global_step,
+                                        var_list=var_list)
+
+    self.reset.append(tf.variables_initializer(
+        tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)))
 
   def update(self, feed_dict=None):
     """Run one iteration of optimizer for variational inference.

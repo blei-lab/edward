@@ -33,12 +33,12 @@ class test_metropolishastings_class(tf.test.TestCase):
                           rtol=1e-2, atol=1e-2)
 
       old_t, old_n_accept = sess.run([inference.t, inference.n_accept])
-      self.assertEquals(old_t, n_samples)
+      self.assertEqual(old_t, n_samples)
       self.assertGreater(old_n_accept, 0.1)
       sess.run(inference.reset)
       new_t, new_n_accept = sess.run([inference.t, inference.n_accept])
-      self.assertEquals(new_t, 0)
-      self.assertEquals(new_n_accept, 0)
+      self.assertEqual(new_t, 0)
+      self.assertEqual(new_n_accept, 0)
 
 if __name__ == '__main__':
   ed.set_seed(42)
