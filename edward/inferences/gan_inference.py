@@ -245,7 +245,7 @@ def _build_optimizer(optimizer, global_step):
       optimizer = tf.train.RMSPropOptimizer(learning_rate)
     else:
       raise ValueError('Optimizer class not found:', optimizer)
-  else:
-    raise TypeError("Optimizer must be a str.")
+  elif not isinstance(optimizer, tf.train.Optimizer):
+    raise TypeError("Optimizer must be a str, tf.train.Optimizer, or None.")
 
   return optimizer, global_step

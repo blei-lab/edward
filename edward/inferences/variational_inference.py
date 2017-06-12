@@ -50,7 +50,7 @@ class VariationalInference(Inference):
       ``True`` if aim to use PrettyTensor optimizer (when using
       PrettyTensor) or ``False`` if aim to use TensorFlow optimizer.
       Defaults to TensorFlow.
-    global_step : a tf.Variable, optional
+    global_step : tf.Variable, optional
       A TensorFlow variable to hold the global step.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -122,8 +122,8 @@ class VariationalInference(Inference):
         optimizer = tf.train.RMSPropOptimizer(learning_rate)
       else:
         raise ValueError('Optimizer class not found:', optimizer)
-    else:
-      raise TypeError("Optimizer must be str.")
+    elif not isinstance(optimizer, tf.train.Optimizer):
+      raise TypeError("Optimizer must be str, tf.train.Optimizer, or None.")
 
     if not use_prettytensor:
       self.train = optimizer.apply_gradients(grads_and_vars,
