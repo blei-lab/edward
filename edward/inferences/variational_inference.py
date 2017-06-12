@@ -53,23 +53,22 @@ class VariationalInference(Inference):
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
 
-    latent_var_list = set()
-    data_var_list = set()
     if var_list is None:
       # Traverse random variable graphs to get default list of variables.
+      var_list = set()
       trainables = tf.trainable_variables()
       for z, qz in six.iteritems(self.latent_vars):
         if isinstance(z, RandomVariable):
-          latent_var_list.update(get_variables(z, collection=trainables))
+          var_list.update(get_variables(z, collection=trainables))
 
-        latent_var_list.update(get_variables(qz, collection=trainables))
+        var_list.update(get_variables(qz, collection=trainables))
 
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable) and \
                 not isinstance(qx, RandomVariable):
-          data_var_list.update(get_variables(x, collection=trainables))
+          var_list.update(get_variables(x, collection=trainables))
 
-      var_list = list(data_var_list | latent_var_list)
+      var_list = list(var_list)
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 

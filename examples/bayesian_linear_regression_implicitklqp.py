@@ -51,18 +51,23 @@ def ratio_estimator(data, local_vars, global_vars):
   return output
 
 
-def next_batch(size, i):
-  diff = (i + 1) * size - X_train.shape[0]
-  if diff <= 0:
-    X_batch = X_train[(i * size):((i + 1) * size), :]
-    y_batch = y_train[(i * size):((i + 1) * size)]
-    i = i + 1
-  else:
-    X_batch = np.concatenate((X_train[(i * size):, :], X_train[:diff, :]))
-    y_batch = np.concatenate((y_train[(i * size):], y_train[:diff]))
-    i = 0
-
-  return X_batch, y_batch, i
+def generator(arrays, batch_size):
+  """Generate batches, one with respect to each array's first axis."""
+  starts = [0] * len(arrays)  # pointers to where we are in iteration
+  while True:
+    batches = []
+    for i, array in enumerate(arrays):
+      start = starts[i]
+      stop = start + batch_size
+      diff = stop - array.shape[0]
+      if diff <= 0:
+        batch = array[start:stop]
+        starts[i] += batch_size
+      else:
+        batch = np.concatenate((array[start:], array[:diff]))
+        starts[i] = diff
+      batches.append(batch)
+    yield batches
 
 
 ed.set_seed(42)
@@ -75,6 +80,7 @@ D = 2  # number of features
 w_true = np.ones(D) * 5.0
 X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(N, w_true)
+data = generator([X_train, y_train], M)
 
 # MODEL
 X = tf.placeholder(tf.float32, [M, D])
@@ -94,9 +100,8 @@ inference.initialize(n_iter=5000, n_print=100, scale={y: float(N) / M})
 sess = ed.get_session()
 tf.global_variables_initializer().run()
 
-i = 0
 for _ in range(inference.n_iter):
-  X_batch, y_batch, i = next_batch(M, i)
+  X_batch, y_batch = next(data)
   for _ in range(5):
     info_dict_d = inference.update(
         variables="Disc", feed_dict={X: X_batch, y_ph: y_batch})

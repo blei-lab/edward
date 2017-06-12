@@ -102,8 +102,7 @@ inference.initialize(n_print=2, n_iter=50)
 qstudents_mean = qstudents.mean()
 qquestions_mean = qquestions.mean()
 
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
 f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 ax1.set_ylim([-3.0, 3.0])

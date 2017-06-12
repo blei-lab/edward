@@ -7,8 +7,8 @@ import numpy as np
 import six
 import tensorflow as tf
 import os
-from datetime import datetime
 
+from datetime import datetime
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, Progbar
 from edward.util import get_variables
@@ -214,7 +214,7 @@ class Inference(object):
         logdir = os.path.join(
             logdir, datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S"))
 
-      self.set_log_variables(log_vars)
+      self._set_log_variables(log_vars)
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
       self.summarize = tf.summary.merge_all()
     else:
@@ -284,7 +284,7 @@ class Inference(object):
     if self.logging:
       self.train_writer.close()
 
-  def set_log_variables(self, log_vars=None):
+  def _set_log_variables(self, log_vars=None):
     """Log variables to TensorBoard.
 
     For each variable in ``log_vars``, forms a ``tf.summary.scalar``if
