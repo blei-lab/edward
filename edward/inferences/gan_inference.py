@@ -60,7 +60,7 @@ class GANInference(VariationalInference):
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
-    """Initialize variational inference.
+    """Initialize GAN inference.
 
     Parameters
     ----------
@@ -103,9 +103,9 @@ class GANInference(VariationalInference):
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar('loss_discriminative', self.loss_d,
+      tf.summary.scalar("loss/discriminative", self.loss_d,
                         collections=[summary_key])
-      tf.summary.scalar('loss_generative', self.loss,
+      tf.summary.scalar("loss/generative", self.loss,
                         collections=[summary_key])
       self.summarize = tf.summary.merge_all(key=summary_key)
 
@@ -120,7 +120,8 @@ class GANInference(VariationalInference):
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.histogram('disc_outputs', tf.concat(d_true, d_fake, axis=0),
+      tf.summary.histogram("discriminator_outputs",
+                           tf.concat(d_true, d_fake, axis=0),
                            collections=[summary_key])
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
@@ -191,7 +192,7 @@ class GANInference(VariationalInference):
       raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:

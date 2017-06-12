@@ -59,32 +59,36 @@ _suff_stat_to_dist['countable'][(('#x',),)] = (
 
 
 def complete_conditional(rv, cond_set=None):
-  """Returns the conditional distribution `RandomVariable` p(`rv` | .).
+  """Returns the conditional distribution ``RandomVariable``
+  :math:`p(\\text{rv} | \\cdot)`.
 
-  This function tries to infer the conditional distribution of `rv`
-  given `cond_set`, a set of other `RandomVariable`s in the graph. It
+  This function tries to infer the conditional distribution of ``rv``
+  given ``cond_set``, a set of other ``RandomVariable``s in the graph. It
   will only be able to do this if
-  a) p(`rv` | `cond_set`) is in a tractable exponential family AND
-  b) the truth of assumption (a) is not obscured in the TensorFlow graph.
+
+  1. :math:`p(\\text{rv} | \\text{cond_set})` is in a tractable
+     exponential family, AND
+  2. the truth of assumption 1 is not obscured in the TensorFlow graph.
+
   In other words, this function will do its best to recognize conjugate
-  relationships when they exist, but it may not always be able to do the
+  relationships when they exist. But it may not always be able to do the
   necessary algebra.
 
   Parameters
   ----------
   rv : RandomVariable
-    The `RandomVariable` whose conditional distribution we are interested in.
-  cond_set : iterable of RandomVariables, optional
-    The set of `RandomVariable`s we want to condition on. Defaults to all
-    `RandomVariable`s in the graph. (It makes no difference if `cond_set` does
-    or does not include `rv`.)
+    The random variable whose conditional distribution we are interested in.
+  cond_set : iterable of RandomVariable, optional
+    The set of random variables we want to condition on. Default is all
+    random variables in the graph. (It makes no difference if ``cond_set``
+    does or does not include ``rv``.)
 
   Notes
   -----
-  When calling `complete_conditional()` multiple times, one should
-  usually pass an explicit `cond_set`. Otherwise
-  `complete_conditional()` will try to condition on the
-  `RandomVariable`s returned by previous calls to itself, which may
+  When calling ``complete_conditional()`` multiple times, one should
+  usually pass an explicit ``cond_set``. Otherwise
+  ``complete_conditional()`` will try to condition on the
+  ``RandomVariable``s returned by previous calls to itself. This may
   result in unpredictable behavior.
   """
   if cond_set is None:

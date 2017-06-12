@@ -76,44 +76,14 @@ class VariationalInference(Inference):
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
       tf.summary.scalar("loss", self.loss, collections=[summary_key])
-      with tf.name_scope('variational'):
-        for grad, var in grads_and_vars:
-          if var in latent_var_list:
-            tf.summary.histogram("parameter_" +
-                                 var.name.replace(':', '_'),
-                                 var, collections=[summary_key])
-            tf.summary.histogram("gradient_" +
-                                 var.name.replace(':', '_'),
-                                 grad, collections=[summary_key])
-            tf.summary.scalar("gradient_norm_" +
-                              var.name.replace(':', '_'),
-                              tf.norm(grad), collections=[summary_key])
-      # replace : with _ because tf does not allow : in var names in summaries
-
-      with tf.name_scope('model'):
-        for grad, var in grads_and_vars:
-          if var in data_var_list:
-            tf.summary.histogram("parameter_" + var.name.replace(':', '_'),
-                                 var, collections=[summary_key])
-            tf.summary.histogram("gradient_" +
-                                 var.name.replace(':', '_'),
-                                 grad, collections=[summary_key])
-            tf.summary.scalar("gradient_norm_" +
-                              var.name.replace(':', '_'),
-                              tf.norm(grad), collections=[summary_key])
-
-      # when var_list is not initialized with None
-      with tf.name_scope(''):
-        for grad, var in grads_and_vars:
-          if var not in latent_var_list and var not in data_var_list:
-            tf.summary.histogram("parameter_" + var.name.replace(':', '_'),
-                                 var, collections=[summary_key])
-            tf.summary.histogram("gradient_" +
-                                 var.name.replace(':', '_'),
-                                 grad, collections=[summary_key])
-            tf.summary.scalar("gradient_norm_" +
-                              var.name.replace(':', '_'),
-                              tf.norm(grad), collections=[summary_key])
+      for grad, var in grads_and_vars:
+        # replace colons which are an invalid character
+        tf.summary.histogram("gradient/" +
+                             var.name.replace(':', '/'),
+                             grad, collections=[summary_key])
+        tf.summary.scalar("gradient_norm/" +
+                          var.name.replace(':', '/'),
+                          tf.norm(grad), collections=[summary_key])
 
       self.summarize = tf.summary.merge_all(key=summary_key)
 
@@ -186,7 +156,7 @@ class VariationalInference(Inference):
     _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:

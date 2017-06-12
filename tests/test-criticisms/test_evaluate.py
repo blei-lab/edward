@@ -6,7 +6,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Bernoulli, Categorical, Multinomial, Normal
 
 
 class test_evaluate_class(tf.test.TestCase):
@@ -22,6 +22,55 @@ class test_evaluate_class(tf.test.TestCase):
       self.assertRaises(TypeError, ed.evaluate, x, {x: x_data}, n_samples=1)
       self.assertRaises(NotImplementedError, ed.evaluate, 'hello world',
                         {x: x_data}, n_samples=1)
+
+  def test_metrics_classification(self):
+    with self.test_session():
+      x = Bernoulli(probs=0.51)
+      x_data = tf.constant(1)
+      self.assertAllClose(
+          1.0,
+          ed.evaluate('binary_accuracy', {x: x_data}, n_samples=1))
+      x = Bernoulli(probs=0.51, sample_shape=5)
+      x_data = tf.constant([1, 1, 1, 0, 0])
+      self.assertAllClose(
+          0.6,
+          ed.evaluate('binary_accuracy', {x: x_data}, n_samples=1))
+      x = Bernoulli(probs=tf.constant([0.51, 0.49, 0.49]))
+      x_data = tf.constant([1, 0, 1])
+      self.assertAllClose(
+          2.0 / 3,
+          ed.evaluate('binary_accuracy', {x: x_data}, n_samples=1))
+
+      x = Categorical(probs=tf.constant([0.48, 0.51, 0.01]))
+      x_data = tf.constant(1)
+      self.assertAllClose(
+          1.0,
+          ed.evaluate('sparse_categorical_accuracy', {x: x_data}, n_samples=1))
+      x = Categorical(probs=tf.constant([0.48, 0.51, 0.01]), sample_shape=5)
+      x_data = tf.constant([1, 1, 1, 0, 2])
+      self.assertAllClose(
+          0.6,
+          ed.evaluate('sparse_categorical_accuracy', {x: x_data}, n_samples=1))
+      x = Categorical(
+          probs=tf.constant([[0.48, 0.51, 0.01], [0.51, 0.48, 0.01]]))
+      x_data = tf.constant([1, 2])
+      self.assertAllClose(
+          0.5,
+          ed.evaluate('sparse_categorical_accuracy', {x: x_data}, n_samples=1))
+
+      x = Multinomial(total_count=1.0, probs=tf.constant([0.48, 0.51, 0.01]))
+      x_data = tf.constant([0, 1, 0], dtype=x.dtype.as_numpy_dtype)
+      self.assertAllClose(
+          1.0,
+          ed.evaluate('categorical_accuracy', {x: x_data}, n_samples=1))
+      x = Multinomial(total_count=1.0, probs=tf.constant([0.48, 0.51, 0.01]),
+                      sample_shape=5)
+      x_data = tf.constant(
+          [[0, 1, 0], [0, 1, 0], [0, 1, 0], [1, 0, 0], [0, 0, 1]],
+          dtype=x.dtype.as_numpy_dtype)
+      self.assertAllClose(
+          0.6,
+          ed.evaluate('categorical_accuracy', {x: x_data}, n_samples=1))
 
   def test_data(self):
     with self.test_session():

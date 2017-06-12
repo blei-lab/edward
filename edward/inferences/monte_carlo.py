@@ -97,9 +97,12 @@ class MonteCarlo(Inference):
     self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 
+    # Subclasses should append any other ops needed to reset chain state
+    self.reset = [tf.assign(self.t, 0), tf.assign(self.n_accept, 0)]
+
     if self.logging:
       summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar('n_accept', self.n_accept, collections=[summary_key])
+      tf.summary.scalar("n_accept", self.n_accept, collections=[summary_key])
       self.summarize = tf.summary.merge_all(key=summary_key)
 
   def update(self, feed_dict=None):
@@ -136,7 +139,7 @@ class MonteCarlo(Inference):
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:

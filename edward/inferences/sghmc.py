@@ -90,7 +90,8 @@ class SGHMC(MonteCarlo):
                              tf.ones(event_shape)))
       sample[z] = old_sample[z] + old_v_sample[z]
       v_sample[z] = ((1. - 0.5 * friction) * old_v_sample[z] +
-                     learning_rate * grad_log_p + normal.sample())
+                     learning_rate * tf.convert_to_tensor(grad_log_p) +
+                     normal.sample())
 
     # Update Empirical random variables.
     assign_ops = []
