@@ -38,7 +38,7 @@ class test_klqp_class(tf.test.TestCase):
       sess.run(inference.reset)
       new_t, new_variables = sess.run([inference.t, variables])
       self.assertEqual(new_t, 0)
-      self.assertNotEquals(old_variables, new_variables)
+      self.assertNotEqual(old_variables, new_variables)
 
 if __name__ == '__main__':
   ed.set_seed(42)

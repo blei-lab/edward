@@ -29,6 +29,10 @@ class Inference(object):
   minimum implement ``initialize`` and ``update``: the former builds
   the computational graph for the algorithm; the latter runs the
   computational graph for the algorithm.
+
+  To reset inference (e.g., internal variable counters incremented
+  over training), fetch inference's reset ops from session with
+  ``sess.run(inference.reset)``.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
