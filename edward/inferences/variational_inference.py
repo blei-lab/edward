@@ -67,6 +67,32 @@ class VariationalInference(Inference):
 
       var_list = list(var_list)
 
+    self._var_list = var_list
+    self.train = self.build_update(optimizer, use_prettytensor)
+
+  def build_update(self, optimizer, use_prettytensor):
+    """Build update rules, returning an assign op for parameters in
+    the passed in variable list.
+
+    Any derived class of ``VariationalInference`` **must** implement
+    this method or ``build_loss_and_gradients``.
+    """
+    # TODO the idea of this generalization is to
+    # 1. bridge monte carlo and VI method abstractions
+    # 2. allow VI to use coordinate ascent/non-gradient based methods
+    #   + if so, this means optimizer must not be a default argument
+    #  of VI but a subclass of it; or otherwise have it be a default
+    #  that's stored within build_update and which can then be
+    #  overwritten
+    var_list = self._var_list
+
+    # TODO Main changes are:
+    # + gradient clipping
+    # + parameter clipping
+    # + exponential moving averages
+    # + custom summary ops (e.g., forward pass, specific things during
+    # training)
+    # + manipulation of loss
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
     if self.logging:
@@ -119,18 +145,20 @@ class VariationalInference(Inference):
 
     with tf.variable_scope(None, default_name="optimizer") as scope:
       if not use_prettytensor:
-        self.train = optimizer.apply_gradients(grads_and_vars,
-                                               global_step=global_step)
+        train = optimizer.apply_gradients(grads_and_vars,
+                                          global_step=global_step)
       else:
         import prettytensor as pt
         # Note PrettyTensor optimizer does not accept manual updates;
         # it autodiffs the loss directly.
-        self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
-                                        global_step=global_step,
-                                        var_list=var_list)
+        train = pt.apply_optimizer(optimizer, losses=[self.loss],
+                                   global_step=global_step,
+                                   var_list=var_list)
 
+    # TODO
     self.reset.append(tf.variables_initializer(
         tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)))
+    return train
 
   def update(self, feed_dict=None):
     """Run one iteration of optimization.
@@ -178,8 +206,9 @@ class VariationalInference(Inference):
     """Build loss function and its gradients. They will be leveraged
     in an optimizer to update the model and variational parameters.
 
-    Any derived class of `VariationalInference` **must** implement
-    this method.
+    TODO enable this
+    Any derived class of ``VariationalInference`` **must** implement
+    this method or rewrite ``build_update``.
 
     Raises:
       NotImplementedError.

@@ -155,15 +155,3 @@ class MonteCarlo(Inference):
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
         self.progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
-
-  @abc.abstractmethod
-  def build_update(self):
-    """Build update rules, returning an assign op for parameters in
-    the `Empirical` random variables.
-
-    Any derived class of `MonteCarlo` **must** implement this method.
-
-    Raises:
-      NotImplementedError.
-    """
-    raise NotImplementedError()

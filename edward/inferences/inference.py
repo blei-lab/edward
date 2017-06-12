@@ -284,6 +284,18 @@ class Inference(object):
     if self.logging:
       self.train_writer.close()
 
+  @abc.abstractmethod
+  def build_update(self):
+    """Build update rules, returning an assign op for parameters in
+    the approximating family or model.
+
+    Any derived class of `Inference` **must** implement this method.
+
+    Raises:
+      NotImplementedError.
+    """
+    raise NotImplementedError()
+
   def _set_log_variables(self, log_vars=None):
     """Log variables to TensorBoard.
 
