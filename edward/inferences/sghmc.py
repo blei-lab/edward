@@ -69,7 +69,8 @@ class SGHMC(MonteCarlo):
 
     Implements the update equations from (15) of Chen et al. (2014).
     """
-    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
+    idx = tf.floor_div(tf.maximum(self.t - 1, 0), self.iters_per_sample)
+    old_sample = {z: tf.gather(qz.params, idx)
                   for z, qz in six.iteritems(self.latent_vars)}
     old_v_sample = {z: v for z, v in six.iteritems(self.v)}
 
@@ -97,7 +98,8 @@ class SGHMC(MonteCarlo):
     assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
-      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
+      idx = tf.floor_div(self.t, self.iters_per_sample)
+      assign_ops.append(tf.scatter_update(variable, idx, sample[z]))
       assign_ops.append(tf.assign(self.v[z], v_sample[z]).op)
 
     # Increment n_accept.

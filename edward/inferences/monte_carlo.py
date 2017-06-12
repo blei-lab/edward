@@ -21,7 +21,8 @@ class MonteCarlo(Inference):
   minimum implement ``build_update``: it determines how to assign
   the samples in the ``Empirical`` approximations.
   """
-  def __init__(self, latent_vars=None, data=None):
+
+  def __init__(self, latent_vars=None, data=None, nsamples=1e4):
     """Initialization.
 
     Parameters
@@ -75,7 +76,7 @@ class MonteCarlo(Inference):
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
         latent_vars = {rv: Empirical(params=tf.Variable(
-            tf.zeros([1e4] + rv.batch_shape.as_list())))
+            tf.zeros([nsamples] + rv.batch_shape.as_list())))
             for rv in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
@@ -88,9 +89,11 @@ class MonteCarlo(Inference):
 
     super(MonteCarlo, self).__init__(latent_vars, data)
 
-  def initialize(self, *args, **kwargs):
-    kwargs['n_iter'] = np.amin([qz.params.shape.as_list()[0] for
-                                qz in six.itervalues(self.latent_vars)])
+  def initialize(self, iters_per_sample=1, *args, **kwargs):
+    nsamples = np.amin([qz.params.shape.as_list()[0] for
+                              qz in six.itervalues(self.latent_vars)])
+    self.iters_per_sample = iters_per_sample
+    kwargs['n_iter'] = iters_per_sample*nsamples
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
     self.n_accept = tf.Variable(0, trainable=False, name="n_accept")
