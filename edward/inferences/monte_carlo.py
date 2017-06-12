@@ -97,8 +97,7 @@ class MonteCarlo(Inference):
     self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 
-    # Subclasses should append any other ops needed to reset chain state
-    self.reset = [tf.assign(self.t, 0), tf.assign(self.n_accept, 0)]
+    self.reset.append(tf.variables_initializer([self.n_accept]))
 
     if self.logging:
       summary_key = 'summaries_' + str(id(self))

@@ -29,6 +29,10 @@ class Inference(object):
   minimum implement ``initialize`` and ``update``: the former builds
   the computational graph for the algorithm; the latter runs the
   computational graph for the algorithm.
+
+  To reset inference (e.g., internal variable counters incremented
+  over training), fetch inference's reset ops from session with
+  ``sess.run(inference.reset)``.
   """
   def __init__(self, latent_vars=None, data=None):
     """Initialization.
@@ -151,10 +155,10 @@ class Inference(object):
   def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
                  log_timestamp=True, log_vars=None, debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
-    and builds ops for the algorithm's computational graph. No ops
-    should be created outside the call to ``initialize()``.
+    and builds ops for the algorithm's computation graph.
 
     Any derived class of ``Inference`` **must** implement this method.
+    No methods which build ops should be called outside ``initialize()``.
 
     Parameters
     ----------
@@ -219,6 +223,10 @@ class Inference(object):
     self.debug = debug
     if self.debug:
       self.op_check = tf.add_check_numerics_ops()
+
+    # Store reset ops which user can call. Subclasses should append
+    # any ops needed to reset internal variables in inference.
+    self.reset = [tf.variables_initializer([self.t])]
 
   @abc.abstractmethod
   def update(self, feed_dict=None):
