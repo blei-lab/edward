@@ -58,8 +58,7 @@ optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer)
 
 sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
 n_epoch = 100
 n_iter_per_epoch = 1000

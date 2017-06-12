@@ -99,8 +99,7 @@ inference.initialize(optimizer=optimizer, use_prettytensor=True)
 
 hidden_rep = tf.sigmoid(logits)
 
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
 n_epoch = 100
 n_iter_per_epoch = 1000
