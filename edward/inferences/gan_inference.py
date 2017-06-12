@@ -224,6 +224,7 @@ def _build_optimizer(optimizer, global_step):
                                                100, 0.9, staircase=True)
   else:
     learning_rate = 0.01
+    global_step = None
 
   # Build optimizer.
   if optimizer is None:
