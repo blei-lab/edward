@@ -214,8 +214,8 @@ class GANInference(VariationalInference):
 
 def _build_optimizer(optimizer, global_step):
   if optimizer is None and global_step is None:
-      # Default optimizer always uses a global step variable.
-      global_step = tf.Variable(0, trainable=False, name="global_step")
+    # Default optimizer always uses a global step variable.
+    global_step = tf.Variable(0, trainable=False, name="global_step")
 
   if isinstance(global_step, tf.Variable):
     starter_learning_rate = 0.1
