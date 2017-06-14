@@ -224,7 +224,6 @@ def _build_optimizer(optimizer, global_step):
                                                100, 0.9, staircase=True)
   else:
     learning_rate = 0.01
-    global_step = None
 
   # Build optimizer.
   if optimizer is None:
@@ -247,6 +246,6 @@ def _build_optimizer(optimizer, global_step):
     else:
       raise ValueError('Optimizer class not found:', optimizer)
   elif not isinstance(optimizer, tf.train.Optimizer):
-    raise TypeError("Optimizer must be a str, tf.train.Optimizer, or None.")
+    raise TypeError("Optimizer must be str, tf.train.Optimizer, or None.")
 
   return optimizer, global_step
