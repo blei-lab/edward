@@ -17,7 +17,7 @@ setup(
     extras_require={
         'tensorflow': ['tensorflow>=1.1.0rc0,<1.2.0rc0'],
         'tensorflow with gpu': ['tensorflow-gpu>=1.1.0rc0,<1.2.0rc0'],
-        'neural networks': ['keras>=1.0.0', 'prettytensor>=0.7.4'],
+        'neural networks': ['keras>=1.0.0,<=2.0.4', 'prettytensor>=0.7.4'],
         'notebooks': ['jupyter>=1.0.0'],
         'visualization': ['matplotlib>=1.3',
                           'pillow>=3.4.2',
