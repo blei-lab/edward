@@ -36,7 +36,9 @@ class test_laplace_class(tf.test.TestCase):
 
   def _test(self, sess, qw, qb, w_true):
     qw_loc, qb_loc, qw_det_covariance, qb_det_covariance = \
-        sess.run([qw.loc, qb.loc, qw.det_covariance(), qb.det_covariance()])
+        sess.run([qw.loc, qb.loc,
+                  tf.square(qw.scale.determinant()),
+                  tf.square(qb.scale.determinant())])
 
     self.assertAllClose(qw_loc, w_true, atol=0.5)
     self.assertAllClose(qb_loc, np.array([0.0]), atol=0.5)
