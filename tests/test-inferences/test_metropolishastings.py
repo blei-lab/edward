@@ -30,7 +30,7 @@ class test_metropolishastings_class(tf.test.TestCase):
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
-                          rtol=1e-2, atol=1e-2)
+                          rtol=1e-1, atol=1e-1)
 
       old_t, old_n_accept = sess.run([inference.t, inference.n_accept])
       self.assertEqual(old_t, n_samples)
