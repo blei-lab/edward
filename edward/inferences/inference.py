@@ -163,7 +163,10 @@ class Inference(object):
     Parameters
     ----------
     n_iter : int, optional
-      Number of iterations for algorithm.
+      Number of iterations for algorithm when calling ``run()``.
+      Alternatively if controlling inference manually, it is the
+      expected number of calls to ``update()``; this number determines
+      tracking information during the print progress.
     n_print : int, optional
       Number of iterations for each print progress. To suppress print
       progress, then specify 0. Default is ``int(n_iter / 100)``.
