@@ -137,9 +137,10 @@
 <p>Edward has optional features that depend on external packages.</p>
 <ul>
 <li>Neural networks are supported through three libraries: <a href="http://keras.io">Keras</a> (&gt;=1.0)
-<pre language="JSON"><code>pip install keras</code></pre>
+<pre language="JSON"><code>pip install keras==2.0.4</code></pre>
 <p><a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> (native in TensorFlow), and <a href="https://github.com/google/prettytensor">PrettyTensor</a> (&gt;=0.7.4)</p>
-<pre language="JSON"><code>pip install prettytensor</code></pre></li>
+<pre language="JSON"><code>pip install prettytensor</code></pre>
+<p>Note that for Keras 2.0.5 and beyond, all neural net layer transformations cannot be directly applied on random variables anymore. For example, if <code>x</code> is a <code>ed.RandomVariable</code> object, one must call <code>tf.convert_to_tensor</code> before applying it to a layer transformation, <code>Dense(256)(tf.convert_to_tensor(x))</code>. See <a href="https://github.com/fchollet/keras/issues/6979">here</a> for more details.</p></li>
 <li>Notebooks require <a href="http://jupyter.org">Jupyter</a> (&gt;=1.0.0)
 <pre language="JSON"><code>pip install jupyter</code></pre></li>
 <li>Visualization requires <a href="http://matplotlib.org">Matplotlib</a> (&gt;=1.3), <a href="https://pillow.readthedocs.io">Pillow</a> (&gt;=3.4.2), and <a href="https://seaborn.pydata.org">Seaborn</a> (&gt;=0.3.1)

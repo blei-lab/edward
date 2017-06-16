@@ -46,7 +46,7 @@ Edward has optional features that depend on external packages.
   \item Neural networks are supported through three libraries:
   \href{http://keras.io}{Keras} (>=1.0)
 \begin{lstlisting}[language=JSON]
-pip install keras
+pip install keras==2.0.4
 \end{lstlisting}
   \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow Slim}
   (native in TensorFlow), and
@@ -54,6 +54,8 @@ pip install keras
 \begin{lstlisting}[language=JSON]
 pip install prettytensor
 \end{lstlisting}
+Note that for Keras 2.0.5 and beyond, all neural net layer transformations cannot be directly applied on random variables anymore. For example, if \texttt{x} is a \texttt{ed.RandomVariable} object, one must call \texttt{tf.convert_to_tensor} before applying it to a layer transformation, \texttt{Dense(256)(tf.convert_to_tensor(x))}.
+See \href{https://github.com/fchollet/keras/issues/6979}{here} for more details.
   \item Notebooks require
   \href{http://jupyter.org}{Jupyter} (>=1.0.0)
 \begin{lstlisting}[language=JSON]
