@@ -38,34 +38,34 @@ X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(235, w_true)
 \end{lstlisting}
 
-We also define a helper function to select the next batch of data points
-from the full set of examples. It keeps track of the current batch index
-using an internal counter.
+We also define a helper function to select the next batch of data
+points from the full set of examples. It keeps track of the current
+batch index and returns the next batch using the function
+\texttt{next()}.
 
 \begin{lstlisting}[language=Python]
-def next_batch(X, y, size):
-  """Grab a [size, :] tensor from X and [size] tensor from y."""
-  global i
-  try:  # initialize batch index
-    i
-  except:
-    i = 0
+def generator(arrays, batch_size):
+  """Generate batches, one with respect to each array's first axis."""
+  starts = [0] * len(arrays)  # pointers to where we are in iteration
+  while True:
+    batches = []
+    for i, array in enumerate(arrays):
+      start = starts[i]
+      stop = start + batch_size
+      diff = stop - array.shape[0]
+      if diff <= 0:
+        batch = array[start:stop]
+        starts[i] += batch_size
+      else:
+        batch = np.concatenate((array[start:], array[:diff]))
+        starts[i] = diff
+      batches.append(batch)
+    yield batches
 
-  N = X.shape[0]
-  diff = (i + 1) * size - N
-  if diff <= 0:
-    X_batch = X[(i * size):((i + 1) * size), :]
-    y_batch = y[(i * size):((i + 1) * size)]
-    i += 1
-  else:
-    X_batch = np.concatenate((X[(i * size):, :], X[:diff, :]))
-    y_batch = np.concatenate((y[(i * size):], y[:diff]))
-    i = 0
-
-  return X_batch, y_batch
+data = generator([X_train, y_train], M)
 \end{lstlisting}
 
-We will use \texttt{next_batch} during inference.
+We will generate batches from \texttt{data} during inference.
 
 \subsubsection{Model}
 
@@ -144,7 +144,7 @@ inference.initialize(n_iter=n_batch * n_epoch, n_samples=5, scale={y: N / M})
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
-  X_batch, y_batch = next_batch(X_train, y_train, M)
+  X_batch, y_batch = next(data)
   info_dict = inference.update({X: X_batch, y_ph: y_batch})
   inference.print_progress(info_dict)
 \end{lstlisting}
@@ -171,7 +171,7 @@ inference.initialize(n_iter=n_batch * n_epoch * 10, n_samples=5, scale={y: N / M
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter // 10):
-  X_batch, y_batch = next_batch(X_train, y_train, M)
+  X_batch, y_batch = next(data)
   for _ in range(10):
     info_dict = inference.update({X: X_batch, y_ph: y_batch})
 

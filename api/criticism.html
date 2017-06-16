@@ -138,7 +138,7 @@
 <hr/>
 <span class="target" id="module-edward.criticisms"></span><dl class="function">
 <dt id="edward.criticisms.evaluate">
-<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>n_samples=500</em>, <em>output_key=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L13" title="Link to definition on GitHub.">[source]</a></dt>
+<code class="descclassname">edward.criticisms.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>metrics</em>, <em>data</em>, <em>n_samples=500</em>, <em>output_key=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/criticisms/evaluate.py#L19" title="Link to definition on GitHub.">[source]</a></dt>
 <dd><p>Evaluate fitted model using a set of metrics.</p>
 <p>A metric, or scoring rule (Winkler, 1994), is a function of observed
 data under the posterior predictive distribution. For example in
@@ -182,7 +182,7 @@ type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). 
 <div><p>Number of posterior samples for making predictions, using the
 posterior predictive distribution.</p>
 </div></blockquote>
-<p><strong>output_key</strong> : RandomVariable, optional</p>
+<p><strong>output_key</strong> : RandomVariable or tf.Tensor, optional</p>
 <blockquote>
 <div><p>It is the key in <code class="docutils literal"><span class="pre">data</span></code> which corresponds to the model’s output.</p>
 </div></blockquote>

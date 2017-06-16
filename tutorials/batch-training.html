@@ -143,28 +143,27 @@ D = 10     # number of features
 w_true = np.ones(D) * 5
 X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(235, w_true)</code></pre>
-<p>We also define a helper function to select the next batch of data points from the full set of examples. It keeps track of the current batch index using an internal counter.</p>
-<pre class="python" language="Python"><code>def next_batch(X, y, size):
-  &quot;&quot;&quot;Grab a [size, :] tensor from X and [size] tensor from y.&quot;&quot;&quot;
-  global i
-  try:  # initialize batch index
-    i
-  except:
-    i = 0
+<p>We also define a helper function to select the next batch of data points from the full set of examples. It keeps track of the current batch index and returns the next batch using the function <code>next()</code>.</p>
+<pre class="python" language="Python"><code>def generator(arrays, batch_size):
+  &quot;&quot;&quot;Generate batches, one with respect to each array&#39;s first axis.&quot;&quot;&quot;
+  starts = [0] * len(arrays)  # pointers to where we are in iteration
+  while True:
+    batches = []
+    for i, array in enumerate(arrays):
+      start = starts[i]
+      stop = start + batch_size
+      diff = stop - array.shape[0]
+      if diff &lt;= 0:
+        batch = array[start:stop]
+        starts[i] += batch_size
+      else:
+        batch = np.concatenate((array[start:], array[:diff]))
+        starts[i] = diff
+      batches.append(batch)
+    yield batches
 
-  N = X.shape[0]
-  diff = (i + 1) * size - N
-  if diff &lt;= 0:
-    X_batch = X[(i * size):((i + 1) * size), :]
-    y_batch = y[(i * size):((i + 1) * size)]
-    i += 1
-  else:
-    X_batch = np.concatenate((X[(i * size):, :], X[:diff, :]))
-    y_batch = np.concatenate((y[(i * size):], y[:diff]))
-    i = 0
-
-  return X_batch, y_batch</code></pre>
-<p>We will use <code>next_batch</code> during inference.</p>
+data = generator([X_train, y_train], M)</code></pre>
+<p>We will generate batches from <code>data</code> during inference.</p>
 <h3 id="model">Model</h3>
 <p>Posit the model as Bayesian linear regression <span class="citation">(Murphy, 2012)</span>. For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model posits the following distributions:</p>
 <p><span class="math display">\[\begin{aligned}
@@ -205,7 +204,7 @@ inference.initialize(n_iter=n_batch * n_epoch, n_samples=5, scale={y: N / M})
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
-  X_batch, y_batch = next_batch(X_train, y_train, M)
+  X_batch, y_batch = next(data)
   info_dict = inference.update({X: X_batch, y_ph: y_batch})
   inference.print_progress(info_dict)</code></pre>
 <pre><code>390/390 [100%] ██████████████████████████████ Elapsed: 4s | Loss: 10481.556</code></pre>
@@ -219,7 +218,7 @@ inference.initialize(n_iter=n_batch * n_epoch * 10, n_samples=5, scale={y: N / M
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter // 10):
-  X_batch, y_batch = next_batch(X_train, y_train, M)
+  X_batch, y_batch = next(data)
   for _ in range(10):
     info_dict = inference.update({X: X_batch, y_ph: y_batch})
 
