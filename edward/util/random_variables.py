@@ -79,7 +79,7 @@ def check_latent_vars(latent_vars):
                       "dtype: {}, {}".format(key.dtype, value.dtype))
 
 
-def copy_default(x, *args, **kwargs):
+def _copy_default(x, *args, **kwargs):
   if isinstance(x, (RandomVariable, tf.Operation, tf.Tensor, tf.Variable)):
     x = copy(x, *args, **kwargs)
 
@@ -216,16 +216,16 @@ def copy(org_instance, dict_swap=None, scope="copied",
     rv = org_instance
 
     # If it has copiable arguments, copy them.
-    args = [copy_default(arg, dict_swap, scope, True, copy_q)
+    args = [_copy_default(arg, dict_swap, scope, True, copy_q)
             for arg in rv._args]
 
     kwargs = {}
     for key, value in six.iteritems(rv._kwargs):
       if isinstance(value, list):
-        kwargs[key] = [copy_default(v, dict_swap, scope, True, copy_q)
+        kwargs[key] = [_copy_default(v, dict_swap, scope, True, copy_q)
                        for v in value]
       else:
-        kwargs[key] = copy_default(value, dict_swap, scope, True, copy_q)
+        kwargs[key] = _copy_default(value, dict_swap, scope, True, copy_q)
 
     kwargs['name'] = new_name
     # Create new random variable with copied arguments.

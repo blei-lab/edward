@@ -2,22 +2,22 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import inspect
+import inspect as _inspect
 
-from edward.models.random_variable import RandomVariable
-from tensorflow.contrib import distributions
+from edward.models.random_variable import RandomVariable as _RandomVariable
+from tensorflow.contrib import distributions as _distributions
 
 # Automatically generate random variable classes from classes in
 # tf.contrib.distributions.
 _globals = globals()
-for _name in sorted(dir(distributions)):
-  _candidate = getattr(distributions, _name)
-  if (inspect.isclass(_candidate) and
-          _candidate != distributions.Distribution and
-          issubclass(_candidate, distributions.Distribution)):
+for _name in sorted(dir(_distributions)):
+  _candidate = getattr(_distributions, _name)
+  if (_inspect.isclass(_candidate) and
+          _candidate != _distributions.Distribution and
+          issubclass(_candidate, _distributions.Distribution)):
 
-    params = {'__doc__': _candidate.__doc__}
-    _globals[_name] = type(_name, (RandomVariable, _candidate), params)
+    _params = {'__doc__': _candidate.__doc__}
+    _globals[_name] = type(_name, (_RandomVariable, _candidate), _params)
 
     del _candidate
 
@@ -36,3 +36,7 @@ Multinomial.support = 'onehot'
 MultivariateNormalDiag.support = 'multivariate_real'
 Normal.support = 'real'
 Poisson.support = 'countable'
+
+del absolute_import
+del division
+del print_function
