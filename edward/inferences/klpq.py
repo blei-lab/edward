@@ -66,7 +66,7 @@ class KLpq(VariationalInference):
     The loss function can be estimated as
 
     $\\frac{1}{S} \sum_{s=1}^S [
-        w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
+      w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
 
     where for \\(z^s \sim q(z; \lambda)\\),
 
@@ -74,12 +74,12 @@ class KLpq(VariationalInference):
           w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)$
 
     normalizes the importance weights, \\(w(z^s; \lambda) = p(x,
-    z^s) / q(z^s; \lambda)\).
+    z^s) / q(z^s; \lambda)\\).
 
     This provides a gradient,
 
     $- \\frac{1}{S} \sum_{s=1}^S [
-        w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
+      w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples

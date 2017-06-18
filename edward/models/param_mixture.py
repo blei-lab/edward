@@ -55,7 +55,7 @@ class distributions_ParamMixture(Distribution):
     params = {'mu': tf.zeros(5), 'sigma': tf.ones(5)}
     x = ParamMixture(probs, params, Normal)
     assert x.shape == ()
-    >>>
+
     probs = tf.ones([2, 5]) / 5.0
     params = {'p': tf.zeros([5, 2]) + 0.8}
     x = ParamMixture(probs, params, Bernoulli)

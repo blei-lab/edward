@@ -63,30 +63,29 @@ class GANInference(VariationalInference):
                  *args, **kwargs):
     """Initialize GAN inference.
 
-    Parameters
-    ----------
-    optimizer: str or tf.train.Optimizer, optional
-      A TensorFlow optimizer, to use for optimizing the generator
-      objective. Alternatively, one can pass in the name of a
-      TensorFlow optimizer, and default parameters for the optimizer
-      will be used.
-    optimizer_d: str or tf.train.Optimizer, optional
-      A TensorFlow optimizer, to use for optimizing the discriminator
-      objective. Alternatively, one can pass in the name of a
-      TensorFlow optimizer, and default parameters for the optimizer
-      will be used.
-    global_step: tf.Variable, optional
-      Optional `Variable` to increment by one after the variables
-      for the generator have been updated. See
-      `tf.train.Optimizer.apply_gradients`.
-    global_step_d: tf.Variable, optional
-      Optional `Variable` to increment by one after the variables
-      for the discriminator have been updated. See
-      `tf.train.Optimizer.apply_gradients`.
-    var_list: list of tf.Variable, optional
-      List of TensorFlow variables to optimize over (in the generative
-      model). Default is all trainable variables that `latent_vars`
-      and `data` depend on.
+    Args:
+      optimizer: str or tf.train.Optimizer, optional.
+        A TensorFlow optimizer, to use for optimizing the generator
+        objective. Alternatively, one can pass in the name of a
+        TensorFlow optimizer, and default parameters for the optimizer
+        will be used.
+      optimizer_d: str or tf.train.Optimizer, optional.
+        A TensorFlow optimizer, to use for optimizing the discriminator
+        objective. Alternatively, one can pass in the name of a
+        TensorFlow optimizer, and default parameters for the optimizer
+        will be used.
+      global_step: tf.Variable, optional.
+        Optional `Variable` to increment by one after the variables
+        for the generator have been updated. See
+        `tf.train.Optimizer.apply_gradients`.
+      global_step_d: tf.Variable, optional.
+        Optional `Variable` to increment by one after the variables
+        for the discriminator have been updated. See
+        `tf.train.Optimizer.apply_gradients`.
+      var_list: list of tf.Variable, optional.
+        List of TensorFlow variables to optimize over (in the generative
+        model). Default is all trainable variables that `latent_vars`
+        and `data` depend on.
     """
     # call grandparent's method; avoid parent (VariationalInference)
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -148,23 +147,21 @@ class GANInference(VariationalInference):
   def update(self, feed_dict=None, variables=None):
     """Run one iteration of optimization.
 
-    Parameters
-    ----------
-    feed_dict: dict, optional
-      Feed dictionary for a TensorFlow session run. It is used to feed
-      placeholders that are not fed during initialization.
-    variables: str, optional
-      Which set of variables to update. Either "Disc" or "Gen".
-      Default is both.
+    Args:
+      feed_dict: dict, optional.
+        Feed dictionary for a TensorFlow session run. It is used to feed
+        placeholders that are not fed during initialization.
+      variables: str, optional.
+        Which set of variables to update. Either "Disc" or "Gen".
+        Default is both.
 
-    Returns
-    -------
-    dict
+    Returns:
+      dict.
       Dictionary of algorithm-specific information. In this case, the
       iteration number and generative and discriminative losses.
 
-    Notes
-    -----
+    #### Notes
+
     The outputted iteration number is the total number of calls to
     `update`. Each update may include updating only a subset of
     parameters.

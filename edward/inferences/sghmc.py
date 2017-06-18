@@ -39,7 +39,7 @@ class SGHMC(MonteCarlo):
     ```python
     z = Normal(loc=0.0, scale=1.0)
     x = Normal(loc=tf.ones(10) * z, scale=1.0)
-    >>>
+
     qz = Empirical(tf.Variable(tf.zeros(500)))
     data = {x: np.array([0.0] * 10, dtype=np.float32)}
     inference = ed.SGHMC({z: qz}, data)

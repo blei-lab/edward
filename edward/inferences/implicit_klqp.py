@@ -33,24 +33,23 @@ class ImplicitKLqp(GANInference):
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
     """
-    Parameters
-    ----------
-    discriminator: function
-      Function (with parameters). Unlike `GANInference`, it is
-      interpreted as a ratio estimator rather than a discriminator.
-      It takes three arguments: a data dict, local latent variable
-      dict, and global latent variable dict. As with GAN
-      discriminators, it can take a batch of data points and local
-      variables, of size \\(M\\), and output a vector of length
-      \\(M\\).
-    global_vars: dict of RandomVariable to RandomVariable, optional
-      Identifying which variables in `latent_vars` are global
-      variables, shared across data points. These will not be
-      encompassed in the ratio estimation problem, and will be
-      estimated with tractable variational approximations.
+    Args:
+      discriminator: function.
+        Function (with parameters). Unlike `GANInference`, it is
+        interpreted as a ratio estimator rather than a discriminator.
+        It takes three arguments: a data dict, local latent variable
+        dict, and global latent variable dict. As with GAN
+        discriminators, it can take a batch of data points and local
+        variables, of size \\(M\\), and output a vector of length
+        \\(M\\).
+      global_vars: dict of RandomVariable to RandomVariable, optional.
+        Identifying which variables in `latent_vars` are global
+        variables, shared across data points. These will not be
+        encompassed in the ratio estimation problem, and will be
+        estimated with tractable variational approximations.
 
-    Notes
-    -----
+    #### Notes
+
     Unlike `GANInference`, `discriminator` takes dict's as input,
     and must subset to the appropriate values through lexical scoping
     from the previously defined model and latent variables. This is
@@ -83,13 +82,12 @@ class ImplicitKLqp(GANInference):
   def initialize(self, ratio_loss='log', *args, **kwargs):
     """Initialization.
 
-    Parameters
-    ----------
-    ratio_loss: str or fn, optional
-      Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
-      Alternatively, one can pass in a function of two inputs,
-      `psamples` and `qsamples`, and output a point-wise value
-      with shape matching the shapes of the two inputs.
+    Args:
+      ratio_loss: str or fn, optional.
+        Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
+        Alternatively, one can pass in a function of two inputs,
+        `psamples` and `qsamples`, and output a point-wise value
+        with shape matching the shapes of the two inputs.
     """
     if callable(ratio_loss):
       self.ratio_loss = ratio_loss
@@ -126,8 +124,8 @@ class ImplicitKLqp(GANInference):
     Gradients are taken using the reparameterization trick (Kingma and
     Welling, 2014).
 
-    Notes
-    -----
+    #### Notes
+
     This also includes model parameters \\(p(x, z, \\beta; \\theta)\\)
     and variational distributions with inference networks
     \\(q(z\mid x)\\).
